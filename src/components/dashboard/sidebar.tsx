@@ -111,46 +111,7 @@ export function Sidebar({ businessName }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="fixed left-4 top-4 z-50 lg:hidden">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="bg-white dark:bg-zinc-900"
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={closeMobile}
-        />
-      )}
-
-      {/* Mobile sidebar */}
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-white transition-transform dark:bg-zinc-900 lg:hidden',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full',
-        )}
-      >
-        <SidebarContent
-          businessName={businessName}
-          pathname={pathname}
-          onLogout={handleLogout}
-          onLinkClick={closeMobile}
-        />
-      </aside>
-
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar only - mobile uses bottom nav */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200 lg:bg-white dark:lg:border-zinc-800 dark:lg:bg-zinc-900">
         <SidebarContent
           businessName={businessName}

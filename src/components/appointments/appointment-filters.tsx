@@ -1,9 +1,7 @@
 'use client'
 
-import { Search, Filter, X } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Badge, type AppointmentStatus } from '@/components/ui/badge'
+import { Search, X } from 'lucide-react'
+import type { AppointmentStatus } from '@/components/ui/badge'
 import { cn } from '@/lib/utils/cn'
 
 interface AppointmentFiltersProps {
@@ -14,13 +12,13 @@ interface AppointmentFiltersProps {
   className?: string
 }
 
-const statusOptions: { value: AppointmentStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'Todas' },
-  { value: 'pending', label: 'Pendientes' },
-  { value: 'confirmed', label: 'Confirmadas' },
-  { value: 'completed', label: 'Completadas' },
-  { value: 'cancelled', label: 'Canceladas' },
-  { value: 'no_show', label: 'No asistió' }
+const statusOptions: { value: AppointmentStatus | 'all'; label: string; color: string }[] = [
+  { value: 'all', label: 'Todas', color: 'bg-zinc-500' },
+  { value: 'pending', label: 'Pendientes', color: 'bg-amber-500' },
+  { value: 'confirmed', label: 'Confirmadas', color: 'bg-blue-500' },
+  { value: 'completed', label: 'Listas', color: 'bg-green-500' },
+  { value: 'cancelled', label: 'Canceladas', color: 'bg-red-500' },
+  { value: 'no_show', label: 'No vino', color: 'bg-zinc-400' }
 ]
 
 export function AppointmentFilters({
@@ -30,72 +28,54 @@ export function AppointmentFilters({
   onStatusFilterChange,
   className
 }: AppointmentFiltersProps) {
-  const hasActiveFilters = search || statusFilter !== 'all'
-
-  const clearFilters = () => {
-    onSearchChange('')
-    onStatusFilterChange('all')
-  }
-
   return (
-    <div className={cn('space-y-4', className)}>
-      {/* Search */}
+    <div className={cn('space-y-3', className)}>
+      {/* Search - más compacto */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
         <input
           type="text"
-          placeholder="Buscar por nombre o teléfono..."
+          placeholder="Buscar cliente..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className={cn(
-            'w-full pl-12 pr-4 py-3 rounded-xl',
-            'bg-white dark:bg-zinc-900',
-            'border border-zinc-200 dark:border-zinc-800',
-            'text-zinc-900 dark:text-zinc-100',
-            'placeholder:text-zinc-400',
-            'focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent',
-            'transition-all duration-200'
+            'w-full pl-10 pr-10 py-2.5 rounded-xl text-sm',
+            'bg-zinc-800/50 border border-zinc-700/50',
+            'text-white placeholder:text-zinc-500',
+            'focus:outline-none focus:border-zinc-600',
+            'transition-colors'
           )}
         />
         {search && (
           <button
             onClick={() => onSearchChange('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-zinc-700 transition-colors"
           >
-            <X className="w-4 h-4 text-zinc-400" />
+            <X className="w-3.5 h-3.5 text-zinc-400" />
           </button>
         )}
       </div>
 
-      {/* Status Filter Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Filter className="w-4 h-4 text-zinc-400 mr-1" />
-        {statusOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => onStatusFilterChange(option.value)}
-            className={cn(
-              'px-3 py-1.5 rounded-full text-sm font-medium',
-              'transition-all duration-200',
-              'border',
-              statusFilter === option.value
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent'
-                : 'bg-transparent text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="ml-2 flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Limpiar
-          </button>
-        )}
+      {/* Status Filter - scroll horizontal, más compacto */}
+      <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+          {statusOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => onStatusFilterChange(option.value)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shrink-0',
+                'transition-all active:scale-95',
+                statusFilter === option.value
+                  ? 'bg-white text-zinc-900'
+                  : 'bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700/60'
+              )}
+            >
+              <span className={cn('w-1.5 h-1.5 rounded-full', option.color)} />
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

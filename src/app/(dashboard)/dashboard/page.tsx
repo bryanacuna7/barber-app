@@ -1,6 +1,6 @@
-import { Calendar, Banknote, Users, Clock } from 'lucide-react'
+import { Clock, ArrowRight, Sparkles, Calendar, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { StatsCard } from '@/components/dashboard/stats-card'
+import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import Link from 'next/link'
@@ -105,98 +105,108 @@ export default async function DashboardPage() {
   const todayRevenueTotal = todayRevenue?.reduce((sum, apt) => sum + Number(apt.price), 0) || 0
   const monthRevenueTotal = monthRevenue?.reduce((sum, apt) => sum + Number(apt.price), 0) || 0
 
+  // Get greeting based on time
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
+
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            Dashboard
+          <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
+            {greeting}
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
-            Bienvenido de vuelta, {business.name}
+          <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Bienvenido a <span className="font-medium text-zinc-700 dark:text-zinc-300">{business.name}</span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link
-            href={`/reservar/${business.slug}`}
-            target="_blank"
-            className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400"
-          >
-            Ver página pública →
-          </Link>
-        </div>
+        <Link
+          href={`/reservar/${business.slug}`}
+          target="_blank"
+          className="inline-flex items-center gap-2 text-[15px] text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+        >
+          Ver página pública
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Citas Hoy"
-          value={todayAppointments || 0}
-          icon={Calendar}
-        />
-        <StatsCard
-          title="Ingresos Hoy"
-          value={formatCurrency(todayRevenueTotal)}
-          icon={Banknote}
-        />
-        <StatsCard
-          title="Ingresos del Mes"
-          value={formatCurrency(monthRevenueTotal)}
-          icon={Banknote}
-          description={`${monthAppointments || 0} citas`}
-        />
-        <StatsCard
-          title="Total Clientes"
-          value={totalClients || 0}
-          icon={Users}
-        />
-      </div>
+      {/* Stats Grid - Client Component */}
+      <DashboardStats
+        todayAppointments={todayAppointments || 0}
+        todayRevenue={formatCurrency(todayRevenueTotal)}
+        monthRevenue={formatCurrency(monthRevenueTotal)}
+        monthAppointments={monthAppointments || 0}
+        totalClients={totalClients || 0}
+      />
 
       {/* Upcoming Appointments */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Próximas Citas Hoy</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+              <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <CardTitle className="text-[17px]">Próximas Citas Hoy</CardTitle>
+          </div>
           <Link href="/citas">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-[13px]">
               Ver todas
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {!upcomingAppointments || upcomingAppointments.length === 0 ? (
-            <p className="text-center py-8 text-zinc-500">
-              No hay citas programadas para hoy
-            </p>
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+                <Sparkles className="h-8 w-8 text-zinc-400" />
+              </div>
+              <p className="mt-4 text-[17px] font-medium text-zinc-900 dark:text-white">
+                Sin citas pendientes
+              </p>
+              <p className="mt-1 text-[15px] text-zinc-500 text-center">
+                No hay más citas programadas para hoy
+              </p>
+            </div>
           ) : (
-            <div className="space-y-4">
-              {upcomingAppointments.map((apt) => {
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              {upcomingAppointments.map((apt, index) => {
                 const client = apt.client as { name: string; phone: string } | null
                 const service = apt.service as { name: string } | null
 
                 return (
                   <div
                     key={apt.id}
-                    className="flex items-center justify-between rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+                    className="flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    style={{
+                      animationDelay: `${index * 50}ms`,
+                    }}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-                        <Clock className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700">
+                        <span className="text-[15px] font-bold text-zinc-600 dark:text-zinc-300">
+                          {client?.name?.charAt(0).toUpperCase() || '?'}
+                        </span>
                       </div>
                       <div>
-                        <p className="font-medium text-zinc-900 dark:text-white">
+                        <p className="text-[15px] font-semibold text-zinc-900 dark:text-white">
                           {client?.name || 'Cliente'}
                         </p>
-                        <p className="text-sm text-zinc-500">
+                        <p className="text-[13px] text-zinc-500">
                           {service?.name || 'Servicio'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-zinc-900 dark:text-white">
+                      <p className="text-[17px] font-bold text-zinc-900 dark:text-white">
                         {formatTime(apt.scheduled_at)}
                       </p>
-                      <p className="text-sm text-zinc-500">
+                      <p className={`text-[12px] font-medium uppercase tracking-wide ${
+                        apt.status === 'confirmed'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-amber-600 dark:text-amber-400'
+                      }`}>
                         {apt.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                       </p>
                     </div>
@@ -211,18 +221,41 @@ export default async function DashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Acciones Rápidas</CardTitle>
+          <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-3">
-          <Link href="/servicios">
-            <Button variant="outline">Agregar Servicio</Button>
-          </Link>
-          <Link href="/clientes">
-            <Button variant="outline">Ver Clientes</Button>
-          </Link>
-          <Link href="/configuracion">
-            <Button variant="outline">Configuración</Button>
-          </Link>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <Link href="/citas">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                  <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-[13px] font-medium text-zinc-900 dark:text-white">
+                  Nueva Cita
+                </span>
+              </div>
+            </Link>
+            <Link href="/servicios">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                  <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+                </div>
+                <span className="text-[13px] font-medium text-zinc-900 dark:text-white">
+                  Servicios
+                </span>
+              </div>
+            </Link>
+            <Link href="/clientes">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+                  <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <span className="text-[13px] font-medium text-zinc-900 dark:text-white">
+                  Clientes
+                </span>
+              </div>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

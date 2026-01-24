@@ -7,24 +7,54 @@ import {
   Trash2,
   Clock,
   Scissors,
-  X,
-  Check,
   AlertTriangle,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Modal } from '@/components/ui/modal'
 import { formatCurrency } from '@/lib/utils'
+import {
+  FadeInUp,
+  StaggeredList,
+  StaggeredItem,
+  ScaleOnHover,
+} from '@/components/ui/motion'
 import type { Service } from '@/types'
 
 // Service color palette
 const SERVICE_COLORS = [
-  'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
-  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+  {
+    bg: 'bg-violet-100 dark:bg-violet-900/30',
+    text: 'text-violet-700 dark:text-violet-400',
+    border: 'border-violet-200 dark:border-violet-800',
+    gradient: 'from-violet-500 to-purple-600',
+  },
+  {
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-700 dark:text-blue-400',
+    border: 'border-blue-200 dark:border-blue-800',
+    gradient: 'from-blue-500 to-cyan-600',
+  },
+  {
+    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    border: 'border-emerald-200 dark:border-emerald-800',
+    gradient: 'from-emerald-500 to-teal-600',
+  },
+  {
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-700 dark:text-amber-400',
+    border: 'border-amber-200 dark:border-amber-800',
+    gradient: 'from-amber-500 to-orange-600',
+  },
+  {
+    bg: 'bg-rose-100 dark:bg-rose-900/30',
+    text: 'text-rose-700 dark:text-rose-400',
+    border: 'border-rose-200 dark:border-rose-800',
+    gradient: 'from-rose-500 to-pink-600',
+  },
 ]
 
 export default function ServiciosPage() {
@@ -133,87 +163,36 @@ export default function ServiciosPage() {
     }
   }
 
-  // Calculate stats
-  const totalServices = services.length
-  const avgPrice =
-    totalServices > 0
-      ? services.reduce((sum, s) => sum + Number(s.price), 0) / totalServices
-      : 0
-  const avgDuration =
-    totalServices > 0
-      ? Math.round(
-          services.reduce((sum, s) => sum + s.duration_minutes, 0) /
-            totalServices,
-        )
-      : 0
-
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            Servicios
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Gestiona el catálogo de servicios de tu barbería
-          </p>
+      <FadeInUp>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div>
+            <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
+              Servicios
+            </h1>
+            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
+              Gestiona el catálogo de servicios de tu barbería
+            </p>
+          </div>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button
+              onClick={() => {
+                resetForm()
+                setShowForm(true)
+              }}
+              className="w-full sm:w-auto h-12 px-6 text-[15px] font-semibold"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Agregar Servicio
+            </Button>
+          </motion.div>
         </div>
-        <Button
-          onClick={() => {
-            resetForm()
-            setShowForm(true)
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Agregar Servicio
-        </Button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-500">Total Servicios</p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                  {totalServices}
-                </p>
-              </div>
-              <Scissors className="h-8 w-8 text-zinc-300 dark:text-zinc-700" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-500">Precio Promedio</p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                  {formatCurrency(avgPrice)}
-                </p>
-              </div>
-              <div className="flex h-8 w-8 items-center justify-center text-zinc-300 dark:text-zinc-700 text-2xl font-bold">
-                ₡
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-500">Duración Promedio</p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                  {avgDuration} min
-                </p>
-              </div>
-              <Clock className="h-8 w-8 text-zinc-300 dark:text-zinc-700" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </FadeInUp>
 
       {/* Form Modal */}
       <Modal
@@ -221,11 +200,15 @@ export default function ServiciosPage() {
         onClose={resetForm}
         title={editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl bg-red-50 p-4 text-[15px] text-red-600 dark:bg-red-900/20 dark:text-red-400"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
           <Input
@@ -281,11 +264,11 @@ export default function ServiciosPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={resetForm}>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={resetForm} className="h-11">
               Cancelar
             </Button>
-            <Button type="submit" isLoading={submitting}>
+            <Button type="submit" isLoading={submitting} className="h-11">
               {editingService ? 'Actualizar' : 'Crear'} Servicio
             </Button>
           </div>
@@ -298,29 +281,34 @@ export default function ServiciosPage() {
         onClose={() => setDeleteService(null)}
         title="Eliminar Servicio"
       >
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-              <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30"
+            >
+              <AlertTriangle className="h-7 w-7 text-red-600 dark:text-red-400" />
+            </motion.div>
             <div>
-              <p className="text-zinc-900 dark:text-white">
+              <p className="text-[17px] text-zinc-900 dark:text-white">
                 ¿Estás seguro de que deseas eliminar{' '}
                 <strong>{deleteService?.name}</strong>?
               </p>
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-2 text-[15px] text-zinc-500">
                 Esta acción no se puede deshacer. Las citas existentes con este
                 servicio no se verán afectadas.
               </p>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteService(null)}>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setDeleteService(null)} className="h-11">
               Cancelar
             </Button>
             <Button
               variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+              className="h-11 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
               onClick={handleDelete}
               isLoading={deleting}
             >
@@ -331,93 +319,128 @@ export default function ServiciosPage() {
       </Modal>
 
       {/* Service List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Catálogo de Servicios</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-900 dark:border-white" />
-            </div>
-          ) : services.length === 0 ? (
-            <div className="py-12 text-center">
-              <Scissors className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-700" />
-              <p className="mt-4 text-zinc-500">
-                No tienes servicios registrados.
-              </p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Agrega tu primer servicio para que los clientes puedan reservar.
-              </p>
-              <Button className="mt-4" onClick={() => setShowForm(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Agregar Servicio
-              </Button>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {services.map((service, index) => {
-                const colorClass = SERVICE_COLORS[index % SERVICE_COLORS.length]
-                return (
-                  <div
-                    key={service.id}
-                    className="group relative rounded-xl border border-zinc-200 bg-white p-5 transition-all duration-200 hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
-                  >
-                    {/* Actions */}
-                    <div className="absolute right-4 top-4 z-10 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                      <button
-                        onClick={() => handleEdit(service)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100/90 text-zinc-600 shadow-sm backdrop-blur-sm transition-all hover:bg-zinc-200 hover:text-zinc-900 dark:bg-zinc-800/90 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
-                        title="Editar servicio"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteService(service)}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50/90 text-red-600 shadow-sm backdrop-blur-sm transition-all hover:bg-red-100 hover:text-red-700 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/50"
-                        title="Eliminar servicio"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+      <FadeInUp delay={0.1}>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
+            <CardTitle className="text-[17px] font-semibold">
+              Catálogo de Servicios
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="h-8 w-8 rounded-full border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
+                />
+              </div>
+            ) : services.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-16 text-center"
+              >
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[22px] bg-zinc-100 dark:bg-zinc-800">
+                  <Scissors className="h-10 w-10 text-zinc-400" />
+                </div>
+                <p className="mt-5 text-[17px] font-medium text-zinc-900 dark:text-white">
+                  No tienes servicios registrados
+                </p>
+                <p className="mt-1 text-[15px] text-zinc-500">
+                  Agrega tu primer servicio para que los clientes puedan reservar.
+                </p>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="mt-6"
+                >
+                  <Button onClick={() => setShowForm(true)} className="h-11">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Agregar Servicio
+                  </Button>
+                </motion.div>
+              </motion.div>
+            ) : (
+              <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <AnimatePresence mode="popLayout">
+                  {services.map((service, index) => {
+                    const colorSet = SERVICE_COLORS[index % SERVICE_COLORS.length]
+                    return (
+                      <StaggeredItem key={service.id}>
+                        <ScaleOnHover>
+                          <motion.div
+                            layout
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className={`group relative rounded-2xl border ${colorSet.border} bg-white p-5 transition-shadow duration-300 hover:shadow-lg dark:bg-zinc-900`}
+                          >
+                            {/* Gradient accent bar */}
+                            <div className={`absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r ${colorSet.gradient}`} />
 
-                    {/* Card Header: Icon */}
-                    <div className="mb-4">
-                      {/* Service Icon */}
-                      <div
-                        className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${colorClass}`}
-                      >
-                        <Scissors className="h-6 w-6" />
-                      </div>
-                    </div>
+                            {/* Actions */}
+                            <div className="absolute right-3 top-4 z-10 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleEdit(service)}
+                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100/90 text-zinc-600 backdrop-blur-sm transition-colors hover:bg-zinc-200 dark:bg-zinc-800/90 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                                title="Editar servicio"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </motion.button>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setDeleteService(service)}
+                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50/90 text-red-600 backdrop-blur-sm transition-colors hover:bg-red-100 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60"
+                                title="Eliminar servicio"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </motion.button>
+                            </div>
 
-                    {/* Service Info */}
-                    <h3 className="font-semibold text-zinc-900 dark:text-white">
-                      {service.name}
-                    </h3>
-                    {service.description && (
-                      <p className="mt-1 text-sm text-zinc-500 line-clamp-2">
-                        {service.description}
-                      </p>
-                    )}
+                            {/* Service Icon */}
+                            <div className="mb-4">
+                              <div
+                                className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl ${colorSet.bg} ${colorSet.text}`}
+                              >
+                                <Scissors className="h-7 w-7" />
+                              </div>
+                            </div>
 
-                    {/* Duration & Price */}
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-sm text-zinc-500">
-                        <Clock className="h-4 w-4" />
-                        {service.duration_minutes} min
-                      </div>
-                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                        {formatCurrency(Number(service.price))}
-                      </p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                            {/* Service Info */}
+                            <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+                              {service.name}
+                            </h3>
+                            {service.description && (
+                              <p className="mt-1 text-[13px] text-zinc-500 line-clamp-2">
+                                {service.description}
+                              </p>
+                            )}
+
+                            {/* Duration & Price */}
+                            <div className="mt-4 flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 text-[13px] text-zinc-500">
+                                <Clock className="h-4 w-4" />
+                                {service.duration_minutes} min
+                              </div>
+                              <p className="text-[20px] font-bold text-zinc-900 dark:text-white">
+                                {formatCurrency(Number(service.price))}
+                              </p>
+                            </div>
+                          </motion.div>
+                        </ScaleOnHover>
+                      </StaggeredItem>
+                    )
+                  })}
+                </AnimatePresence>
+              </StaggeredList>
+            )}
+          </CardContent>
+        </Card>
+      </FadeInUp>
     </div>
   )
 }

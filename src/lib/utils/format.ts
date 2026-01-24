@@ -30,6 +30,19 @@ export function formatCurrency(amount: number): string {
   }).format(amount)
 }
 
+export function formatCurrencyCompact(amount: number): string {
+  if (amount >= 1000000) {
+    return `₡${(amount / 1000000).toFixed(1)}M`
+  }
+  if (amount >= 100000) {
+    return `₡${Math.round(amount / 1000)}k`
+  }
+  if (amount >= 10000) {
+    return `₡${(amount / 1000).toFixed(1)}k`
+  }
+  return `₡${amount.toLocaleString('es-CR')}`
+}
+
 export function formatPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, '')
   if (cleaned.length === 8) {

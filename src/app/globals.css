@@ -506,6 +506,9 @@ html {
   .ios-safe-bottom {
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 /* iOS Typography */

@@ -71,8 +71,8 @@ export default function BookingPage() {
     notes: '',
   })
 
-  // Generate available dates
-  const availableDates = Array.from({ length: 14 }, (_, i) =>
+  // Generate available dates (30 days ahead)
+  const availableDates = Array.from({ length: 30 }, (_, i) =>
     addDays(startOfDay(new Date()), i),
   )
 
@@ -580,52 +580,58 @@ export default function BookingPage() {
               </CardContent>
             </Card>
 
-            {/* Date Selection - iOS Horizontal Scroll */}
+            {/* Date Selection - Horizontal Scroll */}
             <div>
               <h3 className="mb-4 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
                 Selecciona el día
               </h3>
-              <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-hide ios-scroll-snap -mx-4 px-4">
-                {availableDates.map((date) => {
-                  const isSelected =
-                    booking.date?.toDateString() === date.toDateString()
-                  const isToday =
-                    date.toDateString() === new Date().toDateString()
+              <div className="relative -mx-4 sm:mx-0">
+                {/* Scroll fade indicators */}
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#F2F2F7] dark:from-[#1C1C1E] to-transparent z-10" />
 
-                  return (
-                    <button
-                      key={date.toISOString()}
-                      onClick={() => handleDateSelect(date)}
-                      className={cn(
-                        'relative flex min-w-[72px] flex-col items-center rounded-2xl px-4 py-4 transition-all ios-press',
-                        isSelected
-                          ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/30 dark:bg-white dark:text-zinc-900 dark:shadow-white/20'
-                          : 'bg-white dark:bg-zinc-800/80',
-                      )}
-                    >
-                      {isToday && !isSelected && (
-                        <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                          Hoy
+                <div className="flex gap-2.5 overflow-x-auto pb-3 px-4 sm:px-0 snap-x snap-mandatory">
+                  {availableDates.map((date) => {
+                    const isSelected =
+                      booking.date?.toDateString() === date.toDateString()
+                    const isToday =
+                      date.toDateString() === new Date().toDateString()
+
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        onClick={() => handleDateSelect(date)}
+                        className={cn(
+                          'relative flex min-w-[68px] flex-col items-center rounded-2xl px-3 py-3 transition-all ios-press flex-shrink-0 snap-start',
+                          isSelected
+                            ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/30 dark:bg-white dark:text-zinc-900 dark:shadow-white/20'
+                            : 'bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700/80',
+                          isToday && 'mt-2'
+                        )}
+                      >
+                        {isToday && (
+                          <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm whitespace-nowrap">
+                            Hoy
+                          </span>
+                        )}
+                        <span className={cn(
+                          "text-[11px] font-semibold uppercase tracking-wide",
+                          isSelected ? "opacity-80" : "text-zinc-400 dark:text-zinc-500"
+                        )}>
+                          {format(date, 'EEE', { locale: es })}
                         </span>
-                      )}
-                      <span className={cn(
-                        "text-[11px] font-semibold uppercase tracking-wide",
-                        isSelected ? "opacity-80" : "text-zinc-400 dark:text-zinc-500"
-                      )}>
-                        {format(date, 'EEE', { locale: es })}
-                      </span>
-                      <span className="mt-1 text-[28px] font-bold leading-none">
-                        {format(date, 'd')}
-                      </span>
-                      <span className={cn(
-                        "mt-0.5 text-[11px] font-medium uppercase",
-                        isSelected ? "opacity-70" : "text-zinc-400 dark:text-zinc-500"
-                      )}>
-                        {format(date, 'MMM', { locale: es })}
-                      </span>
-                    </button>
-                  )
-                })}
+                        <span className="mt-1 text-[28px] font-bold leading-none">
+                          {format(date, 'd')}
+                        </span>
+                        <span className={cn(
+                          "mt-0.5 text-[11px] font-medium uppercase",
+                          isSelected ? "opacity-70" : "text-zinc-400 dark:text-zinc-500"
+                        )}>
+                          {format(date, 'MMM', { locale: es })}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
 

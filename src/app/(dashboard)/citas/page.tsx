@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { format, addDays, isSameDay } from 'date-fns'
+import { format, addDays, isSameDay, isToday, isTomorrow, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
   Plus,
@@ -12,8 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
-  TrendingUp,
-  Banknote
+  Banknote,
+  CheckCircle2,
 } from 'lucide-react'
 
 // Components
@@ -21,7 +21,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/ui/empty-state'
-import { StatsCard } from '@/components/dashboard/stats-card'
 import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
 
 // Appointment components
@@ -32,7 +31,8 @@ import { AppointmentFilters } from '@/components/appointments/appointment-filter
 import { DaySchedule } from '@/components/appointments/day-schedule'
 
 // Utils
-import { formatCurrency } from '@/lib/utils/format'
+import { formatCurrency, formatCurrencyCompact } from '@/lib/utils/format'
+import { cn } from '@/lib/utils/cn'
 
 // Types
 import type { Appointment, Service, Client } from '@/types'
@@ -42,6 +42,12 @@ type ViewMode = 'list' | 'calendar' | 'timeline'
 type AppointmentWithRelations = Appointment & {
   client?: { id: string; name: string; phone: string; email?: string } | null
   service?: { id: string; name: string; duration_minutes: number; price: number } | null
+}
+
+function getDateLabel(date: Date): string {
+  if (isToday(date)) return 'Hoy'
+  if (isTomorrow(date)) return 'Mañana'
+  return format(date, "EEEE", { locale: es })
 }
 
 export default function CitasPage() {
@@ -107,12 +113,9 @@ export default function CitasPage() {
   // Filter appointments
   const filteredAppointments = useMemo(() => {
     return appointments.filter(apt => {
-      // Status filter
       if (statusFilter !== 'all' && apt.status !== statusFilter) {
         return false
       }
-
-      // Search filter
       if (search) {
         const searchLower = search.toLowerCase()
         const clientName = apt.client?.name?.toLowerCase() || ''
@@ -121,7 +124,6 @@ export default function CitasPage() {
           return false
         }
       }
-
       return true
     })
   }, [appointments, statusFilter, search])
@@ -131,15 +133,28 @@ export default function CitasPage() {
     const today = appointments.filter(a => isSameDay(new Date(a.scheduled_at), selectedDate))
     const completed = today.filter(a => a.status === 'completed')
     const pending = today.filter(a => a.status === 'pending' || a.status === 'confirmed')
+    const cancelled = today.filter(a => a.status === 'cancelled')
     const revenue = completed.reduce((sum, a) => sum + Number(a.price), 0)
+    const expectedRevenue = pending.reduce((sum, a) => sum + Number(a.price), 0)
+    const uniqueClients = new Set(today.map(a => a.client_id)).size
 
     return {
       total: today.length,
       completed: completed.length,
       pending: pending.length,
-      revenue
+      cancelled: cancelled.length,
+      revenue,
+      expectedRevenue,
+      uniqueClients
     }
   }, [appointments, selectedDate])
+
+  // Week days for quick navigation
+  const weekDays = useMemo(() => {
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1 })
+    const end = endOfWeek(selectedDate, { weekStartsOn: 1 })
+    return eachDayOfInterval({ start, end })
+  }, [selectedDate])
 
   // Appointment dates for calendar indicator
   const appointmentDates = useMemo(() => {
@@ -235,74 +250,160 @@ export default function CitasPage() {
   const goToToday = () => setSelectedDate(new Date())
 
   return (
-    <div className="min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-              Citas
-            </h1>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-              Gestiona las citas de tu barbería
-            </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+            Citas
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1">
+            {stats.total} citas programadas para {isToday(selectedDate) ? 'hoy' : format(selectedDate, "d 'de' MMMM", { locale: es })}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fetchAppointments()}
+            className="hidden sm:flex"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+          <Button
+            onClick={() => {
+              setEditingAppointment(null)
+              setIsFormOpen(true)
+            }}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Nueva Cita</span>
+            <span className="sm:hidden">Nueva</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats - iOS Style Pills */}
+      <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 sm:grid sm:grid-cols-4 sm:gap-3 scrollbar-hide">
+          {/* Total Citas */}
+          <div className="shrink-0">
+            <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
+              <div className="rounded-xl bg-blue-500/20 p-2.5">
+                <CalendarIcon className="h-5 w-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">
+                  {stats.total}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  citas
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fetchAppointments()}
-              className="gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span className="hidden sm:inline">Actualizar</span>
-            </Button>
-            <Button
-              onClick={() => {
-                setEditingAppointment(null)
-                setIsFormOpen(true)
-              }}
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Nueva cita
-            </Button>
+
+          {/* Pendientes */}
+          <div className="shrink-0">
+            <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
+              <div className="rounded-xl bg-amber-500/20 p-2.5">
+                <Clock className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">
+                  {stats.pending}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  pendientes
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Completadas */}
+          <div className="shrink-0">
+            <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
+              <div className="rounded-xl bg-green-500/20 p-2.5">
+                <CheckCircle2 className="h-5 w-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">
+                  {stats.completed}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  listas
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ingresos del día */}
+          <div className="shrink-0">
+            <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3 min-w-[140px]">
+              <div className="rounded-xl bg-emerald-500/20 p-2.5">
+                <Banknote className="h-5 w-5 text-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg font-bold text-white leading-none truncate">
+                  {formatCurrency(stats.revenue)}
+                </p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  {isToday(selectedDate) ? 'hoy' : format(selectedDate, "d MMM", { locale: es })}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard
-          title="Citas hoy"
-          value={stats.total.toString()}
-          icon={CalendarIcon}
-          description="programadas"
-        />
-        <StatsCard
-          title="Completadas"
-          value={stats.completed.toString()}
-          icon={TrendingUp}
-          description="finalizadas"
-        />
-        <StatsCard
-          title="Pendientes"
-          value={stats.pending.toString()}
-          icon={Clock}
-          description="por atender"
-        />
-        <StatsCard
-          title="Ingresos"
-          value={formatCurrency(stats.revenue)}
-          icon={Banknote}
-          description="hoy"
-        />
+      {/* Quick Week Navigation - Solo mobile */}
+      <div className="lg:hidden">
+        <div className="flex items-center justify-between mb-3">
+          <Button variant="ghost" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, -7))}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-sm font-medium text-zinc-500">
+            {format(weekDays[0], "d MMM", { locale: es })} - {format(weekDays[6], "d MMM", { locale: es })}
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, 7))}>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1">
+          {weekDays.map((day) => {
+            const isSelected = isSameDay(day, selectedDate)
+            const hasAppointments = appointments.some(a => isSameDay(new Date(a.scheduled_at), day))
+            return (
+              <button
+                key={day.toISOString()}
+                onClick={() => setSelectedDate(day)}
+                className={`flex-1 min-w-[48px] flex flex-col items-center py-2 px-1 rounded-xl transition-all ${
+                  isSelected
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                    : isToday(day)
+                    ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                }`}
+              >
+                <span className="text-[10px] font-medium uppercase">
+                  {format(day, 'EEE', { locale: es })}
+                </span>
+                <span className="text-lg font-bold">
+                  {format(day, 'd')}
+                </span>
+                {hasAppointments && !isSelected && (
+                  <div className="w-1.5 h-1.5 rounded-full bg-current mt-0.5 opacity-50" />
+                )}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Main Layout */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar - Calendar */}
-        <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
+        {/* Sidebar - Calendar (Desktop only) */}
+        <div className="hidden lg:block w-80 flex-shrink-0 space-y-6">
           <Card>
             <MiniCalendar
               selectedDate={selectedDate}
@@ -316,13 +417,16 @@ export default function CitasPage() {
             <h3 className="text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-3">
               Resumen del día
             </h3>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
               {(['pending', 'confirmed', 'completed', 'cancelled'] as AppointmentStatus[]).map(status => {
                 const count = filteredAppointments.filter(a => a.status === status).length
                 return (
-                  <div key={status} className="flex items-center justify-between">
+                  <div
+                    key={status}
+                    className="flex items-center justify-between rounded-lg bg-zinc-50 dark:bg-zinc-800/50 px-3 py-2"
+                  >
                     <StatusBadge status={status} size="sm" />
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                       {count}
                     </span>
                   </div>
@@ -333,40 +437,54 @@ export default function CitasPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0 space-y-6">
-          {/* Date Navigation + View Toggle */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0 space-y-4">
+          {/* Compact Header with View Toggle */}
+          <div className="flex items-center justify-between">
+            {/* Desktop: Date Navigation */}
+            <div className="hidden lg:flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={goToPreviousDay}>
                 <ChevronLeft className="w-5 h-5" />
               </Button>
               <button
                 onClick={goToToday}
-                className="px-4 py-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors capitalize"
+                className="px-4 py-2 text-base font-semibold text-zinc-100 hover:bg-zinc-800 rounded-lg transition-colors capitalize"
               >
-                {format(selectedDate, "EEEE, d 'de' MMMM", { locale: es })}
+                {getDateLabel(selectedDate)}, {format(selectedDate, "d 'de' MMMM", { locale: es })}
               </button>
               <Button variant="ghost" size="sm" onClick={goToNextDay}>
                 <ChevronRight className="w-5 h-5" />
               </Button>
             </div>
 
-            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-              <TabsList>
-                <TabsTrigger value="list" icon={<List className="w-4 h-4" />}>
-                  Lista
-                </TabsTrigger>
-                <TabsTrigger value="calendar" icon={<LayoutGrid className="w-4 h-4" />}>
-                  Horario
-                </TabsTrigger>
-                <TabsTrigger value="timeline" icon={<Clock className="w-4 h-4" />}>
-                  Línea
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            {/* Mobile: Simple date */}
+            <p className="lg:hidden text-sm font-medium text-zinc-400 capitalize">
+              {getDateLabel(selectedDate)}, {format(selectedDate, "d MMM", { locale: es })}
+            </p>
+
+            {/* View Toggle - Compact pills */}
+            <div className="flex bg-zinc-800/60 rounded-xl p-1">
+              {[
+                { value: 'list', icon: List },
+                { value: 'calendar', icon: LayoutGrid },
+                { value: 'timeline', icon: Clock }
+              ].map(({ value, icon: Icon }) => (
+                <button
+                  key={value}
+                  onClick={() => setViewMode(value as ViewMode)}
+                  className={cn(
+                    'p-2 rounded-lg transition-all',
+                    viewMode === value
+                      ? 'bg-zinc-700 text-white'
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Filters */}
+          {/* Filters - Compact */}
           <AppointmentFilters
             search={search}
             onSearchChange={setSearch}
@@ -377,21 +495,25 @@ export default function CitasPage() {
           {/* Content based on view mode */}
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin dark:border-zinc-600 dark:border-t-white" />
             </div>
           ) : filteredAppointments.length === 0 ? (
             <Card>
               <EmptyState
                 icon={CalendarIcon}
                 title="Sin citas"
-                description="No hay citas para este día que coincidan con los filtros"
+                description={
+                  search || statusFilter !== 'all'
+                    ? "No hay citas que coincidan con los filtros"
+                    : `No hay citas programadas para ${isToday(selectedDate) ? 'hoy' : format(selectedDate, "d 'de' MMMM", { locale: es })}`
+                }
                 action={
                   <Button onClick={() => {
                     setEditingAppointment(null)
                     setIsFormOpen(true)
                   }}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Crear primera cita
+                    Crear cita
                   </Button>
                 }
               />
@@ -400,7 +522,7 @@ export default function CitasPage() {
             <>
               {/* List View */}
               {viewMode === 'list' && (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {filteredAppointments
                     .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
                     .map(appointment => (
@@ -433,7 +555,7 @@ export default function CitasPage() {
 
               {/* Timeline View */}
               {viewMode === 'timeline' && (
-                <Card className="p-6">
+                <Card className="p-4 sm:p-6">
                   <div className="space-y-0">
                     {filteredAppointments
                       .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())

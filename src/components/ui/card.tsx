@@ -9,7 +9,8 @@ export function Card({ className, ...props }: CardProps) {
       className={cn(
         'rounded-2xl bg-white/90 p-6 backdrop-blur-sm',
         'shadow-[0_0_0_0.5px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)]',
-        'dark:bg-zinc-900/90 dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.2)]',
+        'dark:bg-zinc-800/80 dark:border dark:border-zinc-700/50',
+        'dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]',
         className
       )}
       {...props}

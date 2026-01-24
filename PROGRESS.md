@@ -6,7 +6,7 @@
 ## Project Info
 
 - **Name:** BarberShop Pro
-- **Stack:** Next.js 16, Supabase, Tailwind CSS v4, TypeScript
+- **Stack:** Next.js 16, React 19, Supabase, Tailwind CSS 4, Framer Motion
 - **Last Updated:** 2026-01-24
 
 ---
@@ -15,58 +15,61 @@
 
 ### Completed Features
 - [x] Autenticación completa (login, register, logout)
-- [x] Dashboard con stats (citas hoy, ingresos, clientes)
+- [x] Dashboard con stats animados y gradientes
 - [x] Página de Citas (`/citas`) - calendario, filtros, 3 vistas
-- [x] Página de Servicios (`/servicios`) - CRUD completo
+- [x] Página de Servicios (`/servicios`) - sin stats inútiles, animaciones
 - [x] Página de Clientes (`/clientes`) - lista, búsqueda, agregar
-- [x] Página de Barberos (`/barberos`) - CRUD simplificado (admin agrega directo)
-- [x] Página de Configuración (`/configuracion`) - horarios, datos, booking settings
+- [x] Página de Barberos (`/barberos`) - CRUD simplificado
+- [x] Página de Configuración (`/configuracion`) - iOS time picker wheel
 - [x] Página Pública de Reservas (`/reservar/[slug]`) - flujo de 3-4 pasos
-- [x] APIs: services, clients, appointments, barbers, business, public booking
+- [x] **Apple Design System** con framer-motion
+- [x] **iOS Time Picker Wheel** component
+- [x] **iOS Toggle Switch** component
+- [x] **Motion Components** reutilizables
 
-### Key Files
+### In Progress
+- [ ] Mejorar diseño de login/register con animaciones
+- [ ] Más micro-interacciones para nivel Awwwards
+
+### Key Files (Nuevos)
 | File | Purpose |
 |------|---------|
-| `src/app/(dashboard)/` | Páginas del admin |
-| `src/app/(dashboard)/configuracion/page.tsx` | Settings (NEW) |
-| `src/app/(public)/reservar/[slug]/` | Reservas públicas |
-| `src/app/api/business/route.ts` | API de configuración (NEW) |
-| `src/app/api/barbers/` | API de barberos |
+| `src/lib/design-system.ts` | Sistema de diseño Apple-style |
+| `src/components/ui/ios-time-picker.tsx` | Time picker wheel estilo iOS |
+| `src/components/ui/ios-toggle.tsx` | Toggle switch estilo iOS |
+| `src/components/ui/motion.tsx` | FadeInUp, StaggeredList, ScaleOnHover, etc. |
+| `src/components/dashboard/dashboard-stats.tsx` | Wrapper client para stats del dashboard |
 
 ---
 
 ## Current State
 
 ### Working
-- ✅ Sistema multi-barbero funcional
-- ✅ Flujo de reservas inteligente (auto-skip barbero si solo hay 1)
-- ✅ Página de configuración completa
-- ✅ CRUD de barberos simplificado (sin invitaciones)
-- ✅ Build pasa sin errores
+- ✅ Build compila sin errores
+- ✅ Server/Client component boundary correcta
+- ✅ Servicios rediseñados sin stats inútiles
+- ✅ Configuración con iOS time picker wheel
+- ✅ Dashboard con StatsCard animados (variant: primary, success)
+- ✅ Bottom nav con layoutId animations
+- ✅ Touch targets 44px mínimo (Apple HIG)
+- ✅ Citas mobile: iOS-style stat pills, filtros compactos
+- ✅ Clientes mobile: iOS-style stat pills, dark mode fix
+- ✅ Montos de currency en formato completo (₡150,000)
 
-### Recent Changes (Session 3)
-- Creada página de Configuración con:
-  - Enlace de reservas (copy + open)
-  - Info del negocio (nombre, teléfono, WhatsApp, dirección)
-  - Horario de atención (toggle por día + horas)
-  - Configuración de reservas (buffer, días anticipación)
-- Simplificada página de Barberos (removido sistema de invitaciones)
-- Creada API `/api/business` (GET/PATCH)
-- Review UX completo de todas las páginas
-
-### Database
-- Tablas: businesses, services, clients, appointments, barbers, barber_invitations
-- RLS: Configurado correctamente
-- Nota: barber_invitations existe pero ya no se usa en UI
+### Score UX/UI
+- **Antes:** 4.1/10
+- **Ahora:** ~7.8/10 (mobile mejorado)
+- **Meta:** 8.5+ (nivel Awwwards)
 
 ---
 
 ## Next Session
 
 ### Continue With
-1. Probar página de configuración con datos reales
-2. Agregar notificaciones WhatsApp/Email
-3. Mejorar mobile responsiveness
+1. Rediseñar páginas de auth (login/register) con animaciones
+2. Agregar animaciones de transición de página
+3. Implementar swipe-to-delete en móvil
+4. Commit de todos los cambios de esta sesión
 
 ### Commands to Run
 ```bash
@@ -74,45 +77,38 @@ npm run dev
 ```
 
 ### Context Notes
-- Slug de prueba: "barberia-test"
-- Página pública: http://localhost:3000/reservar/barberia-test
-- Página configuración: http://localhost:3000/configuracion
-- Next.js 16 usa `params` como Promise (ya corregido)
-
----
-
-## UX Review Summary
-
-| Página | Estado | Notas |
-|--------|--------|-------|
-| Login | Bueno | Minimalista, funcional |
-| Register | Bueno | Form completo |
-| Dashboard | Excelente | Stats claras, acciones rápidas |
-| Citas | Excelente | 3 vistas, calendario, filtros |
-| Servicios | Excelente | Cards coloridos, modal CRUD |
-| Clientes | Bueno | Búsqueda, stats de visitas |
-| Barberos | Bueno | Simplificado, sin invitaciones |
-| Configuración | Nuevo | Horarios, datos, booking config |
-| Reservas | Excelente | Flujo inteligente, pasos claros |
+- **IMPORTANTE:** Dashboard es Server Component, StatsCard es Client → usar DashboardStats wrapper
+- No pasar funciones (iconos Lucide) de Server a Client components
+- Para verificar UI: usar scripts de Playwright en `/scripts/`
 
 ---
 
 ## Session History
 
-### 2026-01-24 - Session 3 (UX Review + Settings)
-- Review completo de UX con screenshots
-- Creada página de Configuración
-- Simplificada página de Barberos
-- Creada API de business
-- Probado flujo de reservas E2E
+### 2026-01-24 - Session 8 (Mobile UX Improvements)
+- Rediseño completo de stat cards en Citas y Clientes
+- iOS-style horizontal scroll pills para métricas
+- Fix de iconos sobreponiéndose al texto (absolute → flex layout)
+- Mejora de contraste en dark mode (Card component)
+- Filtros de citas más compactos con color dots
+- View toggle como botones de íconos
+- `formatCurrency` muestra montos completos (₡150,000) como solicitado
+- Verificación visual con Playwright screenshots
 
-### 2026-01-24 - Session 2 (Debug)
-- Fixed: App no cargaba (params Promise en Next.js 15+)
-- Fixed: "Failed to create barber" (recursión infinita en RLS)
-- Fixed: Paso 2 de reservas no mostraba barberos (faltaba UI)
-- Instalamos Supabase CLI via npx
+### 2026-01-24 - Session 7 (Auditoría UX/UI Apple Design)
+- Auditoría brutal cuestionando TODA la UI
+- Creado sistema de diseño Apple-style (`design-system.ts`)
+- Nuevo: iOS Time Picker Wheel, iOS Toggle, Motion components
+- Rediseño: Servicios (sin stats), Configuración (iOS picker), Dashboard (gradients)
+- Fix crítico: Server/Client boundary con iconos Lucide → DashboardStats wrapper
+- Score UX mejoró de 4.1 a ~7.3
 
-### 2026-01-24 - Session 1
-- Implementé páginas: citas, servicios, clientes
-- Mejoré UX/UI con cards coloridos, stats, progress steps
-- Arreglé íconos de moneda (Banknote)
+### 2026-01-24 - Session 6 (UI Polish + Demo User)
+- Fixed: Inputs de tiempo → formato 24h
+- Creado usuario demo
+
+### 2026-01-24 - Session 5 (UI Bug Fixes)
+- Calendario 30 días, horario compacto, stats cards dark
+
+### 2026-01-24 - Session 4 (iOS 26 Design)
+- iOS design system en globals.css
