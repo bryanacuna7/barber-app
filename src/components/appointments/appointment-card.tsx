@@ -1,0 +1,285 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  Clock,
+  User,
+  Scissors,
+  Phone,
+  MoreVertical,
+  Check,
+  X,
+  MessageCircle,
+  Edit,
+  Trash2,
+  CalendarCheck
+} from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
+import { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel } from '@/components/ui/dropdown'
+import { cn } from '@/lib/utils/cn'
+import { formatTime, formatCurrency } from '@/lib/utils/format'
+import type { Appointment } from '@/types'
+
+interface AppointmentCardProps {
+  appointment: Appointment & {
+    client?: { name: string; phone: string } | null
+    service?: { name: string } | null
+  }
+  onStatusChange?: (id: string, status: AppointmentStatus) => void
+  onEdit?: (appointment: Appointment) => void
+  onDelete?: (id: string) => void
+  onWhatsApp?: (phone: string) => void
+  variant?: 'default' | 'compact' | 'timeline'
+  className?: string
+}
+
+export function AppointmentCard({
+  appointment,
+  onStatusChange,
+  onEdit,
+  onDelete,
+  onWhatsApp,
+  variant = 'default',
+  className
+}: AppointmentCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const scheduledTime = new Date(appointment.scheduled_at)
+  const endTime = new Date(scheduledTime.getTime() + appointment.duration_minutes * 60000)
+
+  const statusColors: Record<AppointmentStatus, string> = {
+    pending: 'border-l-violet-500',
+    confirmed: 'border-l-blue-500',
+    completed: 'border-l-emerald-500',
+    cancelled: 'border-l-red-500',
+    no_show: 'border-l-amber-500'
+  }
+
+  if (variant === 'compact') {
+    return (
+      <div
+        className={cn(
+          'group flex items-center gap-3 p-3 rounded-xl',
+          'bg-zinc-50 dark:bg-zinc-800/50',
+          'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+          'transition-all duration-200',
+          'border-l-4',
+          statusColors[appointment.status as AppointmentStatus],
+          className
+        )}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
+              {appointment.client?.name || 'Cliente sin nombre'}
+            </span>
+            <StatusBadge status={appointment.status as AppointmentStatus} size="sm" />
+          </div>
+          <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500">
+            <span className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              {formatTime(scheduledTime)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Scissors className="w-3.5 h-3.5" />
+              {appointment.service?.name || 'Servicio'}
+            </span>
+          </div>
+        </div>
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+          {formatCurrency(Number(appointment.price))}
+        </span>
+      </div>
+    )
+  }
+
+  if (variant === 'timeline') {
+    return (
+      <div
+        className={cn(
+          'relative pl-8 pb-8 last:pb-0',
+          'before:absolute before:left-3 before:top-3 before:bottom-0 before:w-px',
+          'before:bg-zinc-200 dark:before:bg-zinc-700',
+          'last:before:hidden',
+          className
+        )}
+      >
+        {/* Timeline dot */}
+        <div className={cn(
+          'absolute left-0 top-0 w-6 h-6 rounded-full',
+          'flex items-center justify-center',
+          'ring-4 ring-white dark:ring-zinc-900',
+          appointment.status === 'completed' ? 'bg-emerald-500' :
+          appointment.status === 'confirmed' ? 'bg-blue-500' :
+          appointment.status === 'pending' ? 'bg-violet-500' :
+          appointment.status === 'cancelled' ? 'bg-red-500' : 'bg-amber-500'
+        )}>
+          {appointment.status === 'completed' && <Check className="w-3 h-3 text-white" />}
+          {appointment.status === 'confirmed' && <CalendarCheck className="w-3 h-3 text-white" />}
+          {appointment.status === 'pending' && <Clock className="w-3 h-3 text-white" />}
+          {appointment.status === 'cancelled' && <X className="w-3 h-3 text-white" />}
+        </div>
+
+        <Card className="p-4 hover:shadow-md transition-shadow duration-200">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium text-zinc-500">
+                  {formatTime(scheduledTime)} - {formatTime(endTime)}
+                </span>
+                <StatusBadge status={appointment.status as AppointmentStatus} size="sm" />
+              </div>
+              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                {appointment.client?.name || 'Cliente sin nombre'}
+              </h4>
+              <p className="text-sm text-zinc-500 mt-1">
+                {appointment.service?.name || 'Servicio'} • {appointment.duration_minutes} min
+              </p>
+            </div>
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+              {formatCurrency(Number(appointment.price))}
+            </span>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Default variant
+  return (
+    <Card
+      className={cn(
+        'overflow-hidden transition-all duration-300',
+        'hover:shadow-lg hover:-translate-y-0.5',
+        'border-l-4',
+        statusColors[appointment.status as AppointmentStatus],
+        className
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="p-5">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 flex items-center justify-center flex-shrink-0">
+              <User className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                {appointment.client?.name || 'Cliente sin nombre'}
+              </h3>
+              {appointment.client?.phone && (
+                <button
+                  onClick={() => onWhatsApp?.(appointment.client!.phone)}
+                  className="flex items-center gap-1 text-sm text-zinc-500 hover:text-emerald-600 transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  {appointment.client.phone}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <Dropdown
+            trigger={
+              <button className={cn(
+                'p-2 rounded-lg transition-all duration-200',
+                'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
+                isHovered ? 'opacity-100' : 'opacity-0'
+              )}>
+                <MoreVertical className="w-5 h-5" />
+              </button>
+            }
+            align="right"
+          >
+            <DropdownLabel>Cambiar estado</DropdownLabel>
+            {appointment.status !== 'confirmed' && (
+              <DropdownItem
+                icon={<CalendarCheck className="w-4 h-4" />}
+                onClick={() => onStatusChange?.(appointment.id, 'confirmed')}
+              >
+                Confirmar
+              </DropdownItem>
+            )}
+            {appointment.status !== 'completed' && (
+              <DropdownItem
+                icon={<Check className="w-4 h-4" />}
+                onClick={() => onStatusChange?.(appointment.id, 'completed')}
+              >
+                Completar
+              </DropdownItem>
+            )}
+            {appointment.status !== 'no_show' && (
+              <DropdownItem
+                icon={<X className="w-4 h-4" />}
+                onClick={() => onStatusChange?.(appointment.id, 'no_show')}
+              >
+                No asistió
+              </DropdownItem>
+            )}
+            <DropdownSeparator />
+            {appointment.client?.phone && (
+              <DropdownItem
+                icon={<MessageCircle className="w-4 h-4" />}
+                onClick={() => onWhatsApp?.(appointment.client!.phone)}
+              >
+                WhatsApp
+              </DropdownItem>
+            )}
+            <DropdownItem
+              icon={<Edit className="w-4 h-4" />}
+              onClick={() => onEdit?.(appointment)}
+            >
+              Editar
+            </DropdownItem>
+            <DropdownSeparator />
+            <DropdownItem
+              icon={<Trash2 className="w-4 h-4" />}
+              danger
+              onClick={() => onDelete?.(appointment.id)}
+            >
+              Eliminar
+            </DropdownItem>
+          </Dropdown>
+        </div>
+
+        {/* Service & Time */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800">
+            <Scissors className="w-4 h-4 text-zinc-500" />
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {appointment.service?.name || 'Servicio'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800">
+            <Clock className="w-4 h-4 text-zinc-500" />
+            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {formatTime(scheduledTime)} - {formatTime(endTime)}
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800">
+          <StatusBadge status={appointment.status as AppointmentStatus} />
+          <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+            {formatCurrency(Number(appointment.price))}
+          </span>
+        </div>
+
+        {/* Notes */}
+        {appointment.client_notes && (
+          <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              <span className="font-medium">Nota:</span> {appointment.client_notes}
+            </p>
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+}
