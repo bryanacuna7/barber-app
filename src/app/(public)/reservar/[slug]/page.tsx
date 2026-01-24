@@ -14,6 +14,7 @@ import {
   Phone,
   MessageCircle,
   ChevronRight,
+  ChevronLeft,
   UserRound,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -201,12 +202,12 @@ export default function BookingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900">
-        <div className="text-center">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white">
-            <Scissors className="h-8 w-8 text-white dark:text-zinc-900 animate-pulse" />
+      <div className="flex min-h-screen items-center justify-center bg-[#F2F2F7] dark:bg-[#1C1C1E]">
+        <div className="text-center ios-spring-in">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-[22px] bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-2xl dark:from-zinc-100 dark:to-zinc-200">
+            <Scissors className="h-10 w-10 text-white dark:text-zinc-900 animate-pulse" />
           </div>
-          <p className="mt-4 text-zinc-500">Cargando...</p>
+          <p className="mt-5 text-[15px] font-medium text-zinc-500 dark:text-zinc-400">Cargando...</p>
         </div>
       </div>
     )
@@ -234,62 +235,60 @@ export default function BookingPage() {
 
   if (bookingComplete) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-emerald-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900">
-        <Card className="w-full max-w-md overflow-hidden">
-          {/* Success animation */}
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 px-6 py-8 text-center text-white">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur">
-              <CheckCircle className="h-10 w-10" />
+      <div className="flex min-h-screen items-center justify-center p-4 bg-[#F2F2F7] dark:bg-[#1C1C1E]">
+        <div className="w-full max-w-md ios-card overflow-hidden ios-spring-in">
+          {/* Success animation - iOS style */}
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 px-6 py-10 text-center text-white">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white/20 backdrop-blur-xl">
+              <CheckCircle className="h-12 w-12" />
             </div>
-            <h2 className="mt-4 text-2xl font-bold">¡Cita Reservada!</h2>
-            <p className="mt-1 text-emerald-100">Te esperamos</p>
+            <h2 className="mt-5 text-[28px] font-bold">¡Cita Reservada!</h2>
+            <p className="mt-1 text-[15px] text-emerald-100">Te esperamos</p>
           </div>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  Servicio
-                </p>
-                <p className="font-semibold text-zinc-900 dark:text-white">
-                  {booking.service?.name}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Fecha
-                  </p>
-                  <p className="font-semibold text-zinc-900 dark:text-white">
-                    {booking.date &&
-                      format(booking.date, "d 'de' MMM", { locale: es })}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800">
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Hora
-                  </p>
-                  <p className="font-semibold text-zinc-900 dark:text-white">
-                    {booking.time?.time}
-                  </p>
-                </div>
-              </div>
-              {business?.whatsapp && (
-                <a
-                  href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 font-medium text-white transition-colors hover:bg-emerald-600"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  Enviar mensaje por WhatsApp
-                </a>
-              )}
-              <p className="text-center text-sm text-zinc-500">
-                Te enviaremos un recordatorio antes de tu cita.
+          <div className="p-6 space-y-4">
+            <div className="rounded-2xl bg-zinc-100/80 p-4 dark:bg-zinc-800/80">
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                Servicio
+              </p>
+              <p className="mt-1 text-[17px] font-semibold text-zinc-900 dark:text-white">
+                {booking.service?.name}
               </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-zinc-100/80 p-4 dark:bg-zinc-800/80">
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                  Fecha
+                </p>
+                <p className="mt-1 text-[17px] font-semibold text-zinc-900 dark:text-white">
+                  {booking.date &&
+                    format(booking.date, "d 'de' MMM", { locale: es })}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-zinc-100/80 p-4 dark:bg-zinc-800/80">
+                <p className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                  Hora
+                </p>
+                <p className="mt-1 text-[17px] font-semibold text-zinc-900 dark:text-white">
+                  {booking.time?.time}
+                </p>
+              </div>
+            </div>
+            {business?.whatsapp && (
+              <a
+                href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 px-5 py-4 text-[17px] font-semibold text-white ios-press"
+              >
+                <MessageCircle className="h-5 w-5" />
+                Enviar mensaje por WhatsApp
+              </a>
+            )}
+            <p className="text-center text-[13px] text-zinc-500 dark:text-zinc-400">
+              Te enviaremos un recordatorio antes de tu cita.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -304,38 +303,36 @@ export default function BookingPage() {
     : ['service', 'datetime', 'info']
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900">
-      {/* Header */}
-      <div className="border-b border-zinc-200 bg-white px-4 py-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto max-w-2xl">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-900 dark:bg-white">
-                <Scissors className="h-7 w-7 text-white dark:text-zinc-900" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-zinc-900 dark:text-white">
-                  {business?.name}
-                </h1>
-                <p className="text-sm text-zinc-500">Reserva tu cita online</p>
-              </div>
+    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#1C1C1E]">
+      {/* iOS-style Header with Blur */}
+      <div className="ios-glass sticky top-0 z-50 border-b border-black/5 dark:border-white/5">
+        <div className="mx-auto max-w-2xl px-4 py-4 sm:py-5">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-lg dark:from-zinc-100 dark:to-zinc-200">
+              <Scissors className="h-7 w-7 text-white dark:text-zinc-900" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[22px] font-bold tracking-tight text-zinc-900 dark:text-white truncate">
+                {business?.name}
+              </h1>
+              <p className="text-[15px] text-zinc-500 dark:text-zinc-400">Reserva tu cita</p>
             </div>
           </div>
 
-          {/* Business Info */}
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-zinc-500">
+          {/* Business Info Pills */}
+          <div className="mt-4 flex flex-wrap gap-2">
             {business?.address && (
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4" />
-                <span>{business.address}</span>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-zinc-200/60 px-3 py-1.5 text-[13px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="truncate max-w-[160px] sm:max-w-none">{business.address}</span>
               </div>
             )}
             {business?.phone && (
               <a
                 href={`tel:${business.phone}`}
-                className="flex items-center gap-1.5 hover:text-zinc-900 dark:hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-full bg-zinc-200/60 px-3 py-1.5 text-[13px] font-medium text-zinc-600 ios-press dark:bg-zinc-800 dark:text-zinc-400"
               >
-                <Phone className="h-4 w-4" />
+                <Phone className="h-3.5 w-3.5" />
                 <span>{business.phone}</span>
               </a>
             )}
@@ -344,9 +341,9 @@ export default function BookingPage() {
                 href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700"
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-[13px] font-semibold text-emerald-700 ios-press dark:bg-emerald-900/30 dark:text-emerald-400"
               >
-                <MessageCircle className="h-4 w-4" />
+                <MessageCircle className="h-3.5 w-3.5" />
                 <span>WhatsApp</span>
               </a>
             )}
@@ -354,10 +351,10 @@ export default function BookingPage() {
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+      {/* iOS Progress Steps - Floating Pill Style */}
+      <div className="sticky top-[108px] sm:top-[116px] z-40 px-4 py-3">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2 rounded-2xl bg-white/80 backdrop-blur-xl p-2 shadow-sm dark:bg-zinc-900/80">
             {stepLabels.map((label, i) => {
               const stepIndex = stepKeys.indexOf(step)
               const isCompleted = i < stepIndex
@@ -365,17 +362,20 @@ export default function BookingPage() {
 
               return (
                 <div key={label} className="flex items-center">
-                  <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      'flex items-center gap-2 rounded-full px-3 py-2 transition-all duration-300',
+                      isCurrent && 'bg-zinc-900 dark:bg-white',
+                      isCompleted && 'bg-emerald-100 dark:bg-emerald-900/30',
+                      !isCompleted && !isCurrent && 'bg-transparent',
+                    )}
+                  >
                     <div
                       className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors',
-                        isCompleted &&
-                          'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900',
-                        isCurrent &&
-                          'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900',
-                        !isCompleted &&
-                          !isCurrent &&
-                          'bg-zinc-100 text-zinc-400 dark:bg-zinc-800',
+                        'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
+                        isCurrent && 'bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white',
+                        isCompleted && 'bg-emerald-500 text-white',
+                        !isCompleted && !isCurrent && 'bg-zinc-200 text-zinc-400 dark:bg-zinc-700 dark:text-zinc-500',
                       )}
                     >
                       {isCompleted ? (
@@ -386,17 +386,20 @@ export default function BookingPage() {
                     </div>
                     <span
                       className={cn(
-                        'hidden text-sm font-medium sm:block',
-                        isCompleted || isCurrent
-                          ? 'text-zinc-900 dark:text-white'
-                          : 'text-zinc-400',
+                        'text-[13px] font-semibold hidden sm:block',
+                        isCurrent && 'text-white dark:text-zinc-900',
+                        isCompleted && 'text-emerald-700 dark:text-emerald-400',
+                        !isCompleted && !isCurrent && 'text-zinc-400 dark:text-zinc-500',
                       )}
                     >
                       {label}
                     </span>
                   </div>
                   {i < stepLabels.length - 1 && (
-                    <ChevronRight className="mx-2 h-4 w-4 text-zinc-300 sm:mx-4" />
+                    <div className={cn(
+                      'w-4 sm:w-6 h-0.5 mx-1 rounded-full transition-colors',
+                      i < stepIndex ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
+                    )} />
                   )}
                 </div>
               )
@@ -406,30 +409,30 @@ export default function BookingPage() {
       </div>
 
       {/* Content */}
-      <div className="mx-auto max-w-2xl px-4 py-8">
+      <div className="mx-auto max-w-2xl px-4 py-6">
         {/* Step 1: Select Service */}
         {step === 'service' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-                Selecciona un servicio
+          <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="px-1">
+              <h2 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
+                Elige servicio
               </h2>
-              <p className="mt-1 text-zinc-500">
-                Elige el servicio que deseas reservar
+              <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
+                Selecciona el servicio que deseas reservar
               </p>
             </div>
 
             {services.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Scissors className="mx-auto h-12 w-12 text-zinc-300" />
-                  <p className="mt-4 text-zinc-500">
-                    No hay servicios disponibles.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="ios-card p-8 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+                  <Scissors className="h-8 w-8 text-zinc-400" />
+                </div>
+                <p className="mt-4 text-[15px] text-zinc-500">
+                  No hay servicios disponibles.
+                </p>
+              </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="space-y-3">
                 {services.map((service, index) => {
                   const colorClass =
                     SERVICE_COLORS[index % SERVICE_COLORS.length]
@@ -437,36 +440,36 @@ export default function BookingPage() {
                     <button
                       key={service.id}
                       onClick={() => handleServiceSelect(service)}
-                      className="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+                      className="ios-card w-full flex items-center gap-4 p-4 text-left ios-press"
                     >
                       <div
                         className={cn(
-                          'flex h-14 w-14 items-center justify-center rounded-xl border',
+                          'flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl',
                           colorClass,
                         )}
                       >
                         <Scissors className="h-6 w-6" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-zinc-900 dark:text-white">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate">
                           {service.name}
                         </p>
                         {service.description && (
-                          <p className="mt-0.5 text-sm text-zinc-500">
+                          <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-1">
                             {service.description}
                           </p>
                         )}
-                        <div className="mt-1 flex items-center gap-2 text-sm text-zinc-500">
-                          <Clock className="h-4 w-4" />
+                        <div className="mt-1.5 flex items-center gap-1.5 text-[13px] text-zinc-400">
+                          <Clock className="h-3.5 w-3.5" />
                           <span>{service.duration_minutes} min</span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-zinc-900 dark:text-white">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[20px] font-bold text-zinc-900 dark:text-white">
                           {formatCurrency(Number(service.price))}
                         </p>
+                        <ChevronRight className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
                       </div>
-                      <ChevronRight className="h-5 w-5 text-zinc-300 transition-transform group-hover:translate-x-1" />
                     </button>
                   )
                 })}
@@ -477,12 +480,13 @@ export default function BookingPage() {
 
         {/* Step 2: Select Barber */}
         {step === 'barber' && (
-          <div className="space-y-6">
+          <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
             <button
               onClick={() => setStep('service')}
-              className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
             >
-              ← Cambiar servicio
+              <ChevronLeft className="h-5 w-5 -ml-1" />
+              Servicios
             </button>
 
             {/* Selected Service */}
@@ -512,35 +516,35 @@ export default function BookingPage() {
               </p>
             </div>
 
-            <div className="grid gap-4">
+            <div className="space-y-3">
               {barbers.map((barber) => (
                 <button
                   key={barber.id}
                   onClick={() => handleBarberSelect(barber)}
-                  className="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+                  className="ios-card w-full flex items-center gap-4 p-4 text-left ios-press"
                 >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                  <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 overflow-hidden">
                     {barber.photo_url ? (
                       <img
                         src={barber.photo_url}
                         alt={barber.name}
-                        className="h-14 w-14 rounded-full object-cover"
+                        className="h-16 w-16 rounded-full object-cover"
                       />
                     ) : (
-                      <UserRound className="h-7 w-7 text-zinc-400" />
+                      <UserRound className="h-8 w-8 text-zinc-400" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-zinc-900 dark:text-white">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
                       {barber.name}
                     </p>
                     {barber.bio && (
-                      <p className="mt-0.5 text-sm text-zinc-500">
+                      <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-2">
                         {barber.bio}
                       </p>
                     )}
                   </div>
-                  <ChevronRight className="h-5 w-5 text-zinc-300 transition-transform group-hover:translate-x-1" />
+                  <ChevronRight className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
                 </button>
               ))}
             </div>
@@ -549,12 +553,13 @@ export default function BookingPage() {
 
         {/* Step 3: Select Date & Time */}
         {step === 'datetime' && (
-          <div className="space-y-6">
+          <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
             <button
               onClick={() => setStep(barbers.length > 1 ? 'barber' : 'service')}
-              className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
             >
-              ← {barbers.length > 1 ? 'Cambiar barbero' : 'Cambiar servicio'}
+              <ChevronLeft className="h-5 w-5 -ml-1" />
+              {barbers.length > 1 ? 'Barbero' : 'Servicios'}
             </button>
 
             {/* Selected Service */}
@@ -575,13 +580,12 @@ export default function BookingPage() {
               </CardContent>
             </Card>
 
-            {/* Date Selection */}
+            {/* Date Selection - iOS Horizontal Scroll */}
             <div>
-              <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
-                <Calendar className="h-5 w-5" />
+              <h3 className="mb-4 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
                 Selecciona el día
               </h3>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex gap-2.5 overflow-x-auto pb-3 scrollbar-hide ios-scroll-snap -mx-4 px-4">
                 {availableDates.map((date) => {
                   const isSelected =
                     booking.date?.toDateString() === date.toDateString()
@@ -593,24 +597,30 @@ export default function BookingPage() {
                       key={date.toISOString()}
                       onClick={() => handleDateSelect(date)}
                       className={cn(
-                        'relative flex min-w-[72px] flex-col items-center rounded-xl border px-4 py-3 transition-all',
+                        'relative flex min-w-[72px] flex-col items-center rounded-2xl px-4 py-4 transition-all ios-press',
                         isSelected
-                          ? 'border-zinc-900 bg-zinc-900 text-white shadow-lg dark:border-white dark:bg-white dark:text-zinc-900'
-                          : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow dark:border-zinc-700 dark:bg-zinc-900',
+                          ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/30 dark:bg-white dark:text-zinc-900 dark:shadow-white/20'
+                          : 'bg-white dark:bg-zinc-800/80',
                       )}
                     >
-                      {isToday && (
-                        <span className="absolute -top-1 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-medium text-white">
+                      {isToday && !isSelected && (
+                        <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
                           Hoy
                         </span>
                       )}
-                      <span className="text-xs font-medium uppercase opacity-70">
+                      <span className={cn(
+                        "text-[11px] font-semibold uppercase tracking-wide",
+                        isSelected ? "opacity-80" : "text-zinc-400 dark:text-zinc-500"
+                      )}>
                         {format(date, 'EEE', { locale: es })}
                       </span>
-                      <span className="mt-1 text-2xl font-bold">
+                      <span className="mt-1 text-[28px] font-bold leading-none">
                         {format(date, 'd')}
                       </span>
-                      <span className="text-xs opacity-70">
+                      <span className={cn(
+                        "mt-0.5 text-[11px] font-medium uppercase",
+                        isSelected ? "opacity-70" : "text-zinc-400 dark:text-zinc-500"
+                      )}>
                         {format(date, 'MMM', { locale: es })}
                       </span>
                     </button>
@@ -619,40 +629,39 @@ export default function BookingPage() {
               </div>
             </div>
 
-            {/* Time Selection */}
+            {/* Time Selection - iOS Grid */}
             {booking.date && (
               <div>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-zinc-900 dark:text-white">
-                  <Clock className="h-5 w-5" />
+                <h3 className="mb-4 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
                   Selecciona la hora
                 </h3>
                 {loadingSlots ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-900 dark:border-white" />
+                  <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white" />
                   </div>
                 ) : slots.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-8 text-center">
-                      <Clock className="mx-auto h-8 w-8 text-zinc-300" />
-                      <p className="mt-2 text-zinc-500">
-                        No hay horarios disponibles para este día.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <div className="ios-card p-8 text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+                      <Clock className="h-7 w-7 text-zinc-400" />
+                    </div>
+                    <p className="mt-4 text-[15px] text-zinc-500">
+                      No hay horarios disponibles para este día.
+                    </p>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                  <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
                     {slots.map((slot) => (
                       <button
                         key={slot.datetime}
                         onClick={() => slot.available && handleTimeSelect(slot)}
                         disabled={!slot.available}
                         className={cn(
-                          'rounded-xl border px-3 py-3 text-sm font-medium transition-all',
+                          'rounded-2xl py-4 text-[15px] font-semibold transition-all',
                           !slot.available
-                            ? 'cursor-not-allowed border-zinc-100 bg-zinc-50 text-zinc-300 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-600'
+                            ? 'cursor-not-allowed bg-zinc-100 text-zinc-300 dark:bg-zinc-800/50 dark:text-zinc-600'
                             : booking.time?.datetime === slot.datetime
-                              ? 'border-zinc-900 bg-zinc-900 text-white shadow-lg dark:border-white dark:bg-white dark:text-zinc-900'
-                              : 'border-zinc-200 bg-white hover:border-zinc-300 hover:shadow dark:border-zinc-700 dark:bg-zinc-900',
+                              ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/30 dark:bg-white dark:text-zinc-900'
+                              : 'bg-white text-zinc-900 ios-press dark:bg-zinc-800 dark:text-white',
                         )}
                       >
                         {slot.time}
@@ -665,51 +674,50 @@ export default function BookingPage() {
           </div>
         )}
 
-        {/* Step 3: Client Info */}
+        {/* Step 4: Client Info */}
         {step === 'info' && (
-          <div className="space-y-6">
+          <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
             <button
               onClick={() => setStep('datetime')}
-              className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
             >
-              ← Cambiar horario
+              <ChevronLeft className="h-5 w-5 -ml-1" />
+              Horario
             </button>
 
-            {/* Booking Summary */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                    <Scissors className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-white">
-                      {booking.service?.name}
-                    </p>
-                    <p className="text-sm text-zinc-500">
-                      {booking.date &&
-                        format(booking.date, "EEEE d 'de' MMMM", {
-                          locale: es,
-                        })}{' '}
-                      · {booking.time?.time}
-                    </p>
-                  </div>
+            {/* Booking Summary - iOS Card */}
+            <div className="ios-card p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 to-violet-200 text-violet-600 dark:from-violet-900/40 dark:to-violet-800/40 dark:text-violet-400">
+                  <Scissors className="h-6 w-6" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate">
+                    {booking.service?.name}
+                  </p>
+                  <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
+                    {booking.date &&
+                      format(booking.date, "EEEE d 'de' MMMM", {
+                        locale: es,
+                      })}{' '}
+                    · {booking.time?.time}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                  Tus datos de contacto
+              <div className="px-1">
+                <h3 className="text-[20px] font-bold text-zinc-900 dark:text-white">
+                  Tus datos
                 </h3>
-                <p className="text-sm text-zinc-500">
-                  Los usaremos para enviarte confirmación y recordatorios
+                <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
+                  Para enviarte confirmación y recordatorios
                 </p>
               </div>
 
               {error && (
-                <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                <div className="rounded-2xl bg-red-50 p-4 text-[15px] font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400">
                   {error}
                 </div>
               )}
@@ -756,7 +764,7 @@ export default function BookingPage() {
               />
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                   Notas (opcional)
                 </label>
                 <textarea
@@ -765,12 +773,13 @@ export default function BookingPage() {
                   onChange={(e) =>
                     setBooking((prev) => ({ ...prev, notes: e.target.value }))
                   }
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                  className="w-full rounded-2xl border-0 bg-zinc-100/80 px-4 py-4 text-[17px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:bg-zinc-100 dark:bg-zinc-800/80 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-white/20 dark:focus:bg-zinc-800 transition-all duration-200 resize-none"
                   rows={3}
                 />
               </div>
 
-              <div className="pt-4">
+              {/* Submit Button with Safe Area */}
+              <div className="pt-4 ios-safe-bottom">
                 <Button
                   type="submit"
                   className="w-full"

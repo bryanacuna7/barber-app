@@ -15,7 +15,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
           >
             {label}
           </label>
@@ -24,18 +24,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400',
-            'focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500',
-            'disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:opacity-50',
-            'dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500',
-            'dark:focus:border-zinc-500',
-            error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+            'w-full rounded-2xl border-0 bg-zinc-100/80 px-4 py-4 text-[17px] text-zinc-900 placeholder:text-zinc-400',
+            'focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:bg-zinc-100',
+            'disabled:cursor-not-allowed disabled:opacity-50',
+            'dark:bg-zinc-800/80 dark:text-white dark:placeholder:text-zinc-500',
+            'dark:focus:ring-white/20 dark:focus:bg-zinc-800',
+            'transition-all duration-200',
+            error && 'ring-2 ring-red-500/50 bg-red-50 dark:bg-red-900/20',
             className
           )}
           {...props}
         />
         {error && (
-          <p className="mt-1 text-sm text-red-500">{error}</p>
+          <p className="mt-2 text-[13px] font-medium text-red-500">{error}</p>
         )}
       </div>
     )
