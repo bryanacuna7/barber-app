@@ -17,6 +17,7 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   })
+  const [showPasswords, setShowPasswords] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -136,7 +137,7 @@ export default function RegisterPage() {
 
           <Input
             label="Contraseña"
-            type="password"
+            type={showPasswords ? 'text' : 'password'}
             name="password"
             placeholder="Mínimo 6 caracteres"
             value={formData.password}
@@ -144,10 +145,13 @@ export default function RegisterPage() {
             required
             autoComplete="new-password"
           />
+          <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
+            Debe tener al menos 6 caracteres.
+          </p>
 
           <Input
             label="Confirmar contraseña"
-            type="password"
+            type={showPasswords ? 'text' : 'password'}
             name="confirmPassword"
             placeholder="Repite tu contraseña"
             value={formData.confirmPassword}
@@ -155,6 +159,15 @@ export default function RegisterPage() {
             required
             autoComplete="new-password"
           />
+          <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
+            <input
+              type="checkbox"
+              checked={showPasswords}
+              onChange={(e) => setShowPasswords(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+            />
+            Mostrar contraseñas
+          </label>
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">

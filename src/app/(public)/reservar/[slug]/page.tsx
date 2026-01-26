@@ -133,13 +133,16 @@ export default function BookingPage() {
   }, [slug, booking.service, booking.date])
 
   const handleServiceSelect = (service: Service) => {
-    setBooking(prev => ({ ...prev, service, barber: null, date: null, time: null }))
-    
-    // Smart barber routing
     if (barbers.length === 0) {
-      // No barbers configured, skip to datetime
-      setStep('datetime')
-    } else if (barbers.length === 1) {
+      setError('Este negocio aún no tiene barberos configurados. Contacta a la barbería.')
+      return
+    }
+
+    setError('')
+    setBooking(prev => ({ ...prev, service, barber: null, date: null, time: null }))
+
+    // Smart barber routing
+    if (barbers.length === 1) {
       // Only 1 barber, auto-assign and skip to datetime
       setBooking(prev => ({ ...prev, barber: barbers[0] }))
       setStep('datetime')
@@ -166,6 +169,10 @@ export default function BookingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!booking.service || !booking.time) return
+    if (barbers.length === 0) {
+      setError('Este negocio aún no tiene barberos configurados. Contacta a la barbería.')
+      return
+    }
 
     setSubmitting(true)
     setError('')
@@ -301,6 +308,7 @@ export default function BookingPage() {
   const stepKeys = barbers.length > 1
     ? ['service', 'barber', 'datetime', 'info']
     : ['service', 'datetime', 'info']
+  const noBarbers = barbers.length === 0
 
   return (
     <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#1C1C1E]">
@@ -410,6 +418,11 @@ export default function BookingPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-2xl px-4 py-6">
+        {error && (
+          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-medium text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300">
+            {error}
+          </div>
+        )}
         {/* Step 1: Select Service */}
         {step === 'service' && (
           <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -421,6 +434,11 @@ export default function BookingPage() {
                 Selecciona el servicio que deseas reservar
               </p>
             </div>
+            {noBarbers && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
+                Esta barbería aún no tiene barberos configurados. Contacta al negocio para reservar.
+              </div>
+            )}
 
             {services.length === 0 ? (
               <div className="ios-card p-8 text-center">
@@ -440,7 +458,11 @@ export default function BookingPage() {
                     <button
                       key={service.id}
                       onClick={() => handleServiceSelect(service)}
-                      className="ios-card w-full flex items-center gap-4 p-4 text-left ios-press"
+                      disabled={noBarbers}
+                      className={cn(
+                        'ios-card w-full flex items-center gap-4 p-4 text-left ios-press',
+                        noBarbers && 'opacity-60 cursor-not-allowed'
+                      )}
                     >
                       <div
                         className={cn(

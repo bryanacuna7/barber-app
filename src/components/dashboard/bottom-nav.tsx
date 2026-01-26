@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -9,8 +9,10 @@ import {
   Users,
   Scissors,
   Settings,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 
 const navigation = [
   { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
@@ -22,6 +24,16 @@ const navigation = [
 
 export function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    const shouldLogout = window.confirm('¿Cerrar sesión?')
+    if (!shouldLogout) return
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
@@ -74,6 +86,19 @@ export function BottomNav() {
             </Link>
           )
         })}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1.5 px-2 rounded-xl transition-all duration-200 text-zinc-400 dark:text-zinc-500 active:text-zinc-600 dark:active:text-zinc-400"
+          aria-label="Cerrar sesión"
+        >
+          <div className="relative z-10 flex items-center justify-center w-6 h-6">
+            <LogOut className="h-5 w-5" />
+          </div>
+          <span className="relative z-10 text-[10px] mt-0.5">
+            Salir
+          </span>
+        </button>
       </div>
     </nav>
   )
