@@ -224,33 +224,33 @@ export default async function DashboardPage() {
           <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <Link href="/citas">
-              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <Link href="/citas" className="block">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
                   <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <span className="text-[13px] font-medium text-zinc-900 dark:text-white">
+                <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
                   Nueva Cita
                 </span>
               </div>
             </Link>
-            <Link href="/servicios">
-              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
+            <Link href="/servicios" className="block">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
                   <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                 </div>
-                <span className="text-[13px] font-medium text-zinc-900 dark:text-white">
+                <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
                   Servicios
                 </span>
               </div>
             </Link>
-            <Link href="/clientes">
-              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 p-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
+            <Link href="/clientes" className="block">
+              <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
                   <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <span className="text-[13px] font-medium text-zinc-900 dark:text-white">
+                <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
                   Clientes
                 </span>
               </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Save,
   Building2,
@@ -10,6 +11,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  LogOut,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -19,6 +21,7 @@ import { useToast } from '@/components/ui/toast'
 import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
+import { createClient } from '@/lib/supabase/client'
 import type { Business, OperatingHours, DayHours } from '@/types'
 
 const DAYS = [
@@ -40,6 +43,7 @@ type TimePickerState = {
 }
 
 export default function ConfiguracionPage() {
+  const router = useRouter()
   const [business, setBusiness] = useState<Business | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -161,6 +165,13 @@ export default function ConfiguracionPage() {
     setCopied(true)
     toast.info('Enlace copiado al portapapeles')
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
   }
 
   if (loading) {
@@ -426,6 +437,31 @@ export default function ConfiguracionPage() {
                   </select>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </FadeInUp>
+
+        {/* Session */}
+        <FadeInUp delay={0.2}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[17px]">
+                <LogOut className="h-5 w-5" />
+                Sesión
+              </CardTitle>
+              <CardDescription>
+                Cierra sesión en este dispositivo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleLogout}
+              >
+                Cerrar sesión
+              </Button>
             </CardContent>
           </Card>
         </FadeInUp>

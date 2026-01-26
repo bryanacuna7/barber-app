@@ -77,15 +77,23 @@ function LoginForm() {
             required
             autoComplete="current-password"
           />
-          <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={(e) => setShowPassword(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
-            />
-            Mostrar contraseña
-          </label>
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-zinc-500 dark:text-zinc-400">
+            <label className="flex items-center gap-2 font-medium">
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+              />
+              Mostrar contraseña
+            </label>
+            <Link
+              href="/forgot-password"
+              className="ml-auto whitespace-nowrap font-semibold text-zinc-900 dark:text-white"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">

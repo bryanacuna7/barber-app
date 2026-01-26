@@ -24,12 +24,18 @@ export default function Home() {
                 Crear cuenta gratis
               </a>
               <a
-                href="/login"
+                href="/reservar/demo"
                 className="inline-flex items-center justify-center rounded-2xl border border-zinc-200 bg-white/80 px-6 py-4 text-[15px] font-semibold text-zinc-900 transition hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-white dark:hover:bg-zinc-900"
               >
-                Ya tengo cuenta
+                Ver demo
               </a>
             </div>
+            <p className="mt-3 text-[14px] text-zinc-500 dark:text-zinc-400">
+              ¿Ya tienes cuenta?{' '}
+              <a href="/login" className="font-semibold text-zinc-900 dark:text-white">
+                Inicia sesión
+              </a>
+            </p>
             <div className="mt-6 flex flex-wrap items-center gap-3 text-[13px] text-zinc-500 dark:text-zinc-400">
               <span className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1.5 dark:bg-zinc-800/70">
                 ✅ Reservas públicas personalizadas

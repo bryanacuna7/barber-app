@@ -21,6 +21,7 @@ import {
   StaggeredItem,
   ScaleOnHover,
 } from '@/components/ui/motion'
+import { IOSToggle } from '@/components/ui/ios-toggle'
 import type { Barber } from '@/types'
 import { useToast } from '@/components/ui/toast'
 
@@ -62,6 +63,7 @@ export default function BarberosPage() {
   const [editingBarber, setEditingBarber] = useState<Barber | null>(null)
   const [deleteBarber, setDeleteBarber] = useState<Barber | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const toast = useToast()
 
   const [formData, setFormData] = useState({
@@ -165,6 +167,40 @@ export default function BarberosPage() {
       setDeleting(false)
     }
   }
+
+  async function handleToggleActive(barber: Barber, nextValue: boolean) {
+    setBarbers(prev =>
+      prev.map(item =>
+        item.id === barber.id ? { ...item, is_active: nextValue } : item
+      )
+    )
+
+    try {
+      const res = await fetch(`/api/barbers/${barber.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: nextValue }),
+      })
+
+      if (!res.ok) {
+        throw new Error('update failed')
+      }
+    } catch {
+      setBarbers(prev =>
+        prev.map(item =>
+          item.id === barber.id ? { ...item, is_active: barber.is_active } : item
+        )
+      )
+      toast.error('No pudimos actualizar el estado del barbero.')
+    }
+  }
+
+  const filteredBarbers = barbers.filter(barber => {
+    const isActive = barber.is_active ?? true
+    if (statusFilter === 'all') return true
+    if (statusFilter === 'active') return isActive
+    return !isActive
+  })
 
   return (
     <div className="min-h-screen">
@@ -295,18 +331,40 @@ export default function BarberosPage() {
       <FadeInUp delay={0.1}>
         <Card className="overflow-hidden">
           <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
-                <Sparkles className="h-4 w-4 text-white" />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <CardTitle className="text-[17px] font-semibold">
+                  Equipo
+                </CardTitle>
+                {!loading && filteredBarbers.length > 0 && (
+                  <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[13px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                    {filteredBarbers.length} {filteredBarbers.length === 1 ? 'barbero' : 'barberos'}
+                  </span>
+                )}
               </div>
-              <CardTitle className="text-[17px] font-semibold">
-                Equipo Activo
-              </CardTitle>
-              {!loading && barbers.length > 0 && (
-                <span className="ml-auto rounded-full bg-zinc-100 px-2.5 py-0.5 text-[13px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                  {barbers.length} {barbers.length === 1 ? 'barbero' : 'barberos'}
-                </span>
-              )}
+              <div className="flex w-full items-center gap-1 rounded-full bg-zinc-100 p-1 text-[12px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 sm:w-auto">
+                {[
+                  { label: 'Todos', value: 'all' },
+                  { label: 'Activos', value: 'active' },
+                  { label: 'Inactivos', value: 'inactive' },
+                ].map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setStatusFilter(option.value as typeof statusFilter)}
+                    className={`flex-1 rounded-full px-3 py-1.5 transition-colors sm:flex-initial ${
+                      statusFilter === option.value
+                        ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-white'
+                        : 'hover:text-zinc-700 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
@@ -318,7 +376,7 @@ export default function BarberosPage() {
                   className="h-8 w-8 rounded-full border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
                 />
               </div>
-            ) : barbers.length === 0 ? (
+            ) : filteredBarbers.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -328,27 +386,32 @@ export default function BarberosPage() {
                   <UserRound className="h-10 w-10 text-violet-500 dark:text-violet-400" />
                 </div>
                 <p className="mt-5 text-[17px] font-medium text-zinc-900 dark:text-white">
-                  Aún no tienes barberos
+                  {statusFilter === 'inactive' ? 'No hay barberos inactivos' : 'Aún no tienes barberos'}
                 </p>
                 <p className="mt-1 text-[15px] text-zinc-500">
-                  Agrega a tu primer profesional para gestionar citas.
+                  {statusFilter === 'inactive'
+                    ? 'Todos tus barberos están activos.'
+                    : 'Agrega a tu primer profesional para gestionar citas.'}
                 </p>
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="mt-6"
                 >
-                  <Button onClick={() => setShowForm(true)} className="h-11">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Agregar Barbero
-                  </Button>
+                  {statusFilter !== 'inactive' && (
+                    <Button onClick={() => setShowForm(true)} className="h-11">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Agregar Barbero
+                    </Button>
+                  )}
                 </motion.div>
               </motion.div>
             ) : (
               <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
-                  {barbers.map((barber, index) => {
+                  {filteredBarbers.map((barber, index) => {
                     const colorSet = BARBER_COLORS[index % BARBER_COLORS.length]
+                    const isActive = barber.is_active ?? true
                     return (
                       <StaggeredItem key={barber.id}>
                         <ScaleOnHover>
@@ -357,7 +420,9 @@ export default function BarberosPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:shadow-zinc-900/50"
+                            className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:shadow-zinc-900/50 ${
+                              isActive ? '' : 'opacity-75 grayscale-[10%]'
+                            }`}
                           >
                             {/* Gradient accent bar */}
                             <div
@@ -401,7 +466,13 @@ export default function BarberosPage() {
                                   )}
                                 </div>
                                 {/* Status indicator */}
-                                <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-900" />
+                                <div
+                                  className={`absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 ${
+                                    isActive
+                                      ? 'border-white bg-emerald-500 dark:border-zinc-900'
+                                      : 'border-white bg-zinc-300 dark:border-zinc-900 dark:bg-zinc-600'
+                                  }`}
+                                />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <h3 className="truncate text-[17px] font-semibold text-zinc-900 dark:text-white">
@@ -420,6 +491,16 @@ export default function BarberosPage() {
                                 {barber.bio}
                               </p>
                             )}
+
+                            <div className="mt-4 flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-800/60">
+                              <span className="text-[13px] font-medium text-zinc-600 dark:text-zinc-400">
+                                {isActive ? 'Activo' : 'Inactivo'}
+                              </span>
+                              <IOSToggle
+                                checked={isActive}
+                                onChange={(value) => handleToggleActive(barber, value)}
+                              />
+                            </div>
                           </motion.div>
                         </ScaleOnHover>
                       </StaggeredItem>

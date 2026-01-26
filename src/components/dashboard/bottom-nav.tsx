@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -9,10 +9,8 @@ import {
   Users,
   Scissors,
   Settings,
-  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 
 const navigation = [
   { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
@@ -24,81 +22,49 @@ const navigation = [
 
 export function BottomNav() {
   const pathname = usePathname()
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    const shouldLogout = window.confirm('¿Cerrar sesión?')
-    if (!shouldLogout) return
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
-      {/* iOS-style blur background */}
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-2xl border-t border-zinc-200/50 dark:bg-zinc-900/70 dark:border-zinc-800/50" />
+      <div className="px-4 pb-safe">
+        <div className="mx-auto flex max-w-[420px] items-center justify-between gap-1 rounded-[28px] bg-zinc-900/85 px-2.5 py-2 shadow-2xl shadow-black/20 backdrop-blur-2xl">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                aria-current={isActive ? 'page' : undefined}
+                className={cn(
+                  'relative flex flex-1 flex-col items-center justify-center gap-1 rounded-[22px] px-2 py-2 text-white/70 transition-all',
+                  isActive ? 'text-white' : 'hover:text-white'
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="bottomNavIndicator"
+                    className="absolute inset-0 rounded-[22px] bg-white/15"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
 
-      {/* Safe area padding for iPhone */}
-      <div className="relative flex items-center justify-around px-2 pt-2 pb-safe">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                // Minimum 44px touch target (Apple HIG) - adjusted for 5 items
-                'relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1.5 px-2 rounded-xl transition-all duration-200',
-                isActive
-                  ? 'text-[#007AFF] dark:text-[#0A84FF]'
-                  : 'text-zinc-400 dark:text-zinc-500 active:text-zinc-600 dark:active:text-zinc-400'
-              )}
-            >
-              {/* Active indicator */}
-              {isActive && (
                 <motion.div
-                  layoutId="bottomNavIndicator"
-                  className="absolute inset-0 rounded-xl bg-[#007AFF]/10 dark:bg-[#0A84FF]/15"
-                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                />
-              )}
+                  animate={{ scale: isActive ? 1.06 : 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                  className="relative z-10 flex h-7 w-7 items-center justify-center"
+                >
+                  <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 2} />
+                </motion.div>
 
-              <motion.div
-                animate={{
-                  scale: isActive ? 1.05 : 1,
-                }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="relative z-10 flex items-center justify-center w-6 h-6"
-              >
-                <item.icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-              </motion.div>
-
-              <motion.span
-                animate={{
-                  fontWeight: isActive ? 600 : 500,
-                }}
-                className="relative z-10 text-[10px] mt-0.5"
-              >
-                {item.name}
-              </motion.span>
-            </Link>
-          )
-        })}
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1.5 px-2 rounded-xl transition-all duration-200 text-zinc-400 dark:text-zinc-500 active:text-zinc-600 dark:active:text-zinc-400"
-          aria-label="Cerrar sesión"
-        >
-          <div className="relative z-10 flex items-center justify-center w-6 h-6">
-            <LogOut className="h-5 w-5" />
-          </div>
-          <span className="relative z-10 text-[10px] mt-0.5">
-            Salir
-          </span>
-        </button>
+                <motion.span
+                  animate={{ fontWeight: isActive ? 600 : 500 }}
+                  className="relative z-10 text-[10px] leading-none"
+                >
+                  {item.name}
+                </motion.span>
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </nav>
   )
