@@ -64,6 +64,7 @@ export default function BarberosPage() {
   const [deleteBarber, setDeleteBarber] = useState<Barber | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  const [togglingIds, setTogglingIds] = useState<string[]>([])
   const toast = useToast()
 
   const [formData, setFormData] = useState({
@@ -169,6 +170,10 @@ export default function BarberosPage() {
   }
 
   async function handleToggleActive(barber: Barber, nextValue: boolean) {
+    if (togglingIds.includes(barber.id)) return
+    const previousValue = barber.is_active ?? true
+
+    setTogglingIds(prev => (prev.includes(barber.id) ? prev : [...prev, barber.id]))
     setBarbers(prev =>
       prev.map(item =>
         item.id === barber.id ? { ...item, is_active: nextValue } : item
@@ -188,10 +193,12 @@ export default function BarberosPage() {
     } catch {
       setBarbers(prev =>
         prev.map(item =>
-          item.id === barber.id ? { ...item, is_active: barber.is_active } : item
+          item.id === barber.id ? { ...item, is_active: previousValue } : item
         )
       )
       toast.error('No pudimos actualizar el estado del barbero.')
+    } finally {
+      setTogglingIds(prev => prev.filter(id => id !== barber.id))
     }
   }
 
@@ -412,6 +419,7 @@ export default function BarberosPage() {
                   {filteredBarbers.map((barber, index) => {
                     const colorSet = BARBER_COLORS[index % BARBER_COLORS.length]
                     const isActive = barber.is_active ?? true
+                    const isToggling = togglingIds.includes(barber.id)
                     return (
                       <StaggeredItem key={barber.id}>
                         <ScaleOnHover>
@@ -494,10 +502,11 @@ export default function BarberosPage() {
 
                             <div className="mt-4 flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-800/60">
                               <span className="text-[13px] font-medium text-zinc-600 dark:text-zinc-400">
-                                {isActive ? 'Activo' : 'Inactivo'}
+                                {isToggling ? 'Guardando...' : isActive ? 'Activo' : 'Inactivo'}
                               </span>
                               <IOSToggle
                                 checked={isActive}
+                                disabled={isToggling}
                                 onChange={(value) => handleToggleActive(barber, value)}
                               />
                             </div>

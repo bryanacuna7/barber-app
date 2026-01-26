@@ -17,17 +17,25 @@ function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPasswords, setShowPasswords] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
     const exchangeSession = async () => {
-      if (!code) return
+      if (!code) {
+        setIsSessionValid(false)
+        setError('El enlace no es válido o expiró. Solicita uno nuevo.')
+        return
+      }
       const supabase = createClient()
       const { error } = await supabase.auth.exchangeCodeForSession(code)
       if (error) {
+        setIsSessionValid(false)
         setError('El enlace no es válido o expiró. Solicita uno nuevo.')
+        return
       }
+      setIsSessionValid(true)
     }
 
     exchangeSession()
@@ -38,6 +46,10 @@ function ResetPasswordForm() {
     setError('')
     setMessage('')
 
+    if (isSessionValid !== true) {
+      setError('Necesitas un enlace válido para cambiar la contraseña.')
+      return
+    }
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
       return
@@ -86,6 +98,12 @@ function ResetPasswordForm() {
             </div>
           )}
 
+          {isSessionValid === false && (
+            <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+              Solicita un nuevo enlace de recuperación para continuar.
+            </div>
+          )}
+
           <Input
             label="Nueva contraseña"
             type={showPasswords ? 'text' : 'password'}
@@ -94,6 +112,7 @@ function ResetPasswordForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="new-password"
+            disabled={isSessionValid !== true}
           />
 
           <Input
@@ -104,6 +123,7 @@ function ResetPasswordForm() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             autoComplete="new-password"
+            disabled={isSessionValid !== true}
           />
 
           <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
@@ -112,6 +132,7 @@ function ResetPasswordForm() {
               checked={showPasswords}
               onChange={(e) => setShowPasswords(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+              disabled={isSessionValid !== true}
             />
             Mostrar contraseñas
           </label>
@@ -122,13 +143,14 @@ function ResetPasswordForm() {
             type="submit"
             className="w-full"
             isLoading={isLoading}
+            disabled={isSessionValid !== true}
           >
             Guardar contraseña
           </Button>
 
           <p className="text-center text-sm text-zinc-500">
-            <Link href="/login" className="text-zinc-900 underline dark:text-white">
-              Volver a iniciar sesión
+            <Link href="/forgot-password" className="text-zinc-900 underline dark:text-white">
+              Solicitar nuevo enlace
             </Link>
           </p>
         </CardFooter>
