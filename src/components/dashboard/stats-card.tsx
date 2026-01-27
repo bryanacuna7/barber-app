@@ -25,7 +25,7 @@ const variants = {
     gradient: null,
   },
   primary: {
-    bg: 'bg-gradient-to-br from-violet-500 to-purple-600',
+    bg: 'bg-[var(--brand-primary)]',
     iconBg: 'bg-white/20',
     iconColor: 'text-white',
     gradient: true,

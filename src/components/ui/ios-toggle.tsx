@@ -54,10 +54,10 @@ export function IOSToggle({
         className={cn(
           'relative inline-flex flex-shrink-0 rounded-full p-[2px]',
           'transition-colors duration-200 ease-in-out',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#007AFF] focus-visible:ring-offset-2',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2',
           sizeConfig.track,
           checked
-            ? 'bg-[#34C759]'
+            ? 'bg-[var(--brand-primary)]'
             : 'bg-[#E9E9EB] dark:bg-[#39393D]'
         )}
       >

@@ -42,7 +42,11 @@ export function BottomNav() {
                 {isActive && (
                   <motion.div
                     layoutId="bottomNavIndicator"
-                    className="absolute inset-0 rounded-[22px] bg-white/15"
+                    className="absolute inset-0 rounded-[22px] ring-1 ring-white/10"
+                    style={{
+                      backgroundColor: 'rgba(var(--brand-primary-rgb), 0.25)',
+                      boxShadow: '0 0 20px rgba(var(--brand-primary-rgb), 0.15)'
+                    }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
