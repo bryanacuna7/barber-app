@@ -12,6 +12,11 @@ import {
   Copy,
   Check,
   LogOut,
+  Palette,
+  Upload,
+  X,
+  ImageIcon,
+  Scissors,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -21,7 +26,10 @@ import { useToast } from '@/components/ui/toast'
 import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
+import { ColorPicker } from '@/components/ui/color-picker'
+import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { generateThemeStyle, DEFAULT_BRAND_COLOR } from '@/lib/theme'
 import type { Business, OperatingHours, DayHours } from '@/types'
 
 const DAYS = [
@@ -49,6 +57,11 @@ export default function ConfiguracionPage() {
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
   const toast = useToast()
+
+  const [brandColor, setBrandColor] = useState(DEFAULT_BRAND_COLOR)
+  const [brandSecondary, setBrandSecondary] = useState<string>('')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [logoUploading, setLogoUploading] = useState(false)
 
   const [timePicker, setTimePicker] = useState<TimePickerState>({
     isOpen: false,
@@ -95,6 +108,9 @@ export default function ConfiguracionPage() {
           advance_booking_days: data.advance_booking_days || 14,
           operating_hours: data.operating_hours || formData.operating_hours,
         })
+        setBrandColor(data.brand_primary_color || DEFAULT_BRAND_COLOR)
+        setBrandSecondary(data.brand_secondary_color || '')
+        setLogoUrl(data.logo_url || null)
       }
     } catch (error) {
       console.error('Error fetching business:', error)
@@ -111,7 +127,11 @@ export default function ConfiguracionPage() {
       const res = await fetch('/api/business', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          brand_primary_color: brandColor,
+          brand_secondary_color: brandSecondary || null,
+        }),
       })
 
       if (res.ok) {
@@ -165,6 +185,47 @@ export default function ConfiguracionPage() {
     setCopied(true)
     toast.info('Enlace copiado al portapapeles')
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setLogoUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('logo', file)
+
+      const res = await fetch('/api/business/logo', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setLogoUrl(data.logo_url)
+        toast.success('Logo subido correctamente')
+      } else {
+        const err = await res.json()
+        toast.error(err.error || 'Error al subir logo')
+      }
+    } catch {
+      toast.error('Error de conexión')
+    } finally {
+      setLogoUploading(false)
+    }
+  }
+
+  async function handleLogoDelete() {
+    try {
+      const res = await fetch('/api/business/logo', { method: 'DELETE' })
+      if (res.ok) {
+        setLogoUrl(null)
+        toast.info('Logo eliminado')
+      }
+    } catch {
+      toast.error('Error al eliminar logo')
+    }
   }
 
   async function handleLogout() {
@@ -303,6 +364,123 @@ export default function ConfiguracionPage() {
                 value={formData.address}
                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
               />
+            </CardContent>
+          </Card>
+        </FadeInUp>
+
+        {/* Brand Customization */}
+        <FadeInUp delay={0.12}>
+          <Card className="overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-1" style={{ background: `linear-gradient(90deg, ${brandColor}, ${brandSecondary || brandColor})` }} />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[17px]">
+                <Palette className="h-5 w-5" />
+                Personaliza tu Marca
+              </CardTitle>
+              <CardDescription>
+                Colores y logo que verán tus clientes
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Color Picker */}
+              <ColorPicker
+                label="Color principal"
+                value={brandColor}
+                onChange={setBrandColor}
+              />
+
+              {/* Live Preview */}
+              <div>
+                <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Vista previa
+                </label>
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50" style={generateThemeStyle(brandColor, brandSecondary || null)}>
+                  <div className="flex items-center gap-3 mb-3">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: brandColor }}>
+                        <Scissors className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <span className="font-semibold text-zinc-900 dark:text-white">{formData.name || 'Tu Barbería'}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold text-white" style={{ backgroundColor: brandColor }}>
+                      Reservar ahora
+                    </span>
+                    <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ backgroundColor: `${brandColor}15`, color: brandColor }}>
+                      Ver servicios
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Logo Upload */}
+              <div>
+                <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Logo del negocio
+                </label>
+                {logoUrl ? (
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={logoUrl}
+                      alt="Logo"
+                      className="h-20 w-20 rounded-2xl object-cover border-2 border-zinc-200 dark:border-zinc-700"
+                    />
+                    <div className="flex flex-col gap-2">
+                      <label className="cursor-pointer rounded-xl bg-zinc-100 px-4 py-2.5 text-[13px] font-semibold text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors text-center">
+                        <Upload className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+                        Cambiar
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleLogoDelete}
+                        className="rounded-xl bg-red-50 px-4 py-2.5 text-[13px] font-semibold text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                      >
+                        <X className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className={cn(
+                    'flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 px-6 py-8 transition-colors hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600 dark:hover:bg-zinc-800',
+                    logoUploading && 'opacity-60 pointer-events-none',
+                  )}>
+                    {logoUploading ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                        className="h-8 w-8 rounded-full border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
+                      />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-zinc-400" />
+                    )}
+                    <div className="text-center">
+                      <p className="text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
+                        {logoUploading ? 'Subiendo...' : 'Sube tu logo'}
+                      </p>
+                      <p className="mt-1 text-[13px] text-zinc-400">
+                        PNG, JPG, WebP o SVG · Máximo 2MB
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                      disabled={logoUploading}
+                    />
+                  </label>
+                )}
+              </div>
             </CardContent>
           </Card>
         </FadeInUp>

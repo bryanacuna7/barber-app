@@ -11,7 +11,7 @@ export async function GET(
 
   const { data: business, error } = await supabase
     .from('businesses')
-    .select('id, name, slug, address, phone, operating_hours, booking_buffer_minutes, advance_booking_days')
+    .select('id, name, slug, address, phone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_secondary_color, logo_url')
     .eq('slug', slug)
     .eq('is_active', true)
     .single()

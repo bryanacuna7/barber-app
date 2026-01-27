@@ -76,6 +76,59 @@ export default function BookingPage() {
     addDays(startOfDay(new Date()), i),
   )
 
+  // PWA: inject manifest link and register service worker
+  useEffect(() => {
+    // Dynamic manifest
+    const link = document.createElement('link')
+    link.rel = 'manifest'
+    link.href = `/api/public/${slug}/manifest`
+    document.head.appendChild(link)
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
+
+    return () => {
+      document.head.removeChild(link)
+    }
+  }, [slug])
+
+  // Apply brand theme to :root
+  useEffect(() => {
+    if (!business?.brand_primary_color) return
+
+    function hexToRgb(hex: string): string {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+      if (!result) return '0, 0, 0'
+      return `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+    }
+
+    function lightenColor(hex: string, amount: number): string {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+      if (!result) return hex
+      const r = parseInt(result[1], 16)
+      const g = parseInt(result[2], 16)
+      const b = parseInt(result[3], 16)
+      const newR = Math.min(255, r + Math.round((255 - r) * amount))
+      const newG = Math.min(255, g + Math.round((255 - g) * amount))
+      const newB = Math.min(255, b + Math.round((255 - b) * amount))
+      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`
+    }
+
+    const root = document.documentElement
+    const primaryColor = business.brand_primary_color
+    const secondaryColor = business.brand_secondary_color
+
+    root.style.setProperty('--brand-primary', primaryColor)
+    root.style.setProperty('--brand-primary-rgb', hexToRgb(primaryColor))
+    root.style.setProperty('--brand-primary-light', lightenColor(primaryColor, 0.85))
+    root.style.setProperty(
+      '--brand-secondary',
+      secondaryColor || lightenColor(primaryColor, 0.4)
+    )
+  }, [business?.brand_primary_color, business?.brand_secondary_color])
+
   // Fetch business, services, and barbers
   useEffect(() => {
     async function fetchData() {
@@ -316,9 +369,24 @@ export default function BookingPage() {
       <div className="ios-glass sticky top-0 z-50 border-b border-black/5 dark:border-white/5">
         <div className="mx-auto max-w-2xl px-4 py-4 sm:py-5">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-lg dark:from-zinc-100 dark:to-zinc-200">
-              <Scissors className="h-7 w-7 text-white dark:text-zinc-900" />
-            </div>
+            {business?.logo_url ? (
+              <img
+                src={business.logo_url}
+                alt={business.name}
+                className="h-14 w-14 rounded-[18px] object-cover shadow-lg"
+              />
+            ) : (
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-[18px] shadow-lg"
+                style={{
+                  background: business?.brand_primary_color
+                    ? `linear-gradient(135deg, ${business.brand_primary_color}, ${business.brand_primary_color}dd)`
+                    : 'linear-gradient(135deg, #18181b, #27272a)',
+                }}
+              >
+                <Scissors className="h-7 w-7 text-white" />
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <h1 className="text-[22px] font-bold tracking-tight text-zinc-900 dark:text-white truncate">
                 {business?.name}

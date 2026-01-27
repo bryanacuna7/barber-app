@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-primary: #007AFF;
+  --brand-primary-rgb: 0, 122, 255;
+  --brand-primary-light: #CCE4FF;
+  --brand-secondary: #5AC8FA;
 }
 
 @theme inline {
@@ -350,7 +354,7 @@ html {
   font-weight: 600;
   font-size: 16px;
   border-radius: 25px;
-  background: #007AFF;
+  background: var(--brand-primary);
   color: white;
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
@@ -364,7 +368,7 @@ html {
 /* iOS Capsule Secondary */
 .ios-capsule-secondary {
   background: rgba(118, 118, 128, 0.12);
-  color: #007AFF;
+  color: var(--brand-primary);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -580,7 +584,7 @@ html {
 
 /* iOS Selection Color */
 ::selection {
-  background: rgba(0, 122, 255, 0.25);
+  background: rgba(var(--brand-primary-rgb), 0.25);
 }
 
 /* iOS Spring Animation */

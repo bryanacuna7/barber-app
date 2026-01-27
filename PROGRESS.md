@@ -7,8 +7,8 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, Supabase, Tailwind CSS 4, Framer Motion
-- **Last Updated:** 2026-01-24 17:37
-- **Last Commit:** `4dd2029` ✨ feat(ui): Apple-style design system with mobile UX improvements
+- **Last Updated:** 2026-01-27 18:45
+- **Last Commit:** Fase 1 de Personalización de Marca completada
 
 ---
 
@@ -27,19 +27,34 @@
 - [x] **iOS Time Picker Wheel** component
 - [x] **iOS Toggle Switch** component
 - [x] **Motion Components** reutilizables
+- [x] **FASE 1: Personalización de Marca Completa**
+  - [x] Migración DB con columnas branding (brand_primary_color, brand_secondary_color, logo_url)
+  - [x] Bucket 'logos' en Supabase Storage con RLS policies
+  - [x] Color Picker component con 16 presets + custom hex
+  - [x] API para subir/eliminar logos (POST/DELETE /api/business/logo)
+  - [x] ThemeProvider que aplica CSS variables al :root dinámicamente
+  - [x] UI de configuración con sección "Personaliza tu Marca"
+  - [x] Dashboard aplica branding del negocio
+  - [x] Booking page aplica branding del negocio
+  - [x] PWA manifest dinámico con theme_color del negocio
 
 ### In Progress
-- [ ] Mejorar diseño de login/register con animaciones
-- [ ] Más micro-interacciones para nivel Awwwards
+- [ ] **FASE 2: Panel de Super Admin** (próximo)
+- [ ] **FASE 3: Sistema de Suscripción** (después de Fase 2)
 
-### Key Files (Nuevos)
+### Key Files (Últimos cambios)
 | File | Purpose |
 |------|---------|
-| `src/lib/design-system.ts` | Sistema de diseño Apple-style |
-| `src/components/ui/ios-time-picker.tsx` | Time picker wheel estilo iOS |
-| `src/components/ui/ios-toggle.tsx` | Toggle switch estilo iOS |
-| `src/components/ui/motion.tsx` | FadeInUp, StaggeredList, ScaleOnHover, etc. |
-| `src/components/dashboard/dashboard-stats.tsx` | Wrapper client para stats del dashboard |
+| `supabase/migrations/003_branding.sql` | Columnas de branding en businesses table |
+| `src/lib/theme.ts` | Sistema de temas con CSS variables |
+| `src/components/ui/color-picker.tsx` | Selector de color con 16 presets |
+| `src/components/theme-provider.tsx` | Aplica CSS variables al :root (client component) |
+| `src/app/api/business/logo/route.ts` | API para subir/eliminar logos |
+| `src/app/api/public/[slug]/manifest/route.ts` | Manifest.json dinámico para PWA |
+| `src/app/(dashboard)/layout.tsx` | Usa ThemeProvider para aplicar branding |
+| `src/app/(public)/reservar/[slug]/page.tsx` | Aplica branding con useEffect |
+| `public/sw.js` | Service Worker mínimo para PWA |
+| `public/icon-192.png`, `public/icon-512.png` | Iconos PWA genéricos |
 
 ---
 
@@ -48,14 +63,21 @@
 ### Working
 - ✅ Build compila sin errores
 - ✅ Server/Client component boundary correcta
-- ✅ Servicios rediseñados sin stats inútiles
-- ✅ Configuración con iOS time picker wheel
-- ✅ Dashboard con StatsCard animados (variant: primary, success)
-- ✅ Bottom nav con layoutId animations
-- ✅ Touch targets 44px mínimo (Apple HIG)
-- ✅ Citas mobile: iOS-style stat pills, filtros compactos
-- ✅ Clientes mobile: iOS-style stat pills, dark mode fix
-- ✅ Montos de currency en formato completo (₡150,000)
+- ✅ Migración 003_branding.sql aplicada en Supabase
+- ✅ Bucket 'logos' creado con políticas RLS públicas/authenticated
+- ✅ Color picker con 16 presets estética barbería (dorados, negros, azules, etc.)
+- ✅ Vista previa en vivo de color seleccionado
+- ✅ Upload de logos con validación (2MB, PNG/JPG/WebP/SVG)
+- ✅ ThemeProvider aplica CSS variables correctamente al :root
+- ✅ Dashboard carga brand_primary_color desde DB y aplica tema
+- ✅ Booking page (/reservar/demo) muestra branding dorado (#C4953A)
+- ✅ PWA manifest dinámico con theme_color personalizado
+- ✅ Service Worker registrado correctamente
+
+### Verified with Playwright
+- ✅ `/configuracion` - Color picker funciona, guarda en DB correctamente
+- ✅ `/dashboard` - CSS variables --brand-primary = #C4953A (dorado)
+- ✅ `/reservar/demo` - Ícono con círculo dorado, step indicator dorado
 
 ### Score UX/UI
 - **Antes:** 4.1/10
@@ -66,25 +88,43 @@
 
 ## Next Session
 
-### Continue With
-1. Rediseñar páginas de auth (login/register) con animaciones premium
-2. Agregar animaciones de transición de página (page transitions)
-3. Implementar swipe-to-delete en móvil para citas/clientes
-4. Micro-interacciones para subir score a 8.5+
+### Continue With (Plan Original)
+1. **FASE 2: Panel de Super Admin** (ver plan en `.claude/plans/curried-snuggling-pike.md`)
+   - Tabla admin_users en DB
+   - Rutas /admin protegidas
+   - Dashboard admin con stats globales
+   - Lista de todos los negocios
+   - Activar/desactivar negocios
 
 ### Commands to Run
 ```bash
-npm run dev
+npm run dev  # Already running
 ```
 
 ### Context Notes
-- **IMPORTANTE:** Dashboard es Server Component, StatsCard es Client → usar DashboardStats wrapper
-- No pasar funciones (iconos Lucide) de Server a Client components
-- Para verificar UI: usar scripts de Playwright en `/scripts/`
+- **IMPORTANTE:** Dashboard es Server Component, usa ThemeProvider (Client) para aplicar CSS al :root
+- **IMPORTANTE:** Booking page también usa useEffect para aplicar CSS variables al :root
+- Bucket 'logos' en Supabase Storage está público para lectura, autenticado para escritura
+- Para verificar UI: usar Playwright con `mcp__playwright__` tools
+- Migración aplicada: `003_branding.sql` con columnas brand_primary_color, brand_secondary_color, logo_url
 
 ---
 
 ## Session History
+
+### 2026-01-27 - Session 9 (FASE 1: Personalización Completa) ✅ READY TO COMMIT
+- Aplicada migración 003_branding.sql manualmente en Supabase Dashboard
+- Creado bucket 'logos' en Supabase Storage con políticas RLS
+- Creado ColorPicker component con 16 presets + custom hex
+- Creado ThemeProvider component (client) que aplica CSS al :root
+- Creada API /api/business/logo (POST/DELETE) para upload/eliminar logos
+- Actualizado layout dashboard para usar ThemeProvider
+- Actualizado booking page para aplicar branding con useEffect
+- Creado manifest.json dinámico en /api/public/[slug]/manifest
+- Registrado service worker en booking page
+- Verificado con Playwright: dorado (#C4953A) aplicado correctamente
+- **Archivos nuevos:** theme-provider.tsx, color-picker.tsx, api/business/logo/route.ts, api/public/[slug]/manifest/route.ts, sw.js, icon-192.png, icon-512.png
+- **Archivos modificados:** layout.tsx (dashboard), page.tsx (booking), configuracion/page.tsx, business/route.ts, public/[slug]/route.ts
 
 ### 2026-01-24 - Session 8 (Mobile UX Improvements) ✅ COMMITTED
 - Rediseño completo de stat cards en Citas y Clientes
@@ -104,12 +144,7 @@ npm run dev
 - Fix crítico: Server/Client boundary con iconos Lucide → DashboardStats wrapper
 - Score UX mejoró de 4.1 a ~7.3
 
-### 2026-01-24 - Session 6 (UI Polish + Demo User)
-- Fixed: Inputs de tiempo → formato 24h
-- Creado usuario demo
+---
 
-### 2026-01-24 - Session 5 (UI Bug Fixes)
-- Calendario 30 días, horario compacto, stats cards dark
-
-### 2026-01-24 - Session 4 (iOS 26 Design)
-- iOS design system en globals.css
+## Plan File
+Archivo del plan actual: `/Users/bryanacuna/.claude/plans/curried-snuggling-pike.md`

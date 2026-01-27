@@ -51,20 +51,31 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
   }
 
+  // Build update payload
+  const updateData: Record<string, unknown> = {
+    name: body.name,
+    phone: body.phone || null,
+    whatsapp: body.whatsapp || null,
+    address: body.address || null,
+    timezone: body.timezone || 'America/Costa_Rica',
+    operating_hours: body.operating_hours,
+    booking_buffer_minutes: body.booking_buffer_minutes || 15,
+    advance_booking_days: body.advance_booking_days || 14,
+    updated_at: new Date().toISOString(),
+  }
+
+  // Include brand fields if provided
+  if (body.brand_primary_color !== undefined) {
+    updateData.brand_primary_color = body.brand_primary_color
+  }
+  if (body.brand_secondary_color !== undefined) {
+    updateData.brand_secondary_color = body.brand_secondary_color || null
+  }
+
   // Update business
   const { data, error } = await supabase
     .from('businesses')
-    .update({
-      name: body.name,
-      phone: body.phone || null,
-      whatsapp: body.whatsapp || null,
-      address: body.address || null,
-      timezone: body.timezone || 'America/Costa_Rica',
-      operating_hours: body.operating_hours,
-      booking_buffer_minutes: body.booking_buffer_minutes || 15,
-      advance_booking_days: body.advance_booking_days || 14,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq('id', business.id)
     .select()
     .single()

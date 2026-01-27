@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BarberShop Pro
 
-## Getting Started
+BarberShop Pro is a web app for barbershops to manage appointments, clients, services, and staff, and to offer a branded online booking experience to customers.
 
-First, run the development server:
+## What the app does
+
+- Provides a public booking page per business (e.g. /reservar/[slug])
+- Lets owners manage appointments, services, clients, and staff from a dashboard
+- Calculates availability based on operating hours, service duration, and buffer time
+- Supports multi-barber teams with active/inactive status
+- Tracks client history, spend, and segmentation (VIP/frequent/new/inactive)
+- Allows brand customization (colors + logo) for the public booking page
+- Includes authentication (sign up, login, password reset)
+- PWA-friendly booking page (manifest + service worker)
+
+## Primary user flows
+
+Owner / admin
+1. Sign up and log in
+2. Configure business info, hours, buffer time, and branding
+3. Create services and barbers
+4. Share the public booking link
+5. Manage appointments and clients from the dashboard
+
+Client
+1. Open the booking link
+2. Choose a service (and barber if applicable)
+3. Pick date and time
+4. Enter contact info and confirm
+
+## Main sections
+
+- Public marketing page: /
+- Auth: /login, /register, /forgot-password, /reset-password
+- Dashboard: /dashboard
+- Appointments: /citas
+- Clients: /clientes
+- Services: /servicios
+- Barbers: /barberos
+- Settings: /configuracion
+- Public booking: /reservar/[slug]
+
+## Tech stack
+
+- Next.js App Router (React 19)
+- Tailwind CSS v4
+- Supabase (Auth, Postgres, Storage)
+- Zod validation
+- Framer Motion UI animations
+
+## Local development
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Set environment variables in .env.local
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+3. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Database and Supabase
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Migrations live in `supabase/migrations`:
+  - 001_initial_schema.sql (businesses, services, clients, appointments)
+  - 002_multi_barber.sql (barbers + invitations)
+  - 003_branding.sql (brand colors + logo)
+- Optional seed file: `supabase/seed_test_data.sql`
+- Demo data helper: `scripts/create-demo-user.ts` (requires SUPABASE_SERVICE_ROLE_KEY)
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Booking availability is calculated server-side via `/api/public/[slug]/availability`.
+- The public booking page injects a dynamic PWA manifest via `/api/public/[slug]/manifest`.

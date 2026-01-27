@@ -29,10 +29,12 @@ const navigation = [
 
 interface SidebarProps {
   businessName: string
+  logoUrl?: string | null
 }
 
 interface SidebarContentProps {
   businessName: string
+  logoUrl?: string | null
   pathname: string
   onLogout: () => void
   onLinkClick?: () => void
@@ -40,6 +42,7 @@ interface SidebarContentProps {
 
 function SidebarContent({
   businessName,
+  logoUrl,
   pathname,
   onLogout,
   onLinkClick,
@@ -53,7 +56,11 @@ function SidebarContent({
           className="flex items-center gap-2"
           onClick={onLinkClick}
         >
-          <Scissors className="h-6 w-6" />
+          {logoUrl ? (
+            <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
+          ) : (
+            <Scissors className="h-6 w-6" />
+          )}
           <span className="font-semibold">{businessName}</span>
         </Link>
       </div>
@@ -95,7 +102,7 @@ function SidebarContent({
   )
 }
 
-export function Sidebar({ businessName }: SidebarProps) {
+export function Sidebar({ businessName, logoUrl }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -115,6 +122,7 @@ export function Sidebar({ businessName }: SidebarProps) {
       <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200 lg:bg-white dark:lg:border-zinc-800 dark:lg:bg-zinc-900">
         <SidebarContent
           businessName={businessName}
+          logoUrl={logoUrl}
           pathname={pathname}
           onLogout={handleLogout}
         />

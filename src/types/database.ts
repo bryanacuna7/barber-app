@@ -15,6 +15,9 @@ export interface Business {
   booking_buffer_minutes: number
   advance_booking_days: number
   is_active: boolean
+  brand_primary_color: string
+  brand_secondary_color: string | null
+  logo_url: string | null
 }
 
 export interface OperatingHours {
@@ -127,6 +130,9 @@ export interface BusinessInsert {
   booking_buffer_minutes?: number
   advance_booking_days?: number
   is_active?: boolean
+  brand_primary_color?: string
+  brand_secondary_color?: string | null
+  logo_url?: string | null
 }
 
 export interface ServiceInsert {
@@ -369,9 +375,12 @@ export type Database = {
           address: string | null
           advance_booking_days: number | null
           booking_buffer_minutes: number | null
+          brand_primary_color: string | null
+          brand_secondary_color: string | null
           created_at: string | null
           id: string
           is_active: boolean | null
+          logo_url: string | null
           name: string
           operating_hours: Json | null
           owner_id: string
@@ -385,9 +394,12 @@ export type Database = {
           address?: string | null
           advance_booking_days?: number | null
           booking_buffer_minutes?: number | null
+          brand_primary_color?: string | null
+          brand_secondary_color?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
+          logo_url?: string | null
           name: string
           operating_hours?: Json | null
           owner_id: string
@@ -401,9 +413,12 @@ export type Database = {
           address?: string | null
           advance_booking_days?: number | null
           booking_buffer_minutes?: number | null
+          brand_primary_color?: string | null
+          brand_secondary_color?: string | null
           created_at?: string | null
           id?: string
           is_active?: boolean | null
+          logo_url?: string | null
           name?: string
           operating_hours?: Json | null
           owner_id?: string
