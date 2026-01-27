@@ -33,12 +33,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes
+  // Protected routes (require authentication)
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/citas') ||
     request.nextUrl.pathname.startsWith('/servicios') ||
     request.nextUrl.pathname.startsWith('/clientes') ||
-    request.nextUrl.pathname.startsWith('/configuracion')
+    request.nextUrl.pathname.startsWith('/barberos') ||
+    request.nextUrl.pathname.startsWith('/configuracion') ||
+    request.nextUrl.pathname.startsWith('/admin')
 
   // Auth routes (login, register)
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||

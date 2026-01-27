@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   UserRound,
+  Shield,
 } from 'lucide-react'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -30,11 +31,13 @@ const navigation = [
 interface SidebarProps {
   businessName: string
   logoUrl?: string | null
+  isAdmin?: boolean
 }
 
 interface SidebarContentProps {
   businessName: string
   logoUrl?: string | null
+  isAdmin?: boolean
   pathname: string
   onLogout: () => void
   onLinkClick?: () => void
@@ -43,6 +46,7 @@ interface SidebarContentProps {
 function SidebarContent({
   businessName,
   logoUrl,
+  isAdmin,
   pathname,
   onLogout,
   onLinkClick,
@@ -88,8 +92,18 @@ function SidebarContent({
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
+      {/* Admin Panel + Logout */}
+      <div className="border-t border-zinc-200 p-4 dark:border-zinc-800 space-y-1">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            onClick={onLinkClick}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          >
+            <Shield className="h-5 w-5" />
+            Admin Panel
+          </Link>
+        )}
         <button
           onClick={onLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
@@ -102,7 +116,7 @@ function SidebarContent({
   )
 }
 
-export function Sidebar({ businessName, logoUrl }: SidebarProps) {
+export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -123,6 +137,7 @@ export function Sidebar({ businessName, logoUrl }: SidebarProps) {
         <SidebarContent
           businessName={businessName}
           logoUrl={logoUrl}
+          isAdmin={isAdmin}
           pathname={pathname}
           onLogout={handleLogout}
         />

@@ -7,7 +7,7 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion
-- **Last Updated:** 2026-01-27 (Session 10)
+- **Last Updated:** 2026-01-27 (Session 11)
 - **Last Commit:** `d2bc3b8` feat(branding): apply brand colors to Servicios and Barberos pages
 
 ---
@@ -42,10 +42,21 @@
   - [x] Fix dropdown overflow en appointment cards
   - [x] Mejoras de contraste en dark mode (dropdowns)
   - [x] Responsive color grid (5/6/9 columnas)
+- [x] **FASE 2: Panel de Super Admin (MVP Minimalista)** ✅
+  - [x] Migración 004_admin.sql con tabla admin_users
+  - [x] Middleware protege ruta `/admin` (requiere auth + admin)
+  - [x] Utilidad `verifyAdmin()` para verificar permisos
+  - [x] Admin layout con sidebar (Dashboard, Negocios)
+  - [x] **Stats globales SaaS**: total negocios, activos/inactivos, crecimiento mensual
+  - [x] **API routes admin**: `/api/admin/stats`, `/api/admin/businesses`, `/api/admin/businesses/[id]`
+  - [x] **Dashboard admin** con métricas de plataforma (perspectiva SaaS, no de barberías)
+  - [x] **Lista de negocios** con búsqueda, filtros, stats (barberos, servicios, citas)
+  - [x] **Detalle de negocio** con info completa, toggle activar/desactivar
+  - [x] Placeholders para MRR, trials, conversión (se calculan en Fase 3)
+  - [x] Link "Volver al Dashboard" desde admin panel
 
 ### In Progress
-- [ ] **FASE 2: Panel de Super Admin** (próximo)
-- [ ] **FASE 3: Sistema de Suscripción** (después de Fase 2)
+- [ ] **FASE 3: Sistema de Suscripción** (próximo)
 
 ### Key Files
 | File | Purpose |
@@ -60,61 +71,90 @@
 | `src/components/dashboard/dashboard-stats.tsx` | **Sin branding** (variant="info" fixed) |
 | `supabase/migrations/003_branding.sql` | Schema de personalización |
 | `scripts/test-all-colors.mjs` | Valida WCAG AA compliance (9 colores) |
+| **FASE 2: Admin Panel** | |
+| `supabase/migrations/004_admin.sql` | Tabla admin_users, is_active en businesses |
+| `src/lib/admin.ts` | `verifyAdmin()`, `isUserAdmin()` utils |
+| `src/app/(admin)/layout.tsx` | Layout con auth + admin check, redirect a /dashboard |
+| `src/components/admin/admin-sidebar.tsx` | Sidebar con escudo, Dashboard, Negocios |
+| `src/app/api/admin/stats/route.ts` | Stats globales SaaS (perspectiva vendedor) |
+| `src/app/api/admin/businesses/route.ts` | Lista de negocios con búsqueda/filtros |
+| `src/app/api/admin/businesses/[id]/route.ts` | Detalle + PATCH activar/desactivar |
+| `src/app/(admin)/admin/page.tsx` | Dashboard admin con métricas plataforma |
+| `src/app/(admin)/admin/negocios/page.tsx` | Lista negocios con cards, stats, paginación |
+| `src/app/(admin)/admin/negocios/[id]/page.tsx` | Detalle negocio completo con toggle |
 
 ---
 
 ## Current State
 
 ### Working
-- ✅ Sistema de branding completo y funcional
-- ✅ **9 colores premium** que pasan WCAG AA compliance
-- ✅ Color **"Default" monocromático** (#27272A) como fallback sofisticado
-- ✅ Auto-refresh de UI al cambiar colores (router.refresh)
-- ✅ **Branding minimalista** aplicado en Servicios y Barberos
-- ✅ Dashboard stats con colores fijos (no usan branding)
-- ✅ Dropdowns funcionan correctamente (z-index fix)
-- ✅ Excelente contraste en light/dark mode (WCAG AA)
+- ✅ Sistema de branding completo y funcional (Fase 1)
+- ✅ **Admin Panel MVP** completo y funcional (Fase 2)
+- ✅ Stats SaaS desde perspectiva de vendedor (no de barberías)
+- ✅ Gestión de negocios con activar/desactivar
+- ✅ Búsqueda y filtros en lista de negocios
+- ✅ Detalle completo de cada negocio (barberos, servicios, clientes, citas)
+- ✅ Protección de rutas admin (solo bryn.acuna7@gmail.com)
 - ✅ Color picker responsive (5/6/9 columnas según pantalla)
+- ✅ Excelente contraste en light/dark mode (WCAG AA)
 
-### Recent Fixes (Session 10)
-- ⚠️ Reducidos colores de 16 a **8 esenciales**, luego a **9 con Default**
-- ⚠️ Fixed service cards con `overflow-hidden` para línea de acento
-- ⚠️ Fixed dropdown menu tapado por card (removed `overflow-hidden` en appointment-card)
-- ⚠️ Mejorado texto dropdown de `zinc-700` a `zinc-900` en dark mode
-- ⚠️ Removido branding de dashboard stats (ahora `variant="info"` fijo)
-- ⚠️ Fixed secondary button preview (outline en lugar de filled)
-- ⚠️ Color grid ahora responsive: `grid-cols-5 sm:grid-cols-6 lg:grid-cols-9`
+### Recent Changes (Session 11)
+- ✅ Creada tabla `admin_users` en Supabase
+- ✅ Agregada columna `is_active` a businesses
+- ✅ Implementado Admin Panel completo en `/admin`
+- ✅ API routes admin: stats, businesses, businesses/[id]
+- ✅ Dashboard admin con métricas SaaS (total, activos, inactivos, crecimiento)
+- ✅ Lista de negocios con cards, stats, búsqueda, filtros
+- ✅ Detalle de negocio con toggle activar/desactivar
+- ✅ Placeholders para suscripciones (MRR, trials, conversión) - Fase 3
 
 ---
 
 ## Next Session
 
 ### Continue With
-1. **Phase 2: Super Admin Panel** (si el usuario lo solicita)
-   - CRUD de usuarios/negocios
-   - Analytics globales
-   - Gestión de features flags
-2. **Refinamientos adicionales de UI** (si hay feedback)
-3. **Testing del sistema de branding** en diferentes dispositivos
+1. **Phase 3: Sistema de Suscripción** (próximo)
+   - Migración con tablas `subscription_plans` y `business_subscriptions`
+   - Trial de 7 días con features Pro
+   - 2 planes: Básico ($9.99) y Pro ($24.99)
+   - Feature gating (max barberos, servicios, branding)
+   - Trial banner en dashboard
+   - Página de precios (`/precios`)
+   - Gestión de suscripciones en admin panel
+2. **Refinamientos adicionales del Admin Panel** (si hay feedback)
+3. **Testing del sistema completo** en diferentes dispositivos
 
 ### Commands to Run
 ```bash
 npm run dev
-node scripts/test-all-colors.mjs  # Verificar WCAG compliance de 9 colores
+# Acceder a http://localhost:3000/admin (requiere bryn.acuna7@gmail.com)
 ```
 
 ### Context Notes
-- **Paleta de colores:** 9 colores premium (Default, Slate, Gold, Crimson, Navy, Forest, Plum, Amber, Teal)
-- **Color Default:** #27272A (zinc-800) - monocromático sofisticado, sin color visible
-- **Branding aplicado:** Sidebar nav, bottom nav, inputs, toggles, **servicios, barberos**
-- **NO aplicado:** Dashboard stats (colores fijos), citas cards (solo dropdown fix)
-- **Styling:** Muy sutil, minimalista - líneas de 2px con opacity 60%, borders ligeros
-- **WCAG:** Todos los colores pasan AA compliance (4.5:1 ratio)
-- **Responsive:** Color picker ajusta columnas automáticamente (5/6/9)
+- **Admin Panel:** Solo accesible por `bryn.acuna7@gmail.com`
+- **Stats SaaS:** Perspectiva de vendedor (total negocios, activos, crecimiento, MRR)
+- **Placeholders:** MRR, trials activos, conversión, churn - se calculan en Fase 3
+- **Admin DB:** Tabla `admin_users` con política RLS para verificar admin status
+- **API Admin:** Usa `createServiceClient()` con `verifyAdmin()` previo
+- **Activar/Desactivar:** PATCH `/api/admin/businesses/[id]` con `is_active` boolean
 
 ---
 
 ## Session History
+
+### 2026-01-27 - Session 11: Admin Panel MVP (Fase 2 Completa) ✅
+- ✅ Creada migración `004_admin.sql` con tabla `admin_users` e `is_active` en businesses
+- ✅ Implementada utilidad `verifyAdmin()` en `src/lib/admin.ts`
+- ✅ Protegida ruta `/admin` en middleware (requiere auth + admin)
+- ✅ Creado layout admin con sidebar (Dashboard, Negocios)
+- ✅ API routes admin: stats, businesses, businesses/[id]
+- ✅ **Dashboard admin** con stats SaaS (total, activos, inactivos, crecimiento)
+- ✅ **Lista de negocios** con búsqueda, filtros, paginación, stats
+- ✅ **Detalle de negocio** con info completa, toggle activar/desactivar
+- ✅ Placeholders para suscripciones (MRR, trials, conversión - Fase 3)
+- ✅ Verificado con Playwright: dashboard, lista, detalle, toggle funciona
+- 🎯 **Scope:** MVP minimalista enfocado en gestión básica de negocios
+- 📊 **Stats:** Perspectiva SaaS (vendedor), no de barberías (clientes)
 
 ### 2026-01-27 - Session 10: Premium Colors & Subtle Branding ✅
 - ✅ Creada paleta premium de **9 colores** con validación WCAG (Default + 8)

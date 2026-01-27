@@ -179,6 +179,22 @@ export interface BarberInsert {
   display_order?: number
 }
 
+// Admin types
+export interface AdminUser {
+  id: string
+  user_id: string
+  created_at: string
+}
+
+// Business with stats for admin panel
+export interface BusinessWithStats extends Business {
+  barber_count?: number
+  service_count?: number
+  appointment_count?: number
+  total_revenue?: number
+  owner_email?: string
+}
+
 export type Database = {
   graphql_public: {
     Tables: Record<string, never>
@@ -199,6 +215,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          id: string
+          user_id: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           business_id: string
