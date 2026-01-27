@@ -25,7 +25,7 @@ export function DashboardStats({
         value={todayAppointments}
         icon={Calendar}
         description="programadas"
-        variant="primary"
+        variant="info"
         delay={0}
       />
       <StatsCard
