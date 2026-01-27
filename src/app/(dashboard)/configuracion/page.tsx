@@ -480,7 +480,7 @@ export default function ConfiguracionPage() {
                     <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ backgroundColor: brandColor, color: contrastColors.primaryContrast }}>
                       Reservar ahora
                     </span>
-                    <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ backgroundColor: `${brandColor}15`, color: contrastColors.readableOnLight }}>
+                    <span className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold" style={{ borderColor: brandColor, color: brandColor }}>
                       Ver servicios
                     </span>
                   </div>
