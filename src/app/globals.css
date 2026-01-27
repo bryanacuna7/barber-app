@@ -355,7 +355,7 @@ html {
   font-size: 16px;
   border-radius: 25px;
   background: var(--brand-primary);
-  color: white;
+  color: var(--brand-primary-contrast);
   transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -368,12 +368,13 @@ html {
 /* iOS Capsule Secondary */
 .ios-capsule-secondary {
   background: rgba(118, 118, 128, 0.12);
-  color: var(--brand-primary);
+  color: var(--brand-primary-on-light);
 }
 
 @media (prefers-color-scheme: dark) {
   .ios-capsule-secondary {
     background: rgba(118, 118, 128, 0.24);
+    color: var(--brand-primary-on-dark);
   }
 }
 
