@@ -208,6 +208,7 @@ export default function ConfiguracionPage() {
         const updated = await res.json()
         setBusiness(updated)
         toast.success('Configuración guardada correctamente')
+        router.refresh() // Force layout refresh to update ThemeProvider
       } else {
         const error = await res.json()
         toast.error(error.error || 'Error al guardar')

@@ -6,21 +6,13 @@
 
 const PRESET_COLORS = [
   { hex: '#1C1C1E', name: 'Negro' },
-  { hex: '#2C2C2E', name: 'Carbón' },
   { hex: '#C4953A', name: 'Dorado' },
-  { hex: '#D4A843', name: 'Oro Claro' },
   { hex: '#FF3B30', name: 'Rojo' },
-  { hex: '#8B0000', name: 'Borgoña' },
-  { hex: '#007AFF', name: 'Azul iOS' },
-  { hex: '#0A84FF', name: 'Azul Brillante' },
+  { hex: '#007AFF', name: 'Azul' },
   { hex: '#34C759', name: 'Verde' },
-  { hex: '#30D158', name: 'Verde Menta' },
   { hex: '#AF52DE', name: 'Morado' },
-  { hex: '#5856D6', name: 'Índigo' },
   { hex: '#FF9500', name: 'Naranja' },
-  { hex: '#FF6B35', name: 'Coral' },
   { hex: '#5AC8FA', name: 'Celeste' },
-  { hex: '#64D2FF', name: 'Aqua' },
 ];
 
 function hexToRgbValues(hex) {
