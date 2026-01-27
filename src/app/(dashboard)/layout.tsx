@@ -25,7 +25,7 @@ export default async function DashboardLayout({
     .single()
 
   const businessName = business?.name || 'Mi Barbería'
-  const brandColor = business?.brand_primary_color || '#007AFF'
+  const brandColor = business?.brand_primary_color || '#27272A' // Default monochrome
   const brandSecondary = business?.brand_secondary_color || null
   const logoUrl = business?.logo_url || null
 

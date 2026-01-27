@@ -90,7 +90,7 @@ export function DropdownItem({
         'disabled:opacity-50 disabled:cursor-not-allowed',
         danger
           ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30'
-          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+          : 'text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800',
         className
       )}
     >
@@ -112,7 +112,7 @@ interface DropdownLabelProps {
 
 export function DropdownLabel({ children }: DropdownLabelProps) {
   return (
-    <div className="px-4 py-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+    <div className="px-4 py-2 text-xs font-semibold text-zinc-500 dark:text-zinc-500 uppercase tracking-wider">
       {children}
     </div>
   )
@@ -202,7 +202,7 @@ export function SelectDropdown({
                 'transition-colors duration-150',
                 option.value === value
                   ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                  : 'text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
               )}
             >
               {option.label}

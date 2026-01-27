@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 
 /**
- * Test all 16 preset colors for WCAG contrast compliance
+ * Test all 9 preset colors for WCAG contrast compliance
  */
 
 const PRESET_COLORS = [
-  { hex: '#1C1C1E', name: 'Negro' },
-  { hex: '#C4953A', name: 'Dorado' },
-  { hex: '#FF3B30', name: 'Rojo' },
-  { hex: '#007AFF', name: 'Azul' },
-  { hex: '#34C759', name: 'Verde' },
-  { hex: '#AF52DE', name: 'Morado' },
-  { hex: '#FF9500', name: 'Naranja' },
-  { hex: '#5AC8FA', name: 'Celeste' },
+  { hex: '#27272A', name: 'Default' },
+  { hex: '#334155', name: 'Slate' },
+  { hex: '#B8860B', name: 'Gold' },
+  { hex: '#DC143C', name: 'Crimson' },
+  { hex: '#1E40AF', name: 'Navy' },
+  { hex: '#047857', name: 'Forest' },
+  { hex: '#8B5CF6', name: 'Plum' },
+  { hex: '#D97706', name: 'Amber' },
+  { hex: '#0D9488', name: 'Teal' },
 ];
 
 function hexToRgbValues(hex) {
@@ -47,7 +48,7 @@ function getContrastingTextColor(backgroundColor) {
   return contrastWithWhite >= 4.5 ? '#ffffff' : '#000000';
 }
 
-console.log('🎨 Testing all 16 preset colors for WCAG AA compliance (4.5:1)\n');
+console.log('🎨 Testing all 9 preset colors for WCAG AA compliance (4.5:1)\n');
 console.log('Color          | Hex     | Luminance | Contrast Text | Light BG | Dark BG | Status');
 console.log('─'.repeat(90));
 

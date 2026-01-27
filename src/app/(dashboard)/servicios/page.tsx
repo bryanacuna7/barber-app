@@ -373,11 +373,13 @@ export default function ServiciosPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="group relative rounded-2xl border-2 bg-white p-5 transition-shadow duration-300 hover:shadow-lg dark:bg-zinc-900"
-                            style={{ borderColor: 'var(--brand-primary)' }}
+                            className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
                           >
-                            {/* Brand accent bar */}
-                            <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--brand-primary)' }} />
+                            {/* Subtle brand accent */}
+                            <div
+                              className="absolute inset-x-0 top-0 h-[2px] rounded-t-2xl opacity-60"
+                              style={{ background: 'var(--brand-primary)' }}
+                            />
 
                             {/* Actions */}
                             <div className="absolute right-3 top-4 z-10 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">

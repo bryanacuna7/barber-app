@@ -5,15 +5,16 @@ import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const PRESET_COLORS = [
-  // Essentials - 8 distinctive colors
-  { hex: '#1C1C1E', name: 'Negro' },
-  { hex: '#C4953A', name: 'Dorado' },
-  { hex: '#FF3B30', name: 'Rojo' },
-  { hex: '#007AFF', name: 'Azul' },
-  { hex: '#34C759', name: 'Verde' },
-  { hex: '#AF52DE', name: 'Morado' },
-  { hex: '#FF9500', name: 'Naranja' },
-  { hex: '#5AC8FA', name: 'Celeste' },
+  // Premium palette - sophisticated and refined
+  { hex: '#27272A', name: 'Default' }, // Monochrome - premium zinc gray
+  { hex: '#334155', name: 'Slate' },
+  { hex: '#B8860B', name: 'Gold' },
+  { hex: '#DC143C', name: 'Crimson' },
+  { hex: '#1E40AF', name: 'Navy' },
+  { hex: '#047857', name: 'Forest' },
+  { hex: '#8B5CF6', name: 'Plum' },
+  { hex: '#D97706', name: 'Amber' },
+  { hex: '#0D9488', name: 'Teal' },
 ]
 
 interface ColorPickerProps {
@@ -45,7 +46,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
       )}
 
       {/* Preset grid */}
-      <div className="grid grid-cols-8 gap-2.5">
+      <div className="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-9 gap-2.5">
         {PRESET_COLORS.map((color) => {
           const isSelected = color.hex.toLowerCase() === value.toLowerCase()
           return (

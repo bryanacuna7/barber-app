@@ -427,13 +427,13 @@ export default function BarberosPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-xl hover:shadow-zinc-200/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:shadow-zinc-900/50 ${
+                            className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 ${
                               isActive ? '' : 'opacity-75 grayscale-[10%]'
                             }`}
                           >
-                            {/* Brand accent bar */}
+                            {/* Subtle brand accent */}
                             <div
-                              className="absolute inset-x-0 top-0 h-1"
+                              className="absolute inset-x-0 top-0 h-[2px] opacity-60"
                               style={{ background: 'var(--brand-primary)' }}
                             />
 
@@ -459,7 +459,7 @@ export default function BarberosPage() {
 
                             {/* Avatar with ring */}
                             <div className="mb-4 flex items-center gap-4">
-                              <div className="relative ring-4 rounded-full" style={{ boxShadow: '0 0 0 4px rgba(var(--brand-primary-rgb), 0.2)' }}>
+                              <div className="relative rounded-full" style={{ boxShadow: '0 0 0 3px rgba(var(--brand-primary-rgb), 0.15)' }}>
                                 <div
                                   className="flex h-16 w-16 items-center justify-center rounded-full"
                                   style={{ background: 'var(--brand-primary-light)' }}
