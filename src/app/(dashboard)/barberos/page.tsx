@@ -340,8 +340,8 @@ export default function BarberosPage() {
           <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600">
-                  <Sparkles className="h-4 w-4 text-white" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'var(--brand-primary)' }}>
+                  <Sparkles className="h-4 w-4" style={{ color: 'var(--brand-primary-contrast)' }} />
                 </div>
                 <CardTitle className="text-[17px] font-semibold">
                   Equipo
@@ -389,8 +389,8 @@ export default function BarberosPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-16 text-center"
               >
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[22px] bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30">
-                  <UserRound className="h-10 w-10 text-violet-500 dark:text-violet-400" />
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[22px]" style={{ background: 'var(--brand-primary-light)' }}>
+                  <UserRound className="h-10 w-10" style={{ color: 'var(--brand-primary-on-light)' }} />
                 </div>
                 <p className="mt-5 text-[17px] font-medium text-zinc-900 dark:text-white">
                   {statusFilter === 'inactive' ? 'No hay barberos inactivos' : 'Aún no tienes barberos'}
@@ -417,7 +417,6 @@ export default function BarberosPage() {
               <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
                   {filteredBarbers.map((barber, index) => {
-                    const colorSet = BARBER_COLORS[index % BARBER_COLORS.length]
                     const isActive = barber.is_active ?? true
                     const isToggling = togglingIds.includes(barber.id)
                     return (
@@ -432,9 +431,10 @@ export default function BarberosPage() {
                               isActive ? '' : 'opacity-75 grayscale-[10%]'
                             }`}
                           >
-                            {/* Gradient accent bar */}
+                            {/* Brand accent bar */}
                             <div
-                              className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${colorSet.gradient}`}
+                              className="absolute inset-x-0 top-0 h-1"
+                              style={{ background: 'var(--brand-primary)' }}
                             />
 
                             {/* Actions */}
@@ -459,9 +459,10 @@ export default function BarberosPage() {
 
                             {/* Avatar with ring */}
                             <div className="mb-4 flex items-center gap-4">
-                              <div className={`relative ring-4 ${colorSet.ring} rounded-full`}>
+                              <div className="relative ring-4 rounded-full" style={{ boxShadow: '0 0 0 4px rgba(var(--brand-primary-rgb), 0.2)' }}>
                                 <div
-                                  className={`flex h-16 w-16 items-center justify-center rounded-full ${colorSet.bg}`}
+                                  className="flex h-16 w-16 items-center justify-center rounded-full"
+                                  style={{ background: 'var(--brand-primary-light)' }}
                                 >
                                   {barber.photo_url ? (
                                     <img
@@ -470,7 +471,7 @@ export default function BarberosPage() {
                                       className="h-full w-full rounded-full object-cover"
                                     />
                                   ) : (
-                                    <UserRound className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
+                                    <UserRound className="h-8 w-8" style={{ color: 'var(--brand-primary-on-light)' }} />
                                   )}
                                 </div>
                                 {/* Status indicator */}

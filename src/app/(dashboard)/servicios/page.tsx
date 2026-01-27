@@ -365,7 +365,6 @@ export default function ServiciosPage() {
               <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
                   {services.map((service, index) => {
-                    const colorSet = SERVICE_COLORS[index % SERVICE_COLORS.length]
                     return (
                       <StaggeredItem key={service.id}>
                         <ScaleOnHover>
@@ -374,10 +373,11 @@ export default function ServiciosPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className={`group relative rounded-2xl border ${colorSet.border} bg-white p-5 transition-shadow duration-300 hover:shadow-lg dark:bg-zinc-900`}
+                            className="group relative rounded-2xl border-2 bg-white p-5 transition-shadow duration-300 hover:shadow-lg dark:bg-zinc-900"
+                            style={{ borderColor: 'var(--brand-primary)' }}
                           >
-                            {/* Gradient accent bar */}
-                            <div className={`absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r ${colorSet.gradient}`} />
+                            {/* Brand accent bar */}
+                            <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--brand-primary)' }} />
 
                             {/* Actions */}
                             <div className="absolute right-3 top-4 z-10 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -404,7 +404,11 @@ export default function ServiciosPage() {
                             {/* Service Icon */}
                             <div className="mb-4">
                               <div
-                                className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl ${colorSet.bg} ${colorSet.text}`}
+                                className="inline-flex h-14 w-14 items-center justify-center rounded-2xl"
+                                style={{
+                                  background: 'var(--brand-primary-light)',
+                                  color: 'var(--brand-primary-on-light)'
+                                }}
                               >
                                 <Scissors className="h-7 w-7" />
                               </div>
