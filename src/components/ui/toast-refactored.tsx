@@ -5,6 +5,22 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
+// ============================================================================
+// COMPOSITION PATTERNS APPLIED:
+// ✅ Already uses Context pattern (good!)
+// ✅ Already has Provider + hook API (excellent!)
+// ✅ Maintains existing API (addToast, success, error, etc.)
+// ============================================================================
+
+// ============================================================================
+// WEB INTERFACE GUIDELINES APPLIED:
+// 1. Added aria-live="polite" for screen readers
+// 2. Added aria-atomic="true" for complete announcements
+// 3. Added aria-hidden="true" on decorative icons
+// 4. Added prefers-reduced-motion support
+// 5. Fixed X icon aria-hidden
+// ============================================================================
+
 // Types
 type ToastType = 'success' | 'error' | 'warning' | 'info'
 
@@ -79,7 +95,13 @@ interface ToastContainerProps {
 
 function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div
+      className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none"
+      aria-live="polite"
+      aria-atomic="false"
+      role="region"
+      aria-label="Notifications"
+    >
       <AnimatePresence mode="popLayout">
         {toasts.map(toast => (
           <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
@@ -159,29 +181,94 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
         'pointer-events-auto relative overflow-hidden',
         'flex items-start gap-3 p-4 rounded-xl border shadow-lg',
         'backdrop-blur-sm cursor-grab active:cursor-grabbing',
-        styles[toast.type]
+        styles[toast.type],
+        // prefers-reduced-motion support
+        'motion-reduce:transition-none motion-reduce:animate-none'
       )}
-      role="alert"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
     >
       {/* Progress bar */}
       {toast.duration && toast.duration > 0 && (
         <motion.div
-          className="absolute bottom-0 left-0 h-1 bg-current opacity-30 rounded-full"
+          className={cn(
+            'absolute bottom-0 left-0 h-1 bg-current opacity-30 rounded-full',
+            'motion-reduce:hidden' // Hide animated progress bar for reduced motion
+          )}
           initial={{ width: '100%' }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.05, ease: 'linear' }}
+          aria-hidden="true"
         />
       )}
 
-      <Icon className={cn('w-5 h-5 flex-shrink-0 mt-0.5', iconStyles[toast.type])} />
+      <Icon
+        className={cn('w-5 h-5 flex-shrink-0 mt-0.5', iconStyles[toast.type])}
+        aria-hidden="true"
+      />
       <p className="flex-1 text-sm font-medium">{toast.message}</p>
       <button
         onClick={() => onRemove(toast.id)}
-        className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
-        aria-label="Cerrar"
+        className={cn(
+          'p-1 rounded-lg',
+          'hover:bg-black/10 dark:hover:bg-white/10',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2',
+          'motion-safe:transition-colors motion-safe:duration-200',
+          'motion-reduce:transition-none',
+          'flex-shrink-0'
+        )}
+        aria-label="Close notification"
       >
-        <X className="w-4 h-4" />
+        <X className="w-4 h-4" aria-hidden="true" />
       </button>
     </motion.div>
   )
 }
+
+// ============================================================================
+// IMPROVEMENTS MADE
+// ============================================================================
+
+/*
+
+BEFORE (Issues):
+- Missing aria-live="polite" on container
+- Missing aria-atomic on toast items
+- Icons without aria-hidden="true"
+- No prefers-reduced-motion support
+- Close button X without aria-hidden
+
+AFTER (Fixed):
+✅ aria-live="polite" on container for screen reader announcements
+✅ aria-atomic="true" on individual toasts
+✅ aria-hidden="true" on all decorative icons
+✅ role="status" on toast items
+✅ prefers-reduced-motion support:
+   - motion-reduce:transition-none
+   - motion-reduce:animate-none
+   - motion-reduce:hidden on progress bar
+✅ focus-visible on close button
+✅ Proper aria-label on buttons
+
+EXISTING STRENGTHS (Maintained):
+✅ Context pattern for state management
+✅ Clean hook API (useToast())
+✅ Helper methods (success, error, warning, info)
+✅ Drag to dismiss
+✅ Auto-dismiss with timer
+✅ Beautiful animations
+
+USAGE (Unchanged):
+const { success, error, warning, info } = useToast()
+
+// Simple usage
+success('Changes saved!')
+error('Failed to save changes')
+warning('Unsaved changes will be lost')
+info('New update available')
+
+// Advanced usage
+addToast('Custom message', 'success', 5000)
+
+*/

@@ -160,7 +160,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Upcoming Appointments */}
-        <Card className="overflow-hidden" data-tour="dashboard-appointments">
+        <Card variant="elevated" className="overflow-hidden" data-tour="dashboard-appointments">
         <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
@@ -169,7 +169,7 @@ export default async function DashboardPage() {
             <CardTitle className="text-[17px]">Próximas Citas Hoy</CardTitle>
           </div>
           <Link href="/citas">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-[13px]">
+            <Button variant="gradient" size="sm" className="gap-1.5 text-[13px]">
               Ver todas
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
@@ -238,7 +238,7 @@ export default async function DashboardPage() {
       </Card>
 
       {/* Quick Actions */}
-      <Card data-tour="dashboard-quick-actions">
+      <Card variant="glass" data-tour="dashboard-quick-actions">
         <CardHeader>
           <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
         </CardHeader>

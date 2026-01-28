@@ -461,29 +461,60 @@ export default function ConfiguracionPage() {
                 onChange={setBrandColor}
               />
 
-              {/* Live Preview */}
+              {/* Live Preview - Dual Mode */}
               <div>
                 <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                   Vista previa
                 </label>
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50" style={generateThemeStyle(brandColor, brandSecondary || null)}>
-                  <div className="flex items-center gap-3 mb-3">
-                    {logoUrl ? (
-                      <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: brandColor }}>
-                        <Scissors className="h-5 w-5" style={{ color: contrastColors.primaryContrast }} />
+                <div className="space-y-3">
+                  {/* Light Mode Preview */}
+                  <div>
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Modo claro</div>
+                    <div className="rounded-2xl border-2 border-zinc-300 bg-white p-4" style={generateThemeStyle(brandColor, brandSecondary || null)}>
+                      <div className="flex items-center gap-3 mb-3">
+                        {logoUrl ? (
+                          <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: brandColor }}>
+                            <Scissors className="h-5 w-5" style={{ color: contrastColors.primaryContrast }} />
+                          </div>
+                        )}
+                        <span className="font-semibold text-zinc-900">{formData.name || 'Tu Barbería'}</span>
                       </div>
-                    )}
-                    <span className="font-semibold text-zinc-900 dark:text-white">{formData.name || 'Tu Barbería'}</span>
+                      <div className="flex gap-2">
+                        <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg" style={{ backgroundColor: brandColor, color: contrastColors.primaryContrast }}>
+                          Reservar ahora
+                        </span>
+                        <span className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold text-zinc-900" style={{ borderColor: brandColor }}>
+                          Ver servicios
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold" style={{ backgroundColor: brandColor, color: contrastColors.primaryContrast }}>
-                      Reservar ahora
-                    </span>
-                    <span className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold" style={{ borderColor: brandColor, color: brandColor }}>
-                      Ver servicios
-                    </span>
+
+                  {/* Dark Mode Preview */}
+                  <div>
+                    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Modo oscuro</div>
+                    <div className="rounded-2xl border-2 border-zinc-700 bg-zinc-950 p-4" style={generateThemeStyle(brandColor, brandSecondary || null)}>
+                      <div className="flex items-center gap-3 mb-3">
+                        {logoUrl ? (
+                          <img src={logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: brandColor }}>
+                            <Scissors className="h-5 w-5" style={{ color: contrastColors.primaryContrast }} />
+                          </div>
+                        )}
+                        <span className="font-semibold text-white">{formData.name || 'Tu Barbería'}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg" style={{ backgroundColor: brandColor, color: contrastColors.primaryContrast }}>
+                          Reservar ahora
+                        </span>
+                        <span className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold text-white" style={{ borderColor: brandColor }}>
+                          Ver servicios
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -579,10 +610,10 @@ export default function ConfiguracionPage() {
                     <StaggeredItem key={key}>
                       <motion.div
                         layout
-                        className={`flex items-center gap-3 rounded-2xl p-3 transition-colors ${
+                        className={`flex items-center gap-3 rounded-2xl p-3 transition-colors border-2 ${
                           isOpen
-                            ? 'bg-zinc-50 dark:bg-zinc-800/50'
-                            : 'bg-zinc-100/50 dark:bg-zinc-900/50'
+                            ? 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
+                            : 'bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/50'
                         }`}
                       >
                         {/* Day toggle */}

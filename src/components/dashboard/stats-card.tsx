@@ -23,30 +23,35 @@ const variants = {
     iconBg: 'bg-zinc-100 dark:bg-zinc-800',
     iconColor: 'text-zinc-600 dark:text-zinc-400',
     gradient: null,
+    shadow: 'shadow-sm hover:shadow-md',
   },
   primary: {
     bg: 'bg-[var(--brand-primary)]',
     iconBg: 'bg-white/20',
     iconColor: 'text-white',
     gradient: true,
+    shadow: 'shadow-lg hover:shadow-xl',
   },
   success: {
     bg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
     iconBg: 'bg-white/20',
     iconColor: 'text-white',
     gradient: true,
+    shadow: 'shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30',
   },
   warning: {
     bg: 'bg-gradient-to-br from-amber-500 to-orange-600',
     iconBg: 'bg-white/20',
     iconColor: 'text-white',
     gradient: true,
+    shadow: 'shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30',
   },
   info: {
     bg: 'bg-gradient-to-br from-blue-500 to-cyan-600',
     iconBg: 'bg-white/20',
     iconColor: 'text-white',
     gradient: true,
+    shadow: 'shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30',
   },
 }
 
@@ -72,17 +77,26 @@ export function StatsCard({
         damping: 24,
         delay,
       }}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, scale: 1.01, transition: { duration: 0.2 } }}
       className={cn(
         'relative overflow-hidden rounded-2xl p-4 sm:p-5',
-        'shadow-sm hover:shadow-md transition-shadow duration-300',
+        'transition-all duration-300',
         styles.bg,
+        styles.shadow,
         !isGradient && 'border border-zinc-200 dark:border-zinc-800'
       )}
     >
       {/* Gradient overlay for depth */}
       {isGradient && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+        <>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+          {/* Shine effect */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/10 to-white/0 opacity-0"
+            whileHover={{ opacity: [0, 1, 0], x: ['-100%', '100%'] }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+          />
+        </>
       )}
 
       <div className="relative flex items-start justify-between gap-3">
