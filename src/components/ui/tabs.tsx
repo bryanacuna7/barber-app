@@ -28,13 +28,7 @@ interface TabsProps {
   className?: string
 }
 
-export function Tabs({
-  defaultValue = '',
-  value,
-  onValueChange,
-  children,
-  className
-}: TabsProps) {
+export function Tabs({ defaultValue = '', value, onValueChange, children, className }: TabsProps) {
   const [internalValue, setInternalValue] = useState(value ?? defaultValue)
 
   const activeTab = value ?? internalValue
@@ -47,9 +41,7 @@ export function Tabs({
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
-      <div className={className}>
-        {children}
-      </div>
+      <div className={className}>{children}</div>
     </TabsContext.Provider>
   )
 }
@@ -89,13 +81,14 @@ export function TabsTrigger({
   children,
   disabled = false,
   className,
-  icon
+  icon,
 }: TabsTriggerProps) {
   const { activeTab, setActiveTab } = useTabsContext()
   const isActive = activeTab === value
 
   return (
     <button
+      type="button"
       role="tab"
       aria-selected={isActive}
       aria-controls={`tabpanel-${value}`}
@@ -127,12 +120,7 @@ interface TabsContentProps {
   forceMount?: boolean
 }
 
-export function TabsContent({
-  value,
-  children,
-  className,
-  forceMount = false
-}: TabsContentProps) {
+export function TabsContent({ value, children, className, forceMount = false }: TabsContentProps) {
   const { activeTab } = useTabsContext()
   const isActive = activeTab === value
 
