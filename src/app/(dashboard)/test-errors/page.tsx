@@ -16,8 +16,8 @@ export default function TestErrorsPage() {
   }
 
   const triggerTypeError = () => {
-    // @ts-expect-error - intentional error for testing
-    const obj = null
+    // Intentional error for testing
+    const obj: any = null
     obj.nonExistent.property()
   }
 

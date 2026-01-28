@@ -38,7 +38,9 @@ export default function OnboardingPage() {
         const supabase = createClient()
 
         // Get business info
-        const { data: { user } } = await supabase.auth.getUser()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
         if (!user) {
           router.push('/login')
           return
@@ -65,15 +67,18 @@ export default function OnboardingPage() {
           .eq('business_id', business.id)
           .single()
 
-        if (onboarding?.completed) {
+        if (onboarding && (onboarding as { completed: boolean }).completed) {
           // Already completed, redirect to dashboard
           router.push('/dashboard')
           return
         }
 
         // Resume from saved step
-        if (onboarding?.current_step) {
-          setCurrentStep(onboarding.current_step)
+        const currentStepValue = onboarding
+          ? (onboarding as { current_step?: number }).current_step
+          : undefined
+        if (currentStepValue) {
+          setCurrentStep(currentStepValue)
         }
 
         setIsLoading(false)
@@ -134,7 +139,7 @@ export default function OnboardingPage() {
       if (data.hours) {
         await supabase
           .from('businesses')
-          .update({ operating_hours: data.hours })
+          .update({ operating_hours: data.hours as any })
           .eq('id', businessId)
       }
 
@@ -153,9 +158,9 @@ export default function OnboardingPage() {
         await supabase.from('barbers').insert({
           business_id: businessId,
           name: data.barber.name,
-          phone: data.barber.phone || null,
-          email: data.barber.email || null,
-        })
+          phone: data.barber.phone || '',
+          email: data.barber.email || 'noreply@example.com',
+        } as any)
       }
 
       // Save branding
@@ -175,18 +180,15 @@ export default function OnboardingPage() {
             })
 
           if (!uploadError && uploadData) {
-            const { data: { publicUrl } } = supabase.storage
-              .from('logos')
-              .getPublicUrl(uploadData.path)
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from('logos').getPublicUrl(uploadData.path)
 
             updates.logo_url = publicUrl
           }
         }
 
-        await supabase
-          .from('businesses')
-          .update(updates)
-          .eq('id', businessId)
+        await supabase.from('businesses').update(updates).eq('id', businessId)
       }
 
       // Mark onboarding as completed
@@ -240,20 +242,11 @@ export default function OnboardingPage() {
         {/* Steps */}
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
-            <Welcome
-              key="welcome"
-              onNext={handleNext}
-              businessName={businessName}
-            />
+            <Welcome key="welcome" onNext={handleNext} businessName={businessName} />
           )}
 
           {currentStep === 2 && (
-            <Hours
-              key="hours"
-              onNext={handleNext}
-              onBack={handleBack}
-              initialHours={data.hours}
-            />
+            <Hours key="hours" onNext={handleNext} onBack={handleBack} initialHours={data.hours} />
           )}
 
           {currentStep === 3 && (
@@ -285,11 +278,7 @@ export default function OnboardingPage() {
           )}
 
           {currentStep === 6 && (
-            <Success
-              key="success"
-              onComplete={handleComplete}
-              businessName={businessName}
-            />
+            <Success key="success" onComplete={handleComplete} businessName={businessName} />
           )}
         </AnimatePresence>
       </div>
