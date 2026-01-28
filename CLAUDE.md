@@ -367,20 +367,91 @@ Usuario corrige: "usa arrow functions, no function declarations"
 > ⚠️ **REGLA CRÍTICA:** Los agentes NO son solo documentación.
 > DEBES leer el archivo del agente y seguir sus instrucciones específicas.
 
+### No Mencionar Agentes Explícitamente
+
+**El sistema automáticamente detecta y aplica los especialistas correctos.**
+
+Ejemplos:
+```
+Usuario: "Add JWT authentication"
+Claude: 🤖 Applying @security-auditor + @backend-specialist...
+
+Usuario: "Fix the dark mode button"
+Claude: 🤖 Using @frontend-specialist...
+
+Usuario: "Login returns 500 error"
+Claude: 🤖 Using @debugger for systematic analysis...
+```
+
+### Socratic Gate Protocol (OBLIGATORIO)
+
+**ANTES de implementar cualquier cosa**, aplicar este protocolo:
+
+| Tipo de Request | Acción Requerida |
+|-----------------|------------------|
+| **Feature Nueva** | Hacer preguntas clarificadoras sobre alcance, requisitos, edge cases |
+| **Bug Fix** | Confirmar entendimiento del problema y comportamiento esperado |
+| **Request Vago** | Explorar opciones y pedir especificaciones |
+| **Cambio Crítico** (auth, payment, etc) | Confirmar implicaciones de seguridad y datos |
+
+**Ejemplos:**
+
+```
+Usuario: "Agrega autenticación"
+
+Claude: Antes de implementar, necesito aclarar:
+1. ¿Qué método prefieres? (JWT, session-based, OAuth)
+2. ¿Necesitas roles/permisos?
+3. ¿2FA requerido?
+4. ¿Integración con servicios externos?
+
+[Esperar respuesta antes de continuar]
+```
+
+```
+Usuario: "El login no funciona"
+
+Claude: Para entender el problema:
+1. ¿Qué error específico ves?
+2. ¿En qué paso falla? (form submit, API call, redirect)
+3. ¿Funciona en algunos casos y en otros no?
+
+[Esperar respuesta antes de debuggear]
+```
+
+**PROHIBIDO:** Implementar sin clarificar cuando hay ambigüedad.
+
+### Agent Routing Checklist (OBLIGATORIO)
+
+**NUNCA empezar a trabajar sin completar esta checklist:**
+
+- [ ] **1. Identificar dominio:** Analizar keywords silenciosamente
+- [ ] **2. Seleccionar agente(s):** Usar matriz de selección
+- [ ] **3. Leer configuración:** Leer `.claude/agents/[nombre].md`
+- [ ] **4. Anunciar agente:** Mostrar "🤖 Using/Applying @[agente]..."
+- [ ] **5. Cargar skills:** Si el agente requiere skills específicos, cargarlos
+- [ ] **6. Aplicar Socratic Gate:** Si es feature nueva o request vago, preguntar primero
+- [ ] **7. Comenzar trabajo:** Seguir instrucciones del agente
+
 ### Flujo OBLIGATORIO para cada tarea:
 
 ```
 1. Usuario hace request ─────────────────────────────────────────┐
-2. Analizar keywords para detectar tipo de tarea                 │
-3. Seleccionar agente apropiado (ver matriz abajo)               │
-4. LEER el archivo del agente: .claude/agents/[nombre].md        │
-5. Mostrar: "🤖 Using @[agente]..."                              │
-6. Seguir las instrucciones específicas del agente               │
-7. Aplicar el expertise del agente al trabajo                    │
+2. ANALIZAR SILENCIOSAMENTE: keywords y tipo de tarea            │
+3. DETECTAR DOMINIO: frontend, backend, security, etc.           │
+4. Seleccionar agente(s) apropiado(s) (ver matriz abajo)         │
+5. LEER archivo(s) del agente: .claude/agents/[nombre].md        │
+6. Mostrar ANTES de trabajar:                                    │
+   - Un agente: "🤖 Using @[agente]..."                          │
+   - Múltiples: "🤖 Applying @[agente1] + @[agente2]..."         │
+   - Con contexto: "🤖 Using @[agente] for [specific task]..."   │
+7. Aplicar Socratic Gate si es necesario                         │
+8. Seguir las instrucciones específicas del agente               │
+9. Aplicar el expertise del agente al trabajo                    │
 └────────────────────────────────────────────────────────────────┘
 ```
 
-### Agent Selection Matrix
+### Agent Selection Matrix (15 agentes)
 
 | Keywords en request | Agente | Archivo a leer |
 |---------------------|--------|----------------|
@@ -393,30 +464,158 @@ Usuario corrige: "usa arrow functions, no function declarations"
 | refactor, migrate, modernize, arquitectura | `architecture-modernizer` | `.claude/agents/architecture-modernizer.md` |
 | docs, readme, comments, documentar | `documentation-expert` | `.claude/agents/documentation-expert.md` |
 | design, UI/UX, colores, estilos, diseño | `ui-ux-designer` | `.claude/agents/ui-ux-designer.md` |
+| review, quality, standards, code smell | `code-reviewer` | `.claude/agents/code-reviewer.md` |
+| prompt, ai, llm, gpt, optimize prompt | `prompt-engineer` | `.claude/agents/prompt-engineer.md` |
+| devops, ci/cd, docker, kubernetes, deploy pipeline | `devops-engineer` | `.claude/agents/devops-engineer.md` |
+| roadmap, features, mvp, product, strategy | `product-strategist` | `.claude/agents/product-strategist.md` |
+| context, session, multi-agent, coordination | `context-manager` | `.claude/agents/context-manager.md` |
+| frontend only, react advanced, state management | `frontend-specialist` | `.claude/agents/frontend-specialist.md` |
+| backend only, api design, microservices | `backend-specialist` | `.claude/agents/backend-specialist.md` |
 
-### Ejemplo de uso correcto:
+### Ejemplos de uso correcto:
 
+**Ejemplo 1: Bug de UI**
 ```
 Usuario: "El botón de búsqueda se ve mal, el ícono se sobrepone"
 
 Claude debe:
-1. Detectar: keywords "botón", "se ve mal" → UI issue + bug
-2. Seleccionar: @fullstack-developer (UI) + @debugger (fix)
-3. Leer: .claude/agents/fullstack-developer.md
-4. Mostrar: "🤖 Using @fullstack-developer to fix UI issue..."
-5. Arreglar el código
-6. OBLIGATORIO: Usar Playwright para verificar el fix visualmente
-7. Mostrar screenshot confirmando que se ve bien
+1. Analizar silenciosamente: "botón", "se ve mal" → UI issue + bug
+2. Detectar dominio: Frontend + Debugging
+3. Seleccionar: @fullstack-developer + @debugger
+4. Leer ambos archivos .md
+5. Mostrar: "🤖 Applying @fullstack-developer + @debugger to fix UI issue..."
+6. Arreglar el código siguiendo las instrucciones de ambos agentes
+7. OBLIGATORIO: Usar Playwright para verificar el fix visualmente
+8. Mostrar screenshot confirmando que se ve bien
 ```
+
+**Ejemplo 2: Feature de autenticación**
+```
+Usuario: "Agregar login con JWT"
+
+Claude debe:
+1. Analizar: "login", "JWT" → Auth + Backend + Security
+2. Mostrar: "🤖 Applying @security-auditor + @backend-specialist for JWT authentication..."
+3. Implementar siguiendo best practices de seguridad
+```
+
+**Ejemplo 3: Error en producción**
+```
+Usuario: "El checkout da error 500"
+
+Claude debe:
+1. Analizar: "error 500" → Debugging needed
+2. Mostrar: "🤖 Using @debugger for systematic error analysis..."
+3. Investigar causa raíz siguiendo metodología del debugger
+```
+
+### Multi-Agent Orchestration
+
+**Para tareas complejas que requieren múltiples dominios:**
+
+El sistema procesa cada dominio **secuencialmente**, cambiando de contexto entre especialistas (NO es ejecución paralela real).
+
+**Ejemplo: Full-stack feature**
+```
+Usuario: "Crear sistema de notificaciones en tiempo real"
+
+Claude: 🤖 Orchestrating @backend-specialist + @frontend-specialist + @security-auditor...
+
+1. [Backend] Diseñando WebSocket API...
+2. [Frontend] Creando componente de notificaciones...
+3. [Security] Validando autenticación de WebSocket...
+4. [Integration] Conectando frontend con backend...
+
+✅ Feature completado con coherencia entre dominios
+```
+
+**Coherencia de código:** Aunque se cambia entre agentes, se mantiene consistencia en:
+- Convenciones de naming
+- Patrones de arquitectura
+- Estilo de código
 
 ### PROHIBIDO:
 - ❌ Ignorar la matriz de agentes
-- ❌ No mostrar qué agente se está usando
+- ❌ No mostrar qué agente se está usando ANTES de trabajar
 - ❌ No leer el archivo del agente
 - ❌ Trabajar sin el expertise específico del agente
+- ❌ Mencionar agentes sin aplicar su expertise real
+- ❌ Cambiar de agente sin anunciar el cambio
 
 ### Override manual:
-Si el usuario menciona `@agent-name` explícitamente, usar ese agente.
+Si el usuario menciona `@agent-name` explícitamente, usar ese agente y confirmarlo:
+```
+Usuario: "Usa @security-auditor para revisar esto"
+Claude: "🤖 Using @security-auditor as requested..."
+```
+
+---
+
+## Validation & Quality Gates
+
+### Quick Checks (~30 segundos)
+
+**TRIGGER:** Después de modificar código importante
+
+**Ejecutar automáticamente:**
+```bash
+# Security scan
+npm audit
+
+# Code quality
+npm run lint
+
+# Unit tests
+npm test -- --coverage
+
+# Type checking
+npx tsc --noEmit
+```
+
+**Reportar:**
+```
+✅ Quick checks passed
+   Security: No vulnerabilities
+   Linting: 0 errors
+   Tests: 45/45 passing
+   Types: No errors
+```
+
+### Full Verification (3-5 minutos)
+
+**TRIGGER:** Antes de `/deploy` o cuando usuario pide "verificar todo"
+
+**Ejecutar:**
+```bash
+# Todo lo de Quick Checks +
+
+# Performance audit
+npm run build && npx lighthouse http://localhost:3000 --only-categories=performance
+
+# E2E tests
+npm run test:e2e
+
+# Bundle analysis
+npm run build -- --analyze
+
+# Accessibility
+npx pa11y http://localhost:3000
+```
+
+**Reportar:**
+```
+🔍 Full Verification Complete
+
+✅ Security: No vulnerabilities
+✅ Tests: 45/45 passing (100% coverage)
+✅ Performance: Score 95/100
+✅ Accessibility: WCAG AA compliant
+⚠️  Bundle size: 245KB (recommend < 200KB)
+
+💡 Suggestion: Code-split large components
+```
+
+---
 
 ## Project Overview
 
