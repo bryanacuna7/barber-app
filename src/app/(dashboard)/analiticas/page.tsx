@@ -30,9 +30,11 @@ export default function AnaliticasPage() {
 
   // Data states
   const [overview, setOverview] = useState<OverviewMetrics | null>(null)
-  const [revenueSeries, setRevenueSeries] = useState<any[]>([])
-  const [services, setServices] = useState<any[]>([])
-  const [barbers, setBarbers] = useState<any[]>([])
+  const [revenueSeries, setRevenueSeries] = useState<Array<{ date: string; value: number }>>([])
+  const [services, setServices] = useState<Array<{ name: string; value: number }>>([])
+  const [barbers, setBarbers] = useState<Array<{ name: string; value: number; avatar?: string }>>(
+    []
+  )
 
   useEffect(() => {
     loadAnalytics()
@@ -86,21 +88,21 @@ export default function AnaliticasPage() {
           {/* Period Selector */}
           <div className="flex gap-2 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg">
             <Button
-              variant={period === 'week' ? 'default' : 'ghost'}
+              variant={period === 'week' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setPeriod('week')}
             >
               Semana
             </Button>
             <Button
-              variant={period === 'month' ? 'default' : 'ghost'}
+              variant={period === 'month' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setPeriod('month')}
             >
               Mes
             </Button>
             <Button
-              variant={period === 'year' ? 'default' : 'ghost'}
+              variant={period === 'year' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setPeriod('year')}
             >
