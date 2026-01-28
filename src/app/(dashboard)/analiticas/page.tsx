@@ -121,37 +121,45 @@ export default function AnaliticasPage() {
             <StaggeredList>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StaggeredItem index={0}>
-                  <KPICard
-                    icon={<DollarSign className="w-5 h-5" />}
-                    label="Ingresos Totales"
-                    value={`₡${overview.totalRevenue.toLocaleString()}`}
-                    color="blue"
-                  />
+                  <div className="h-full">
+                    <KPICard
+                      icon={<DollarSign className="w-5 h-5" />}
+                      label="Ingresos Totales"
+                      value={`₡${overview.totalRevenue.toLocaleString()}`}
+                      color="blue"
+                    />
+                  </div>
                 </StaggeredItem>
                 <StaggeredItem index={1}>
-                  <KPICard
-                    icon={<Calendar className="w-5 h-5" />}
-                    label="Citas Completadas"
-                    value={overview.completedAppointments.toString()}
-                    subtitle={`${overview.totalAppointments} totales`}
-                    color="green"
-                  />
+                  <div className="h-full">
+                    <KPICard
+                      icon={<Calendar className="w-5 h-5" />}
+                      label="Citas Completadas"
+                      value={overview.completedAppointments.toString()}
+                      subtitle={`${overview.totalAppointments} totales`}
+                      color="green"
+                    />
+                  </div>
                 </StaggeredItem>
                 <StaggeredItem index={2}>
-                  <KPICard
-                    icon={<TrendingUp className="w-5 h-5" />}
-                    label="Promedio por Cita"
-                    value={`₡${overview.avgPerAppointment.toLocaleString()}`}
-                    color="amber"
-                  />
+                  <div className="h-full">
+                    <KPICard
+                      icon={<TrendingUp className="w-5 h-5" />}
+                      label="Promedio por Cita"
+                      value={`₡${overview.avgPerAppointment.toLocaleString()}`}
+                      color="amber"
+                    />
+                  </div>
                 </StaggeredItem>
                 <StaggeredItem index={3}>
-                  <KPICard
-                    icon={<Users className="w-5 h-5" />}
-                    label="Tasa de Completación"
-                    value={`${overview.completionRate}%`}
-                    color="purple"
-                  />
+                  <div className="h-full">
+                    <KPICard
+                      icon={<Users className="w-5 h-5" />}
+                      label="Tasa de Completación"
+                      value={`${overview.completionRate}%`}
+                      color="purple"
+                    />
+                  </div>
                 </StaggeredItem>
               </div>
             </StaggeredList>
@@ -199,10 +207,10 @@ function KPICard({
   }
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+    <Card className="h-full">
+      <CardContent className="p-6 h-full flex items-center">
+        <div className="flex items-start justify-between w-full">
+          <div className="flex-1 min-h-[80px] flex flex-col justify-center">
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2">{label}</p>
             <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
             {subtitle && (

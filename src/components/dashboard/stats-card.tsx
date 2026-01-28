@@ -26,11 +26,11 @@ const variants = {
     shadow: 'shadow-sm hover:shadow-md',
   },
   primary: {
-    bg: 'bg-[var(--brand-primary)]',
+    bg: 'bg-gradient-to-br from-blue-600 to-blue-700',
     iconBg: 'bg-white/20',
     iconColor: 'text-white',
     gradient: true,
-    shadow: 'shadow-lg hover:shadow-xl',
+    shadow: 'shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30',
   },
   success: {
     bg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
@@ -156,7 +156,8 @@ export function StatsCard({
         <div
           className={cn(
             'flex h-11 w-11 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl',
-            styles.iconBg
+            styles.iconBg,
+            isGradient && 'ring-4 ring-white/10'
           )}
         >
           <Icon className={cn('h-5 w-5 sm:h-6 sm:w-6', styles.iconColor)} />

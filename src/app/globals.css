@@ -24,6 +24,28 @@
   --animate-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
   --animate-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --animate-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Premium Shadow System - Elevation scale */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* Colored shadows for stat cards with gradients */
+  --shadow-blue: 0 10px 15px -3px rgb(59 130 246 / 0.2), 0 4px 6px -4px rgb(59 130 246 / 0.1);
+  --shadow-emerald: 0 10px 15px -3px rgb(16 185 129 / 0.2), 0 4px 6px -4px rgb(16 185 129 / 0.1);
+  --shadow-purple: 0 10px 15px -3px rgb(168 85 247 / 0.2), 0 4px 6px -4px rgb(168 85 247 / 0.1);
+  --shadow-amber: 0 10px 15px -3px rgb(245 158 11 / 0.2), 0 4px 6px -4px rgb(245 158 11 / 0.1);
+  --shadow-red: 0 10px 15px -3px rgb(239 68 68 / 0.2), 0 4px 6px -4px rgb(239 68 68 / 0.1);
+
+  /* Hover variations (stronger) */
+  --shadow-blue-hover: 0 10px 15px -3px rgb(59 130 246 / 0.3), 0 4px 6px -4px rgb(59 130 246 / 0.15);
+  --shadow-emerald-hover: 0 10px 15px -3px rgb(16 185 129 / 0.3), 0 4px 6px -4px rgb(16 185 129 / 0.15);
+  --shadow-purple-hover: 0 10px 15px -3px rgb(168 85 247 / 0.3), 0 4px 6px -4px rgb(168 85 247 / 0.15);
+  --shadow-amber-hover: 0 10px 15px -3px rgb(245 158 11 / 0.3), 0 4px 6px -4px rgb(245 158 11 / 0.15);
+  --shadow-red-hover: 0 10px 15px -3px rgb(239 68 68 / 0.3), 0 4px 6px -4px rgb(239 68 68 / 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,8 +66,13 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Focus visible styles */
-*:focus-visible {
+/* Premium Focus Ring - Consistent across all interactive elements */
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-400/50 dark:focus-visible:ring-offset-zinc-900;
+}
+
+/* Focus visible styles (fallback) */
+*:focus-visible:not(.focus-ring) {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
