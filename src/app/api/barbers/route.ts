@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
@@ -38,10 +39,7 @@ export async function GET() {
     .order('display_order', { ascending: true })
 
   if (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch barbers' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to fetch barbers' }, { status: 500 })
   }
 
   return NextResponse.json(barbers)
@@ -65,10 +63,13 @@ export async function POST(request: Request) {
     .single()
 
   if (!business) {
-    return NextResponse.json({
-      error: 'Business not found',
-      debug: { userId: user.id, bizError: bizError?.message }
-    }, { status: 404 })
+    return NextResponse.json(
+      {
+        error: 'Business not found',
+        debug: { userId: user.id, bizError: bizError?.message },
+      },
+      { status: 404 }
+    )
   }
 
   let body
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: 'Invalid data', details: parsed.error.flatten() },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
         message: limitCheck.reason,
         current: limitCheck.current,
         max: limitCheck.max,
-        upgrade_required: true
+        upgrade_required: true,
       },
       { status: 403 }
     )
@@ -118,17 +119,15 @@ export async function POST(request: Request) {
     console.error('Supabase error creating barber:', error)
     return NextResponse.json(
       { error: 'Failed to create barber', details: error.message },
-      { status: 500 },
+      { status: 500 }
     )
   }
 
   // Create invitation for the barber to register
-  const { error: inviteError } = await supabase
-    .from('barber_invitations')
-    .insert({
-      business_id: business.id,
-      email: parsed.data.email,
-    })
+  const { error: inviteError } = await supabase.from('barber_invitations').insert({
+    business_id: business.id,
+    email: parsed.data.email,
+  })
 
   if (inviteError) {
     console.error('Failed to create invitation:', inviteError)

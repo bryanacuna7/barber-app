@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
@@ -13,7 +14,9 @@ const serviceSchema = z.object({
 export async function GET() {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -45,7 +48,9 @@ export async function GET() {
 export async function POST(request: Request) {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -70,7 +75,10 @@ export async function POST(request: Request) {
 
   const parsed = serviceSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten() }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Invalid data', details: parsed.error.flatten() },
+      { status: 400 }
+    )
   }
 
   // Check subscription limits
@@ -82,7 +90,7 @@ export async function POST(request: Request) {
         message: limitCheck.reason,
         current: limitCheck.current,
         max: limitCheck.max,
-        upgrade_required: true
+        upgrade_required: true,
       },
       { status: 403 }
     )

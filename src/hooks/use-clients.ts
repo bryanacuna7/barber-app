@@ -1,19 +1,39 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Client } from '@/types'
 
+interface ClientsResponse {
+  data: Client[]
+  pagination: {
+    total: number
+    offset: number
+    limit: number
+    hasMore: boolean
+  }
+}
+
 export function useClients(searchTerm?: string) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['clients', searchTerm],
-    queryFn: async () => {
-      const url = searchTerm
-        ? `/api/clients?search=${encodeURIComponent(searchTerm)}`
-        : '/api/clients'
-      const response = await fetch(url)
+    queryFn: async ({ pageParam = 0 }) => {
+      const params = new URLSearchParams({
+        limit: '20',
+        offset: pageParam.toString(),
+      })
+      if (searchTerm) {
+        params.append('search', searchTerm)
+      }
+      const response = await fetch(`/api/clients?${params}`)
       if (!response.ok) {
         throw new Error('Failed to fetch clients')
       }
-      return response.json() as Promise<Client[]>
+      return response.json() as Promise<ClientsResponse>
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.pagination.hasMore
+        ? lastPage.pagination.offset + lastPage.pagination.limit
+        : undefined
+    },
+    initialPageParam: 0,
     // Keep data for 2 minutes
     staleTime: 2 * 60 * 1000,
   })

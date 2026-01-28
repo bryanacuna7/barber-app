@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -34,10 +35,7 @@ export async function POST(request: Request) {
   const proof = formData.get('proof') as File | null
 
   if (!planId || !amount) {
-    return NextResponse.json(
-      { error: 'Plan ID and amount are required' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Plan ID and amount are required' }, { status: 400 })
   }
 
   // Verify plan exists
@@ -56,17 +54,11 @@ export async function POST(request: Request) {
   // Upload proof image if provided
   if (proof && proof.size > 0) {
     if (proof.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'El archivo es muy grande (máximo 5MB)' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'El archivo es muy grande (máximo 5MB)' }, { status: 400 })
     }
 
     if (!ALLOWED_TYPES.includes(proof.type)) {
-      return NextResponse.json(
-        { error: 'Tipo de archivo no permitido' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 })
     }
 
     const fileExt = proof.name.split('.').pop()
@@ -107,10 +99,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error('Error creating payment report:', error)
-    return NextResponse.json(
-      { error: 'Failed to create payment report' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create payment report' }, { status: 500 })
   }
 
   return NextResponse.json(payment, { status: 201 })

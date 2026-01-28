@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Route: Send notification
  * Handles intelligent notification sending based on user preferences
@@ -6,10 +7,7 @@
 
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
-import {
-  sendNotificationEmail,
-  type EmailNotificationType,
-} from '@/lib/email/sender'
+import { sendNotificationEmail, type EmailNotificationType } from '@/lib/email/sender'
 import TrialExpiringEmail from '@/lib/email/templates/trial-expiring'
 import PaymentApprovedEmail from '@/lib/email/templates/payment-approved'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'

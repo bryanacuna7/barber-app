@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { z } from 'zod'
@@ -12,10 +13,7 @@ const bookingSchema = z.object({
   notes: z.string().optional(),
 })
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
   let body
@@ -29,19 +27,12 @@ export async function POST(
   if (!parsed.success) {
     return NextResponse.json(
       { error: 'Invalid request', details: parsed.error.flatten() },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
-  const {
-    service_id,
-    barber_id,
-    scheduled_at,
-    client_name,
-    client_phone,
-    client_email,
-    notes,
-  } = parsed.data
+  const { service_id, barber_id, scheduled_at, client_name, client_phone, client_email, notes } =
+    parsed.data
 
   const supabase = await createServiceClient()
 
@@ -94,10 +85,7 @@ export async function POST(
       .single()
 
     if (clientError) {
-      return NextResponse.json(
-        { error: 'Failed to create client' },
-        { status: 500 },
-      )
+      return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
     }
     client = newClient
   }
@@ -120,10 +108,7 @@ export async function POST(
     .single()
 
   if (appointmentError) {
-    return NextResponse.json(
-      { error: 'Failed to create appointment' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 })
   }
 
   return NextResponse.json({

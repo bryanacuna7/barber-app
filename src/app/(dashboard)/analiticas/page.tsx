@@ -6,13 +6,59 @@
  */
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { TrendingUp, Calendar, DollarSign, Users } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { RevenueChart } from '@/components/analytics/revenue-chart'
-import { ServicesChart } from '@/components/analytics/services-chart'
-import { BarbersLeaderboard } from '@/components/analytics/barbers-leaderboard'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
+
+// Lazy load chart components (they're heavy with Recharts)
+const RevenueChart = dynamic(
+  () =>
+    import('@/components/analytics/revenue-chart').then((mod) => ({ default: mod.RevenueChart })),
+  {
+    loading: () => (
+      <Card className="p-6">
+        <div className="h-[300px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white" />
+        </div>
+      </Card>
+    ),
+    ssr: false,
+  }
+)
+
+const ServicesChart = dynamic(
+  () =>
+    import('@/components/analytics/services-chart').then((mod) => ({ default: mod.ServicesChart })),
+  {
+    loading: () => (
+      <Card className="p-6">
+        <div className="h-[300px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white" />
+        </div>
+      </Card>
+    ),
+    ssr: false,
+  }
+)
+
+const BarbersLeaderboard = dynamic(
+  () =>
+    import('@/components/analytics/barbers-leaderboard').then((mod) => ({
+      default: mod.BarbersLeaderboard,
+    })),
+  {
+    loading: () => (
+      <Card className="p-6">
+        <div className="h-[300px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white" />
+        </div>
+      </Card>
+    ),
+    ssr: false,
+  }
+)
 
 type Period = 'week' | 'month' | 'year'
 

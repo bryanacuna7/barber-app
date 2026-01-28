@@ -92,8 +92,18 @@ export default function ClientesPage() {
   })
 
   // React Query hooks
-  const { data: clients = [], isLoading: loading } = useClients()
+  const {
+    data: clientsData,
+    isLoading: loading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useClients()
   const createClient = useCreateClient()
+
+  // Flatten all pages into single array
+  const clients = clientsData?.pages.flatMap((page) => page.data) || []
+  const totalClients = clientsData?.pages[0]?.pagination.total || 0
 
   // Métricas calculadas con contexto temporal
   const metrics = useMemo(() => {
@@ -205,7 +215,7 @@ export default function ClientesPage() {
             <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
               Clientes
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">{metrics.total} registrados</p>
+            <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">{totalClients} registrados</p>
           </div>
           <Button
             data-tour="clients-add-button"
@@ -443,6 +453,20 @@ export default function ClientesPage() {
                     </div>
                   )
                 })}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {!loading && filteredClients.length > 0 && hasNextPage && (
+              <div className="mt-4 text-center">
+                <Button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                >
+                  {isFetchingNextPage ? 'Cargando...' : 'Cargar más clientes'}
+                </Button>
               </div>
             )}
           </CardContent>

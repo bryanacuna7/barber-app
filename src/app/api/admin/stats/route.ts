@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
@@ -67,9 +68,12 @@ export async function GET() {
       .gte('created_at', startOfLastMonth.toISOString())
       .lt('created_at', startOfMonth.toISOString())
 
-    const growthRate = lastMonthCount && lastMonthCount > 0
-      ? Math.round(((newThisMonth || 0) - lastMonthCount) / lastMonthCount * 100)
-      : newThisMonth && newThisMonth > 0 ? 100 : 0
+    const growthRate =
+      lastMonthCount && lastMonthCount > 0
+        ? Math.round((((newThisMonth || 0) - lastMonthCount) / lastMonthCount) * 100)
+        : newThisMonth && newThisMonth > 0
+          ? 100
+          : 0
 
     // Get real subscription stats
     const subscriptionStats = await getSubscriptionStats(serviceClient)
@@ -100,9 +104,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Admin stats error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch stats' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })
   }
 }

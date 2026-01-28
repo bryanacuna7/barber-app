@@ -12,16 +12,14 @@ import { TourProvider } from '@/lib/tours/tour-provider'
 import { TourTooltip } from '@/components/tours/tour-tooltip'
 import { AlertTriangle } from 'lucide-react'
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || ''
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
     redirect('/login')
@@ -84,7 +82,7 @@ export default async function DashboardLayout({
       .single()
 
     // If onboarding not completed, redirect to onboarding
-    if (onboarding && !onboarding.completed) {
+    if (onboarding && !(onboarding as { completed: boolean }).completed) {
       redirect('/onboarding')
     }
   }
