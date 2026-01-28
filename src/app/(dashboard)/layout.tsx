@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
@@ -15,6 +16,8 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || ''
 
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -25,10 +28,10 @@ export default async function DashboardLayout({
   // Check if user is admin
   const isAdmin = !!(await verifyAdmin(supabase))
 
-  // Get business info including is_active
+  // Get business info including is_active and ID
   const { data: business } = await supabase
     .from('businesses')
-    .select('name, brand_primary_color, brand_secondary_color, logo_url, is_active')
+    .select('id, name, brand_primary_color, brand_secondary_color, logo_url, is_active')
     .eq('owner_id', user.id)
     .single()
 
@@ -69,6 +72,20 @@ export default async function DashboardLayout({
   const brandSecondary = business.brand_secondary_color || null
   const logoUrl = business.logo_url || null
   const isActive = business.is_active ?? true
+
+  // Check onboarding status (skip for admin and if already on onboarding page)
+  if (!isAdmin && !pathname.includes('/onboarding')) {
+    const { data: onboarding } = await supabase
+      .from('business_onboarding')
+      .select('completed')
+      .eq('business_id', business.id)
+      .single()
+
+    // If onboarding not completed, redirect to onboarding
+    if (onboarding && !onboarding.completed) {
+      redirect('/onboarding')
+    }
+  }
 
   // If business is inactive, show suspended message
   if (!isActive && !isAdmin) {

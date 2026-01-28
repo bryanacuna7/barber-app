@@ -7,8 +7,8 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend
-- **Last Updated:** 2026-01-28 (Session 15)
-- **Last Commit:** Phase 1 - Foundation & Quick Wins Complete
+- **Last Updated:** 2026-01-28 (Session 16)
+- **Last Commit:** Phase 2.1 - Onboarding Wizard Complete
 
 ---
 
@@ -81,6 +81,20 @@
   - [x] Trial Banner con posicionamiento condicional (urgente arriba, normal compacto)
   - [x] Auto-downgrade para pagos vencidos (3 días grace period)
   - [x] API `/api/subscription/change-plan` para upgrade/downgrade
+- [x] **PHASE 2: Core Features & UX (Inicio)** 🚧
+  - [x] **2.1 Onboarding Wizard** ✅
+    - [x] Migración `012_onboarding.sql` con tabla business_onboarding
+    - [x] API `/api/onboarding` (GET/PATCH) para tracking de progreso
+    - [x] 6 pasos completos: Welcome, Hours, Service, Barber, Branding, Success
+    - [x] Progress Bar component animado con indicadores de paso
+    - [x] iOS Time Picker integration para horarios
+    - [x] Color Picker y logo upload en paso de branding (opcional/skippable)
+    - [x] Confetti celebration en paso final con canvas-confetti
+    - [x] Auto-save de datos: horarios, primer servicio, primer barbero, branding
+    - [x] Layout redirect logic: negocios sin onboarding → /onboarding
+    - [x] Middleware x-pathname header para detección de ruta
+    - [x] Avatar component creado (fix para analytics)
+    - [x] Recharts package instalado (analytics dependency)
 - [x] **PLAN DE EVOLUCIÓN: Phase 1 - Foundation & Quick Wins** ✅
   - [x] **1.1 Email Notifications + Preferencias**
     - [x] Migración `009_notification_preferences.sql`
@@ -113,8 +127,11 @@
 - [x] Ejecutar migración 006_notifications.sql en Supabase Dashboard
 - [x] Ejecutar migración 007_exchange_rate.sql en Supabase Dashboard
 - [x] Ejecutar migración 008_payment_settings.sql en Supabase Dashboard
+- [x] Ejecutar migración 012_onboarding.sql en Supabase Dashboard ✅
 - [x] Crear bucket `payment-proofs` en Supabase Storage
-- [ ] Definir estrategia de almacenamiento de comprobantes (fase futura)
+- [ ] Implementar Interactive Tour (2.2) - NEXT
+- [ ] Rediseñar Landing Page (2.3)
+- [ ] Implementar Premium Appearance (2.5)
 
 ### Key Files
 | File | Purpose |
@@ -189,6 +206,20 @@
 | `vercel.json` | Configuración cron jobs Vercel |
 | `.env.example` | Template variables de entorno |
 | `PHASE1_IMPLEMENTATION.md` | Guía completa implementación Phase 1 |
+| **Session 16: Onboarding Wizard** | |
+| `supabase/migrations/012_onboarding.sql` | Tabla business_onboarding + triggers + RLS |
+| `src/app/api/onboarding/route.ts` | API GET/PATCH para tracking |
+| `src/app/(dashboard)/onboarding/page.tsx` | Wizard orquestador principal |
+| `src/components/onboarding/progress-bar.tsx` | Progress bar animado con steps |
+| `src/components/onboarding/steps/welcome.tsx` | Paso 1: Bienvenida con animaciones |
+| `src/components/onboarding/steps/hours.tsx` | Paso 2: Horarios con iOS Time Picker |
+| `src/components/onboarding/steps/service.tsx` | Paso 3: Primer servicio + sugerencias |
+| `src/components/onboarding/steps/barber.tsx` | Paso 4: Primer barbero |
+| `src/components/onboarding/steps/branding.tsx` | Paso 5: Color + logo (skippable) |
+| `src/components/onboarding/steps/success.tsx` | Paso 6: Success con confetti |
+| `src/components/ui/avatar.tsx` | Avatar component (fix analytics) |
+| `src/app/(dashboard)/layout.tsx` | Redirect logic para onboarding |
+| `src/middleware.ts` | x-pathname header para detección |
 
 ---
 
@@ -203,28 +234,33 @@
 - ✅ Pagos SINPE Móvil con reportes y aprobación manual
 - ✅ Métricas reales: MRR, trials activos, conversión
 - ✅ Página de precios pública
+- ✅ **Onboarding Wizard** completo (Phase 2.1)
+- ✅ Sistema de notificaciones email + in-app (Phase 1)
+- ✅ Analytics dashboard con Recharts (Phase 1)
+- ✅ Storage retention automático (Phase 1)
 
-### Recent Changes (Session 15) - Phase 1: Foundation & Quick Wins ✅
-- ✅ **Email Notifications System (1.1)**
-  - Sistema dual: email + in-app con preferencias por usuario
-  - Integración Resend (3,000 emails/mes gratis)
-  - 3 templates premium: trial expiring, payment approved, new appointment
-  - UI en `/configuracion` para gestionar canales y tipos de notificaciones
-- ✅ **Storage Retention Strategy (1.2)**
-  - Auto-cleanup de comprobantes de pago
-  - Cron job diario (3:00 AM UTC)
-  - Approved: delete después de 30 días, Rejected: delete inmediato
-  - Mantiene storage <1GB → $0/año
-- ✅ **Analytics Dashboard (1.3)**
-  - Nueva página `/analiticas` con visualizaciones completas
-  - 4 APIs: overview, revenue-series, services, barbers
-  - Charts con Recharts: área (revenue), barras (servicios), leaderboard (barberos)
-  - Filtros por período: semana, mes, año
-- ✅ **Performance Optimizations (1.4)**
-  - 15+ database indexes para queries críticos
-  - Image optimization: AVIF, WebP, responsive sizes
-  - Bundle analyzer configurado
-  - Queries 50-70% más rápidos
+### Recent Changes (Session 16) - Phase 2.1: Onboarding Wizard ✅
+- ✅ **Onboarding Wizard Completo (6 Pasos)**
+  - Welcome: Bienvenida animada con preview de features (3 cards)
+  - Hours: Configuración horarios 7 días con iOS Time Picker + IOSToggle
+  - Service: Primer servicio con sugerencias populares + vista previa
+  - Barber: Primer barbero con datos básicos (nombre requerido, phone/email opcional)
+  - Branding: Color picker (9 premium + custom) + logo upload (skippable)
+  - Success: Celebration con confetti automático (canvas-confetti CDN)
+- ✅ **Progress Tracking System**
+  - Tabla `business_onboarding` con current_step, completed, skipped
+  - API `/api/onboarding` con GET/PATCH para actualizar estado
+  - Progress Bar animado con Framer Motion (indicadores de paso completado)
+  - Auto-save en cada paso para poder resumir wizard después
+- ✅ **Layout Integration**
+  - Redirect automático: negocios sin onboarding → /onboarding
+  - Middleware x-pathname header para detección de ruta actual
+  - Skip admin users (no requieren onboarding)
+  - Negocios existentes marcados como completados automáticamente
+- ✅ **Fixes & Dependencies**
+  - Avatar component creado (soluciona import en analytics)
+  - Recharts package instalado (charts para analytics dashboard)
+  - update_updated_at_column() function agregada a migración
 
 ### Session 14 - Conversión de Moneda y Configuración
 - ✅ Conversión de moneda USD → CRC con tipo de cambio configurable
@@ -246,31 +282,32 @@
 
 ## Next Session
 
-### IMMEDIATE: Deploy Phase 1 🚀
-1. **Ejecutar migraciones en Supabase:**
-   - `009_notification_preferences.sql`
-   - `010_storage_retention.sql`
-   - `011_performance_indexes.sql`
+### Continue With Phase 2 - Core Features & UX
+**Progreso:** 1/4 completado (Onboarding Wizard ✅)
 
-2. **Configurar variables de entorno en Vercel:**
-   - `RESEND_API_KEY` (obtener de https://resend.com)
-   - `EMAIL_FROM` (configurar dominio)
-   - `NOTIFICATION_API_SECRET` (generar con openssl)
-   - `CRON_SECRET` (generar con openssl)
+**Siguiente:** 2.2 Interactive Tour System
+- Custom TourProvider + TourTooltip components con Portal
+- Tours definidos:
+  - Dashboard tour (4 steps): stats, citas, quick actions, sidebar
+  - Citas tour (3 steps): calendario, filtros, nueva cita
+  - Clientes tour (2 steps): lista, agregar
+- Tabla `tour_progress` para tracking por negocio
+- Context-aware activation (primera vez en cada página)
+- UI: Tooltip con flecha, spotlight/highlight, botones siguiente/saltar
 
-3. **Verificar después del deploy:**
-   - Email notifications en `/configuracion`
-   - Analytics dashboard en `/analiticas`
-   - Cron job ejecutándose en Vercel
+**Pendiente:**
+- 2.3 Landing Page Rediseñada (premium con demo interactivo)
+- 2.5 Premium Appearance (custom components + microinteractions)
 
-**📚 Guía completa:** Ver `PHASE1_IMPLEMENTATION.md`
+### Tareas Técnicas Pendientes
+1. **Ejecutar migración en Supabase:**
+   - `012_onboarding.sql` ✅ EJECUTADA
 
-### Continue With Phase 2
-**Siguiente:** Phase 2 - Core Features & UX
-- Onboarding wizard para nuevos negocios
-- Interactive tour (context-aware)
-- Landing page rediseñada (premium)
-- Premium appearance (unique design)
+2. **Testing Onboarding:**
+   - Crear negocio nuevo → verificar wizard se activa
+   - Completar todos los pasos → verificar datos se guardan
+   - Skip branding → verificar funciona correctamente
+   - Confetti en paso final → verificar animación
 
 ### Testing Completo Sistema
 1. **Phase 1 Features:**
@@ -301,6 +338,25 @@ npm run dev
 ---
 
 ## Session History
+
+### 2026-01-28 - Session 16: Phase 2.1 - Onboarding Wizard ✅
+- ✅ **Migración `012_onboarding.sql`** con tabla business_onboarding y triggers
+- ✅ **API `/api/onboarding`** con GET/PATCH para tracking de progreso
+- ✅ **6 pasos completos del wizard:**
+  - Step 1 (Welcome): Bienvenida animada con preview de features
+  - Step 2 (Hours): Configuración horarios con iOS Time Picker + toggles
+  - Step 3 (Service): Primer servicio con sugerencias populares + preview
+  - Step 4 (Barber): Primer barbero con campos opcionales (phone, email)
+  - Step 5 (Branding): Color picker + logo upload (opcional, skippable)
+  - Step 6 (Success): Celebration con confetti automático (canvas-confetti)
+- ✅ **Progress Bar component** con indicadores animados y porcentaje
+- ✅ **Layout redirect logic**: Negocios sin onboarding completado → /onboarding
+- ✅ **Middleware actualizado**: x-pathname header para detección de ruta
+- ✅ **Auto-save completo**: Guarda horarios, servicio, barbero, branding en DB
+- ✅ **Avatar component** creado (fix para analytics barbers-leaderboard)
+- ✅ **Recharts instalado** (dependency para analytics charts)
+- 📊 **Scope:** MVP wizard de 5 minutos para nuevos negocios
+- 🎨 **UX:** Animaciones Framer Motion, skip opcional en branding, confetti celebration
 
 ### 2026-01-27 - Session 14: Conversión de Moneda y Configuración Admin ✅
 - ✅ Creada migración `007_exchange_rate.sql` con tabla system_settings
