@@ -6,7 +6,16 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
+import { useFormValidation } from '@/hooks/use-form-validation'
+import { loginSchema } from '@/lib/validations/auth'
 
 function LoginForm() {
   const router = useRouter()
@@ -19,24 +28,43 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  const { getFieldError, markFieldTouched, validateForm, clearErrors } =
+    useFormValidation(loginSchema)
+
+  const handleBlur = (field: string) => {
+    markFieldTouched(field)
+    validateForm({ email, password })
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
 
+    // Validate form
+    const validation = validateForm({ email, password })
+    if (!validation.success) {
+      setError('Por favor corrige los errores')
+      setIsLoading(false)
+      markFieldTouched('email')
+      markFieldTouched('password')
+      return
+    }
+
     const supabase = createClient()
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
+    if (authError) {
       setError('Credenciales incorrectas. Intenta de nuevo.')
       setIsLoading(false)
       return
     }
 
+    clearErrors()
     router.push(redirect)
     router.refresh()
   }
@@ -45,9 +73,7 @@ function LoginForm() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-        <CardDescription>
-          Ingresa a tu cuenta de BarberShop Pro
-        </CardDescription>
+        <CardDescription>Ingresa a tu cuenta de BarberShop Pro</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleLogin}>
@@ -63,7 +89,13 @@ function LoginForm() {
             type="email"
             placeholder="tu@email.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              if (error) setError('')
+            }}
+            onBlur={() => handleBlur('email')}
+            error={getFieldError('email')}
+            success={email && !getFieldError('email') ? 'Correo válido' : undefined}
             required
             autoComplete="email"
           />
@@ -73,7 +105,12 @@ function LoginForm() {
             type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (error) setError('')
+            }}
+            onBlur={() => handleBlur('password')}
+            error={getFieldError('password')}
             required
             autoComplete="current-password"
           />
@@ -97,11 +134,7 @@ function LoginForm() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            isLoading={isLoading}
-          >
+          <Button type="submit" className="w-full" isLoading={isLoading}>
             Iniciar Sesión
           </Button>
 

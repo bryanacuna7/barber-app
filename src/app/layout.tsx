@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ToastProvider } from '@/components/ui/toast'
 import { QueryProvider } from '@/providers/query-provider'
+import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register'
+import { SkipToContent } from '@/components/accessibility/skip-to-content'
 import './globals.css'
 
 const geistSans = Geist({
@@ -23,6 +25,12 @@ export const metadata: Metadata = {
   keywords: ['barbería', 'citas', 'agenda', 'gestión', 'peluquería'],
   authors: [{ name: 'BarberShop Pro' }],
   creator: 'BarberShop Pro',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'BarberShop Pro',
+  },
   openGraph: {
     type: 'website',
     locale: 'es_CR',
@@ -46,7 +54,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <SkipToContent />
+        <ServiceWorkerRegister />
         <QueryProvider>
           <ToastProvider>{children}</ToastProvider>
         </QueryProvider>
