@@ -195,6 +195,172 @@ export interface BusinessWithStats extends Business {
   owner_email?: string
 }
 
+// ============================================================================
+// Subscription Types (Phase 3)
+// ============================================================================
+
+export interface SubscriptionPlan {
+  id: string
+  name: 'basic' | 'pro'
+  display_name: string
+  price_usd: number
+  max_barbers: number | null      // null = ilimitado
+  max_services: number | null
+  max_clients: number | null
+  has_branding: boolean
+  is_active: boolean
+  created_at: string
+}
+
+export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'cancelled'
+
+export interface BusinessSubscription {
+  id: string
+  business_id: string
+  plan_id: string
+  status: SubscriptionStatus
+  trial_ends_at: string | null
+  current_period_start: string | null
+  current_period_end: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BusinessSubscriptionWithPlan extends BusinessSubscription {
+  plan: SubscriptionPlan
+}
+
+export type PaymentReportStatus = 'pending' | 'approved' | 'rejected'
+
+export interface PaymentReport {
+  id: string
+  business_id: string
+  plan_id: string
+  amount_usd: number
+  proof_url: string | null
+  notes: string | null
+  status: PaymentReportStatus
+  reviewed_by: string | null
+  reviewed_at: string | null
+  admin_notes: string | null
+  created_at: string
+}
+
+export interface PaymentReportWithDetails extends PaymentReport {
+  plan: SubscriptionPlan
+  business: Pick<Business, 'id' | 'name' | 'slug'>
+}
+
+// Subscription insert types
+export interface PaymentReportInsert {
+  business_id: string
+  plan_id: string
+  amount_usd: number
+  proof_url?: string | null
+  notes?: string | null
+}
+
+// Subscription status response (for frontend)
+export interface SubscriptionStatusResponse {
+  status: SubscriptionStatus
+  plan: SubscriptionPlan
+  trial_ends_at: string | null
+  current_period_end: string | null
+  days_remaining: number | null
+  usage: {
+    barbers: { current: number; max: number | null }
+    services: { current: number; max: number | null }
+    clients: { current: number; max: number | null }
+  }
+  can_use_branding: boolean
+}
+
+// ============================================================================
+// System Settings Types (Exchange Rate, etc.)
+// ============================================================================
+
+export interface SystemSetting {
+  id: string
+  key: string
+  value: Record<string, unknown>
+  updated_by: string | null
+  updated_at: string
+  created_at: string
+}
+
+export interface ExchangeRateValue {
+  usd_to_crc: number
+  last_updated: string
+  notes?: string
+}
+
+export interface UsdBankAccountValue {
+  enabled: boolean
+  bank_name: string
+  account_number: string
+  account_holder: string
+  notes?: string
+}
+
+// Exchange rate response for frontend
+export interface ExchangeRateResponse {
+  usd_to_crc: number
+  last_updated: string
+  notes?: string
+}
+
+export interface SupportWhatsAppValue {
+  number: string
+  display_number: string
+  message_template?: string
+}
+
+export interface SinpeDetailsValue {
+  phone_number: string
+  account_name: string
+  notes?: string
+}
+
+// ============================================================================
+// Notification Preferences Types
+// ============================================================================
+
+export type NotificationChannel = 'email' | 'app' | 'both'
+
+export interface NotificationPreferences {
+  id: string
+  business_id: string
+  channel: NotificationChannel
+  email_address: string | null
+
+  // Preferencias por tipo (business owner)
+  email_trial_expiring: boolean
+  email_subscription_expiring: boolean
+  email_payment_status: boolean
+  email_new_appointment: boolean
+  email_appointment_reminder: boolean
+
+  // Preferencias admin
+  email_new_business: boolean
+  email_payment_pending: boolean
+
+  created_at: string
+  updated_at: string
+}
+
+export interface NotificationPreferencesInsert {
+  business_id: string
+  channel?: NotificationChannel
+  email_address?: string | null
+  email_trial_expiring?: boolean
+  email_subscription_expiring?: boolean
+  email_payment_status?: boolean
+  email_new_appointment?: boolean
+  email_appointment_reminder?: boolean
+  email_new_business?: boolean
+  email_payment_pending?: boolean
+}
+
 export type Database = {
   graphql_public: {
     Tables: Record<string, never>

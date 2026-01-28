@@ -27,6 +27,7 @@ import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picke
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
 import { ColorPicker } from '@/components/ui/color-picker'
+import { NotificationPreferencesSection } from '@/components/settings/notification-preferences-section'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { generateThemeStyle, DEFAULT_BRAND_COLOR } from '@/lib/theme'
@@ -689,6 +690,9 @@ export default function ConfiguracionPage() {
             </CardContent>
           </Card>
         </FadeInUp>
+
+        {/* Notification Preferences */}
+        <NotificationPreferencesSection />
 
         {/* Session */}
         <FadeInUp delay={0.2}>

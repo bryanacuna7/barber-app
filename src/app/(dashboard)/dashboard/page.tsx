@@ -1,8 +1,9 @@
-import { Clock, ArrowRight, Sparkles, Calendar, Users } from 'lucide-react'
+import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { formatCurrency, formatTime } from '@/lib/utils'
+import { getSubscriptionStatus } from '@/lib/subscription'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -104,6 +105,20 @@ export default async function DashboardPage() {
 
   const todayRevenueTotal = todayRevenue?.reduce((sum, apt) => sum + Number(apt.price), 0) || 0
   const monthRevenueTotal = monthRevenue?.reduce((sum, apt) => sum + Number(apt.price), 0) || 0
+
+  // Get subscription status
+  const subscriptionStatus = await getSubscriptionStatus(supabase, business.id)
+
+  // Determine if we should show "Reportar Pago" quick action
+  const showPaymentAction =
+    subscriptionStatus &&
+    (subscriptionStatus.status === 'expired' ||
+      (subscriptionStatus.status === 'active' &&
+        subscriptionStatus.days_remaining !== null &&
+        subscriptionStatus.days_remaining <= 7) ||
+      (subscriptionStatus.status === 'trial' &&
+        subscriptionStatus.days_remaining !== null &&
+        subscriptionStatus.days_remaining <= 3))
 
   // Get greeting based on time
   const hour = new Date().getHours()
@@ -224,7 +239,19 @@ export default async function DashboardPage() {
           <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className={`grid gap-2 sm:gap-3 ${showPaymentAction ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'}`}>
+            {showPaymentAction && (
+              <Link href="/suscripcion" className="block">
+                <div className="flex flex-col items-center gap-2 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 px-3 py-4 hover:from-amber-100 hover:to-amber-150 dark:from-amber-900/20 dark:to-amber-800/20 dark:hover:from-amber-900/30 dark:hover:to-amber-800/30 transition-colors ring-1 ring-amber-200 dark:ring-amber-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 dark:bg-amber-600">
+                    <CreditCard className="h-6 w-6 text-white" />
+                  </div>
+                  <span className="text-[13px] font-medium text-amber-900 dark:text-amber-100 text-center">
+                    Reportar Pago
+                  </span>
+                </div>
+              </Link>
+            )}
             <Link href="/citas" className="block">
               <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 hover:bg-zinc-100 dark:bg-zinc-800/50 dark:hover:bg-zinc-800 transition-colors">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">

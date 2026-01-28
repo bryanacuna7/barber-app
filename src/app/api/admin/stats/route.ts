@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
+import { getSubscriptionStats } from '@/lib/subscription'
 
 export async function GET() {
   try {
@@ -70,14 +71,14 @@ export async function GET() {
       ? Math.round(((newThisMonth || 0) - lastMonthCount) / lastMonthCount * 100)
       : newThisMonth && newThisMonth > 0 ? 100 : 0
 
-    // Placeholder stats for when subscriptions exist
-    // These will be calculated from business_subscriptions table in Phase 3
-    const subscriptionStats = {
-      mrr: 0, // Monthly Recurring Revenue - calculated from active subscriptions
-      trialsActive: 0, // Count of status='trialing'
-      conversionRate: 0, // % of trials that became paid
-      churnRate: 0, // % of cancelled/expired this month
-    }
+    // Get real subscription stats
+    const subscriptionStats = await getSubscriptionStats(serviceClient)
+
+    // Get pending payments count
+    const { count: pendingPayments } = await serviceClient
+      .from('payment_reports')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
 
     return NextResponse.json({
       overview: {
@@ -88,7 +89,13 @@ export async function GET() {
         newThisWeek: newThisWeek || 0,
         growthRate,
       },
-      subscription: subscriptionStats,
+      subscription: {
+        mrr: subscriptionStats.mrr,
+        trialsActive: subscriptionStats.trials_active,
+        activeSubscriptions: subscriptionStats.active_subscriptions,
+        conversionRate: subscriptionStats.conversion_rate,
+      },
+      pendingPayments: pendingPayments || 0,
       recentBusinesses: recentBusinesses || [],
     })
   } catch (error) {

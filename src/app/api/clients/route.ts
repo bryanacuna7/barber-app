@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { canAddClient } from '@/lib/subscription'
 
 // Validation schema for creating clients
 const clientSchema = z.object({
@@ -91,6 +92,21 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Datos inválidos', details: result.error.flatten() },
         { status: 400 }
+      )
+    }
+
+    // Check subscription limits
+    const limitCheck = await canAddClient(supabase, business.id)
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Límite de plan alcanzado',
+          message: limitCheck.reason,
+          current: limitCheck.current,
+          max: limitCheck.max,
+          upgrade_required: true
+        },
+        { status: 403 }
       )
     }
 

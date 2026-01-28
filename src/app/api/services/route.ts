@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { canAddService } from '@/lib/subscription'
 
 const serviceSchema = z.object({
   name: z.string().min(1),
@@ -70,6 +71,21 @@ export async function POST(request: Request) {
   const parsed = serviceSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid data', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  // Check subscription limits
+  const limitCheck = await canAddService(supabase, business.id)
+  if (!limitCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Límite de plan alcanzado',
+        message: limitCheck.reason,
+        current: limitCheck.current,
+        max: limitCheck.max,
+        upgrade_required: true
+      },
+      { status: 403 }
+    )
   }
 
   const { data: service, error } = await supabase

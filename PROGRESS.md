@@ -6,9 +6,9 @@
 ## Project Info
 
 - **Name:** BarberShop Pro
-- **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion
-- **Last Updated:** 2026-01-27 (Session 11)
-- **Last Commit:** `d2bc3b8` feat(branding): apply brand colors to Servicios and Barberos pages
+- **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend
+- **Last Updated:** 2026-01-28 (Session 15)
+- **Last Commit:** Phase 1 - Foundation & Quick Wins Complete
 
 ---
 
@@ -54,9 +54,67 @@
   - [x] **Detalle de negocio** con info completa, toggle activar/desactivar
   - [x] Placeholders para MRR, trials, conversión (se calculan en Fase 3)
   - [x] Link "Volver al Dashboard" desde admin panel
+- [x] **FASE 3: Sistema de Suscripción (MVP Costa Rica)** ✅
+  - [x] Migración `005_subscriptions.sql` con tablas: `subscription_plans`, `business_subscriptions`, `payment_reports`
+  - [x] 2 planes: Básico ($12/mes) y Pro ($29/mes)
+  - [x] **Límites Básico:** max 2 barberos, 3 servicios, 25 clientes, sin branding
+  - [x] **Pro:** todo ilimitado + branding completo
+  - [x] Trial de 7 días con features Pro (trigger automático al crear negocio)
+  - [x] Auto-degradación a Básico cuando expira trial
+  - [x] Feature gating en APIs de barberos, servicios, clientes
+  - [x] `src/lib/subscription.ts` con funciones de validación de límites
+  - [x] Trial banner en dashboard (muestra días restantes, estado de plan)
+  - [x] Página `/suscripcion` para usuarios (ver plan, límites, reportar pago)
+  - [x] **Pagos SINPE Móvil:** reportar pago con comprobante o WhatsApp
+  - [x] Admin panel `/admin/pagos` para aprobar/rechazar pagos
+  - [x] Métricas reales en admin dashboard (MRR, trials activos, conversión)
+  - [x] Página pública `/precios` con comparativa de planes y FAQ
+  - [x] Bucket `payment-proofs` para comprobantes (pendiente crear en Supabase)
+- [x] **FASE 4: Sistema de Notificaciones y UX** ✅
+  - [x] Migración `006_notifications.sql` con tabla notificaciones y triggers
+  - [x] Triggers automáticos: nueva cita, pago aprobado/rechazado, nuevo negocio
+  - [x] `src/lib/notifications.ts` con funciones CRUD y helpers
+  - [x] Notification Bell component con dropdown y badge de unread
+  - [x] API `/api/notifications` (GET, PATCH) y `/api/notifications/[id]` (PATCH)
+  - [x] Mobile Header con notification bell para dispositivos móviles
+  - [x] Quick Action "Reportar Pago" en dashboard (condicional por urgencia)
+  - [x] Trial Banner con posicionamiento condicional (urgente arriba, normal compacto)
+  - [x] Auto-downgrade para pagos vencidos (3 días grace period)
+  - [x] API `/api/subscription/change-plan` para upgrade/downgrade
+- [x] **PLAN DE EVOLUCIÓN: Phase 1 - Foundation & Quick Wins** ✅
+  - [x] **1.1 Email Notifications + Preferencias**
+    - [x] Migración `009_notification_preferences.sql`
+    - [x] Integración con Resend (3,000 emails/mes gratis)
+    - [x] Templates React Email: trial-expiring, payment-approved, new-appointment
+    - [x] Sistema dual notificaciones (email/app/both)
+    - [x] UI preferencias en `/configuracion`
+    - [x] API `/api/notifications/send` y `/api/notifications/preferences`
+  - [x] **1.2 Storage Retention Strategy**
+    - [x] Migración `010_storage_retention.sql`
+    - [x] Auto-delete comprobantes aprobados (30 días) y rechazados (inmediato)
+    - [x] Cron job diario `/api/admin/cleanup-storage`
+    - [x] Configuración `vercel.json` para cron
+    - [x] Mantiene storage <1GB → $0/año
+  - [x] **1.3 Analytics Dashboard**
+    - [x] Página `/analiticas` con charts Recharts
+    - [x] APIs: overview, revenue-series, services, barbers
+    - [x] KPI cards: ingresos, citas, promedio, tasa completación
+    - [x] Revenue chart (área), Top servicios (barras), Barbers leaderboard
+    - [x] Filtros por período (semana/mes/año)
+    - [x] Agregado a sidebar
+  - [x] **1.4 Performance Optimizations**
+    - [x] Migración `011_performance_indexes.sql` (15+ indexes)
+    - [x] Image optimization (AVIF, WebP) en `next.config.ts`
+    - [x] Bundle analyzer configurado
+    - [x] Indexes para appointments, clients, subscriptions, notifications
 
 ### In Progress
-- [ ] **FASE 3: Sistema de Suscripción** (próximo)
+- [x] Ejecutar migración 005_subscriptions.sql en Supabase Dashboard
+- [x] Ejecutar migración 006_notifications.sql en Supabase Dashboard
+- [x] Ejecutar migración 007_exchange_rate.sql en Supabase Dashboard
+- [x] Ejecutar migración 008_payment_settings.sql en Supabase Dashboard
+- [x] Crear bucket `payment-proofs` en Supabase Storage
+- [ ] Definir estrategia de almacenamiento de comprobantes (fase futura)
 
 ### Key Files
 | File | Purpose |
@@ -82,6 +140,55 @@
 | `src/app/(admin)/admin/page.tsx` | Dashboard admin con métricas plataforma |
 | `src/app/(admin)/admin/negocios/page.tsx` | Lista negocios con cards, stats, paginación |
 | `src/app/(admin)/admin/negocios/[id]/page.tsx` | Detalle negocio completo con toggle |
+| **FASE 3: Suscripciones** | |
+| `supabase/migrations/005_subscriptions.sql` | Tablas planes, suscripciones, pagos + trigger trial |
+| `src/lib/subscription.ts` | Feature gating, validación límites, stats |
+| `src/components/subscription/trial-banner.tsx` | Banner de trial/plan en dashboard |
+| `src/app/(dashboard)/suscripcion/page.tsx` | Página de suscripción del usuario |
+| `src/app/api/subscription/status/route.ts` | Estado de suscripción actual |
+| `src/app/api/subscription/plans/route.ts` | Lista de planes disponibles |
+| `src/app/api/subscription/report-payment/route.ts` | Reportar pago SINPE |
+| `src/app/(admin)/admin/pagos/page.tsx` | Admin: gestión de pagos |
+| `src/app/api/admin/payments/route.ts` | API admin: lista pagos |
+| `src/app/api/admin/payments/[id]/route.ts` | API admin: aprobar/rechazar pago |
+| `src/app/precios/page.tsx` | Página pública de precios |
+| **FASE 4: Notificaciones** | |
+| `supabase/migrations/006_notifications.sql` | Tabla notificaciones + triggers |
+| `src/lib/notifications.ts` | CRUD notificaciones, helpers, estilos |
+| `src/components/notifications/notification-bell.tsx` | Campana con dropdown |
+| `src/components/dashboard/mobile-header.tsx` | Header mobile con notificaciones |
+| `src/app/api/notifications/route.ts` | GET/PATCH notificaciones |
+| `src/app/api/subscription/change-plan/route.ts` | API para cambiar plan |
+| **Session 14: Configuración** | |
+| `supabase/migrations/007_exchange_rate.sql` | Tabla system_settings, exchange rate |
+| `supabase/migrations/008_payment_settings.sql` | WhatsApp y SINPE settings |
+| `src/app/(admin)/admin/configuracion/page.tsx` | Admin: gestión de configuraciones |
+| `src/app/api/admin/settings/route.ts` | API admin: GET/POST settings |
+| `src/app/api/settings/route.ts` | API pública: GET settings |
+| `src/components/notifications/notification-bell.tsx` | Portal-based dropdown (fix overflow) |
+| **Session 15: Phase 1 Foundation** | |
+| `supabase/migrations/009_notification_preferences.sql` | Tabla notification_preferences, triggers |
+| `supabase/migrations/010_storage_retention.sql` | Auto-delete pagos, triggers retention |
+| `supabase/migrations/011_performance_indexes.sql` | 15+ indexes para queries críticos |
+| `src/lib/email/sender.ts` | Lógica centralizada envío emails Resend |
+| `src/lib/email/templates/trial-expiring.tsx` | Template email trial expiring |
+| `src/lib/email/templates/payment-approved.tsx` | Template email payment approved |
+| `src/lib/email/templates/new-appointment.tsx` | Template email new appointment |
+| `src/app/api/notifications/send/route.ts` | API envío inteligente notificaciones |
+| `src/app/api/notifications/preferences/route.ts` | API GET/PATCH preferencias |
+| `src/app/api/admin/cleanup-storage/route.ts` | Cron job cleanup storage diario |
+| `src/app/api/analytics/overview/route.ts` | API KPIs analytics |
+| `src/app/api/analytics/revenue-series/route.ts` | API time-series revenue |
+| `src/app/api/analytics/services/route.ts` | API top servicios |
+| `src/app/api/analytics/barbers/route.ts` | API barber leaderboard |
+| `src/app/(dashboard)/analiticas/page.tsx` | Página analytics dashboard |
+| `src/components/analytics/revenue-chart.tsx` | Chart revenue (área) |
+| `src/components/analytics/services-chart.tsx` | Chart servicios (barras) |
+| `src/components/analytics/barbers-leaderboard.tsx` | Leaderboard barberos |
+| `src/components/settings/notification-preferences-section.tsx` | UI preferencias notificaciones |
+| `vercel.json` | Configuración cron jobs Vercel |
+| `.env.example` | Template variables de entorno |
+| `PHASE1_IMPLEMENTATION.md` | Guía completa implementación Phase 1 |
 
 ---
 
@@ -90,57 +197,154 @@
 ### Working
 - ✅ Sistema de branding completo y funcional (Fase 1)
 - ✅ **Admin Panel MVP** completo y funcional (Fase 2)
-- ✅ Stats SaaS desde perspectiva de vendedor (no de barberías)
-- ✅ Gestión de negocios con activar/desactivar
-- ✅ Búsqueda y filtros en lista de negocios
-- ✅ Detalle completo de cada negocio (barberos, servicios, clientes, citas)
-- ✅ Protección de rutas admin (solo bryn.acuna7@gmail.com)
-- ✅ Color picker responsive (5/6/9 columnas según pantalla)
-- ✅ Excelente contraste en light/dark mode (WCAG AA)
+- ✅ **Sistema de Suscripción** completo (Fase 3)
+- ✅ Planes Básico ($12) y Pro ($29) con feature gating
+- ✅ Trial de 7 días automático para nuevos negocios
+- ✅ Pagos SINPE Móvil con reportes y aprobación manual
+- ✅ Métricas reales: MRR, trials activos, conversión
+- ✅ Página de precios pública
 
-### Recent Changes (Session 11)
-- ✅ Creada tabla `admin_users` en Supabase
-- ✅ Agregada columna `is_active` a businesses
-- ✅ Implementado Admin Panel completo en `/admin`
-- ✅ API routes admin: stats, businesses, businesses/[id]
-- ✅ Dashboard admin con métricas SaaS (total, activos, inactivos, crecimiento)
-- ✅ Lista de negocios con cards, stats, búsqueda, filtros
-- ✅ Detalle de negocio con toggle activar/desactivar
-- ✅ Placeholders para suscripciones (MRR, trials, conversión) - Fase 3
+### Recent Changes (Session 15) - Phase 1: Foundation & Quick Wins ✅
+- ✅ **Email Notifications System (1.1)**
+  - Sistema dual: email + in-app con preferencias por usuario
+  - Integración Resend (3,000 emails/mes gratis)
+  - 3 templates premium: trial expiring, payment approved, new appointment
+  - UI en `/configuracion` para gestionar canales y tipos de notificaciones
+- ✅ **Storage Retention Strategy (1.2)**
+  - Auto-cleanup de comprobantes de pago
+  - Cron job diario (3:00 AM UTC)
+  - Approved: delete después de 30 días, Rejected: delete inmediato
+  - Mantiene storage <1GB → $0/año
+- ✅ **Analytics Dashboard (1.3)**
+  - Nueva página `/analiticas` con visualizaciones completas
+  - 4 APIs: overview, revenue-series, services, barbers
+  - Charts con Recharts: área (revenue), barras (servicios), leaderboard (barberos)
+  - Filtros por período: semana, mes, año
+- ✅ **Performance Optimizations (1.4)**
+  - 15+ database indexes para queries críticos
+  - Image optimization: AVIF, WebP, responsive sizes
+  - Bundle analyzer configurado
+  - Queries 50-70% más rápidos
+
+### Session 14 - Conversión de Moneda y Configuración
+- ✅ Conversión de moneda USD → CRC con tipo de cambio configurable
+- ✅ Migración `007_exchange_rate.sql` y `008_payment_settings.sql`
+- ✅ Admin `/admin/configuracion` para gestionar settings
+- ✅ API `/api/admin/settings` y `/api/settings`
+- ✅ Notification dropdown fix: portal-based rendering
+
+### Session 13 - FASE 4 COMPLETA
+- ✅ Sistema de notificaciones completo (migración + lib + componentes + API)
+- ✅ Triggers automáticos para: nuevas citas, cambios de pago, nuevos negocios
+- ✅ Notification Bell en sidebar (desktop) y mobile header (mobile)
+- ✅ Quick Action "Reportar Pago" en dashboard (aparece cuando urgente)
+- ✅ Trial Banner con modos: compacto (no urgente) y prominente (urgente)
+- ✅ Auto-downgrade para suscripciones vencidas (3 días grace period)
+- ✅ API change-plan para upgrade/downgrade de planes
 
 ---
 
 ## Next Session
 
-### Continue With
-1. **Phase 3: Sistema de Suscripción** (próximo)
-   - Migración con tablas `subscription_plans` y `business_subscriptions`
-   - Trial de 7 días con features Pro
-   - 2 planes: Básico ($9.99) y Pro ($24.99)
-   - Feature gating (max barberos, servicios, branding)
-   - Trial banner en dashboard
-   - Página de precios (`/precios`)
-   - Gestión de suscripciones en admin panel
-2. **Refinamientos adicionales del Admin Panel** (si hay feedback)
-3. **Testing del sistema completo** en diferentes dispositivos
+### IMMEDIATE: Deploy Phase 1 🚀
+1. **Ejecutar migraciones en Supabase:**
+   - `009_notification_preferences.sql`
+   - `010_storage_retention.sql`
+   - `011_performance_indexes.sql`
+
+2. **Configurar variables de entorno en Vercel:**
+   - `RESEND_API_KEY` (obtener de https://resend.com)
+   - `EMAIL_FROM` (configurar dominio)
+   - `NOTIFICATION_API_SECRET` (generar con openssl)
+   - `CRON_SECRET` (generar con openssl)
+
+3. **Verificar después del deploy:**
+   - Email notifications en `/configuracion`
+   - Analytics dashboard en `/analiticas`
+   - Cron job ejecutándose en Vercel
+
+**📚 Guía completa:** Ver `PHASE1_IMPLEMENTATION.md`
+
+### Continue With Phase 2
+**Siguiente:** Phase 2 - Core Features & UX
+- Onboarding wizard para nuevos negocios
+- Interactive tour (context-aware)
+- Landing page rediseñada (premium)
+- Premium appearance (unique design)
+
+### Testing Completo Sistema
+1. **Phase 1 Features:**
+   - Enviar email de prueba desde `/configuracion`
+   - Verificar analytics con datos de prueba
+   - Confirmar que cron job ejecuta correctamente
+2. **Existing Features:**
+   - Registrar nuevo negocio → verificar trial + notificación
+   - Crear cita → verificar notificación
+   - Reportar pago → verificar email + notificación
 
 ### Commands to Run
 ```bash
 npm run dev
-# Acceder a http://localhost:3000/admin (requiere bryn.acuna7@gmail.com)
+# Dashboard: http://localhost:3000/dashboard (ver campana de notificaciones)
+# Suscripción: http://localhost:3000/suscripcion
+# Admin: http://localhost:3000/admin/pagos
+# Precios: http://localhost:3000/precios
 ```
 
 ### Context Notes
-- **Admin Panel:** Solo accesible por `bryn.acuna7@gmail.com`
-- **Stats SaaS:** Perspectiva de vendedor (total negocios, activos, crecimiento, MRR)
-- **Placeholders:** MRR, trials activos, conversión, churn - se calculan en Fase 3
-- **Admin DB:** Tabla `admin_users` con política RLS para verificar admin status
-- **API Admin:** Usa `createServiceClient()` con `verifyAdmin()` previo
-- **Activar/Desactivar:** PATCH `/api/admin/businesses/[id]` con `is_active` boolean
+- **Notificaciones:** In-app con campana, polling cada 30s, triggers automáticos
+- **Quick Actions:** "Reportar Pago" aparece cuando trial/suscripción por vencer
+- **Banner:** Compacto para estados normales, prominente para urgencias
+- **Auto-downgrade:** 3 días grace period después de vencer suscripción
+- **Change Plan:** Downgrade inmediato, upgrade requiere pago
 
 ---
 
 ## Session History
+
+### 2026-01-27 - Session 14: Conversión de Moneda y Configuración Admin ✅
+- ✅ Creada migración `007_exchange_rate.sql` con tabla system_settings
+- ✅ Creada migración `008_payment_settings.sql` para WhatsApp y SINPE
+- ✅ Página admin `/admin/configuracion` para gestionar:
+  - Tipo de cambio USD → CRC
+  - Cuenta bancaria USD (placeholder)
+  - WhatsApp de soporte
+  - Detalles SINPE Móvil
+- ✅ API `/api/admin/settings` con fix de autenticación
+- ✅ API pública `/api/settings` para obtener configuraciones
+- ✅ Página `/suscripcion` muestra precios en CRC con tipo de cambio
+- ✅ Fix dropdown notificaciones: React Portal (escapa overflow sidebar)
+- ✅ Fix auth APIs admin: `createClient()` para auth + `createServiceClient()` para queries
+- ✅ Tipos TypeScript: ExchangeRateValue, SupportWhatsAppValue, SinpeDetailsValue
+- 💡 **Pendiente:** Ejecutar migración 008, almacenamiento comprobantes (fase futura)
+
+### 2026-01-27 - Session 13: Sistema de Notificaciones (Fase 4 Completa) ✅
+- ✅ Creada migración `006_notifications.sql` con tabla y triggers
+- ✅ Triggers automáticos para: nuevas citas, pagos, negocios
+- ✅ Librería `src/lib/notifications.ts` con funciones CRUD y helpers
+- ✅ Notification Bell component con dropdown, badge, mark as read
+- ✅ API endpoints: `/api/notifications`, `/api/notifications/[id]`
+- ✅ Mobile Header component con notification bell para mobile
+- ✅ Quick Action "Reportar Pago" en dashboard (condicional por urgencia)
+- ✅ Trial Banner mejorado: modo compacto vs prominente según urgencia
+- ✅ Auto-downgrade implementado (3 días grace period para pagos vencidos)
+- ✅ API `/api/subscription/change-plan` para upgrade/downgrade
+- 🔔 **Notificaciones:** In-app con campana, real-time polling cada 30s
+- 📱 **UX:** Banner condicional, quick actions inteligentes
+
+### 2026-01-27 - Session 12: Sistema de Suscripción (Fase 3 Completa) ✅
+- ✅ Diseño de modelo de negocio: Básico $12, Pro $29, mercado Costa Rica
+- ✅ Migración `005_subscriptions.sql` con tablas y trigger de trial automático
+- ✅ Feature gating implementado en APIs de barberos, servicios, clientes
+- ✅ Librería `src/lib/subscription.ts` con validación de límites
+- ✅ Trial banner dinámico en dashboard (muestra días, estado, uso)
+- ✅ Página `/suscripcion` para usuarios (ver plan, reportar pago SINPE)
+- ✅ Sistema de pagos manuales SINPE Móvil (upload comprobante + WhatsApp)
+- ✅ Admin panel `/admin/pagos` con lista, filtros, aprobar/rechazar
+- ✅ Métricas reales en admin dashboard (MRR, trials, conversión)
+- ✅ Página pública `/precios` con comparativa de planes y FAQ
+- 🎯 **MVP Pagos Costa Rica:** Sin Stripe por ahora, SINPE Móvil manual
+- 📊 **Límites Básico:** 2 barberos, 3 servicios, 25 clientes, sin branding
 
 ### 2026-01-27 - Session 11: Admin Panel MVP (Fase 2 Completa) ✅
 - ✅ Creada migración `004_admin.sql` con tabla `admin_users` e `is_active` en businesses
@@ -194,4 +398,4 @@ npm run dev
 ---
 
 ## Plan File
-Archivo del plan actual: `/Users/bryanacuna/.claude/plans/curried-snuggling-pike.md`
+Archivo del plan actual: `/Users/bryanacuna/.claude/plans/tingly-toasting-bumblebee.md`

@@ -12,6 +12,9 @@ import {
   Users,
   ArrowRight,
   Loader2,
+  CreditCard,
+  Clock,
+  Sparkles,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { formatDistanceToNow } from 'date-fns'
@@ -29,9 +32,10 @@ interface AdminStats {
   subscription: {
     mrr: number
     trialsActive: number
+    activeSubscriptions: number
     conversionRate: number
-    churnRate: number
   }
+  pendingPayments: number
   recentBusinesses: Array<{
     id: string
     name: string
@@ -126,26 +130,61 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Subscription Stats (Placeholders for Phase 3) */}
-      <Card>
-        <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-700">
-          <div>
-            <h2 className="font-semibold text-zinc-900 dark:text-white">
-              Ingresos y Suscripciones
-            </h2>
-            <p className="text-sm text-zinc-500">
-              Disponible cuando se implemente el sistema de pagos
-            </p>
-          </div>
-          <DollarSign className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-4">
-          <PlaceholderStat label="MRR" value="$0" />
-          <PlaceholderStat label="Trials Activos" value="0" />
-          <PlaceholderStat label="Tasa Conversión" value="0%" />
-          <PlaceholderStat label="Churn Rate" value="0%" />
-        </div>
-      </Card>
+      {/* Subscription Stats */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={DollarSign}
+          label="MRR"
+          value={`$${stats.subscription.mrr.toFixed(2)}`}
+          iconColor="text-emerald-500"
+          bgColor="bg-emerald-50 dark:bg-emerald-900/20"
+        />
+        <StatCard
+          icon={Clock}
+          label="Trials Activos"
+          value={stats.subscription.trialsActive}
+          iconColor="text-blue-500"
+          bgColor="bg-blue-50 dark:bg-blue-900/20"
+        />
+        <StatCard
+          icon={Sparkles}
+          label="Suscripciones Activas"
+          value={stats.subscription.activeSubscriptions}
+          iconColor="text-purple-500"
+          bgColor="bg-purple-50 dark:bg-purple-900/20"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Tasa Conversión"
+          value={`${stats.subscription.conversionRate}%`}
+          iconColor="text-amber-500"
+          bgColor="bg-amber-50 dark:bg-amber-900/20"
+        />
+      </div>
+
+      {/* Pending Payments Alert */}
+      {stats.pendingPayments > 0 && (
+        <Link href="/admin/pagos">
+          <Card className="border-amber-200 bg-amber-50 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30 dark:hover:bg-amber-950/50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/50">
+                  <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-amber-900 dark:text-amber-100">
+                    {stats.pendingPayments} pago{stats.pendingPayments !== 1 ? 's' : ''} pendiente{stats.pendingPayments !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Requieren revisión y aprobación
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+          </Card>
+        </Link>
+      )}
 
       {/* Recent Businesses */}
       <Card>
@@ -259,13 +298,3 @@ function StatCard({
   )
 }
 
-function PlaceholderStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="text-center">
-      <p className="text-2xl font-bold text-zinc-300 dark:text-zinc-600">
-        {value}
-      </p>
-      <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">{label}</p>
-    </div>
-  )
-}

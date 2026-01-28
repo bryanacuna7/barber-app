@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { canAddBarber } from '@/lib/subscription'
 
 const barberSchema = z.object({
   name: z.string().min(1),
@@ -82,6 +83,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: 'Invalid data', details: parsed.error.flatten() },
       { status: 400 },
+    )
+  }
+
+  // Check subscription limits
+  const limitCheck = await canAddBarber(supabase, business.id)
+  if (!limitCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Límite de plan alcanzado',
+        message: limitCheck.reason,
+        current: limitCheck.current,
+        max: limitCheck.max,
+        upgrade_required: true
+      },
+      { status: 403 }
     )
   }
 

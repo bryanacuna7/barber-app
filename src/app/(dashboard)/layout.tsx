@@ -3,8 +3,10 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
 import { Sidebar } from '@/components/dashboard/sidebar'
+import { MobileHeader } from '@/components/dashboard/mobile-header'
 import { BottomNav } from '@/components/dashboard/bottom-nav'
 import { ThemeProvider } from '@/components/theme-provider'
+import { TrialBanner } from '@/components/subscription/trial-banner'
 import { AlertTriangle } from 'lucide-react'
 
 export default async function DashboardLayout({
@@ -100,9 +102,13 @@ export default async function DashboardLayout({
       <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
       <Sidebar businessName={businessName} logoUrl={logoUrl} isAdmin={isAdmin} />
 
+      {/* Mobile header with notification bell */}
+      <MobileHeader businessName={businessName} logoUrl={logoUrl} />
+
       {/* Main content */}
       <main className="lg:pl-64">
         <div className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8">
+          <TrialBanner />
           {children}
         </div>
       </main>

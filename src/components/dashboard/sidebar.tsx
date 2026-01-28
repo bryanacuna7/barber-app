@@ -9,15 +9,13 @@ import {
   Users,
   Settings,
   LogOut,
-  Menu,
-  X,
   UserRound,
   Shield,
+  TrendingUp,
 } from 'lucide-react'
-import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -25,6 +23,7 @@ const navigation = [
   { name: 'Servicios', href: '/servicios', icon: Scissors },
   { name: 'Barberos', href: '/barberos', icon: UserRound },
   { name: 'Clientes', href: '/clientes', icon: Users },
+  { name: 'Analíticas', href: '/analiticas', icon: TrendingUp },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
 
@@ -53,8 +52,8 @@ function SidebarContent({
 }: SidebarContentProps) {
   return (
     <>
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b border-zinc-200 px-6 dark:border-zinc-800">
+      {/* Logo and notifications */}
+      <div className="flex h-16 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
         <Link
           href="/dashboard"
           className="flex items-center gap-2"
@@ -65,8 +64,9 @@ function SidebarContent({
           ) : (
             <Scissors className="h-6 w-6" />
           )}
-          <span className="font-semibold">{businessName}</span>
+          <span className="font-semibold truncate max-w-[140px]">{businessName}</span>
         </Link>
+        <NotificationBell />
       </div>
 
       {/* Navigation */}
@@ -119,7 +119,6 @@ function SidebarContent({
 export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -127,8 +126,6 @@ export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
     router.push('/login')
     router.refresh()
   }
-
-  const closeMobile = () => setMobileOpen(false)
 
   return (
     <>
