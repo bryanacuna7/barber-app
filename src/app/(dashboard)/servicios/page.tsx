@@ -1,27 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Clock,
-  Scissors,
-  AlertTriangle,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Pencil, Trash2, Clock, Scissors, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Modal } from '@/components/ui/modal'
 import { formatCurrency } from '@/lib/utils'
-import {
-  FadeInUp,
-  StaggeredList,
-  StaggeredItem,
-  ScaleOnHover,
-} from '@/components/ui/motion'
+import { FadeInUp, StaggeredList, StaggeredItem, ScaleOnHover } from '@/components/ui/motion'
 import type { Service } from '@/types'
+import {
+  useServices,
+  useCreateService,
+  useUpdateService,
+  useDeleteService,
+} from '@/hooks/use-services'
 
 // Service color palette
 const SERVICE_COLORS = [
@@ -58,14 +52,10 @@ const SERVICE_COLORS = [
 ]
 
 export default function ServiciosPage() {
-  const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [deleteService, setDeleteService] = useState<Service | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -74,21 +64,11 @@ export default function ServiciosPage() {
     price: 0,
   })
 
-  useEffect(() => {
-    fetchServices()
-  }, [])
-
-  async function fetchServices() {
-    try {
-      const res = await fetch('/api/services')
-      const data = await res.json()
-      setServices(data)
-    } catch {
-      setError('Error al cargar servicios')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // React Query hooks
+  const { data: services = [], isLoading: loading } = useServices()
+  const createService = useCreateService()
+  const updateService = useUpdateService()
+  const deleteServiceMutation = useDeleteService()
 
   function resetForm() {
     setFormData({ name: '', description: '', duration_minutes: 30, price: 0 })
@@ -110,56 +90,32 @@ export default function ServiciosPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSubmitting(true)
     setError('')
 
     try {
-      const url = editingService
-        ? `/api/services/${editingService.id}`
-        : '/api/services'
-
-      const res = await fetch(url, {
-        method: editingService ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al guardar servicio')
-        return
+      if (editingService) {
+        await updateService.mutateAsync({
+          id: editingService.id,
+          data: formData,
+        })
+      } else {
+        await createService.mutateAsync(formData)
       }
 
       resetForm()
-      fetchServices()
-    } catch {
-      setError('Error de conexión')
-    } finally {
-      setSubmitting(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar servicio')
     }
   }
 
   async function handleDelete() {
     if (!deleteService) return
-    setDeleting(true)
 
     try {
-      const res = await fetch(`/api/services/${deleteService.id}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al eliminar servicio')
-        return
-      }
-
+      await deleteServiceMutation.mutateAsync(deleteService.id)
       setDeleteService(null)
-      fetchServices()
-    } catch {
-      setError('Error de conexión')
-    } finally {
-      setDeleting(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar servicio')
     }
   }
 
@@ -176,10 +132,7 @@ export default function ServiciosPage() {
               Gestiona el catálogo de servicios de tu barbería
             </p>
           </div>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={() => {
                 resetForm()
@@ -216,9 +169,7 @@ export default function ServiciosPage() {
             type="text"
             placeholder="Ej: Corte de cabello"
             value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             required
           />
 
@@ -227,9 +178,7 @@ export default function ServiciosPage() {
             type="text"
             placeholder="Ej: Incluye lavado y peinado"
             value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -268,7 +217,11 @@ export default function ServiciosPage() {
             <Button type="button" variant="outline" onClick={resetForm} className="h-11">
               Cancelar
             </Button>
-            <Button type="submit" isLoading={submitting} className="h-11">
+            <Button
+              type="submit"
+              isLoading={createService.isPending || updateService.isPending}
+              className="h-11"
+            >
               {editingService ? 'Actualizar' : 'Crear'} Servicio
             </Button>
           </div>
@@ -293,12 +246,11 @@ export default function ServiciosPage() {
             </motion.div>
             <div>
               <p className="text-[17px] text-zinc-900 dark:text-white">
-                ¿Estás seguro de que deseas eliminar{' '}
-                <strong>{deleteService?.name}</strong>?
+                ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
               </p>
               <p className="mt-2 text-[15px] text-zinc-500">
-                Esta acción no se puede deshacer. Las citas existentes con este
-                servicio no se verán afectadas.
+                Esta acción no se puede deshacer. Las citas existentes con este servicio no se verán
+                afectadas.
               </p>
             </div>
           </div>
@@ -310,7 +262,7 @@ export default function ServiciosPage() {
               variant="outline"
               className="h-11 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
               onClick={handleDelete}
-              isLoading={deleting}
+              isLoading={deleteServiceMutation.isPending}
             >
               Eliminar
             </Button>
@@ -322,9 +274,7 @@ export default function ServiciosPage() {
       <FadeInUp delay={0.1}>
         <Card className="overflow-hidden">
           <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-[17px] font-semibold">
-              Catálogo de Servicios
-            </CardTitle>
+            <CardTitle className="text-[17px] font-semibold">Catálogo de Servicios</CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             {loading ? (
@@ -409,7 +359,7 @@ export default function ServiciosPage() {
                                 className="inline-flex h-14 w-14 items-center justify-center rounded-2xl"
                                 style={{
                                   background: 'var(--brand-primary-light)',
-                                  color: 'var(--brand-primary-on-light)'
+                                  color: 'var(--brand-primary-on-light)',
                                 }}
                               >
                                 <Scissors className="h-7 w-7" />
