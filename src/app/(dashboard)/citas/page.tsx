@@ -29,6 +29,7 @@ import { MiniCalendar } from '@/components/appointments/mini-calendar'
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/appointment-form'
 import { AppointmentFilters } from '@/components/appointments/appointment-filters'
 import { DaySchedule } from '@/components/appointments/day-schedule'
+import { CitasTourWrapper } from '@/components/tours/citas-tour-wrapper'
 
 // Utils
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils/format'
@@ -250,6 +251,7 @@ export default function CitasPage() {
   const goToToday = () => setSelectedDate(new Date())
 
   return (
+    <CitasTourWrapper>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -271,6 +273,7 @@ export default function CitasPage() {
             <RefreshCw className="w-4 h-4" />
           </Button>
           <Button
+            data-tour="appointments-new-button"
             onClick={() => {
               setEditingAppointment(null)
               setIsFormOpen(true)
@@ -357,7 +360,7 @@ export default function CitasPage() {
       </div>
 
       {/* Quick Week Navigation - Solo mobile */}
-      <div className="lg:hidden">
+      <div className="lg:hidden" data-tour="appointments-calendar">
         <div className="flex items-center justify-between mb-3">
           <Button variant="ghost" size="sm" onClick={() => setSelectedDate(addDays(selectedDate, -7))}>
             <ChevronLeft className="w-4 h-4" />
@@ -404,7 +407,7 @@ export default function CitasPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar - Calendar (Desktop only) */}
         <div className="hidden lg:block w-80 flex-shrink-0 space-y-6">
-          <Card>
+          <Card data-tour="appointments-calendar">
             <MiniCalendar
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
@@ -485,12 +488,14 @@ export default function CitasPage() {
           </div>
 
           {/* Filters - Compact */}
-          <AppointmentFilters
-            search={search}
-            onSearchChange={setSearch}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-          />
+          <div data-tour="appointments-filters">
+            <AppointmentFilters
+              search={search}
+              onSearchChange={setSearch}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+            />
+          </div>
 
           {/* Content based on view mode */}
           {isLoading ? (
@@ -592,5 +597,6 @@ export default function CitasPage() {
         selectedDate={selectedDate}
       />
     </div>
+    </CitasTourWrapper>
   )
 }

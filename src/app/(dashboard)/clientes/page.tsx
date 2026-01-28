@@ -13,6 +13,7 @@ import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { format, startOfMonth, isAfter, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Client } from '@/types'
+import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
 
 type ClientSegment = 'all' | 'vip' | 'frequent' | 'new' | 'inactive'
 
@@ -211,6 +212,7 @@ export default function ClientesPage() {
   }
 
   return (
+    <ClientesTourWrapper>
     <div className="space-y-4 sm:space-y-6">
       {/* Header - Mobile optimized */}
       <div className="flex items-center justify-between gap-3">
@@ -222,7 +224,7 @@ export default function ClientesPage() {
             {metrics.total} registrados
           </p>
         </div>
-        <Button onClick={() => setShowModal(true)} className="shrink-0 text-sm px-3 py-2 sm:px-4 sm:py-2">
+        <Button data-tour="clients-add-button" onClick={() => setShowModal(true)} className="shrink-0 text-sm px-3 py-2 sm:px-4 sm:py-2">
           <Plus className="h-4 w-4 sm:mr-2" />
           <span className="hidden sm:inline">Nuevo Cliente</span>
         </Button>
@@ -352,7 +354,7 @@ export default function ClientesPage() {
       </div>
 
       {/* Client List */}
-      <Card>
+      <Card data-tour="clients-list">
         <CardHeader className="flex flex-row items-center justify-between p-3 sm:p-6">
           <CardTitle className="text-base sm:text-lg">
             {selectedSegment === 'all'
@@ -657,5 +659,6 @@ export default function ClientesPage() {
         </div>
       )}
     </div>
+    </ClientesTourWrapper>
   )
 }

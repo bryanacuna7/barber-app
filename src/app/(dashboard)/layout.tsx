@@ -8,6 +8,8 @@ import { MobileHeader } from '@/components/dashboard/mobile-header'
 import { BottomNav } from '@/components/dashboard/bottom-nav'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TrialBanner } from '@/components/subscription/trial-banner'
+import { TourProvider } from '@/lib/tours/tour-provider'
+import { TourTooltip } from '@/components/tours/tour-tooltip'
 import { AlertTriangle } from 'lucide-react'
 
 export default async function DashboardLayout({
@@ -115,23 +117,28 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
-      <Sidebar businessName={businessName} logoUrl={logoUrl} isAdmin={isAdmin} />
+    <TourProvider businessId={business.id}>
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+        <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
+        <Sidebar businessName={businessName} logoUrl={logoUrl} isAdmin={isAdmin} />
 
-      {/* Mobile header with notification bell */}
-      <MobileHeader businessName={businessName} logoUrl={logoUrl} />
+        {/* Mobile header with notification bell */}
+        <MobileHeader businessName={businessName} logoUrl={logoUrl} />
 
-      {/* Main content */}
-      <main className="lg:pl-64">
-        <div className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8">
-          <TrialBanner />
-          {children}
-        </div>
-      </main>
+        {/* Main content */}
+        <main className="lg:pl-64">
+          <div className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8">
+            <TrialBanner />
+            {children}
+          </div>
+        </main>
 
-      {/* Mobile bottom navigation */}
-      <BottomNav />
-    </div>
+        {/* Mobile bottom navigation */}
+        <BottomNav />
+
+        {/* Tour tooltip overlay */}
+        <TourTooltip />
+      </div>
+    </TourProvider>
   )
 }

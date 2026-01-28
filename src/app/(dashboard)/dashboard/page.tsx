@@ -6,6 +6,7 @@ import { formatCurrency, formatTime } from '@/lib/utils'
 import { getSubscriptionStatus } from '@/lib/subscription'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { DashboardTourWrapper } from '@/components/tours/dashboard-tour-wrapper'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -125,38 +126,41 @@ export default async function DashboardPage() {
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
 
   return (
-    <div className="min-h-screen space-y-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
-            {greeting}
-          </h1>
-          <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Bienvenido a <span className="font-medium text-zinc-700 dark:text-zinc-300">{business.name}</span>
-          </p>
+    <DashboardTourWrapper>
+      <div className="min-h-screen space-y-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
+              {greeting}
+            </h1>
+            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Bienvenido a <span className="font-medium text-zinc-700 dark:text-zinc-300">{business.name}</span>
+            </p>
+          </div>
+          <Link
+            href={`/reservar/${business.slug}`}
+            target="_blank"
+            className="inline-flex items-center gap-2 text-[15px] text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
+          >
+            Ver página pública
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <Link
-          href={`/reservar/${business.slug}`}
-          target="_blank"
-          className="inline-flex items-center gap-2 text-[15px] text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
-        >
-          Ver página pública
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
 
-      {/* Stats Grid - Client Component */}
-      <DashboardStats
-        todayAppointments={todayAppointments || 0}
-        todayRevenue={formatCurrency(todayRevenueTotal)}
-        monthRevenue={formatCurrency(monthRevenueTotal)}
-        monthAppointments={monthAppointments || 0}
-        totalClients={totalClients || 0}
-      />
+        {/* Stats Grid - Client Component */}
+        <div data-tour="dashboard-stats">
+          <DashboardStats
+            todayAppointments={todayAppointments || 0}
+            todayRevenue={formatCurrency(todayRevenueTotal)}
+            monthRevenue={formatCurrency(monthRevenueTotal)}
+            monthAppointments={monthAppointments || 0}
+            totalClients={totalClients || 0}
+          />
+        </div>
 
-      {/* Upcoming Appointments */}
-      <Card className="overflow-hidden">
+        {/* Upcoming Appointments */}
+        <Card className="overflow-hidden" data-tour="dashboard-appointments">
         <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
@@ -234,7 +238,7 @@ export default async function DashboardPage() {
       </Card>
 
       {/* Quick Actions */}
-      <Card>
+      <Card data-tour="dashboard-quick-actions">
         <CardHeader>
           <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
         </CardHeader>
@@ -286,5 +290,6 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
     </div>
+    </DashboardTourWrapper>
   )
 }
