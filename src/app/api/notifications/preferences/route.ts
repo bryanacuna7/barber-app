@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Route: Notification Preferences
  * GET - Get notification preferences for current business

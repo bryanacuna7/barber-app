@@ -1,29 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  UserRound,
-  AlertTriangle,
-  Mail,
-  Sparkles,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Pencil, Trash2, UserRound, AlertTriangle, Mail, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Modal } from '@/components/ui/modal'
-import {
-  FadeInUp,
-  StaggeredList,
-  StaggeredItem,
-  ScaleOnHover,
-} from '@/components/ui/motion'
+import { FadeInUp, StaggeredList, StaggeredItem, ScaleOnHover } from '@/components/ui/motion'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import type { Barber } from '@/types'
 import { useToast } from '@/components/ui/toast'
+import { useBarbers, useCreateBarber, useUpdateBarber, useDeleteBarber } from '@/hooks/use-barbers'
 
 // Premium barber color palette
 const BARBER_COLORS = [
@@ -55,14 +43,10 @@ const BARBER_COLORS = [
 ]
 
 export default function BarberosPage() {
-  const [barbers, setBarbers] = useState<Barber[]>([])
-  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [editingBarber, setEditingBarber] = useState<Barber | null>(null)
   const [deleteBarber, setDeleteBarber] = useState<Barber | null>(null)
-  const [deleting, setDeleting] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [togglingIds, setTogglingIds] = useState<string[]>([])
   const toast = useToast()
@@ -73,21 +57,11 @@ export default function BarberosPage() {
     bio: '',
   })
 
-  useEffect(() => {
-    fetchBarbers()
-  }, [])
-
-  async function fetchBarbers() {
-    try {
-      const res = await fetch('/api/barbers')
-      const data = await res.json()
-      setBarbers(Array.isArray(data) ? data : [])
-    } catch {
-      setError('Error al cargar datos')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // React Query hooks
+  const { data: barbers = [], isLoading: loading } = useBarbers()
+  const createBarber = useCreateBarber()
+  const updateBarber = useUpdateBarber()
+  const deleteBarberMutation = useDeleteBarber()
 
   function resetForm() {
     setFormData({ name: '', email: '', bio: '' })
@@ -108,101 +82,59 @@ export default function BarberosPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSubmitting(true)
     setError('')
 
     try {
-      const url = editingBarber
-        ? `/api/barbers/${editingBarber.id}`
-        : '/api/barbers'
-
-      const res = await fetch(url, {
-        method: editingBarber ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al guardar')
-        return
+      if (editingBarber) {
+        await updateBarber.mutateAsync({
+          id: editingBarber.id,
+          data: formData,
+        })
+        toast.success('Barbero actualizado correctamente.')
+      } else {
+        await createBarber.mutateAsync({
+          name: formData.name,
+          phone: formData.email,
+        })
+        toast.success('Barbero agregado correctamente.')
       }
 
-      toast.success(
-        editingBarber
-          ? 'Barbero actualizado correctamente.'
-          : 'Barbero agregado correctamente.',
-      )
-
       resetForm()
-      fetchBarbers()
-    } catch {
-      setError('Error de conexión')
-    } finally {
-      setSubmitting(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar')
     }
   }
 
   async function handleDelete() {
     if (!deleteBarber) return
-    setDeleting(true)
 
     try {
-      const res = await fetch(`/api/barbers/${deleteBarber.id}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al eliminar')
-        return
-      }
-
+      await deleteBarberMutation.mutateAsync(deleteBarber.id)
       toast.success('El barbero ha sido removido del staff.')
-
       setDeleteBarber(null)
-      fetchBarbers()
-    } catch {
-      setError('Error de conexión')
-    } finally {
-      setDeleting(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar')
     }
   }
 
   async function handleToggleActive(barber: Barber, nextValue: boolean) {
     if (togglingIds.includes(barber.id)) return
-    const previousValue = barber.is_active ?? true
 
-    setTogglingIds(prev => (prev.includes(barber.id) ? prev : [...prev, barber.id]))
-    setBarbers(prev =>
-      prev.map(item =>
-        item.id === barber.id ? { ...item, is_active: nextValue } : item
-      )
-    )
+    setTogglingIds((prev) => (prev.includes(barber.id) ? prev : [...prev, barber.id]))
 
     try {
-      const res = await fetch(`/api/barbers/${barber.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_active: nextValue }),
+      await updateBarber.mutateAsync({
+        id: barber.id,
+        data: { is_active: nextValue },
       })
-
-      if (!res.ok) {
-        throw new Error('update failed')
-      }
     } catch {
-      setBarbers(prev =>
-        prev.map(item =>
-          item.id === barber.id ? { ...item, is_active: previousValue } : item
-        )
-      )
       toast.error('No pudimos actualizar el estado del barbero.')
     } finally {
-      setTogglingIds(prev => prev.filter(id => id !== barber.id))
+      setTogglingIds((prev) => prev.filter((id) => id !== barber.id))
     }
   }
 
-  const filteredBarbers = barbers.filter(barber => {
+  const filteredBarbers = barbers.filter((barber) => {
     const isActive = barber.is_active ?? true
     if (statusFilter === 'all') return true
     if (statusFilter === 'active') return isActive
@@ -258,9 +190,7 @@ export default function BarberosPage() {
             label="Nombre Completo"
             placeholder="Ej: Juan Pérez"
             value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             required
           />
           <Input
@@ -268,25 +198,25 @@ export default function BarberosPage() {
             type="email"
             placeholder="juan@ejemplo.com"
             value={formData.email}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, email: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
             required
           />
           <Input
             label="Especialidad / Bio"
             placeholder="Ej: Experto en degradados y barba"
             value={formData.bio}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, bio: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
           />
 
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={resetForm} className="h-11">
               Cancelar
             </Button>
-            <Button type="submit" isLoading={submitting} className="h-11">
+            <Button
+              type="submit"
+              isLoading={createBarber.isPending || updateBarber.isPending}
+              className="h-11"
+            >
               {editingBarber ? 'Actualizar' : 'Agregar'} Barbero
             </Button>
           </div>
@@ -294,11 +224,7 @@ export default function BarberosPage() {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={!!deleteBarber}
-        onClose={() => setDeleteBarber(null)}
-        title="Eliminar Barbero"
-      >
+      <Modal isOpen={!!deleteBarber} onClose={() => setDeleteBarber(null)} title="Eliminar Barbero">
         <div className="space-y-5">
           <div className="flex items-start gap-4">
             <motion.div
@@ -326,7 +252,7 @@ export default function BarberosPage() {
               variant="outline"
               className="h-11 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
               onClick={handleDelete}
-              isLoading={deleting}
+              isLoading={deleteBarberMutation.isPending}
             >
               Eliminar
             </Button>
@@ -340,12 +266,16 @@ export default function BarberosPage() {
           <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'var(--brand-primary)' }}>
-                  <Sparkles className="h-4 w-4" style={{ color: 'var(--brand-primary-contrast)' }} />
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-lg"
+                  style={{ background: 'var(--brand-primary)' }}
+                >
+                  <Sparkles
+                    className="h-4 w-4"
+                    style={{ color: 'var(--brand-primary-contrast)' }}
+                  />
                 </div>
-                <CardTitle className="text-[17px] font-semibold">
-                  Equipo
-                </CardTitle>
+                <CardTitle className="text-[17px] font-semibold">Equipo</CardTitle>
                 {!loading && filteredBarbers.length > 0 && (
                   <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[13px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                     {filteredBarbers.length} {filteredBarbers.length === 1 ? 'barbero' : 'barberos'}
@@ -357,7 +287,7 @@ export default function BarberosPage() {
                   { label: 'Todos', value: 'all' },
                   { label: 'Activos', value: 'active' },
                   { label: 'Inactivos', value: 'inactive' },
-                ].map(option => (
+                ].map((option) => (
                   <button
                     key={option.value}
                     type="button"
@@ -389,11 +319,19 @@ export default function BarberosPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-16 text-center"
               >
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[22px]" style={{ background: 'var(--brand-primary-light)' }}>
-                  <UserRound className="h-10 w-10" style={{ color: 'var(--brand-primary-on-light)' }} />
+                <div
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-[22px]"
+                  style={{ background: 'var(--brand-primary-light)' }}
+                >
+                  <UserRound
+                    className="h-10 w-10"
+                    style={{ color: 'var(--brand-primary-on-light)' }}
+                  />
                 </div>
                 <p className="mt-5 text-[17px] font-medium text-zinc-900 dark:text-white">
-                  {statusFilter === 'inactive' ? 'No hay barberos inactivos' : 'Aún no tienes barberos'}
+                  {statusFilter === 'inactive'
+                    ? 'No hay barberos inactivos'
+                    : 'Aún no tienes barberos'}
                 </p>
                 <p className="mt-1 text-[15px] text-zinc-500">
                   {statusFilter === 'inactive'
@@ -459,7 +397,12 @@ export default function BarberosPage() {
 
                             {/* Avatar with ring */}
                             <div className="mb-4 flex items-center gap-4">
-                              <div className="relative rounded-full" style={{ boxShadow: '0 0 0 3px rgba(var(--brand-primary-rgb), 0.15)' }}>
+                              <div
+                                className="relative rounded-full"
+                                style={{
+                                  boxShadow: '0 0 0 3px rgba(var(--brand-primary-rgb), 0.15)',
+                                }}
+                              >
                                 <div
                                   className="flex h-16 w-16 items-center justify-center rounded-full"
                                   style={{ background: 'var(--brand-primary-light)' }}
@@ -471,7 +414,10 @@ export default function BarberosPage() {
                                       className="h-full w-full rounded-full object-cover"
                                     />
                                   ) : (
-                                    <UserRound className="h-8 w-8" style={{ color: 'var(--brand-primary-on-light)' }} />
+                                    <UserRound
+                                      className="h-8 w-8"
+                                      style={{ color: 'var(--brand-primary-on-light)' }}
+                                    />
                                   )}
                                 </div>
                                 {/* Status indicator */}

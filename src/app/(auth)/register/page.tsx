@@ -6,7 +6,17 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import { PasswordStrength } from '@/components/ui/password-strength'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
+import { useFormValidation } from '@/hooks/use-form-validation'
+import { registerSchema } from '@/lib/validations/auth'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -21,11 +31,23 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  const { getFieldError, markFieldTouched, validateForm, clearErrors } =
+    useFormValidation(registerSchema)
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    const { name, value } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value,
     }))
+
+    // Clear server error when user types
+    if (error) setError('')
+  }
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    markFieldTouched(e.target.name)
+    validateForm(formData)
   }
 
   const generateSlug = (name: string) => {
@@ -42,15 +64,13 @@ export default function RegisterPage() {
     setIsLoading(true)
     setError('')
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden')
+    // Validate form before submitting
+    const validation = validateForm(formData)
+    if (!validation.success) {
+      setError('Por favor corrige los errores en el formulario')
       setIsLoading(false)
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
-      setIsLoading(false)
+      // Mark all fields as touched to show errors
+      Object.keys(formData).forEach((field) => markFieldTouched(field))
       return
     }
 
@@ -63,9 +83,11 @@ export default function RegisterPage() {
     })
 
     if (authError) {
-      setError(authError.message === 'User already registered'
-        ? 'Este correo ya está registrado'
-        : 'Error al crear la cuenta. Intenta de nuevo.')
+      setError(
+        authError.message === 'User already registered'
+          ? 'Este correo ya está registrado'
+          : 'Error al crear la cuenta. Intenta de nuevo.'
+      )
       setIsLoading(false)
       return
     }
@@ -79,13 +101,11 @@ export default function RegisterPage() {
     // 2. Create business
     const slug = generateSlug(formData.businessName)
 
-    const { error: businessError } = await supabase
-      .from('businesses')
-      .insert({
-        owner_id: authData.user.id,
-        name: formData.businessName,
-        slug: slug,
-      })
+    const { error: businessError } = await supabase.from('businesses').insert({
+      owner_id: authData.user.id,
+      name: formData.businessName,
+      slug: slug,
+    })
 
     if (businessError) {
       setError('Error al crear el negocio. El nombre puede estar en uso.')
@@ -93,6 +113,7 @@ export default function RegisterPage() {
       return
     }
 
+    clearErrors()
     router.push('/dashboard')
     router.refresh()
   }
@@ -101,9 +122,7 @@ export default function RegisterPage() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
-        <CardDescription>
-          Registra tu barbería en BarberShop Pro
-        </CardDescription>
+        <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleRegister}>
@@ -121,6 +140,11 @@ export default function RegisterPage() {
             placeholder="Barbería El Patrón"
             value={formData.businessName}
             onChange={handleChange}
+            onBlur={handleBlur}
+            error={getFieldError('businessName')}
+            success={
+              formData.businessName && !getFieldError('businessName') ? 'Nombre válido' : undefined
+            }
             required
           />
 
@@ -131,23 +155,28 @@ export default function RegisterPage() {
             placeholder="tu@email.com"
             value={formData.email}
             onChange={handleChange}
+            onBlur={handleBlur}
+            error={getFieldError('email')}
+            success={formData.email && !getFieldError('email') ? 'Correo válido' : undefined}
             required
             autoComplete="email"
           />
 
-          <Input
-            label="Contraseña"
-            type={showPasswords ? 'text' : 'password'}
-            name="password"
-            placeholder="Mínimo 6 caracteres"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            autoComplete="new-password"
-          />
-          <p className="text-[12px] text-zinc-500 dark:text-zinc-400">
-            Debe tener al menos 6 caracteres.
-          </p>
+          <div className="space-y-2">
+            <Input
+              label="Contraseña"
+              type={showPasswords ? 'text' : 'password'}
+              name="password"
+              placeholder="Mínimo 8 caracteres"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={getFieldError('password')}
+              required
+              autoComplete="new-password"
+            />
+            {formData.password && <PasswordStrength password={formData.password} />}
+          </div>
 
           <Input
             label="Confirmar contraseña"
@@ -156,9 +185,19 @@ export default function RegisterPage() {
             placeholder="Repite tu contraseña"
             value={formData.confirmPassword}
             onChange={handleChange}
+            onBlur={handleBlur}
+            error={getFieldError('confirmPassword')}
+            success={
+              formData.confirmPassword &&
+              formData.password === formData.confirmPassword &&
+              !getFieldError('confirmPassword')
+                ? 'Las contraseñas coinciden'
+                : undefined
+            }
             required
             autoComplete="new-password"
           />
+
           <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
             <input
               type="checkbox"
@@ -171,11 +210,7 @@ export default function RegisterPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            isLoading={isLoading}
-          >
+          <Button type="submit" className="w-full" isLoading={isLoading}>
             Crear Cuenta
           </Button>
 

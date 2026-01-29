@@ -1,27 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Clock,
-  Scissors,
-  AlertTriangle,
-} from 'lucide-react'
+import { Plus, Pencil, Trash2, Clock, Scissors, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Modal } from '@/components/ui/modal'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { formatCurrency } from '@/lib/utils'
-import {
-  FadeInUp,
-  StaggeredList,
-  StaggeredItem,
-  ScaleOnHover,
-} from '@/components/ui/motion'
+import { FadeInUp, StaggeredList, StaggeredItem, ScaleOnHover } from '@/components/ui/motion'
 import type { Service } from '@/types'
+import {
+  useServices,
+  useCreateService,
+  useUpdateService,
+  useDeleteService,
+} from '@/hooks/use-services'
 
 // Service color palette
 const SERVICE_COLORS = [
@@ -58,14 +53,11 @@ const SERVICE_COLORS = [
 ]
 
 export default function ServiciosPage() {
-  const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [deleteService, setDeleteService] = useState<Service | null>(null)
-  const [deleting, setDeleting] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -74,20 +66,23 @@ export default function ServiciosPage() {
     price: 0,
   })
 
+  // Detect mobile viewport
   useEffect(() => {
-    fetchServices()
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  async function fetchServices() {
-    try {
-      const res = await fetch('/api/services')
-      const data = await res.json()
-      setServices(data)
-    } catch {
-      setError('Error al cargar servicios')
-    } finally {
-      setLoading(false)
-    }
+  // React Query hooks
+  const { data: services = [], isLoading: loading, refetch } = useServices()
+  const createService = useCreateService()
+  const updateService = useUpdateService()
+  const deleteServiceMutation = useDeleteService()
+
+  // Pull to refresh handler
+  const handleRefresh = async () => {
+    await refetch()
   }
 
   function resetForm() {
@@ -110,56 +105,32 @@ export default function ServiciosPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSubmitting(true)
     setError('')
 
     try {
-      const url = editingService
-        ? `/api/services/${editingService.id}`
-        : '/api/services'
-
-      const res = await fetch(url, {
-        method: editingService ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al guardar servicio')
-        return
+      if (editingService) {
+        await updateService.mutateAsync({
+          id: editingService.id,
+          data: formData,
+        })
+      } else {
+        await createService.mutateAsync(formData)
       }
 
       resetForm()
-      fetchServices()
-    } catch {
-      setError('Error de conexión')
-    } finally {
-      setSubmitting(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al guardar servicio')
     }
   }
 
   async function handleDelete() {
     if (!deleteService) return
-    setDeleting(true)
 
     try {
-      const res = await fetch(`/api/services/${deleteService.id}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Error al eliminar servicio')
-        return
-      }
-
+      await deleteServiceMutation.mutateAsync(deleteService.id)
       setDeleteService(null)
-      fetchServices()
-    } catch {
-      setError('Error de conexión')
-    } finally {
-      setDeleting(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar servicio')
     }
   }
 
@@ -176,10 +147,7 @@ export default function ServiciosPage() {
               Gestiona el catálogo de servicios de tu barbería
             </p>
           </div>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
               onClick={() => {
                 resetForm()
@@ -216,9 +184,7 @@ export default function ServiciosPage() {
             type="text"
             placeholder="Ej: Corte de cabello"
             value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             required
           />
 
@@ -227,9 +193,7 @@ export default function ServiciosPage() {
             type="text"
             placeholder="Ej: Incluye lavado y peinado"
             value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -268,7 +232,11 @@ export default function ServiciosPage() {
             <Button type="button" variant="outline" onClick={resetForm} className="h-11">
               Cancelar
             </Button>
-            <Button type="submit" isLoading={submitting} className="h-11">
+            <Button
+              type="submit"
+              isLoading={createService.isPending || updateService.isPending}
+              className="h-11"
+            >
               {editingService ? 'Actualizar' : 'Crear'} Servicio
             </Button>
           </div>
@@ -293,12 +261,11 @@ export default function ServiciosPage() {
             </motion.div>
             <div>
               <p className="text-[17px] text-zinc-900 dark:text-white">
-                ¿Estás seguro de que deseas eliminar{' '}
-                <strong>{deleteService?.name}</strong>?
+                ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
               </p>
               <p className="mt-2 text-[15px] text-zinc-500">
-                Esta acción no se puede deshacer. Las citas existentes con este
-                servicio no se verán afectadas.
+                Esta acción no se puede deshacer. Las citas existentes con este servicio no se verán
+                afectadas.
               </p>
             </div>
           </div>
@@ -310,7 +277,7 @@ export default function ServiciosPage() {
               variant="outline"
               className="h-11 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
               onClick={handleDelete}
-              isLoading={deleting}
+              isLoading={deleteServiceMutation.isPending}
             >
               Eliminar
             </Button>
@@ -320,13 +287,12 @@ export default function ServiciosPage() {
 
       {/* Service List */}
       <FadeInUp delay={0.1}>
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-[17px] font-semibold">
-              Catálogo de Servicios
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
+        <div className="space-y-4">
+          <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+            Catálogo de Servicios
+          </h3>
+
+          <div>
             {loading ? (
               <div className="flex justify-center py-12">
                 <motion.div
@@ -361,10 +327,72 @@ export default function ServiciosPage() {
                   </Button>
                 </motion.div>
               </motion.div>
+            ) : isMobile ? (
+              <PullToRefresh onRefresh={handleRefresh}>
+                <StaggeredList className="space-y-2">
+                  <AnimatePresence mode="popLayout">
+                    {services.map((service) => {
+                      return (
+                        <StaggeredItem key={service.id}>
+                          {/* Compact mobile view - with swipe gestures */}
+                          <div className="relative rounded-xl overflow-hidden">
+                            {/* Swipeable content */}
+                            <motion.div
+                              drag="x"
+                              dragConstraints={{ left: -160, right: 0 }}
+                              dragElastic={0.1}
+                              dragMomentum={false}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="group relative z-10 w-full flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 touch-pan-y border-l-4 border-l-blue-500"
+                            >
+                              {/* Action buttons - positioned absolutely on the right edge of motion.div */}
+                              <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+                                {/* Edit button */}
+                                <button
+                                  onClick={() => handleEdit(service)}
+                                  className="flex h-full w-20 items-center justify-center bg-blue-500 text-white"
+                                >
+                                  <Pencil className="h-5 w-5" />
+                                </button>
+                                {/* Delete button */}
+                                <button
+                                  onClick={() => setDeleteService(service)}
+                                  className="flex h-full w-20 items-center justify-center bg-red-500 text-white"
+                                >
+                                  <Trash2 className="h-5 w-5" />
+                                </button>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-zinc-900 dark:text-white truncate">
+                                    {service.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {service.duration_minutes} min
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-zinc-900 dark:text-white">
+                                {formatCurrency(Number(service.price))}
+                              </span>
+                            </motion.div>
+                          </div>
+                        </StaggeredItem>
+                      )
+                    })}
+                  </AnimatePresence>
+                </StaggeredList>
+              </PullToRefresh>
             ) : (
               <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
-                  {services.map((service, index) => {
+                  {services.map((service) => {
                     return (
                       <StaggeredItem key={service.id}>
                         <ScaleOnHover>
@@ -409,7 +437,7 @@ export default function ServiciosPage() {
                                 className="inline-flex h-14 w-14 items-center justify-center rounded-2xl"
                                 style={{
                                   background: 'var(--brand-primary-light)',
-                                  color: 'var(--brand-primary-on-light)'
+                                  color: 'var(--brand-primary-on-light)',
                                 }}
                               >
                                 <Scissors className="h-7 w-7" />
@@ -444,8 +472,8 @@ export default function ServiciosPage() {
                 </AnimatePresence>
               </StaggeredList>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </FadeInUp>
     </div>
   )

@@ -11,10 +11,11 @@ import { Scissors } from 'lucide-react'
 
 interface ServicesChartProps {
   data: Array<{
-    id: string
+    id?: string
     name: string
-    bookings: number
-    revenue: number
+    bookings?: number
+    revenue?: number
+    value?: number
   }>
   period: 'week' | 'month' | 'year'
 }
@@ -31,9 +32,7 @@ export function ServicesChart({ data, period }: ServicesChartProps) {
             <Scissors className="w-5 h-5 text-green-500" />
             <CardTitle>Top Servicios</CardTitle>
           </div>
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            Por ingresos
-          </div>
+          <div className="text-sm text-zinc-500 dark:text-zinc-400">Por ingresos</div>
         </div>
       </CardHeader>
       <CardContent>
@@ -45,7 +44,12 @@ export function ServicesChart({ data, period }: ServicesChartProps) {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={topServices} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-              <XAxis type="number" stroke="#6b7280" fontSize={12} tickFormatter={(value) => `₡${value}`} />
+              <XAxis
+                type="number"
+                stroke="#6b7280"
+                fontSize={12}
+                tickFormatter={(value) => `₡${value}`}
+              />
               <YAxis
                 type="category"
                 dataKey="name"

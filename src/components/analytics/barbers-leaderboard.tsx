@@ -11,13 +11,15 @@ import { Avatar } from '@/components/ui/avatar'
 
 interface BarbersLeaderboardProps {
   data: Array<{
-    id: string
+    id?: string
     name: string
-    photo_url: string | null
-    appointments: number
-    revenue: number
-    uniqueClients: number
-    avgPerAppointment: number
+    photo_url?: string | null
+    avatar?: string
+    appointments?: number
+    revenue?: number
+    value?: number
+    uniqueClients?: number
+    avgPerAppointment?: number
   }>
   period: 'week' | 'month' | 'year'
 }
@@ -31,9 +33,7 @@ export function BarbersLeaderboard({ data, period }: BarbersLeaderboardProps) {
             <Trophy className="w-5 h-5 text-amber-500" />
             <CardTitle>Ranking de Barberos</CardTitle>
           </div>
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            Por ingresos
-          </div>
+          <div className="text-sm text-zinc-500 dark:text-zinc-400">Por ingresos</div>
         </div>
       </CardHeader>
       <CardContent>
@@ -78,9 +78,7 @@ export function BarbersLeaderboard({ data, period }: BarbersLeaderboardProps) {
                     size="md"
                   />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                      {barber.name}
-                    </p>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">{barber.name}</p>
                     <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       {barber.appointments} citas • {barber.uniqueClients} clientes
                     </p>

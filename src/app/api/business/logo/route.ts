@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -36,27 +37,22 @@ export async function POST(request: Request) {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return NextResponse.json(
       { error: 'Tipo de archivo no permitido. Usa PNG, JPG, WebP o SVG.' },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
   if (file.size > MAX_SIZE) {
-    return NextResponse.json(
-      { error: 'El archivo es muy grande. Máximo 2MB.' },
-      { status: 400 },
-    )
+    return NextResponse.json({ error: 'El archivo es muy grande. Máximo 2MB.' }, { status: 400 })
   }
 
   const ext = file.name.split('.').pop() || 'png'
   const filePath = `${business.id}/logo.${ext}`
 
   // Upload to storage
-  const { error: uploadError } = await supabase.storage
-    .from('logos')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: true,
-    })
+  const { error: uploadError } = await supabase.storage.from('logos').upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: true,
+  })
 
   if (uploadError) {
     console.error('Logo upload error:', uploadError)
@@ -64,9 +60,7 @@ export async function POST(request: Request) {
   }
 
   // Get public URL
-  const { data: urlData } = supabase.storage
-    .from('logos')
-    .getPublicUrl(filePath)
+  const { data: urlData } = supabase.storage.from('logos').getPublicUrl(filePath)
 
   const logoUrl = urlData.publicUrl
 

@@ -5,15 +5,24 @@
  * Line chart showing revenue over time
  */
 
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from 'recharts'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TrendingUp } from 'lucide-react'
 
 interface RevenueChartProps {
   data: Array<{
     date: string
-    revenue: number
-    appointments: number
+    revenue?: number
+    value?: number
+    appointments?: number
   }>
   period: 'week' | 'month' | 'year'
 }
@@ -69,7 +78,7 @@ export function RevenueChart({ data, period }: RevenueChartProps) {
             />
             <Area
               type="monotone"
-              dataKey="revenue"
+              dataKey={(item: any) => item.revenue ?? item.value ?? 0}
               stroke="#3b82f6"
               strokeWidth={2}
               fillOpacity={1}

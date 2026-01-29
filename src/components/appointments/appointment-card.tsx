@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Clock,
   User,
@@ -12,7 +13,7 @@ import {
   MessageCircle,
   Edit,
   Trash2,
-  CalendarCheck
+  CalendarCheck,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
@@ -41,7 +42,7 @@ export function AppointmentCard({
   onDelete,
   onWhatsApp,
   variant = 'default',
-  className
+  className,
 }: AppointmentCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
@@ -53,43 +54,81 @@ export function AppointmentCard({
     confirmed: 'border-l-blue-500',
     completed: 'border-l-emerald-500',
     cancelled: 'border-l-red-500',
-    no_show: 'border-l-amber-500'
+    no_show: 'border-l-amber-500',
   }
 
   if (variant === 'compact') {
+    // Contextual actions based on status
+    const canConfirm = appointment.status === 'pending'
+    const canComplete = appointment.status === 'confirmed' || appointment.status === 'pending'
+    const canCancel = appointment.status !== 'cancelled' && appointment.status !== 'completed'
+
     return (
-      <div
-        className={cn(
-          'group flex items-center gap-3 p-3 rounded-xl',
-          'bg-zinc-50 dark:bg-zinc-800/50',
-          'hover:bg-zinc-100 dark:hover:bg-zinc-800',
-          'transition-all duration-200',
-          'border-l-4',
-          statusColors[appointment.status as AppointmentStatus],
-          className
-        )}
-      >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
-              {appointment.client?.name || 'Cliente sin nombre'}
-            </span>
-            <StatusBadge status={appointment.status as AppointmentStatus} size="sm" />
+      <div className="relative rounded-xl overflow-hidden">
+        {/* Swipeable content */}
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: -160, right: 0 }}
+          dragElastic={0.1}
+          dragMomentum={false}
+          className={cn(
+            'group relative z-10 w-full flex items-center gap-3 p-3 rounded-xl',
+            'bg-zinc-50 dark:bg-zinc-800',
+            'touch-pan-y border-l-4',
+            statusColors[appointment.status as AppointmentStatus],
+            className
+          )}
+        >
+          {/* Action buttons - positioned absolutely on the right edge */}
+          <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+            {/* Primary action: Confirm or Complete */}
+            {(canConfirm || canComplete) && (
+              <button
+                onClick={() => {
+                  if (canConfirm) {
+                    onStatusChange?.(appointment.id, 'confirmed')
+                  } else if (canComplete) {
+                    onStatusChange?.(appointment.id, 'completed')
+                  }
+                }}
+                className="flex h-full w-20 items-center justify-center bg-emerald-500 text-white"
+              >
+                {canConfirm ? <CalendarCheck className="h-5 w-5" /> : <Check className="h-5 w-5" />}
+              </button>
+            )}
+            {/* Secondary action: Cancel or Delete */}
+            {canCancel && (
+              <button
+                onClick={() => onStatusChange?.(appointment.id, 'cancelled')}
+                className="flex h-full w-20 items-center justify-center bg-red-500 text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
           </div>
-          <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              {formatTime(scheduledTime)}
-            </span>
-            <span className="flex items-center gap-1">
-              <Scissors className="w-3.5 h-3.5" />
-              {appointment.service?.name || 'Servicio'}
-            </span>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-zinc-900 dark:text-white truncate">
+                {appointment.client?.name || 'Cliente sin nombre'}
+              </span>
+              <StatusBadge status={appointment.status as AppointmentStatus} size="sm" />
+            </div>
+            <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                {formatTime(scheduledTime)}
+              </span>
+              <span className="flex items-center gap-1">
+                <Scissors className="w-3.5 h-3.5" />
+                {appointment.service?.name || 'Servicio'}
+              </span>
+            </div>
           </div>
-        </div>
-        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-          {formatCurrency(Number(appointment.price))}
-        </span>
+          <span className="font-semibold text-zinc-900 dark:text-white">
+            {formatCurrency(Number(appointment.price))}
+          </span>
+        </motion.div>
       </div>
     )
   }
@@ -106,15 +145,22 @@ export function AppointmentCard({
         )}
       >
         {/* Timeline dot */}
-        <div className={cn(
-          'absolute left-0 top-0 w-6 h-6 rounded-full',
-          'flex items-center justify-center',
-          'ring-4 ring-white dark:ring-zinc-900',
-          appointment.status === 'completed' ? 'bg-emerald-500' :
-          appointment.status === 'confirmed' ? 'bg-blue-500' :
-          appointment.status === 'pending' ? 'bg-violet-500' :
-          appointment.status === 'cancelled' ? 'bg-red-500' : 'bg-amber-500'
-        )}>
+        <div
+          className={cn(
+            'absolute left-0 top-0 w-6 h-6 rounded-full',
+            'flex items-center justify-center',
+            'ring-4 ring-white dark:ring-zinc-900',
+            appointment.status === 'completed'
+              ? 'bg-emerald-500'
+              : appointment.status === 'confirmed'
+                ? 'bg-blue-500'
+                : appointment.status === 'pending'
+                  ? 'bg-violet-500'
+                  : appointment.status === 'cancelled'
+                    ? 'bg-red-500'
+                    : 'bg-amber-500'
+          )}
+        >
           {appointment.status === 'completed' && <Check className="w-3 h-3 text-white" />}
           {appointment.status === 'confirmed' && <CalendarCheck className="w-3 h-3 text-white" />}
           {appointment.status === 'pending' && <Clock className="w-3 h-3 text-white" />}
@@ -185,12 +231,14 @@ export function AppointmentCard({
 
           <Dropdown
             trigger={
-              <button className={cn(
-                'p-2 rounded-lg transition-all duration-200',
-                'hover:bg-zinc-100 dark:hover:bg-zinc-800',
-                'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
-                isHovered ? 'opacity-100' : 'opacity-0'
-              )}>
+              <button
+                className={cn(
+                  'p-2 rounded-lg transition-all duration-200',
+                  'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                  'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                )}
+              >
                 <MoreVertical className="w-5 h-5" />
               </button>
             }
@@ -230,10 +278,7 @@ export function AppointmentCard({
                 WhatsApp
               </DropdownItem>
             )}
-            <DropdownItem
-              icon={<Edit className="w-4 h-4" />}
-              onClick={() => onEdit?.(appointment)}
-            >
+            <DropdownItem icon={<Edit className="w-4 h-4" />} onClick={() => onEdit?.(appointment)}>
               Editar
             </DropdownItem>
             <DropdownSeparator />

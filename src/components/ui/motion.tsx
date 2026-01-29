@@ -72,9 +72,11 @@ export function StaggeredList({
 export function StaggeredItem({
   children,
   className,
+  index,
 }: {
   children: ReactNode
   className?: string
+  index?: number
 }) {
   return (
     <motion.div
@@ -122,13 +124,7 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(
 Pressable.displayName = 'Pressable'
 
 // Hover lift animation
-export function HoverLift({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
+export function HoverLift({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.div
       whileHover={{
@@ -143,13 +139,7 @@ export function HoverLift({
 }
 
 // Scale on hover (for cards)
-export function ScaleOnHover({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
+export function ScaleOnHover({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.div
       whileHover={{
@@ -186,13 +176,7 @@ export function PageTransition({
 }
 
 // Slide in from right (for navigation)
-export function SlideInRight({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
+export function SlideInRight({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -207,13 +191,7 @@ export function SlideInRight({
 }
 
 // Number counter animation
-export function AnimatedNumber({
-  value,
-  className,
-}: {
-  value: number
-  className?: string
-}) {
+export function AnimatedNumber({ value, className }: { value: number; className?: string }) {
   return (
     <motion.span
       key={value}
@@ -287,10 +265,7 @@ export function SuccessCheckmark({ className }: { className?: string }) {
 }
 
 // Skeleton loader with shimmer
-export function Skeleton({
-  className,
-  ...props
-}: ComponentProps<'div'>) {
+export function Skeleton({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
       className={cn(
