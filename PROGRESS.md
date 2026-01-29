@@ -7,10 +7,10 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend, React Query
-- **Last Updated:** 2026-01-28 (Session 31)
+- **Last Updated:** 2026-01-28 (Session 32)
 - **Last Commit:** 514cd2a - Code cleanup and refactoring ✅
 - **Current Branch:** `main`
-- **Next Session:** Refactor reservar/page.tsx (959 lines), add error boundaries, or Phase 5 (CI/CD)
+- **Next Session:** Phase 5 (CI/CD), Performance audit, or Final production testing
 
 ---
 
@@ -66,8 +66,9 @@
 - ✅ **Landing Page Premium** con SEO optimizado ✨
 - ✅ **Premium Component System** con microinteractions 🎨
 - ✅ **Premium UI Improvements** - P0+P1+P2 completas 🚀
-- ✅ **Design System Documentation** - DESIGN_TOKENS.md
-- ✅ **Error Boundaries** - Graceful error handling
+- ✅ **Design System Documentation** - Organized in docs/reference/
+- ✅ **Documentation Structure** - Clean organization (reference/, archive/, specs/)
+- ✅ **Error Boundaries** - 4 layers (Global, Dashboard, Admin, Public) with contextual recovery
 - ✅ **Code Quality** - Prettier + Husky automation
 - ✅ **Security Headers** - Grade A-, comprehensive protection
 - ✅ **React Query** - Intelligent caching, auto-refresh, optimistic UI
@@ -110,6 +111,79 @@
 ---
 
 ## Session History
+
+### Session 32 (2026-01-28) - Error Boundaries & Documentation Cleanup ✅
+
+**Duration:** ~1 hour | **Agents:** @fullstack-developer + @documentation-expert
+
+**Accomplished:**
+
+- ✅ **Error Boundaries Implementation:**
+  - Verified reservar/page.tsx already refactored (212 lines, not 959)
+  - Created Admin error boundary: `src/app/(admin)/error.tsx` (4.7KB)
+  - Created Public error boundary: `src/app/(public)/error.tsx` (3.8KB)
+  - Dashboard error boundary already existed ✅
+  - Global error boundary already existed ✅
+
+- ✅ **Error Boundary Architecture:**
+  - 4-layer strategy: Global → Route Group → Page
+  - Contextual messages per section (Admin, Dashboard, Public)
+  - Recovery actions specific to each context
+  - iOS-style design consistent with app
+  - Dev mode: Full stack traces and error IDs
+  - Prod mode: User-friendly messages only
+
+- ✅ **Documentation Reorganization:**
+  - Removed 7 duplicate files (" 2.md" versions kept as newer)
+  - Created docs/ structure: reference/, archive/, specs/
+  - Moved 6 technical docs to docs/reference/
+  - Archived 6 completed implementation docs
+  - Created docs/README.md with structure guide
+  - Root now only contains governance docs (CLAUDE.md, GUARDRAILS.md, etc.)
+
+**Files Created:**
+
+- `src/app/(admin)/error.tsx` - Admin panel error boundary
+- `src/app/(public)/error.tsx` - Public pages error boundary
+- `docs/README.md` - Documentation structure guide
+
+**Files Reorganized:**
+
+Reference docs (6):
+
+- `docs/reference/DESIGN_TOKENS.md`
+- `docs/reference/ACCESSIBILITY.md`
+- `docs/reference/ACCESSIBILITY_AUDIT.md`
+- `docs/reference/TESTING.md`
+- `docs/reference/SECURITY_HEADERS.md`
+- `docs/reference/PERFORMANCE_BASELINE.md`
+
+Archived docs (6):
+
+- `docs/archive/PHASE1_IMPLEMENTATION.md`
+- `docs/archive/REFACTORING_COMPLETE.md`
+- `docs/archive/DROPDOWN_REFACTOR_ANALYSIS.md`
+- `docs/archive/REFACTOR_CANDIDATES.md`
+- `docs/archive/COMPONENTS_MIGRATION_GUIDE.md`
+- `docs/archive/UI_PREMIUM_IMPROVEMENTS.md`
+
+**Impact:**
+
+- 🛡️ **Error Isolation:** Errors won't crash entire app, only affected section
+- 🎯 **Contextual UX:** Admin/Dashboard/Public get appropriate error messages
+- 📚 **Clean Docs:** Well-organized, easy to find information
+- 🗂️ **Archive:** Historical docs preserved but separated from active work
+- 🔍 **Discoverability:** docs/README.md guides developers to right place
+
+**Production Readiness:** 9.85/10 (+0.05 improvement)
+
+**Next Steps:**
+
+1. Phase 5: CI/CD pipeline setup
+2. Final performance audit
+3. Visual testing across viewports
+
+---
 
 ### Session 31 (2026-01-28) - Subscription Page Refactoring ✅
 

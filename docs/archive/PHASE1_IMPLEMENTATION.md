@@ -9,6 +9,7 @@ Todas las tareas de Phase 1 han sido implementadas. Sigue estos pasos para despl
 ## 📋 Resumen de Cambios
 
 ### 1.1 ✅ Email Notifications + Preferencias
+
 - **Migración:** `009_notification_preferences.sql`
 - **Features:**
   - Sistema dual de notificaciones (email + in-app)
@@ -17,6 +18,7 @@ Todas las tareas de Phase 1 han sido implementadas. Sigue estos pasos para despl
   - Integración con Resend (3,000 emails/mes gratis)
 
 ### 1.2 ✅ Storage Retention Strategy
+
 - **Migración:** `010_storage_retention.sql`
 - **Features:**
   - Auto-delete de comprobantes aprobados después de 30 días
@@ -25,6 +27,7 @@ Todas las tareas de Phase 1 han sido implementadas. Sigue estos pasos para despl
   - Mantiene storage bajo 1GB → $0/año
 
 ### 1.3 ✅ Analytics Dashboard
+
 - **Migración:** Ninguna (usa tablas existentes)
 - **Features:**
   - Dashboard completo con KPIs
@@ -34,6 +37,7 @@ Todas las tareas de Phase 1 han sido implementadas. Sigue estos pasos para despl
   - Top servicios por ingresos
 
 ### 1.4 ✅ Performance Optimizations
+
 - **Migración:** `011_performance_indexes.sql`
 - **Features:**
   - 15+ indexes para queries críticos
@@ -98,6 +102,7 @@ NEXT_PUBLIC_APP_URL=https://app.barbershoppro.com
 ```
 
 **Generar secrets:**
+
 ```bash
 # En terminal:
 openssl rand -base64 32
@@ -133,6 +138,7 @@ openssl rand -base64 32
 ### Paso 4: Deploy a Vercel
 
 1. **Commit cambios:**
+
    ```bash
    git add .
    git commit -m "feat: Phase 1 - Email notifications, storage retention, analytics dashboard, performance optimizations
@@ -149,6 +155,7 @@ openssl rand -base64 32
    ```
 
 2. **Push a GitHub:**
+
    ```bash
    git push origin feature/phase1-foundation
    ```
@@ -172,12 +179,14 @@ openssl rand -base64 32
 ### Paso 5: Verificación Post-Deploy
 
 #### ✅ Email Notifications
+
 1. Ve a `/configuracion` en tu app
 2. Deberías ver nueva sección "Notificaciones"
 3. Prueba cambiar canal (Email / App / Ambos)
 4. Verifica que se guarde correctamente
 
 #### ✅ Analytics Dashboard
+
 1. Ve a `/analiticas` (nuevo ítem en sidebar)
 2. Deberías ver:
    - KPI cards (Ingresos, Citas, Promedio, Tasa)
@@ -187,6 +196,7 @@ openssl rand -base64 32
 3. Prueba cambiar período (Semana/Mes/Año)
 
 #### ✅ Storage Retention
+
 1. El cron job se ejecuta diariamente a las 3:00 AM UTC
 2. Para probar manualmente:
    ```bash
@@ -196,6 +206,7 @@ openssl rand -base64 32
 3. Debería retornar: `{ "success": true, "deleted": X }`
 
 #### ✅ Performance
+
 1. Verifica queries más rápidos en dashboard
 2. Para analizar bundle:
    ```bash
@@ -208,21 +219,25 @@ openssl rand -base64 32
 ## 📊 Resultados Esperados
 
 ### Email Notifications
+
 - ✅ 0% emails perdidos (configuración por usuario)
 - ✅ Templates branded con logo de negocio
 - ✅ $0/mes en costos (free tier 3,000 emails)
 
 ### Storage Retention
+
 - ✅ Storage se mantiene bajo 1GB (free tier)
 - ✅ $0/año en costos de storage
 - ✅ Cleanup automático sin intervención manual
 
 ### Analytics Dashboard
+
 - ✅ Visualización clara de métricas
 - ✅ Insights de servicios y barberos
 - ✅ Datos históricos por período
 
 ### Performance
+
 - ✅ Queries 50-70% más rápidos (indexes)
 - ✅ Imágenes optimizadas (AVIF/WebP)
 - ✅ Bundle size visible y analizable
@@ -232,21 +247,25 @@ openssl rand -base64 32
 ## 🐛 Troubleshooting
 
 ### Emails no se envían
+
 - **Verificar:** `RESEND_API_KEY` está configurada correctamente
 - **Verificar:** `EMAIL_FROM` tiene formato válido
 - **Logs:** Vercel → Functions → Ver logs de `/api/notifications/send`
 
 ### Cron job no ejecuta
+
 - **Verificar:** `CRON_SECRET` coincide en Vercel
 - **Verificar:** `vercel.json` existe en root
 - **Dashboard:** Vercel → Cron Jobs → Ver ejecuciones
 
 ### Analytics vacío
+
 - **Verificar:** Hay citas completadas en el negocio
 - **Verificar:** Migración 011 se ejecutó correctamente
 - **Logs:** Browser console → Ver errores de API
 
 ### Performance no mejora
+
 - **Verificar:** Migración 011 (indexes) se ejecutó
 - **Verificar:** `next.config.ts` tiene configuración de images
 - **Análisis:** Ejecutar `ANALYZE=true npm run build`
@@ -257,18 +276,19 @@ openssl rand -base64 32
 
 Después de 1 semana de uso:
 
-| Métrica | Objetivo | Verificación |
-|---------|----------|--------------|
-| Email deliverability | >95% | Resend Dashboard → Deliverability |
-| Storage usage | <1GB | Supabase Dashboard → Storage |
-| Dashboard load time | <2s | Chrome DevTools → Network |
-| Analytics usage | >50% usuarios | Verificar visitas a `/analiticas` |
+| Métrica              | Objetivo      | Verificación                      |
+| -------------------- | ------------- | --------------------------------- |
+| Email deliverability | >95%          | Resend Dashboard → Deliverability |
+| Storage usage        | <1GB          | Supabase Dashboard → Storage      |
+| Dashboard load time  | <2s           | Chrome DevTools → Network         |
+| Analytics usage      | >50% usuarios | Verificar visitas a `/analiticas` |
 
 ---
 
 ## 📚 Archivos Creados/Modificados
 
 ### Nuevos Archivos
+
 ```
 supabase/migrations/
   ├── 009_notification_preferences.sql
@@ -310,6 +330,7 @@ vercel.json
 ```
 
 ### Archivos Modificados
+
 ```
 src/types/database.ts (agregado NotificationPreferences)
 src/components/dashboard/sidebar.tsx (agregado Analíticas)
@@ -331,6 +352,7 @@ Todos los features de Foundation & Quick Wins están implementados y listos para
 ## 📞 Support
 
 Si tienes problemas con la implementación:
+
 1. Revisa los logs en Vercel Dashboard
 2. Verifica que todas las migraciones se ejecutaron
 3. Confirma que todas las variables de entorno están configuradas
