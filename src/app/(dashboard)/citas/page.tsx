@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmptyState } from '@/components/ui/empty-state'
 import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 
 // Appointment components
 import { AppointmentCard } from '@/components/appointments/appointment-card'
@@ -82,6 +83,15 @@ export default function CitasPage() {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all')
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Fetch data
   const fetchAppointments = useCallback(async () => {
@@ -544,23 +554,51 @@ export default function CitasPage() {
               <>
                 {/* List View */}
                 {viewMode === 'list' && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {filteredAppointments
-                      .sort(
-                        (a, b) =>
-                          new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
-                      )
-                      .map((appointment) => (
-                        <AppointmentCard
-                          key={appointment.id}
-                          appointment={appointment}
-                          onStatusChange={handleStatusChange}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                          onWhatsApp={handleWhatsApp}
-                        />
-                      ))}
-                  </div>
+                  <>
+                    {isMobile ? (
+                      <PullToRefresh onRefresh={fetchAppointments}>
+                        <div className="space-y-2">
+                          {filteredAppointments
+                            .sort(
+                              (a, b) =>
+                                new Date(a.scheduled_at).getTime() -
+                                new Date(b.scheduled_at).getTime()
+                            )
+                            .map((appointment) => (
+                              <AppointmentCard
+                                key={appointment.id}
+                                appointment={appointment}
+                                variant="compact"
+                                onStatusChange={handleStatusChange}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                onWhatsApp={handleWhatsApp}
+                              />
+                            ))}
+                        </div>
+                      </PullToRefresh>
+                    ) : (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {filteredAppointments
+                          .sort(
+                            (a, b) =>
+                              new Date(a.scheduled_at).getTime() -
+                              new Date(b.scheduled_at).getTime()
+                          )
+                          .map((appointment) => (
+                            <AppointmentCard
+                              key={appointment.id}
+                              appointment={appointment}
+                              variant="default"
+                              onStatusChange={handleStatusChange}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                              onWhatsApp={handleWhatsApp}
+                            />
+                          ))}
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Calendar/Schedule View */}

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import {
   Plus,
   Search,
@@ -22,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { format, startOfMonth, isAfter, subDays } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -83,6 +85,7 @@ export default function ClientesPage() {
   const [search, setSearch] = useState('')
   const [selectedSegment, setSelectedSegment] = useState<ClientSegment>('all')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -91,6 +94,14 @@ export default function ClientesPage() {
     notes: '',
   })
 
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   // React Query hooks
   const {
     data: clientsData,
@@ -98,8 +109,14 @@ export default function ClientesPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useClients()
   const createClient = useCreateClient()
+
+  // Pull to refresh handler
+  const handleRefresh = async () => {
+    await refetch()
+  }
 
   // Flatten all pages into single array
   const clients = clientsData?.pages.flatMap((page) => page.data) || []
@@ -343,18 +360,18 @@ export default function ClientesPage() {
         </div>
 
         {/* Client List */}
-        <Card data-tour="clients-list">
-          <CardHeader className="flex flex-row items-center justify-between p-3 sm:p-6">
-            <CardTitle className="text-base sm:text-lg">
+        <div data-tour="clients-list" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white">
               {selectedSegment === 'all'
                 ? 'Todos los Clientes'
                 : `${segmentConfig[selectedSegment as keyof typeof segmentConfig]?.label || ''}`}
-            </CardTitle>
+            </h3>
             <span className="text-xs sm:text-sm text-zinc-500">
               {filteredClients.length} clientes
             </span>
-          </CardHeader>
-          <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+          </div>
+          <div>
             {loading ? (
               <div className="flex justify-center py-8 sm:py-12">
                 <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-zinc-900 dark:border-white" />
@@ -374,86 +391,192 @@ export default function ClientesPage() {
                 )}
               </div>
             ) : (
-              <div className="space-y-1.5 sm:space-y-2">
-                {filteredClients.map((client) => {
-                  const segment = getClientSegment(client)
-                  const segmentInfo = segmentConfig[segment]
-                  const SegmentIcon = segmentInfo.icon
+              <PullToRefresh onRefresh={handleRefresh}>
+                <div className="space-y-1.5 sm:space-y-2">
+                  {filteredClients.map((client) => {
+                    const segment = getClientSegment(client)
+                    const segmentInfo = segmentConfig[segment]
+                    const SegmentIcon = segmentInfo.icon
 
-                  return (
-                    <div
-                      key={client.id}
-                      onClick={() => setSelectedClient(client)}
-                      className="group flex items-center gap-3 rounded-xl border border-zinc-200 p-3 sm:p-4 transition-all hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50 cursor-pointer active:scale-[0.98]"
-                    >
-                      {/* Avatar */}
-                      <div className="relative shrink-0">
-                        <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 text-base sm:text-lg font-semibold text-zinc-600 dark:from-zinc-700 dark:to-zinc-800 dark:text-zinc-300">
-                          {client.name.charAt(0).toUpperCase()}
-                        </div>
-                        {segment === 'vip' && (
-                          <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 rounded-full bg-amber-500 p-0.5">
-                            <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+                    return isMobile ? (
+                      // Mobile: Swipeable card
+                      <div
+                        key={client.id}
+                        className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+                      >
+                        <motion.div
+                          drag="x"
+                          dragConstraints={{ left: -160, right: 0 }}
+                          dragElastic={0.1}
+                          dragMomentum={false}
+                          onClick={() => setSelectedClient(client)}
+                          className="group relative z-10 flex items-center gap-3 p-3 transition-all cursor-pointer touch-pan-y"
+                        >
+                          {/* Action buttons - positioned absolutely on the right edge */}
+                          <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+                            {/* WhatsApp button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleWhatsApp(client.phone)
+                              }}
+                              className="flex h-full w-20 items-center justify-center bg-green-500 text-white"
+                            >
+                              <MessageCircle className="h-5 w-5" />
+                            </button>
+                            {/* Edit/View button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedClient(client)
+                              }}
+                              className="flex h-full w-20 items-center justify-center bg-blue-500 text-white"
+                            >
+                              <User className="h-5 w-5" />
+                            </button>
                           </div>
-                        )}
-                      </div>
+                          {/* Avatar */}
+                          <div className="relative shrink-0">
+                            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 text-base sm:text-lg font-semibold text-zinc-600 dark:from-zinc-700 dark:to-zinc-800 dark:text-zinc-300">
+                              {client.name.charAt(0).toUpperCase()}
+                            </div>
+                            {segment === 'vip' && (
+                              <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 rounded-full bg-amber-500 p-0.5">
+                                <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+                              </div>
+                            )}
+                          </div>
 
-                      {/* Info */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <p className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-white truncate">
-                            {client.name}
-                          </p>
-                          <span
-                            className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${segmentInfo.color}`}
-                          >
-                            <SegmentIcon className="h-3 w-3" />
-                            {segmentInfo.label}
-                          </span>
-                        </div>
-                        <div className="mt-0.5 flex items-center gap-2 text-xs sm:text-sm text-zinc-500">
-                          <span className="flex items-center gap-1">
-                            <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                            {client.phone}
-                          </span>
-                          <span className="sm:hidden text-zinc-300 dark:text-zinc-600">•</span>
-                          <span className="sm:hidden text-xs">
-                            {client.total_visits || 0} visitas
-                          </span>
-                        </div>
-                      </div>
+                          {/* Info */}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                              <p className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-white truncate">
+                                {client.name}
+                              </p>
+                              <span
+                                className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${segmentInfo.color}`}
+                              >
+                                <SegmentIcon className="h-3 w-3" />
+                                {segmentInfo.label}
+                              </span>
+                            </div>
+                            <div className="mt-0.5 flex items-center gap-2 text-xs sm:text-sm text-zinc-500">
+                              <span className="flex items-center gap-1">
+                                <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                {client.phone}
+                              </span>
+                              <span className="sm:hidden text-zinc-300 dark:text-zinc-600">•</span>
+                              <span className="sm:hidden text-xs">
+                                {client.total_visits || 0} visitas
+                              </span>
+                            </div>
+                          </div>
 
-                      {/* Desktop: Stats + Actions */}
-                      <div className="hidden sm:flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                            {formatCurrency(Number(client.total_spent || 0))}
-                          </p>
-                          <p className="text-xs text-zinc-500">
-                            {client.total_visits || 0} visitas
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleWhatsApp(client.phone)
-                            }}
-                            className="p-2 rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
-                            title="WhatsApp"
-                          >
-                            <MessageCircle className="h-4 w-4" />
-                          </button>
-                          <ChevronRight className="h-4 w-4 text-zinc-400" />
-                        </div>
-                      </div>
+                          {/* Desktop: Stats + Actions */}
+                          <div className="hidden sm:flex items-center gap-3 shrink-0">
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                                {formatCurrency(Number(client.total_spent || 0))}
+                              </p>
+                              <p className="text-xs text-zinc-500">
+                                {client.total_visits || 0} visitas
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleWhatsApp(client.phone)
+                                }}
+                                className="p-2 rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                                title="WhatsApp"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                              </button>
+                              <ChevronRight className="h-4 w-4 text-zinc-400" />
+                            </div>
+                          </div>
 
-                      {/* Mobile: Chevron */}
-                      <ChevronRight className="h-4 w-4 text-zinc-400 sm:hidden shrink-0" />
-                    </div>
-                  )
-                })}
-              </div>
+                          {/* Mobile: Chevron */}
+                          <ChevronRight className="h-4 w-4 text-zinc-400 shrink-0" />
+                        </motion.div>
+                      </div>
+                    ) : (
+                      // Desktop: Standard card
+                      <div
+                        key={client.id}
+                        onClick={() => setSelectedClient(client)}
+                        className="group flex items-center gap-3 rounded-xl border border-zinc-200 p-3 sm:p-4 transition-all hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50 cursor-pointer active:scale-[0.98]"
+                      >
+                        {/* Avatar */}
+                        <div className="relative shrink-0">
+                          <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 text-base sm:text-lg font-semibold text-zinc-600 dark:from-zinc-700 dark:to-zinc-800 dark:text-zinc-300">
+                            {client.name.charAt(0).toUpperCase()}
+                          </div>
+                          {segment === 'vip' && (
+                            <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 rounded-full bg-amber-500 p-0.5">
+                              <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <p className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-white truncate">
+                              {client.name}
+                            </p>
+                            <span
+                              className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${segmentInfo.color}`}
+                            >
+                              <SegmentIcon className="h-3 w-3" />
+                              {segmentInfo.label}
+                            </span>
+                          </div>
+                          <div className="mt-0.5 flex items-center gap-2 text-xs sm:text-sm text-zinc-500">
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                              {client.phone}
+                            </span>
+                            <span className="sm:hidden text-zinc-300 dark:text-zinc-600">•</span>
+                            <span className="sm:hidden text-xs">
+                              {client.total_visits || 0} visitas
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Desktop: Stats + Actions */}
+                        <div className="hidden sm:flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                              {formatCurrency(Number(client.total_spent || 0))}
+                            </p>
+                            <p className="text-xs text-zinc-500">
+                              {client.total_visits || 0} visitas
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleWhatsApp(client.phone)
+                              }}
+                              className="p-2 rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                              title="WhatsApp"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </button>
+                            <ChevronRight className="h-4 w-4 text-zinc-400" />
+                          </div>
+                        </div>
+
+                        {/* Mobile: Chevron */}
+                        <ChevronRight className="h-4 w-4 text-zinc-400 sm:hidden shrink-0" />
+                      </div>
+                    )
+                  })}
+                </div>
+              </PullToRefresh>
             )}
 
             {/* Load More Button */}
@@ -469,8 +592,8 @@ export default function ClientesPage() {
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Modal Nuevo Cliente */}
         {showModal && (

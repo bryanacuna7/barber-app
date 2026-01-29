@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, Clock, Scissors, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Modal } from '@/components/ui/modal'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { formatCurrency } from '@/lib/utils'
 import { FadeInUp, StaggeredList, StaggeredItem, ScaleOnHover } from '@/components/ui/motion'
 import type { Service } from '@/types'
@@ -56,6 +57,7 @@ export default function ServiciosPage() {
   const [error, setError] = useState('')
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [deleteService, setDeleteService] = useState<Service | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -64,11 +66,24 @@ export default function ServiciosPage() {
     price: 0,
   })
 
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   // React Query hooks
-  const { data: services = [], isLoading: loading } = useServices()
+  const { data: services = [], isLoading: loading, refetch } = useServices()
   const createService = useCreateService()
   const updateService = useUpdateService()
   const deleteServiceMutation = useDeleteService()
+
+  // Pull to refresh handler
+  const handleRefresh = async () => {
+    await refetch()
+  }
 
   function resetForm() {
     setFormData({ name: '', description: '', duration_minutes: 30, price: 0 })
@@ -272,11 +287,12 @@ export default function ServiciosPage() {
 
       {/* Service List */}
       <FadeInUp delay={0.1}>
-        <Card className="overflow-hidden">
-          <CardHeader className="border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-[17px] font-semibold">Catálogo de Servicios</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
+        <div className="space-y-4">
+          <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+            Catálogo de Servicios
+          </h3>
+
+          <div>
             {loading ? (
               <div className="flex justify-center py-12">
                 <motion.div
@@ -311,10 +327,72 @@ export default function ServiciosPage() {
                   </Button>
                 </motion.div>
               </motion.div>
+            ) : isMobile ? (
+              <PullToRefresh onRefresh={handleRefresh}>
+                <StaggeredList className="space-y-2">
+                  <AnimatePresence mode="popLayout">
+                    {services.map((service) => {
+                      return (
+                        <StaggeredItem key={service.id}>
+                          {/* Compact mobile view - with swipe gestures */}
+                          <div className="relative rounded-xl overflow-hidden">
+                            {/* Swipeable content */}
+                            <motion.div
+                              drag="x"
+                              dragConstraints={{ left: -160, right: 0 }}
+                              dragElastic={0.1}
+                              dragMomentum={false}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="group relative z-10 w-full flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 touch-pan-y border-l-4 border-l-blue-500"
+                            >
+                              {/* Action buttons - positioned absolutely on the right edge of motion.div */}
+                              <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+                                {/* Edit button */}
+                                <button
+                                  onClick={() => handleEdit(service)}
+                                  className="flex h-full w-20 items-center justify-center bg-blue-500 text-white"
+                                >
+                                  <Pencil className="h-5 w-5" />
+                                </button>
+                                {/* Delete button */}
+                                <button
+                                  onClick={() => setDeleteService(service)}
+                                  className="flex h-full w-20 items-center justify-center bg-red-500 text-white"
+                                >
+                                  <Trash2 className="h-5 w-5" />
+                                </button>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-zinc-900 dark:text-white truncate">
+                                    {service.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {service.duration_minutes} min
+                                  </span>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-zinc-900 dark:text-white">
+                                {formatCurrency(Number(service.price))}
+                              </span>
+                            </motion.div>
+                          </div>
+                        </StaggeredItem>
+                      )
+                    })}
+                  </AnimatePresence>
+                </StaggeredList>
+              </PullToRefresh>
             ) : (
               <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
-                  {services.map((service, index) => {
+                  {services.map((service) => {
                     return (
                       <StaggeredItem key={service.id}>
                         <ScaleOnHover>
@@ -394,8 +472,8 @@ export default function ServiciosPage() {
                 </AnimatePresence>
               </StaggeredList>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </FadeInUp>
     </div>
   )

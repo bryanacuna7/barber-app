@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, type ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -28,6 +28,9 @@ export function Drawer({
 }: DrawerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const y = useMotionValue(0)
+  const opacity = useTransform(y, [0, 200], [1, 0.5])
 
   // Handle escape key
   useEffect(() => {
@@ -65,6 +68,32 @@ export function Drawer({
     }
   }
 
+  const handleDragStart = () => {
+    setIsDragging(true)
+  }
+
+  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Only allow dragging down
+    if (info.offset.y > 0) {
+      y.set(info.offset.y)
+    } else {
+      y.set(0)
+    }
+  }
+
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false)
+    const threshold = 150
+
+    // Close if dragged down beyond threshold or velocity is high
+    if (info.offset.y > threshold || info.velocity.y > 500) {
+      onClose()
+    } else {
+      // Snap back
+      y.set(0)
+    }
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -90,10 +119,21 @@ export function Drawer({
           <motion.div
             ref={drawerRef}
             tabIndex={-1}
+            drag="y"
+            dragDirectionLock
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.5 }}
+            onDragStart={handleDragStart}
+            onDrag={handleDrag}
+            onDragEnd={handleDragEnd}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            style={{
+              y: isDragging ? y : 0,
+              opacity,
+            }}
             className={cn(
               'relative w-full bg-white dark:bg-zinc-900 rounded-t-[28px] shadow-2xl',
               'border border-zinc-200 dark:border-zinc-800 border-b-0',
