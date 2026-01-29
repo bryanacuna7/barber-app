@@ -7,10 +7,10 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend, React Query
-- **Last Updated:** 2026-01-28 (Session 30)
+- **Last Updated:** 2026-01-28 (Session 31)
 - **Last Commit:** 514cd2a - Code cleanup and refactoring ✅
 - **Current Branch:** `main`
-- **Next Session:** Continue comprehensive refactoring (large components), add error boundaries, or Phase 5 (CI/CD)
+- **Next Session:** Refactor reservar/page.tsx (959 lines), add error boundaries, or Phase 5 (CI/CD)
 
 ---
 
@@ -110,6 +110,75 @@
 ---
 
 ## Session History
+
+### Session 31 (2026-01-28) - Subscription Page Refactoring ✅
+
+**Duration:** ~1 hour | **Agent:** @architecture-modernizer
+
+**Accomplished:**
+
+- ✅ **Modular Component Architecture:**
+  - Created `/src/components/subscription/` directory for domain-specific components
+  - Extracted 6 reusable components from 1,130-line monolith
+  - Reduced main page from 1,130 → 363 lines (68% reduction)
+
+- ✅ **Components Created:**
+  - `StatusBadge.tsx` (25 lines) - Subscription status indicator
+  - `UsageCard.tsx` (65 lines) - Resource usage display
+  - `PlanCard.tsx` (134 lines) - Subscription plan cards
+  - `PaymentFormModal.tsx` (316 lines) - Payment reporting modal
+  - `PaymentHistoryItem.tsx` (58 lines) - Payment history entries
+  - `ChangePlanModal.tsx` (134 lines) - Plan change confirmation
+
+- ✅ **Custom Hook:**
+  - Created `useSubscriptionData.ts` (86 lines)
+  - Extracted all data fetching logic from page component
+  - Clean separation of concerns: UI vs data management
+
+- ✅ **Quality Assurance:**
+  - Verified no TypeScript errors in refactored code
+  - Tested page functionality with Playwright
+  - Confirmed UI renders correctly with all features intact
+  - Maintained exact same functionality and user experience
+
+**Files Created:**
+
+- `src/components/subscription/StatusBadge.tsx`
+- `src/components/subscription/UsageCard.tsx`
+- `src/components/subscription/PlanCard.tsx`
+- `src/components/subscription/PaymentFormModal.tsx`
+- `src/components/subscription/PaymentHistoryItem.tsx`
+- `src/components/subscription/ChangePlanModal.tsx`
+- `src/hooks/useSubscriptionData.ts`
+
+**Files Modified:**
+
+- `src/app/(dashboard)/suscripcion/page.tsx` (1,130 → 363 lines)
+
+**Impact:**
+
+- 🎯 **Maintainability:** Much easier to modify individual components
+- 📦 **Reusability:** Components can be used in other pages
+- 🧪 **Testability:** Smaller components are easier to test
+- 📖 **Readability:** Clear separation between UI and business logic
+- ⚡ **Developer Experience:** Faster to understand and modify code
+
+**Architecture Pattern:**
+
+Following Domain-Driven Design principles:
+
+- Components organized by domain (subscription)
+- Clear boundaries between UI and data layer
+- Single Responsibility Principle applied to each component
+- Composable architecture for future scalability
+
+**Next Steps:**
+
+1. Refactor `reservar/page.tsx` (959 lines) using same pattern
+2. Add error boundaries to critical pages
+3. Continue with remaining P1 issues from audit
+
+---
 
 ### Session 30 (2026-01-28) - Code Cleanup & Refactoring Foundation ✅
 
