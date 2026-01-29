@@ -26,7 +26,6 @@ const floatingAnimation = {
     duration: 3,
     repeat: Infinity,
     repeatType: 'reverse' as const,
-    ease: 'easeInOut',
   },
 }
 
@@ -124,14 +123,8 @@ export function HeroSection() {
           </div>
 
           {/* Right Content - Animated Dashboard Preview */}
-          <motion.div
-            variants={item}
-            className="relative"
-          >
-            <motion.div
-              animate={floatingAnimation}
-              className="relative"
-            >
+          <motion.div variants={item} className="relative">
+            <motion.div animate={floatingAnimation} className="relative">
               {/* Glow Effect */}
               <div className="absolute -inset-6 rounded-[32px] bg-gradient-to-br from-blue-200/70 via-purple-200/50 to-pink-200/70 blur-3xl dark:from-blue-800/40 dark:via-purple-800/30 dark:to-pink-800/40" />
 
@@ -191,9 +184,7 @@ export function HeroSection() {
                         <p className="font-semibold text-zinc-900 dark:text-white">
                           {apt.time} · {apt.name}
                         </p>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                          {apt.service}
-                        </p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">{apt.service}</p>
                       </div>
                       <div className="h-2 w-2 rounded-full bg-emerald-500" />
                     </motion.div>

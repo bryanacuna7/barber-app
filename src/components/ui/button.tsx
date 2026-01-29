@@ -80,6 +80,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     return (
+      // @ts-ignore - framer-motion type compatibility issue
       <motion.button
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}

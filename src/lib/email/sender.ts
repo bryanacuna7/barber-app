@@ -136,7 +136,6 @@ export async function sendNotificationEmail({
   const shouldSend = await shouldSendEmailType(businessId, notificationType)
 
   if (!shouldSend) {
-    console.log(`Email notification ${notificationType} skipped for business ${businessId} (preferences)`)
     return { success: false, error: 'Email disabled by preferences' }
   }
 

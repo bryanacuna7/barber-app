@@ -61,7 +61,6 @@ export async function GET(request: Request) {
     const allPaymentsToClean = [...(expiredPayments || []), ...(stalePayments || [])]
 
     if (allPaymentsToClean.length === 0) {
-      console.log('No payment proofs to clean up')
       return NextResponse.json({
         success: true,
         message: 'No files to delete',
@@ -109,7 +108,6 @@ export async function GET(request: Request) {
         }
 
         deletedCount++
-        console.log(`Deleted proof for payment ${paymentData.id} (status: ${paymentData.status})`)
       } catch (error) {
         console.error(`Error processing payment ${paymentData.id}:`, error)
         errors.push({ id: paymentData.id, error: String(error) })
@@ -124,8 +122,6 @@ export async function GET(request: Request) {
         .update({ delete_after: new Date().toISOString() })
         .in('id', staleIds)
         .is('delete_after', null) // Only if not already marked
-
-      console.log(`Marked ${stalePayments.length} stale payments for deletion`)
     }
 
     return NextResponse.json({

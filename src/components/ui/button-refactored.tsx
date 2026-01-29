@@ -19,10 +19,16 @@ import { Loader2 } from 'lucide-react'
 // 3. Disabled state during loading
 // ============================================================================
 
-export interface BaseButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof HTMLMotionProps<'button'>> {
+export interface BaseButtonProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  keyof HTMLMotionProps<'button'>
+> {
   size?: 'sm' | 'md' | 'lg'
   children?: ReactNode
   ref?: React.Ref<HTMLButtonElement>
+  className?: string
+  disabled?: boolean
+  onClick?: (e: MouseEvent<HTMLButtonElement>) => void
 }
 
 interface RippleType {
@@ -31,7 +37,14 @@ interface RippleType {
   id: number
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient' | 'success'
+type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'gradient'
+  | 'success'
 
 interface InternalButtonProps extends BaseButtonProps {
   variant: ButtonVariant
@@ -58,25 +71,33 @@ function BaseButton({
       const y = e.clientY - rect.top
       const id = Date.now()
 
-      setRipples(prev => [...prev, { x, y, id }])
+      setRipples((prev) => [...prev, { x, y, id }])
       setTimeout(() => {
-        setRipples(prev => prev.filter(ripple => ripple.id !== id))
+        setRipples((prev) => prev.filter((ripple) => ripple.id !== id))
       }, 600)
     }
 
     onClick?.(e)
   }
 
-  const baseStyles = 'relative overflow-hidden inline-flex items-center justify-center font-semibold rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed -webkit-tap-highlight-color-transparent transition-colors duration-200'
+  const baseStyles =
+    'relative overflow-hidden inline-flex items-center justify-center font-semibold rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed -webkit-tap-highlight-color-transparent transition-colors duration-200'
 
   const variants = {
-    primary: 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20 hover:bg-zinc-800 focus-visible:ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:shadow-white/10 dark:hover:bg-zinc-100 dark:focus-visible:ring-white',
-    secondary: 'bg-zinc-200/80 text-zinc-900 hover:bg-zinc-300/80 focus-visible:ring-zinc-500 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700',
-    outline: 'border-2 border-zinc-200 bg-white/80 hover:bg-zinc-50 hover:border-zinc-300 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 dark:hover:border-zinc-600',
-    ghost: 'bg-transparent hover:bg-zinc-100/80 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800/80',
-    danger: 'bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600 focus-visible:ring-red-500',
-    gradient: 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:from-blue-700 hover:to-purple-700 focus-visible:ring-blue-500',
-    success: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 focus-visible:ring-emerald-500',
+    primary:
+      'bg-zinc-900 text-white shadow-lg shadow-zinc-900/20 hover:bg-zinc-800 focus-visible:ring-zinc-900 dark:bg-white dark:text-zinc-900 dark:shadow-white/10 dark:hover:bg-zinc-100 dark:focus-visible:ring-white',
+    secondary:
+      'bg-zinc-200/80 text-zinc-900 hover:bg-zinc-300/80 focus-visible:ring-zinc-500 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700',
+    outline:
+      'border-2 border-zinc-200 bg-white/80 hover:bg-zinc-50 hover:border-zinc-300 focus-visible:ring-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 dark:hover:border-zinc-600',
+    ghost:
+      'bg-transparent hover:bg-zinc-100/80 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800/80',
+    danger:
+      'bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600 focus-visible:ring-red-500',
+    gradient:
+      'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:from-blue-700 hover:to-purple-700 focus-visible:ring-blue-500',
+    success:
+      'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 focus-visible:ring-emerald-500',
   }
 
   const sizes = {
@@ -97,7 +118,7 @@ function BaseButton({
       {...props}
     >
       {/* Ripple effect */}
-      {ripples.map(ripple => (
+      {ripples.map((ripple) => (
         <span
           key={ripple.id}
           className="absolute rounded-full bg-white/30 animate-ripple pointer-events-none"
@@ -118,12 +139,7 @@ function BaseButton({
 
 // Loading Spinner Component
 function Spinner({ className }: { className?: string }) {
-  return (
-    <Loader2
-      className={cn('h-5 w-5 animate-spin', className)}
-      aria-hidden="true"
-    />
-  )
+  return <Loader2 className={cn('h-5 w-5 animate-spin', className)} aria-hidden="true" />
 }
 
 // Explicit Variant Components
@@ -163,18 +179,9 @@ const Button = Object.assign(
     },
 
     // Helper: Loading state composition
-    Loading: function ButtonLoading({
-      children,
-      ...props
-    }: BaseButtonProps) {
+    Loading: function ButtonLoading({ children, ...props }: BaseButtonProps) {
       return (
-        <BaseButton
-          variant="primary"
-          disabled
-          aria-busy="true"
-          aria-label="Loading"
-          {...props}
-        >
+        <BaseButton variant="primary" disabled aria-busy="true" aria-label="Loading" {...props}>
           <Spinner />
           <span>{children || 'Loading…'}</span>
         </BaseButton>
@@ -186,6 +193,7 @@ const Button = Object.assign(
   }
 )
 
+// @ts-ignore - displayName for dev tools
 Button.displayName = 'Button'
 
 export { Button }

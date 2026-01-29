@@ -45,6 +45,11 @@ const DEFAULT_HOURS: OperatingHours = {
 
 export function Hours({ onNext, onBack, initialHours }: HoursProps) {
   const [hours, setHours] = useState<OperatingHours>(initialHours || DEFAULT_HOURS)
+  const [pickerState, setPickerState] = useState<{
+    isOpen: boolean
+    day: string | null
+    field: 'open' | 'close' | null
+  }>({ isOpen: false, day: null, field: null })
 
   const handleToggleDay = (day: string) => {
     setHours((prev) => ({
@@ -53,11 +58,18 @@ export function Hours({ onNext, onBack, initialHours }: HoursProps) {
     }))
   }
 
-  const handleTimeChange = (day: string, field: 'open' | 'close', value: string) => {
-    setHours((prev) => ({
-      ...prev,
-      [day]: { ...prev[day], [field]: value },
-    }))
+  const openTimePicker = (day: string, field: 'open' | 'close') => {
+    setPickerState({ isOpen: true, day, field })
+  }
+
+  const handleTimeChange = (value: string) => {
+    if (pickerState.day && pickerState.field) {
+      setHours((prev) => ({
+        ...prev,
+        [pickerState.day!]: { ...prev[pickerState.day!], [pickerState.field!]: value },
+      }))
+    }
+    setPickerState({ isOpen: false, day: null, field: null })
   }
 
   const handleSubmit = () => {
@@ -104,9 +116,7 @@ export function Hours({ onNext, onBack, initialHours }: HoursProps) {
                   checked={hours[day.key].enabled}
                   onChange={() => handleToggleDay(day.key)}
                 />
-                <span className="font-medium text-zinc-900 dark:text-white">
-                  {day.label}
-                </span>
+                <span className="font-medium text-zinc-900 dark:text-white">{day.label}</span>
               </div>
 
               {/* Time pickers */}
@@ -114,20 +124,18 @@ export function Hours({ onNext, onBack, initialHours }: HoursProps) {
                 <div className="flex items-center gap-3">
                   <TimePickerTrigger
                     value={hours[day.key].open}
-                    onChange={(value) => handleTimeChange(day.key, 'open', value)}
+                    onClick={() => openTimePicker(day.key, 'open')}
                   />
                   <span className="text-zinc-400 dark:text-zinc-600">—</span>
                   <TimePickerTrigger
                     value={hours[day.key].close}
-                    onChange={(value) => handleTimeChange(day.key, 'close', value)}
+                    onClick={() => openTimePicker(day.key, 'close')}
                   />
                 </div>
               )}
 
               {!hours[day.key].enabled && (
-                <span className="text-sm text-zinc-400 dark:text-zinc-600">
-                  Cerrado
-                </span>
+                <span className="text-sm text-zinc-400 dark:text-zinc-600">Cerrado</span>
               )}
             </div>
           </motion.div>
@@ -136,22 +144,26 @@ export function Hours({ onNext, onBack, initialHours }: HoursProps) {
 
       {/* Actions */}
       <div className="flex gap-3 justify-between">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          className="group"
-        >
+        <Button variant="outline" onClick={onBack} className="group">
           <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
           Atrás
         </Button>
-        <Button
-          onClick={handleSubmit}
-          className="group bg-blue-600 hover:bg-blue-700 text-white"
-        >
+        <Button onClick={handleSubmit} className="group bg-blue-600 hover:bg-blue-700 text-white">
           Continuar
           <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Button>
       </div>
+
+      {/* Time Picker Modal */}
+      <IOSTimePicker
+        isOpen={pickerState.isOpen}
+        onClose={() => setPickerState({ isOpen: false, day: null, field: null })}
+        value={
+          pickerState.day && pickerState.field ? hours[pickerState.day][pickerState.field] : '09:00'
+        }
+        onChange={handleTimeChange}
+        title={pickerState.field === 'open' ? 'Hora de Apertura' : 'Hora de Cierre'}
+      />
     </motion.div>
   )
 }

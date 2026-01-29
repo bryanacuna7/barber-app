@@ -80,10 +80,10 @@ export function Service({ onNext, onBack, initialService }: ServiceProps) {
           </p>
           <div className="flex flex-wrap gap-2">
             {[
-              { name: 'Corte Regular', price: 5000, duration: 30 },
-              { name: 'Corte + Barba', price: 8000, duration: 45 },
-              { name: 'Afeitado Clásico', price: 6000, duration: 40 },
-              { name: 'Corte Niño', price: 4000, duration: 25 },
+              { name: 'Corte Regular', price: 5000, duration_minutes: 30 },
+              { name: 'Corte + Barba', price: 8000, duration_minutes: 45 },
+              { name: 'Afeitado Clásico', price: 6000, duration_minutes: 40 },
+              { name: 'Corte Niño', price: 4000, duration_minutes: 25 },
             ].map((suggestion) => (
               <button
                 key={suggestion.name}
@@ -112,9 +112,7 @@ export function Service({ onNext, onBack, initialService }: ServiceProps) {
             placeholder="Ej: Corte Regular"
             className={errors.name ? 'border-red-500' : ''}
           />
-          {errors.name && (
-            <p className="text-sm text-red-500">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
         </div>
 
         {/* Price and duration */}
@@ -125,9 +123,7 @@ export function Service({ onNext, onBack, initialService }: ServiceProps) {
               Precio (₡) *
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
-                ₡
-              </span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">₡</span>
               <Input
                 type="number"
                 value={service.price}
@@ -141,9 +137,7 @@ export function Service({ onNext, onBack, initialService }: ServiceProps) {
                 step="500"
               />
             </div>
-            {errors.price && (
-              <p className="text-sm text-red-500">{errors.price}</p>
-            )}
+            {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
           </div>
 
           {/* Duration */}
@@ -168,9 +162,7 @@ export function Service({ onNext, onBack, initialService }: ServiceProps) {
                 min
               </span>
             </div>
-            {errors.duration && (
-              <p className="text-sm text-red-500">{errors.duration}</p>
-            )}
+            {errors.duration && <p className="text-sm text-red-500">{errors.duration}</p>}
           </div>
         </div>
 
@@ -202,19 +194,11 @@ export function Service({ onNext, onBack, initialService }: ServiceProps) {
 
         {/* Actions */}
         <div className="flex gap-3 justify-between pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="group"
-          >
+          <Button type="button" variant="outline" onClick={onBack} className="group">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Atrás
           </Button>
-          <Button
-            type="submit"
-            className="group bg-purple-600 hover:bg-purple-700 text-white"
-          >
+          <Button type="submit" className="group bg-purple-600 hover:bg-purple-700 text-white">
             Continuar
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
