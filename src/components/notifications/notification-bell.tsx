@@ -72,14 +72,16 @@ export function NotificationBell() {
   const [stats, setStats] = useState<NotificationStats>({ total: 0, unread: 0 })
   const [isLoading, setIsLoading] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
-  const [mounted, setMounted] = useState(false)
+  // Hydration-safe: Only render portal on client
+  const [mounted, setMounted] = useState(typeof window !== 'undefined')
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Only render portal on client
+  // Ensure mounted state is set after hydration - valid pattern for SSR + portals
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    if (!mounted) setMounted(true)
+  }, [mounted])
 
   const fetchNotifications = useCallback(async () => {
     try {

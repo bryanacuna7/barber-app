@@ -165,6 +165,8 @@ function DesktopTimePicker({
   const [tempMinute, setTempMinute] = useState(minute || '00')
   const popoverRef = useRef<HTMLDivElement>(null)
 
+  // Sync temp values when picker opens - valid pattern for controlled inputs
+   
   useEffect(() => {
     if (isOpen) {
       const [h, m] = value.split(':')
@@ -349,6 +351,8 @@ function MobileTimePicker({
   const [tempHour, setTempHour] = useState(hour || '09')
   const [tempMinute, setTempMinute] = useState(minute || '00')
 
+  // Sync temp values when picker opens - valid pattern for controlled inputs
+   
   useEffect(() => {
     if (isOpen) {
       const [h, m] = value.split(':')

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useId, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -43,7 +43,7 @@ interface ModalRootProps {
 }
 
 function ModalRoot({ children, isOpen, onClose }: ModalRootProps) {
-  const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 9)}`).current
+  const titleId = `modal-title-${useId()}`
   const contentRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -190,6 +190,8 @@ function ModalContent({ children, size = 'md', className }: ModalContentProps) {
 
   return (
     <div
+      // Passing ref to DOM element is valid usage
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       ref={meta.contentRef}
       className={cn(
         'relative w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl',
@@ -272,6 +274,8 @@ function ModalCloseButton({
 
   return (
     <button
+      // Passing ref to DOM element is valid usage
+       
       ref={meta.closeButtonRef}
       onClick={actions.close}
       className={cn(

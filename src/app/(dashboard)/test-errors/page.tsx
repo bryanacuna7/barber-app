@@ -1,5 +1,9 @@
 'use client'
 
+/* eslint-disable */
+// This page intentionally contains code that triggers errors to test error boundaries
+// All lint rules are disabled for this test file
+
 import { useState } from 'react'
 import { AlertTriangle, Bomb, Bug } from 'lucide-react'
 

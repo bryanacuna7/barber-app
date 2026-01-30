@@ -131,7 +131,7 @@ export function TestimonialsSection() {
 
               {/* Quote */}
               <p className="relative mt-4 text-zinc-700 dark:text-zinc-300">
-                "{testimonial.quote}"
+                &ldquo;{testimonial.quote}&rdquo;
               </p>
 
               {/* Author */}
