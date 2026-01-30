@@ -406,34 +406,36 @@ export default function ClientesPage() {
                       >
                         <motion.div
                           drag="x"
-                          dragConstraints={{ left: -160, right: 0 }}
+                          dragConstraints={{ left: -200, right: 0 }}
                           dragElastic={0.1}
                           dragMomentum={false}
                           onClick={() => setSelectedClient(client)}
                           className="group relative z-10 flex items-center gap-3 p-3 transition-all cursor-pointer touch-pan-y"
                         >
-                          {/* Action buttons - positioned absolutely on the right edge */}
-                          <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+                          {/* Action buttons - iOS style ovals */}
+                          <div className="absolute right-0 top-0 bottom-0 flex items-center gap-3 px-3 translate-x-full">
                             {/* WhatsApp button */}
-                            <button
+                            <motion.button
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleWhatsApp(client.phone)
                               }}
-                              className="flex h-full w-20 items-center justify-center bg-green-500 text-white"
+                              whileTap={{ scale: 0.95 }}
+                              className="flex h-12 w-20 items-center justify-center rounded-full bg-green-500 text-white shadow-lg"
                             >
                               <MessageCircle className="h-5 w-5" />
-                            </button>
+                            </motion.button>
                             {/* Edit/View button */}
-                            <button
+                            <motion.button
                               onClick={(e) => {
                                 e.stopPropagation()
                                 setSelectedClient(client)
                               }}
-                              className="flex h-full w-20 items-center justify-center bg-blue-500 text-white"
+                              whileTap={{ scale: 0.95 }}
+                              className="flex h-12 w-20 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg"
                             >
                               <User className="h-5 w-5" />
-                            </button>
+                            </motion.button>
                           </div>
                           {/* Avatar */}
                           <div className="relative shrink-0">

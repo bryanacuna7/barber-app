@@ -339,7 +339,7 @@ export default function ServiciosPage() {
                             {/* Swipeable content */}
                             <motion.div
                               drag="x"
-                              dragConstraints={{ left: -160, right: 0 }}
+                              dragConstraints={{ left: -200, right: 0 }}
                               dragElastic={0.1}
                               dragMomentum={false}
                               layout
@@ -348,22 +348,24 @@ export default function ServiciosPage() {
                               exit={{ opacity: 0, y: -10 }}
                               className="group relative z-10 w-full flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 touch-pan-y border-l-4 border-l-blue-500"
                             >
-                              {/* Action buttons - positioned absolutely on the right edge of motion.div */}
-                              <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+                              {/* Action buttons - iOS style ovals */}
+                              <div className="absolute right-0 top-0 bottom-0 flex items-center gap-3 px-3 translate-x-full">
                                 {/* Edit button */}
-                                <button
+                                <motion.button
                                   onClick={() => handleEdit(service)}
-                                  className="flex h-full w-20 items-center justify-center bg-blue-500 text-white"
+                                  whileTap={{ scale: 0.95 }}
+                                  className="flex h-12 w-20 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg"
                                 >
                                   <Pencil className="h-5 w-5" />
-                                </button>
+                                </motion.button>
                                 {/* Delete button */}
-                                <button
+                                <motion.button
                                   onClick={() => setDeleteService(service)}
-                                  className="flex h-full w-20 items-center justify-center bg-red-500 text-white"
+                                  whileTap={{ scale: 0.95 }}
+                                  className="flex h-12 w-20 items-center justify-center rounded-full bg-red-500 text-white shadow-lg"
                                 >
                                   <Trash2 className="h-5 w-5" />
-                                </button>
+                                </motion.button>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
