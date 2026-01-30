@@ -174,6 +174,8 @@ function DropdownTrigger({ children, className, asChild }: DropdownTriggerProps)
 
   return (
     <button
+      // Passing ref to DOM element is valid usage
+       
       ref={meta.triggerRef}
       type="button"
       onClick={actions.toggle}
@@ -218,6 +220,8 @@ function DropdownMenu({ children, className }: DropdownMenuProps) {
 
   return (
     <div
+      // Passing ref to DOM element is valid usage
+       
       ref={meta.menuRef}
       role="menu"
       aria-label="Menu"
@@ -229,6 +233,7 @@ function DropdownMenu({ children, className }: DropdownMenuProps) {
         // Animation with prefers-reduced-motion support
         'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:slide-in-from-top-2 motion-safe:duration-200',
         'motion-reduce:animate-none',
+         
         meta.align === 'right' ? 'right-0' : 'left-0',
         className
       )}

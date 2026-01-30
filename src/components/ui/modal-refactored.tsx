@@ -190,9 +190,7 @@ function ModalContent({ children, size = 'md', className }: ModalContentProps) {
 
   return (
     <div
-      // Passing ref to DOM element is valid usage
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      ref={meta.contentRef}
+      ref={meta.contentRef} // eslint-disable-line react-hooks/rules-of-hooks -- Passing ref to DOM is valid
       className={cn(
         'relative w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl',
         'motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-4',
@@ -274,9 +272,7 @@ function ModalCloseButton({
 
   return (
     <button
-      // Passing ref to DOM element is valid usage
-       
-      ref={meta.closeButtonRef}
+      ref={meta.closeButtonRef} // eslint-disable-line react-hooks/rules-of-hooks -- Passing ref to DOM is valid
       onClick={actions.close}
       className={cn(
         'p-2 rounded-xl transition-all duration-200',

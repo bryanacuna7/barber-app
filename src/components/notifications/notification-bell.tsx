@@ -78,9 +78,8 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Ensure mounted state is set after hydration - valid pattern for SSR + portals
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!mounted) setMounted(true)
+    if (!mounted) setMounted(true) // eslint-disable-line react-hooks/exhaustive-deps
   }, [mounted])
 
   const fetchNotifications = useCallback(async () => {
@@ -97,7 +96,7 @@ export function NotificationBell() {
   }, [])
 
   useEffect(() => {
-    fetchNotifications()
+    fetchNotifications() // eslint-disable-line react-hooks/exhaustive-deps
 
     // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000)

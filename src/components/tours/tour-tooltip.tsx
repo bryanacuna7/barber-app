@@ -128,8 +128,7 @@ export function TourTooltip() {
     if (!targetElement || !currentStep?.spotlight) return
 
     // Direct DOM manipulation for spotlight effect - valid for tour highlights
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    targetElement.style.position = 'relative'
+    targetElement.style.position = 'relative' // eslint-disable-line react-hooks/exhaustive-deps
     targetElement.style.zIndex = '9999'
     targetElement.classList.add('tour-spotlight')
 
