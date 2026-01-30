@@ -249,60 +249,60 @@ export default function ClientesPage() {
           <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 sm:grid sm:grid-cols-4 sm:gap-3 scrollbar-hide">
             {/* Clientes Nuevos */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
-                <div className="rounded-xl bg-green-500/20 p-2.5">
-                  <UserPlus className="h-5 w-5 text-green-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 shadow-sm">
+                <div className="rounded-xl bg-green-500/15 dark:bg-green-500/20 p-2.5">
+                  <UserPlus className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white leading-none">
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white leading-none">
                     {metrics.newThisMonth}
                   </p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">nuevos</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">nuevos</p>
                 </div>
               </div>
             </div>
 
             {/* Clientes Activos */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
-                <div className="rounded-xl bg-blue-500/20 p-2.5">
-                  <TrendingUp className="h-5 w-5 text-blue-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 shadow-sm">
+                <div className="rounded-xl bg-blue-500/15 dark:bg-blue-500/20 p-2.5">
+                  <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white leading-none">
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white leading-none">
                     {metrics.recentActive}
                   </p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">activos</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">activos</p>
                 </div>
               </div>
             </div>
 
             {/* Ingresos Totales */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3 min-w-[140px]">
-                <div className="rounded-xl bg-emerald-500/20 p-2.5">
-                  <Banknote className="h-5 w-5 text-emerald-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 min-w-[140px] shadow-sm">
+                <div className="rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 p-2.5">
+                  <Banknote className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold text-white leading-none truncate">
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white leading-none truncate">
                     {formatCurrency(metrics.totalRevenue)}
                   </p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">ingresos</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">ingresos</p>
                 </div>
               </div>
             </div>
 
             {/* Valor Promedio */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3 min-w-[140px]">
-                <div className="rounded-xl bg-purple-500/20 p-2.5">
-                  <User className="h-5 w-5 text-purple-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 min-w-[140px] shadow-sm">
+                <div className="rounded-xl bg-purple-500/15 dark:bg-purple-500/20 p-2.5">
+                  <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold text-white leading-none truncate">
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white leading-none truncate">
                     {formatCurrency(metrics.avgValue)}
                   </p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">promedio</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">promedio</p>
                 </div>
               </div>
             </div>

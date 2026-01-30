@@ -32,7 +32,7 @@ export function DashboardStats({
         title="Ingresos Hoy"
         value={todayRevenue}
         icon={Banknote}
-        description="completadas"
+        description="generados"
         variant="success"
         delay={0.05}
       />

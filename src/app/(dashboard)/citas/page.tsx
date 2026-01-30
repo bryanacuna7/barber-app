@@ -316,54 +316,60 @@ export default function CitasPage() {
           <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 sm:grid sm:grid-cols-4 sm:gap-3 scrollbar-hide">
             {/* Total Citas */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
-                <div className="rounded-xl bg-blue-500/20 p-2.5">
-                  <CalendarIcon className="h-5 w-5 text-blue-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 shadow-sm">
+                <div className="rounded-xl bg-blue-500/15 dark:bg-blue-500/20 p-2.5">
+                  <CalendarIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white leading-none">{stats.total}</p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">citas</p>
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white leading-none">
+                    {stats.total}
+                  </p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">citas</p>
                 </div>
               </div>
             </div>
 
             {/* Pendientes */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
-                <div className="rounded-xl bg-amber-500/20 p-2.5">
-                  <Clock className="h-5 w-5 text-amber-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 shadow-sm">
+                <div className="rounded-xl bg-amber-500/15 dark:bg-amber-500/20 p-2.5">
+                  <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white leading-none">{stats.pending}</p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">pendientes</p>
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white leading-none">
+                    {stats.pending}
+                  </p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">pendientes</p>
                 </div>
               </div>
             </div>
 
             {/* Completadas */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3">
-                <div className="rounded-xl bg-green-500/20 p-2.5">
-                  <CheckCircle2 className="h-5 w-5 text-green-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 shadow-sm">
+                <div className="rounded-xl bg-green-500/15 dark:bg-green-500/20 p-2.5">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white leading-none">{stats.completed}</p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">listas</p>
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white leading-none">
+                    {stats.completed}
+                  </p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">listas</p>
                 </div>
               </div>
             </div>
 
             {/* Ingresos del día */}
             <div className="shrink-0">
-              <div className="flex items-center gap-3 rounded-2xl bg-zinc-800/60 border border-zinc-700/40 px-4 py-3 min-w-[140px]">
-                <div className="rounded-xl bg-emerald-500/20 p-2.5">
-                  <Banknote className="h-5 w-5 text-emerald-400" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 px-4 py-3 min-w-[140px] shadow-sm">
+                <div className="rounded-xl bg-emerald-500/15 dark:bg-emerald-500/20 p-2.5">
+                  <Banknote className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold text-white leading-none truncate">
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white leading-none truncate">
                     {formatCurrency(stats.revenue)}
                   </p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mt-0.5">
                     {isToday(selectedDate) ? 'hoy' : format(selectedDate, 'd MMM', { locale: es })}
                   </p>
                 </div>
@@ -404,12 +410,12 @@ export default function CitasPage() {
                 <button
                   key={day.toISOString()}
                   onClick={() => setSelectedDate(day)}
-                  className={`flex-1 min-w-[48px] flex flex-col items-center py-2 px-1 rounded-xl transition-all ${
+                  className={`flex-1 min-w-[48px] flex flex-col items-center py-2 px-1 rounded-xl transition-all border ${
                     isSelected
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                      ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-900 dark:border-white'
                       : isToday(day)
-                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                        : 'bg-white text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700'
                   }`}
                 >
                   <span className="text-[10px] font-medium uppercase">
@@ -490,7 +496,7 @@ export default function CitasPage() {
               </p>
 
               {/* View Toggle - Compact pills */}
-              <div className="flex bg-zinc-800/60 rounded-xl p-1">
+              <div className="flex bg-zinc-100 dark:bg-zinc-800/60 rounded-xl p-1 border border-zinc-200 dark:border-zinc-700/40">
                 {[
                   { value: 'list', icon: List },
                   { value: 'calendar', icon: LayoutGrid },
@@ -502,8 +508,8 @@ export default function CitasPage() {
                     className={cn(
                       'p-2 rounded-lg transition-all',
                       viewMode === value
-                        ? 'bg-zinc-700 text-white'
-                        : 'text-zinc-500 hover:text-zinc-300'
+                        ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300'
                     )}
                   >
                     <Icon className="w-4 h-4" />
