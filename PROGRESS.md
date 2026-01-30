@@ -7,11 +7,11 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend, React Query
-- **Last Updated:** 2026-01-30 (Session 37 - UI Consistency ✅)
-- **Last Commit:** bc90cb0 - UI text size standardization
-- **Current Branch:** `main`
+- **Last Updated:** 2026-01-30 (Session 38 - Client Loyalty MVP ✅)
+- **Last Commit:** af9beb9 - Migration fix for system_settings
+- **Current Branch:** `feature/gamification-system`
 - **Dev Server:** Running (port 3000)
-- **Next Session:** Phase 6 (Gamification - RECOMMENDED) or Phase 7 (Pre-production)
+- **Next Session:** Test Phase 1 Loyalty or Continue with Phase 2 Barber Gamification
 
 ---
 
@@ -35,8 +35,9 @@
 - [x] **PHASE 3: Testing Foundation** ✅
 - [x] **PHASE 4: UX/Mobile Excellence** ✅
 - [x] **PHASE 5: CI/CD - Basic Setup** ✅ (Session 33)
+- [x] **PHASE 6: Gamification - Client Loyalty MVP** ✅ (Session 38)
 
-### Current Priority: Phase 6 or 7
+### Current Priority: Phase 6 continuation or Phase 7
 
 - [x] **Code Quality Cleanup** ✅ (Session 34 - COMPLETE)
   - [x] Fixed 10 ESLint errors → 0 errors
@@ -55,12 +56,19 @@
 
 ### Future Phases
 
-- [ ] **PHASE 6: Gamification System** 🎮 (RECOMMENDED NEXT)
-  - [ ] Explore gamification ideas (badges, points, achievements, leaderboards)
-  - [ ] Design reward mechanics for barbers/business owners
-  - [ ] Plan user engagement features
-  - [ ] Implementation roadmap
-  - **Status:** Ready to brainstorm - use `/brainstorm` to explore options
+- [x] **PHASE 6: Gamification System** 🎮 (IN PROGRESS)
+  - [x] Phase 1: Client Loyalty MVP ✅ (Session 38)
+    - [x] Database schema (4 tables, triggers, RLS)
+    - [x] Business logic (480 lines)
+    - [x] Configuration UI with 4 presets
+    - [x] Client account modal + status card
+  - [ ] Phase 2: Barber Gamification (1-2 weeks)
+    - [ ] Achievement system (badges, milestones)
+    - [ ] Leaderboard (revenue, clients, ratings)
+    - [ ] Challenges and competitions
+  - [ ] Phase 3: B2B Referrals (optional)
+  - [ ] Phase 4: Push Notifications (optional)
+  - **Status:** Phase 1 complete, ready for testing or Phase 2
 
 - [ ] **PHASE 7: Pre-Production** 🚀
   - [ ] Final visual testing across all viewports
@@ -98,6 +106,7 @@
 - ✅ **Accessibility** - WCAG AA compliant, keyboard nav, screen reader support, **44px touch targets**
 - ✅ **CI/CD Pipeline** - GitHub Actions, automated testing, build verification
 - ✅ **Code Quality** - 0 ESLint errors, 0 TypeScript errors, production build passing ✨
+- ✅ **Client Loyalty System** - Points, visits, referrals, hybrid modes, tier progression, 4 preset templates 🎮
 
 ### Production Readiness
 
@@ -105,11 +114,13 @@
 - **After Session 34:** 9.90/10 (+0.05 improvement)
 - **Session 35:** 9.92/10 (+0.02 UX improvement)
 - **Session 36:** 9.94/10 (+0.02 mobile UX refinement)
-- **Current Score (Session 37):** 9.95/10 (+0.01 visual consistency)
+- **Session 37:** 9.95/10 (+0.01 visual consistency)
+- **Current Score (Session 38):** 9.95/10 (Phase 1 gamification foundation)
 - **Target Final:** 9.8/10 ✅ **EXCEEDED!**
 
 **Latest improvements:**
 
+- Session 38: Client Loyalty MVP complete (Phase 6 Phase 1) 🎮
 - Session 37: UI text size consistency (15px standard) ✅
 - Session 36: Bottom nav glassmorphism redesign ✅
 - Session 35: iOS-style swipe buttons ✅
@@ -141,6 +152,120 @@
 ---
 
 ## Session History
+
+### Session 38 (2026-01-30) - Client Loyalty MVP ✅
+
+**Duration:** ~2 hours | **Agents:** @fullstack-developer + @backend-specialist | **Commits:** 2 | **Branch:** feature/gamification-system
+
+**Git Workflow:**
+
+- Created tag: `v1.0.0-pre-gamification` (before starting feature)
+- Created branch: `feature/gamification-system` from main
+- Note: No remote origin configured (local-only repo)
+
+**Accomplished:**
+
+- 🎮 **Phase 1: Client Loyalty System MVP**
+  - Complete database schema with 4 tables, 2 triggers, RLS policies
+  - Business logic: 480 lines of loyalty calculations and reward management
+  - UI components: Configuration form with 4 preset templates
+  - Client account creation flow for loyalty enrollment
+  - Tier progression system (Bronze → Silver → Gold → Platinum)
+
+- 📊 **Database Schema (461 lines)**
+  - Added `user_id` column to clients table (links to auth.users)
+  - `loyalty_programs` table: Program configuration per business
+  - `client_loyalty_status` table: Points balance, tier, visit tracking
+  - `loyalty_transactions` table: Complete audit trail
+  - `client_referrals` table: Referral tracking with unique codes
+  - Automatic point awarding via database triggers
+  - 4 preset templates seeded in system_settings
+
+- 🎯 **Program Types Supported**
+  - **Points-based:** Earn points per currency unit spent
+  - **Visit-based:** Free service after N visits (punch card)
+  - **Referral:** Reward referrer + referee with points
+  - **Hybrid:** Combine points + visits + referrals
+
+- 🏆 **Tier System**
+  - Bronze: 0-499 points (1.0x multiplier)
+  - Silver: 500-1,999 points (1.1x multiplier)
+  - Gold: 2,000-4,999 points (1.3x multiplier)
+  - Platinum: 5,000+ points (1.5x multiplier)
+
+- 🎨 **UI Components**
+  - Configuration page: `/lealtad/configuracion`
+  - Live preview of loyalty program
+  - Client account modal: Post-booking signup prompt
+  - Client status card: Shows points, tier, progress, referral code
+  - 4 preset templates for quick setup
+
+**Files Created (10):**
+
+1. `supabase/migrations/014_loyalty_system.sql` (461 lines)
+2. `src/lib/gamification/loyalty-calculator.ts` (480 lines)
+3. `src/components/loyalty/loyalty-config-form.tsx` (530 lines)
+4. `src/components/loyalty/client-account-modal.tsx` (405 lines)
+5. `src/components/loyalty/client-status-card.tsx` (338 lines)
+6. `src/components/loyalty/loyalty-preview.tsx` (228 lines)
+7. `src/app/(dashboard)/lealtad/configuracion/page.tsx` (172 lines)
+8. `src/components/ui/dialog.tsx` (98 lines)
+9. `src/components/ui/label.tsx` (21 lines)
+10. `src/components/ui/switch.tsx` (27 lines)
+
+**Total:** 2,795 lines of new code
+
+**Errors Fixed:**
+
+1. **Syntax Error** - loyalty-config-form.tsx:433
+   - Issue: `</p>` instead of `/>` for Input component
+   - Fixed during commit process
+
+2. **Migration Error** - 014_loyalty_system.sql:377
+   - Issue: INSERT INTO system_settings included non-existent "description" column
+   - Error: `column "description" of relation "system_settings" does not exist`
+   - Investigation: Read 007_exchange_rate.sql schema, confirmed table structure
+   - Fix: Removed description column, added `::jsonb` cast to value column
+   - Commit: af9beb9 - "fix(migration): remove description column from system_settings INSERT"
+   - Verification: User confirmed migration executed successfully
+
+**Critical Design Decisions:**
+
+- ✅ Loyalty ONLY for clients with auth.users accounts
+- ✅ Post-booking signup modal to incentivize account creation
+- ✅ Automatic point awarding via database triggers
+- ✅ RLS policies: Everyone can read, only admins can modify
+- ✅ Complete audit trail via loyalty_transactions table
+- ✅ Referral code auto-generation (8 chars uppercase)
+
+**Migration Success:**
+
+```sql
+-- Successfully seeded 4 templates:
+- loyalty_template_punch_card (Visit-based)
+- loyalty_template_points (Points-based)
+- loyalty_template_referral (Referral-based)
+- loyalty_template_hybrid (Combined system)
+```
+
+**Commits:**
+
+1. 97881c7 - "feat(gamification): Phase 1 - Client Loyalty MVP (10 files, 2,795 lines)"
+2. af9beb9 - "fix(migration): remove description column from system_settings INSERT"
+
+**Next Steps:**
+
+Three options presented to user:
+
+- **Option A:** Test Phase 1 (15 min) - Configure program → Create appointment → Verify points
+- **Option B:** Continue with Phase 2 (1-2 weeks) - Barber Gamification (achievements, leaderboard)
+- **Option C:** Integration (30 min) - Add ClientAccountModal + ClientStatusCard to existing pages
+
+**Production Readiness:** 9.95/10 (gamification foundation established)
+
+**Status:** ✅ Phase 1 complete, migration successful, ready for testing or Phase 2
+
+---
 
 ### Session 37 (2026-01-30) - UI Consistency ✅
 
@@ -355,6 +480,21 @@
 
 ## Key Files
 
+### Session 38 - Client Loyalty MVP
+
+| File                                                 | Purpose                              | Lines |
+| ---------------------------------------------------- | ------------------------------------ | ----- |
+| `supabase/migrations/014_loyalty_system.sql`         | Database schema (4 tables, triggers) | 461   |
+| `src/lib/gamification/loyalty-calculator.ts`         | Core loyalty business logic          | 480   |
+| `src/components/loyalty/loyalty-config-form.tsx`     | Configuration UI with 4 presets      | 530   |
+| `src/components/loyalty/client-account-modal.tsx`    | Post-booking signup prompt           | 405   |
+| `src/components/loyalty/client-status-card.tsx`      | Points, tier, progress display       | 338   |
+| `src/components/loyalty/loyalty-preview.tsx`         | Live preview of loyalty program      | 228   |
+| `src/app/(dashboard)/lealtad/configuracion/page.tsx` | Configuration page with stats        | 172   |
+| `src/components/ui/dialog.tsx`                       | Radix UI dialog primitive            | 98    |
+| `src/components/ui/label.tsx`                        | Radix UI label primitive             | 21    |
+| `src/components/ui/switch.tsx`                       | Radix UI switch primitive            | 27    |
+
 ### Session 36 - Mobile Nav
 
 | File                                      | Purpose                       | Lines |
@@ -376,16 +516,48 @@
 
 ## Next Session
 
-### Recommended: Phase 6 - Gamification System 🎮
+### Current State: Phase 1 Client Loyalty MVP Complete ✅
 
-**What to do:**
+**Branch:** `feature/gamification-system`
+**Status:** Phase 1 complete, migration successful, ready for next step
 
-1. Use `/brainstorm` to explore gamification ideas
-2. Design reward mechanics for barbers
-3. Plan achievement system
-4. Implementation roadmap
+### Option A: Test Phase 1 (Recommended - 15 min) 🧪
 
-**Or Alternative: Phase 7 - Pre-Production**
+**What to test:**
+
+1. Configure a loyalty program at `/lealtad/configuracion`
+2. Create a test appointment and mark as completed
+3. Verify points awarded automatically via database trigger
+4. Test client signup flow (ClientAccountModal)
+5. Verify tier progression logic
+
+**Commands:**
+
+```bash
+npm run dev
+# Navigate to /lealtad/configuracion
+# Test the loyalty flow end-to-end
+```
+
+### Option B: Continue with Phase 2 (1-2 weeks) 🎮
+
+**Barber Gamification System:**
+
+1. Achievement system (badges, milestones)
+2. Leaderboard (top barbers by revenue, clients, ratings)
+3. Barber challenges and competitions
+4. Performance analytics dashboard
+
+### Option C: Integration (30 min) 🔗
+
+**Integrate Phase 1 components:**
+
+1. Add ClientAccountModal to `/reservar/[slug]` (post-booking prompt)
+2. Add ClientStatusCard to client dashboard
+3. Link loyalty status to existing appointment flow
+4. Test complete user journey
+
+### Or Alternative: Phase 7 - Pre-Production 🚀
 
 1. Performance audit (Lighthouse)
 2. Visual testing across viewports
@@ -412,5 +584,9 @@ npm run build
 - Mobile UX polished with glassmorphism nav ✨
 - iOS-style swipe buttons implemented ✅
 - UI text sizing standardized (15px for interactive elements) ✅
-- Working tree: 6 modified files (PROGRESS.md + uncommitted changes)
-- Ready for Phase 6 (Gamification) or Phase 7 (Pre-production)
+- **Phase 1 Client Loyalty MVP complete** ✅ 🎮
+- Branch: `feature/gamification-system`
+- Migration: Successfully executed in Supabase
+- 10 new files created (2,795 lines)
+- 4 preset templates seeded
+- Ready for Phase 1 testing or Phase 2 continuation
