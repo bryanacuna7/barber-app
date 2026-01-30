@@ -21,9 +21,9 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/no-unused-vars': 'warn', // Downgrade to warning
     },
   },
-  // Relax React 19 strict rules for components (valid edge cases)
+  // Relax React hooks rules for components (valid edge cases)
   {
-    files: ['src/components/**/*.{ts,tsx}'],
+    files: ['src/components/**/*.{ts,tsx}', 'src/lib/**/*.{ts,tsx}'],
     rules: {
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'warn',

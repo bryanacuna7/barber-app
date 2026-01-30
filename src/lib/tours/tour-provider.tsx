@@ -32,8 +32,8 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
       .then((res) => res.json())
       .then((data) => {
         if (data.tours) {
-          const completed = new Set(
-            data.tours.filter((t: any) => t.completed).map((t: any) => t.tour_id)
+          const completed = new Set<string>(
+            data.tours.filter((t: any) => t.completed).map((t: any) => String(t.tour_id))
           )
           setState((prev) => ({ ...prev, completedTours: completed }))
         }

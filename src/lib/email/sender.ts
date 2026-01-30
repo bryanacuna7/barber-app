@@ -4,7 +4,7 @@
  */
 
 import { Resend } from 'resend'
-import type { NotificationChannel } from '@/types/database'
+import type { NotificationChannel, NotificationPreferences } from '@/types/database'
 import { createServiceClient } from '@/lib/supabase/service-client'
 
 // Initialize Resend client
@@ -18,7 +18,9 @@ export const isEmailConfigured = () => {
 /**
  * Get notification preferences for a business
  */
-export async function getNotificationPreferences(businessId: string) {
+export async function getNotificationPreferences(
+  businessId: string
+): Promise<NotificationPreferences | null> {
   const supabase = createServiceClient()
 
   const { data, error } = await supabase

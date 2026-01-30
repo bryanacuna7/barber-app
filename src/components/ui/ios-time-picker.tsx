@@ -166,13 +166,14 @@ function DesktopTimePicker({
   const popoverRef = useRef<HTMLDivElement>(null)
 
   // Sync temp values when picker opens - valid pattern for controlled inputs
-   
   useEffect(() => {
     if (isOpen) {
       const [h, m] = value.split(':')
+       
       setTempHour(h || '09')
       const mins = parseInt(m || '0')
       const rounded = Math.round(mins / 5) * 5
+       
       setTempMinute(rounded.toString().padStart(2, '0'))
     }
   }, [isOpen, value])
@@ -352,13 +353,14 @@ function MobileTimePicker({
   const [tempMinute, setTempMinute] = useState(minute || '00')
 
   // Sync temp values when picker opens - valid pattern for controlled inputs
-   
   useEffect(() => {
     if (isOpen) {
       const [h, m] = value.split(':')
+       
       setTempHour(h || '09')
       const mins = parseInt(m || '0')
       const rounded = Math.round(mins / 5) * 5
+       
       setTempMinute(rounded.toString().padStart(2, '0'))
     }
   }, [isOpen, value])

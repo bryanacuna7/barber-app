@@ -4,7 +4,7 @@ import { type HTMLAttributes, type ReactNode } from 'react'
 import { motion, type HTMLMotionProps } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends Omit<HTMLMotionProps<'div'>, 'ref'> {
   variant?: 'default' | 'elevated' | 'gradient' | 'bordered' | 'glass'
   hoverable?: boolean
   clickable?: boolean

@@ -28,7 +28,7 @@ export function useFormValidation<T extends z.ZodTypeAny>(schema: T) {
         return null
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return error.errors[0]?.message || 'Invalid value'
+          return error.issues[0]?.message || 'Invalid value'
         }
         return 'Validation error'
       }
@@ -45,7 +45,7 @@ export function useFormValidation<T extends z.ZodTypeAny>(schema: T) {
       } catch (error) {
         if (error instanceof z.ZodError) {
           const formattedErrors: ValidationError = {}
-          error.errors.forEach((err) => {
+          error.issues.forEach((err) => {
             const path = err.path.join('.')
             formattedErrors[path] = err.message
           })

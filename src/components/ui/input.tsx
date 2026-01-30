@@ -1,11 +1,11 @@
 'use client'
 
-import { forwardRef, type InputHTMLAttributes, type ReactNode, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { forwardRef, type ReactNode, useState } from 'react'
+import { motion, AnimatePresence, type HTMLMotionProps } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<HTMLMotionProps<'input'>, 'ref'> {
   label?: string
   error?: string
   success?: string

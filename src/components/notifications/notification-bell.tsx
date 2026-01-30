@@ -79,8 +79,8 @@ export function NotificationBell() {
 
   // Ensure mounted state is set after hydration - valid pattern for SSR + portals
   useEffect(() => {
-    if (!mounted) setMounted(true) // eslint-disable-line react-hooks/exhaustive-deps
-  }, [mounted])
+    setMounted(true)
+  }, []) // Only run once on mount
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -96,7 +96,8 @@ export function NotificationBell() {
   }, [])
 
   useEffect(() => {
-    fetchNotifications() // eslint-disable-line react-hooks/exhaustive-deps
+     
+    fetchNotifications()
 
     // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000)

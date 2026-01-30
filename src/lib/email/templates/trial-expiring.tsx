@@ -33,7 +33,7 @@ export default function TrialExpiringEmail({
   return (
     <Html>
       <Head />
-      <Preview>Tu período de prueba Pro vence en {daysRemaining} días</Preview>
+      <Preview>{`Tu período de prueba Pro vence en ${daysRemaining} días`}</Preview>
       <Body style={main}>
         <Container style={container}>
           {logoUrl && (
