@@ -34,15 +34,7 @@ import { FAB } from '@/components/ui/fab'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { generateThemeStyle, DEFAULT_BRAND_COLOR } from '@/lib/theme'
-import {
-  hexToRgbValues,
-  getLuminance,
-  getContrastRatio,
-  getContrastingTextColor,
-  darkenColor,
-  lightenColor,
-  getReadableBrandColor,
-} from '@/lib/utils/color'
+import { getContrastingTextColor, getReadableBrandColor } from '@/lib/utils/color'
 import type { Business, OperatingHours, DayHours } from '@/types'
 
 // Day labels for operating hours
@@ -113,6 +105,7 @@ export default function ConfiguracionPage() {
 
   useEffect(() => {
     fetchBusiness()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function fetchBusiness() {
@@ -500,7 +493,7 @@ export default function ConfiguracionPage() {
                             booking_buffer_minutes: Number(e.target.value),
                           }))
                         }
-                        className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[17px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                        className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
                       >
                         <option value={0}>Sin tiempo extra</option>
                         <option value={5}>5 minutos</option>
@@ -521,7 +514,7 @@ export default function ConfiguracionPage() {
                             advance_booking_days: Number(e.target.value),
                           }))
                         }
-                        className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[17px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                        className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
                       >
                         <option value={7}>1 semana</option>
                         <option value={14}>2 semanas</option>

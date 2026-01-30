@@ -64,6 +64,7 @@ function WheelColumn({
 
   useEffect(() => {
     scrollToValue(value, false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleScroll = useCallback(() => {
@@ -176,7 +177,8 @@ function DesktopTimePicker({
        
       setTempMinute(rounded.toString().padStart(2, '0'))
     }
-  }, [isOpen, value])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only sync when modal opens
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -363,7 +365,8 @@ function MobileTimePicker({
        
       setTempMinute(rounded.toString().padStart(2, '0'))
     }
-  }, [isOpen, value])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only sync when modal opens
+  }, [isOpen])
 
   const handleConfirm = () => {
     onChange(`${tempHour}:${tempMinute}`)
@@ -450,10 +453,11 @@ export function TimePickerTrigger({ value, onClick, className }: TimePickerTrigg
       type="button"
       onClick={onClick}
       className={cn(
-        'flex h-11 min-w-[80px] items-center justify-center rounded-xl',
-        'bg-zinc-100 dark:bg-zinc-800',
-        'text-[17px] font-semibold text-zinc-900 dark:text-white',
-        'active:scale-95 transition-transform duration-150',
+        'flex h-10 min-w-[72px] items-center justify-center rounded-xl px-3',
+        'bg-zinc-100/80 dark:bg-zinc-800/80',
+        'text-[15px] font-medium text-zinc-900 dark:text-white',
+        'active:scale-95 transition-all duration-150',
+        'hover:bg-zinc-100 dark:hover:bg-zinc-800',
         'focus:outline-none focus:ring-2 focus:ring-[#007AFF]/50',
         className
       )}
