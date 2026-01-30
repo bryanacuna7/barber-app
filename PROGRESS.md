@@ -132,6 +132,18 @@
 - ✅ Touch targets compliant
 - ✅ Ready for production deployment
 
+**Issues/Blockers:**
+
+- ⚠️ 10 ESLint errors restantes (edge cases válidos de React 19, no bloquean funcionalidad)
+- ⚠️ 6 pares de componentes duplicados (*-refactored.tsx) pendientes de consolidar
+
+**Known Bugs:**
+
+- 🐛 **Tour guiado**: A veces se activa más de una vez (debería ser solo primera visita)
+  - Archivos: `src/lib/tours/`, `src/components/tours/`
+  - Prioridad: Media - Revisar lógica de first-visit tracking
+  - Estado: Pendiente de investigación
+
 **Optional Next Steps:**
 
 - Phase 5: CI/CD pipeline setup
