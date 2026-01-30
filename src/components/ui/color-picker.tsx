@@ -59,7 +59,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
                 'relative flex h-10 w-10 items-center justify-center rounded-full transition-all',
                 isSelected
                   ? 'ring-2 ring-offset-2 ring-zinc-900 dark:ring-white dark:ring-offset-zinc-900 scale-110'
-                  : 'hover:scale-110',
+                  : 'hover:scale-110'
               )}
               style={{ backgroundColor: color.hex }}
             >
@@ -109,7 +109,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
               className="h-10 w-10 flex-shrink-0 rounded-full border-2 border-zinc-200 dark:border-zinc-700"
               style={{
                 backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(
-                  customHex.startsWith('#') ? customHex : `#${customHex}`,
+                  customHex.startsWith('#') ? customHex : `#${customHex}`
                 )
                   ? customHex.startsWith('#')
                     ? customHex

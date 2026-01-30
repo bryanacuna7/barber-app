@@ -41,7 +41,10 @@ export function DemoSection() {
   const activeTabData = tabs.find((tab) => tab.id === activeTab)
 
   return (
-    <section id="demo" className="scroll-mt-20 bg-gradient-to-br from-zinc-900 to-black py-20 dark:from-zinc-950 dark:to-black">
+    <section
+      id="demo"
+      className="scroll-mt-20 bg-gradient-to-br from-zinc-900 to-black py-20 dark:from-zinc-950 dark:to-black"
+    >
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -142,9 +145,7 @@ export function DemoSection() {
               >
                 Prueba gratis por 7 días
               </a>
-              <p className="mt-3 text-sm text-zinc-500">
-                No se requiere tarjeta de crédito
-              </p>
+              <p className="mt-3 text-sm text-zinc-500">No se requiere tarjeta de crédito</p>
             </div>
           </motion.div>
         </AnimatePresence>

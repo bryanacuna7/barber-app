@@ -86,12 +86,7 @@ export interface BarberInvitation {
   used_at: string | null
 }
 
-export type AppointmentStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'completed'
-  | 'cancelled'
-  | 'no_show'
+export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
 
 export interface Appointment {
   id: string
@@ -204,7 +199,7 @@ export interface SubscriptionPlan {
   name: 'basic' | 'pro'
   display_name: string
   price_usd: number
-  max_barbers: number | null      // null = ilimitado
+  max_barbers: number | null // null = ilimitado
   max_services: number | null
   max_clients: number | null
   has_branding: boolean

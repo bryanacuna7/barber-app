@@ -57,12 +57,8 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
           <User className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">
-          Tu Primer Barbero
-        </h2>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Registra el primer miembro de tu equipo
-        </p>
+        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Tu Primer Barbero</h2>
+        <p className="text-zinc-600 dark:text-zinc-400">Registra el primer miembro de tu equipo</p>
       </div>
 
       {/* Form */}
@@ -82,9 +78,7 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
             placeholder="Ej: Carlos Rodríguez"
             className={errors.name ? 'border-red-500' : ''}
           />
-          {errors.name && (
-            <p className="text-sm text-red-500">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
         </div>
 
         {/* Phone (optional) */}
@@ -140,9 +134,7 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
                 <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-0.5">
                   {barber.phone && <p>📱 {barber.phone}</p>}
                   {barber.email && <p>✉️ {barber.email}</p>}
-                  {!barber.phone && !barber.email && (
-                    <p className="text-zinc-400">Sin contacto</p>
-                  )}
+                  {!barber.phone && !barber.email && <p className="text-zinc-400">Sin contacto</p>}
                 </div>
               </div>
             </div>
@@ -152,25 +144,18 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
         {/* Info box */}
         <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-4 border border-blue-200 dark:border-blue-800">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            💡 <strong>Tip:</strong> Puedes agregar más barberos después desde la sección "Barberos" en el menú.
+            💡 <strong>Tip:</strong> Puedes agregar más barberos después desde la sección "Barberos"
+            en el menú.
           </p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 justify-between pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="group"
-          >
+          <Button type="button" variant="outline" onClick={onBack} className="group">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Atrás
           </Button>
-          <Button
-            type="submit"
-            className="group bg-green-600 hover:bg-green-700 text-white"
-          >
+          <Button type="submit" className="group bg-green-600 hover:bg-green-700 text-white">
             Continuar
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>

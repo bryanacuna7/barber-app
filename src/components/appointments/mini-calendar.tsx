@@ -13,7 +13,7 @@ import {
   addMonths,
   subMonths,
   startOfWeek,
-  endOfWeek
+  endOfWeek,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { cn } from '@/lib/utils/cn'
@@ -31,7 +31,7 @@ export function MiniCalendar({
   selectedDate,
   onDateSelect,
   appointmentDates = [],
-  className
+  className,
 }: MiniCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(selectedDate))
 
@@ -43,7 +43,7 @@ export function MiniCalendar({
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd })
 
   const hasAppointment = (date: Date) => {
-    return appointmentDates.some(d => isSameDay(d, date))
+    return appointmentDates.some((d) => isSameDay(d, date))
   }
 
   const goToPreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
@@ -93,10 +93,7 @@ export function MiniCalendar({
       </div>
 
       {/* Days grid */}
-      <div
-        className="gap-1"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}
-      >
+      <div className="gap-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
         {days.map((day, idx) => {
           const isSelected = isSameDay(day, selectedDate)
           const isCurrentMonth = isSameMonth(day, currentMonth)
@@ -113,8 +110,13 @@ export function MiniCalendar({
                 'text-sm font-medium transition-all duration-200',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
                 !isCurrentMonth && 'text-zinc-300 dark:text-zinc-700 cursor-not-allowed',
-                isCurrentMonth && !isSelected && !isDayToday && 'text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800',
-                isDayToday && !isSelected && 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100',
+                isCurrentMonth &&
+                  !isSelected &&
+                  !isDayToday &&
+                  'text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                isDayToday &&
+                  !isSelected &&
+                  'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100',
                 isSelected && 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg'
               )}
             >

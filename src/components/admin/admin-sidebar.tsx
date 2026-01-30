@@ -47,8 +47,8 @@ export function AdminSidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navigation.map((item) => {
-          const isActive = pathname === item.href ||
-            (item.href !== '/admin' && pathname.startsWith(item.href))
+          const isActive =
+            pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
           return (
             <Link
               key={item.name}
@@ -57,7 +57,7 @@ export function AdminSidebar() {
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800',
+                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -96,20 +96,20 @@ export function AdminBottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-200 bg-white/80 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80 lg:hidden">
       <div className="flex items-center justify-around px-4 py-2">
         {navigation.map((item) => {
-          const isActive = pathname === item.href ||
-            (item.href !== '/admin' && pathname.startsWith(item.href))
+          const isActive =
+            pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
           return (
             <Link
               key={item.name}
               href={item.href}
               className={cn(
                 'flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors',
-                isActive
-                  ? 'text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-500 dark:text-zinc-400',
+                isActive ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'
               )}
             >
-              <item.icon className={cn('h-5 w-5', isActive && 'text-zinc-900 dark:text-zinc-100')} />
+              <item.icon
+                className={cn('h-5 w-5', isActive && 'text-zinc-900 dark:text-zinc-100')}
+              />
               {item.name}
             </Link>
           )

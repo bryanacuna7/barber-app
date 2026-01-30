@@ -15,9 +15,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -34,7 +32,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes (require authentication)
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') ||
+  const isProtectedRoute =
+    request.nextUrl.pathname.startsWith('/dashboard') ||
     request.nextUrl.pathname.startsWith('/citas') ||
     request.nextUrl.pathname.startsWith('/servicios') ||
     request.nextUrl.pathname.startsWith('/clientes') ||
@@ -43,7 +42,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/admin')
 
   // Auth routes (login, register)
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
+  const isAuthRoute =
+    request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register')
 
   // Redirect unauthenticated users to login

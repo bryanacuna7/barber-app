@@ -52,7 +52,9 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
         transition={{ delay: 0.3 }}
         className="text-lg text-zinc-600 dark:text-zinc-400 mb-2"
       >
-        Vamos a configurar <span className="font-semibold text-zinc-900 dark:text-white">{businessName}</span> en solo 5 minutos.
+        Vamos a configurar{' '}
+        <span className="font-semibold text-zinc-900 dark:text-white">{businessName}</span> en solo
+        5 minutos.
       </motion.p>
 
       <motion.p
@@ -72,7 +74,11 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
         className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 w-full"
       >
         {[
-          { emoji: '⏰', title: 'Configura tu horario', desc: 'Define cuándo está abierta tu barbería' },
+          {
+            emoji: '⏰',
+            title: 'Configura tu horario',
+            desc: 'Define cuándo está abierta tu barbería',
+          },
           { emoji: '✂️', title: 'Agrega tus servicios', desc: 'Cortes, afeitados y más' },
           { emoji: '👤', title: 'Registra tus barberos', desc: 'Tu equipo en un solo lugar' },
         ].map((feature, i) => (
@@ -84,12 +90,8 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
             className="rounded-2xl bg-white dark:bg-zinc-800 p-6 shadow-sm border border-zinc-200 dark:border-zinc-700"
           >
             <div className="text-3xl mb-3">{feature.emoji}</div>
-            <h3 className="font-semibold text-zinc-900 dark:text-white mb-1">
-              {feature.title}
-            </h3>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              {feature.desc}
-            </p>
+            <h3 className="font-semibold text-zinc-900 dark:text-white mb-1">{feature.title}</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">{feature.desc}</p>
           </motion.div>
         ))}
       </motion.div>

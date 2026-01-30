@@ -51,9 +51,7 @@ export default function AdminBusinessesPage() {
   const [error, setError] = useState<string | null>(null)
 
   const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [statusFilter, setStatusFilter] = useState(
-    searchParams.get('status') || 'all'
-  )
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all')
   const currentPage = parseInt(searchParams.get('page') || '1')
 
   const fetchBusinesses = useCallback(async () => {
@@ -107,9 +105,7 @@ export default function AdminBusinessesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-          Negocios
-        </h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Negocios</h1>
         <p className="mt-1 text-zinc-500 dark:text-zinc-400">
           Gestiona todas las barberías registradas en la plataforma
         </p>
@@ -145,11 +141,7 @@ export default function AdminBusinessesPage() {
                     : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
                 }`}
               >
-                {status === 'all'
-                  ? 'Todos'
-                  : status === 'active'
-                    ? 'Activos'
-                    : 'Inactivos'}
+                {status === 'all' ? 'Todos' : status === 'active' ? 'Activos' : 'Inactivos'}
               </button>
             ))}
           </div>
@@ -246,8 +238,7 @@ export default function AdminBusinessesPage() {
             <div className="flex items-center justify-between">
               <p className="text-sm text-zinc-500">
                 Mostrando {(currentPage - 1) * pagination.limit + 1} -{' '}
-                {Math.min(currentPage * pagination.limit, pagination.total)} de{' '}
-                {pagination.total}
+                {Math.min(currentPage * pagination.limit, pagination.total)} de {pagination.total}
               </p>
               <div className="flex gap-2">
                 <button

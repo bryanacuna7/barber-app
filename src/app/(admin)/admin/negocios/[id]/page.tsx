@@ -165,9 +165,7 @@ export default function AdminBusinessDetailPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-                {business.name}
-              </h1>
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{business.name}</h1>
               <span
                 className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                   business.is_active
@@ -210,31 +208,11 @@ export default function AdminBusinessDetailPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard
-          icon={Users}
-          label="Barberos"
-          value={stats.totalBarbers}
-        />
-        <StatCard
-          icon={Scissors}
-          label="Servicios"
-          value={stats.totalServices}
-        />
-        <StatCard
-          icon={Calendar}
-          label="Citas Totales"
-          value={stats.totalAppointments}
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Completadas"
-          value={stats.completedAppointments}
-        />
-        <StatCard
-          icon={Users}
-          label="Clientes"
-          value={stats.totalClients}
-        />
+        <StatCard icon={Users} label="Barberos" value={stats.totalBarbers} />
+        <StatCard icon={Scissors} label="Servicios" value={stats.totalServices} />
+        <StatCard icon={Calendar} label="Citas Totales" value={stats.totalAppointments} />
+        <StatCard icon={CheckCircle2} label="Completadas" value={stats.completedAppointments} />
+        <StatCard icon={Users} label="Clientes" value={stats.totalClients} />
       </div>
 
       {/* Details Grid */}
@@ -245,14 +223,8 @@ export default function AdminBusinessDetailPage() {
             <CardTitle>Información del Negocio</CardTitle>
           </CardHeader>
           <div className="space-y-4">
-            <InfoRow
-              icon={Mail}
-              label="Email del dueño"
-              value={business.owner_email}
-            />
-            {business.phone && (
-              <InfoRow icon={Phone} label="Teléfono" value={business.phone} />
-            )}
+            <InfoRow icon={Mail} label="Email del dueño" value={business.owner_email} />
+            {business.phone && <InfoRow icon={Phone} label="Teléfono" value={business.phone} />}
             {business.address && (
               <InfoRow icon={MapPin} label="Dirección" value={business.address} />
             )}
@@ -305,16 +277,12 @@ export default function AdminBusinessDetailPage() {
                   className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800"
                 >
                   <div>
-                    <p className="font-medium text-zinc-900 dark:text-white">
-                      {barber.name}
-                    </p>
+                    <p className="font-medium text-zinc-900 dark:text-white">{barber.name}</p>
                     <p className="text-sm text-zinc-500">{barber.email}</p>
                   </div>
                   <span
                     className={`h-2 w-2 rounded-full ${
-                      barber.is_active
-                        ? 'bg-emerald-500'
-                        : 'bg-zinc-300 dark:bg-zinc-600'
+                      barber.is_active ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-600'
                     }`}
                   />
                 </div>
@@ -337,9 +305,7 @@ export default function AdminBusinessDetailPage() {
                   key={service.id}
                   className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800"
                 >
-                  <p className="font-medium text-zinc-900 dark:text-white">
-                    {service.name}
-                  </p>
+                  <p className="font-medium text-zinc-900 dark:text-white">{service.name}</p>
                   <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
                     ${service.price}
                   </span>
@@ -365,9 +331,7 @@ function StatCard({
   return (
     <Card className="text-center">
       <Icon className="mx-auto h-5 w-5 text-zinc-400" />
-      <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-white">
-        {value}
-      </p>
+      <p className="mt-2 text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
       <p className="text-sm text-zinc-500">{label}</p>
     </Card>
   )
@@ -387,9 +351,7 @@ function InfoRow({
       <Icon className="h-4 w-4 text-zinc-400" />
       <div>
         <p className="text-xs text-zinc-500">{label}</p>
-        <p className="text-sm font-medium text-zinc-900 dark:text-white">
-          {value}
-        </p>
+        <p className="text-sm font-medium text-zinc-900 dark:text-white">{value}</p>
       </div>
     </div>
   )

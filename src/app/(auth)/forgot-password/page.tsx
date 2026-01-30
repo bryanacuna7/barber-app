@@ -5,7 +5,14 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -73,11 +80,7 @@ export default function ForgotPasswordPage() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            isLoading={isLoading}
-          >
+          <Button type="submit" className="w-full" isLoading={isLoading}>
             Enviar enlace
           </Button>
 

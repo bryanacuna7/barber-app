@@ -112,17 +112,12 @@ function BaseConfirmDialog({
               </h3>
 
               {/* Description */}
-              {description && (
-                typeof description === 'string' ? (
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
-                    {description}
-                  </p>
+              {description &&
+                (typeof description === 'string' ? (
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">{description}</p>
                 ) : (
-                  <div className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
-                    {description}
-                  </div>
-                )
-              )}
+                  <div className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">{description}</div>
+                ))}
 
               {/* Custom children (if provided) */}
               {children && <div className="mb-6 w-full">{children}</div>}

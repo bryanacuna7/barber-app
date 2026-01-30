@@ -61,7 +61,9 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
   const isBasicNonUrgent =
     !isUrgent &&
     (subscription.plan.name === 'basic' ||
-      (subscription.status === 'trial' && subscription.days_remaining && subscription.days_remaining > 3))
+      (subscription.status === 'trial' &&
+        subscription.days_remaining &&
+        subscription.days_remaining > 3))
 
   // Compact mode for non-urgent states
   if (variant === 'compact' || (isBasicNonUrgent && !isUrgent)) {
@@ -229,12 +231,10 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
           </div>
 
           <div className="flex-1 pr-6">
-            <h3 className="font-semibold text-zinc-900 dark:text-white">
-              Estás en el plan Básico
-            </h3>
+            <h3 className="font-semibold text-zinc-900 dark:text-white">Estás en el plan Básico</h3>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Actualiza a Pro para desbloquear barberos y servicios ilimitados,
-              personalización de marca y más.
+              Actualiza a Pro para desbloquear barberos y servicios ilimitados, personalización de
+              marca y más.
             </p>
 
             <div className="mt-3">
@@ -291,9 +291,7 @@ function UsageItem({
       <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
       <div
         className={`text-sm font-semibold ${
-          isAtLimit
-            ? 'text-red-600 dark:text-red-400'
-            : 'text-zinc-900 dark:text-white'
+          isAtLimit ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white'
         }`}
       >
         {current}/{max || '∞'}

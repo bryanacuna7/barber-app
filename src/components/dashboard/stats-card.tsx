@@ -173,11 +173,7 @@ export function StatsCard({
 }
 
 // Alternative compact stats for mobile
-export function StatsRow({
-  stats,
-}: {
-  stats: Array<{ label: string; value: string | number }>
-}) {
+export function StatsRow({ stats }: { stats: Array<{ label: string; value: string | number }> }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -189,9 +185,7 @@ export function StatsRow({
           {i > 0 && (
             <div className="absolute left-0 top-1/2 h-8 w-px -translate-y-1/2 bg-zinc-700" />
           )}
-          <span className="text-[11px] uppercase tracking-wide text-zinc-400">
-            {stat.label}
-          </span>
+          <span className="text-[11px] uppercase tracking-wide text-zinc-400">{stat.label}</span>
           <motion.span
             key={String(stat.value)}
             initial={{ scale: 0.8 }}

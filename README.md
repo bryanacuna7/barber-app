@@ -16,6 +16,7 @@ BarberShop Pro is a web app for barbershops to manage appointments, clients, ser
 ## Primary user flows
 
 Owner / admin
+
 1. Sign up and log in
 2. Configure business info, hours, buffer time, and branding
 3. Create services and barbers
@@ -23,6 +24,7 @@ Owner / admin
 5. Manage appointments and clients from the dashboard
 
 Client
+
 1. Open the booking link
 2. Choose a service (and barber if applicable)
 3. Pick date and time

@@ -88,12 +88,8 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-          Panel de Administrador
-        </h1>
-        <p className="mt-1 text-zinc-500 dark:text-zinc-400">
-          Vista general de tu plataforma SaaS
-        </p>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Panel de Administrador</h1>
+        <p className="mt-1 text-zinc-500 dark:text-zinc-400">Vista general de tu plataforma SaaS</p>
       </div>
 
       {/* Main Stats */}
@@ -126,7 +122,11 @@ export default function AdminDashboard() {
           trend={`${stats.overview.newThisMonth} nuevos este mes`}
           trendUp={stats.overview.growthRate > 0}
           iconColor={stats.overview.growthRate > 0 ? 'text-emerald-500' : 'text-red-500'}
-          bgColor={stats.overview.growthRate > 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-red-50 dark:bg-red-900/20'}
+          bgColor={
+            stats.overview.growthRate > 0
+              ? 'bg-emerald-50 dark:bg-emerald-900/20'
+              : 'bg-red-50 dark:bg-red-900/20'
+          }
         />
       </div>
 
@@ -173,7 +173,8 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <p className="font-semibold text-amber-900 dark:text-amber-100">
-                    {stats.pendingPayments} pago{stats.pendingPayments !== 1 ? 's' : ''} pendiente{stats.pendingPayments !== 1 ? 's' : ''}
+                    {stats.pendingPayments} pago{stats.pendingPayments !== 1 ? 's' : ''} pendiente
+                    {stats.pendingPayments !== 1 ? 's' : ''}
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-300">
                     Requieren revisión y aprobación
@@ -189,9 +190,7 @@ export default function AdminDashboard() {
       {/* Recent Businesses */}
       <Card>
         <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-700">
-          <h2 className="font-semibold text-zinc-900 dark:text-white">
-            Negocios Recientes
-          </h2>
+          <h2 className="font-semibold text-zinc-900 dark:text-white">Negocios Recientes</h2>
           <Link
             href="/admin/negocios"
             className="flex items-center gap-1 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
@@ -202,9 +201,7 @@ export default function AdminDashboard() {
         </div>
         <div className="mt-4 divide-y divide-zinc-100 dark:divide-zinc-700">
           {stats.recentBusinesses.length === 0 ? (
-            <p className="py-8 text-center text-zinc-500">
-              No hay negocios registrados
-            </p>
+            <p className="py-8 text-center text-zinc-500">No hay negocios registrados</p>
           ) : (
             stats.recentBusinesses.map((business) => (
               <Link
@@ -217,12 +214,8 @@ export default function AdminDashboard() {
                     <Building2 className="h-5 w-5 text-zinc-600 dark:text-zinc-300" />
                   </div>
                   <div>
-                    <p className="font-medium text-zinc-900 dark:text-white">
-                      {business.name}
-                    </p>
-                    <p className="text-sm text-zinc-500">
-                      /{business.slug}
-                    </p>
+                    <p className="font-medium text-zinc-900 dark:text-white">{business.name}</p>
+                    <p className="text-sm text-zinc-500">/{business.slug}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -274,18 +267,10 @@ function StatCard({
     <Card className="relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            {label}
-          </p>
-          <p className="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">
-            {value}
-          </p>
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
+          <p className="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">{value}</p>
           {trend && (
-            <p
-              className={`mt-1 text-sm ${
-                trendUp ? 'text-emerald-600' : 'text-zinc-500'
-              }`}
-            >
+            <p className={`mt-1 text-sm ${trendUp ? 'text-emerald-600' : 'text-zinc-500'}`}>
               {trend}
             </p>
           )}
@@ -297,4 +282,3 @@ function StatCard({
     </Card>
   )
 }
-

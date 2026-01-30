@@ -39,12 +39,12 @@ export function Success({ onComplete, businessName }: SuccessProps) {
 
         // Create confetti
         if (typeof window !== 'undefined' && (window as any).confetti) {
-          (window as any).confetti({
+          ;(window as any).confetti({
             ...defaults,
             particleCount,
             origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-          });
-          (window as any).confetti({
+          })
+          ;(window as any).confetti({
             ...defaults,
             particleCount,
             origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
@@ -147,9 +147,7 @@ export function Success({ onComplete, businessName }: SuccessProps) {
                 className="flex items-start gap-3"
               >
                 <span className="text-2xl">{feature.emoji}</span>
-                <span className="text-zinc-700 dark:text-zinc-300 pt-1">
-                  {feature.text}
-                </span>
+                <span className="text-zinc-700 dark:text-zinc-300 pt-1">{feature.text}</span>
               </motion.div>
             ))}
           </div>
@@ -164,7 +162,8 @@ export function Success({ onComplete, businessName }: SuccessProps) {
         className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-4 border border-blue-200 dark:border-blue-800 mb-8"
       >
         <p className="text-sm text-blue-800 dark:text-blue-300">
-          🎁 <strong>Tienes 7 días de prueba gratis</strong> con todas las funciones Pro desbloqueadas.
+          🎁 <strong>Tienes 7 días de prueba gratis</strong> con todas las funciones Pro
+          desbloqueadas.
         </p>
       </motion.div>
 

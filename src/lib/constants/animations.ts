@@ -7,9 +7,9 @@
 
 export const TRANSITIONS = {
   // Tiempos (en milisegundos)
-  fast: 150,      // Hover states, feedback inmediato
-  default: 200,   // Transiciones estándar
-  slow: 300,      // Animaciones complejas
+  fast: 150, // Hover states, feedback inmediato
+  default: 200, // Transiciones estándar
+  slow: 300, // Animaciones complejas
 
   // Spring configurations (Framer Motion)
   spring: {
@@ -117,13 +117,13 @@ export const OPACITY = {
  * Usar con animate={{}} en Framer Motion
  */
 export const DURATION = {
-  floating: 3,        // Floating animations (idle states)
-  pulse: 2,          // Pulse effects (loading, attention)
-  shimmer: 1.5,      // Shimmer effects (skeletons)
-  ripple: 0.6,       // Ripple effects (touch feedback)
-  toast: 0.3,        // Toast enter/exit
-  modal: 0.25,       // Modal open/close
-  drawer: 0.3,       // Drawer slide
+  floating: 3, // Floating animations (idle states)
+  pulse: 2, // Pulse effects (loading, attention)
+  shimmer: 1.5, // Shimmer effects (skeletons)
+  ripple: 0.6, // Ripple effects (touch feedback)
+  toast: 0.3, // Toast enter/exit
+  modal: 0.25, // Modal open/close
+  drawer: 0.3, // Drawer slide
 } as const
 
 /**

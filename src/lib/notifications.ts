@@ -67,7 +67,9 @@ export async function getNotifications(
   let query = (supabase as AnySupabase)
     .from('notifications')
     .select('*', { count: 'exact' })
-    .or(`user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`)
+    .or(
+      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
+    )
     .order('created_at', { ascending: false })
 
   if (unreadOnly) {
@@ -85,7 +87,9 @@ export async function getNotifications(
   const { count: unreadCount } = await (supabase as AnySupabase)
     .from('notifications')
     .select('*', { count: 'exact', head: true })
-    .or(`user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`)
+    .or(
+      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
+    )
     .eq('is_read', false)
 
   return {
@@ -118,9 +122,7 @@ export async function markAsRead(
 /**
  * Mark all notifications as read
  */
-export async function markAllAsRead(
-  supabase: SupabaseClient<Database>
-): Promise<boolean> {
+export async function markAllAsRead(supabase: SupabaseClient<Database>): Promise<boolean> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -133,7 +135,9 @@ export async function markAllAsRead(
       is_read: true,
       read_at: new Date().toISOString(),
     })
-    .or(`user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`)
+    .or(
+      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
+    )
     .eq('is_read', false)
 
   return !error
@@ -142,9 +146,7 @@ export async function markAllAsRead(
 /**
  * Get unread notification count
  */
-export async function getUnreadCount(
-  supabase: SupabaseClient<Database>
-): Promise<number> {
+export async function getUnreadCount(supabase: SupabaseClient<Database>): Promise<number> {
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -154,7 +156,9 @@ export async function getUnreadCount(
   const { count } = await (supabase as AnySupabase)
     .from('notifications')
     .select('*', { count: 'exact', head: true })
-    .or(`user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`)
+    .or(
+      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
+    )
     .eq('is_read', false)
 
   return count || 0
@@ -234,20 +238,72 @@ export function getNotificationStyle(type: NotificationType): {
 } {
   const styles: Record<NotificationType, { icon: string; color: string; bgColor: string }> = {
     // Business owner notifications
-    trial_expiring: { icon: 'clock', color: 'text-amber-600', bgColor: 'bg-amber-100 dark:bg-amber-900/30' },
-    trial_expired: { icon: 'alert-circle', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
-    subscription_expiring: { icon: 'clock', color: 'text-amber-600', bgColor: 'bg-amber-100 dark:bg-amber-900/30' },
-    subscription_expired: { icon: 'alert-circle', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
-    payment_approved: { icon: 'check-circle', color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' },
-    payment_rejected: { icon: 'x-circle', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
-    new_appointment: { icon: 'calendar', color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
-    appointment_reminder: { icon: 'bell', color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
-    appointment_cancelled: { icon: 'calendar-x', color: 'text-zinc-600', bgColor: 'bg-zinc-100 dark:bg-zinc-800' },
+    trial_expiring: {
+      icon: 'clock',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+    },
+    trial_expired: {
+      icon: 'alert-circle',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100 dark:bg-red-900/30',
+    },
+    subscription_expiring: {
+      icon: 'clock',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+    },
+    subscription_expired: {
+      icon: 'alert-circle',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100 dark:bg-red-900/30',
+    },
+    payment_approved: {
+      icon: 'check-circle',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100 dark:bg-green-900/30',
+    },
+    payment_rejected: {
+      icon: 'x-circle',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100 dark:bg-red-900/30',
+    },
+    new_appointment: {
+      icon: 'calendar',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    },
+    appointment_reminder: {
+      icon: 'bell',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    },
+    appointment_cancelled: {
+      icon: 'calendar-x',
+      color: 'text-zinc-600',
+      bgColor: 'bg-zinc-100 dark:bg-zinc-800',
+    },
     // Admin notifications
-    new_business: { icon: 'building', color: 'text-purple-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' },
-    payment_pending: { icon: 'credit-card', color: 'text-amber-600', bgColor: 'bg-amber-100 dark:bg-amber-900/30' },
-    trials_expiring_bulk: { icon: 'users', color: 'text-amber-600', bgColor: 'bg-amber-100 dark:bg-amber-900/30' },
-    system_alert: { icon: 'alert-triangle', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
+    new_business: {
+      icon: 'building',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+    },
+    payment_pending: {
+      icon: 'credit-card',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+    },
+    trials_expiring_bulk: {
+      icon: 'users',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+    },
+    system_alert: {
+      icon: 'alert-triangle',
+      color: 'text-red-600',
+      bgColor: 'bg-red-100 dark:bg-red-900/30',
+    },
   }
 
   return styles[type] || { icon: 'bell', color: 'text-zinc-600', bgColor: 'bg-zinc-100' }

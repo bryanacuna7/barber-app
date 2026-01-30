@@ -49,7 +49,9 @@ export default function NewAppointmentEmail({
   return (
     <Html>
       <Head />
-      <Preview>Nueva cita: {clientName} - {serviceName}</Preview>
+      <Preview>
+        Nueva cita: {clientName} - {serviceName}
+      </Preview>
       <Body style={main}>
         <Container style={container}>
           {logoUrl && (
@@ -58,15 +60,13 @@ export default function NewAppointmentEmail({
             </Section>
           )}
 
-          <Heading style={{ ...heading, color: brandColor }}>
-            📅 Nueva Cita Agendada
-          </Heading>
-
-          <Text style={paragraph}>Hola desde <strong>{businessName}</strong>,</Text>
+          <Heading style={{ ...heading, color: brandColor }}>📅 Nueva Cita Agendada</Heading>
 
           <Text style={paragraph}>
-            Se ha agendado una nueva cita en tu barbería:
+            Hola desde <strong>{businessName}</strong>,
           </Text>
+
+          <Text style={paragraph}>Se ha agendado una nueva cita en tu barbería:</Text>
 
           <Section style={detailsBox}>
             <Text style={detailsLabel}>Cliente:</Text>
@@ -99,8 +99,8 @@ export default function NewAppointmentEmail({
           </Section>
 
           <Text style={tip}>
-            💡 <strong>Tip:</strong> Puedes ver todas tus citas del día en el dashboard y
-            recibir notificaciones en tiempo real.
+            💡 <strong>Tip:</strong> Puedes ver todas tus citas del día en el dashboard y recibir
+            notificaciones en tiempo real.
           </Text>
 
           <Text style={footer}>
@@ -108,9 +108,7 @@ export default function NewAppointmentEmail({
             <Link href="https://app.barbershoppro.com/citas">Gestionar citas</Link>
           </Text>
 
-          <Text style={footer}>
-            BarberShop Pro - Tu barbería, sin complicaciones
-          </Text>
+          <Text style={footer}>BarberShop Pro - Tu barbería, sin complicaciones</Text>
         </Container>
       </Body>
     </Html>

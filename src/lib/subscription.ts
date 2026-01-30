@@ -98,10 +98,7 @@ export async function getSubscriptionStatus(
       0,
       Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     )
-  } else if (
-    subscription.status === 'active' &&
-    subscription.current_period_end
-  ) {
+  } else if (subscription.status === 'active' && subscription.current_period_end) {
     const periodEnd = new Date(subscription.current_period_end)
     const now = new Date()
     daysRemaining = Math.max(
@@ -384,9 +381,7 @@ export async function activateSubscription(
 /**
  * Get all available plans
  */
-export async function getPlans(
-  supabase: SupabaseClient<Database>
-): Promise<SubscriptionPlan[]> {
+export async function getPlans(supabase: SupabaseClient<Database>): Promise<SubscriptionPlan[]> {
   const { data, error } = await (supabase as AnySupabase)
     .from('subscription_plans')
     .select('*')
@@ -404,9 +399,7 @@ export async function getPlans(
 /**
  * Get subscription stats for admin dashboard
  */
-export async function getSubscriptionStats(
-  supabase: SupabaseClient<Database>
-): Promise<{
+export async function getSubscriptionStats(supabase: SupabaseClient<Database>): Promise<{
   mrr: number
   trials_active: number
   active_subscriptions: number

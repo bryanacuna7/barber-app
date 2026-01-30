@@ -13,7 +13,12 @@ import {
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { ExchangeRateValue, UsdBankAccountValue, SupportWhatsAppValue, SinpeDetailsValue } from '@/types/database'
+import type {
+  ExchangeRateValue,
+  UsdBankAccountValue,
+  SupportWhatsAppValue,
+  SinpeDetailsValue,
+} from '@/types/database'
 
 interface SystemSetting {
   id: string
@@ -223,9 +228,7 @@ export default function AdminConfiguracion() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-          Configuración
-        </h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Configuración</h1>
         <p className="mt-1 text-zinc-500 dark:text-zinc-400">
           Configuración global de la plataforma
         </p>
@@ -274,10 +277,12 @@ export default function AdminConfiguracion() {
                   min="1"
                   step="0.01"
                   value={exchangeRate.usd_to_crc}
-                  onChange={(e) => setExchangeRate({
-                    ...exchangeRate,
-                    usd_to_crc: parseFloat(e.target.value) || 0,
-                  })}
+                  onChange={(e) =>
+                    setExchangeRate({
+                      ...exchangeRate,
+                      usd_to_crc: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-lg font-semibold dark:border-zinc-700 dark:bg-zinc-800"
                 />
               </div>
@@ -293,10 +298,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={exchangeRate.notes || ''}
-                onChange={(e) => setExchangeRate({
-                  ...exchangeRate,
-                  notes: e.target.value,
-                })}
+                onChange={(e) =>
+                  setExchangeRate({
+                    ...exchangeRate,
+                    notes: e.target.value,
+                  })
+                }
                 placeholder="Ej: Tipo de cambio del BCCR"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -311,20 +318,21 @@ export default function AdminConfiguracion() {
             <div className="mt-2 grid gap-2 text-sm">
               <div className="flex justify-between">
                 <span>Plan Básico ($12)</span>
-                <span className="font-semibold">₡{(12 * exchangeRate.usd_to_crc).toLocaleString('es-CR')}</span>
+                <span className="font-semibold">
+                  ₡{(12 * exchangeRate.usd_to_crc).toLocaleString('es-CR')}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Plan Pro ($29)</span>
-                <span className="font-semibold">₡{(29 * exchangeRate.usd_to_crc).toLocaleString('es-CR')}</span>
+                <span className="font-semibold">
+                  ₡{(29 * exchangeRate.usd_to_crc).toLocaleString('es-CR')}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button
-              onClick={saveExchangeRate}
-              disabled={saving === 'exchange_rate'}
-            >
+            <Button onClick={saveExchangeRate} disabled={saving === 'exchange_rate'}>
               {saving === 'exchange_rate' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -357,17 +365,21 @@ export default function AdminConfiguracion() {
               <input
                 type="checkbox"
                 checked={bankAccount.enabled}
-                onChange={(e) => setBankAccount({
-                  ...bankAccount,
-                  enabled: e.target.checked,
-                })}
+                onChange={(e) =>
+                  setBankAccount({
+                    ...bankAccount,
+                    enabled: e.target.checked,
+                  })
+                }
                 className="h-5 w-5 rounded border-zinc-300 dark:border-zinc-600"
               />
               <span className="font-medium">Habilitar opción de depósito en dólares</span>
             </label>
           </div>
 
-          <div className={`grid gap-4 sm:grid-cols-2 ${!bankAccount.enabled && 'opacity-50 pointer-events-none'}`}>
+          <div
+            className={`grid gap-4 sm:grid-cols-2 ${!bankAccount.enabled && 'opacity-50 pointer-events-none'}`}
+          >
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Nombre del Banco
@@ -375,10 +387,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={bankAccount.bank_name}
-                onChange={(e) => setBankAccount({
-                  ...bankAccount,
-                  bank_name: e.target.value,
-                })}
+                onChange={(e) =>
+                  setBankAccount({
+                    ...bankAccount,
+                    bank_name: e.target.value,
+                  })
+                }
                 placeholder="Ej: Banco Nacional de Costa Rica"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -391,10 +405,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={bankAccount.account_holder}
-                onChange={(e) => setBankAccount({
-                  ...bankAccount,
-                  account_holder: e.target.value,
-                })}
+                onChange={(e) =>
+                  setBankAccount({
+                    ...bankAccount,
+                    account_holder: e.target.value,
+                  })
+                }
                 placeholder="Ej: BarberShop Pro S.A."
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -407,10 +423,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={bankAccount.account_number}
-                onChange={(e) => setBankAccount({
-                  ...bankAccount,
-                  account_number: e.target.value,
-                })}
+                onChange={(e) =>
+                  setBankAccount({
+                    ...bankAccount,
+                    account_number: e.target.value,
+                  })
+                }
                 placeholder="Ej: CR00 0000 0000 0000 0000 00"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 font-mono dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -422,10 +440,12 @@ export default function AdminConfiguracion() {
               </label>
               <textarea
                 value={bankAccount.notes || ''}
-                onChange={(e) => setBankAccount({
-                  ...bankAccount,
-                  notes: e.target.value,
-                })}
+                onChange={(e) =>
+                  setBankAccount({
+                    ...bankAccount,
+                    notes: e.target.value,
+                  })
+                }
                 placeholder="Instrucciones adicionales para el depósito..."
                 rows={2}
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
@@ -434,10 +454,7 @@ export default function AdminConfiguracion() {
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button
-              onClick={saveBankAccount}
-              disabled={saving === 'usd_bank_account'}
-            >
+            <Button onClick={saveBankAccount} disabled={saving === 'usd_bank_account'}>
               {saving === 'usd_bank_account' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -473,10 +490,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={whatsapp.number}
-                onChange={(e) => setWhatsapp({
-                  ...whatsapp,
-                  number: e.target.value.replace(/\D/g, ''),
-                })}
+                onChange={(e) =>
+                  setWhatsapp({
+                    ...whatsapp,
+                    number: e.target.value.replace(/\D/g, ''),
+                  })
+                }
                 placeholder="Ej: 50688888888"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 font-mono dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -492,16 +511,16 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={whatsapp.display_number}
-                onChange={(e) => setWhatsapp({
-                  ...whatsapp,
-                  display_number: e.target.value,
-                })}
+                onChange={(e) =>
+                  setWhatsapp({
+                    ...whatsapp,
+                    display_number: e.target.value,
+                  })
+                }
                 placeholder="Ej: 8888-8888"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
-              <p className="mt-1 text-xs text-zinc-500">
-                Formato legible para mostrar a usuarios
-              </p>
+              <p className="mt-1 text-xs text-zinc-500">Formato legible para mostrar a usuarios</p>
             </div>
           </div>
 
@@ -521,10 +540,7 @@ export default function AdminConfiguracion() {
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button
-              onClick={saveWhatsApp}
-              disabled={saving === 'support_whatsapp'}
-            >
+            <Button onClick={saveWhatsApp} disabled={saving === 'support_whatsapp'}>
               {saving === 'support_whatsapp' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -560,10 +576,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={sinpe.phone_number}
-                onChange={(e) => setSinpe({
-                  ...sinpe,
-                  phone_number: e.target.value,
-                })}
+                onChange={(e) =>
+                  setSinpe({
+                    ...sinpe,
+                    phone_number: e.target.value,
+                  })
+                }
                 placeholder="Ej: 8888-8888"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 font-mono dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -576,10 +594,12 @@ export default function AdminConfiguracion() {
               <input
                 type="text"
                 value={sinpe.account_name}
-                onChange={(e) => setSinpe({
-                  ...sinpe,
-                  account_name: e.target.value,
-                })}
+                onChange={(e) =>
+                  setSinpe({
+                    ...sinpe,
+                    account_name: e.target.value,
+                  })
+                }
                 placeholder="Ej: BarberShop Pro"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
@@ -591,10 +611,12 @@ export default function AdminConfiguracion() {
               </label>
               <textarea
                 value={sinpe.notes || ''}
-                onChange={(e) => setSinpe({
-                  ...sinpe,
-                  notes: e.target.value,
-                })}
+                onChange={(e) =>
+                  setSinpe({
+                    ...sinpe,
+                    notes: e.target.value,
+                  })
+                }
                 placeholder="Instrucciones adicionales para el pago..."
                 rows={2}
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
@@ -603,10 +625,7 @@ export default function AdminConfiguracion() {
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button
-              onClick={saveSinpe}
-              disabled={saving === 'sinpe_details'}
-            >
+            <Button onClick={saveSinpe} disabled={saving === 'sinpe_details'}>
               {saving === 'sinpe_details' ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (

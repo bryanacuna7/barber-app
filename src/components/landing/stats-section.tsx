@@ -91,8 +91,12 @@ export function StatsSection() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/50 to-pink-50/50 opacity-0 transition-opacity group-hover:opacity-100 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20" />
 
                 <div className="relative">
-                  <div className={`inline-flex items-center justify-center rounded-xl bg-${stat.color}-100 p-3 dark:bg-${stat.color}-900/30`}>
-                    <Icon className={`h-6 w-6 text-${stat.color}-600 dark:text-${stat.color}-400`} />
+                  <div
+                    className={`inline-flex items-center justify-center rounded-xl bg-${stat.color}-100 p-3 dark:bg-${stat.color}-900/30`}
+                  >
+                    <Icon
+                      className={`h-6 w-6 text-${stat.color}-600 dark:text-${stat.color}-400`}
+                    />
                   </div>
 
                   <p className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">

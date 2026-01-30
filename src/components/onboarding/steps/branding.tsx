@@ -124,16 +124,9 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
                 <p className="mb-2 text-sm text-zinc-600 dark:text-zinc-400">
                   <span className="font-semibold">Click para subir</span> o arrastra aquí
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-500">
-                  PNG, JPG, SVG (máx. 2MB)
-                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-500">PNG, JPG, SVG (máx. 2MB)</p>
               </div>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleLogoUpload}
-              />
+              <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
             </label>
           ) : (
             <div className="relative rounded-2xl bg-white dark:bg-zinc-800 p-6 border border-zinc-200 dark:border-zinc-700">
@@ -150,12 +143,8 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
                   className="h-20 w-20 object-contain rounded-lg bg-zinc-100 dark:bg-zinc-700 p-2"
                 />
                 <div>
-                  <p className="font-medium text-zinc-900 dark:text-white">
-                    Logo subido
-                  </p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {branding.logo?.name}
-                  </p>
+                  <p className="font-medium text-zinc-900 dark:text-white">Logo subido</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{branding.logo?.name}</p>
                 </div>
               </div>
             </div>
@@ -164,16 +153,10 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
 
         {/* Preview */}
         <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 border border-amber-200 dark:border-amber-800">
-          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-4">
-            Vista previa:
-          </p>
+          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-4">Vista previa:</p>
           <div className="rounded-xl bg-white dark:bg-zinc-800 p-6">
             {branding.logoPreview && (
-              <img
-                src={branding.logoPreview}
-                alt="Logo"
-                className="h-12 mb-4 object-contain"
-              />
+              <img src={branding.logoPreview} alt="Logo" className="h-12 mb-4 object-contain" />
             )}
             <div className="flex items-center gap-4">
               <div
@@ -181,9 +164,7 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
                 style={{ backgroundColor: branding.primaryColor }}
               />
               <div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
-                  Tu color de marca:
-                </p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">Tu color de marca:</p>
                 <p className="font-mono text-lg font-semibold text-zinc-900 dark:text-white">
                   {branding.primaryColor}
                 </p>
@@ -195,18 +176,14 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
         {/* Info box */}
         <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-4 border border-blue-200 dark:border-blue-800">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            💡 <strong>Tip:</strong> Puedes cambiar estos ajustes en cualquier momento desde Configuración.
+            💡 <strong>Tip:</strong> Puedes cambiar estos ajustes en cualquier momento desde
+            Configuración.
           </p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 justify-between pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="group"
-          >
+          <Button type="button" variant="outline" onClick={onBack} className="group">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
             Atrás
           </Button>

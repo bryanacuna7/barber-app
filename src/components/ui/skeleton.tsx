@@ -5,14 +5,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return (
-    <div
-      className={cn(
-        'skeleton rounded-lg',
-        className
-      )}
-    />
-  )
+  return <div className={cn('skeleton rounded-lg', className)} />
 }
 
 // Preset skeletons
@@ -42,7 +35,10 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+        <div
+          key={i}
+          className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50"
+        >
           <Skeleton className="w-10 h-10 rounded-lg" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-1/3" />

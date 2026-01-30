@@ -30,14 +30,16 @@ export interface AppointmentFormData {
 }
 
 const timeSlots = Array.from({ length: 24 }, (_, hour) => {
-  return ['00', '30'].map(minutes => {
+  return ['00', '30'].map((minutes) => {
     const time = `${hour.toString().padStart(2, '0')}:${minutes}`
     return { value: time, label: time }
   })
-}).flat().filter(slot => {
-  const hour = parseInt(slot.value.split(':')[0])
-  return hour >= 8 && hour < 20
 })
+  .flat()
+  .filter((slot) => {
+    const hour = parseInt(slot.value.split(':')[0])
+    return hour >= 8 && hour < 20
+  })
 
 export function AppointmentForm({
   isOpen,
@@ -46,7 +48,7 @@ export function AppointmentForm({
   appointment,
   services,
   clients,
-  selectedDate
+  selectedDate,
 }: AppointmentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -56,7 +58,7 @@ export function AppointmentForm({
     service_id: '',
     scheduled_at: '',
     client_notes: '',
-    internal_notes: ''
+    internal_notes: '',
   })
 
   const [date, setDate] = useState(format(selectedDate || new Date(), 'yyyy-MM-dd'))
@@ -71,7 +73,7 @@ export function AppointmentForm({
         service_id: appointment.service_id || '',
         scheduled_at: appointment.scheduled_at,
         client_notes: appointment.client_notes || '',
-        internal_notes: appointment.internal_notes || ''
+        internal_notes: appointment.internal_notes || '',
       })
       setDate(format(apptDate, 'yyyy-MM-dd'))
       setTime(format(apptDate, 'HH:mm'))
@@ -82,7 +84,7 @@ export function AppointmentForm({
         service_id: services[0]?.id || '',
         scheduled_at: '',
         client_notes: '',
-        internal_notes: ''
+        internal_notes: '',
       })
       setDate(format(selectedDate || new Date(), 'yyyy-MM-dd'))
       setTime('09:00')
@@ -108,7 +110,7 @@ export function AppointmentForm({
       const scheduled_at = new Date(`${date}T${time}:00`).toISOString()
       await onSubmit({
         ...formData,
-        scheduled_at
+        scheduled_at,
       })
       onClose()
     } catch (err) {
@@ -118,14 +120,16 @@ export function AppointmentForm({
     }
   }
 
-  const selectedService = services.find(s => s.id === formData.service_id)
+  const selectedService = services.find((s) => s.id === formData.service_id)
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={appointment ? 'Editar Cita' : 'Nueva Cita'}
-      description={appointment ? 'Modifica los detalles de la cita' : 'Programa una nueva cita para un cliente'}
+      description={
+        appointment ? 'Modifica los detalles de la cita' : 'Programa una nueva cita para un cliente'
+      }
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -146,7 +150,7 @@ export function AppointmentForm({
             onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
             options={[
               { value: '', label: 'Seleccionar cliente...' },
-              ...clients.map(c => ({ value: c.id, label: `${c.name} - ${c.phone}` }))
+              ...clients.map((c) => ({ value: c.id, label: `${c.name} - ${c.phone}` })),
             ]}
           />
         </div>
@@ -160,9 +164,9 @@ export function AppointmentForm({
           <Select
             value={formData.service_id}
             onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
-            options={services.map(s => ({
+            options={services.map((s) => ({
               value: s.id,
-              label: `${s.name} - ${s.duration_minutes} min - ₡${s.price}`
+              label: `${s.name} - ${s.duration_minutes} min - ₡${s.price}`,
             }))}
           />
           {selectedService && (
@@ -191,11 +195,7 @@ export function AppointmentForm({
               <Clock className="w-4 h-4" />
               Hora
             </label>
-            <Select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              options={timeSlots}
-            />
+            <Select value={time} onChange={(e) => setTime(e.target.value)} options={timeSlots} />
           </div>
         </div>
 
@@ -203,7 +203,9 @@ export function AppointmentForm({
         <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Vista previa:</p>
           <p className="font-medium text-zinc-900 dark:text-zinc-100 capitalize">
-            {format(new Date(`${date}T${time}:00`), "EEEE, d 'de' MMMM 'a las' HH:mm", { locale: es })}
+            {format(new Date(`${date}T${time}:00`), "EEEE, d 'de' MMMM 'a las' HH:mm", {
+              locale: es,
+            })}
           </p>
         </div>
 
@@ -255,18 +257,10 @@ export function AppointmentForm({
         </div>
 
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button
-            type="submit"
-            isLoading={isSubmitting}
-          >
+          <Button type="submit" isLoading={isSubmitting}>
             {appointment ? 'Guardar cambios' : 'Crear cita'}
           </Button>
         </ModalFooter>

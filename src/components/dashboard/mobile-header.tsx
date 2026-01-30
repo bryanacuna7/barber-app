@@ -15,11 +15,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
         {logoUrl ? (
-          <img
-            src={logoUrl}
-            alt=""
-            className="h-7 w-7 rounded-lg object-cover"
-          />
+          <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
         ) : (
           <Scissors className="h-5 w-5" />
         )}

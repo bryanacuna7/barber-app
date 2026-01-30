@@ -78,9 +78,7 @@ export function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
                 ) : (
                   <span
                     className={`text-xs font-semibold ${
-                      isCurrent
-                        ? 'text-white'
-                        : 'text-zinc-400 dark:text-zinc-600'
+                      isCurrent ? 'text-white' : 'text-zinc-400 dark:text-zinc-600'
                     }`}
                   >
                     {stepNum}

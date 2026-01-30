@@ -29,10 +29,7 @@ export interface ThemeVars {
   '--brand-secondary': string
 }
 
-export function generateThemeVars(
-  primaryColor: string,
-  secondaryColor?: string | null,
-): ThemeVars {
+export function generateThemeVars(primaryColor: string, secondaryColor?: string | null): ThemeVars {
   const rgb = hexToRgb(primaryColor) || { r: 0, g: 122, b: 255 }
 
   return {
@@ -45,7 +42,7 @@ export function generateThemeVars(
 
 export function generateThemeStyle(
   primaryColor: string,
-  secondaryColor?: string | null,
+  secondaryColor?: string | null
 ): React.CSSProperties {
   const vars = generateThemeVars(primaryColor, secondaryColor)
   return vars as unknown as React.CSSProperties
@@ -54,7 +51,7 @@ export function generateThemeStyle(
 export function applyThemeToElement(
   element: HTMLElement,
   primaryColor: string,
-  secondaryColor?: string | null,
+  secondaryColor?: string | null
 ) {
   const vars = generateThemeVars(primaryColor, secondaryColor)
   for (const [key, value] of Object.entries(vars)) {

@@ -118,10 +118,7 @@ export function ThemeProvider({ primaryColor, secondaryColor }: ThemeProviderPro
     root.style.setProperty('--brand-primary-rgb', hexToRgb(primaryColor))
     root.style.setProperty('--brand-primary-light', lightenColor(primaryColor, 0.85))
     root.style.setProperty('--brand-primary-dark', darkenColor(primaryColor, 0.3))
-    root.style.setProperty(
-      '--brand-secondary',
-      secondaryColor || lightenColor(primaryColor, 0.4)
-    )
+    root.style.setProperty('--brand-secondary', secondaryColor || lightenColor(primaryColor, 0.4))
 
     // Contrasting text colors
     root.style.setProperty('--brand-primary-contrast', getContrastingTextColor(primaryColor))

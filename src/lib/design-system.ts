@@ -32,11 +32,11 @@ export const typography = {
 
 // Spacing Scale (8pt grid)
 export const spacing = {
-  xs: '8px',   // 0.5rem
-  sm: '12px',  // 0.75rem
-  md: '16px',  // 1rem
-  lg: '24px',  // 1.5rem
-  xl: '32px',  // 2rem
+  xs: '8px', // 0.5rem
+  sm: '12px', // 0.75rem
+  md: '16px', // 1rem
+  lg: '24px', // 1.5rem
+  xl: '32px', // 2rem
   '2xl': '40px', // 2.5rem
   '3xl': '48px', // 3rem
   '4xl': '64px', // 4rem
@@ -51,10 +51,10 @@ export const touchTargets = {
 
 // Border radius (Apple style)
 export const radius = {
-  sm: 'rounded-lg',      // 8px
-  md: 'rounded-xl',      // 12px
-  lg: 'rounded-2xl',     // 16px
-  xl: 'rounded-[20px]',  // 20px
+  sm: 'rounded-lg', // 8px
+  md: 'rounded-xl', // 12px
+  lg: 'rounded-2xl', // 16px
+  xl: 'rounded-[20px]', // 20px
   full: 'rounded-full',
   card: 'rounded-[18px]',
   button: 'rounded-[14px]',

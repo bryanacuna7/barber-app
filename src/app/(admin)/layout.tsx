@@ -3,15 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
 import { AdminSidebar, AdminBottomNav } from '@/components/admin/admin-sidebar'
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
 
   // Verify authentication
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
     redirect('/login')
@@ -31,9 +29,7 @@ export default async function AdminLayout({
 
       {/* Main content */}
       <main className="lg:pl-64">
-        <div className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8">
-          {children}
-        </div>
+        <div className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8">{children}</div>
       </main>
 
       {/* Mobile bottom navigation */}

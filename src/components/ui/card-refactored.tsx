@@ -19,39 +19,32 @@ import { cn } from '@/lib/utils'
 // 4. touch-action for mobile
 // ============================================================================
 
-export interface BaseCardProps extends Omit<HTMLAttributes<HTMLDivElement>, keyof HTMLMotionProps<'div'>> {
+export interface BaseCardProps {
   variant?: 'default' | 'elevated' | 'gradient' | 'bordered' | 'glass'
   children?: ReactNode
+  className?: string
 }
 
 const baseStyles = 'rounded-2xl p-6 backdrop-blur-sm transition-colors duration-200'
 
 const variants = {
-  default: 'bg-white/90 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)] dark:bg-zinc-800/80 dark:border dark:border-zinc-700/50 dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]',
-  elevated: 'bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08),0_8px_40px_rgba(0,0,0,0.04)] dark:bg-zinc-800 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]',
-  gradient: 'bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/30',
+  default:
+    'bg-white/90 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)] dark:bg-zinc-800/80 dark:border dark:border-zinc-700/50 dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]',
+  elevated:
+    'bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08),0_8px_40px_rgba(0,0,0,0.04)] dark:bg-zinc-800 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]',
+  gradient:
+    'bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/30',
   bordered: 'bg-white border-2 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-700',
-  glass: 'bg-white/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:bg-zinc-900/60 dark:border-zinc-700/20',
+  glass:
+    'bg-white/60 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:bg-zinc-900/60 dark:border-zinc-700/20',
 }
 
 // Base Card Component (static, no interaction)
-export function Card({
-  className,
-  variant = 'default',
-  children,
-  ...props
-}: BaseCardProps) {
+export function Card({ className, variant = 'default', children, ...props }: BaseCardProps) {
   const MotionCard = motion.div
 
   return (
-    <MotionCard
-      className={cn(
-        baseStyles,
-        variants[variant],
-        className
-      )}
-      {...props}
-    >
+    <MotionCard className={cn(baseStyles, variants[variant], className)} {...props}>
       {children}
     </MotionCard>
   )
@@ -72,12 +65,7 @@ function CardInteractive({
 
   return (
     <MotionCard
-      className={cn(
-        baseStyles,
-        variants[variant],
-        'cursor-pointer',
-        className
-      )}
+      className={cn(baseStyles, variants[variant], 'cursor-pointer', className)}
       whileHover={{
         y: -4,
         scale: 1.01,
@@ -203,12 +191,7 @@ function CardLink({
 type CardHeaderProps = HTMLAttributes<HTMLDivElement>
 
 export function CardHeader({ className, ...props }: CardHeaderProps) {
-  return (
-    <div
-      className={cn('mb-4', className)}
-      {...props}
-    />
-  )
+  return <div className={cn('mb-4', className)} {...props} />
 }
 
 type CardTitleProps = HTMLAttributes<HTMLHeadingElement>
@@ -216,10 +199,7 @@ type CardTitleProps = HTMLAttributes<HTMLHeadingElement>
 export function CardTitle({ className, ...props }: CardTitleProps) {
   return (
     <h3
-      className={cn(
-        'text-lg font-semibold text-zinc-900 dark:text-white',
-        className
-      )}
+      className={cn('text-lg font-semibold text-zinc-900 dark:text-white', className)}
       {...props}
     />
   )
@@ -228,37 +208,19 @@ export function CardTitle({ className, ...props }: CardTitleProps) {
 type CardDescriptionProps = HTMLAttributes<HTMLParagraphElement>
 
 export function CardDescription({ className, ...props }: CardDescriptionProps) {
-  return (
-    <p
-      className={cn(
-        'mt-1 text-sm text-zinc-500 dark:text-zinc-400',
-        className
-      )}
-      {...props}
-    />
-  )
+  return <p className={cn('mt-1 text-sm text-zinc-500 dark:text-zinc-400', className)} {...props} />
 }
 
 type CardContentProps = HTMLAttributes<HTMLDivElement>
 
 export function CardContent({ className, ...props }: CardContentProps) {
-  return (
-    <div
-      className={cn('', className)}
-      {...props}
-    />
-  )
+  return <div className={cn('', className)} {...props} />
 }
 
 type CardFooterProps = HTMLAttributes<HTMLDivElement>
 
 export function CardFooter({ className, ...props }: CardFooterProps) {
-  return (
-    <div
-      className={cn('mt-4 flex items-center gap-2', className)}
-      {...props}
-    />
-  )
+  return <div className={cn('mt-4 flex items-center gap-2', className)} {...props} />
 }
 
 // ============================================================================
@@ -293,19 +255,18 @@ export function StatCard({
   return (
     <Component onClick={onClick} className={cn('relative overflow-hidden', className)} {...props}>
       {icon && (
-        <div className="mb-3 inline-flex p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800" aria-hidden="true">
+        <div
+          className="mb-3 inline-flex p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800"
+          aria-hidden="true"
+        >
           {icon}
         </div>
       )}
 
       <div className="space-y-1">
-        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          {label}
-        </p>
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
         <div className="flex items-end gap-2">
-          <p className="text-3xl font-bold text-zinc-900 dark:text-white">
-            {value}
-          </p>
+          <p className="text-3xl font-bold text-zinc-900 dark:text-white">{value}</p>
           {trend && (
             <span
               className={cn(
@@ -314,15 +275,12 @@ export function StatCard({
               )}
               aria-label={`${trend.isPositive ? 'Increase' : 'Decrease'} of ${trend.value} percent`}
             >
-              {trend.isPositive ? '+' : ''}{trend.value}%
+              {trend.isPositive ? '+' : ''}
+              {trend.value}%
             </span>
           )}
         </div>
-        {description && (
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {description}
-          </p>
-        )}
+        {description && <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>}
       </div>
     </Component>
   )
@@ -340,12 +298,7 @@ Card.Footer = CardFooter
 Card.Stat = StatCard
 
 // Named exports for backwards compatibility
-export {
-  Card as default,
-  CardInteractive,
-  CardButton,
-  CardLink,
-}
+export { Card as default, CardInteractive, CardButton, CardLink }
 
 // ============================================================================
 // USAGE EXAMPLES

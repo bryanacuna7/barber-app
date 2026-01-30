@@ -9,24 +9,28 @@ This file provides guidance to Claude Code when working with code in this reposi
 Estas reglas son **OBLIGATORIAS**, no sugerencias:
 
 ### 1. SIEMPRE verificar cambios UI visualmente
+
 ```
 Después de modificar CSS/componentes → Playwright screenshot OBLIGATORIO
 NUNCA decir "debería verse bien" sin verificar
 ```
 
 ### 2. SIEMPRE mostrar qué agente se usa
+
 ```
 Antes de trabajar → "🤖 Using @[agente]..."
 Leer .claude/agents/[agente].md para instrucciones específicas
 ```
 
 ### 3. SIEMPRE verificar el dev server antes de preview
+
 ```
 lsof -i :3000 | grep LISTEN
 Si no corre → iniciar automáticamente
 ```
 
 ### 4. NUNCA asumir que el código funciona
+
 ```
 Cambio de UI → screenshot
 Cambio de lógica → test o verificación
@@ -44,8 +48,10 @@ ls PROGRESS.md 2>/dev/null
 ```
 
 **Si PROGRESS.md existe:**
+
 1. Léelo silenciosamente
 2. Muestra resumen breve:
+
    ```
    📋 Sesión anterior: [resumen 1 línea]
    ➡️  Siguiente: [próxima tarea]
@@ -58,17 +64,20 @@ ls PROGRESS.md 2>/dev/null
 ### Auto-Save - Después de completar trabajo importante:
 
 Automáticamente actualiza `PROGRESS.md` cuando:
+
 - ✅ Se completa una feature (`/create`, `/enhance`)
 - ✅ Se hace deploy (`/deploy`)
 - ✅ Se hace commit (`/commit`)
 - ✅ El usuario dice "listo", "terminé", "por hoy"
 
 **No preguntes permiso** - simplemente actualiza PROGRESS.md silenciosamente y confirma:
+
 ```
 💾 Progreso guardado automáticamente.
 ```
 
 ### Comandos Manuales (opcionales):
+
 - `/continue` - Forzar lectura de PROGRESS.md
 - `/save-progress` - Forzar guardado manual
 
@@ -83,6 +92,7 @@ Estos comportamientos se ejecutan **automáticamente** sin que el usuario lo pid
 **IMPORTANTE:** Verificar servidor en MÚLTIPLES momentos, no solo al inicio.
 
 **Cuándo verificar:**
+
 1. Al inicio de sesión
 2. Después de crear/modificar componentes UI
 3. Cuando el usuario pide "ver", "probar", "revisar" algo visual
@@ -90,17 +100,19 @@ Estos comportamientos se ejecutan **automáticamente** sin que el usuario lo pid
 5. Después de `/create`, `/enhance` que afecten UI
 
 **Verificación:**
+
 ```bash
 lsof -i :3000 2>/dev/null | grep LISTEN
 ```
 
-| Estado | Acción |
-|--------|--------|
-| No está corriendo | **Iniciar automáticamente** en background: `npm run dev &` |
-| Ya está corriendo | Silencioso (no mostrar nada) |
+| Estado                  | Acción                                                          |
+| ----------------------- | --------------------------------------------------------------- |
+| No está corriendo       | **Iniciar automáticamente** en background: `npm run dev &`      |
+| Ya está corriendo       | Silencioso (no mostrar nada)                                    |
 | Puerto ocupado por otro | Liberar y reiniciar: `kill $(lsof -t -i:3000) && npm run dev &` |
 
 **Comportamiento:**
+
 - **NO preguntar** - iniciar directamente
 - Mostrar brevemente: "🟢 Server started at http://localhost:3000"
 - Si el usuario menciona "ver", "probar", "preview" → verificar servidor PRIMERO
@@ -111,13 +123,13 @@ lsof -i :3000 2>/dev/null | grep LISTEN
 
 **Cuando ocurre un error**, arreglarlo automáticamente:
 
-| Error | Auto-Fix | Mensaje |
-|-------|----------|---------|
-| ESLint errors | `npm run lint -- --fix` | "🔧 Fixed X lint errors" |
-| Prettier format | `npx prettier --write [file]` | "🔧 Formatted" |
-| TypeScript (simple) | Aplicar fix sugerido | "🔧 Fixed type error" |
-| Missing semicolon | Auto-add | (silencioso) |
-| Unused imports | Auto-remove | "🧹 Removed unused imports" |
+| Error               | Auto-Fix                      | Mensaje                     |
+| ------------------- | ----------------------------- | --------------------------- |
+| ESLint errors       | `npm run lint -- --fix`       | "🔧 Fixed X lint errors"    |
+| Prettier format     | `npx prettier --write [file]` | "🔧 Formatted"              |
+| TypeScript (simple) | Aplicar fix sugerido          | "🔧 Fixed type error"       |
+| Missing semicolon   | Auto-add                      | (silencioso)                |
+| Unused imports      | Auto-remove                   | "🧹 Removed unused imports" |
 
 **No preguntar** - arreglar y confirmar brevemente.
 
@@ -125,17 +137,18 @@ lsof -i :3000 2>/dev/null | grep LISTEN
 
 **Detectar y resolver errores comunes automáticamente:**
 
-| Error | Detección | Auto-Recovery |
-|-------|-----------|---------------|
-| `EADDRINUSE :3000` | Puerto ocupado | `kill -9 $(lsof -t -i:3000)` + restart |
-| `node_modules not found` | npm error | `npm install` automático |
-| `Cannot find module 'X'` | Import error | `npm install X` automático |
-| `ENOENT .env` | Archivo faltante | Crear desde `.env.example` |
-| `lock file conflict` | npm/yarn conflict | Delete lock + reinstall |
-| `CORS error` | API error | Sugerir configuración específica |
-| `Build failed` | Next.js/Vite error | Mostrar error + sugerir fix |
+| Error                    | Detección          | Auto-Recovery                          |
+| ------------------------ | ------------------ | -------------------------------------- |
+| `EADDRINUSE :3000`       | Puerto ocupado     | `kill -9 $(lsof -t -i:3000)` + restart |
+| `node_modules not found` | npm error          | `npm install` automático               |
+| `Cannot find module 'X'` | Import error       | `npm install X` automático             |
+| `ENOENT .env`            | Archivo faltante   | Crear desde `.env.example`             |
+| `lock file conflict`     | npm/yarn conflict  | Delete lock + reinstall                |
+| `CORS error`             | API error          | Sugerir configuración específica       |
+| `Build failed`           | Next.js/Vite error | Mostrar error + sugerir fix            |
 
 **Flujo:**
+
 1. Detectar error
 2. Intentar auto-fix
 3. Si funciona → "🔧 Resuelto: [problema]"
@@ -148,6 +161,7 @@ lsof -i :3000 2>/dev/null | grep LISTEN
 > NO es opcional. NO es "cuando sea posible". ES OBLIGATORIO.
 
 **Archivos que REQUIEREN preview visual:**
+
 - `src/app/**/*.tsx`
 - `src/components/**/*.tsx`
 - `src/pages/**/*.tsx`
@@ -169,6 +183,7 @@ lsof -i :3000 2>/dev/null | grep LISTEN
 ```
 
 **Comandos Playwright a usar:**
+
 ```
 mcp__playwright__playwright_navigate → ir a la URL
 mcp__playwright__playwright_screenshot → capturar pantalla
@@ -176,6 +191,7 @@ mcp__playwright__playwright_click → interactuar si necesario
 ```
 
 **Output esperado:**
+
 ```
 🟢 Server running
 🖼️ Verificando cambios visualmente...
@@ -184,6 +200,7 @@ mcp__playwright__playwright_click → interactuar si necesario
 ```
 
 **PROHIBIDO:**
+
 - ❌ Decir "el cambio debería verse bien" sin verificar
 - ❌ Asumir que el CSS funciona sin screenshot
 - ❌ Confiar en que el código está correcto sin preview
@@ -196,11 +213,13 @@ mcp__playwright__playwright_click → interactuar si necesario
 **TRIGGER:** Cuando escribo/edito código con imports
 
 **Acción:** Verificar si el paquete está instalado
+
 ```bash
 grep "package-name" package.json
 ```
 
 **Si no está instalado:**
+
 1. Instalar automáticamente: `npm install package-name`
 2. Confirmar: "📦 Installed: package-name"
 
@@ -214,9 +233,11 @@ grep "package-name" package.json
 ### Después de modificar archivos de AUTH/PAYMENT → Security Check
 
 **Trigger:** Editar archivos en:
+
 - `**/auth/**`, `**/login/**`, `**/payment/**`, `**/api/admin/**`
 
 **Acción OBLIGATORIA:**
+
 1. Escanear el código modificado por:
    - Hardcoded secrets (API keys, passwords)
    - SQL injection (`${}` en queries)
@@ -231,9 +252,11 @@ grep "package-name" package.json
 ### Después de modificar archivos en src/lib o src/utils → Run Tests
 
 **Trigger:** Editar archivos en:
+
 - `src/lib/**`, `src/utils/**`, `src/api/**`
 
 **Acción OBLIGATORIA:**
+
 1. Buscar tests relacionados: `ls **/__tests__/*[filename]*`
 2. Si existen tests → ejecutarlos: `npm test -- [test-file]`
 3. Reportar: `✅ Tests OK` o `❌ Test failed: [error]`
@@ -245,6 +268,7 @@ grep "package-name" package.json
 **Trigger:** Crear archivo en `src/app/api/**` o `pages/api/**`
 
 **Acción OBLIGATORIA:**
+
 1. Verificar si usa variables de entorno (`process.env.X`)
 2. Si usa nuevas variables → agregarlas a `.env.example`
 3. Confirmar: `📚 Added X_API_KEY to .env.example`
@@ -256,6 +280,7 @@ grep "package-name" package.json
 **Trigger:** Completar comando `/create` o `/enhance`
 
 **Acción OBLIGATORIA:**
+
 1. Guardar progreso en PROGRESS.md
 2. Sugerir siguiente paso:
    ```
@@ -270,6 +295,7 @@ grep "package-name" package.json
 **Trigger:** Completar comando `/commit`
 
 **Acción:**
+
 1. Ejecutar `git status`
 2. Si hay cambios pendientes → avisar
 3. Si no hay cambios → `✅ Working tree clean`
@@ -281,6 +307,7 @@ grep "package-name" package.json
 **Trigger:** Error en `npm run build` o `npm run dev`
 
 **Acción OBLIGATORIA:**
+
 1. Leer el error completo
 2. Identificar causa raíz
 3. Proponer fix específico
@@ -291,9 +318,11 @@ grep "package-name" package.json
 ### Cuando usuario dice "funciona" o "listo" → Guardar progreso
 
 **Trigger:** Usuario indica que terminó algo:
+
 - "listo", "funciona", "done", "terminé", "ya quedó"
 
 **Acción:**
+
 1. Actualizar PROGRESS.md con lo completado
 2. Confirmar: `💾 Progress saved`
 
@@ -304,6 +333,7 @@ grep "package-name" package.json
 **Trigger:** Ejecutar `/commit` con archivos que tienen `console.log`
 
 **Acción:**
+
 1. Detectar console.logs en archivos staged
 2. Advertir: `⚠️ Found X console.log statements. Remove before production?`
 3. Ofrecer removerlos automáticamente
@@ -315,6 +345,7 @@ grep "package-name" package.json
 **Trigger:** Crear/editar componente con `<img>` tags
 
 **Acción:**
+
 1. Verificar que tiene `alt` attribute
 2. Si falta → advertir y sugerir fix
 3. También verificar: `<input>` sin label, `<div onClick>` sin role
@@ -326,6 +357,7 @@ grep "package-name" package.json
 > Con Memory MCP configurado, Claude SÍ puede recordar entre sesiones.
 
 **Configuración actual** (`.mcp.json`):
+
 ```json
 "memory": {
   "command": "npx",
@@ -338,6 +370,7 @@ grep "package-name" package.json
 **TRIGGER:** Al detectar preferencia del usuario
 
 **Guardar con `mcp__memory__create_entities`:**
+
 ```
 - Preferencias de código (Tailwind vs CSS, arrow vs function)
 - Patrones usados frecuentemente
@@ -346,6 +379,7 @@ grep "package-name" package.json
 ```
 
 **Ejemplo:**
+
 ```
 Usuario corrige: "usa arrow functions, no function declarations"
 → Guardar: { entity: "user_preferences", observation: "prefers arrow functions" }
@@ -353,10 +387,10 @@ Usuario corrige: "usa arrow functions, no function declarations"
 
 ### Qué NO funciona (sin timers)
 
-| Feature | Por qué no |
-|---------|-----------|
-| Auto-backup cada 15 min | No hay timers |
-| Reportes semanales | No hay concepto de tiempo |
+| Feature                 | Por qué no                |
+| ----------------------- | ------------------------- |
+| Auto-backup cada 15 min | No hay timers             |
+| Reportes semanales      | No hay concepto de tiempo |
 
 **Alternativa:** Usar `/status` cuando quieras ver health del proyecto.
 
@@ -372,6 +406,7 @@ Usuario corrige: "usa arrow functions, no function declarations"
 **El sistema automáticamente detecta y aplica los especialistas correctos.**
 
 Ejemplos:
+
 ```
 Usuario: "Add JWT authentication"
 Claude: 🤖 Applying @security-auditor + @backend-specialist...
@@ -387,12 +422,12 @@ Claude: 🤖 Using @debugger for systematic analysis...
 
 **ANTES de implementar cualquier cosa**, aplicar este protocolo:
 
-| Tipo de Request | Acción Requerida |
-|-----------------|------------------|
-| **Feature Nueva** | Hacer preguntas clarificadoras sobre alcance, requisitos, edge cases |
-| **Bug Fix** | Confirmar entendimiento del problema y comportamiento esperado |
-| **Request Vago** | Explorar opciones y pedir especificaciones |
-| **Cambio Crítico** (auth, payment, etc) | Confirmar implicaciones de seguridad y datos |
+| Tipo de Request                         | Acción Requerida                                                     |
+| --------------------------------------- | -------------------------------------------------------------------- |
+| **Feature Nueva**                       | Hacer preguntas clarificadoras sobre alcance, requisitos, edge cases |
+| **Bug Fix**                             | Confirmar entendimiento del problema y comportamiento esperado       |
+| **Request Vago**                        | Explorar opciones y pedir especificaciones                           |
+| **Cambio Crítico** (auth, payment, etc) | Confirmar implicaciones de seguridad y datos                         |
 
 **Ejemplos:**
 
@@ -453,28 +488,29 @@ Claude: Para entender el problema:
 
 ### Agent Selection Matrix (15 agentes)
 
-| Keywords en request | Agente | Archivo a leer |
-|---------------------|--------|----------------|
-| component, react, css, UI, layout, button, form | `fullstack-developer` | `.claude/agents/fullstack-developer.md` |
-| api, endpoint, server, database, backend | `fullstack-developer` | `.claude/agents/fullstack-developer.md` |
-| error, bug, crash, not working, falla, no funciona | `debugger` | `.claude/agents/debugger.md` |
-| test, coverage, unit, e2e, jest, vitest | `test-engineer` | `.claude/agents/test-engineer.md` |
-| slow, optimize, memory, performance, lento | `performance-profiler` | `.claude/agents/performance-profiler.md` |
-| auth, jwt, password, security, xss, sql injection | `security-auditor` | `.claude/agents/security-auditor.md` |
-| refactor, migrate, modernize, arquitectura | `architecture-modernizer` | `.claude/agents/architecture-modernizer.md` |
-| docs, readme, comments, documentar | `documentation-expert` | `.claude/agents/documentation-expert.md` |
-| design, UI/UX, colores, estilos, diseño | `ui-ux-designer` | `.claude/agents/ui-ux-designer.md` |
-| review, quality, standards, code smell | `code-reviewer` | `.claude/agents/code-reviewer.md` |
-| prompt, ai, llm, gpt, optimize prompt | `prompt-engineer` | `.claude/agents/prompt-engineer.md` |
-| devops, ci/cd, docker, kubernetes, deploy pipeline | `devops-engineer` | `.claude/agents/devops-engineer.md` |
-| roadmap, features, mvp, product, strategy | `product-strategist` | `.claude/agents/product-strategist.md` |
-| context, session, multi-agent, coordination | `context-manager` | `.claude/agents/context-manager.md` |
-| frontend only, react advanced, state management | `frontend-specialist` | `.claude/agents/frontend-specialist.md` |
-| backend only, api design, microservices | `backend-specialist` | `.claude/agents/backend-specialist.md` |
+| Keywords en request                                | Agente                    | Archivo a leer                              |
+| -------------------------------------------------- | ------------------------- | ------------------------------------------- |
+| component, react, css, UI, layout, button, form    | `fullstack-developer`     | `.claude/agents/fullstack-developer.md`     |
+| api, endpoint, server, database, backend           | `fullstack-developer`     | `.claude/agents/fullstack-developer.md`     |
+| error, bug, crash, not working, falla, no funciona | `debugger`                | `.claude/agents/debugger.md`                |
+| test, coverage, unit, e2e, jest, vitest            | `test-engineer`           | `.claude/agents/test-engineer.md`           |
+| slow, optimize, memory, performance, lento         | `performance-profiler`    | `.claude/agents/performance-profiler.md`    |
+| auth, jwt, password, security, xss, sql injection  | `security-auditor`        | `.claude/agents/security-auditor.md`        |
+| refactor, migrate, modernize, arquitectura         | `architecture-modernizer` | `.claude/agents/architecture-modernizer.md` |
+| docs, readme, comments, documentar                 | `documentation-expert`    | `.claude/agents/documentation-expert.md`    |
+| design, UI/UX, colores, estilos, diseño            | `ui-ux-designer`          | `.claude/agents/ui-ux-designer.md`          |
+| review, quality, standards, code smell             | `code-reviewer`           | `.claude/agents/code-reviewer.md`           |
+| prompt, ai, llm, gpt, optimize prompt              | `prompt-engineer`         | `.claude/agents/prompt-engineer.md`         |
+| devops, ci/cd, docker, kubernetes, deploy pipeline | `devops-engineer`         | `.claude/agents/devops-engineer.md`         |
+| roadmap, features, mvp, product, strategy          | `product-strategist`      | `.claude/agents/product-strategist.md`      |
+| context, session, multi-agent, coordination        | `context-manager`         | `.claude/agents/context-manager.md`         |
+| frontend only, react advanced, state management    | `frontend-specialist`     | `.claude/agents/frontend-specialist.md`     |
+| backend only, api design, microservices            | `backend-specialist`      | `.claude/agents/backend-specialist.md`      |
 
 ### Ejemplos de uso correcto:
 
 **Ejemplo 1: Bug de UI**
+
 ```
 Usuario: "El botón de búsqueda se ve mal, el ícono se sobrepone"
 
@@ -490,6 +526,7 @@ Claude debe:
 ```
 
 **Ejemplo 2: Feature de autenticación**
+
 ```
 Usuario: "Agregar login con JWT"
 
@@ -500,6 +537,7 @@ Claude debe:
 ```
 
 **Ejemplo 3: Error en producción**
+
 ```
 Usuario: "El checkout da error 500"
 
@@ -516,6 +554,7 @@ Claude debe:
 El sistema procesa cada dominio **secuencialmente**, cambiando de contexto entre especialistas (NO es ejecución paralela real).
 
 **Ejemplo: Full-stack feature**
+
 ```
 Usuario: "Crear sistema de notificaciones en tiempo real"
 
@@ -530,11 +569,13 @@ Claude: 🤖 Orchestrating @backend-specialist + @frontend-specialist + @securit
 ```
 
 **Coherencia de código:** Aunque se cambia entre agentes, se mantiene consistencia en:
+
 - Convenciones de naming
 - Patrones de arquitectura
 - Estilo de código
 
 ### PROHIBIDO:
+
 - ❌ Ignorar la matriz de agentes
 - ❌ No mostrar qué agente se está usando ANTES de trabajar
 - ❌ No leer el archivo del agente
@@ -543,7 +584,9 @@ Claude: 🤖 Orchestrating @backend-specialist + @frontend-specialist + @securit
 - ❌ Cambiar de agente sin anunciar el cambio
 
 ### Override manual:
+
 Si el usuario menciona `@agent-name` explícitamente, usar ese agente y confirmarlo:
+
 ```
 Usuario: "Usa @security-auditor para revisar esto"
 Claude: "🤖 Using @security-auditor as requested..."
@@ -558,6 +601,7 @@ Claude: "🤖 Using @security-auditor as requested..."
 **TRIGGER:** Después de modificar código importante
 
 **Ejecutar automáticamente:**
+
 ```bash
 # Security scan
 npm audit
@@ -573,6 +617,7 @@ npx tsc --noEmit
 ```
 
 **Reportar:**
+
 ```
 ✅ Quick checks passed
    Security: No vulnerabilities
@@ -586,6 +631,7 @@ npx tsc --noEmit
 **TRIGGER:** Antes de `/deploy` o cuando usuario pide "verificar todo"
 
 **Ejecutar:**
+
 ```bash
 # Todo lo de Quick Checks +
 
@@ -603,6 +649,7 @@ npx pa11y http://localhost:3000
 ```
 
 **Reportar:**
+
 ```
 🔍 Full Verification Complete
 
@@ -645,39 +692,41 @@ npm run build
 ## Architecture
 
 ### Key Directories
+
 - `src/` - Source code
 - `tests/` - Test files
 - `docs/` - Documentation
 
 ### Key Files
+
 - [Important file] - [Purpose]
 
 ## Critical Rules
 
-| Rule | Description |
-|------|-------------|
-| TypeScript | All code must be typed |
-| Tests | PRs require test coverage |
-| Formatting | Use Prettier/ESLint |
+| Rule       | Description               |
+| ---------- | ------------------------- |
+| TypeScript | All code must be typed    |
+| Tests      | PRs require test coverage |
+| Formatting | Use Prettier/ESLint       |
 
 ## High-Risk Areas
 
 Changes to these require extra review:
 
-| Area | Risk |
-|------|------|
-| Authentication | Security critical |
-| Payment | Financial data |
-| Database migrations | Data integrity |
+| Area                | Risk              |
+| ------------------- | ----------------- |
+| Authentication      | Security critical |
+| Payment             | Financial data    |
+| Database migrations | Data integrity    |
 
 ## File Location Rules
 
-| Type | Location |
-|------|----------|
+| Type            | Location            |
+| --------------- | ------------------- |
 | Governance docs | Root (UPPERCASE.md) |
-| Technical docs | docs/reference/ |
-| Specs | docs/specs/ |
-| Archive | docs/archive/ |
+| Technical docs  | docs/reference/     |
+| Specs           | docs/specs/         |
+| Archive         | docs/archive/       |
 
 ## Commit Format
 
@@ -698,36 +747,36 @@ Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
 ## Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `/setup` | Configure project |
-| `/continue` | Resume where you left off |
-| `/save-progress` | Save state for next session |
-| `/commit` | Smart git commit |
-| `/create` | Create feature/app |
-| `/brainstorm` | Explore options |
-| `/plan` | Implementation plan |
-| `/deploy` | Production deploy |
-| `/test` | Run tests |
-| `/debug` | Debug issues |
-| `/enhance` | Improve code |
-| `/preview` | Preview changes |
-| `/status` | Project status |
-| `/orchestrate` | Multi-agent tasks |
-| `/code-review` | Quality review |
-| `/generate-tests` | Generate tests |
+| Command           | Description                 |
+| ----------------- | --------------------------- |
+| `/setup`          | Configure project           |
+| `/continue`       | Resume where you left off   |
+| `/save-progress`  | Save state for next session |
+| `/commit`         | Smart git commit            |
+| `/create`         | Create feature/app          |
+| `/brainstorm`     | Explore options             |
+| `/plan`           | Implementation plan         |
+| `/deploy`         | Production deploy           |
+| `/test`           | Run tests                   |
+| `/debug`          | Debug issues                |
+| `/enhance`        | Improve code                |
+| `/preview`        | Preview changes             |
+| `/status`         | Project status              |
+| `/orchestrate`    | Multi-agent tasks           |
+| `/code-review`    | Quality review              |
+| `/generate-tests` | Generate tests              |
 
 ## Proactive Behavior
 
 Claude should proactively:
 
-| When you see... | Suggest... |
-|-----------------|------------|
-| UI testing needed | "Use Playwright to verify?" |
-| Auth/payment code | "Run security review?" |
+| When you see...    | Suggest...                           |
+| ------------------ | ------------------------------------ |
+| UI testing needed  | "Use Playwright to verify?"          |
+| Auth/payment code  | "Run security review?"               |
 | Performance issues | "Profile with performance-profiler?" |
-| Complex refactor | "Create plan first?" |
-| New feature | "Brainstorm options?" |
+| Complex refactor   | "Create plan first?"                 |
+| New feature        | "Brainstorm options?"                |
 
 ## Development Flow Suggestions
 
@@ -737,30 +786,30 @@ Claude should proactively:
 
 When a user arrives with a new feature request (not a bug fix or specific task), suggest starting the flow:
 
-| User says... | Suggest... |
-|--------------|------------|
-| "Quiero agregar X" | "Let's explore options first! Use `/brainstorm [feature]`" |
-| "Necesito implementar Y" | "Want to explore approaches? Start with `/brainstorm`" |
-| "Hay que hacer Z" | "Let's plan this out. Use `/brainstorm` to explore options" |
+| User says...                     | Suggest...                                                    |
+| -------------------------------- | ------------------------------------------------------------- |
+| "Quiero agregar X"               | "Let's explore options first! Use `/brainstorm [feature]`"    |
+| "Necesito implementar Y"         | "Want to explore approaches? Start with `/brainstorm`"        |
+| "Hay que hacer Z"                | "Let's plan this out. Use `/brainstorm` to explore options"   |
 | Vague request without clear path | "Let's start with `/brainstorm` to explore the best approach" |
 
 **Exception:** If the user has a very specific, small task (like "add a button that does X"), skip brainstorm and suggest `/create` directly.
 
 ### After Commands - Next Steps + Auto-Save
 
-| After completing... | Action | Suggest next... |
-|---------------------|--------|-----------------|
-| `/brainstorm` | - | "Ready to plan? Use `/plan`" |
-| `/plan` | - | "Plan ready! Use `/create` to start building" |
-| `/create` | **Auto-save** | "Feature created! `/enhance` or `/refactor-code`" |
-| `/enhance` | **Auto-save** | "Enhanced! `/refactor-code` to clean up" |
-| `/refactor-code` | - | "Code cleaned! `/test` or `/generate-tests`" |
-| `/test` (pass) | - | "Tests pass! `/commit`" |
-| `/test` (fail) | - | "Tests failing. `/debug` to investigate" |
-| `/debug` | - | "Bug fixed! `/test` to verify" |
-| `/commit` | **Auto-save** | "Committed! `/create-pr` or `/deploy preview`" |
-| `/create-pr` | **Auto-save** | "PR created! Monitor and merge" |
-| `/deploy` | **Auto-save** | "Deployed! 🎉" |
+| After completing... | Action        | Suggest next...                                   |
+| ------------------- | ------------- | ------------------------------------------------- |
+| `/brainstorm`       | -             | "Ready to plan? Use `/plan`"                      |
+| `/plan`             | -             | "Plan ready! Use `/create` to start building"     |
+| `/create`           | **Auto-save** | "Feature created! `/enhance` or `/refactor-code`" |
+| `/enhance`          | **Auto-save** | "Enhanced! `/refactor-code` to clean up"          |
+| `/refactor-code`    | -             | "Code cleaned! `/test` or `/generate-tests`"      |
+| `/test` (pass)      | -             | "Tests pass! `/commit`"                           |
+| `/test` (fail)      | -             | "Tests failing. `/debug` to investigate"          |
+| `/debug`            | -             | "Bug fixed! `/test` to verify"                    |
+| `/commit`           | **Auto-save** | "Committed! `/create-pr` or `/deploy preview`"    |
+| `/create-pr`        | **Auto-save** | "PR created! Monitor and merge"                   |
+| `/deploy`           | **Auto-save** | "Deployed! 🎉"                                    |
 
 **Auto-save** = Actualiza PROGRESS.md automáticamente (sin preguntar)
 
@@ -775,6 +824,7 @@ After each command, add a brief suggestion:
 ```
 
 Example:
+
 ```
 ✅ Feature created: Authentication system with JWT
 

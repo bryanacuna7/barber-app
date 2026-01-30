@@ -17,7 +17,10 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "ci": "npm run format:check && npm run test:unit && npm run build:skip-ts",
+    "ci:full": "npm run ci && npm run test:e2e",
+    "ci:lint": "npm run lint"
   },
   "dependencies": {
     "@react-email/components": "^1.0.6",

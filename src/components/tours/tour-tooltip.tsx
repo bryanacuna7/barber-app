@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
 /**
  * Tour Tooltip Component
  * Renders an interactive tooltip for product tours with Portal and animations
  */
 
-import React, { useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, ArrowLeft } from 'lucide-react';
-import { useTour } from '@/lib/tours/tour-provider';
+import React, { useEffect, useState, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, ArrowRight, ArrowLeft } from 'lucide-react'
+import { useTour } from '@/lib/tours/tour-provider'
 
 interface TooltipPosition {
-  top: number;
-  left: number;
-  arrowPosition: 'top' | 'bottom' | 'left' | 'right';
+  top: number
+  left: number
+  arrowPosition: 'top' | 'bottom' | 'left' | 'right'
 }
 
 export function TourTooltip() {
@@ -27,146 +27,146 @@ export function TourTooltip() {
     previousStep,
     skipTour,
     completeTour,
-  } = useTour();
+  } = useTour()
 
-  const [position, setPosition] = useState<TooltipPosition | null>(null);
-  const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<TooltipPosition | null>(null)
+  const [targetElement, setTargetElement] = useState<HTMLElement | null>(null)
+  const tooltipRef = useRef<HTMLDivElement>(null)
 
-  const currentStep = getCurrentStep();
-  const currentTour = getCurrentTour();
+  const currentStep = getCurrentStep()
+  const currentTour = getCurrentTour()
 
   // Calculate tooltip position based on target element
   useEffect(() => {
     if (!isRunning || !currentStep) {
-      setPosition(null);
-      setTargetElement(null);
-      return;
+      setPosition(null)
+      setTargetElement(null)
+      return
     }
 
     // Find target element
-    const target = document.querySelector(currentStep.target) as HTMLElement;
+    const target = document.querySelector(currentStep.target) as HTMLElement
     if (!target) {
-      console.warn(`Tour target not found: ${currentStep.target}`);
-      return;
+      console.warn(`Tour target not found: ${currentStep.target}`)
+      return
     }
 
-    setTargetElement(target);
+    setTargetElement(target)
 
     // Calculate position
     const calculatePosition = () => {
-      const targetRect = target.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect()
       // Responsive width: 90% on mobile, 360px on desktop
-      const isMobile = window.innerWidth < 640; // sm breakpoint
-      const tooltipWidth = isMobile ? window.innerWidth * 0.9 : 360;
-      const tooltipHeight = 200; // Estimated height
-      const spacing = isMobile ? 8 : 16; // Smaller gap on mobile
+      const isMobile = window.innerWidth < 640 // sm breakpoint
+      const tooltipWidth = isMobile ? window.innerWidth * 0.9 : 360
+      const tooltipHeight = 200 // Estimated height
+      const spacing = isMobile ? 8 : 16 // Smaller gap on mobile
 
-      let top = 0;
-      let left = 0;
-      let arrowPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
+      let top = 0
+      let left = 0
+      let arrowPosition: 'top' | 'bottom' | 'left' | 'right' = 'top'
 
-      const placement = currentStep.placement || 'bottom';
+      const placement = currentStep.placement || 'bottom'
 
       switch (placement) {
         case 'bottom':
-          top = targetRect.bottom + spacing;
-          left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
-          arrowPosition = 'top';
-          break;
+          top = targetRect.bottom + spacing
+          left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2
+          arrowPosition = 'top'
+          break
 
         case 'top':
-          top = targetRect.top - tooltipHeight - spacing;
-          left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2;
-          arrowPosition = 'bottom';
-          break;
+          top = targetRect.top - tooltipHeight - spacing
+          left = targetRect.left + targetRect.width / 2 - tooltipWidth / 2
+          arrowPosition = 'bottom'
+          break
 
         case 'left':
-          top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2;
-          left = targetRect.left - tooltipWidth - spacing;
-          arrowPosition = 'right';
-          break;
+          top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2
+          left = targetRect.left - tooltipWidth - spacing
+          arrowPosition = 'right'
+          break
 
         case 'right':
-          top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2;
-          left = targetRect.right + spacing;
-          arrowPosition = 'left';
-          break;
+          top = targetRect.top + targetRect.height / 2 - tooltipHeight / 2
+          left = targetRect.right + spacing
+          arrowPosition = 'left'
+          break
       }
 
       // Ensure tooltip stays within viewport
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
 
-      if (left < 8) left = 8;
+      if (left < 8) left = 8
       if (left + tooltipWidth > viewportWidth - 8) {
-        left = viewportWidth - tooltipWidth - 8;
+        left = viewportWidth - tooltipWidth - 8
       }
 
-      if (top < 8) top = 8;
+      if (top < 8) top = 8
       if (top + tooltipHeight > viewportHeight - 8) {
-        top = viewportHeight - tooltipHeight - 8;
+        top = viewportHeight - tooltipHeight - 8
       }
 
-      setPosition({ top, left, arrowPosition });
-    };
+      setPosition({ top, left, arrowPosition })
+    }
 
-    calculatePosition();
+    calculatePosition()
 
     // Recalculate on resize or scroll
-    window.addEventListener('resize', calculatePosition);
-    window.addEventListener('scroll', calculatePosition);
+    window.addEventListener('resize', calculatePosition)
+    window.addEventListener('scroll', calculatePosition)
 
     return () => {
-      window.removeEventListener('resize', calculatePosition);
-      window.removeEventListener('scroll', calculatePosition);
-    };
-  }, [isRunning, currentStep]);
+      window.removeEventListener('resize', calculatePosition)
+      window.removeEventListener('scroll', calculatePosition)
+    }
+  }, [isRunning, currentStep])
 
   // Add spotlight effect to target element
   useEffect(() => {
-    if (!targetElement || !currentStep?.spotlight) return;
+    if (!targetElement || !currentStep?.spotlight) return
 
     // Add highlight class
-    targetElement.style.position = 'relative';
-    targetElement.style.zIndex = '9999';
-    targetElement.classList.add('tour-spotlight');
+    targetElement.style.position = 'relative'
+    targetElement.style.zIndex = '9999'
+    targetElement.classList.add('tour-spotlight')
 
     return () => {
-      targetElement.style.position = '';
-      targetElement.style.zIndex = '';
-      targetElement.classList.remove('tour-spotlight');
-    };
-  }, [targetElement, currentStep]);
+      targetElement.style.position = ''
+      targetElement.style.zIndex = ''
+      targetElement.classList.remove('tour-spotlight')
+    }
+  }, [targetElement, currentStep])
 
   // Handle keyboard navigation
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isRunning) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        skipTour();
+        skipTour()
       } else if (e.key === 'ArrowRight') {
         if (currentStep?.isLastStep) {
-          completeTour();
+          completeTour()
         } else {
-          nextStep();
+          nextStep()
         }
       } else if (e.key === 'ArrowLeft' && currentStepIndex > 0) {
-        previousStep();
+        previousStep()
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isRunning, currentStep, currentStepIndex, nextStep, previousStep, skipTour, completeTour]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isRunning, currentStep, currentStepIndex, nextStep, previousStep, skipTour, completeTour])
 
   if (!isRunning || !currentStep || !currentTour || !position) {
-    return null;
+    return null
   }
 
-  const totalSteps = currentTour.steps.length;
-  const progress = ((currentStepIndex + 1) / totalSteps) * 100;
+  const totalSteps = currentTour.steps.length
+  const progress = ((currentStepIndex + 1) / totalSteps) * 100
 
   const tooltipContent = (
     <>
@@ -287,16 +287,17 @@ export function TourTooltip() {
       {/* Global styles for spotlight effect */}
       <style jsx global>{`
         .tour-spotlight {
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5),
+          box-shadow:
+            0 0 0 4px rgba(59, 130, 246, 0.5),
             0 0 0 9999px rgba(0, 0, 0, 0.6) !important;
           border-radius: 8px;
         }
       `}</style>
     </>
-  );
+  )
 
   return createPortal(
     <AnimatePresence mode="wait">{tooltipContent}</AnimatePresence>,
     document.body
-  );
+  )
 }

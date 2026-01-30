@@ -9,17 +9,20 @@ Instalación completada el 2026-01-28
 ### 1. **web-design-guidelines** (47.4K installs)
 
 **Ubicación:**
+
 - `claude-starter-kit/.agents/skills/web-design-guidelines/`
 - `barber-app/.agents/skills/web-design-guidelines/`
 
 **Qué hace:**
 Auditoría automática de UI con 100+ reglas cubriendo:
+
 - ✅ Accesibilidad (WCAG)
 - ⚡ Performance
 - 🎨 UX best practices
 
 **Cómo se activa:**
 El skill se activa automáticamente cuando el usuario dice:
+
 - "review my UI"
 - "check accessibility"
 - "audit design"
@@ -27,6 +30,7 @@ El skill se activa automáticamente cuando el usuario dice:
 - "check my site against best practices"
 
 **Funcionamiento:**
+
 1. Fetcha las guidelines más recientes desde:
    ```
    https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
@@ -36,6 +40,7 @@ El skill se activa automáticamente cuando el usuario dice:
 4. Reporta hallazgos en formato `file:line`
 
 **Ejemplo de uso:**
+
 ```
 Usuario: "Revisa la accesibilidad de mi header"
 Claude: [Activa web-design-guidelines automáticamente]
@@ -51,11 +56,13 @@ Claude: [Activa web-design-guidelines automáticamente]
 ### 2. **vercel-composition-patterns**
 
 **Ubicación:**
+
 - `claude-starter-kit/.agents/skills/vercel-composition-patterns/`
 - `barber-app/.agents/skills/vercel-composition-patterns/`
 
 **Qué hace:**
 Patrones arquitectónicos de React para componentes escalables:
+
 - 🏗️ Compound Components
 - 🔄 State Management patterns
 - 🎯 Composition over boolean props
@@ -63,6 +70,7 @@ Patrones arquitectónicos de React para componentes escalables:
 
 **Cómo se activa:**
 El skill se activa cuando el usuario menciona:
+
 - "refactor component"
 - "too many props"
 - "compound component"
@@ -71,14 +79,15 @@ El skill se activa cuando el usuario menciona:
 
 **Categorías de Reglas:**
 
-| Prioridad | Categoría | Reglas |
-|-----------|-----------|--------|
-| HIGH | Component Architecture | Evitar boolean props, usar compound components |
-| MEDIUM | State Management | Desacoplar implementación, context interface |
-| MEDIUM | Implementation Patterns | Explicit variants, children over render props |
-| MEDIUM | React 19 APIs | No forwardRef, usar use() en vez de useContext() |
+| Prioridad | Categoría               | Reglas                                           |
+| --------- | ----------------------- | ------------------------------------------------ |
+| HIGH      | Component Architecture  | Evitar boolean props, usar compound components   |
+| MEDIUM    | State Management        | Desacoplar implementación, context interface     |
+| MEDIUM    | Implementation Patterns | Explicit variants, children over render props    |
+| MEDIUM    | React 19 APIs           | No forwardRef, usar use() en vez de useContext() |
 
 **Ejemplo de uso:**
+
 ```
 Usuario: "Este componente tiene demasiados props boolean"
 
@@ -108,11 +117,13 @@ Claude: [Activa vercel-composition-patterns]
 ### 3. **vercel-react-native-skills**
 
 **Ubicación:**
+
 - `claude-starter-kit/.agents/skills/vercel-react-native-skills/`
 - `barber-app/.agents/skills/vercel-react-native-skills/`
 
 **Qué hace:**
 Best practices para React Native y Expo:
+
 - 📱 Mobile performance optimization
 - 🎬 Animaciones fluidas
 - ⚡ List rendering optimization
@@ -121,6 +132,7 @@ Best practices para React Native y Expo:
 
 **Cómo se activa:**
 El skill se activa cuando el usuario menciona:
+
 - "React Native component"
 - "optimize list performance"
 - "mobile animations"
@@ -130,15 +142,16 @@ El skill se activa cuando el usuario menciona:
 
 **Categorías de Best Practices:**
 
-| Prioridad | Área | Ejemplos |
-|-----------|------|----------|
-| HIGH | List Performance | FlatList optimization, virtualization |
-| HIGH | Animations | Reanimated 2/3, gesture handlers |
-| MEDIUM | Navigation | React Navigation best practices |
-| MEDIUM | State Management | Redux, Zustand, Context patterns |
-| MEDIUM | Native Modules | Expo modules, bridging |
+| Prioridad | Área             | Ejemplos                              |
+| --------- | ---------------- | ------------------------------------- |
+| HIGH      | List Performance | FlatList optimization, virtualization |
+| HIGH      | Animations       | Reanimated 2/3, gesture handlers      |
+| MEDIUM    | Navigation       | React Navigation best practices       |
+| MEDIUM    | State Management | Redux, Zustand, Context patterns      |
+| MEDIUM    | Native Modules   | Expo modules, bridging                |
 
 **Ejemplo de uso:**
+
 ```
 Usuario: "Esta FlatList se siente lenta al hacer scroll"
 
@@ -199,11 +212,13 @@ const renderItem = useCallback(({ item }) => (
 ## 🎯 Diferencia con Skills Existentes
 
 ### Skills Existentes (`.claude/skills/`)
+
 - Creados manualmente para el starter kit
 - Formato markdown simple
 - Siempre activos
 
 ### Skills de skills.sh (`.agents/skills/`)
+
 - Instalados desde repositorios externos
 - Formato con metadata YAML
 - Se activan bajo condiciones específicas (triggers)
@@ -211,11 +226,11 @@ const renderItem = useCallback(({ item }) => (
 
 **Complementan tus skills existentes:**
 
-| Tu Skill | Nuevo Skill | Relación |
-|----------|-------------|----------|
-| `react-patterns` | `vercel-composition-patterns` | ✅ Complementario - Composition vs Patterns |
-| `ui-ux-designer` | `web-design-guidelines` | ✅ Complementario - Design vs Audit |
-| `mobile-development` | `vercel-react-native-skills` | ✅ Complementario - General vs Vercel Best Practices |
+| Tu Skill             | Nuevo Skill                   | Relación                                             |
+| -------------------- | ----------------------------- | ---------------------------------------------------- |
+| `react-patterns`     | `vercel-composition-patterns` | ✅ Complementario - Composition vs Patterns          |
+| `ui-ux-designer`     | `web-design-guidelines`       | ✅ Complementario - Design vs Audit                  |
+| `mobile-development` | `vercel-react-native-skills`  | ✅ Complementario - General vs Vercel Best Practices |
 
 ---
 
@@ -285,10 +300,12 @@ Proyectos:
 Si en el futuro necesitas más capabilities:
 
 ### Media Prioridad
+
 - **remotion-best-practices** (44.9K installs) - Video creation
 - **agent-browser** (11.7K installs) - Web scraping
 
 ### Baja Prioridad (según necesidad)
+
 - **pdf/pptx/xlsx/docx** - Document generation
 - **vercel-react-native-skills** - Mobile development
 

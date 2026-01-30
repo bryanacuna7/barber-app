@@ -47,7 +47,8 @@ export function Spinner({ size = 'md', variant = 'default', className }: Spinner
 }
 
 function DotsSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className'>) {
-  const dotSize = size === 'sm' ? 'w-2 h-2' : size === 'md' ? 'w-3 h-3' : size === 'lg' ? 'w-4 h-4' : 'w-5 h-5'
+  const dotSize =
+    size === 'sm' ? 'w-2 h-2' : size === 'md' ? 'w-3 h-3' : size === 'lg' ? 'w-4 h-4' : 'w-5 h-5'
 
   return (
     <div className={cn('inline-flex gap-2', className)}>
@@ -73,7 +74,13 @@ function DotsSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className
 
 function PulseSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className'>) {
   return (
-    <div className={cn('relative inline-flex items-center justify-center', sizeClasses[size], className)}>
+    <div
+      className={cn(
+        'relative inline-flex items-center justify-center',
+        sizeClasses[size],
+        className
+      )}
+    >
       <motion.div
         className="absolute w-full h-full rounded-full border-2 border-blue-500"
         animate={{
@@ -105,7 +112,14 @@ function PulseSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'classNam
 }
 
 function BarsSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className'>) {
-  const barSize = size === 'sm' ? 'w-1 h-4' : size === 'md' ? 'w-1.5 h-8' : size === 'lg' ? 'w-2 h-12' : 'w-2.5 h-16'
+  const barSize =
+    size === 'sm'
+      ? 'w-1 h-4'
+      : size === 'md'
+        ? 'w-1.5 h-8'
+        : size === 'lg'
+          ? 'w-2 h-12'
+          : 'w-2.5 h-16'
 
   return (
     <div className={cn('inline-flex gap-1 items-center', className)}>

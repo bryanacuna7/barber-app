@@ -16,38 +16,45 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({
-    className,
-    label,
-    error,
-    success,
-    helperText,
-    leftIcon,
-    rightIcon,
-    variant = 'default',
-    id,
-    type,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      label,
+      error,
+      success,
+      helperText,
+      leftIcon,
+      rightIcon,
+      variant = 'default',
+      id,
+      type,
+      ...props
+    },
+    ref
+  ) => {
     const [showPassword, setShowPassword] = useState(false)
     const [isFocused, setIsFocused] = useState(false)
     const inputId = id || props.name
     const isPassword = type === 'password'
     const inputType = isPassword && showPassword ? 'text' : type
 
-    const baseStyles = 'w-full px-4 py-4 text-[17px] text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:placeholder:text-zinc-500 transition-all duration-200 focus:outline-none'
+    const baseStyles =
+      'w-full px-4 py-4 text-[17px] text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:placeholder:text-zinc-500 transition-all duration-200 focus:outline-none'
 
     const variantStyles = {
-      default: 'rounded-2xl border-0 bg-zinc-100/80 focus:bg-zinc-100 dark:bg-zinc-800/80 dark:focus:bg-zinc-800',
-      filled: 'rounded-2xl border-0 bg-zinc-200/60 focus:bg-zinc-200 dark:bg-zinc-700/60 dark:focus:bg-zinc-700',
-      outline: 'rounded-2xl border-2 border-zinc-200 bg-transparent focus:border-[var(--brand-primary)] dark:border-zinc-700',
+      default:
+        'rounded-2xl border-0 bg-zinc-100/80 focus:bg-zinc-100 dark:bg-zinc-800/80 dark:focus:bg-zinc-800',
+      filled:
+        'rounded-2xl border-0 bg-zinc-200/60 focus:bg-zinc-200 dark:bg-zinc-700/60 dark:focus:bg-zinc-700',
+      outline:
+        'rounded-2xl border-2 border-zinc-200 bg-transparent focus:border-[var(--brand-primary)] dark:border-zinc-700',
     }
 
     const stateStyles = error
       ? 'ring-2 ring-red-500/50 bg-red-50 focus:ring-red-500/70 dark:bg-red-900/20'
       : success
-      ? 'ring-2 ring-emerald-500/50 bg-emerald-50 focus:ring-emerald-500/70 dark:bg-emerald-900/20'
-      : 'focus:ring-2 focus:ring-[var(--brand-primary)]/20 dark:focus:ring-[var(--brand-primary)]/30'
+        ? 'ring-2 ring-emerald-500/50 bg-emerald-50 focus:ring-emerald-500/70 dark:bg-emerald-900/20'
+        : 'focus:ring-2 focus:ring-[var(--brand-primary)]/20 dark:focus:ring-[var(--brand-primary)]/30'
 
     return (
       <div className="w-full">
@@ -124,18 +131,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                 tabIndex={-1}
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             )}
 
             {rightIcon && !error && !success && !isPassword && (
-              <div className="text-zinc-400 dark:text-zinc-500">
-                {rightIcon}
-              </div>
+              <div className="text-zinc-400 dark:text-zinc-500">{rightIcon}</div>
             )}
           </div>
         </div>
@@ -150,12 +151,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <p className={cn(
-                'mt-2 text-[13px] font-medium',
-                error && 'text-red-500',
-                success && 'text-emerald-500',
-                !error && !success && 'text-zinc-500 dark:text-zinc-400'
-              )}>
+              <p
+                className={cn(
+                  'mt-2 text-[13px] font-medium',
+                  error && 'text-red-500',
+                  success && 'text-emerald-500',
+                  !error && !success && 'text-zinc-500 dark:text-zinc-400'
+                )}
+              >
                 {error || success || helperText}
               </p>
             </motion.div>

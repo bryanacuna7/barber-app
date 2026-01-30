@@ -125,10 +125,7 @@ export function TestimonialsSection() {
               {/* Rating */}
               <div className="relative flex gap-1">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                  />
+                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
 
@@ -143,15 +140,11 @@ export function TestimonialsSection() {
                   {testimonial.avatar}
                 </div>
                 <div>
-                  <p className="font-semibold text-zinc-900 dark:text-white">
-                    {testimonial.name}
-                  </p>
+                  <p className="font-semibold text-zinc-900 dark:text-white">{testimonial.name}</p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
                     {testimonial.role} · {testimonial.business}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500">
-                    {testimonial.location}
-                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500">{testimonial.location}</p>
                 </div>
               </div>
             </motion.div>
@@ -166,9 +159,7 @@ export function TestimonialsSection() {
           transition={{ delay: 0.5 }}
           className="mt-12 text-center"
         >
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            ¿Listo para unirte a ellos?
-          </p>
+          <p className="text-lg text-zinc-600 dark:text-zinc-400">¿Listo para unirte a ellos?</p>
           <a
             href="/register"
             className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all hover:shadow-2xl hover:shadow-blue-500/40"

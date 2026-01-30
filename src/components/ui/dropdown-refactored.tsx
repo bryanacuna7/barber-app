@@ -439,9 +439,7 @@ export function SelectDropdown({
   return (
     <div className={cn('relative', className)}>
       {/* Hidden input for form submission */}
-      {name && (
-        <input type="hidden" name={name} value={value} required={required} />
-      )}
+      {name && <input type="hidden" name={name} value={value} required={required} />}
 
       <button
         ref={triggerRef}
@@ -462,11 +460,7 @@ export function SelectDropdown({
           isOpen && 'ring-2 ring-zinc-500 ring-offset-2'
         )}
       >
-        <span
-          className={cn(
-            selectedOption ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500'
-          )}
-        >
+        <span className={cn(selectedOption ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500')}>
           {selectedOption?.label || placeholder}
         </span>
         <ChevronDown
@@ -512,10 +506,7 @@ export function SelectDropdown({
             >
               {option.label}
               {option.value === value && (
-                <Check
-                  aria-hidden="true"
-                  className="w-4 h-4 text-zinc-600 dark:text-zinc-400"
-                />
+                <Check aria-hidden="true" className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
               )}
             </button>
           ))}

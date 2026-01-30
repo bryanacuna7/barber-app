@@ -49,15 +49,18 @@ function WheelColumn({
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
 
-  const scrollToValue = useCallback((val: string, smooth = true) => {
-    const index = items.indexOf(val)
-    if (index !== -1 && containerRef.current) {
-      containerRef.current.scrollTo({
-        top: index * ITEM_HEIGHT,
-        behavior: smooth ? 'smooth' : 'auto',
-      })
-    }
-  }, [items])
+  const scrollToValue = useCallback(
+    (val: string, smooth = true) => {
+      const index = items.indexOf(val)
+      if (index !== -1 && containerRef.current) {
+        containerRef.current.scrollTo({
+          top: index * ITEM_HEIGHT,
+          behavior: smooth ? 'smooth' : 'auto',
+        })
+      }
+    },
+    [items]
+  )
 
   useEffect(() => {
     scrollToValue(value, false)
@@ -258,12 +261,16 @@ function DesktopTimePicker({
                     className="h-14 w-24 rounded-xl bg-zinc-100 dark:bg-zinc-700 text-center text-[24px] font-semibold text-zinc-900 dark:text-white border-0 focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer appearance-none"
                   >
                     {HOURS.map((h) => (
-                      <option key={h} value={h}>{h}</option>
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
                     ))}
                   </select>
                 </div>
 
-                <span className="text-[32px] font-bold text-zinc-400 dark:text-zinc-500 mt-5">:</span>
+                <span className="text-[32px] font-bold text-zinc-400 dark:text-zinc-500 mt-5">
+                  :
+                </span>
 
                 <div className="flex flex-col items-center gap-1">
                   <label className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
@@ -275,7 +282,9 @@ function DesktopTimePicker({
                     className="h-14 w-24 rounded-xl bg-zinc-100 dark:bg-zinc-700 text-center text-[24px] font-semibold text-zinc-900 dark:text-white border-0 focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer appearance-none"
                   >
                     {MINUTES.map((m) => (
-                      <option key={m} value={m}>{m}</option>
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -283,28 +292,39 @@ function DesktopTimePicker({
 
               <div className="mt-5 flex items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400">
                 <Clock className="h-4 w-4" />
-                <span className="text-[14px]">{tempHour}:{tempMinute}</span>
+                <span className="text-[14px]">
+                  {tempHour}:{tempMinute}
+                </span>
               </div>
             </div>
 
             <div className="px-4 pb-4 flex gap-2">
               <button
                 type="button"
-                onClick={() => { setTempHour('09'); setTempMinute('00') }}
+                onClick={() => {
+                  setTempHour('09')
+                  setTempMinute('00')
+                }}
                 className="flex-1 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
               >
                 9:00 AM
               </button>
               <button
                 type="button"
-                onClick={() => { setTempHour('12'); setTempMinute('00') }}
+                onClick={() => {
+                  setTempHour('12')
+                  setTempMinute('00')
+                }}
                 className="flex-1 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
               >
                 12:00 PM
               </button>
               <button
                 type="button"
-                onClick={() => { setTempHour('18'); setTempMinute('00') }}
+                onClick={() => {
+                  setTempHour('18')
+                  setTempMinute('00')
+                }}
                 className="flex-1 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-[13px] font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
               >
                 6:00 PM

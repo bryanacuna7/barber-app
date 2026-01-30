@@ -54,11 +54,7 @@ function SidebarContent({
     <>
       {/* Logo and notifications */}
       <div className="flex h-16 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2"
-          onClick={onLinkClick}
-        >
+        <Link href="/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
           {logoUrl ? (
             <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
           ) : (
@@ -82,7 +78,7 @@ function SidebarContent({
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-[var(--brand-primary)] text-[var(--brand-primary-contrast)] ring-1 ring-white/10 dark:ring-white/20'
-                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800',
+                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
               )}
             >
               <item.icon className="h-5 w-5" />

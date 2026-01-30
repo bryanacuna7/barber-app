@@ -21,7 +21,7 @@ const sizeClasses = {
   md: 'max-w-md',
   lg: 'max-w-lg',
   xl: 'max-w-xl',
-  full: 'max-w-4xl'
+  full: 'max-w-4xl',
 }
 
 export function Modal({
@@ -33,7 +33,7 @@ export function Modal({
   size = 'md',
   showCloseButton = true,
   closeOnOverlayClick = true,
-  className
+  className,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
@@ -117,9 +117,7 @@ export function Modal({
                 </h2>
               )}
               {description && (
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  {description}
-                </p>
+                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
               )}
             </div>
             {showCloseButton && (
@@ -141,9 +139,7 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </div>
     </div>
   )
@@ -157,11 +153,13 @@ interface ModalFooterProps {
 
 export function ModalFooter({ children, className }: ModalFooterProps) {
   return (
-    <div className={cn(
-      'flex items-center justify-end gap-3 pt-6 mt-6',
-      'border-t border-zinc-200 dark:border-zinc-800',
-      className
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-end gap-3 pt-6 mt-6',
+        'border-t border-zinc-200 dark:border-zinc-800',
+        className
+      )}
+    >
       {children}
     </div>
   )

@@ -40,9 +40,7 @@ export default function ComponentsDemoPage() {
 
       {/* Buttons */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Buttons
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Buttons</h2>
         <div className="flex flex-wrap gap-4">
           <Button variant="primary">Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -59,9 +57,7 @@ export default function ComponentsDemoPage() {
           </Button>
         </div>
 
-        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">
-          Sizes
-        </h3>
+        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">Sizes</h3>
         <div className="flex flex-wrap items-center gap-4">
           <Button size="sm">Small</Button>
           <Button size="md">Medium</Button>
@@ -71,9 +67,7 @@ export default function ComponentsDemoPage() {
 
       {/* Inputs */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Inputs
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Inputs</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
           <Input
             label="Default Input"
@@ -112,9 +106,7 @@ export default function ComponentsDemoPage() {
           />
         </div>
 
-        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">
-          Variants
-        </h3>
+        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">Variants</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
           <Input variant="default" placeholder="Default variant" />
           <Input variant="filled" placeholder="Filled variant" />
@@ -124,9 +116,7 @@ export default function ComponentsDemoPage() {
 
       {/* Cards */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Cards
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Cards</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card variant="default" hoverable>
             <CardHeader>
@@ -170,9 +160,7 @@ export default function ComponentsDemoPage() {
               <CardDescription>With border</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Clean bordered style.
-              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">Clean bordered style.</p>
             </CardContent>
           </Card>
 
@@ -182,16 +170,12 @@ export default function ComponentsDemoPage() {
               <CardDescription>Glassmorphism effect</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Frosted glass with blur.
-              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">Frosted glass with blur.</p>
             </CardContent>
           </Card>
         </div>
 
-        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">
-          Stat Cards
-        </h3>
+        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">Stat Cards</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             icon={<TrendingUp className="w-6 h-6 text-blue-500" />}
@@ -226,9 +210,7 @@ export default function ComponentsDemoPage() {
 
       {/* Spinners */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Loading States
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Loading States</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-2 text-center">
             <Spinner variant="default" size="lg" />
@@ -248,9 +230,7 @@ export default function ComponentsDemoPage() {
           </div>
         </div>
 
-        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">
-          Progress Bar
-        </h3>
+        <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mt-6">Progress Bar</h3>
         <div className="max-w-2xl space-y-4">
           <ProgressBar value={progress} showLabel />
           <div className="flex gap-2">
@@ -269,9 +249,7 @@ export default function ComponentsDemoPage() {
 
       {/* Toasts */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Toasts
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Toasts</h2>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
           Click the buttons to see animated toasts (swipe to dismiss)
         </p>
@@ -293,9 +271,7 @@ export default function ComponentsDemoPage() {
 
       {/* Empty States */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Empty States
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Empty States</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-4">
@@ -304,9 +280,7 @@ export default function ComponentsDemoPage() {
             <EmptyAppointments onCreateNew={() => info('Create appointment clicked')} />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-4">
-              Default
-            </h3>
+            <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-4">Default</h3>
             <EmptyState
               variant="default"
               icon={Users}
@@ -324,20 +298,14 @@ export default function ComponentsDemoPage() {
 
       {/* Skeletons */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Skeleton Loaders
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Skeleton Loaders</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300">
-              Card Skeleton
-            </h3>
+            <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300">Card Skeleton</h3>
             <SkeletonCard />
           </div>
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300">
-              List Skeleton
-            </h3>
+            <h3 className="text-lg font-medium text-zinc-700 dark:text-zinc-300">List Skeleton</h3>
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-3/4" />
             <Skeleton className="h-10 w-1/2" />
@@ -347,17 +315,13 @@ export default function ComponentsDemoPage() {
 
       {/* Stagger Animation */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-          Stagger Animations
-        </h2>
+        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-white">Stagger Animations</h2>
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <StaggerItem key={i}>
               <Card variant="bordered">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-zinc-900 dark:text-white">
-                    Item {i}
-                  </h3>
+                  <h3 className="font-semibold text-zinc-900 dark:text-white">Item {i}</h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2">
                     Animated with stagger effect
                   </p>

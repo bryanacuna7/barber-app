@@ -60,9 +60,7 @@ export default function AdminPaymentsPage() {
   const [processingId, setProcessingId] = useState<string | null>(null)
 
   const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [statusFilter, setStatusFilter] = useState(
-    searchParams.get('status') || 'pending'
-  )
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'pending')
   const currentPage = parseInt(searchParams.get('page') || '1')
 
   const fetchPayments = useCallback(async () => {
@@ -90,11 +88,7 @@ export default function AdminPaymentsPage() {
     fetchPayments()
   }, [fetchPayments])
 
-  const updateFilters = (
-    newSearch?: string,
-    newStatus?: string,
-    newPage?: number
-  ) => {
+  const updateFilters = (newSearch?: string, newStatus?: string, newPage?: number) => {
     const params = new URLSearchParams()
     const s = newSearch ?? search
     const st = newStatus ?? statusFilter
@@ -167,9 +161,7 @@ export default function AdminPaymentsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
-          Pagos Reportados
-        </h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Pagos Reportados</h1>
         <p className="mt-1 text-zinc-600 dark:text-zinc-400">
           Revisa y aprueba los pagos de suscripción
         </p>
@@ -219,12 +211,12 @@ export default function AdminPaymentsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
         </div>
       ) : error ? (
-        <Card className="p-8 text-center text-red-600 dark:text-red-400">
-          {error}
-        </Card>
+        <Card className="p-8 text-center text-red-600 dark:text-red-400">{error}</Card>
       ) : payments.length === 0 ? (
         <Card className="p-8 text-center text-zinc-500">
-          No hay pagos {statusFilter !== 'all' && statusLabels[statusFilter as keyof typeof statusLabels]?.toLowerCase()}
+          No hay pagos{' '}
+          {statusFilter !== 'all' &&
+            statusLabels[statusFilter as keyof typeof statusLabels]?.toLowerCase()}
         </Card>
       ) : (
         <div className="space-y-4">
@@ -270,8 +262,7 @@ export default function AdminPaymentsPage() {
 
                       {payment.notes && (
                         <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                          <span className="font-medium">Nota:</span>{' '}
-                          {payment.notes}
+                          <span className="font-medium">Nota:</span> {payment.notes}
                         </div>
                       )}
                     </div>
@@ -307,9 +298,7 @@ export default function AdminPaymentsPage() {
 
                         <button
                           onClick={() => {
-                            const reason = prompt(
-                              'Razón del rechazo (opcional):'
-                            )
+                            const reason = prompt('Razón del rechazo (opcional):')
                             handleAction(payment.id, 'reject', reason || undefined)
                           }}
                           disabled={processingId === payment.id}
@@ -333,8 +322,7 @@ export default function AdminPaymentsPage() {
 
                 {payment.admin_notes && payment.status === 'rejected' && (
                   <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
-                    <span className="font-medium">Razón del rechazo:</span>{' '}
-                    {payment.admin_notes}
+                    <span className="font-medium">Razón del rechazo:</span> {payment.admin_notes}
                   </div>
                 )}
               </Card>
@@ -348,8 +336,7 @@ export default function AdminPaymentsPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Mostrando {(pagination.page - 1) * pagination.limit + 1} -{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} de{' '}
-            {pagination.total}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total}
           </p>
 
           <div className="flex gap-2">

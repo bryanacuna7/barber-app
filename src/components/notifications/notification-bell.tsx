@@ -199,114 +199,113 @@ export function NotificationBell() {
     setIsLoading(false)
   }
 
-  const dropdown = isOpen && mounted ? (
-    <div
-      ref={dropdownRef}
-      className="fixed z-[9999] w-80 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-800 sm:w-96"
-      style={{
-        top: dropdownPosition.top,
-        left: dropdownPosition.left,
-      }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
-        <h3 className="font-semibold text-zinc-900 dark:text-white">
-          Notificaciones
-        </h3>
-        {stats.unread > 0 && (
-          <button
-            onClick={markAllAsRead}
-            disabled={isLoading}
-            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 dark:text-blue-400"
-          >
-            <CheckCheck className="h-3.5 w-3.5" />
-            Marcar todas
-          </button>
-        )}
-      </div>
+  const dropdown =
+    isOpen && mounted ? (
+      <div
+        ref={dropdownRef}
+        className="fixed z-[9999] w-80 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-800 sm:w-96"
+        style={{
+          top: dropdownPosition.top,
+          left: dropdownPosition.left,
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
+          <h3 className="font-semibold text-zinc-900 dark:text-white">Notificaciones</h3>
+          {stats.unread > 0 && (
+            <button
+              onClick={markAllAsRead}
+              disabled={isLoading}
+              className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 dark:text-blue-400"
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Marcar todas
+            </button>
+          )}
+        </div>
 
-      {/* Notification list */}
-      <div className="max-h-[400px] overflow-y-auto">
-        {notifications.length === 0 ? (
-          <div className="px-4 py-8 text-center">
-            <Bell className="mx-auto h-8 w-8 text-zinc-300 dark:text-zinc-600" />
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              No tienes notificaciones
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-zinc-100 dark:divide-zinc-700">
-            {notifications.map((notification) => {
-              const Icon = notificationIcons[notification.type] || Bell
-              const colors = notificationColors[notification.type] || {
-                icon: 'text-zinc-600',
-                bg: 'bg-zinc-100',
-              }
+        {/* Notification list */}
+        <div className="max-h-[400px] overflow-y-auto">
+          {notifications.length === 0 ? (
+            <div className="px-4 py-8 text-center">
+              <Bell className="mx-auto h-8 w-8 text-zinc-300 dark:text-zinc-600" />
+              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                No tienes notificaciones
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-700">
+              {notifications.map((notification) => {
+                const Icon = notificationIcons[notification.type] || Bell
+                const colors = notificationColors[notification.type] || {
+                  icon: 'text-zinc-600',
+                  bg: 'bg-zinc-100',
+                }
 
-              return (
-                <button
-                  key={notification.id}
-                  onClick={() => {
-                    if (!notification.is_read) {
-                      markAsRead(notification.id)
-                    }
-                  }}
-                  className={cn(
-                    'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700/50',
-                    !notification.is_read && 'bg-blue-50/50 dark:bg-blue-900/10'
-                  )}
-                >
-                  {/* Icon */}
-                  <div
+                return (
+                  <button
+                    key={notification.id}
+                    onClick={() => {
+                      if (!notification.is_read) {
+                        markAsRead(notification.id)
+                      }
+                    }}
                     className={cn(
-                      'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full',
-                      colors.bg
+                      'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700/50',
+                      !notification.is_read && 'bg-blue-50/50 dark:bg-blue-900/10'
                     )}
                   >
-                    <Icon className={cn('h-4 w-4', colors.icon)} />
-                  </div>
-
-                  {/* Content */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p
-                        className={cn(
-                          'text-sm font-medium',
-                          notification.is_read
-                            ? 'text-zinc-600 dark:text-zinc-400'
-                            : 'text-zinc-900 dark:text-white'
-                        )}
-                      >
-                        {notification.title}
-                      </p>
-                      {!notification.is_read && (
-                        <span className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                    {/* Icon */}
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full',
+                        colors.bg
                       )}
+                    >
+                      <Icon className={cn('h-4 w-4', colors.icon)} />
                     </div>
-                    <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
-                      {notification.message}
-                    </p>
-                    <p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
-                      {formatNotificationTime(notification.created_at)}
-                    </p>
-                  </div>
-                </button>
-              )
-            })}
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p
+                          className={cn(
+                            'text-sm font-medium',
+                            notification.is_read
+                              ? 'text-zinc-600 dark:text-zinc-400'
+                              : 'text-zinc-900 dark:text-white'
+                          )}
+                        >
+                          {notification.title}
+                        </p>
+                        {!notification.is_read && (
+                          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
+                        )}
+                      </div>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        {notification.message}
+                      </p>
+                      <p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
+                        {formatNotificationTime(notification.created_at)}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {stats.total > 10 && (
+          <div className="border-t border-zinc-200 px-4 py-2 dark:border-zinc-700">
+            <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+              Mostrando 10 de {stats.total} notificaciones
+            </p>
           </div>
         )}
       </div>
-
-      {/* Footer */}
-      {stats.total > 10 && (
-        <div className="border-t border-zinc-200 px-4 py-2 dark:border-zinc-700">
-          <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
-            Mostrando 10 de {stats.total} notificaciones
-          </p>
-        </div>
-      )}
-    </div>
-  ) : null
+    ) : null
 
   return (
     <>

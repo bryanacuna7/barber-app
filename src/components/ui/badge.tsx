@@ -20,7 +20,8 @@ const variantClasses: Record<BadgeVariant, string> = {
   danger: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400',
   info: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
   pending: 'bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400',
-  outline: 'bg-transparent border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400'
+  outline:
+    'bg-transparent border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400',
 }
 
 const dotColors: Record<BadgeVariant, string> = {
@@ -30,13 +31,13 @@ const dotColors: Record<BadgeVariant, string> = {
   danger: 'bg-red-500',
   info: 'bg-blue-500',
   pending: 'bg-violet-500',
-  outline: 'bg-zinc-400'
+  outline: 'bg-zinc-400',
 }
 
 const sizeClasses: Record<BadgeSize, string> = {
   sm: 'px-2 py-0.5 text-xs',
   md: 'px-2.5 py-1 text-xs',
-  lg: 'px-3 py-1.5 text-sm'
+  lg: 'px-3 py-1.5 text-sm',
 }
 
 export function Badge({
@@ -45,7 +46,7 @@ export function Badge({
   size = 'md',
   dot = false,
   pulse = false,
-  className
+  className,
 }: BadgeProps) {
   return (
     <span
@@ -67,12 +68,7 @@ export function Badge({
               )}
             />
           )}
-          <span
-            className={cn(
-              'relative inline-flex rounded-full h-2 w-2',
-              dotColors[variant]
-            )}
-          />
+          <span className={cn('relative inline-flex rounded-full h-2 w-2', dotColors[variant])} />
         </span>
       )}
       {children}
@@ -83,12 +79,15 @@ export function Badge({
 // Appointment status specific badges
 export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
 
-const statusConfig: Record<AppointmentStatus, { label: string; variant: BadgeVariant; dot: boolean; pulse: boolean }> = {
+const statusConfig: Record<
+  AppointmentStatus,
+  { label: string; variant: BadgeVariant; dot: boolean; pulse: boolean }
+> = {
   pending: { label: 'Pendiente', variant: 'pending', dot: true, pulse: true },
   confirmed: { label: 'Confirmada', variant: 'info', dot: true, pulse: false },
   completed: { label: 'Completada', variant: 'success', dot: true, pulse: false },
   cancelled: { label: 'Cancelada', variant: 'danger', dot: false, pulse: false },
-  no_show: { label: 'No asistió', variant: 'warning', dot: false, pulse: false }
+  no_show: { label: 'No asistió', variant: 'warning', dot: false, pulse: false },
 }
 
 interface StatusBadgeProps {

@@ -46,11 +46,13 @@ export default function TrialExpiringEmail({
             ⏰ Te quedan {daysRemaining} días de prueba Pro
           </Heading>
 
-          <Text style={paragraph}>Hola desde <strong>{businessName}</strong>,</Text>
+          <Text style={paragraph}>
+            Hola desde <strong>{businessName}</strong>,
+          </Text>
 
           <Text style={paragraph}>
-            Tu período de prueba de 7 días está por vencer. Después de esta fecha, tu plan
-            cambiará automáticamente a <strong>Básico</strong> con las siguientes limitaciones:
+            Tu período de prueba de 7 días está por vencer. Después de esta fecha, tu plan cambiará
+            automáticamente a <strong>Básico</strong> con las siguientes limitaciones:
           </Text>
 
           <Section style={listSection}>
@@ -84,9 +86,7 @@ export default function TrialExpiringEmail({
             ¿Tienes preguntas? <Link href="https://app.barbershoppro.com/precios">Ver precios</Link>
           </Text>
 
-          <Text style={footer}>
-            BarberShop Pro - Tu barbería, sin complicaciones
-          </Text>
+          <Text style={footer}>BarberShop Pro - Tu barbería, sin complicaciones</Text>
         </Container>
       </Body>
     </Html>

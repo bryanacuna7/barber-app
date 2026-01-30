@@ -3,13 +3,13 @@
  * Defines the interactive tours for different pages
  */
 
-import { TourDefinition } from './types';
+import { TourDefinition } from './types'
 
 export const TOUR_IDS = {
   DASHBOARD: 'dashboard',
   CITAS: 'citas',
   CLIENTES: 'clientes',
-} as const;
+} as const
 
 export const tours: Record<string, TourDefinition> = {
   [TOUR_IDS.DASHBOARD]: {
@@ -22,7 +22,8 @@ export const tours: Record<string, TourDefinition> = {
         id: 'dashboard-stats',
         target: '[data-tour="dashboard-stats"]',
         title: '📊 Estadísticas en Tiempo Real',
-        content: 'Aquí puedes ver tus métricas principales: citas de hoy, ingresos del mes, clientes activos y más.',
+        content:
+          'Aquí puedes ver tus métricas principales: citas de hoy, ingresos del mes, clientes activos y más.',
         placement: 'bottom',
         spotlight: true,
       },
@@ -30,7 +31,8 @@ export const tours: Record<string, TourDefinition> = {
         id: 'dashboard-appointments',
         target: '[data-tour="dashboard-appointments"]',
         title: '📅 Citas de Hoy',
-        content: 'Revisa y gestiona las citas programadas para hoy. Puedes cambiar su estado directamente desde aquí.',
+        content:
+          'Revisa y gestiona las citas programadas para hoy. Puedes cambiar su estado directamente desde aquí.',
         placement: 'bottom',
         spotlight: true,
       },
@@ -38,7 +40,8 @@ export const tours: Record<string, TourDefinition> = {
         id: 'dashboard-quick-actions',
         target: '[data-tour="dashboard-quick-actions"]',
         title: '⚡ Acciones Rápidas',
-        content: 'Accesos directos a las acciones más comunes: crear cita, agregar cliente, reportar pago.',
+        content:
+          'Accesos directos a las acciones más comunes: crear cita, agregar cliente, reportar pago.',
         placement: 'top',
         spotlight: true,
       },
@@ -46,7 +49,8 @@ export const tours: Record<string, TourDefinition> = {
         id: 'dashboard-sidebar',
         target: '[data-tour="sidebar"]',
         title: '🧭 Menú de Navegación',
-        content: 'Usa el menú lateral para navegar entre Citas, Clientes, Servicios, Barberos, Analíticas y Configuración.',
+        content:
+          'Usa el menú lateral para navegar entre Citas, Clientes, Servicios, Barberos, Analíticas y Configuración.',
         placement: 'right',
         spotlight: true,
         isLastStep: true,
@@ -80,7 +84,8 @@ export const tours: Record<string, TourDefinition> = {
         id: 'citas-new',
         target: '[data-tour="appointments-new-button"]',
         title: '➕ Nueva Cita',
-        content: 'Haz clic aquí para crear una nueva cita. Selecciona cliente, servicio, barbero, fecha y hora.',
+        content:
+          'Haz clic aquí para crear una nueva cita. Selecciona cliente, servicio, barbero, fecha y hora.',
         placement: 'left',
         spotlight: true,
         isLastStep: true,
@@ -98,7 +103,8 @@ export const tours: Record<string, TourDefinition> = {
         id: 'clientes-list',
         target: '[data-tour="clients-list"]',
         title: '👥 Lista de Clientes',
-        content: 'Aquí puedes ver todos tus clientes con su información de contacto, visitas y último servicio.',
+        content:
+          'Aquí puedes ver todos tus clientes con su información de contacto, visitas y último servicio.',
         placement: 'bottom',
         spotlight: true,
       },
@@ -106,25 +112,26 @@ export const tours: Record<string, TourDefinition> = {
         id: 'clientes-add',
         target: '[data-tour="clients-add-button"]',
         title: '➕ Agregar Cliente',
-        content: 'Crea nuevos clientes con su nombre, teléfono y email. Luego podrás asignarles citas.',
+        content:
+          'Crea nuevos clientes con su nombre, teléfono y email. Luego podrás asignarles citas.',
         placement: 'left',
         spotlight: true,
         isLastStep: true,
       },
     ],
   },
-};
+}
 
 /**
  * Get tour definition by ID
  */
 export function getTourById(tourId: string): TourDefinition | undefined {
-  return tours[tourId];
+  return tours[tourId]
 }
 
 /**
  * Get all available tours
  */
 export function getAllTours(): TourDefinition[] {
-  return Object.values(tours);
+  return Object.values(tours)
 }

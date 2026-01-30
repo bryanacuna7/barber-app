@@ -1,6 +1,4 @@
-export const metadata = {
-  title: 'Sin conexión',
-}
+'use client'
 
 export default function OfflinePage() {
   return (

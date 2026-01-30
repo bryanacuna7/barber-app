@@ -153,10 +153,7 @@ function ModalOverlay({ children, closeOnClick = true, className }: ModalOverlay
     <div
       ref={overlayRef}
       onClick={handleClick}
-      className={cn(
-        'fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6',
-        className
-      )}
+      className={cn('fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6', className)}
       role="dialog"
       aria-modal="true"
       aria-labelledby={meta.titleId}
@@ -258,9 +255,7 @@ interface ModalDescriptionProps {
 
 function ModalDescription({ children, className }: ModalDescriptionProps) {
   return (
-    <p className={cn('mt-1 text-sm text-zinc-500 dark:text-zinc-400', className)}>
-      {children}
-    </p>
+    <p className={cn('mt-1 text-sm text-zinc-500 dark:text-zinc-400', className)}>{children}</p>
   )
 }
 
@@ -269,7 +264,10 @@ interface ModalCloseButtonProps {
   'aria-label'?: string
 }
 
-function ModalCloseButton({ className, 'aria-label': ariaLabel = 'Cerrar' }: ModalCloseButtonProps) {
+function ModalCloseButton({
+  className,
+  'aria-label': ariaLabel = 'Cerrar',
+}: ModalCloseButtonProps) {
   const { actions, meta } = useModal()
 
   return (
@@ -297,11 +295,7 @@ interface ModalBodyProps {
 }
 
 function ModalBody({ children, className }: ModalBodyProps) {
-  return (
-    <div className={cn('flex-1 overflow-y-auto p-6', className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('flex-1 overflow-y-auto p-6', className)}>{children}</div>
 }
 
 interface ModalFooterProps {

@@ -40,6 +40,10 @@ coverage
 .vscode
 .idea
 
+# Claude Code configuration
+.claude
+.agents
+
 # Lock files
 package-lock.json
 yarn.lock

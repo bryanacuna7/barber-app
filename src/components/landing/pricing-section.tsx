@@ -68,8 +68,7 @@ export function PricingSection() {
           className="text-center"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-            <Crown className="h-4 w-4" />
-            7 días de prueba gratis · Sin tarjeta de crédito
+            <Crown className="h-4 w-4" />7 días de prueba gratis · Sin tarjeta de crédito
           </span>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
             Planes simples,{' '}
@@ -110,12 +109,8 @@ export function PricingSection() {
               )}
 
               <div className="mb-8">
-                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">
-                  {plan.name}
-                </h3>
-                <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-                  {plan.description}
-                </p>
+                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">{plan.name}</h3>
+                <p className="mt-2 text-zinc-600 dark:text-zinc-400">{plan.description}</p>
                 <div className="mt-6 flex items-baseline gap-2">
                   <span className="text-5xl font-bold text-zinc-900 dark:text-white">
                     ${plan.price}

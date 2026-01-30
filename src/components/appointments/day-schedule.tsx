@@ -37,7 +37,7 @@ export function DaySchedule({
   onWhatsApp,
   startHour = 8,
   endHour = 20,
-  className
+  className,
 }: DayScheduleProps) {
   const hours = useMemo(() => {
     const result = []
@@ -48,15 +48,13 @@ export function DaySchedule({
   }, [startHour, endHour])
 
   const getAppointmentsForHour = (hour: number) => {
-    return appointments.filter(apt => {
+    return appointments.filter((apt) => {
       const aptDate = new Date(apt.scheduled_at)
       return aptDate.getHours() === hour && isSameDay(aptDate, date)
     })
   }
 
-  const dayAppointments = appointments.filter(apt =>
-    isSameDay(new Date(apt.scheduled_at), date)
-  )
+  const dayAppointments = appointments.filter((apt) => isSameDay(new Date(apt.scheduled_at), date))
 
   if (dayAppointments.length === 0) {
     return (
@@ -85,9 +83,7 @@ export function DaySchedule({
             >
               {/* Time label */}
               <div className="w-16 flex-shrink-0 pt-2 pr-4 text-right">
-                <span className="text-sm font-medium text-zinc-400">
-                  {timeLabel}
-                </span>
+                <span className="text-sm font-medium text-zinc-400">{timeLabel}</span>
               </div>
 
               {/* Appointments slot */}

@@ -18,7 +18,7 @@ const statusOptions: { value: AppointmentStatus | 'all'; label: string; color: s
   { value: 'confirmed', label: 'Confirmadas', color: 'bg-blue-500' },
   { value: 'completed', label: 'Listas', color: 'bg-green-500' },
   { value: 'cancelled', label: 'Canceladas', color: 'bg-red-500' },
-  { value: 'no_show', label: 'No vino', color: 'bg-zinc-400' }
+  { value: 'no_show', label: 'No vino', color: 'bg-zinc-400' },
 ]
 
 export function AppointmentFilters({
@@ -26,7 +26,7 @@ export function AppointmentFilters({
   onSearchChange,
   statusFilter,
   onStatusFilterChange,
-  className
+  className,
 }: AppointmentFiltersProps) {
   return (
     <div className={cn('space-y-3', className)}>

@@ -20,13 +20,15 @@ const features = [
   {
     icon: Calendar,
     title: 'Agenda Inteligente',
-    description: 'Calendario visual con vista diaria, semanal y mensual. Drag & drop para reorganizar citas.',
+    description:
+      'Calendario visual con vista diaria, semanal y mensual. Drag & drop para reorganizar citas.',
     color: 'blue',
   },
   {
     icon: Users,
     title: 'Gestión de Clientes',
-    description: 'Historial completo, notas privadas, frecuencia de visitas y análisis de comportamiento.',
+    description:
+      'Historial completo, notas privadas, frecuencia de visitas y análisis de comportamiento.',
     color: 'purple',
   },
   {
@@ -56,13 +58,15 @@ const features = [
   {
     icon: Shield,
     title: 'Datos Seguros',
-    description: 'Respaldos automáticos, encriptación y cumplimiento GDPR. Tu información protegida.',
+    description:
+      'Respaldos automáticos, encriptación y cumplimiento GDPR. Tu información protegida.',
     color: 'red',
   },
   {
     icon: Zap,
     title: 'Configuración en Minutos',
-    description: 'Wizard de onboarding que te guía paso a paso. Empieza a agendar en menos de 10 minutos.',
+    description:
+      'Wizard de onboarding que te guía paso a paso. Empieza a agendar en menos de 10 minutos.',
     color: 'yellow',
   },
   {
@@ -148,8 +152,12 @@ export function FeaturesSection() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-purple-50/0 to-pink-50/0 opacity-0 transition-opacity group-hover:from-blue-50/50 group-hover:via-purple-50/50 group-hover:to-pink-50/50 group-hover:opacity-100 dark:group-hover:from-blue-950/20 dark:group-hover:via-purple-950/20 dark:group-hover:to-pink-950/20" />
 
                 <div className="relative">
-                  <div className={`inline-flex items-center justify-center rounded-xl bg-${feature.color}-100 p-3 dark:bg-${feature.color}-900/30`}>
-                    <Icon className={`h-6 w-6 text-${feature.color}-600 dark:text-${feature.color}-400`} />
+                  <div
+                    className={`inline-flex items-center justify-center rounded-xl bg-${feature.color}-100 p-3 dark:bg-${feature.color}-900/30`}
+                  >
+                    <Icon
+                      className={`h-6 w-6 text-${feature.color}-600 dark:text-${feature.color}-400`}
+                    />
                   </div>
 
                   <h3 className="mt-4 font-semibold text-zinc-900 dark:text-white">
@@ -178,8 +186,8 @@ export function FeaturesSection() {
                 ¿Por qué BarberShop Pro?
               </h3>
               <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-                No es solo un calendario. Es un sistema completo diseñado para resolver los problemas
-                reales de barberías:
+                No es solo un calendario. Es un sistema completo diseñado para resolver los
+                problemas reales de barberías:
               </p>
               <ul className="mt-6 space-y-3">
                 {[

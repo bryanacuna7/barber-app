@@ -6,9 +6,7 @@ import type { Database, AdminUser } from '@/types/database'
  * @param supabase - Supabase client (server or client)
  * @returns AdminUser if user is admin, null otherwise
  */
-export async function verifyAdmin(
-  supabase: SupabaseClient<Database>
-): Promise<AdminUser | null> {
+export async function verifyAdmin(supabase: SupabaseClient<Database>): Promise<AdminUser | null> {
   const {
     data: { user },
     error: authError,

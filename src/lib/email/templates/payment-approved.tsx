@@ -58,11 +58,13 @@ export default function PaymentApprovedEmail({
 
           <Heading style={{ ...heading, color: brandColor }}>¡Pago Aprobado!</Heading>
 
-          <Text style={paragraph}>Hola desde <strong>{businessName}</strong>,</Text>
+          <Text style={paragraph}>
+            Hola desde <strong>{businessName}</strong>,
+          </Text>
 
           <Text style={paragraph}>
-            Excelentes noticias: tu pago ha sido verificado y aprobado. Tu plan <strong>{planName}</strong>{' '}
-            está ahora activo.
+            Excelentes noticias: tu pago ha sido verificado y aprobado. Tu plan{' '}
+            <strong>{planName}</strong> está ahora activo.
           </Text>
 
           <Section style={detailsBox}>
@@ -92,12 +94,11 @@ export default function PaymentApprovedEmail({
           </Text>
 
           <Text style={footer}>
-            ¿Tienes preguntas? <Link href="https://app.barbershoppro.com/suscripcion">Ver mi suscripción</Link>
+            ¿Tienes preguntas?{' '}
+            <Link href="https://app.barbershoppro.com/suscripcion">Ver mi suscripción</Link>
           </Text>
 
-          <Text style={footer}>
-            BarberShop Pro - Tu barbería, sin complicaciones
-          </Text>
+          <Text style={footer}>BarberShop Pro - Tu barbería, sin complicaciones</Text>
         </Container>
       </Body>
     </Html>

@@ -40,10 +40,7 @@ export function IOSToggle({
 
   return (
     <label
-      className={cn(
-        'inline-flex items-center gap-3',
-        disabled && 'opacity-50 cursor-not-allowed'
-      )}
+      className={cn('inline-flex items-center gap-3', disabled && 'opacity-50 cursor-not-allowed')}
     >
       <button
         type="button"
@@ -56,9 +53,7 @@ export function IOSToggle({
           'transition-colors duration-200 ease-in-out',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2',
           sizeConfig.track,
-          checked
-            ? 'bg-[var(--brand-primary)]'
-            : 'bg-[#E9E9EB] dark:bg-[#39393D]'
+          checked ? 'bg-[var(--brand-primary)]' : 'bg-[#E9E9EB] dark:bg-[#39393D]'
         )}
       >
         <motion.span
@@ -79,9 +74,7 @@ export function IOSToggle({
         />
       </button>
       {label && (
-        <span className="text-[17px] font-normal text-zinc-900 dark:text-white">
-          {label}
-        </span>
+        <span className="text-[17px] font-normal text-zinc-900 dark:text-white">{label}</span>
       )}
     </label>
   )

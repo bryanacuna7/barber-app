@@ -105,9 +105,7 @@ export function NotificationPreferencesSection() {
             <Bell className="w-5 h-5 text-blue-500" />
             <CardTitle>Notificaciones</CardTitle>
           </div>
-          <CardDescription>
-            Configura cómo quieres recibir notificaciones
-          </CardDescription>
+          <CardDescription>Configura cómo quieres recibir notificaciones</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Channel Selection */}

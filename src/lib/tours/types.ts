@@ -5,69 +5,69 @@
 
 export interface TourStep {
   /** Unique identifier for the step */
-  id: string;
+  id: string
   /** Target element selector (CSS selector) */
-  target: string;
+  target: string
   /** Title of the tooltip */
-  title: string;
+  title: string
   /** Description text */
-  content: string;
+  content: string
   /** Placement of the tooltip relative to target */
-  placement?: 'top' | 'bottom' | 'left' | 'right';
+  placement?: 'top' | 'bottom' | 'left' | 'right'
   /** Whether to show spotlight/highlight on target */
-  spotlight?: boolean;
+  spotlight?: boolean
   /** Whether this is the last step */
-  isLastStep?: boolean;
+  isLastStep?: boolean
 }
 
 export interface TourDefinition {
   /** Unique identifier for the tour */
-  id: string;
+  id: string
   /** Display name */
-  name: string;
+  name: string
   /** Tour description */
-  description: string;
+  description: string
   /** Array of tour steps */
-  steps: TourStep[];
+  steps: TourStep[]
   /** Auto-start tour on first visit */
-  autoStart?: boolean;
+  autoStart?: boolean
 }
 
 export interface TourProgress {
-  business_id: string;
-  tour_id: string;
-  completed: boolean;
-  completed_at?: string;
-  created_at: string;
-  updated_at: string;
+  business_id: string
+  tour_id: string
+  completed: boolean
+  completed_at?: string
+  created_at: string
+  updated_at: string
 }
 
 export interface TourState {
   /** Currently active tour ID */
-  activeTourId: string | null;
+  activeTourId: string | null
   /** Current step index */
-  currentStepIndex: number;
+  currentStepIndex: number
   /** Whether tour is running */
-  isRunning: boolean;
+  isRunning: boolean
   /** Completed tours (cached from API) */
-  completedTours: Set<string>;
+  completedTours: Set<string>
 }
 
 export interface TourContextValue extends TourState {
   /** Start a tour */
-  startTour: (tourId: string) => void;
+  startTour: (tourId: string) => void
   /** Go to next step */
-  nextStep: () => void;
+  nextStep: () => void
   /** Go to previous step */
-  previousStep: () => void;
+  previousStep: () => void
   /** Skip/exit current tour */
-  skipTour: () => void;
+  skipTour: () => void
   /** Complete current tour and save progress */
-  completeTour: () => Promise<void>;
+  completeTour: () => Promise<void>
   /** Check if a tour has been completed */
-  isTourCompleted: (tourId: string) => boolean;
+  isTourCompleted: (tourId: string) => boolean
   /** Get current tour definition */
-  getCurrentTour: () => TourDefinition | null;
+  getCurrentTour: () => TourDefinition | null
   /** Get current step */
-  getCurrentStep: () => TourStep | null;
+  getCurrentStep: () => TourStep | null
 }

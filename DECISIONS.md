@@ -10,6 +10,7 @@
 
 ```markdown
 ### [DECISION TITLE]
+
 **Date:** YYYY-MM-DD
 **Status:** Active | Superseded | Deprecated
 
@@ -23,14 +24,17 @@ What we decided to do.
 Why this approach over alternatives.
 
 **Alternatives Considered:**
+
 1. Alternative A - rejected because X
 2. Alternative B - rejected because Y
 
 **Consequences:**
+
 - Positive: [BENEFITS]
 - Negative: [TRADEOFFS]
 
 **Related:**
+
 - Links to relevant code/docs
 ```
 
@@ -39,6 +43,7 @@ Why this approach over alternatives.
 ## Decisions
 
 ### [Your First Decision Here]
+
 **Date:** [TODAY]
 **Status:** Active
 
@@ -57,9 +62,9 @@ Why this approach over alternatives.
 
 Track bugs that inform future decisions:
 
-| ID | Description | Root Cause | Fix | Lesson |
-|----|-------------|------------|-----|--------|
-| #001 | [BUG] | [CAUSE] | [FIX] | [LESSON] |
+| ID   | Description | Root Cause | Fix   | Lesson   |
+| ---- | ----------- | ---------- | ----- | -------- |
+| #001 | [BUG]       | [CAUSE]    | [FIX] | [LESSON] |
 
 ---
 
@@ -67,6 +72,6 @@ Track bugs that inform future decisions:
 
 Major architectural choices:
 
-| ADR | Title | Status | Date |
-|-----|-------|--------|------|
+| ADR | Title   | Status | Date   |
+| --- | ------- | ------ | ------ |
 | 001 | [TITLE] | Active | [DATE] |

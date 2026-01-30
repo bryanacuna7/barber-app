@@ -60,19 +60,22 @@ export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
+    setToasts((prev) => prev.filter((toast) => toast.id !== id))
   }, [])
 
-  const addToast = useCallback((message: string, type: ToastType = 'info', duration: number = 4000) => {
-    const id = Math.random().toString(36).slice(2)
-    const toast: Toast = { id, message, type, duration }
+  const addToast = useCallback(
+    (message: string, type: ToastType = 'info', duration: number = 4000) => {
+      const id = Math.random().toString(36).slice(2)
+      const toast: Toast = { id, message, type, duration }
 
-    setToasts(prev => [...prev, toast])
+      setToasts((prev) => [...prev, toast])
 
-    if (duration > 0) {
-      setTimeout(() => removeToast(id), duration)
-    }
-  }, [removeToast])
+      if (duration > 0) {
+        setTimeout(() => removeToast(id), duration)
+      }
+    },
+    [removeToast]
+  )
 
   const success = useCallback((message: string) => addToast(message, 'success'), [addToast])
   const error = useCallback((message: string) => addToast(message, 'error', 6000), [addToast])
@@ -103,7 +106,7 @@ function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
       aria-label="Notifications"
     >
       <AnimatePresence mode="popLayout">
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
         ))}
       </AnimatePresence>
@@ -121,21 +124,24 @@ const icons = {
   success: CheckCircle,
   error: AlertCircle,
   warning: AlertTriangle,
-  info: Info
+  info: Info,
 }
 
 const styles = {
-  success: 'bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200',
-  error: 'bg-red-50 dark:bg-red-950/80 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
-  warning: 'bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
-  info: 'bg-blue-50 dark:bg-blue-950/80 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
+  success:
+    'bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200',
+  error:
+    'bg-red-50 dark:bg-red-950/80 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+  warning:
+    'bg-amber-50 dark:bg-amber-950/80 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+  info: 'bg-blue-50 dark:bg-blue-950/80 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
 }
 
 const iconStyles = {
   success: 'text-emerald-500',
   error: 'text-red-500',
   warning: 'text-amber-500',
-  info: 'text-blue-500'
+  info: 'text-blue-500',
 }
 
 function ToastItem({ toast, onRemove }: ToastItemProps) {

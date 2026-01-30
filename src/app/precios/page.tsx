@@ -13,8 +13,7 @@ import {
 
 export const metadata = {
   title: 'Precios - BarberShop Pro',
-  description:
-    'Elige el plan perfecto para tu barbería. 7 días de prueba gratis.',
+  description: 'Elige el plan perfecto para tu barbería. 7 días de prueba gratis.',
 }
 
 const plans = [
@@ -87,9 +86,7 @@ export default function PreciosPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100">
               <Scissors className="h-4 w-4 text-white dark:text-zinc-900" />
             </div>
-            <span className="font-semibold text-zinc-900 dark:text-white">
-              BarberShop Pro
-            </span>
+            <span className="font-semibold text-zinc-900 dark:text-white">BarberShop Pro</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link
@@ -112,8 +109,7 @@ export default function PreciosPage() {
       <section className="py-16 text-center sm:py-24">
         <div className="mx-auto max-w-3xl px-4">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-            <Crown className="h-4 w-4" />
-            7 días de prueba gratis
+            <Crown className="h-4 w-4" />7 días de prueba gratis
           </span>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-5xl">
             Planes simples,
@@ -149,12 +145,8 @@ export default function PreciosPage() {
               )}
 
               <div className="mb-6">
-                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">
-                  {plan.name}
-                </h3>
-                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                  {plan.description}
-                </p>
+                <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{plan.name}</h3>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{plan.description}</p>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-4xl font-bold text-zinc-900 dark:text-white">
                     ${plan.price}
@@ -243,12 +235,8 @@ export default function PreciosPage() {
                 key={i}
                 className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <h3 className="font-semibold text-zinc-900 dark:text-white">
-                  {faq.question}
-                </h3>
-                <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-                  {faq.answer}
-                </p>
+                <h3 className="font-semibold text-zinc-900 dark:text-white">{faq.question}</h3>
+                <p className="mt-2 text-zinc-600 dark:text-zinc-400">{faq.answer}</p>
               </div>
             ))}
           </div>
@@ -258,12 +246,8 @@ export default function PreciosPage() {
       {/* CTA */}
       <section className="border-t border-zinc-200 bg-zinc-900 py-16 dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold text-white">
-            Empieza tu prueba gratuita hoy
-          </h2>
-          <p className="mt-4 text-zinc-400">
-            7 días de acceso completo. Sin tarjeta de crédito.
-          </p>
+          <h2 className="text-3xl font-bold text-white">Empieza tu prueba gratuita hoy</h2>
+          <p className="mt-4 text-zinc-400">7 días de acceso completo. Sin tarjeta de crédito.</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/register"
@@ -309,12 +293,8 @@ function FeatureCard({
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
         <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
       </div>
-      <h3 className="mt-4 font-semibold text-zinc-900 dark:text-white">
-        {title}
-      </h3>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        {description}
-      </p>
+      <h3 className="mt-4 font-semibold text-zinc-900 dark:text-white">{title}</h3>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
     </div>
   )
 }

@@ -40,9 +40,7 @@ export function Dropdown({ trigger, children, align = 'left', className }: Dropd
 
   return (
     <div ref={dropdownRef} className={cn('relative inline-block', className)}>
-      <div onClick={() => setIsOpen(!isOpen)}>
-        {trigger}
-      </div>
+      <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
 
       {isOpen && (
         <div
@@ -78,7 +76,7 @@ export function DropdownItem({
   icon,
   danger = false,
   disabled = false,
-  className
+  className,
 }: DropdownItemProps) {
   return (
     <button
@@ -137,12 +135,12 @@ export function SelectDropdown({
   onChange,
   options,
   placeholder = 'Seleccionar...',
-  className
+  className,
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const selectedOption = options.find(opt => opt.value === value)
+  const selectedOption = options.find((opt) => opt.value === value)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -170,25 +168,27 @@ export function SelectDropdown({
           isOpen && 'ring-2 ring-zinc-500 ring-offset-2'
         )}
       >
-        <span className={cn(
-          selectedOption ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500'
-        )}>
+        <span className={cn(selectedOption ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500')}>
           {selectedOption?.label || placeholder}
         </span>
-        <ChevronDown className={cn(
-          'w-4 h-4 text-zinc-400 transition-transform duration-200',
-          isOpen && 'rotate-180'
-        )} />
+        <ChevronDown
+          className={cn(
+            'w-4 h-4 text-zinc-400 transition-transform duration-200',
+            isOpen && 'rotate-180'
+          )}
+        />
       </button>
 
       {isOpen && (
-        <div className={cn(
-          'absolute z-50 w-full mt-2',
-          'bg-white dark:bg-zinc-900 rounded-xl shadow-lg',
-          'border border-zinc-200 dark:border-zinc-800',
-          'py-1.5 max-h-60 overflow-auto',
-          'animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200'
-        )}>
+        <div
+          className={cn(
+            'absolute z-50 w-full mt-2',
+            'bg-white dark:bg-zinc-900 rounded-xl shadow-lg',
+            'border border-zinc-200 dark:border-zinc-800',
+            'py-1.5 max-h-60 overflow-auto',
+            'animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200'
+          )}
+        >
           {options.map((option) => (
             <button
               key={option.value}
