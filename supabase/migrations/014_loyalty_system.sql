@@ -374,15 +374,14 @@ CREATE TRIGGER trigger_auto_generate_referral_code
 -- Add default loyalty program templates to system_settings
 -- Business owners can quick-start with these presets
 
-INSERT INTO system_settings (key, value, description) VALUES
+INSERT INTO system_settings (key, value) VALUES
   ('loyalty_template_punch_card',
    '{
      "name": "Punch Card Clásico",
      "program_type": "visits",
      "free_service_after_visits": 10,
      "description": "10 visitas = 1 servicio gratis"
-   }',
-   'Loyalty program template: Classic punch card system'),
+   }'::jsonb),
 
   ('loyalty_template_points',
    '{
@@ -391,8 +390,7 @@ INSERT INTO system_settings (key, value, description) VALUES
      "points_per_currency_unit": 100,
      "discount_percentage": 20,
      "description": "1 punto por cada ₡100 gastado. 500 puntos = 20% descuento"
-   }',
-   'Loyalty program template: Points-based rewards'),
+   }'::jsonb),
 
   ('loyalty_template_vip',
    '{
@@ -401,8 +399,7 @@ INSERT INTO system_settings (key, value, description) VALUES
      "free_service_after_visits": 5,
      "points_per_currency_unit": 50,
      "description": "5 visitas = VIP tier. Acumula puntos para beneficios extra"
-   }',
-   'Loyalty program template: Fast VIP progression'),
+   }'::jsonb),
 
   ('loyalty_template_referral',
    '{
@@ -412,8 +409,7 @@ INSERT INTO system_settings (key, value, description) VALUES
      "referral_reward_amount": 25,
      "referee_reward_amount": 25,
      "description": "Refiere amigo = ambos 25% descuento"
-   }',
-   'Loyalty program template: Referral-focused program')
+   }'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 
 -- -------------------------------------------
