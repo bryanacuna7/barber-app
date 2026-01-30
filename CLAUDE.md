@@ -4,6 +4,29 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ---
 
+## 🔄 Session Start
+
+Al iniciar una nueva sesión, **EJECUTA AUTOMÁTICAMENTE** el comando `/continue`:
+
+1. Lee `PROGRESS.md` para entender:
+   - Qué está construido
+   - Estado actual del proyecto
+   - Qué sigue
+
+2. Muestra resumen breve:
+   ```
+   📋 Sesión anterior: [resumen 1 línea]
+   ➡️  Siguiente: [próxima tarea]
+
+   ¿Continuamos o prefieres algo diferente?
+   ```
+
+3. Espera confirmación del usuario antes de continuar
+
+**Nota:** Si el usuario dice algo diferente a "continuar", ajusta según su request.
+
+---
+
 ## 🚨 REGLAS CRÍTICAS (LEER PRIMERO)
 
 Estas reglas son **OBLIGATORIAS**, no sugerencias:
