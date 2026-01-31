@@ -16,7 +16,13 @@ const navigation = [
 ]
 
 // Pages accessible through "More" menu
-const morePages = ['/analiticas', '/barberos', '/suscripcion', '/configuracion']
+const morePages = [
+  '/analiticas',
+  '/lealtad/configuracion',
+  '/barberos',
+  '/suscripcion',
+  '/configuracion',
+]
 
 export function BottomNav() {
   const pathname = usePathname()

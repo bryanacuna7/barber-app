@@ -283,15 +283,31 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                   whileTap={{ scale: 0.97 }}
                   className={`group relative flex min-w-[240px] max-w-[240px] flex-shrink-0 flex-col gap-2 overflow-hidden rounded-xl p-3 text-left transition-all ${
                     isSelected
-                      ? preset.color === 'emerald'
-                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25'
-                        : preset.color === 'amber'
-                          ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25'
-                          : preset.color === 'purple'
-                            ? 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/25'
-                            : 'bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/25'
-                      : 'border border-border/50 bg-card/80 shadow-sm backdrop-blur-sm hover:shadow-md'
+                      ? 'shadow-lg'
+                      : 'border border-zinc-200 dark:border-zinc-800 bg-card/80 shadow-sm backdrop-blur-sm hover:shadow-md'
                   }`}
+                  style={
+                    isSelected
+                      ? {
+                          background:
+                            preset.color === 'emerald'
+                              ? 'linear-gradient(to bottom right, rgb(16, 185, 129), rgb(20, 184, 166))'
+                              : preset.color === 'amber'
+                                ? 'linear-gradient(to bottom right, rgb(245, 158, 11), rgb(251, 146, 60))'
+                                : preset.color === 'purple'
+                                  ? 'linear-gradient(to bottom right, rgb(168, 85, 247), rgb(147, 51, 234))'
+                                  : 'linear-gradient(to bottom right, rgb(59, 130, 246), rgb(6, 182, 212))',
+                          boxShadow:
+                            preset.color === 'emerald'
+                              ? '0 10px 15px -3px rgba(16, 185, 129, 0.25)'
+                              : preset.color === 'amber'
+                                ? '0 10px 15px -3px rgba(245, 158, 11, 0.25)'
+                                : preset.color === 'purple'
+                                  ? '0 10px 15px -3px rgba(168, 85, 247, 0.25)'
+                                  : '0 10px 15px -3px rgba(59, 130, 246, 0.25)',
+                        }
+                      : undefined
+                  }
                 >
                   {/* Gradient overlay for depth when selected */}
                   {isSelected && (
@@ -393,15 +409,31 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                   whileTap={{ scale: 0.98 }}
                   className={`group relative flex flex-col gap-3 overflow-hidden rounded-2xl p-4 text-left transition-all lg:p-5 ${
                     isSelected
-                      ? preset.color === 'emerald'
-                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20'
-                        : preset.color === 'amber'
-                          ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/20'
-                          : preset.color === 'purple'
-                            ? 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/20'
-                            : 'bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/20'
-                      : 'border border-border/50 bg-card/80 shadow-sm backdrop-blur-sm hover:shadow-lg'
+                      ? 'shadow-lg'
+                      : 'border border-zinc-200 dark:border-zinc-800 bg-card/80 shadow-sm backdrop-blur-sm hover:shadow-lg'
                   }`}
+                  style={
+                    isSelected
+                      ? {
+                          background:
+                            preset.color === 'emerald'
+                              ? 'linear-gradient(to bottom right, rgb(16, 185, 129), rgb(20, 184, 166))'
+                              : preset.color === 'amber'
+                                ? 'linear-gradient(to bottom right, rgb(245, 158, 11), rgb(251, 146, 60))'
+                                : preset.color === 'purple'
+                                  ? 'linear-gradient(to bottom right, rgb(168, 85, 247), rgb(147, 51, 234))'
+                                  : 'linear-gradient(to bottom right, rgb(59, 130, 246), rgb(6, 182, 212))',
+                          boxShadow:
+                            preset.color === 'emerald'
+                              ? '0 10px 15px -3px rgba(16, 185, 129, 0.2)'
+                              : preset.color === 'amber'
+                                ? '0 10px 15px -3px rgba(245, 158, 11, 0.2)'
+                                : preset.color === 'purple'
+                                  ? '0 10px 15px -3px rgba(168, 85, 247, 0.2)'
+                                  : '0 10px 15px -3px rgba(59, 130, 246, 0.2)',
+                        }
+                      : undefined
+                  }
                 >
                   {/* Gradient overlay for depth when selected */}
                   {isSelected && (
@@ -496,28 +528,28 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
             <TabsList className="grid w-full grid-cols-2 gap-1.5 bg-transparent p-0 sm:grid-cols-4 sm:gap-2.5">
               <TabsTrigger
                 value="points"
-                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-amber-400 data-[state=active]:bg-amber-50 data-[state=active]:ring-1 data-[state=active]:ring-amber-200/50 dark:data-[state=active]:border-amber-600 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:ring-amber-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+                className="flex-col gap-0.5 border border-zinc-200 dark:border-zinc-800 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-amber-400 data-[state=active]:bg-amber-50 data-[state=active]:ring-1 data-[state=active]:ring-amber-200/50 dark:data-[state=active]:border-amber-600 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:ring-amber-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
               >
                 <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Puntos</span>
               </TabsTrigger>
               <TabsTrigger
                 value="visits"
-                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-emerald-400 data-[state=active]:bg-emerald-50 data-[state=active]:ring-1 data-[state=active]:ring-emerald-200/50 dark:data-[state=active]:border-emerald-600 dark:data-[state=active]:bg-emerald-950/30 dark:data-[state=active]:ring-emerald-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+                className="flex-col gap-0.5 border border-zinc-200 dark:border-zinc-800 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-emerald-400 data-[state=active]:bg-emerald-50 data-[state=active]:ring-1 data-[state=active]:ring-emerald-200/50 dark:data-[state=active]:border-emerald-600 dark:data-[state=active]:bg-emerald-950/30 dark:data-[state=active]:ring-emerald-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
               >
                 <Footprints className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Visitas</span>
               </TabsTrigger>
               <TabsTrigger
                 value="referral"
-                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-blue-400 data-[state=active]:bg-blue-50 data-[state=active]:ring-1 data-[state=active]:ring-blue-200/50 dark:data-[state=active]:border-blue-600 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:ring-blue-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+                className="flex-col gap-0.5 border border-zinc-200 dark:border-zinc-800 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-blue-400 data-[state=active]:bg-blue-50 data-[state=active]:ring-1 data-[state=active]:ring-blue-200/50 dark:data-[state=active]:border-blue-600 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:ring-blue-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
               >
                 <UserPlus className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Referidos</span>
               </TabsTrigger>
               <TabsTrigger
                 value="hybrid"
-                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-purple-400 data-[state=active]:bg-purple-50 data-[state=active]:ring-1 data-[state=active]:ring-purple-200/50 dark:data-[state=active]:border-purple-600 dark:data-[state=active]:bg-purple-950/30 dark:data-[state=active]:ring-purple-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+                className="flex-col gap-0.5 border border-zinc-200 dark:border-zinc-800 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-purple-400 data-[state=active]:bg-purple-50 data-[state=active]:ring-1 data-[state=active]:ring-purple-200/50 dark:data-[state=active]:border-purple-600 dark:data-[state=active]:bg-purple-950/30 dark:data-[state=active]:ring-purple-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
               >
                 <Layers3 className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 sm:h-4 sm:w-4" />
                 <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Híbrido</span>
