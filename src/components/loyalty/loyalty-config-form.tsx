@@ -6,7 +6,7 @@
  *
  * Features:
  * - Toggle enabled/disabled
- * - 4 preset templates
+ * - 4 preset templates (mobile-optimized)
  * - Custom configuration mode
  * - Real-time validation
  */
@@ -25,7 +25,19 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gift, Star, Zap, Users, Save, CheckCircle2, AlertCircle } from 'lucide-react'
+import {
+  Gift,
+  Star,
+  Zap,
+  Users,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Footprints,
+  UserPlus,
+  Layers3,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
@@ -41,6 +53,8 @@ const PRESETS = [
     name: 'Punch Card Clásico',
     icon: Gift,
     description: '10 visitas = 1 servicio gratis',
+    example: 'Simple y efectivo',
+    badge: 'Recomendado',
     color: 'emerald',
     config: {
       program_type: 'visits' as const,
@@ -51,7 +65,9 @@ const PRESETS = [
     id: 'points',
     name: 'Sistema de Puntos',
     icon: Star,
-    description: '1 punto por ₡100. 500 pts = 20% descuento',
+    description: '₡100 gastados = 1 punto',
+    example: '500 pts = 20% descuento',
+    badge: 'Popular',
     color: 'amber',
     config: {
       program_type: 'points' as const,
@@ -63,19 +79,24 @@ const PRESETS = [
     id: 'vip',
     name: 'VIP Acelerado',
     icon: Zap,
-    description: '5 visitas = VIP tier + puntos extra',
+    description: '5 visitas + puntos extra',
+    example: '1 pto/₡50 + 20% off',
+    badge: 'Avanzado',
     color: 'purple',
     config: {
       program_type: 'hybrid' as const,
       free_service_after_visits: 5,
       points_per_currency_unit: 50,
+      discount_percentage: 20,
     },
   },
   {
     id: 'referral',
     name: 'Referidos Focus',
     icon: Users,
-    description: 'Refiere amigo = ambos 25% off',
+    description: 'Crece con tus clientes',
+    example: 'Ambos ganan 25% off',
+    badge: 'Crecimiento',
     color: 'blue',
     config: {
       program_type: 'referral' as const,
@@ -154,7 +175,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
     try {
       const supabase = createClient()
 
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         business_id: businessId,
         enabled,
         program_type: programType,
@@ -188,13 +209,15 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
       }
 
       // Upsert loyalty program
-      const { error } = await supabase.from('loyalty_programs').upsert(payload, {
+      // Note: loyalty_programs table created in migration 014_loyalty_system.sql
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any).from('loyalty_programs').upsert(payload, {
         onConflict: 'business_id',
       })
 
       if (error) throw error
 
-      toast.success('Configuración guardada exitosamente! 🎉')
+      toast.success('Configuración guardada')
     } catch (error) {
       console.error('Failed to save loyalty program:', error)
       toast.error('Error al guardar configuración')
@@ -204,30 +227,46 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   }
 
   return (
-    <Card className="border-border/50 bg-card/80 p-6 backdrop-blur-sm">
-      <div className="space-y-6">
+    <Card className="overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm">
+      <div className="w-full space-y-3 overflow-x-hidden p-3 sm:space-y-4 sm:p-5 lg:space-y-6 lg:p-6">
         {/* Header with Toggle */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Configuración</h2>
-            <p className="text-sm text-muted-foreground">
-              {enabled
-                ? 'Programa activo - los clientes acumularán puntos'
-                : 'Programa desactivado'}
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-semibold lg:text-lg">Configuración</h2>
+            <p className="truncate text-xs lg:text-sm">
+              {enabled ? (
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                  ✓ Programa activo - los clientes acumularán puntos
+                </span>
+              ) : (
+                <span className="font-medium text-zinc-500 dark:text-zinc-400">
+                  ○ Programa desactivado - actívalo para comenzar
+                </span>
+              )}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Label htmlFor="enabled-toggle" className="text-sm font-medium">
-              {enabled ? 'Activado' : 'Desactivado'}
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <Label
+              htmlFor="enabled-toggle"
+              className="hidden text-sm font-semibold sm:inline-block"
+            >
+              {enabled ? (
+                <span className="text-emerald-600 dark:text-emerald-400">Activado</span>
+              ) : (
+                <span className="text-zinc-500">Desactivado</span>
+              )}
             </Label>
             <Switch id="enabled-toggle" checked={enabled} onCheckedChange={setEnabled} />
           </div>
         </div>
 
-        {/* Preset Templates */}
-        <div>
-          <Label className="mb-3 block">Quick Start - Templates</Label>
-          <div className="grid gap-3 sm:grid-cols-2">
+        {/* Preset Templates - Horizontal scroll on mobile, grid on desktop */}
+        <div className="w-full">
+          <Label className="mb-2.5 block text-sm font-medium sm:mb-3 lg:mb-4 lg:text-base">
+            Quick Start
+          </Label>
+          {/* Mobile: Horizontal scroll */}
+          <div className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-2 scrollbar-hide sm:hidden">
             {PRESETS.map((preset) => {
               const Icon = preset.icon
               const isSelected = selectedPreset === preset.id
@@ -237,42 +276,141 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                   key={preset.id}
                   type="button"
                   onClick={() => handlePresetSelect(preset.id)}
-                  className={`group relative flex items-start gap-3 rounded-xl border-2 p-4 text-left transition-all ${
+                  className={`relative flex min-w-[240px] max-w-[240px] flex-shrink-0 flex-col gap-2 rounded-xl border p-3 text-left transition-all active:scale-[0.98] ${
                     isSelected
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border/50 bg-background/50 hover:border-border hover:bg-accent/50'
+                      ? 'border-primary/40 bg-primary/5 ring-2 ring-primary/20'
+                      : 'border-border/50 bg-card/80 backdrop-blur-sm'
                   }`}
                 >
-                  <div
-                    className={`rounded-lg p-2 ${
-                      preset.color === 'emerald'
-                        ? 'bg-emerald-500/10'
-                        : preset.color === 'amber'
-                          ? 'bg-amber-500/10'
-                          : preset.color === 'purple'
-                            ? 'bg-purple-500/10'
-                            : 'bg-blue-500/10'
-                    }`}
-                  >
-                    <Icon
-                      className={`h-5 w-5 ${
+                  {/* Header */}
+                  <div className="flex items-start gap-2">
+                    <div
+                      className={`rounded-lg p-1.5 ${
                         preset.color === 'emerald'
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'bg-emerald-100 dark:bg-emerald-950/50'
                           : preset.color === 'amber'
-                            ? 'text-amber-600 dark:text-amber-400'
+                            ? 'bg-amber-100 dark:bg-amber-950/50'
                             : preset.color === 'purple'
-                              ? 'text-purple-600 dark:text-purple-400'
-                              : 'text-blue-600 dark:text-blue-400'
+                              ? 'bg-purple-100 dark:bg-purple-950/50'
+                              : 'bg-blue-100 dark:bg-blue-950/50'
                       }`}
-                    />
+                    >
+                      <Icon
+                        className={`h-4 w-4 ${
+                          preset.color === 'emerald'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : preset.color === 'amber'
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : preset.color === 'purple'
+                                ? 'text-purple-600 dark:text-purple-400'
+                                : 'text-blue-600 dark:text-blue-400'
+                        }`}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-xs font-semibold text-foreground">{preset.name}</h3>
+                      <span
+                        className={`mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
+                          preset.badge === 'Recomendado'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                            : preset.badge === 'Popular'
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                              : preset.badge === 'Avanzado'
+                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
+                        }`}
+                      >
+                        {preset.badge}
+                      </span>
+                    </div>
+                    {isSelected && <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium">{preset.name}</h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{preset.description}</p>
+
+                  {/* Description */}
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-medium text-foreground/90">{preset.description}</p>
+                    <p className="text-[11px] text-muted-foreground">{preset.example}</p>
                   </div>
-                  {isSelected && (
-                    <CheckCircle2 className="absolute right-4 top-4 h-5 w-5 text-primary" />
-                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Desktop: Grid */}
+          <div className="hidden grid-cols-2 gap-3 sm:grid sm:gap-4 xl:grid-cols-4 xl:gap-5">
+            {PRESETS.map((preset) => {
+              const Icon = preset.icon
+              const isSelected = selectedPreset === preset.id
+
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => handlePresetSelect(preset.id)}
+                  className={`group relative flex flex-col gap-3 rounded-2xl border p-4 text-left transition-all lg:p-5 ${
+                    isSelected
+                      ? 'border-primary/40 bg-primary/5 shadow-md ring-2 ring-primary/20'
+                      : 'border-border/50 bg-card/80 backdrop-blur-sm hover:border-zinc-300 hover:bg-white/60 hover:shadow-md dark:hover:border-zinc-700 dark:hover:bg-zinc-900/60'
+                  }`}
+                >
+                  {/* Header with Icon and Badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`rounded-xl p-2.5 shadow-sm lg:p-3 ${
+                          preset.color === 'emerald'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50'
+                            : preset.color === 'amber'
+                              ? 'bg-amber-100 dark:bg-amber-950/50'
+                              : preset.color === 'purple'
+                                ? 'bg-purple-100 dark:bg-purple-950/50'
+                                : 'bg-blue-100 dark:bg-blue-950/50'
+                        }`}
+                      >
+                        <Icon
+                          className={`h-5 w-5 lg:h-6 lg:w-6 ${
+                            preset.color === 'emerald'
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : preset.color === 'amber'
+                                ? 'text-amber-600 dark:text-amber-400'
+                                : preset.color === 'purple'
+                                  ? 'text-purple-600 dark:text-purple-400'
+                                  : 'text-blue-600 dark:text-blue-400'
+                          }`}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-sm font-semibold text-foreground lg:text-base">
+                          {preset.name}
+                        </h3>
+                      </div>
+                    </div>
+                    {isSelected ? (
+                      <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary lg:h-6 lg:w-6" />
+                    ) : (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide lg:text-[11px] ${
+                          preset.badge === 'Recomendado'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                            : preset.badge === 'Popular'
+                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                              : preset.badge === 'Avanzado'
+                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400'
+                                : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
+                        }`}
+                      >
+                        {preset.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium text-foreground/90 lg:text-[15px]">
+                      {preset.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground lg:text-sm">{preset.example}</p>
+                  </div>
                 </button>
               )
             })}
@@ -281,126 +419,211 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
 
         {/* Custom Configuration Tabs */}
         <div>
-          <Label className="mb-3 block">Configuración Personalizada</Label>
+          <Label className="mb-2 block text-sm font-medium sm:mb-3 lg:mb-4 lg:text-base">
+            Personalizar
+          </Label>
           <Tabs value={programType} onValueChange={setProgramType}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="points">Puntos</TabsTrigger>
-              <TabsTrigger value="visits">Visitas</TabsTrigger>
-              <TabsTrigger value="referral">Referidos</TabsTrigger>
-              <TabsTrigger value="hybrid">Híbrido</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 gap-1.5 bg-transparent p-0 sm:grid-cols-4 sm:gap-2.5">
+              <TabsTrigger
+                value="points"
+                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-amber-400 data-[state=active]:bg-amber-50 data-[state=active]:ring-1 data-[state=active]:ring-amber-200/50 dark:data-[state=active]:border-amber-600 dark:data-[state=active]:bg-amber-950/30 dark:data-[state=active]:ring-amber-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 sm:h-4 sm:w-4" />
+                <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Puntos</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="visits"
+                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-emerald-400 data-[state=active]:bg-emerald-50 data-[state=active]:ring-1 data-[state=active]:ring-emerald-200/50 dark:data-[state=active]:border-emerald-600 dark:data-[state=active]:bg-emerald-950/30 dark:data-[state=active]:ring-emerald-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+              >
+                <Footprints className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 sm:h-4 sm:w-4" />
+                <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Visitas</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="referral"
+                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-blue-400 data-[state=active]:bg-blue-50 data-[state=active]:ring-1 data-[state=active]:ring-blue-200/50 dark:data-[state=active]:border-blue-600 dark:data-[state=active]:bg-blue-950/30 dark:data-[state=active]:ring-blue-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+              >
+                <UserPlus className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 sm:h-4 sm:w-4" />
+                <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Referidos</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="hybrid"
+                className="flex-col gap-0.5 border border-border/50 bg-card/80 py-2 backdrop-blur-sm data-[state=active]:border-purple-400 data-[state=active]:bg-purple-50 data-[state=active]:ring-1 data-[state=active]:ring-purple-200/50 dark:data-[state=active]:border-purple-600 dark:data-[state=active]:bg-purple-950/30 dark:data-[state=active]:ring-purple-900/50 sm:flex-row sm:gap-2 sm:py-2.5"
+              >
+                <Layers3 className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400 sm:h-4 sm:w-4" />
+                <span className="text-[10px] font-semibold sm:text-xs lg:text-sm">Híbrido</span>
+              </TabsTrigger>
             </TabsList>
 
             {/* Points Config */}
-            <TabsContent value="points" className="space-y-4">
+            <TabsContent
+              value="points"
+              className="mt-3 space-y-3 sm:mt-4 sm:space-y-4 lg:space-y-5"
+            >
+              {/* Visual Example Box - Compact on mobile */}
+              <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-2.5 dark:border-amber-900/50 dark:bg-amber-950/20 sm:rounded-xl sm:border-2 sm:p-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="rounded-lg bg-amber-500/10 p-1.5 sm:p-2">
+                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 sm:h-5 sm:w-5" />
+                  </div>
+                  <div className="flex-1 space-y-1 sm:space-y-2">
+                    <h4 className="text-xs font-semibold text-amber-900 dark:text-amber-300 sm:text-sm">
+                      Cómo funciona
+                    </h4>
+                    <div className="space-y-1 text-[11px] text-amber-800 dark:text-amber-400 sm:space-y-1.5 sm:text-xs lg:text-sm">
+                      <p className="font-medium">📊 ₡{pointsPerCurrency || '100'} = 1 punto</p>
+                      <p className="font-medium">
+                        🎁 500 pts = {discountPercentage || '20'}% descuento
+                      </p>
+                      <p className="hidden text-[11px] italic text-amber-700 dark:text-amber-500 sm:block lg:text-xs">
+                        Ejemplo: Cliente gasta ₡
+                        {(parseFloat(pointsPerCurrency || '100') * 500).toLocaleString()} → obtiene
+                        500 pts → puede canjear {discountPercentage || '20'}% off
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="points-currency">Puntos por unidad de moneda</Label>
+                  <Label htmlFor="points-currency" className="text-sm font-medium lg:text-[15px]">
+                    Cada ₡X gastados = 1 punto
+                  </Label>
                   <Input
                     id="points-currency"
                     type="number"
                     value={pointsPerCurrency}
                     onChange={(e) => setPointsPerCurrency(e.target.value)}
                     placeholder="100"
+                    className="mt-2"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ej: 1 punto por cada ₡100 gastados
+                  <p className="mt-1.5 text-xs text-muted-foreground lg:text-sm">
+                    Ejemplo: ₡100 = mientras más bajo, más rápido acumulan
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="discount-percentage">% de descuento (con puntos)</Label>
+                  <Label
+                    htmlFor="discount-percentage"
+                    className="text-sm font-medium lg:text-[15px]"
+                  >
+                    % de descuento al canjear
+                  </Label>
                   <Input
                     id="discount-percentage"
                     type="number"
                     value={discountPercentage}
                     onChange={(e) => setDiscountPercentage(e.target.value)}
                     placeholder="20"
+                    className="mt-2"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ej: 20% de descuento al canjear
+                  <p className="mt-1.5 text-xs text-muted-foreground lg:text-sm">
+                    Ejemplo: 20% = descuento típico por canjear 500 puntos
                   </p>
                 </div>
               </div>
               <div>
-                <Label htmlFor="points-expiry">Días de expiración (opcional)</Label>
+                <Label htmlFor="points-expiry" className="text-sm font-medium lg:text-[15px]">
+                  Días para expirar (opcional)
+                </Label>
                 <Input
                   id="points-expiry"
                   type="number"
                   value={pointsExpiry}
                   onChange={(e) => setPointsExpiry(e.target.value)}
                   placeholder="365"
+                  className="mt-2"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1.5 text-xs text-muted-foreground lg:text-sm">
                   Dejar vacío = puntos nunca expiran
                 </p>
               </div>
             </TabsContent>
 
             {/* Visits Config */}
-            <TabsContent value="visits" className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <TabsContent value="visits" className="mt-4 space-y-3 lg:space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:gap-4">
                 <div>
-                  <Label htmlFor="free-service-visits">Visitas para servicio gratis</Label>
+                  <Label htmlFor="free-service-visits" className="text-xs lg:text-sm">
+                    Visitas para gratis
+                  </Label>
                   <Input
                     id="free-service-visits"
                     type="number"
                     value={freeServiceAfterVisits}
                     onChange={(e) => setFreeServiceAfterVisits(e.target.value)}
                     placeholder="10"
+                    className="mt-1.5"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ej: 10 visitas = 1 servicio gratis
+                  <p className="mt-1 text-[11px] text-muted-foreground lg:text-xs">
+                    Visitas para servicio gratis
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="discount-visits">Visitas para descuento (opcional)</Label>
+                  <Label htmlFor="discount-visits" className="text-xs lg:text-sm">
+                    Visitas para descuento
+                  </Label>
                   <Input
                     id="discount-visits"
                     type="number"
                     value={discountAfterVisits}
                     onChange={(e) => setDiscountAfterVisits(e.target.value)}
                     placeholder="5"
+                    className="mt-1.5"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ej: 5 visitas = descuento especial
+                  <p className="mt-1 text-[11px] text-muted-foreground lg:text-xs">
+                    Opcional: visitas para % off
                   </p>
                 </div>
               </div>
             </TabsContent>
 
             {/* Referral Config */}
-            <TabsContent value="referral" className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <TabsContent value="referral" className="mt-4 space-y-3 lg:space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:gap-4">
                 <div>
-                  <Label htmlFor="referrer-reward">Recompensa para quien refiere</Label>
+                  <Label htmlFor="referrer-reward" className="text-xs lg:text-sm">
+                    Quien refiere
+                  </Label>
                   <Input
                     id="referrer-reward"
                     type="number"
                     value={referralRewardAmount}
                     onChange={(e) => setReferralRewardAmount(e.target.value)}
                     placeholder="25"
+                    className="mt-1.5"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ej: 25 puntos o 25% descuento
+                  <p className="mt-1 text-[11px] text-muted-foreground lg:text-xs">
+                    Recompensa para quien refiere
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="referee-reward">Recompensa para el referido</Label>
+                  <Label htmlFor="referee-reward" className="text-xs lg:text-sm">
+                    El referido
+                  </Label>
                   <Input
                     id="referee-reward"
                     type="number"
                     value={refereeRewardAmount}
                     onChange={(e) => setRefereeRewardAmount(e.target.value)}
                     placeholder="25"
+                    className="mt-1.5"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ambos ganan cuando el referido completa su primera visita
+                  <p className="mt-1 text-[11px] text-muted-foreground lg:text-xs">
+                    Ambos ganan al completar visita
                   </p>
                 </div>
               </div>
               <div>
-                <Label htmlFor="referral-type">Tipo de recompensa</Label>
-                <Select value={referralRewardType} onValueChange={setReferralRewardType}>
-                  <SelectTrigger id="referral-type">
+                <Label htmlFor="referral-type" className="text-xs lg:text-sm">
+                  Tipo de recompensa
+                </Label>
+                <Select
+                  value={referralRewardType}
+                  onValueChange={(value) =>
+                    setReferralRewardType(value as 'discount' | 'points' | 'free_service')
+                  }
+                >
+                  <SelectTrigger id="referral-type" className="mt-1.5">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -413,63 +636,138 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
             </TabsContent>
 
             {/* Hybrid Config */}
-            <TabsContent value="hybrid" className="space-y-4">
-              <div className="rounded-lg border border-border/50 bg-primary/5 p-4">
+            <TabsContent value="hybrid" className="mt-4 space-y-4 lg:space-y-5">
+              <div className="rounded-lg border border-border/50 bg-primary/5 p-3 lg:p-4">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="mt-0.5 h-5 w-5 text-primary" />
+                  <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary lg:h-5 lg:w-5" />
                   <div>
-                    <p className="text-sm font-medium">Modo Híbrido</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Combina puntos + visitas + referidos. Configura cada sección según tus
-                      necesidades.
+                    <p className="text-xs font-medium lg:text-sm">Modo Híbrido</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground lg:text-xs">
+                      Combina puntos + visitas + referidos
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* Visual Example Box for Points */}
+              <div className="rounded-xl border-2 border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-lg bg-amber-500/10 p-2">
+                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-300">
+                      Cómo funciona el sistema de puntos
+                    </h4>
+                    <div className="space-y-1.5 text-xs text-amber-800 dark:text-amber-400 lg:text-sm">
+                      <p className="font-medium">
+                        📊 Cliente gasta{' '}
+                        <span className="rounded bg-amber-200 px-1.5 py-0.5 font-bold dark:bg-amber-900">
+                          ₡{pointsPerCurrency || '100'}
+                        </span>{' '}
+                        = gana{' '}
+                        <span className="rounded bg-amber-200 px-1.5 py-0.5 font-bold dark:bg-amber-900">
+                          1 punto
+                        </span>
+                      </p>
+                      <p className="font-medium">
+                        🎁 Con{' '}
+                        <span className="rounded bg-amber-200 px-1.5 py-0.5 font-bold dark:bg-amber-900">
+                          500 puntos
+                        </span>{' '}
+                        puede canjear{' '}
+                        <span className="rounded bg-amber-200 px-1.5 py-0.5 font-bold dark:bg-amber-900">
+                          {discountPercentage || '20'}% descuento
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Puntos</Label>
+                  <Label className="text-sm font-medium lg:text-[15px]">Puntos</Label>
                   <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                    <Input
-                      type="number"
-                      value={pointsPerCurrency}
-                      onChange={(e) => setPointsPerCurrency(e.target.value)}
-                      placeholder="Puntos por ₡"
-                    />
-                    <Input
-                      type="number"
-                      value={discountPercentage}
-                      onChange={(e) => setDiscountPercentage(e.target.value)}
-                      placeholder="% Descuento"
-                    />
+                    <div>
+                      <Label
+                        htmlFor="hybrid-points-currency"
+                        className="text-xs text-muted-foreground"
+                      >
+                        Cada ₡X gastados = 1 punto
+                      </Label>
+                      <Input
+                        id="hybrid-points-currency"
+                        type="number"
+                        value={pointsPerCurrency}
+                        onChange={(e) => setPointsPerCurrency(e.target.value)}
+                        placeholder="100"
+                        className="mt-1.5"
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor="hybrid-discount-percentage"
+                        className="text-xs text-muted-foreground"
+                      >
+                        % de descuento al canjear
+                      </Label>
+                      <Input
+                        id="hybrid-discount-percentage"
+                        type="number"
+                        value={discountPercentage}
+                        onChange={(e) => setDiscountPercentage(e.target.value)}
+                        placeholder="20"
+                        className="mt-1.5"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Visitas</Label>
+                  <Label className="text-sm font-medium lg:text-[15px]">Visitas</Label>
                   <div className="mt-2">
+                    <Label htmlFor="hybrid-free-visits" className="text-xs text-muted-foreground">
+                      Número de visitas para servicio gratis
+                    </Label>
                     <Input
+                      id="hybrid-free-visits"
                       type="number"
                       value={freeServiceAfterVisits}
                       onChange={(e) => setFreeServiceAfterVisits(e.target.value)}
-                      placeholder="Visitas para servicio gratis"
+                      placeholder="10"
+                      className="mt-1.5"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium">Referidos</Label>
+                  <Label className="text-sm font-medium lg:text-[15px]">Referidos</Label>
                   <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                    <Input
-                      type="number"
-                      value={referralRewardAmount}
-                      onChange={(e) => setReferralRewardAmount(e.target.value)}
-                      placeholder="Recompensa referidor"
-                    />
-                    <Input
-                      type="number"
-                      value={refereeRewardAmount}
-                      onChange={(e) => setRefereeRewardAmount(e.target.value)}
-                      placeholder="Recompensa referido"
-                    />
+                    <div>
+                      <Label htmlFor="hybrid-referrer" className="text-xs text-muted-foreground">
+                        Recompensa para quien refiere (%)
+                      </Label>
+                      <Input
+                        id="hybrid-referrer"
+                        type="number"
+                        value={referralRewardAmount}
+                        onChange={(e) => setReferralRewardAmount(e.target.value)}
+                        placeholder="25"
+                        className="mt-1.5"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="hybrid-referee" className="text-xs text-muted-foreground">
+                        Recompensa para el referido (%)
+                      </Label>
+                      <Input
+                        id="hybrid-referee"
+                        type="number"
+                        value={refereeRewardAmount}
+                        onChange={(e) => setRefereeRewardAmount(e.target.value)}
+                        placeholder="25"
+                        className="mt-1.5"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -477,17 +775,16 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
           </Tabs>
         </div>
 
-        {/* Save Button */}
-        <div className="flex items-center gap-3 border-t border-border/50 pt-6">
-          <Button onClick={handleSave} disabled={saving || !enabled} className="flex-1" size="lg">
-            {saving ? (
-              <>Guardando...</>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                Guardar Configuración
-              </>
-            )}
+        {/* Save Button - Match configuracion style */}
+        <div className="border-t border-border/50 pt-4 lg:flex lg:justify-end lg:pt-6">
+          <Button
+            onClick={handleSave}
+            disabled={saving || !enabled}
+            isLoading={saving}
+            className="h-12 w-full px-8 gap-2 text-[15px] font-semibold lg:w-auto"
+          >
+            <Save className="h-5 w-5" />
+            Guardar Cambios
           </Button>
         </div>
       </div>
