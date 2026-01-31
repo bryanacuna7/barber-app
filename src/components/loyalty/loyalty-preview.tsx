@@ -17,13 +17,13 @@ interface Props {
 export function LoyaltyPreview({ program }: Props) {
   if (!program || !program.enabled) {
     return (
-      <Card className="sticky top-6 border-border/50 bg-card/80 p-6 backdrop-blur-sm">
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <AlertCircle className="h-12 w-12 text-muted-foreground/50" />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">
+      <Card className="sticky top-6 border-border/50 bg-card/80 p-4 backdrop-blur-sm sm:p-6">
+        <div className="flex flex-col items-center justify-center py-6 text-center sm:py-8">
+          <AlertCircle className="h-10 w-10 text-muted-foreground/50 sm:h-12 sm:w-12" />
+          <p className="mt-3 text-xs font-medium text-muted-foreground sm:mt-4 sm:text-sm">
             Vista previa no disponible
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-[11px] text-muted-foreground sm:text-xs">
             Activa el programa para ver el preview
           </p>
         </div>
@@ -75,29 +75,29 @@ export function LoyaltyPreview({ program }: Props) {
         </div>
 
         {/* Mock Client Status Card */}
-        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">Tus Puntos</p>
-              <p className="mt-1 text-3xl font-bold text-primary">
+        <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 backdrop-blur-sm sm:p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium text-muted-foreground sm:text-xs">Tus Puntos</p>
+              <p className="mt-0.5 text-2xl font-bold text-primary sm:mt-1 sm:text-3xl">
                 {program.programType === 'points' || program.programType === 'hybrid' ? '250' : '0'}
               </p>
             </div>
-            <div className="rounded-lg bg-background/80 px-2 py-1">
-              <p className="text-xs font-medium text-muted-foreground">Tier</p>
-              <p className="text-sm font-bold">Bronze</p>
+            <div className="flex-shrink-0 rounded-lg bg-background/80 px-2 py-1">
+              <p className="text-[10px] font-medium text-muted-foreground sm:text-xs">Tier</p>
+              <p className="text-xs font-bold sm:text-sm">Bronze</p>
             </div>
           </div>
 
           {/* Progress to Reward */}
           {(program.programType === 'points' || program.programType === 'hybrid') &&
             program.pointsPerCurrencyUnit && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-xs">
+              <div className="mt-3 sm:mt-4">
+                <div className="flex items-center justify-between text-[11px] sm:text-xs">
                   <span className="text-muted-foreground">Progreso a recompensa</span>
                   <span className="font-medium">250 / 500 pts</span>
                 </div>
-                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-background/50">
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-background/50 sm:mt-2 sm:h-2">
                   <div className="h-full w-1/2 rounded-full bg-primary" />
                 </div>
               </div>
@@ -106,12 +106,12 @@ export function LoyaltyPreview({ program }: Props) {
           {/* Visit Progress */}
           {(program.programType === 'visits' || program.programType === 'hybrid') &&
             program.freeServiceAfterVisits && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-xs">
+              <div className="mt-3 sm:mt-4">
+                <div className="flex items-center justify-between text-[11px] sm:text-xs">
                   <span className="text-muted-foreground">Progreso a servicio gratis</span>
                   <span className="font-medium">5 / {program.freeServiceAfterVisits} visitas</span>
                 </div>
-                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-background/50">
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-background/50 sm:mt-2 sm:h-2">
                   <div
                     className="h-full rounded-full bg-emerald-500"
                     style={{
@@ -124,18 +124,18 @@ export function LoyaltyPreview({ program }: Props) {
         </div>
 
         {/* Benefits List */}
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Tus Beneficios</p>
+        <div className="space-y-1.5 sm:space-y-2">
+          <p className="text-[11px] font-medium text-muted-foreground sm:text-xs">Tus Beneficios</p>
 
           {(program.programType === 'points' || program.programType === 'hybrid') &&
             program.pointsPerCurrencyUnit && (
               <div className="flex items-center gap-2 rounded-lg bg-background/50 p-2">
-                <div className="rounded bg-amber-500/10 p-1.5">
-                  <Star className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                <div className="flex-shrink-0 rounded bg-amber-500/10 p-1.5">
+                  <Star className="h-3 w-3 text-amber-600 dark:text-amber-400 sm:h-3.5 sm:w-3.5" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium">Acumula Puntos</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-medium sm:text-xs">Acumula Puntos</p>
+                  <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                     {program.pointsPerCurrencyUnit} punto por cada ₡{program.pointsPerCurrencyUnit}
                   </p>
                 </div>
@@ -145,12 +145,12 @@ export function LoyaltyPreview({ program }: Props) {
           {(program.programType === 'visits' || program.programType === 'hybrid') &&
             program.freeServiceAfterVisits && (
               <div className="flex items-center gap-2 rounded-lg bg-background/50 p-2">
-                <div className="rounded bg-emerald-500/10 p-1.5">
-                  <Gift className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex-shrink-0 rounded bg-emerald-500/10 p-1.5">
+                  <Gift className="h-3 w-3 text-emerald-600 dark:text-emerald-400 sm:h-3.5 sm:w-3.5" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium">Servicio Gratis</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-medium sm:text-xs">Servicio Gratis</p>
+                  <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                     Cada {program.freeServiceAfterVisits} visitas
                   </p>
                 </div>
@@ -160,12 +160,12 @@ export function LoyaltyPreview({ program }: Props) {
           {(program.programType === 'referral' || program.programType === 'hybrid') &&
             program.referralRewardAmount && (
               <div className="flex items-center gap-2 rounded-lg bg-background/50 p-2">
-                <div className="rounded bg-blue-500/10 p-1.5">
-                  <Users className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                <div className="flex-shrink-0 rounded bg-blue-500/10 p-1.5">
+                  <Users className="h-3 w-3 text-blue-600 dark:text-blue-400 sm:h-3.5 sm:w-3.5" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium">Refiere Amigos</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-medium sm:text-xs">Refiere Amigos</p>
+                  <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                     {program.referralRewardType === 'discount'
                       ? `${program.referralRewardAmount}% descuento`
                       : program.referralRewardType === 'points'
@@ -178,12 +178,12 @@ export function LoyaltyPreview({ program }: Props) {
 
           {program.discountPercentage && (
             <div className="flex items-center gap-2 rounded-lg bg-background/50 p-2">
-              <div className="rounded bg-purple-500/10 p-1.5">
-                <Zap className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+              <div className="flex-shrink-0 rounded bg-purple-500/10 p-1.5">
+                <Zap className="h-3 w-3 text-purple-600 dark:text-purple-400 sm:h-3.5 sm:w-3.5" />
               </div>
-              <div className="flex-1">
-                <p className="text-xs font-medium">Descuentos</p>
-                <p className="text-xs text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-medium sm:text-xs">Descuentos</p>
+                <p className="truncate text-[11px] text-muted-foreground sm:text-xs">
                   Hasta {program.discountPercentage}% off
                 </p>
               </div>
@@ -193,10 +193,14 @@ export function LoyaltyPreview({ program }: Props) {
 
         {/* Referral Code Preview */}
         {(program.programType === 'referral' || program.programType === 'hybrid') && (
-          <div className="rounded-lg border border-dashed border-border/50 bg-background/30 p-3">
-            <p className="text-xs font-medium text-muted-foreground">Tu Código de Referido</p>
-            <p className="mt-1 font-mono text-sm font-bold">BARBERSHOP_JUAN_A4B2</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border/50 bg-background/30 p-2.5 sm:p-3">
+            <p className="text-[11px] font-medium text-muted-foreground sm:text-xs">
+              Tu Código de Referido
+            </p>
+            <p className="mt-1 truncate font-mono text-xs font-bold sm:text-sm">
+              BARBERSHOP_JUAN_A4B2
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground sm:text-xs">
               Comparte con amigos para ganar recompensas
             </p>
           </div>
@@ -204,8 +208,8 @@ export function LoyaltyPreview({ program }: Props) {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border/50 p-4">
-        <p className="text-center text-xs text-muted-foreground">
+      <div className="border-t border-border/50 p-3 sm:p-4">
+        <p className="text-center text-[11px] text-muted-foreground sm:text-xs">
           ✨ Los clientes verán esto en la página de reservas
         </p>
       </div>

@@ -6,16 +6,17 @@
  * - Toggle enabled/disabled
  * - Quick Start: 4 preset templates
  * - Custom Mode: Modify any parameter
- * - Live preview of client-facing UI
+ * - Live preview (desktop only)
  */
 
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Gift, Sparkles, Users, TrendingUp } from 'lucide-react'
+import { Gift, Sparkles, Users, TrendingUp, ChevronLeft } from 'lucide-react'
 import { LoyaltyConfigForm } from '@/components/loyalty/loyalty-config-form'
 import { LoyaltyPreview } from '@/components/loyalty/loyalty-preview'
 import { Card } from '@/components/ui/card'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Configuración de Lealtad | BarberShop Pro',
@@ -50,7 +51,10 @@ async function getLoyaltyStats(businessId: string) {
     .eq('business_id', businessId)
 
   const totalPoints =
-    totalPointsData?.reduce((sum, row) => sum + (row.lifetime_points || 0), 0) || 0
+    (totalPointsData as { lifetime_points: number }[] | null)?.reduce(
+      (sum, row) => sum + (row.lifetime_points || 0),
+      0
+    ) || 0
 
   // Total rewards redeemed
   const { count: rewardsCount } = await supabase
@@ -90,138 +94,128 @@ export default async function LoyaltyConfigPage() {
   const stats = program ? await getLoyaltyStats(business.id) : null
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-24 md:p-6">
-      {/* Header */}
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Programa de Lealtad</h1>
-          <p className="text-sm text-muted-foreground">
-            Configura recompensas para tus clientes más fieles
-          </p>
-        </div>
-
-        {/* Stats Cards (if program exists) */}
-        {program && stats && (
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-border/50 bg-card/80 p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-primary/10 p-2.5">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Clientes Inscritos</p>
-                  <p className="text-2xl font-bold">{stats.enrolledClients}</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="border-border/50 bg-card/80 p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-amber-500/10 p-2.5">
-                  <Sparkles className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Puntos Otorgados</p>
-                  <p className="text-2xl font-bold">{stats.totalPointsAwarded.toLocaleString()}</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="border-border/50 bg-card/80 p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="rounded-full bg-emerald-500/10 p-2.5">
-                  <Gift className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Recompensas Canjeadas</p>
-                  <p className="text-2xl font-bold">{stats.totalRewardsRedeemed}</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Configuration Form (2/3 width) */}
-          <div className="lg:col-span-2">
-            <Suspense fallback={<ConfigFormSkeleton />}>
-              <LoyaltyConfigForm businessId={business.id} initialProgram={program} />
-            </Suspense>
-          </div>
-
-          {/* Live Preview (1/3 width) */}
-          <div className="lg:col-span-1">
-            <Suspense fallback={<PreviewSkeleton />}>
-              <LoyaltyPreview program={program} />
-            </Suspense>
+    <>
+      {/* Mobile Header - Fixed */}
+      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-xl lg:hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 -mt-6">
+        <div className="flex h-14 items-center gap-3">
+          <Link
+            href="/dashboard"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/80 transition-colors active:bg-secondary"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-[17px] font-semibold">Programa de Lealtad</h1>
           </div>
         </div>
+      </header>
 
-        {/* Info Banner */}
-        {!program && (
-          <Card className="border-primary/20 bg-primary/5 p-4">
-            <div className="flex items-start gap-3">
-              <TrendingUp className="mt-0.5 h-5 w-5 text-primary" />
-              <div className="flex-1">
-                <h3 className="font-medium">¿Por qué activar un programa de lealtad?</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Los programas de lealtad aumentan la retención de clientes en un 30% promedio.
-                  Clientes leales reservan 2.5x más frecuente que clientes ocasionales.
-                </p>
-                <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    Incrementa frecuencia de visitas
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    Fomenta referidos orgánicos
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    Diferenciación vs competencia
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </Card>
-        )}
+      {/* Desktop Header */}
+      <div className="mb-5 hidden lg:mb-6 lg:block">
+        <h1 className="text-2xl font-bold tracking-tight">Programa de Lealtad</h1>
+        <p className="text-sm text-muted-foreground">
+          Configura recompensas para tus clientes más fieles
+        </p>
       </div>
-    </div>
+
+      {/* Stats Cards (if program exists) - Horizontal scroll on mobile */}
+      {program && stats && (
+        <div className="mb-5 lg:mb-6">
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
+            <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
+              <div className="flex items-center gap-2.5 lg:gap-3">
+                <div className="rounded-full bg-primary/10 p-2 lg:p-2.5">
+                  <Users className="h-4 w-4 text-primary lg:h-5 lg:w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground lg:text-xs">Inscritos</p>
+                  <p className="text-xl font-bold lg:text-2xl">{stats.enrolledClients}</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
+              <div className="flex items-center gap-2.5 lg:gap-3">
+                <div className="rounded-full bg-amber-500/10 p-2 lg:p-2.5">
+                  <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400 lg:h-5 lg:w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground lg:text-xs">Puntos</p>
+                  <p className="text-xl font-bold lg:text-2xl">
+                    {stats.totalPointsAwarded.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
+              <div className="flex items-center gap-2.5 lg:gap-3">
+                <div className="rounded-full bg-emerald-500/10 p-2 lg:p-2.5">
+                  <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400 lg:h-5 lg:w-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground lg:text-xs">Canjeados</p>
+                  <p className="text-xl font-bold lg:text-2xl">{stats.totalRewardsRedeemed}</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content - Full Width */}
+      <Suspense fallback={<ConfigFormSkeleton />}>
+        <LoyaltyConfigForm businessId={business.id} initialProgram={program} />
+      </Suspense>
+
+      {/* Info Banner (only if no program) */}
+      {!program && (
+        <Card className="mt-6 border-primary/20 bg-primary/5 p-4">
+          <div className="flex items-start gap-3">
+            <TrendingUp className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium">¿Por qué activar un programa de lealtad?</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Los programas de lealtad aumentan la retención de clientes en un 30% promedio.
+              </p>
+              <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                  Incrementa frecuencia de visitas
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                  Fomenta referidos orgánicos
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                  Diferenciación vs competencia
+                </li>
+              </ul>
+            </div>
+          </div>
+        </Card>
+      )}
+    </>
   )
 }
 
 function ConfigFormSkeleton() {
   return (
-    <Card className="border-border/50 bg-card/80 p-6 backdrop-blur-sm">
-      <div className="animate-pulse space-y-6">
+    <Card className="border-border/50 bg-card/80 p-5 backdrop-blur-sm lg:p-6">
+      <div className="animate-pulse space-y-4 lg:space-y-6">
         <div className="space-y-2">
-          <div className="h-5 w-48 rounded bg-muted" />
-          <div className="h-4 w-96 rounded bg-muted" />
+          <div className="h-5 w-32 rounded bg-muted lg:w-48" />
+          <div className="h-4 w-48 rounded bg-muted lg:w-96" />
         </div>
-        <div className="h-12 w-full rounded bg-muted" />
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="h-32 rounded bg-muted" />
-          <div className="h-32 rounded bg-muted" />
-          <div className="h-32 rounded bg-muted" />
-          <div className="h-32 rounded bg-muted" />
+        <div className="h-10 w-full rounded bg-muted lg:h-12" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4 xl:gap-5">
+          <div className="h-32 rounded-2xl bg-muted lg:h-36" />
+          <div className="h-32 rounded-2xl bg-muted lg:h-36" />
+          <div className="h-32 rounded-2xl bg-muted lg:h-36" />
+          <div className="h-32 rounded-2xl bg-muted lg:h-36" />
         </div>
-      </div>
-    </Card>
-  )
-}
-
-function PreviewSkeleton() {
-  return (
-    <Card className="sticky top-6 border-border/50 bg-card/80 p-6 backdrop-blur-sm">
-      <div className="animate-pulse space-y-4">
-        <div className="h-5 w-24 rounded bg-muted" />
-        <div className="h-48 rounded-xl bg-muted" />
-        <div className="space-y-2">
-          <div className="h-4 w-full rounded bg-muted" />
-          <div className="h-4 w-3/4 rounded bg-muted" />
-        </div>
+        <div className="h-12 w-full rounded-xl bg-muted" />
       </div>
     </Card>
   )

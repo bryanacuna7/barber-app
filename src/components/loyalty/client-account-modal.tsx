@@ -94,9 +94,10 @@ export function ClientAccountModal({
       }
 
       // Link client record to user
+      // Note: user_id column added in migration 014_loyalty_system.sql
       const { error: linkError } = await supabase
         .from('clients')
-        .update({ user_id: authData.user.id })
+        .update({ user_id: authData.user.id } as Record<string, unknown>)
         .eq('id', clientId)
 
       if (linkError) {
@@ -105,7 +106,9 @@ export function ClientAccountModal({
       }
 
       // Create initial loyalty status (with 0 points - next visit will start accumulating)
-      const { error: loyaltyError } = await supabase.from('client_loyalty_status').insert({
+      // Note: client_loyalty_status table created in migration 014_loyalty_system.sql
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: loyaltyError } = await (supabase as any).from('client_loyalty_status').insert({
         client_id: clientId,
         business_id: businessId,
         user_id: authData.user.id,
@@ -166,9 +169,10 @@ export function ClientAccountModal({
       }
 
       // Link client record to existing user
+      // Note: user_id column added in migration 014_loyalty_system.sql
       const { error: linkError } = await supabase
         .from('clients')
-        .update({ user_id: authData.user.id })
+        .update({ user_id: authData.user.id } as Record<string, unknown>)
         .eq('id', clientId)
 
       if (linkError) {
@@ -176,7 +180,8 @@ export function ClientAccountModal({
       }
 
       // Create loyalty status if doesn't exist
-      const { error: loyaltyError } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: loyaltyError } = await (supabase as any)
         .from('client_loyalty_status')
         .insert({
           client_id: clientId,

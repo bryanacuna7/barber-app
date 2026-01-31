@@ -7,7 +7,13 @@ import { Calendar, Clock, User, Scissors, FileText } from 'lucide-react'
 import { Modal, ModalFooter } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { cn } from '@/lib/utils/cn'
 import type { Appointment, Service, Client } from '@/types'
 
@@ -147,12 +153,19 @@ export function AppointmentForm({
           </label>
           <Select
             value={formData.client_id}
-            onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-            options={[
-              { value: '', label: 'Seleccionar cliente...' },
-              ...clients.map((c) => ({ value: c.id, label: `${c.name} - ${c.phone}` })),
-            ]}
-          />
+            onValueChange={(value) => setFormData({ ...formData, client_id: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar cliente..." />
+            </SelectTrigger>
+            <SelectContent>
+              {clients.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name} - {c.phone}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Service Selection */}
@@ -163,12 +176,19 @@ export function AppointmentForm({
           </label>
           <Select
             value={formData.service_id}
-            onChange={(e) => setFormData({ ...formData, service_id: e.target.value })}
-            options={services.map((s) => ({
-              value: s.id,
-              label: `${s.name} - ${s.duration_minutes} min - ₡${s.price}`,
-            }))}
-          />
+            onValueChange={(value) => setFormData({ ...formData, service_id: value })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar servicio..." />
+            </SelectTrigger>
+            <SelectContent>
+              {services.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name} - {s.duration_minutes} min - ₡{s.price}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {selectedService && (
             <p className="text-sm text-zinc-500">
               Duración: {selectedService.duration_minutes} minutos
@@ -195,7 +215,18 @@ export function AppointmentForm({
               <Clock className="w-4 h-4" />
               Hora
             </label>
-            <Select value={time} onChange={(e) => setTime(e.target.value)} options={timeSlots} />
+            <Select value={time} onValueChange={setTime}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {timeSlots.map((slot) => (
+                  <SelectItem key={slot.value} value={slot.value}>
+                    {slot.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

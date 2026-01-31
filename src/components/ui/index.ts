@@ -12,7 +12,18 @@ export {
   type CardProps,
   type StatCardProps,
 } from './card'
-export { Select, type SelectProps } from './select'
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from './select'
 
 // Feedback Components
 export {

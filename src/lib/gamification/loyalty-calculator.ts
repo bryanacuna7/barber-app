@@ -6,9 +6,57 @@
  * - Reward eligibility
  * - Tier progression
  * - Redemption logic
+ *
+ * NOTE: This file uses tables from migration 014_loyalty_system.sql
+ * that don't have generated TypeScript types yet.
+ * Run `npx supabase gen types` to generate types when ready.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { createClient } from '@/lib/supabase/server'
+
+// ===========================================
+// DATABASE ROW TYPES (pending Supabase type generation)
+// ===========================================
+
+interface LoyaltyProgramRow {
+  id: string
+  business_id: string
+  enabled: boolean
+  program_type: string
+  points_per_currency_unit?: number
+  points_expiry_days?: number
+  free_service_after_visits?: number
+  discount_after_visits?: number
+  discount_percentage?: number
+  referral_reward_type?: string
+  referral_reward_amount?: number
+  referee_reward_amount?: number
+  created_at: string
+  updated_at: string
+}
+
+interface ClientLoyaltyStatusRow {
+  id: string
+  client_id: string
+  business_id: string
+  user_id: string
+  points_balance: number
+  lifetime_points: number
+  visit_count: number
+  current_tier: string
+  last_points_earned_at?: string
+  last_reward_redeemed_at?: string
+  referred_by_client_id?: string
+  referral_code: string
+  created_at: string
+  updated_at: string
+}
+
+// Helper to get untyped Supabase client for new tables
+ 
+const getUntypedClient = async () => (await createClient()) as any
 
 // ===========================================
 // TYPES
@@ -169,12 +217,15 @@ export async function checkRewardEligibility(
   const supabase = await createClient()
 
   // Get loyalty program config
-  const { data: program } = await supabase
+   
+  const { data: programData } = await (supabase as any)
     .from('loyalty_programs')
     .select('*')
     .eq('business_id', businessId)
     .eq('enabled', true)
     .single()
+
+  const program = programData as LoyaltyProgramRow | null
 
   if (!program) {
     return {
@@ -187,11 +238,14 @@ export async function checkRewardEligibility(
   }
 
   // Get client loyalty status
-  const { data: status } = await supabase
+   
+  const { data: statusData } = await (supabase as any)
     .from('client_loyalty_status')
     .select('*')
     .eq('client_id', clientId)
     .single()
+
+  const status = statusData as ClientLoyaltyStatusRow | null
 
   if (!status) {
     return {
@@ -268,22 +322,28 @@ export async function redeemReward(
   }
 
   // Get current status
-  const { data: status, error: statusError } = await supabase
+   
+  const { data: statusData, error: statusError } = await (supabase as any)
     .from('client_loyalty_status')
     .select('*')
     .eq('client_id', clientId)
     .single()
+
+  const status = statusData as ClientLoyaltyStatusRow | null
 
   if (statusError || !status) {
     return { success: false, error: 'Failed to fetch loyalty status' }
   }
 
   // Get program config
-  const { data: program } = await supabase
+   
+  const { data: programData } = await (supabase as any)
     .from('loyalty_programs')
     .select('*')
     .eq('business_id', businessId)
     .single()
+
+  const program = programData as LoyaltyProgramRow | null
 
   if (!program) {
     return { success: false, error: 'Loyalty program not found' }
@@ -302,7 +362,8 @@ export async function redeemReward(
   }
 
   // Update points balance
-  const { error: updateError } = await supabase
+   
+  const { error: updateError } = await (supabase as any)
     .from('client_loyalty_status')
     .update({
       points_balance: Math.max(0, status.points_balance - pointsToDeduct),
@@ -316,7 +377,8 @@ export async function redeemReward(
   }
 
   // Log transaction
-  const { error: txError } = await supabase.from('loyalty_transactions').insert({
+   
+  const { error: txError } = await (supabase as any).from('loyalty_transactions').insert({
     client_id: clientId,
     business_id: businessId,
     transaction_type: rewardType === 'discount' ? 'redeemed_discount' : 'redeemed_free_service',
@@ -331,7 +393,8 @@ export async function redeemReward(
   }
 
   // Create notification
-  const { error: notifError } = await supabase.from('notifications').insert({
+   
+  const { error: notifError } = await (supabase as any).from('notifications').insert({
     user_id: status.user_id,
     type: 'loyalty_reward_redeemed',
     title: '¡Recompensa canjeada! 🎁',
@@ -365,15 +428,17 @@ export async function processReferralReward(
   referredClientId: string,
   businessId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
+  const supabase = (await createClient()) as any
 
   // Get program config
-  const { data: program } = await supabase
+  const { data: programData } = await supabase
     .from('loyalty_programs')
     .select('*')
     .eq('business_id', businessId)
     .eq('enabled', true)
     .single()
+
+  const program = programData as LoyaltyProgramRow | null
 
   if (!program || !program.referral_reward_amount) {
     return { success: false, error: 'Referral rewards not configured' }
@@ -451,7 +516,7 @@ export async function processReferralReward(
  * Get loyalty program statistics
  */
 export async function getLoyaltyStats(businessId: string) {
-  const supabase = await createClient()
+  const supabase = (await createClient()) as any
 
   // Total enrolled clients (with user accounts)
   const { count: enrolledCount } = await supabase
@@ -466,7 +531,10 @@ export async function getLoyaltyStats(businessId: string) {
     .eq('business_id', businessId)
 
   const totalPoints =
-    totalPointsData?.reduce((sum, row) => sum + (row.lifetime_points || 0), 0) || 0
+    (totalPointsData as { lifetime_points: number }[] | null)?.reduce(
+      (sum, row) => sum + (row.lifetime_points || 0),
+      0
+    ) || 0
 
   // Total rewards redeemed
   const { count: rewardsCount } = await supabase

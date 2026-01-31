@@ -12,6 +12,7 @@ import {
   HelpCircle,
   ExternalLink,
   ChevronRight,
+  Gift,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
@@ -29,6 +30,14 @@ const menuItems = [
     description: 'Reportes y estadísticas',
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+  },
+  {
+    name: 'Lealtad',
+    href: '/lealtad/configuracion',
+    icon: Gift,
+    description: 'Programa de recompensas',
+    color: 'text-amber-600 dark:text-amber-400',
+    bgColor: 'bg-amber-100 dark:bg-amber-900/30',
   },
   {
     name: 'Barberos',
