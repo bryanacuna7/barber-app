@@ -460,7 +460,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
               className="mt-3 space-y-3 sm:mt-4 sm:space-y-4 lg:space-y-5"
             >
               {/* Visual Example Box - Compact on mobile */}
-              <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-2.5 dark:border-amber-900/50 dark:bg-amber-950/20 sm:rounded-xl sm:border-2 sm:p-4">
+              <div className="rounded-lg border border-amber-200/60 bg-amber-50/50 p-2.5 dark:border-amber-900/50 dark:bg-amber-950/20 sm:rounded-xl sm:p-4">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <div className="rounded-lg bg-amber-500/10 p-1.5 sm:p-2">
                     <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 sm:h-5 sm:w-5" />
