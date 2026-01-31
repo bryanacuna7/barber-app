@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Scissors, AlertCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,6 +12,9 @@ import { ServiceSelection } from '@/components/reservar/ServiceSelection'
 import { BarberSelection } from '@/components/reservar/BarberSelection'
 import { DateTimeSelection } from '@/components/reservar/DateTimeSelection'
 import { ClientInfoForm } from '@/components/reservar/ClientInfoForm'
+import { ClientStatusCard, ClientStatusCardSkeleton } from '@/components/loyalty/client-status-card'
+import { createClient } from '@/lib/supabase/client'
+import type { ClientLoyaltyStatus, LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 import {
   hexToRgbValues,
   lightenColor,
@@ -44,6 +47,7 @@ export default function BookingPage() {
     bookingComplete,
     booking,
     availableDates,
+    createdClientId,
     setStep,
     setBooking,
     setError,
@@ -53,6 +57,87 @@ export default function BookingPage() {
     handleTimeSelect,
     handleSubmit,
   } = useBookingData(slug)
+
+  // Loyalty status state
+  const [loyaltyStatus, setLoyaltyStatus] = useState<ClientLoyaltyStatus | null>(null)
+  const [loyaltyProgram, setLoyaltyProgram] = useState<LoyaltyProgram | null>(null)
+  const [loadingLoyalty, setLoadingLoyalty] = useState(true)
+
+  // Load loyalty status for authenticated user
+  useEffect(() => {
+    async function loadLoyaltyStatus() {
+      if (!business?.id) return
+
+      try {
+        const supabase = createClient()
+
+        // Check if user is authenticated
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+
+        if (!user) {
+          setLoadingLoyalty(false)
+          return
+        }
+
+        // Get loyalty program
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: program } = await (supabase as any)
+          .from('loyalty_programs')
+          .select('*')
+          .eq('business_id', business.id)
+          .eq('is_active', true)
+          .single()
+
+        if (!program) {
+          setLoadingLoyalty(false)
+          return
+        }
+
+        // Get client loyalty status
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: status } = await (supabase as any)
+          .from('client_loyalty_status')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('business_id', business.id)
+          .single()
+
+        if (status && program) {
+          setLoyaltyStatus({
+            clientId: status.client_id,
+            businessId: status.business_id,
+            pointsBalance: status.points_balance,
+            lifetimePoints: status.lifetime_points,
+            visitCount: status.visit_count,
+            currentTier: status.current_tier || 'bronze',
+            referralCode: status.referral_code,
+            createdAt: status.created_at,
+            lastPointsEarnedAt: status.last_points_earned_at,
+          })
+
+          setLoyaltyProgram({
+            id: program.id,
+            businessId: program.business_id,
+            programType: program.program_type,
+            pointsPerVisit: program.points_per_visit,
+            pointsPerDollar: program.points_per_dollar,
+            freeServiceAfterVisits: program.free_service_after_visits,
+            referralRewardType: program.referral_reward_type,
+            referralRewardAmount: program.referral_reward_amount,
+            isActive: program.is_active,
+          })
+        }
+      } catch (error) {
+        console.error('Error loading loyalty status:', error)
+      } finally {
+        setLoadingLoyalty(false)
+      }
+    }
+
+    loadLoyaltyStatus()
+  }, [business?.id])
 
   // PWA: inject manifest link and register service worker
   useEffect(() => {
@@ -128,6 +213,8 @@ export default function BookingPage() {
         date={booking.date}
         time={booking.time?.time || null}
         business={business}
+        clientId={createdClientId}
+        clientEmail={booking.clientEmail}
       />
     )
   }
@@ -144,6 +231,23 @@ export default function BookingPage() {
 
       {/* Content */}
       <div className="mx-auto max-w-2xl px-4 py-6">
+        {/* Loyalty Status Card - Shows if user is authenticated and has loyalty status */}
+        {!loadingLoyalty && loyaltyStatus && loyaltyProgram && business && (
+          <div className="mb-5">
+            <ClientStatusCard
+              status={loyaltyStatus}
+              program={loyaltyProgram}
+              businessName={business.name}
+            />
+          </div>
+        )}
+
+        {loadingLoyalty && (
+          <div className="mb-5">
+            <ClientStatusCardSkeleton />
+          </div>
+        )}
+
         {error && (
           <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[14px] font-medium text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300">
             {error}

@@ -114,6 +114,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   return NextResponse.json({
     success: true,
     appointment_id: appointment.id,
+    client_id: client.id,
+    client_email: client_email || null,
     message: 'Cita reservada exitosamente',
   })
 }

@@ -1,16 +1,71 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { CheckCircle, MessageCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Service, Business } from '@/types'
+import { ClientAccountModal } from '@/components/loyalty/client-account-modal'
+import { createClient } from '@/lib/supabase/client'
 
 interface BookingSuccessProps {
   service: Service | null
   date: Date | null
   time: string | null
   business: Business | null
+  clientId: string | null
+  clientEmail: string
 }
 
-export function BookingSuccess({ service, date, time, business }: BookingSuccessProps) {
+export function BookingSuccess({
+  service,
+  date,
+  time,
+  business,
+  clientId,
+  clientEmail,
+}: BookingSuccessProps) {
+  const [showLoyaltyModal, setShowLoyaltyModal] = useState(false)
+  const [hasLoyaltyProgram, setHasLoyaltyProgram] = useState(false)
+
+  // Check if business has active loyalty program
+  useEffect(() => {
+    async function checkLoyaltyProgram() {
+      if (!business?.id || !clientId) return
+
+      try {
+        const supabase = createClient()
+
+        // Check if there's a loyalty program for this business
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase as any)
+          .from('loyalty_programs')
+          .select('id')
+          .eq('business_id', business.id)
+          .eq('is_active', true)
+          .single()
+
+        if (!error && data) {
+          setHasLoyaltyProgram(true)
+
+          // Check if modal was dismissed recently (within 30 days)
+          const dismissedUntil = localStorage.getItem(`loyalty_modal_dismissed_${business.id}`)
+          const isDismissed = dismissedUntil && parseInt(dismissedUntil) > Date.now()
+
+          if (!isDismissed) {
+            // Show modal after 2 seconds (let user see success message first)
+            setTimeout(() => {
+              setShowLoyaltyModal(true)
+            }, 2000)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking loyalty program:', error)
+      }
+    }
+
+    checkLoyaltyProgram()
+  }, [business?.id, clientId])
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-[#F2F2F7] dark:bg-[#1C1C1E]">
       <div className="w-full max-w-md ios-card overflow-hidden ios-spring-in">
@@ -63,6 +118,18 @@ export function BookingSuccess({ service, date, time, business }: BookingSuccess
           </p>
         </div>
       </div>
+
+      {/* Loyalty Account Modal */}
+      {hasLoyaltyProgram && clientId && business && (
+        <ClientAccountModal
+          isOpen={showLoyaltyModal}
+          onClose={() => setShowLoyaltyModal(false)}
+          businessName={business.name}
+          businessId={business.id}
+          clientId={clientId}
+          prefillEmail={clientEmail}
+        />
+      )}
     </div>
   )
 }

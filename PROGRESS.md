@@ -7,8 +7,8 @@
 
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend, React Query
-- **Last Updated:** 2026-01-31 (Session 43 - Loyalty Premium Design Fix)
-- **Last Commit:** 98cd309 - fix(loyalty): resolve premium design issues
+- **Last Updated:** 2026-01-30 (Session 44 - Loyalty Booking Integration)
+- **Last Commit:** (pending) - feat(loyalty): integrate loyalty system into booking flow
 - **Current Branch:** `feature/gamification-system`
 - **Dev Server:** Running (port 3000)
 
@@ -33,20 +33,27 @@
   - Database migration complete
   - **Premium design with gradients (inline styles)**
   - **Dark mode borders matching dashboard**
+  - **Booking flow integration complete**
+    - ClientAccountModal shows after successful booking
+    - ClientStatusCard shows for authenticated users with loyalty
+    - API returns client_id for modal signup
 
 ### In Progress
 
-- [ ] Loyalty system integration into booking flow
-- [ ] Testing complete user journey
+- [ ] Manual testing and refinement
 
 ### Key Files
 
 | File                                              | Purpose                                                      |
 | ------------------------------------------------- | ------------------------------------------------------------ |
 | `src/components/loyalty/loyalty-config-form.tsx`  | Loyalty configuration with 4 presets (gradients fixed)       |
-| `src/components/loyalty/client-account-modal.tsx` | Client signup modal                                          |
-| `src/components/loyalty/client-status-card.tsx`   | Shows client loyalty status                                  |
+| `src/components/loyalty/client-account-modal.tsx` | Client signup modal (integrated in BookingSuccess)           |
+| `src/components/loyalty/client-status-card.tsx`   | Shows client loyalty status (in booking page when logged in) |
 | `src/lib/gamification/loyalty-calculator.ts`      | Points/rewards calculation engine                            |
+| `src/app/api/public/[slug]/book/route.ts`         | Booking API (returns client_id for loyalty signup)           |
+| `src/hooks/useBookingData.ts`                     | Booking state management (captures client_id)                |
+| `src/app/(public)/reservar/[slug]/page.tsx`       | Booking page (shows ClientStatusCard if authenticated)       |
+| `src/components/reservar/BookingSuccess.tsx`      | Success screen (triggers ClientAccountModal)                 |
 | `src/components/pwa/service-worker-register.tsx`  | SW disabled in dev mode                                      |
 | `.claude/DESIGN_STANDARDS.md`                     | Mandatory design patterns (updated with gradient guidelines) |
 
@@ -108,11 +115,14 @@
 - ✅ Premium design with gradients and colored shadows
 - ✅ Dark mode fully functional
 - ✅ Service worker only in production
-- ✅ Dev server running clean
+- ✅ **Loyalty booking integration complete**
+- ✅ ClientAccountModal triggers after booking
+- ✅ ClientStatusCard shows for authenticated users
 
 ### Issues/Blockers
 
-- None currently
+- ⚠️ Cache corruption encountered (cleared)
+- Need manual testing of complete booking → signup → status flow
 
 ---
 
@@ -120,16 +130,23 @@
 
 ### Continue With
 
-1. **Option A (Recommended):** Loyalty Integration (~30 min)
-   - Add ClientAccountModal to `/reservar/[slug]` (post-booking prompt)
-   - Add ClientStatusCard to client view pages
-   - Test complete user journey
+1. **Option A (Recommended):** Manual Testing & Refinement (~30 min)
+   - Test complete booking → signup → points flow
+   - Verify ClientStatusCard displays correctly
+   - Test modal dismissal and re-trigger logic
+   - Commit changes when verified
 
 2. **Option B:** Phase 2 - Barber Gamification (1-2 weeks)
    - Achievement system (badges, milestones)
    - Leaderboard (revenue, clients, ratings)
+   - Barber dashboard with stats
 
-3. **Option C:** Pre-Production Polish (Phase 7)
+3. **Option C:** Admin Loyalty Dashboard (~2-3 hours)
+   - View all client loyalty statuses
+   - Manual points adjustment
+   - Analytics and insights
+
+4. **Option D:** Pre-Production Polish (Phase 7)
    - Visual testing across all viewports
    - Performance audit (Lighthouse)
    - Security review
@@ -158,6 +175,61 @@ npm run dev  # Dev server should auto-start
 ---
 
 ## Session History
+
+### Session 44 (2026-01-30) - Loyalty Booking Integration ✅
+
+**Duration:** ~45 min | **Agents:** @fullstack-developer | **Commits:** 0 (pending)
+
+**Goal:** Integrate loyalty system into complete booking user journey
+
+**What Was Done:**
+
+1. **API Enhancement** - Modified `/api/public/[slug]/book` to return:
+   - `client_id` - needed for loyalty modal signup
+   - `client_email` - to prefill modal form
+
+2. **Hook Update** - Enhanced `useBookingData` hook:
+   - Added `createdClientId` state
+   - Captures client_id from booking response
+   - Returns it for use in success screen
+
+3. **BookingSuccess Modal Integration**:
+   - Added logic to check if business has active loyalty program
+   - Shows `ClientAccountModal` 2 seconds after success
+   - Respects 30-day dismissal preference (localStorage)
+   - Pre-fills email if provided during booking
+
+4. **ClientStatusCard in Booking Flow**:
+   - Added to booking page for authenticated users
+   - Loads loyalty status and program data
+   - Shows points, progress, tier, referral code
+   - Only visible when user is logged in with loyalty status
+
+**Files Modified:**
+
+- `src/app/api/public/[slug]/book/route.ts` (return client_id)
+- `src/hooks/useBookingData.ts` (capture client_id)
+- `src/app/(public)/reservar/[slug]/page.tsx` (show ClientStatusCard)
+- `src/components/reservar/BookingSuccess.tsx` (integrate modal)
+
+**Complete User Journey:**
+
+```
+1. Client books appointment
+2. BookingSuccess screen shows
+3. (2s delay)
+4. ClientAccountModal appears if:
+   - Business has loyalty program
+   - Not dismissed in last 30 days
+5. Client creates account/logs in
+6. client.user_id linked
+7. loyalty_status created
+8. Next booking: ClientStatusCard visible
+```
+
+**Status:** ✅ Integration complete, ready for manual testing
+
+---
 
 ### Session 43 (2026-01-31) - Loyalty Premium Design Fix ✅
 

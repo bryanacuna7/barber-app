@@ -26,6 +26,7 @@ export function useBookingData(slug: string) {
   const [error, setError] = useState('')
   const [step, setStep] = useState<Step>('service')
   const [bookingComplete, setBookingComplete] = useState(false)
+  const [createdClientId, setCreatedClientId] = useState<string | null>(null)
 
   const [booking, setBooking] = useState<BookingData>({
     service: null,
@@ -164,6 +165,11 @@ export function useBookingData(slug: string) {
         return
       }
 
+      // Store client_id for loyalty modal
+      if (data.client_id) {
+        setCreatedClientId(data.client_id)
+      }
+
       setBookingComplete(true)
     } catch {
       setError('Error de conexión. Intenta de nuevo.')
@@ -186,6 +192,7 @@ export function useBookingData(slug: string) {
     bookingComplete,
     booking,
     availableDates,
+    createdClientId,
     // Setters
     setStep,
     setBooking,
