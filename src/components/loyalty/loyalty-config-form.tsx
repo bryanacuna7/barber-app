@@ -12,6 +12,7 @@
  */
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -272,66 +273,104 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
               const isSelected = selectedPreset === preset.id
 
               return (
-                <button
+                <motion.button
                   key={preset.id}
                   type="button"
                   onClick={() => handlePresetSelect(preset.id)}
-                  className={`relative flex min-w-[240px] max-w-[240px] flex-shrink-0 flex-col gap-2 rounded-xl border p-3 text-left transition-all active:scale-[0.98] ${
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: PRESETS.findIndex((p) => p.id === preset.id) * 0.1 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`group relative flex min-w-[240px] max-w-[240px] flex-shrink-0 flex-col gap-2 overflow-hidden rounded-xl p-3 text-left transition-all ${
                     isSelected
-                      ? 'border-primary/40 bg-primary/5 ring-2 ring-primary/20'
-                      : 'border-border/50 bg-card/80 backdrop-blur-sm'
+                      ? preset.color === 'emerald'
+                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25'
+                        : preset.color === 'amber'
+                          ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25'
+                          : preset.color === 'purple'
+                            ? 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/25'
+                            : 'bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/25'
+                      : 'border border-border/50 bg-card/80 shadow-sm backdrop-blur-sm hover:shadow-md'
                   }`}
                 >
+                  {/* Gradient overlay for depth when selected */}
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                  )}
+
                   {/* Header */}
-                  <div className="flex items-start gap-2">
+                  <div className="relative flex items-start gap-2">
                     <div
                       className={`rounded-lg p-1.5 ${
-                        preset.color === 'emerald'
-                          ? 'bg-emerald-100 dark:bg-emerald-950/50'
-                          : preset.color === 'amber'
-                            ? 'bg-amber-100 dark:bg-amber-950/50'
-                            : preset.color === 'purple'
-                              ? 'bg-purple-100 dark:bg-purple-950/50'
-                              : 'bg-blue-100 dark:bg-blue-950/50'
+                        isSelected
+                          ? 'bg-white/20 ring-2 ring-white/20'
+                          : preset.color === 'emerald'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50'
+                            : preset.color === 'amber'
+                              ? 'bg-amber-100 dark:bg-amber-950/50'
+                              : preset.color === 'purple'
+                                ? 'bg-purple-100 dark:bg-purple-950/50'
+                                : 'bg-blue-100 dark:bg-blue-950/50'
                       }`}
                     >
                       <Icon
                         className={`h-4 w-4 ${
-                          preset.color === 'emerald'
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : preset.color === 'amber'
-                              ? 'text-amber-600 dark:text-amber-400'
-                              : preset.color === 'purple'
-                                ? 'text-purple-600 dark:text-purple-400'
-                                : 'text-blue-600 dark:text-blue-400'
+                          isSelected
+                            ? 'text-white'
+                            : preset.color === 'emerald'
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : preset.color === 'amber'
+                                ? 'text-amber-600 dark:text-amber-400'
+                                : preset.color === 'purple'
+                                  ? 'text-purple-600 dark:text-purple-400'
+                                  : 'text-blue-600 dark:text-blue-400'
                         }`}
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xs font-semibold text-foreground">{preset.name}</h3>
+                      <h3
+                        className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-foreground'}`}
+                      >
+                        {preset.name}
+                      </h3>
                       <span
                         className={`mt-0.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
-                          preset.badge === 'Recomendado'
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
-                            : preset.badge === 'Popular'
-                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
-                              : preset.badge === 'Avanzado'
-                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400'
-                                : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
+                          isSelected
+                            ? 'bg-white/20 text-white'
+                            : preset.badge === 'Recomendado'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                              : preset.badge === 'Popular'
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400'
+                                : preset.badge === 'Avanzado'
+                                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400'
+                                  : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
                         }`}
                       >
                         {preset.badge}
                       </span>
                     </div>
-                    {isSelected && <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />}
+                    {isSelected && <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-white" />}
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-medium text-foreground/90">{preset.description}</p>
-                    <p className="text-[11px] text-muted-foreground">{preset.example}</p>
+                  <div className="relative space-y-0.5">
+                    <p
+                      className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-foreground/90'}`}
+                    >
+                      {preset.description}
+                    </p>
+                    <p
+                      className={`text-[11px] ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}
+                    >
+                      {preset.example}
+                    </p>
                   </div>
-                </button>
+
+                  {/* Decorative circle when selected */}
+                  {isSelected && (
+                    <div className="absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-white/10" />
+                  )}
+                </motion.button>
               )
             })}
           </div>
@@ -343,50 +382,75 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
               const isSelected = selectedPreset === preset.id
 
               return (
-                <button
+                <motion.button
                   key={preset.id}
                   type="button"
                   onClick={() => handlePresetSelect(preset.id)}
-                  className={`group relative flex flex-col gap-3 rounded-2xl border p-4 text-left transition-all lg:p-5 ${
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: PRESETS.findIndex((p) => p.id === preset.id) * 0.1 }}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`group relative flex flex-col gap-3 overflow-hidden rounded-2xl p-4 text-left transition-all lg:p-5 ${
                     isSelected
-                      ? 'border-primary/40 bg-primary/5 shadow-md ring-2 ring-primary/20'
-                      : 'border-border/50 bg-card/80 backdrop-blur-sm hover:border-zinc-300 hover:bg-white/60 hover:shadow-md dark:hover:border-zinc-700 dark:hover:bg-zinc-900/60'
+                      ? preset.color === 'emerald'
+                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20'
+                        : preset.color === 'amber'
+                          ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/20'
+                          : preset.color === 'purple'
+                            ? 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/20'
+                            : 'bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/20'
+                      : 'border border-border/50 bg-card/80 shadow-sm backdrop-blur-sm hover:shadow-lg'
                   }`}
                 >
+                  {/* Gradient overlay for depth when selected */}
+                  {isSelected && (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+                      <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-white/10" />
+                    </>
+                  )}
+
                   {/* Header with Icon and Badge */}
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="relative flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <div
                         className={`rounded-xl p-2.5 shadow-sm lg:p-3 ${
-                          preset.color === 'emerald'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/50'
-                            : preset.color === 'amber'
-                              ? 'bg-amber-100 dark:bg-amber-950/50'
-                              : preset.color === 'purple'
-                                ? 'bg-purple-100 dark:bg-purple-950/50'
-                                : 'bg-blue-100 dark:bg-blue-950/50'
+                          isSelected
+                            ? 'bg-white/20 ring-4 ring-white/10'
+                            : preset.color === 'emerald'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/50'
+                              : preset.color === 'amber'
+                                ? 'bg-amber-100 dark:bg-amber-950/50'
+                                : preset.color === 'purple'
+                                  ? 'bg-purple-100 dark:bg-purple-950/50'
+                                  : 'bg-blue-100 dark:bg-blue-950/50'
                         }`}
                       >
                         <Icon
                           className={`h-5 w-5 lg:h-6 lg:w-6 ${
-                            preset.color === 'emerald'
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : preset.color === 'amber'
-                                ? 'text-amber-600 dark:text-amber-400'
-                                : preset.color === 'purple'
-                                  ? 'text-purple-600 dark:text-purple-400'
-                                  : 'text-blue-600 dark:text-blue-400'
+                            isSelected
+                              ? 'text-white'
+                              : preset.color === 'emerald'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : preset.color === 'amber'
+                                  ? 'text-amber-600 dark:text-amber-400'
+                                  : preset.color === 'purple'
+                                    ? 'text-purple-600 dark:text-purple-400'
+                                    : 'text-blue-600 dark:text-blue-400'
                           }`}
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-semibold text-foreground lg:text-base">
+                        <h3
+                          className={`text-sm font-semibold lg:text-base ${isSelected ? 'text-white' : 'text-foreground'}`}
+                        >
                           {preset.name}
                         </h3>
                       </div>
                     </div>
                     {isSelected ? (
-                      <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-primary lg:h-6 lg:w-6" />
+                      <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-white lg:h-6 lg:w-6" />
                     ) : (
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide lg:text-[11px] ${
@@ -405,13 +469,19 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                   </div>
 
                   {/* Description */}
-                  <div className="space-y-1.5">
-                    <p className="text-sm font-medium text-foreground/90 lg:text-[15px]">
+                  <div className="relative space-y-1.5">
+                    <p
+                      className={`text-sm font-medium lg:text-[15px] ${isSelected ? 'text-white' : 'text-foreground/90'}`}
+                    >
                       {preset.description}
                     </p>
-                    <p className="text-xs text-muted-foreground lg:text-sm">{preset.example}</p>
+                    <p
+                      className={`text-xs lg:text-sm ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}
+                    >
+                      {preset.example}
+                    </p>
                   </div>
-                </button>
+                </motion.button>
               )
             })}
           </div>
