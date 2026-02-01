@@ -80,13 +80,19 @@ export async function GET(request: Request) {
     const achievementsWithProgress = allAchievements.map((achievement) => {
       const earned = earnedAchievements?.find((e) => e.achievement_id === achievement.id)
 
+      // Parse unlock_conditions if it's a string (JSONB from Supabase)
+      const unlockConditions =
+        typeof achievement.unlock_conditions === 'string'
+          ? JSON.parse(achievement.unlock_conditions)
+          : achievement.unlock_conditions
+
       // Calculate progress
       let progress = 0
       let current = 0
-      const threshold = achievement.unlock_conditions.threshold || 0
+      const threshold = unlockConditions.threshold || 0
 
       if (stats) {
-        switch (achievement.unlock_conditions.type) {
+        switch (unlockConditions.type) {
           case 'revenue':
             current = stats.total_revenue
             break
@@ -105,6 +111,7 @@ export async function GET(request: Request) {
 
       return {
         ...achievement,
+        unlock_conditions: unlockConditions, // Ensure it's an object
         is_earned: !!earned,
         earned_at: earned?.earned_at || null,
         progress,
