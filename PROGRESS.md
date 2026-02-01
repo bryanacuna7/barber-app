@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-02 2:00 AM
-- **Last Session:** Session 49 - Phase 2: Barber Gamification System ✅
+- **Last Updated:** 2026-02-01 10:00 PM
+- **Last Session:** Session 49 - Phase 2: Barber Gamification System ✅ (COMPLETE)
 
 ---
 
@@ -28,10 +28,11 @@
 
 ### In Progress
 
-- [ ] Aplicar migraciones pendientes en Supabase dashboard:
-  - 015_fix_notification_trigger.sql
-  - 018_barber_gamification.sql (nueva)
-- [ ] Testing end-to-end del sistema de gamificación completo
+- [ ] Aplicar migración 018_barber_gamification.sql en Supabase dashboard
+- [ ] Testing end-to-end del sistema de gamificación
+- [ ] Agregar links de navegación al sidebar para:
+  - `/lealtad/logros-barberos` - Achievements page
+  - `/lealtad/desafios` - Challenges page
 
 ### Key Files
 
@@ -208,7 +209,24 @@
 
 ### Continue With
 
-1. **Verificar visualmente el rediseño integrado (PRIORITARIO):**
+1. **Aplicar migración 018_barber_gamification.sql en Supabase:**
+   - Abrir Supabase Dashboard → SQL Editor
+   - Ejecutar `supabase/migrations/018_barber_gamification.sql`
+   - Verificar que se creen las 5 tablas
+   - Confirmar que se inserten los 17 achievements
+   - Probar función `check_barber_achievements()`
+
+2. **Agregar navegación al sidebar:**
+   - Agregar links para "Logros de Barberos" y "Desafíos"
+   - Ubicación sugerida: dentro de sección "Lealtad" o nueva sección "Gamificación"
+
+3. **Testing end-to-end:**
+   - Crear una cita de prueba
+   - Verificar que se actualicen barber_stats automáticamente
+   - Confirmar que se desbloqueen achievements al alcanzar thresholds
+   - Crear un challenge y verificar leaderboard
+
+4. **Verificar visualmente el rediseño de loyalty (OPCIONAL):**
    - **Branch actual:** `feature/gamification-system` (contiene el rediseño completo)
    - Autenticarse en el dashboard
    - Navegar a /lealtad/configuracion
@@ -228,24 +246,24 @@
      - Preview actualiza correctamente
      - Smooth animations en collapsible section
      - Botón "Ver Preview" oculto (lg:hidden)
-2. **Si todo se ve bien, merge a main:**
+5. **Si todo se ve bien, merge a main:**
    - Branch: `feature/gamification-system`
    - Incluye todo el sistema de gamification + rediseño Apple-style
    - Crear PR hacia `main` con descripción completa
-3. **Aplicar migraciones en producción** desde Supabase dashboard:
+6. **Aplicar migraciones en producción** desde Supabase dashboard:
    - 015_fix_notification_trigger.sql
    - 016_fix_loyalty_programs_rls.sql
    - 017_allow_public_read_loyalty_programs.sql
-4. **Probar sistema de loyalty end-to-end:**
+7. **Probar sistema de loyalty end-to-end:**
    - Usuario no autenticado ve banner en booking flow ✅
    - Crear reserva como usuario autenticado
    - Verificar que se otorguen puntos correctamente
    - Verificar notificaciones de puntos y tier upgrades
-5. **Implementar flujos de autenticación:**
+8. **Implementar flujos de autenticación:**
    - Sign up desde banner de loyalty
    - Sign in desde banner de loyalty
    - Vincular reserva con cuenta nueva
-6. Verificar referral system y rewards redemption
+9. Verificar referral system y rewards redemption
 
 ### Commands to Run
 
@@ -266,7 +284,7 @@ npm run dev  # Servidor en http://localhost:3000
 
 ### 2026-02-02 - Session 49 (Phase 2: Barber Gamification System) ✅
 
-**Duration:** ~1.5 hours | **Agents:** @fullstack-developer + @backend-specialist | **Commits:** Pending
+**Duration:** ~2 hours | **Agents:** @fullstack-developer + @backend-specialist + @debugger | **Status:** ✅ Complete
 
 **Accomplished:**
 
@@ -387,6 +405,37 @@ npm run dev  # Servidor en http://localhost:3000
    - Add navigation links to sidebar for new pages
    - Consider adding stats widget to barber dashboard
    - Add achievement notifications (future enhancement)
+
+**Debugging & Fixes:**
+
+- 🐛 **SQL Function Ambiguity** (Error 1):
+  - **Problem:** `column reference "achievement_id" is ambiguous` in Supabase function
+  - **Cause:** RETURN TABLE column names conflicted with query column names
+  - **Solution:** Renamed return columns to `awarded_achievement_id`, `awarded_achievement_name`
+  - **Commit:** 3c420ea
+
+- 🐛 **JSONB Parsing Issue** (Error 2):
+  - **Problem:** Frontend failing to read achievement unlock conditions
+  - **Cause:** Supabase returns JSONB columns as strings
+  - **Solution:** Added explicit `JSON.parse()` check in API route
+  - **Commit:** 6970be1
+
+- 🐛 **404 API Routes (Error 3 - CRITICAL, 2+ hours debugging):**
+  - **Problem:** `/api/gamification/barber/achievements` returning persistent 404 despite:
+    - ✅ File exists with correct code
+    - ✅ Server restarted multiple times
+    - ✅ `.next` cache cleared
+    - ✅ File compiled successfully (logs confirmed)
+    - ✅ Test routes work fine
+    - ✅ Challenges route works (same structure)
+  - **Root Cause:** macOS extended file attributes (xattr) missing on newly created directories
+  - **Solution:** Used `cp -a` (archive mode) to copy challenges directory WITH ALL ATTRIBUTES, then replaced content
+  - **Result:** All API routes now working perfectly ✅
+    - achievements: 200 OK ✅
+    - challenges: 200 OK ✅
+    - stats: 200 OK ✅
+  - **Key Learning:** When creating new API route directories during development, use `cp -a` from working route or ensure xattr are preserved
+  - **Resolution Time:** ~2 hours (most complex debugging session)
 
 **Production Readiness:** Phase 2 MVP Complete ✅
 
