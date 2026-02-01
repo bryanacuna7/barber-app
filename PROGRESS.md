@@ -8,7 +8,7 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-01 8:45 AM
+- **Last Updated:** 2026-02-01 10:30 PM
 
 ---
 
@@ -29,8 +29,8 @@
 
 ### In Progress
 
-- [ ] Debugging: Banner de loyalty no aparece para usuarios no autenticados
 - [ ] Aplicar migración 015_fix_notification_trigger.sql manualmente en Supabase dashboard
+- [ ] Testing end-to-end del sistema de loyalty
 
 ### Key Files
 
@@ -55,6 +55,22 @@
 - ✅ Sistema de loyalty integrado
 
 ### Recent Fixes
+
+**Session 47 (2026-02-01 10:30 PM)**
+
+- ✅ **Resuelto:** RLS policy bloqueaba guardado de loyalty program silenciosamente
+  - **Causa raíz:** Policy solo tenía USING clause, faltaba WITH CHECK para INSERT/UPDATE
+  - **Solución:** Agregado WITH CHECK clause en migration 016
+  - **Verificación:** Upsert ahora incluye `.select().single()` para validación RLS
+- ✅ **Resuelto:** Banner de loyalty no visible para usuarios no autenticados
+  - **Causa raíz:** RLS policy requería ownership para lectura
+  - **Solución:** Separadas policies: lectura pública (enabled=true), escritura solo owner
+  - **Migration:** 017_allow_public_read_loyalty_programs.sql
+  - **Resultado:** Banner aparece correctamente en booking flow para usuarios no auth
+- ✅ **Limpieza:** Removidos console.logs de debug
+  - Limpiado detectPresetFromProgram()
+  - Limpiado handleSave()
+  - Mantenido solo console.error para errores
 
 **Session 46 (2026-02-01 8:45 AM)**
 
@@ -81,7 +97,10 @@
 ### Known Issues
 
 - ⚠️ No actualizar a Next.js 16 hasta que Turbopack esté más estable (esperar 16.2+)
-- ⚠️ Migración 015_fix_notification_trigger.sql pendiente de aplicar en producción
+- ⚠️ Migraciones pendientes de aplicar en producción:
+  - 015_fix_notification_trigger.sql
+  - 016_fix_loyalty_programs_rls.sql (aplicada en dev)
+  - 017_allow_public_read_loyalty_programs.sql (aplicada en dev)
 
 ---
 
@@ -89,13 +108,20 @@
 
 ### Continue With
 
-1. Probar el sistema de loyalty end-to-end en staging/producción
+1. **Aplicar migraciones en producción** desde Supabase dashboard:
+   - 015_fix_notification_trigger.sql
+   - 016_fix_loyalty_programs_rls.sql
+   - 017_allow_public_read_loyalty_programs.sql
+2. **Probar sistema de loyalty end-to-end:**
+   - Usuario no autenticado ve banner en booking flow ✅
    - Crear reserva como usuario autenticado
    - Verificar que se otorguen puntos correctamente
    - Verificar notificaciones de puntos y tier upgrades
-2. Aplicar migración 015 manualmente desde Supabase dashboard
-3. Verificar referral system y rewards redemption
-4. Optimización de performance del loyalty system si es necesario
+3. **Implementar flujos de autenticación:**
+   - Sign up desde banner de loyalty
+   - Sign in desde banner de loyalty
+   - Vincular reserva con cuenta nueva
+4. Verificar referral system y rewards redemption
 
 ### Commands to Run
 
