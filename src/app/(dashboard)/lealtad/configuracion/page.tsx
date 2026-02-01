@@ -12,7 +12,7 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Gift, Sparkles, Users, TrendingUp, ChevronLeft } from 'lucide-react'
+import { Gift, Sparkles, Users, ChevronLeft } from 'lucide-react'
 import { LoyaltyConfigForm } from '@/components/loyalty/loyalty-config-form'
 import { LoyaltyPreview } from '@/components/loyalty/loyalty-preview'
 import { Card } from '@/components/ui/card'
@@ -137,84 +137,80 @@ export default async function LoyaltyConfigPage() {
         </p>
       </div>
 
-      {/* Stats Cards (if program exists) - Horizontal scroll on mobile */}
-      {program && stats && (
-        <div className="mb-5 lg:mb-6">
-          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
-            <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
-              <div className="flex items-center gap-2.5 lg:gap-3">
-                <div className="rounded-full bg-primary/10 p-2 lg:p-2.5">
-                  <Users className="h-4 w-4 text-primary lg:h-5 lg:w-5" />
+      {/* Stats Cards - Only show if program exists and has data */}
+      {program &&
+        stats &&
+        (stats.enrolledClients > 0 || stats.totalPointsAwarded > 0 || stats.totalRewardsRedeemed > 0) && (
+          <div className="mb-5 lg:mb-6">
+            <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
+              <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
+                <div className="flex items-center gap-2.5 lg:gap-3">
+                  <div className="rounded-full bg-primary/10 p-2 lg:p-2.5">
+                    <Users className="h-4 w-4 text-primary lg:h-5 lg:w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-muted-foreground lg:text-xs">Inscritos</p>
+                    <p className="text-xl font-bold lg:text-2xl">{stats.enrolledClients}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground lg:text-xs">Inscritos</p>
-                  <p className="text-xl font-bold lg:text-2xl">{stats.enrolledClients}</p>
-                </div>
-              </div>
-            </Card>
+              </Card>
 
-            <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
-              <div className="flex items-center gap-2.5 lg:gap-3">
-                <div className="rounded-full bg-amber-500/10 p-2 lg:p-2.5">
-                  <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400 lg:h-5 lg:w-5" />
+              <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
+                <div className="flex items-center gap-2.5 lg:gap-3">
+                  <div className="rounded-full bg-amber-500/10 p-2 lg:p-2.5">
+                    <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400 lg:h-5 lg:w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-muted-foreground lg:text-xs">Puntos</p>
+                    <p className="text-xl font-bold lg:text-2xl">
+                      {stats.totalPointsAwarded.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground lg:text-xs">Puntos</p>
-                  <p className="text-xl font-bold lg:text-2xl">
-                    {stats.totalPointsAwarded.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            </Card>
+              </Card>
 
-            <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
-              <div className="flex items-center gap-2.5 lg:gap-3">
-                <div className="rounded-full bg-emerald-500/10 p-2 lg:p-2.5">
-                  <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400 lg:h-5 lg:w-5" />
+              <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
+                <div className="flex items-center gap-2.5 lg:gap-3">
+                  <div className="rounded-full bg-emerald-500/10 p-2 lg:p-2.5">
+                    <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400 lg:h-5 lg:w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] text-muted-foreground lg:text-xs">Canjeados</p>
+                    <p className="text-xl font-bold lg:text-2xl">{stats.totalRewardsRedeemed}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground lg:text-xs">Canjeados</p>
-                  <p className="text-xl font-bold lg:text-2xl">{stats.totalRewardsRedeemed}</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content - Full Width */}
-      <Suspense fallback={<ConfigFormSkeleton />}>
-        <LoyaltyConfigForm businessId={business.id} initialProgram={program} />
-      </Suspense>
-
-      {/* Info Banner (only if no program) */}
-      {!program && (
-        <Card className="mt-6 border-primary/20 bg-primary/5 p-4">
-          <div className="flex items-start gap-3">
-            <TrendingUp className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium">¿Por qué activar un programa de lealtad?</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Los programas de lealtad aumentan la retención de clientes en un 30% promedio.
-              </p>
-              <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                  Incrementa frecuencia de visitas
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                  Fomenta referidos orgánicos
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                  Diferenciación vs competencia
-                </li>
-              </ul>
+              </Card>
             </div>
           </div>
+        )}
+
+      {/* Empty State when no program or no stats */}
+      {program && stats && stats.enrolledClients === 0 && stats.totalPointsAwarded === 0 && (
+        <Card className="mb-5 border-border/50 bg-muted/20 p-6 text-center lg:mb-6">
+          <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
+          <p className="mt-3 text-sm font-medium text-foreground">
+            Activa el programa y tus clientes comenzarán a acumular puntos
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Los primeros datos aparecerán aquí después de la primera reserva
+          </p>
         </Card>
       )}
+
+      {/* Main Content - Side by side on desktop */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
+        {/* Left Column: Configuration Form */}
+        <Suspense fallback={<ConfigFormSkeleton />}>
+          <LoyaltyConfigForm businessId={business.id} initialProgram={program} />
+        </Suspense>
+
+        {/* Right Column: Preview (Desktop only - sticky) */}
+        <div className="hidden lg:block">
+          <div className="sticky top-6">
+            <LoyaltyPreview program={program} />
+          </div>
+        </div>
+      </div>
     </>
   )
 }
