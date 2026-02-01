@@ -53,7 +53,7 @@ export function RadioGroupItem({ value, id, className = '', children }: RadioGro
       onClick={() => context.onValueChange(value)}
       className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-all min-h-[56px] ${
         isSelected
-          ? 'bg-primary/5 dark:bg-primary/10'
+          ? 'bg-primary/20 dark:bg-primary/30'
           : 'bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800'
       } ${className}`}
     >
