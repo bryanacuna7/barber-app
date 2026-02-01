@@ -30,7 +30,7 @@ const RadioGroupContext = React.createContext<{
 export function RadioGroup({ value, onValueChange, className = '', children }: RadioGroupProps) {
   return (
     <RadioGroupContext.Provider value={{ value, onValueChange }}>
-      <div role="radiogroup" className={`space-y-2 ${className}`}>
+      <div role="radiogroup" className={`grid grid-cols-2 gap-2 lg:grid-cols-1 ${className}`}>
         {children}
       </div>
     </RadioGroupContext.Provider>
@@ -51,10 +51,10 @@ export function RadioGroupItem({ value, id, className = '', children }: RadioGro
       aria-checked={isSelected}
       id={itemId}
       onClick={() => context.onValueChange(value)}
-      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-all min-h-[56px] ${
+      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-all min-h-[56px] shadow-sm ${
         isSelected
-          ? 'bg-primary/20 dark:bg-primary/30'
-          : 'bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800'
+          ? 'bg-primary/20 shadow-md dark:bg-zinc-950 dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]'
+          : 'bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700'
       } ${className}`}
     >
       {/* Radio indicator */}

@@ -8,7 +8,7 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-01 10:30 PM
+- **Last Updated:** 2026-02-01 11:55 PM
 
 ---
 
@@ -40,9 +40,9 @@
 | `src/components/loyalty/client-status-card.tsx`      | Card de status de loyalty                    |
 | `src/components/loyalty/loyalty-upsell-banner.tsx`   | Banner upsell para usuarios no auth          |
 | `src/components/loyalty/loyalty-config-form.tsx`     | Form de config (Apple-style, single path)    |
+| `src/components/loyalty/loyalty-config-wrapper.tsx`  | Wrapper simplificado para form               |
 | `src/components/loyalty/program-type-selector.tsx`   | Type selector limpio (radio group iOS-style) |
 | `src/components/loyalty/collapsible-section.tsx`     | Progressive disclosure wrapper               |
-| `src/components/loyalty/preview-button-mobile.tsx`   | Floating preview button para mobile          |
 | `src/components/ui/sheet.tsx`                        | Modal component con Framer Motion            |
 | `src/components/ui/radio-group.tsx`                  | Radio selection component                    |
 | `src/lib/gamification/loyalty-calculator.ts`         | Lógica de cálculo de puntos                  |
@@ -68,28 +68,85 @@
   - **Eliminado:** Sistema dual confuso (Quick Start presets vs Personalizar tabs)
   - **Implementado:** Single path claro: Enable → Type Selection → Configuration → Save
   - **Principios aplicados:** Clarity, Deference, Progressive Disclosure, Mobile-First
-  - **Componentes nuevos creados:**
-    - `src/components/ui/sheet.tsx` - Modal con animaciones Framer Motion
-    - `src/components/ui/radio-group.tsx` - Radio selection iOS-style (56px touch targets)
-    - `src/components/loyalty/program-type-selector.tsx` - Type selector limpio (sin gradientes)
-    - `src/components/loyalty/collapsible-section.tsx` - Progressive disclosure para opciones avanzadas
-    - `src/components/loyalty/preview-button-mobile.tsx` - Floating preview button (z-40)
-  - **Refactor mayor:** loyalty-config-form.tsx (~400 líneas eliminadas)
-    - Removido: PRESETS array, detectPresetFromProgram(), selectedPreset state
-    - Removido: Preset cards con gradientes y decoración
-    - Removido: Tabs component y TabsContent wrappers
-    - Reemplazado: Conditional rendering basado en programType
-  - **Layout actualizado:** page.tsx ahora tiene side-by-side en desktop (config 60% + preview 40%)
-  - **Stats mejorados:** Conditional rendering (oculta si todos = 0), empty state sugerente
-- ✅ **Resuelto:** JSX structure error causando build failure
-  - **Error:** Extra closing div tag en loyalty-config-form.tsx:404
-  - **Fix:** Removido div sobrante, estructura ahora balanceada correctamente
-  - **Verificación:** App builds successfully (HTTP 200)
-- ⏳ **Pendiente verificación visual:** Requiere autenticación para acceder a /lealtad/configuracion
-  - Trial banner en mobile
-  - Touch targets y responsive breakpoints
-  - Preview modal en mobile
+
+- ✅ **Componentes nuevos creados:**
+  - `src/components/loyalty/program-type-selector.tsx` - Type selector limpio (sin gradientes)
+  - `src/components/loyalty/collapsible-section.tsx` - Progressive disclosure para opciones avanzadas
+  - `src/components/loyalty/loyalty-config-wrapper.tsx` - Wrapper simplificado (sin shared state)
+
+- ✅ **Refactor mayor:** `loyalty-config-form.tsx` (~400 líneas eliminadas)
+  - Removido: PRESETS array, detectPresetFromProgram(), selectedPreset state
+  - Removido: Preset cards con gradientes y decoración
+  - Removido: Tabs component y TabsContent wrappers
+  - Reemplazado: Conditional rendering basado en programType
+  - Agregado: Integración de preview button inline (no flotante)
+  - Agregado: Sheet modal para preview en mobile
+
+- ✅ **Layout actualizado:** `page.tsx` ahora tiene side-by-side en desktop (config 60% + preview 40%)
+  - Stats mejorados: Conditional rendering (oculta si todos = 0), empty state sugerente
+  - Spacing mobile optimizado: mt-4 lg:mt-0 para evitar colisión con header
+
+- ✅ **Batalla épica contra bordes (15+ iteraciones):**
+  - **Problema:** Usuario frustrado con borders apareciendo repetidamente
+  - **Solución final:** Eliminados TODOS los borders, usando solo backgrounds y sombras
+  - **Radio buttons:** `border-0`, selección con `bg-primary/20` + `shadow-md`
+  - **Collapsible section:** `shadow-sm` en lugar de border
+  - **Dropdowns:** `shadow-lg` en SelectContent, sin borders
+  - **Inputs:** `shadow-sm` agregado al baseStyles
+
+- ✅ **Dark mode con primary gris (5+ iteraciones):**
+  - **Problema:** Selected radio no visible cuando primary color es gris en dark mode
+  - **Soluciones intentadas:**
+    1. `bg-primary/15` → muy sutil
+    2. `bg-primary/30` → aún no visible
+    3. `bg-emerald-500/20` → hardcoded, no respeta customización
+    4. `bg-primary/60` dark → no suficiente contraste
+    5. `bg-zinc-700` dark → mejor pero no ideal
+  - **Solución final (invertida):**
+    - Unselected: `dark:bg-zinc-800`
+    - Selected: `dark:bg-zinc-950` (MÁS oscuro que unselected)
+    - Concepto: Selected es el más oscuro, invirtiendo la lógica usual
+
+- ✅ **Preview button saga (4+ iteraciones):**
+  - **Intento 1:** Floating button `bottom-24 right-4` → mal posicionado
+  - **Intento 2:** Centrado `bottom-4 left-1/2` → choca con "Guardar Cambios"
+  - **Intento 3:** Subido `bottom-20` → aún choca
+  - **Intento 4:** Movido fuera del Card con wrapper → técnicamente correcto pero "incómodo"
+  - **Solución final:** Integrado después de "Guardar Cambios" como parte del form
+    - Button con `variant="outline"` y `lg:hidden`
+    - Abre Sheet modal cuando se hace tap
+    - No más positioning fixed/absolute
+    - UX natural y no intrusiva
+
+- ✅ **Trial banner mobile:** Optimizado en `trial-banner.tsx`
+  - Padding reducido: `p-3` (antes `p-4`)
+  - Iconos reducidos: `h-8 w-8` (antes `h-10 w-10`)
+  - Texto reducido: `text-[15px]` y `text-[13px]`
+
+- ✅ **Archivos modificados (7 totales):**
+  1. `src/components/ui/radio-group.tsx` - Grid 2 columnas mobile, inverted dark mode colors, sombras
+  2. `src/components/loyalty/loyalty-config-form.tsx` - Integración preview button, Sheet modal
+  3. `src/components/loyalty/collapsible-section.tsx` - Shadows en lugar de borders
+  4. `src/components/ui/select.tsx` - Removed borders de SelectContent
+  5. `src/components/ui/input.tsx` - Agregado shadow-sm al baseStyles
+  6. `src/components/subscription/trial-banner.tsx` - Compact mobile version
+  7. `src/app/(dashboard)/lealtad/configuracion/page.tsx` - Spacing mobile optimizado
+
+- ✅ **Nuevo componente creado:**
+  - `src/components/loyalty/loyalty-config-wrapper.tsx` - Wrapper simplificado (solo render directo)
+
+- ✅ **Grid responsive para tipo de programa (2026-02-01 11:55 PM):**
+  - **Cambio:** Radio group ahora usa grid de 2 columnas en mobile (< 1024px)
+  - **Archivo:** `src/components/ui/radio-group.tsx` - Cambio de `space-y-2` a `grid grid-cols-2 gap-2 lg:grid-cols-1`
+  - **Verificado:** Screenshots en mobile (375px) y desktop (1280px) confirman funcionamiento correcto
+  - **UX mejorada:** Cards de tipo de programa más compactos y aprovechan mejor el espacio en mobile
+
+- ⏳ **Pendiente verificación visual en app real:** Requiere autenticación para acceder a /lealtad/configuracion
+  - Preview button inline en mobile (Sheet modal)
+  - Radio buttons con dark mode invertido
+  - Sombras en lugar de borders
   - Side-by-side layout en desktop
+  - Grid 2x2 en mobile para tipo de programa
 
 **Session 47 (2026-02-01 10:30 PM)**
 
@@ -147,16 +204,19 @@
    - Autenticarse en el dashboard
    - Navegar a /lealtad/configuracion
    - Verificar en mobile (375px):
-     - Trial banner se ve bien
+     - Trial banner se ve compacto y bien espaciado
+     - Radio buttons de tipo sin borders (solo backgrounds + sombras)
+     - Selected radio visible en dark mode con gris (zinc-950 vs zinc-800)
      - Type selector tiene touch targets adecuados (56px)
      - No hay horizontal scroll
-     - Botón "Ver Preview" flotante funciona
-     - Modal de preview se abre correctamente
+     - Botón "Ver Preview" integrado después de "Guardar Cambios" (NO flotante)
+     - Modal Sheet de preview se abre correctamente
      - "Opciones Avanzadas" colapsa/expande suavemente
    - Verificar en desktop (1280px+):
      - Layout side-by-side (config left, preview right sticky)
      - Preview actualiza con debounce (500ms)
      - Smooth animations en collapsible section
+     - Botón "Ver Preview" oculto (lg:hidden)
 2. **Si todo se ve bien, considerar merge a main:**
    - Branch: feature/loyalty-config-apple-redesign
    - 5 commits ready
