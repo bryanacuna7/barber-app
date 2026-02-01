@@ -356,6 +356,100 @@ export interface NotificationPreferencesInsert {
   email_payment_pending?: boolean
 }
 
+// ============================================================================
+// Barber Gamification Types (Phase 2)
+// ============================================================================
+
+export type AchievementCategory = 'revenue' | 'appointments' | 'clients' | 'streak' | 'special'
+export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'legendary'
+export type ChallengeType = 'revenue' | 'appointments' | 'clients' | 'team_total'
+
+export interface BarberStats {
+  id: string
+  barber_id: string
+  business_id: string
+  total_appointments: number
+  total_revenue: number
+  total_clients: number
+  avg_rating: number
+  current_streak_days: number
+  best_streak_days: number
+  last_appointment_date: string | null
+  revenue_rank: number | null
+  appointments_rank: number | null
+  clients_rank: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BarberAchievement {
+  id: string
+  key: string
+  name: string
+  description: string
+  icon: string
+  category: AchievementCategory
+  unlock_conditions: {
+    type: string
+    threshold: number
+  }
+  tier: AchievementTier
+  display_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface BarberEarnedAchievement {
+  id: string
+  barber_id: string
+  achievement_id: string
+  earned_at: string
+  progress?: Json
+}
+
+export interface BarberChallenge {
+  id: string
+  business_id: string
+  name: string
+  description: string | null
+  challenge_type: ChallengeType
+  target_value: number
+  target_metric: string
+  reward_description: string | null
+  reward_amount: number | null
+  starts_at: string
+  ends_at: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface BarberChallengeParticipant {
+  id: string
+  challenge_id: string
+  barber_id: string
+  current_value: number
+  target_value: number
+  completed_at: string | null
+  rank: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BarberChallengeInsert {
+  business_id: string
+  name: string
+  description?: string | null
+  challenge_type: ChallengeType
+  target_value: number
+  target_metric: string
+  reward_description?: string | null
+  reward_amount?: number | null
+  starts_at: string
+  ends_at: string
+  is_active?: boolean
+}
+
 export type Database = {
   graphql_public: {
     Tables: Record<string, never>

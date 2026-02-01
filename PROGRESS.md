@@ -8,7 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-01 11:55 PM
+- **Last Updated:** 2026-02-02 2:00 AM
+- **Last Session:** Session 49 - Phase 2: Barber Gamification System ✅
 
 ---
 
@@ -18,19 +19,19 @@
 
 - [x] Sistema de reservas online público (/reservar/[slug])
 - [x] Dashboard administrativo para barberías
-- [x] Sistema de gamificación y loyalty
-  - Puntos por visitas
-  - Tiers (Bronze, Silver, Gold, Platinum)
-  - Códigos de referidos
-  - Recompensas y descuentos
+- [x] **Sistema de Gamificación Completo** 🎮
+  - **Phase 1: Client Loyalty** ✅ (puntos, tiers, referidos, recompensas)
+  - **Phase 2: Barber Gamification** ✅ (achievements, leaderboards, challenges)
 - [x] Integración de loyalty en booking flow
 - [x] PWA y branding personalizable
 - [x] Notificaciones automáticas
 
 ### In Progress
 
-- [ ] Aplicar migración 015_fix_notification_trigger.sql manualmente en Supabase dashboard
-- [ ] Testing end-to-end del sistema de loyalty
+- [ ] Aplicar migraciones pendientes en Supabase dashboard:
+  - 015_fix_notification_trigger.sql
+  - 018_barber_gamification.sql (nueva)
+- [ ] Testing end-to-end del sistema de gamificación completo
 
 ### Key Files
 
@@ -141,6 +142,13 @@
   - **Verificado:** Screenshots en mobile (375px) y desktop (1280px) confirman funcionamiento correcto
   - **UX mejorada:** Cards de tipo de programa más compactos y aprovechan mejor el espacio en mobile
 
+- ✅ **Merge completado (2026-02-02 12:05 AM):**
+  - **Branch:** `feature/loyalty-config-apple-redesign` → `feature/gamification-system`
+  - **Tipo:** Fast-forward merge (sin conflictos)
+  - **Archivos integrados:** 13 archivos (856 líneas agregadas, 868 eliminadas)
+  - **Estado:** Todo el rediseño Apple-style ahora integrado en rama principal de gamification
+  - **Siguiente:** Verificación visual y testing, luego merge a `main`
+
 - ⏳ **Pendiente verificación visual en app real:** Requiere autenticación para acceder a /lealtad/configuracion
   - Preview button inline en mobile (Sheet modal)
   - Radio buttons con dark mode invertido
@@ -200,27 +208,30 @@
 
 ### Continue With
 
-1. **Verificar visualmente el rediseño de loyalty config (PRIORITARIO):**
+1. **Verificar visualmente el rediseño integrado (PRIORITARIO):**
+   - **Branch actual:** `feature/gamification-system` (contiene el rediseño completo)
    - Autenticarse en el dashboard
    - Navegar a /lealtad/configuracion
    - Verificar en mobile (375px):
+     - Grid 2x2 para tipo de programa funcionando
      - Trial banner se ve compacto y bien espaciado
-     - Radio buttons de tipo sin borders (solo backgrounds + sombras)
-     - Selected radio visible en dark mode con gris (zinc-950 vs zinc-800)
-     - Type selector tiene touch targets adecuados (56px)
+     - Radio buttons sin borders (solo backgrounds + sombras)
+     - Selected radio visible en dark mode (zinc-950 vs zinc-800)
+     - Touch targets adecuados (56px)
      - No hay horizontal scroll
-     - Botón "Ver Preview" integrado después de "Guardar Cambios" (NO flotante)
-     - Modal Sheet de preview se abre correctamente
+     - Botón "Ver Preview" integrado después de "Guardar Cambios"
+     - Modal Sheet de preview funciona correctamente
      - "Opciones Avanzadas" colapsa/expande suavemente
    - Verificar en desktop (1280px+):
      - Layout side-by-side (config left, preview right sticky)
-     - Preview actualiza con debounce (500ms)
+     - Grid 1 columna para tipo de programa
+     - Preview actualiza correctamente
      - Smooth animations en collapsible section
      - Botón "Ver Preview" oculto (lg:hidden)
-2. **Si todo se ve bien, considerar merge a main:**
-   - Branch: feature/loyalty-config-apple-redesign
-   - 5 commits ready
-   - Crear PR con descripción del redesign
+2. **Si todo se ve bien, merge a main:**
+   - Branch: `feature/gamification-system`
+   - Incluye todo el sistema de gamification + rediseño Apple-style
+   - Crear PR hacia `main` con descripción completa
 3. **Aplicar migraciones en producción** desde Supabase dashboard:
    - 015_fix_notification_trigger.sql
    - 016_fix_loyalty_programs_rls.sql
@@ -252,6 +263,134 @@ npm run dev  # Servidor en http://localhost:3000
 ---
 
 ## Session History
+
+### 2026-02-02 - Session 49 (Phase 2: Barber Gamification System) ✅
+
+**Duration:** ~1.5 hours | **Agents:** @fullstack-developer + @backend-specialist | **Commits:** Pending
+
+**Accomplished:**
+
+- 🎮 **Phase 2: Barber Gamification System MVP**
+  - Complete achievement system with 17 seeded achievements
+  - Active challenges/competitions system
+  - Enhanced leaderboard with rankings
+  - Automatic stats tracking via database triggers
+
+- 📊 **Database Schema (Migration 018_barber_gamification.sql)**
+  - `barber_stats` table: Aggregated performance metrics (appointments, revenue, clients, streaks)
+  - `barber_achievements` table: 17 achievements across 5 categories (revenue, appointments, clients, streak, special)
+  - `barber_earned_achievements` table: Tracks earned achievements per barber
+  - `barber_challenges` table: Active competitions with goals and rewards
+  - `barber_challenge_participants` table: Progress tracking in challenges
+  - Auto-update trigger on appointments → updates barber_stats
+  - Helper function `check_barber_achievements()` for auto-awarding
+  - Backfill script for existing barbers
+
+- 🎯 **Achievement System**
+  - 5 categories: Revenue, Appointments, Clients, Streaks, Special
+  - 5 tier levels: Bronze, Silver, Gold, Platinum, Legendary
+  - Auto-unlock based on thresholds (e.g., ₡10k revenue, 100 appointments)
+  - Progress tracking with visual indicators
+  - Seeded achievements:
+    - Revenue: ₡10k, ₡50k, ₡100k, ₡500k
+    - Appointments: 10, 50, 100, 500, 1000
+    - Clients: 10, 50, 100 unique clients
+    - Streaks: 7, 14, 30 consecutive days
+    - Special: First appointment, first client
+
+- 🏆 **Challenges System**
+  - 4 challenge types: Revenue, Appointments, Clients, Team Total
+  - Time-bound competitions with start/end dates
+  - Leaderboard with real-time rankings
+  - Optional rewards (description + amount)
+  - Auto-enrollment of all active barbers
+  - Progress tracking per participant
+
+- 🔧 **Business Logic** (`src/lib/gamification/barber-gamification.ts`)
+  - Achievement progress calculation
+  - Tier color and badge helpers
+  - Leaderboard ranking calculation
+  - Challenge progress and time remaining
+  - Formatting utilities (currency, compact numbers)
+  - Validation functions
+
+- 🌐 **API Routes**
+  - `GET /api/gamification/barber/stats` - Get barber statistics
+  - `GET /api/gamification/barber/achievements` - Get achievements with progress
+  - `GET /api/gamification/barber/challenges` - Get active challenges
+  - `POST /api/gamification/barber/challenges` - Create new challenge (owner only)
+
+- 🎨 **UI Components**
+  - `AchievementCard` - Individual achievement with progress bar, icon, tier badge
+  - `ChallengeCard` - Challenge display with leaderboard, time remaining, rewards
+  - `AchievementsView` - Fetch and display achievements grouped by category
+  - `ChallengesView` - Fetch and display active challenges
+
+- 📱 **Pages**
+  - `/lealtad/logros-barberos` - Achievements page with progress summary
+  - `/lealtad/desafios` - Active challenges page with leaderboard
+
+- 📝 **TypeScript Types**
+  - Added 8 new interfaces to `src/types/database.ts`:
+    - `BarberStats`, `BarberAchievement`, `BarberEarnedAchievement`
+    - `BarberChallenge`, `BarberChallengeParticipant`, `BarberChallengeInsert`
+    - Type aliases: `AchievementCategory`, `AchievementTier`, `ChallengeType`
+
+**Files Created (11):**
+
+1. `supabase/migrations/018_barber_gamification.sql` (550+ lines)
+2. `src/lib/gamification/barber-gamification.ts` (380+ lines)
+3. `src/app/api/gamification/barber/stats/route.ts` (85 lines)
+4. `src/app/api/gamification/barber/achievements/route.ts` (120 lines)
+5. `src/app/api/gamification/barber/challenges/route.ts` (185 lines)
+6. `src/components/gamification/achievement-card.tsx` (150 lines)
+7. `src/components/gamification/challenge-card.tsx` (220 lines)
+8. `src/components/gamification/achievements-view.tsx` (180 lines)
+9. `src/components/gamification/challenges-view.tsx` (120 lines)
+10. `src/app/(dashboard)/lealtad/logros-barberos/page.tsx` (45 lines)
+11. `src/app/(dashboard)/lealtad/desafios/page.tsx` (45 lines)
+
+**Files Modified (1):**
+
+1. `src/types/database.ts` - Added barber gamification types
+
+**Total:** ~2,100 lines of new code
+
+**Key Features:**
+
+- ✅ 17 achievements across 5 categories (seeded in migration)
+- ✅ Automatic stats tracking (trigger on completed appointments)
+- ✅ Achievement auto-unlock (helper function checks conditions)
+- ✅ Challenge creation by business owners
+- ✅ Real-time leaderboards with rankings
+- ✅ Progress visualization with animated bars
+- ✅ Tier-based badge system (Bronze → Legendary)
+- ✅ Time-bound competitions with rewards
+- ✅ RLS policies for security (owners + barbers)
+
+**Next Steps:**
+
+1. **Apply migration in Supabase:**
+   - Run `018_barber_gamification.sql` in Supabase SQL Editor
+   - Verify all 5 tables created successfully
+   - Check 17 achievements seeded
+   - Confirm triggers and functions active
+
+2. **Testing Phase 2:**
+   - Navigate to `/lealtad/logros-barberos` - verify achievements display
+   - Navigate to `/lealtad/desafios` - verify challenges display
+   - Create test appointments and verify stats update
+   - Test achievement unlocking (reach thresholds)
+   - Create a challenge and verify leaderboard
+
+3. **Integration:**
+   - Add navigation links to sidebar for new pages
+   - Consider adding stats widget to barber dashboard
+   - Add achievement notifications (future enhancement)
+
+**Production Readiness:** Phase 2 MVP Complete ✅
+
+---
 
 ### 2026-02-01 - Session 45 (Loyalty System Integration)
 
