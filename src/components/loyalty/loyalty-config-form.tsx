@@ -221,8 +221,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
 
             {/* Points Configuration */}
             {(programType === 'points' || programType === 'hybrid') && (
-              <div className="space-y-4"
-
+              <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <Label htmlFor="points-currency" className="text-sm font-medium">
@@ -260,8 +259,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
 
             {/* Visits Configuration */}
             {(programType === 'visits' || programType === 'hybrid') && (
-              <div className="space-y-4"
-
+              <div className="space-y-4">
                 <div>
                   <Label htmlFor="free-service-visits" className="text-sm font-medium">
                     Visitas para servicio gratis
@@ -401,10 +399,10 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
             Guardar Cambios
           </Button>
         </div>
-      </div>
 
-      {/* Preview Button - Mobile only */}
-      <PreviewButtonMobile program={currentConfig} />
+        {/* Preview Button - Mobile only */}
+        <PreviewButtonMobile program={currentConfig} />
+      </div>
     </Card>
   )
 }
