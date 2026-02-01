@@ -34,14 +34,20 @@
 
 ### Key Files
 
-| File                                               | Purpose                                   |
-| -------------------------------------------------- | ----------------------------------------- |
-| `src/app/(public)/reservar/[slug]/page.tsx`        | Página principal de reservas              |
-| `src/components/loyalty/client-status-card.tsx`    | Card de status de loyalty                 |
-| `src/components/loyalty/loyalty-upsell-banner.tsx` | Banner upsell para usuarios no auth       |
-| `src/components/loyalty/loyalty-config-form.tsx`   | Formulario de configuración con templates |
-| `src/lib/gamification/loyalty-calculator.ts`       | Lógica de cálculo de puntos               |
-| `src/hooks/useBookingData.ts`                      | Hook para datos de reservas               |
+| File                                                 | Purpose                                      |
+| ---------------------------------------------------- | -------------------------------------------- |
+| `src/app/(public)/reservar/[slug]/page.tsx`          | Página principal de reservas                 |
+| `src/components/loyalty/client-status-card.tsx`      | Card de status de loyalty                    |
+| `src/components/loyalty/loyalty-upsell-banner.tsx`   | Banner upsell para usuarios no auth          |
+| `src/components/loyalty/loyalty-config-form.tsx`     | Form de config (Apple-style, single path)    |
+| `src/components/loyalty/program-type-selector.tsx`   | Type selector limpio (radio group iOS-style) |
+| `src/components/loyalty/collapsible-section.tsx`     | Progressive disclosure wrapper               |
+| `src/components/loyalty/preview-button-mobile.tsx`   | Floating preview button para mobile          |
+| `src/components/ui/sheet.tsx`                        | Modal component con Framer Motion            |
+| `src/components/ui/radio-group.tsx`                  | Radio selection component                    |
+| `src/lib/gamification/loyalty-calculator.ts`         | Lógica de cálculo de puntos                  |
+| `src/hooks/useBookingData.ts`                        | Hook para datos de reservas                  |
+| `src/app/(dashboard)/lealtad/configuracion/page.tsx` | Page con side-by-side layout                 |
 
 ---
 
@@ -55,6 +61,35 @@
 - ✅ Sistema de loyalty integrado
 
 ### Recent Fixes
+
+**Session 48 (2026-02-01 11:00 PM) - Apple-Style Mobile UX Redesign**
+
+- ✅ **Rediseño completo:** Loyalty config tab optimizado para mobile siguiendo principios de Apple 2026
+  - **Eliminado:** Sistema dual confuso (Quick Start presets vs Personalizar tabs)
+  - **Implementado:** Single path claro: Enable → Type Selection → Configuration → Save
+  - **Principios aplicados:** Clarity, Deference, Progressive Disclosure, Mobile-First
+  - **Componentes nuevos creados:**
+    - `src/components/ui/sheet.tsx` - Modal con animaciones Framer Motion
+    - `src/components/ui/radio-group.tsx` - Radio selection iOS-style (56px touch targets)
+    - `src/components/loyalty/program-type-selector.tsx` - Type selector limpio (sin gradientes)
+    - `src/components/loyalty/collapsible-section.tsx` - Progressive disclosure para opciones avanzadas
+    - `src/components/loyalty/preview-button-mobile.tsx` - Floating preview button (z-40)
+  - **Refactor mayor:** loyalty-config-form.tsx (~400 líneas eliminadas)
+    - Removido: PRESETS array, detectPresetFromProgram(), selectedPreset state
+    - Removido: Preset cards con gradientes y decoración
+    - Removido: Tabs component y TabsContent wrappers
+    - Reemplazado: Conditional rendering basado en programType
+  - **Layout actualizado:** page.tsx ahora tiene side-by-side en desktop (config 60% + preview 40%)
+  - **Stats mejorados:** Conditional rendering (oculta si todos = 0), empty state sugerente
+- ✅ **Resuelto:** JSX structure error causando build failure
+  - **Error:** Extra closing div tag en loyalty-config-form.tsx:404
+  - **Fix:** Removido div sobrante, estructura ahora balanceada correctamente
+  - **Verificación:** App builds successfully (HTTP 200)
+- ⏳ **Pendiente verificación visual:** Requiere autenticación para acceder a /lealtad/configuracion
+  - Trial banner en mobile
+  - Touch targets y responsive breakpoints
+  - Preview modal en mobile
+  - Side-by-side layout en desktop
 
 **Session 47 (2026-02-01 10:30 PM)**
 
@@ -108,20 +143,38 @@
 
 ### Continue With
 
-1. **Aplicar migraciones en producción** desde Supabase dashboard:
+1. **Verificar visualmente el rediseño de loyalty config (PRIORITARIO):**
+   - Autenticarse en el dashboard
+   - Navegar a /lealtad/configuracion
+   - Verificar en mobile (375px):
+     - Trial banner se ve bien
+     - Type selector tiene touch targets adecuados (56px)
+     - No hay horizontal scroll
+     - Botón "Ver Preview" flotante funciona
+     - Modal de preview se abre correctamente
+     - "Opciones Avanzadas" colapsa/expande suavemente
+   - Verificar en desktop (1280px+):
+     - Layout side-by-side (config left, preview right sticky)
+     - Preview actualiza con debounce (500ms)
+     - Smooth animations en collapsible section
+2. **Si todo se ve bien, considerar merge a main:**
+   - Branch: feature/loyalty-config-apple-redesign
+   - 5 commits ready
+   - Crear PR con descripción del redesign
+3. **Aplicar migraciones en producción** desde Supabase dashboard:
    - 015_fix_notification_trigger.sql
    - 016_fix_loyalty_programs_rls.sql
    - 017_allow_public_read_loyalty_programs.sql
-2. **Probar sistema de loyalty end-to-end:**
+4. **Probar sistema de loyalty end-to-end:**
    - Usuario no autenticado ve banner en booking flow ✅
    - Crear reserva como usuario autenticado
    - Verificar que se otorguen puntos correctamente
    - Verificar notificaciones de puntos y tier upgrades
-3. **Implementar flujos de autenticación:**
+5. **Implementar flujos de autenticación:**
    - Sign up desde banner de loyalty
    - Sign in desde banner de loyalty
    - Vincular reserva con cuenta nueva
-4. Verificar referral system y rewards redemption
+6. Verificar referral system y rewards redemption
 
 ### Commands to Run
 
