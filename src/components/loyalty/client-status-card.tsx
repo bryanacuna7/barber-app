@@ -19,7 +19,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Star, Gift, Users, Share2, QrCode, TrendingUp, Sparkles } from 'lucide-react'
-import { toast } from 'sonner'
+import { useToast } from '@/components/ui/toast'
 import type { ClientLoyaltyStatus, LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 import { getPointsToNextTier } from '@/lib/gamification/loyalty-calculator'
 
@@ -53,6 +53,7 @@ const TIER_CONFIG = {
 }
 
 export function ClientStatusCard({ status, program, businessName }: Props) {
+  const toast = useToast()
   const tierConfig = TIER_CONFIG[status.currentTier]
   const { nextTier, pointsNeeded } = getPointsToNextTier(status.lifetimePoints)
 

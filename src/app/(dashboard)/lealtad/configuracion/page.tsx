@@ -17,13 +17,14 @@ import { LoyaltyConfigForm } from '@/components/loyalty/loyalty-config-form'
 import { LoyaltyPreview } from '@/components/loyalty/loyalty-preview'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
+import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 
 export const metadata = {
   title: 'Configuración de Lealtad | BarberShop Pro',
   description: 'Configura tu programa de lealtad para recompensar a tus clientes',
 }
 
-async function getLoyaltyProgram(businessId: string) {
+async function getLoyaltyProgram(businessId: string): Promise<LoyaltyProgram | null> {
   const supabase = await createClient()
 
   const { data } = await supabase
@@ -32,7 +33,25 @@ async function getLoyaltyProgram(businessId: string) {
     .eq('business_id', businessId)
     .single()
 
-  return data
+  if (!data) return null
+
+  // Transform snake_case from DB to camelCase for component
+  return {
+    id: data.id,
+    businessId: data.business_id,
+    enabled: data.enabled,
+    programType: data.program_type,
+    pointsPerCurrencyUnit: data.points_per_currency_unit,
+    pointsExpiryDays: data.points_expiry_days,
+    freeServiceAfterVisits: data.free_service_after_visits,
+    discountAfterVisits: data.discount_after_visits,
+    discountPercentage: data.discount_percentage,
+    referralRewardType: data.referral_reward_type,
+    referralRewardAmount: data.referral_reward_amount,
+    refereeRewardAmount: data.referee_reward_amount,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
 }
 
 async function getLoyaltyStats(businessId: string) {

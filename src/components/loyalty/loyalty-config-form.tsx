@@ -11,7 +11,7 @@
  * - Real-time validation
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -40,7 +40,7 @@ import {
   Layers3,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { toast } from 'sonner'
+import { useToast } from '@/components/ui/toast'
 import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 
 interface Props {
@@ -108,10 +108,79 @@ const PRESETS = [
   },
 ]
 
+// Helper function to detect which preset matches the current configuration
+function detectPresetFromProgram(program: LoyaltyProgram | null): string | null {
+  if (!program) return null
+
+  // Check each preset for exact match
+  for (const preset of PRESETS) {
+    let matches = true
+
+    // Check program type
+    if (preset.config.program_type !== program.programType) {
+      matches = false
+      continue
+    }
+
+    // Check specific fields based on preset config
+    if ('points_per_currency_unit' in preset.config) {
+      if (preset.config.points_per_currency_unit !== program.pointsPerCurrencyUnit) {
+        matches = false
+        continue
+      }
+    }
+
+    if ('free_service_after_visits' in preset.config) {
+      if (preset.config.free_service_after_visits !== program.freeServiceAfterVisits) {
+        matches = false
+        continue
+      }
+    }
+
+    if ('discount_percentage' in preset.config) {
+      if (preset.config.discount_percentage !== program.discountPercentage) {
+        matches = false
+        continue
+      }
+    }
+
+    if ('referral_reward_type' in preset.config) {
+      if (preset.config.referral_reward_type !== program.referralRewardType) {
+        matches = false
+        continue
+      }
+    }
+
+    if ('referral_reward_amount' in preset.config) {
+      if (preset.config.referral_reward_amount !== program.referralRewardAmount) {
+        matches = false
+        continue
+      }
+    }
+
+    if ('referee_reward_amount' in preset.config) {
+      if (preset.config.referee_reward_amount !== program.refereeRewardAmount) {
+        matches = false
+        continue
+      }
+    }
+
+    // If all fields match, this is the preset
+    if (matches) {
+      return preset.id
+    }
+  }
+
+  return null
+}
+
 export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
+  const toast = useToast()
   const [enabled, setEnabled] = useState(initialProgram?.enabled ?? false)
   const [programType, setProgramType] = useState<string>(initialProgram?.programType || 'points')
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(
+    detectPresetFromProgram(initialProgram)
+  )
   const [saving, setSaving] = useState(false)
 
   // Form state
@@ -139,6 +208,12 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   const [refereeRewardAmount, setRefereeRewardAmount] = useState(
     initialProgram?.refereeRewardAmount?.toString() || '25'
   )
+
+  // Update selected preset when initialProgram changes
+  useEffect(() => {
+    const detectedPreset = detectPresetFromProgram(initialProgram)
+    setSelectedPreset(detectedPreset)
+  }, [initialProgram])
 
   const handlePresetSelect = (presetId: string) => {
     const preset = PRESETS.find((p) => p.id === presetId)
@@ -212,15 +287,17 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
       // Upsert loyalty program
       // Note: loyalty_programs table created in migration 014_loyalty_system.sql
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).from('loyalty_programs').upsert(payload, {
-        onConflict: 'business_id',
-      })
+      const { data, error } = await (supabase as any)
+        .from('loyalty_programs')
+        .upsert(payload, { onConflict: 'business_id' })
+        .select()
+        .single()
 
       if (error) throw error
 
       toast.success('Configuración guardada')
     } catch (error) {
-      console.error('Failed to save loyalty program:', error)
+      console.error('Error saving loyalty configuration:', error)
       toast.error('Error al guardar configuración')
     } finally {
       setSaving(false)

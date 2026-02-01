@@ -13,6 +13,7 @@ import { BarberSelection } from '@/components/reservar/BarberSelection'
 import { DateTimeSelection } from '@/components/reservar/DateTimeSelection'
 import { ClientInfoForm } from '@/components/reservar/ClientInfoForm'
 import { ClientStatusCard, ClientStatusCardSkeleton } from '@/components/loyalty/client-status-card'
+import { LoyaltyUpsellBanner } from '@/components/loyalty/loyalty-upsell-banner'
 import { createClient } from '@/lib/supabase/client'
 import type { ClientLoyaltyStatus, LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 import {
@@ -62,6 +63,7 @@ export default function BookingPage() {
   const [loyaltyStatus, setLoyaltyStatus] = useState<ClientLoyaltyStatus | null>(null)
   const [loyaltyProgram, setLoyaltyProgram] = useState<LoyaltyProgram | null>(null)
   const [loadingLoyalty, setLoadingLoyalty] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Load loyalty status for authenticated user
   useEffect(() => {
@@ -76,21 +78,38 @@ export default function BookingPage() {
           data: { user },
         } = await supabase.auth.getUser()
 
-        if (!user) {
-          setLoadingLoyalty(false)
-          return
-        }
+        setIsAuthenticated(!!user)
 
-        // Get loyalty program
+        // Always get loyalty program (regardless of auth status)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: program } = await (supabase as any)
           .from('loyalty_programs')
           .select('*')
           .eq('business_id', business.id)
-          .eq('is_active', true)
+          .eq('enabled', true)
           .single()
 
-        if (!program) {
+        if (program) {
+          setLoyaltyProgram({
+            id: program.id,
+            businessId: program.business_id,
+            enabled: program.enabled,
+            programType: program.program_type,
+            pointsPerCurrencyUnit: program.points_per_currency_unit,
+            pointsExpiryDays: program.points_expiry_days,
+            freeServiceAfterVisits: program.free_service_after_visits,
+            discountAfterVisits: program.discount_after_visits,
+            discountPercentage: program.discount_percentage,
+            referralRewardType: program.referral_reward_type,
+            referralRewardAmount: program.referral_reward_amount,
+            refereeRewardAmount: program.referee_reward_amount,
+            createdAt: program.created_at,
+            updatedAt: program.updated_at,
+          })
+        }
+
+        // Only get client status if user is authenticated
+        if (!user) {
           setLoadingLoyalty(false)
           return
         }
@@ -104,29 +123,22 @@ export default function BookingPage() {
           .eq('business_id', business.id)
           .single()
 
-        if (status && program) {
+        if (status) {
           setLoyaltyStatus({
+            id: status.id,
             clientId: status.client_id,
             businessId: status.business_id,
+            userId: status.user_id,
             pointsBalance: status.points_balance,
             lifetimePoints: status.lifetime_points,
             visitCount: status.visit_count,
             currentTier: status.current_tier || 'bronze',
             referralCode: status.referral_code,
             createdAt: status.created_at,
+            updatedAt: status.updated_at,
             lastPointsEarnedAt: status.last_points_earned_at,
-          })
-
-          setLoyaltyProgram({
-            id: program.id,
-            businessId: program.business_id,
-            programType: program.program_type,
-            pointsPerVisit: program.points_per_visit,
-            pointsPerDollar: program.points_per_dollar,
-            freeServiceAfterVisits: program.free_service_after_visits,
-            referralRewardType: program.referral_reward_type,
-            referralRewardAmount: program.referral_reward_amount,
-            isActive: program.is_active,
+            lastRewardRedeemedAt: status.last_reward_redeemed_at,
+            referredByClientId: status.referred_by_client_id,
           })
         }
       } catch (error) {
@@ -245,6 +257,29 @@ export default function BookingPage() {
         {loadingLoyalty && (
           <div className="mb-5">
             <ClientStatusCardSkeleton />
+          </div>
+        )}
+
+        {/* Loyalty Upsell Banner - Shows if user is NOT authenticated and there's an active program */}
+        {!loadingLoyalty && !isAuthenticated && loyaltyProgram && business && (
+          <div className="mb-5">
+            <LoyaltyUpsellBanner
+              program={loyaltyProgram}
+              businessName={business.name}
+              estimatedPoints={
+                booking.service
+                  ? Math.floor(booking.service.price * loyaltyProgram.pointsPerCurrencyUnit)
+                  : 0
+              }
+              onCreateAccount={() => {
+                // TODO: Implement account creation flow
+                window.location.href = '/auth/signup'
+              }}
+              onSignIn={() => {
+                // TODO: Implement sign in flow
+                window.location.href = '/auth/login'
+              }}
+            />
           </div>
         )}
 

@@ -22,13 +22,13 @@
  */
 
 import { useState } from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Gift, Sparkles, Users, TrendingUp, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { toast } from 'sonner'
+import { useToast } from '@/components/ui/toast'
 
 interface Props {
   isOpen: boolean
@@ -47,6 +47,7 @@ export function ClientAccountModal({
   clientId,
   prefillEmail = '',
 }: Props) {
+  const toast = useToast()
   const [email, setEmail] = useState(prefillEmail)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -243,7 +244,7 @@ export function ClientAccountModal({
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10">
             <Gift className="h-6 w-6 text-primary" />
           </div>
-          <h2 className="mt-4 text-xl font-bold">¡Empieza a ganar puntos!</h2>
+          <DialogTitle className="mt-4 text-xl font-bold">¡Empieza a ganar puntos!</DialogTitle>
           <p className="mt-2 text-sm text-muted-foreground">
             <span className="font-medium text-foreground">{businessName}</span> tiene programa de
             recompensas

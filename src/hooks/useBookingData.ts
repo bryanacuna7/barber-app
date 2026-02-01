@@ -140,27 +140,43 @@ export function useBookingData(slug: string) {
       return
     }
 
+    // Validate barber_id exists
+    const selectedBarberId = booking.barber?.id || barbers[0]?.id
+    if (!selectedBarberId) {
+      setError('No se pudo asignar un barbero para esta cita. Contacta a la barbería.')
+      return
+    }
+
     setSubmitting(true)
     setError('')
 
     try {
+      const bookingPayload = {
+        service_id: booking.service.id,
+        barber_id: selectedBarberId,
+        scheduled_at: booking.time.datetime,
+        client_name: booking.clientName,
+        client_phone: booking.clientPhone,
+        client_email: booking.clientEmail || undefined,
+        notes: booking.notes || undefined,
+      }
+
+      console.log('[Booking] Sending payload:', bookingPayload)
+      console.log(
+        '[Booking] Available barbers:',
+        barbers.map((b) => ({ id: b.id, name: b.name }))
+      )
+
       const res = await fetch(`/api/public/${slug}/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: booking.service.id,
-          barber_id: booking.barber?.id || barbers[0]?.id, // Fallback to first barber if none selected
-          scheduled_at: booking.time.datetime,
-          client_name: booking.clientName,
-          client_phone: booking.clientPhone,
-          client_email: booking.clientEmail || undefined,
-          notes: booking.notes || undefined,
-        }),
+        body: JSON.stringify(bookingPayload),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
+        console.error('[Booking] API error:', data)
         setError(data.error || 'Error al reservar la cita')
         return
       }

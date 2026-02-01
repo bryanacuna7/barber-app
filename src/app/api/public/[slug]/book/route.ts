@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { processAppointmentLoyalty } from '@/lib/gamification/loyalty-calculator-server'
 
 const bookingSchema = z.object({
   service_id: z.string().uuid(),
@@ -61,6 +62,19 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: 'Service not found' }, { status: 404 })
   }
 
+  // Validate barber exists and belongs to business
+  const { data: barber, error: barberError } = await supabase
+    .from('barbers')
+    .select('id')
+    .eq('id', barber_id)
+    .eq('business_id', business.id)
+    .eq('is_active', true)
+    .single()
+
+  if (barberError || !barber) {
+    return NextResponse.json({ error: 'Barber not found or inactive' }, { status: 404 })
+  }
+
   // Find or create client
   let client
   const { data: existingClient } = await supabase
@@ -108,8 +122,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     .single()
 
   if (appointmentError) {
-    return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 })
+    console.error('[Book API] Appointment creation error:', appointmentError)
+    return NextResponse.json(
+      {
+        error: 'Failed to create appointment',
+        details: appointmentError.message || 'Unknown error',
+      },
+      { status: 500 }
+    )
   }
+
+  // Process loyalty points and rewards
+  // Note: This runs asynchronously and doesn't block the booking response
+  // If it fails, the booking is still successful
+  processAppointmentLoyalty(appointment.id, client.id, business.id, service.price).catch(
+    (error) => {
+      console.error('[Book API] Loyalty processing error:', error)
+      // Log error but don't fail the booking
+    }
+  )
 
   return NextResponse.json({
     success: true,

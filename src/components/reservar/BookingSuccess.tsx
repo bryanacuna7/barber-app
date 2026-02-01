@@ -42,7 +42,7 @@ export function BookingSuccess({
           .from('loyalty_programs')
           .select('id')
           .eq('business_id', business.id)
-          .eq('is_active', true)
+          .eq('enabled', true)
           .single()
 
         if (!error && data) {

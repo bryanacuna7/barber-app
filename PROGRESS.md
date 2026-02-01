@@ -6,11 +6,9 @@
 ## Project Info
 
 - **Name:** BarberShop Pro
-- **Stack:** Next.js 16, React 19, TypeScript, Supabase, Tailwind CSS v4, Framer Motion, Recharts, Resend, React Query
-- **Last Updated:** 2026-01-30 (Session 44 - Loyalty Booking Integration)
-- **Last Commit:** (pending) - feat(loyalty): integrate loyalty system into booking flow
-- **Current Branch:** `feature/gamification-system`
-- **Dev Server:** Running (port 3000)
+- **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
+- **Database:** PostgreSQL (Supabase)
+- **Last Updated:** 2026-02-01 8:45 AM
 
 ---
 
@@ -18,92 +16,32 @@
 
 ### Completed Features
 
-- [x] Autenticación completa (login, register, logout)
-- [x] Sistema de citas con calendario
-- [x] Gestión de clientes y barberos
-- [x] Catálogo de servicios
-- [x] Dashboard con estadísticas
-- [x] Sistema de suscripción (Stripe)
-- [x] Tour guide interactivo
-- [x] Mobile UX premium con glassmorphism
-- [x] **Phase 1 - Client Loyalty System (MVP)** 🎮
-  - Loyalty configuration page (4 presets: Punch Card, Points, VIP, Referral)
-  - Client account modal & status card
-  - Loyalty calculator engine
-  - Database migration complete
-  - **Premium design with gradients (inline styles)**
-  - **Dark mode borders matching dashboard**
-  - **Booking flow integration complete**
-    - ClientAccountModal shows after successful booking
-    - ClientStatusCard shows for authenticated users with loyalty
-    - API returns client_id for modal signup
+- [x] Sistema de reservas online público (/reservar/[slug])
+- [x] Dashboard administrativo para barberías
+- [x] Sistema de gamificación y loyalty
+  - Puntos por visitas
+  - Tiers (Bronze, Silver, Gold, Platinum)
+  - Códigos de referidos
+  - Recompensas y descuentos
+- [x] Integración de loyalty en booking flow
+- [x] PWA y branding personalizable
+- [x] Notificaciones automáticas
 
 ### In Progress
 
-- [ ] Manual testing and refinement
+- [ ] Debugging: Banner de loyalty no aparece para usuarios no autenticados
+- [ ] Aplicar migración 015_fix_notification_trigger.sql manualmente en Supabase dashboard
 
 ### Key Files
 
-| File                                              | Purpose                                                      |
-| ------------------------------------------------- | ------------------------------------------------------------ |
-| `src/components/loyalty/loyalty-config-form.tsx`  | Loyalty configuration with 4 presets (gradients fixed)       |
-| `src/components/loyalty/client-account-modal.tsx` | Client signup modal (integrated in BookingSuccess)           |
-| `src/components/loyalty/client-status-card.tsx`   | Shows client loyalty status (in booking page when logged in) |
-| `src/lib/gamification/loyalty-calculator.ts`      | Points/rewards calculation engine                            |
-| `src/app/api/public/[slug]/book/route.ts`         | Booking API (returns client_id for loyalty signup)           |
-| `src/hooks/useBookingData.ts`                     | Booking state management (captures client_id)                |
-| `src/app/(public)/reservar/[slug]/page.tsx`       | Booking page (shows ClientStatusCard if authenticated)       |
-| `src/components/reservar/BookingSuccess.tsx`      | Success screen (triggers ClientAccountModal)                 |
-| `src/components/pwa/service-worker-register.tsx`  | SW disabled in dev mode                                      |
-| `.claude/DESIGN_STANDARDS.md`                     | Mandatory design patterns (updated with gradient guidelines) |
-
----
-
-## Session 43 Summary (2026-01-31)
-
-### 🐛 Problems Fixed
-
-**Critical Issues:**
-
-1. ❌ Tailwind v4 not generating dynamic gradient classes
-2. ❌ White borders in dark mode (inconsistent with dashboard)
-3. ❌ Service worker caching old code in dev
-4. ❌ Turbopack cache corruption causing build errors
-
-### ✅ Solutions Applied
-
-1. **Gradients:** Changed from Tailwind classes → inline styles
-
-   ```tsx
-   style={{
-     background: 'linear-gradient(to bottom right, rgb(16, 185, 129), rgb(20, 184, 166))',
-     boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.25)'
-   }}
-   ```
-
-2. **Borders:** Updated to match dashboard standard
-   - Changed: `border-border/50` → `border-zinc-200 dark:border-zinc-800`
-   - Consistent with StatsCard and entire app
-
-3. **Service Worker:** Disabled in development
-   - Only registers in production (`NODE_ENV === 'production'`)
-   - Auto-unregisters existing SWs in dev mode
-
-4. **Cache:** Cleared Turbopack and .next directories
-
-### 📝 Documentation Updated
-
-- Updated `.claude/DESIGN_STANDARDS.md`:
-  - ✅ Correct border pattern: `border-zinc-200 dark:border-zinc-800`
-  - ❌ Wrong pattern: `border-border/50` (undefined in dark mode)
-  - Added gradient guidelines (use inline styles for dynamic gradients)
-
-### 🎯 Result
-
-- ✅ Premium gradients working (emerald, amber, purple, blue)
-- ✅ Dark mode borders match entire dashboard
-- ✅ No more cache issues during development
-- ✅ Loyalty section visually consistent with app
+| File                                               | Purpose                                   |
+| -------------------------------------------------- | ----------------------------------------- |
+| `src/app/(public)/reservar/[slug]/page.tsx`        | Página principal de reservas              |
+| `src/components/loyalty/client-status-card.tsx`    | Card de status de loyalty                 |
+| `src/components/loyalty/loyalty-upsell-banner.tsx` | Banner upsell para usuarios no auth       |
+| `src/components/loyalty/loyalty-config-form.tsx`   | Formulario de configuración con templates |
+| `src/lib/gamification/loyalty-calculator.ts`       | Lógica de cálculo de puntos               |
+| `src/hooks/useBookingData.ts`                      | Hook para datos de reservas               |
 
 ---
 
@@ -111,18 +49,39 @@
 
 ### Working
 
-- ✅ Loyalty configuration page with 4 preset templates
-- ✅ Premium design with gradients and colored shadows
-- ✅ Dark mode fully functional
-- ✅ Service worker only in production
-- ✅ **Loyalty booking integration complete**
-- ✅ ClientAccountModal triggers after booking
-- ✅ ClientStatusCard shows for authenticated users
+- ✅ App funcionando correctamente en http://localhost:3000
+- ✅ Sistema de reservas operativo
+- ✅ Dashboard administrativo funcional
+- ✅ Sistema de loyalty integrado
 
-### Issues/Blockers
+### Recent Fixes
 
-- ⚠️ Cache corruption encountered (cleared)
-- Need manual testing of complete booking → signup → status flow
+**Session 46 (2026-02-01 8:45 AM)**
+
+- ✅ **Resuelto:** Caché corrupto de Next.js causando errores intermitentes
+  - **Solución:** Limpieza completa de `.next` y `node_modules/.cache`
+  - **Prevención:** Script de limpieza implementado
+- ✅ **Resuelto:** Banner de loyalty no visible para usuarios no autenticados durante reserva
+  - **Implementado:** Componente `LoyaltyUpsellBanner` con beneficios y CTA
+  - **Ubicación:** Se muestra en booking flow antes de completar reserva
+- ✅ **Resuelto:** Template de loyalty no se mostraba seleccionado al regresar a config
+  - **Causa raíz:** Datos de DB en snake_case no se transformaban a camelCase
+  - **Solución:** Transformación explícita en `getLoyaltyProgram()`
+  - **Ubicación:** `src/app/(dashboard)/lealtad/configuracion/page.tsx`
+
+**Session 44 (Previous)**
+
+- ⚠️ **IMPORTANTE:** Downgrade de Next.js 16 → 15 por bug crítico en Turbopack
+  - **Problema:** Loop infinito de compilación, servidor no respondía
+  - **Solución:** `npm install next@15 react@19 react-dom@19`
+  - **Status:** ✅ Resuelto - app funciona perfectamente
+- ✅ Limpieza de caché corrupto (.next)
+- ✅ Servidor estable sin timeouts
+
+### Known Issues
+
+- ⚠️ No actualizar a Next.js 16 hasta que Turbopack esté más estable (esperar 16.2+)
+- ⚠️ Migración 015_fix_notification_trigger.sql pendiente de aplicar en producción
 
 ---
 
@@ -130,202 +89,65 @@
 
 ### Continue With
 
-1. **Option A (Recommended):** Manual Testing & Refinement (~30 min)
-   - Test complete booking → signup → points flow
-   - Verify ClientStatusCard displays correctly
-   - Test modal dismissal and re-trigger logic
-   - Commit changes when verified
-
-2. **Option B:** Phase 2 - Barber Gamification (1-2 weeks)
-   - Achievement system (badges, milestones)
-   - Leaderboard (revenue, clients, ratings)
-   - Barber dashboard with stats
-
-3. **Option C:** Admin Loyalty Dashboard (~2-3 hours)
-   - View all client loyalty statuses
-   - Manual points adjustment
-   - Analytics and insights
-
-4. **Option D:** Pre-Production Polish (Phase 7)
-   - Visual testing across all viewports
-   - Performance audit (Lighthouse)
-   - Security review
+1. Probar el sistema de loyalty end-to-end en staging/producción
+   - Crear reserva como usuario autenticado
+   - Verificar que se otorguen puntos correctamente
+   - Verificar notificaciones de puntos y tier upgrades
+2. Aplicar migración 015 manualmente desde Supabase dashboard
+3. Verificar referral system y rewards redemption
+4. Optimización de performance del loyalty system si es necesario
 
 ### Commands to Run
 
 ```bash
-npm run dev  # Dev server should auto-start
+npm run dev  # Servidor en http://localhost:3000
 ```
 
 ### Context Notes
 
-**IMPORTANT - Lessons Learned:**
-
-- **Tailwind v4 JIT:** Dynamic gradient classes don't generate reliably → use inline styles
-- **Dark Mode Borders:** Always use `border-zinc-200 dark:border-zinc-800` (not `border-border/50`)
-- **Service Worker:** Disabled in dev to prevent cache issues
-- **Design Consistency:** All patterns documented in `.claude/DESIGN_STANDARDS.md`
-
-**Commits This Session:**
-
-- `98cd309` - fix(loyalty): resolve premium design issues (Session 43)
-- `195f86d` - feat(loyalty): apply premium design to template cards
-- `519afba` - fix(loyalty): remove thick borders
+- **Next.js Version:** Mantenerse en 15.x (no actualizar a 16 por ahora)
+- **Loyalty System:** Integrado en booking flow, requiere usuario autenticado para mostrar
+- **Database:** Supabase configurado correctamente
+- **Dev Server:** Funciona sin problemas después del downgrade
 
 ---
 
 ## Session History
 
-### Session 44 (2026-01-30) - Loyalty Booking Integration ✅
+### 2026-02-01 - Session 45 (Loyalty System Integration)
 
-**Duration:** ~45 min | **Agents:** @fullstack-developer | **Commits:** 0 (pending)
+- **Implementado:** Activación automática del sistema de loyalty después de crear cita
+- **Archivos modificados:**
+  - `src/lib/gamification/loyalty-calculator-server.ts` - Nueva función `processAppointmentLoyalty()`
+  - `src/app/api/public/[slug]/book/route.ts` - Integración automática de loyalty
+- **Características implementadas:**
+  - ✅ Cálculo automático de puntos basado en precio del servicio
+  - ✅ Incremento automático de visit_count
+  - ✅ Actualización automática de tier (Bronze → Silver → Gold → Platinum)
+  - ✅ Creación de loyalty_transaction por cada appointment
+  - ✅ Notificaciones automáticas para tier upgrades y puntos ganados
+  - ✅ Sistema resiliente - loyalty no bloquea booking si falla
+- **Flujo implementado:** Reserva → Crear appointment → Procesar loyalty → Otorgar puntos → Actualizar tier → Notificar cliente
+- **Bug resuelto:** Caché corrupto de Next.js causando Internal Server Error
 
-**Goal:** Integrate loyalty system into complete booking user journey
+### 2026-01-30 - Session 44 (Debugging Critical)
 
-**What Was Done:**
+- **Resuelto:** Bug crítico de Turbopack en Next.js 16 causando loop infinito
+- **Solución:** Downgrade a Next.js 15 para estabilidad
+- **Aprendizaje:** Turbopack en Next.js 16.1.4 tiene bugs de caché corrupto
+- **Decisión:** Permanecer en Next.js 15 hasta versión más estable
+- **Issue Identificado:** Loyalty no se activa automáticamente después de completar reserva
 
-1. **API Enhancement** - Modified `/api/public/[slug]/book` to return:
-   - `client_id` - needed for loyalty modal signup
-   - `client_email` - to prefill modal form
+### 2026-01-30 - Session 43
 
-2. **Hook Update** - Enhanced `useBookingData` hook:
-   - Added `createdClientId` state
-   - Captures client_id from booking response
-   - Returns it for use in success screen
+- Integración completa del sistema de loyalty en booking flow
+- Mejoras de UX móvil y type safety
+- Resolución de issues de diseño premium
 
-3. **BookingSuccess Modal Integration**:
-   - Added logic to check if business has active loyalty program
-   - Shows `ClientAccountModal` 2 seconds after success
-   - Respects 30-day dismissal preference (localStorage)
-   - Pre-fills email if provided during booking
-
-4. **ClientStatusCard in Booking Flow**:
-   - Added to booking page for authenticated users
-   - Loads loyalty status and program data
-   - Shows points, progress, tier, referral code
-   - Only visible when user is logged in with loyalty status
-
-**Files Modified:**
-
-- `src/app/api/public/[slug]/book/route.ts` (return client_id)
-- `src/hooks/useBookingData.ts` (capture client_id)
-- `src/app/(public)/reservar/[slug]/page.tsx` (show ClientStatusCard)
-- `src/components/reservar/BookingSuccess.tsx` (integrate modal)
-
-**Complete User Journey:**
+### Commits Recientes
 
 ```
-1. Client books appointment
-2. BookingSuccess screen shows
-3. (2s delay)
-4. ClientAccountModal appears if:
-   - Business has loyalty program
-   - Not dismissed in last 30 days
-5. Client creates account/logs in
-6. client.user_id linked
-7. loyalty_status created
-8. Next booking: ClientStatusCard visible
+d4d673e ✨ feat(loyalty): integrate loyalty system into booking flow
+e79b14d ♻️ refactor(loyalty): enhance type safety and mobile UX
+f46ae09 📝 docs: streamline PROGRESS.md documentation
 ```
-
-**Status:** ✅ Integration complete, ready for manual testing
-
----
-
-### Session 43 (2026-01-31) - Loyalty Premium Design Fix ✅
-
-**Duration:** ~90 min | **Agents:** @debugger + @fullstack-developer | **Commits:** 3
-
-**Problem:** Loyalty templates had flat design with white borders in dark mode, didn't match premium dashboard look.
-
-**Root Causes:**
-
-1. Tailwind v4 not generating dynamic gradient classes
-2. Using `border-border/50` instead of `border-zinc-200 dark:border-zinc-800`
-3. Service worker caching old code
-4. Turbopack cache corruption
-
-**Solutions:**
-
-- Switched to inline styles for gradients (reliable)
-- Updated borders to match dashboard standard
-- Disabled SW in dev, added auto-unregister
-- Cleaned all caches, restarted server
-
-**Files Modified:**
-
-- `src/components/loyalty/loyalty-config-form.tsx` (gradients + borders)
-- `src/components/pwa/service-worker-register.tsx` (dev mode disabled)
-- `src/components/dashboard/bottom-nav.tsx` (add loyalty to more pages)
-- `.claude/DESIGN_STANDARDS.md` (updated guidelines)
-
-**Status:** ✅ Premium design working, dark mode consistent, no cache issues
-
----
-
-### Session 42 (2026-01-31) - Critical Viewport Fix ✅
-
-**Duration:** ~20 min | **Commits:** 1
-
-**Problem:** All dashboard pages showing 367px width instead of 375px on mobile.
-
-**Root Cause:** Custom scrollbar (8px width) occupying layout space.
-
-**Solution:** Hide scrollbar on mobile with media queries:
-
-```css
-@media (max-width: 1023px) {
-  ::-webkit-scrollbar {
-    display: none;
-  }
-}
-```
-
-**Status:** ✅ Full 375px viewport on mobile, no horizontal scroll
-
----
-
-### Session 41 (2026-01-30) - Loyalty Design Consistency ✅
-
-**Duration:** ~45 min | **Commits:** 3
-
-**Problem:** Loyalty cards had inconsistent styling vs rest of app, poor mobile UX.
-
-**Solution:**
-
-- Mobile-first horizontal scroll for templates
-- Consistent spacing, colors, borders
-- Created `.claude/DESIGN_STANDARDS.md` (245 lines)
-
-**Status:** ✅ Loyalty section visually consistent, design standards documented
-
----
-
-### Session 40 (2026-01-30) - Phase 1 Loyalty MVP Complete ✅
-
-**Duration:** ~4 hours | **Commits:** 1
-
-**Completed:**
-
-- Database migration (loyalty_programs, client_loyalty_status, loyalty_transactions)
-- 4 preset templates seeded
-- Configuration page with Quick Start
-- Client account modal & status card
-- Loyalty calculator engine
-- Preview system
-
-**Status:** ✅ Phase 1 complete, ready for integration
-
----
-
-### Session 39 (2026-01-29) - Mobile UX Refinements Complete ✅
-
-**Duration:** ~3 hours | **Commits:** 1
-
-**Completed:**
-
-- Glassmorphism mobile nav
-- iOS-style swipe buttons
-- UI text sizing standardization (15px)
-- Responsive improvements across all pages
-
-**Status:** ✅ Mobile UX polished and premium
