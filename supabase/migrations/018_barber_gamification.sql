@@ -369,8 +369,8 @@ COMMENT ON TABLE barber_achievements IS 'Seeded with 17 default achievements acr
 -- Function: Check and award achievements for a barber
 CREATE OR REPLACE FUNCTION check_barber_achievements(p_barber_id UUID)
 RETURNS TABLE (
-  achievement_id UUID,
-  achievement_name TEXT,
+  awarded_achievement_id UUID,
+  awarded_achievement_name TEXT,
   newly_earned BOOLEAN
 ) AS $$
 DECLARE
@@ -391,10 +391,10 @@ BEGIN
   FOR v_achievement IN
     SELECT * FROM barber_achievements WHERE is_active = true
   LOOP
-    -- Check if already earned
+    -- Check if already earned (using table alias to avoid ambiguity)
     SELECT EXISTS (
-      SELECT 1 FROM barber_earned_achievements
-      WHERE barber_id = p_barber_id AND achievement_id = v_achievement.id
+      SELECT 1 FROM barber_earned_achievements bea
+      WHERE bea.barber_id = p_barber_id AND bea.achievement_id = v_achievement.id
     ) INTO v_already_earned;
 
     -- Skip if already earned
