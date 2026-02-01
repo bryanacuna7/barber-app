@@ -51,10 +51,10 @@ export function RadioGroupItem({ value, id, className = '', children }: RadioGro
       aria-checked={isSelected}
       id={itemId}
       onClick={() => context.onValueChange(value)}
-      className={`flex w-full items-center gap-3 rounded-lg bg-zinc-50 p-3 text-left transition-all min-h-[56px] dark:bg-zinc-900 ${
+      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-all min-h-[56px] ${
         isSelected
-          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-          : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
+          ? 'bg-primary/5 dark:bg-primary/10'
+          : 'bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800'
       } ${className}`}
     >
       {/* Radio indicator */}
