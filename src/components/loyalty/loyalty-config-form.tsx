@@ -150,38 +150,27 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   }
 
   return (
-    <Card className="overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm">
-      <div className="w-full space-y-3 overflow-x-hidden p-3 sm:space-y-4 sm:p-5 lg:space-y-6 lg:p-6">
+    <Card variant="default">
+      <div className="space-y-5 sm:space-y-6">
         {/* Header with Toggle */}
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold lg:text-lg">Configuración</h2>
-            <p className="truncate text-xs lg:text-sm">
+            <h2 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              Configuración
+            </h2>
+            <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
               {enabled ? (
                 <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                  ✓ Programa activo - los clientes acumularán puntos
+                  ✓ Programa activo
                 </span>
               ) : (
-                <span className="font-medium text-zinc-500 dark:text-zinc-400">
-                  ○ Programa desactivado - actívalo para comenzar
-                </span>
+                <span>○ Desactivado</span>
               )}
             </p>
           </div>
-          <div className="flex flex-shrink-0 items-center gap-3">
-            <Label
-              htmlFor="enabled-toggle"
-              className="hidden text-sm font-semibold sm:inline-block"
-            >
-              {enabled ? (
-                <span className="text-emerald-600 dark:text-emerald-400">Activado</span>
-              ) : (
-                <span className="text-zinc-500">Desactivado</span>
-              )}
-            </Label>
-            <Switch id="enabled-toggle" checked={enabled} onCheckedChange={setEnabled} />
-          </div>
+          <Switch id="enabled-toggle" checked={enabled} onCheckedChange={setEnabled} />
         </div>
+
         {/* Program Type Selector */}
         <ProgramTypeSelector
           value={programType}
@@ -214,9 +203,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
           ]}
         />
         {/* Configuration Form - Adaptive based on type */}
-        <div>
-          <Label className="mb-3 block text-sm font-medium lg:text-base">Configuración</Label>
-
+        <div className="space-y-4">
           {/* Points Configuration */}
           {(programType === 'points' || programType === 'hybrid') && (
             <div className="space-y-4">
@@ -317,90 +304,93 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
           )}
 
           {/* Advanced Options - Collapsible */}
-          <CollapsibleSection title="Opciones Avanzadas" defaultOpen={false}>
-            <div className="space-y-4">
-              {/* Points Expiry */}
-              {(programType === 'points' || programType === 'hybrid') && (
-                <div>
-                  <Label htmlFor="points-expiry" className="text-sm font-medium">
-                    Días para que expiren puntos (opcional)
-                  </Label>
-                  <Input
-                    id="points-expiry"
-                    type="number"
-                    value={pointsExpiry}
-                    onChange={(e) => setPointsExpiry(e.target.value)}
-                    placeholder="365"
-                    className="mt-2"
-                  />
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    Dejar vacío = puntos nunca expiran
-                  </p>
-                </div>
-              )}
+          <div className="mt-6">
+            <CollapsibleSection title="Opciones Avanzadas" defaultOpen={false}>
+              <div className="space-y-4">
+                {/* Points Expiry */}
+                {(programType === 'points' || programType === 'hybrid') && (
+                  <div>
+                    <Label htmlFor="points-expiry" className="text-sm font-medium">
+                      Días para que expiren puntos (opcional)
+                    </Label>
+                    <Input
+                      id="points-expiry"
+                      type="number"
+                      value={pointsExpiry}
+                      onChange={(e) => setPointsExpiry(e.target.value)}
+                      placeholder="365"
+                      className="mt-2"
+                    />
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      Dejar vacío = puntos nunca expiran
+                    </p>
+                  </div>
+                )}
 
-              {/* Discount after visits (optional) */}
-              {(programType === 'visits' || programType === 'hybrid') && (
-                <div>
-                  <Label htmlFor="discount-visits" className="text-sm font-medium">
-                    Visitas para descuento (opcional)
-                  </Label>
-                  <Input
-                    id="discount-visits"
-                    type="number"
-                    value={discountAfterVisits}
-                    onChange={(e) => setDiscountAfterVisits(e.target.value)}
-                    placeholder="5"
-                    className="mt-2"
-                  />
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    Opcional: ofrecer descuento cada X visitas
-                  </p>
-                </div>
-              )}
+                {/* Discount after visits (optional) */}
+                {(programType === 'visits' || programType === 'hybrid') && (
+                  <div>
+                    <Label htmlFor="discount-visits" className="text-sm font-medium">
+                      Visitas para descuento (opcional)
+                    </Label>
+                    <Input
+                      id="discount-visits"
+                      type="number"
+                      value={discountAfterVisits}
+                      onChange={(e) => setDiscountAfterVisits(e.target.value)}
+                      placeholder="5"
+                      className="mt-2"
+                    />
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      Opcional: ofrecer descuento cada X visitas
+                    </p>
+                  </div>
+                )}
 
-              {/* Referral reward type */}
-              {(programType === 'referral' || programType === 'hybrid') && (
-                <div>
-                  <Label htmlFor="referral-type" className="text-sm font-medium">
-                    Tipo de recompensa de referido
-                  </Label>
-                  <Select
-                    value={referralRewardType}
-                    onValueChange={(value) =>
-                      setReferralRewardType(value as 'discount' | 'points' | 'free_service')
-                    }
-                  >
-                    <SelectTrigger id="referral-type" className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="discount">Descuento (%)</SelectItem>
-                      <SelectItem value="points">Puntos</SelectItem>
-                      <SelectItem value="free_service">Servicio Gratis</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-          </CollapsibleSection>
-        </div>{' '}
+                {/* Referral reward type */}
+                {(programType === 'referral' || programType === 'hybrid') && (
+                  <div>
+                    <Label htmlFor="referral-type" className="text-sm font-medium">
+                      Tipo de recompensa de referido
+                    </Label>
+                    <Select
+                      value={referralRewardType}
+                      onValueChange={(value) =>
+                        setReferralRewardType(value as 'discount' | 'points' | 'free_service')
+                      }
+                    >
+                      <SelectTrigger id="referral-type" className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="discount">Descuento (%)</SelectItem>
+                        <SelectItem value="points">Puntos</SelectItem>
+                        <SelectItem value="free_service">Servicio Gratis</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </CollapsibleSection>
+          </div>
+        </div>
         {/* End Configuration Form */}
-        {/* Save Button - Match configuracion style */}
-        <div className="border-t border-border/50 pt-4 lg:flex lg:justify-end lg:pt-6">
+        {/* Save Button */}
+        <div className="flex justify-end border-t border-zinc-200 dark:border-zinc-700 pt-5">
           <Button
             onClick={handleSave}
             disabled={saving || !enabled}
             isLoading={saving}
-            className="h-12 w-full px-8 gap-2 text-[15px] font-semibold lg:w-auto"
+            className="w-full sm:w-auto"
           >
-            <Save className="h-5 w-5" />
+            <Save className="mr-2 h-4 w-4" />
             Guardar Cambios
           </Button>
         </div>
+
         {/* Preview Button - Mobile only */}
         <PreviewButtonMobile program={currentConfig} />
-      </div>{' '}
+      </div>
       {/* End main container */}
     </Card>
   )

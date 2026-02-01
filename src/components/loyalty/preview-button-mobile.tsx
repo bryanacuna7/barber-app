@@ -26,7 +26,7 @@ export function PreviewButtonMobile({ program, className = '' }: Props) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-20 right-4 z-40 flex h-12 items-center gap-2 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-lg transition-transform hover:scale-105 active:scale-95 lg:hidden ${className}`}
+        className={`fixed bottom-24 right-4 z-40 flex h-11 items-center gap-2 rounded-xl bg-white px-4 text-[15px] font-semibold text-zinc-900 shadow-lg ring-1 ring-black/5 transition-all hover:shadow-xl active:scale-95 dark:bg-zinc-800 dark:text-white dark:ring-white/10 lg:hidden ${className}`}
         aria-label="Ver preview del programa"
       >
         <Eye className="h-4 w-4" />
