@@ -98,29 +98,29 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
 
     return (
       <div
-        className={`relative mb-4 rounded-xl border p-4 ${
+        className={`relative mb-4 rounded-lg p-3 ${
           urgencyColor === 'red'
-            ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/50'
-            : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50'
+            ? 'bg-red-50 dark:bg-red-950/50'
+            : 'bg-amber-50 dark:bg-amber-950/50'
         }`}
       >
         <button
           onClick={() => setDismissed(true)}
-          className="absolute right-3 top-3 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+          className="absolute right-2 top-2 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
 
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2.5 pr-7">
           <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
               urgencyColor === 'red'
                 ? 'bg-red-100 dark:bg-red-900/50'
                 : 'bg-amber-100 dark:bg-amber-900/50'
             }`}
           >
             <AlertTriangle
-              className={`h-5 w-5 ${
+              className={`h-4 w-4 ${
                 urgencyColor === 'red'
                   ? 'text-red-600 dark:text-red-400'
                   : 'text-amber-600 dark:text-amber-400'
@@ -128,42 +128,42 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
             />
           </div>
 
-          <div className="flex-1 pr-6">
+          <div className="flex-1 min-w-0">
             <h3
-              className={`font-semibold ${
+              className={`text-[15px] font-semibold ${
                 urgencyColor === 'red'
                   ? 'text-red-900 dark:text-red-100'
                   : 'text-amber-900 dark:text-amber-100'
               }`}
             >
               {isExpired
-                ? 'Tu suscripción ha expirado'
+                ? 'Suscripción expirada'
                 : isTrialExpiringSoon
-                  ? `Tu prueba termina en ${subscription.days_remaining} ${subscription.days_remaining === 1 ? 'día' : 'días'}`
-                  : `Tu suscripción vence en ${subscription.days_remaining} días`}
+                  ? `Prueba termina en ${subscription.days_remaining} ${subscription.days_remaining === 1 ? 'día' : 'días'}`
+                  : `Vence en ${subscription.days_remaining} días`}
             </h3>
             <p
-              className={`mt-1 text-sm ${
+              className={`mt-0.5 text-[13px] ${
                 urgencyColor === 'red'
                   ? 'text-red-700 dark:text-red-300'
                   : 'text-amber-700 dark:text-amber-300'
               }`}
             >
               {isExpired
-                ? 'Reporta tu pago para reactivar tu suscripción Pro.'
-                : 'Reporta tu pago ahora para mantener el acceso a todas las funciones.'}
+                ? 'Reporta tu pago para reactivar.'
+                : 'Reporta tu pago ahora para mantener el acceso.'}
             </p>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2">
               <Link
                 href="/suscripcion"
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
                   urgencyColor === 'red'
                     ? 'bg-red-600 text-white hover:bg-red-700'
                     : 'bg-amber-600 text-white hover:bg-amber-700'
                 }`}
               >
-                <CreditCard className="h-4 w-4" />
+                <CreditCard className="h-3.5 w-3.5" />
                 Reportar Pago
               </Link>
             </div>
