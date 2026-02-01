@@ -17,7 +17,12 @@ interface Props {
   className?: string
 }
 
-export function CollapsibleSection({ title, defaultOpen = false, children, className = '' }: Props) {
+export function CollapsibleSection({
+  title,
+  defaultOpen = false,
+  children,
+  className = '',
+}: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
@@ -26,7 +31,7 @@ export function CollapsibleSection({ title, defaultOpen = false, children, class
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-xl border border-border/50 bg-background px-4 py-3 text-left transition-colors hover:bg-muted/30"
+        className="flex w-full items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 text-left shadow-sm transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
         aria-expanded={isOpen}
         aria-controls={`collapsible-${title.replace(/\s+/g, '-').toLowerCase()}`}
       >

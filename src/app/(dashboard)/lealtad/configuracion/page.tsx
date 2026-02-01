@@ -13,7 +13,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Gift, Sparkles, Users, ChevronLeft } from 'lucide-react'
-import { LoyaltyConfigForm } from '@/components/loyalty/loyalty-config-form'
+import { LoyaltyConfigWrapper } from '@/components/loyalty/loyalty-config-wrapper'
 import { LoyaltyPreview } from '@/components/loyalty/loyalty-preview'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
@@ -140,7 +140,9 @@ export default async function LoyaltyConfigPage() {
       {/* Stats Cards - Only show if program exists and has data */}
       {program &&
         stats &&
-        (stats.enrolledClients > 0 || stats.totalPointsAwarded > 0 || stats.totalRewardsRedeemed > 0) && (
+        (stats.enrolledClients > 0 ||
+          stats.totalPointsAwarded > 0 ||
+          stats.totalRewardsRedeemed > 0) && (
           <div className="mb-5 lg:mb-6">
             <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0 lg:pb-0">
               <Card className="min-w-[150px] flex-shrink-0 border-border/50 bg-card/80 p-4 backdrop-blur-sm lg:min-w-0 lg:p-5">
@@ -186,7 +188,7 @@ export default async function LoyaltyConfigPage() {
 
       {/* Empty State when no program or no stats */}
       {program && stats && stats.enrolledClients === 0 && stats.totalPointsAwarded === 0 && (
-        <Card className="mb-5 border-border/50 bg-muted/20 p-6 text-center lg:mb-6">
+        <Card className="mt-4 mb-5 border-border/50 bg-muted/20 p-6 text-center lg:mb-6 lg:mt-0">
           <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
           <p className="mt-3 text-sm font-medium text-foreground">
             Activa el programa y tus clientes comenzarán a acumular puntos
@@ -198,10 +200,10 @@ export default async function LoyaltyConfigPage() {
       )}
 
       {/* Main Content - Side by side on desktop */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
-        {/* Left Column: Configuration Form */}
+      <div className="mt-4 grid grid-cols-1 gap-6 lg:mt-0 lg:grid-cols-[1fr_400px]">
+        {/* Left Column: Configuration Form + Mobile Preview Button */}
         <Suspense fallback={<ConfigFormSkeleton />}>
-          <LoyaltyConfigForm businessId={business.id} initialProgram={program} />
+          <LoyaltyConfigWrapper businessId={business.id} initialProgram={program} />
         </Suspense>
 
         {/* Right Column: Preview (Desktop only - sticky) */}

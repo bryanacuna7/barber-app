@@ -12,7 +12,7 @@
  * - Live preview integration
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,13 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Save, Star, Gift, Users, Layers3 } from 'lucide-react'
+import { Save, Star, Gift, Users, Layers3, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/toast'
 import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 import { ProgramTypeSelector } from './program-type-selector'
 import { CollapsibleSection } from './collapsible-section'
-import { PreviewButtonMobile } from './preview-button-mobile'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
+import { LoyaltyPreview } from './loyalty-preview'
 
 interface Props {
   businessId: string
@@ -43,6 +44,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   const [enabled, setEnabled] = useState(initialProgram?.enabled ?? false)
   const [programType, setProgramType] = useState<string>(initialProgram?.programType || 'points')
   const [saving, setSaving] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
 
   // Form state
   const [pointsPerCurrency, setPointsPerCurrency] = useState(
@@ -71,24 +73,44 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   )
 
   // Build current config for preview (simplified, no debouncing for now)
-  const currentConfig: LoyaltyProgram | null = enabled
-    ? {
-        id: initialProgram?.id || '',
-        businessId,
-        enabled,
-        programType: programType as LoyaltyProgram['programType'],
-        pointsPerCurrencyUnit: parseFloat(pointsPerCurrency) || null,
-        pointsExpiryDays: pointsExpiry ? parseInt(pointsExpiry) : null,
-        freeServiceAfterVisits: freeServiceAfterVisits ? parseInt(freeServiceAfterVisits) : null,
-        discountAfterVisits: discountAfterVisits ? parseInt(discountAfterVisits) : null,
-        discountPercentage: discountPercentage ? parseFloat(discountPercentage) : null,
-        referralRewardType: referralRewardType as LoyaltyProgram['referralRewardType'],
-        referralRewardAmount: referralRewardAmount ? parseFloat(referralRewardAmount) : null,
-        refereeRewardAmount: refereeRewardAmount ? parseFloat(refereeRewardAmount) : null,
-        createdAt: initialProgram?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-    : null
+  const currentConfig: LoyaltyProgram | null = useMemo(
+    () =>
+      enabled
+        ? {
+            id: initialProgram?.id || '',
+            businessId,
+            enabled,
+            programType: programType as LoyaltyProgram['programType'],
+            pointsPerCurrencyUnit: parseFloat(pointsPerCurrency) || null,
+            pointsExpiryDays: pointsExpiry ? parseInt(pointsExpiry) : null,
+            freeServiceAfterVisits: freeServiceAfterVisits
+              ? parseInt(freeServiceAfterVisits)
+              : null,
+            discountAfterVisits: discountAfterVisits ? parseInt(discountAfterVisits) : null,
+            discountPercentage: discountPercentage ? parseFloat(discountPercentage) : null,
+            referralRewardType: referralRewardType as LoyaltyProgram['referralRewardType'],
+            referralRewardAmount: referralRewardAmount ? parseFloat(referralRewardAmount) : null,
+            refereeRewardAmount: refereeRewardAmount ? parseFloat(refereeRewardAmount) : null,
+            createdAt: initialProgram?.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    [
+      enabled,
+      businessId,
+      programType,
+      pointsPerCurrency,
+      pointsExpiry,
+      freeServiceAfterVisits,
+      discountAfterVisits,
+      discountPercentage,
+      referralRewardType,
+      referralRewardAmount,
+      refereeRewardAmount,
+      initialProgram?.id,
+      initialProgram?.createdAt,
+    ]
+  )
 
   const handleSave = async () => {
     setSaving(true)
@@ -376,22 +398,46 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
         </div>
         {/* End Configuration Form */}
         {/* Save Button */}
-        <div className="flex justify-end border-t border-zinc-200 dark:border-zinc-700 pt-5">
+        <div className="space-y-3 border-t border-zinc-200 dark:border-zinc-700 pt-5">
+          <div className="flex justify-end">
+            <Button
+              onClick={handleSave}
+              disabled={saving || !enabled}
+              isLoading={saving}
+              className="w-full sm:w-auto"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Guardar Cambios
+            </Button>
+          </div>
+
+          {/* Preview Button - Mobile only */}
           <Button
-            onClick={handleSave}
-            disabled={saving || !enabled}
-            isLoading={saving}
-            className="w-full sm:w-auto"
+            type="button"
+            variant="outline"
+            onClick={() => setIsPreviewOpen(true)}
+            className="w-full lg:hidden"
           >
-            <Save className="mr-2 h-4 w-4" />
-            Guardar Cambios
+            <Eye className="mr-2 h-4 w-4" />
+            Ver Preview
           </Button>
         </div>
-
-        {/* Preview Button - Mobile only */}
-        <PreviewButtonMobile program={currentConfig} />
       </div>
       {/* End main container */}
+
+      {/* Preview Modal - Mobile only */}
+      <Sheet open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <SheetContent side="bottom" className="h-[85vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Vista Previa</SheetTitle>
+            <SheetClose onClose={() => setIsPreviewOpen(false)} />
+          </SheetHeader>
+
+          <div className="mt-4">
+            <LoyaltyPreview program={currentConfig} />
+          </div>
+        </SheetContent>
+      </Sheet>
     </Card>
   )
 }
