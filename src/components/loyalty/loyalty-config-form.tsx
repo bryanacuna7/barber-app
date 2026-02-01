@@ -385,23 +385,23 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
               </div>
             </CollapsibleSection>
           </div>
-        </div>
 
-        {/* Save Button - Match configuracion style */}
-        <div className="border-t border-border/50 pt-4 lg:flex lg:justify-end lg:pt-6">
-          <Button
-            onClick={handleSave}
-            disabled={saving || !enabled}
-            isLoading={saving}
-            className="h-12 w-full px-8 gap-2 text-[15px] font-semibold lg:w-auto"
-          >
-            <Save className="h-5 w-5" />
-            Guardar Cambios
-          </Button>
-        </div>
+          {/* Save Button - Match configuracion style */}
+          <div className="border-t border-border/50 pt-4 lg:flex lg:justify-end lg:pt-6">
+            <Button
+              onClick={handleSave}
+              disabled={saving || !enabled}
+              isLoading={saving}
+              className="h-12 w-full px-8 gap-2 text-[15px] font-semibold lg:w-auto"
+            >
+              <Save className="h-5 w-5" />
+              Guardar Cambios
+            </Button>
+          </div>
 
-        {/* Preview Button - Mobile only */}
-        <PreviewButtonMobile program={currentConfig} />
+          {/* Preview Button - Mobile only */}
+          <PreviewButtonMobile program={currentConfig} />
+        </div>
       </div>
     </Card>
   )
