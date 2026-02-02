@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-02 06:30 PM
-- **Last Session:** Session 60 - Branch Cleanup + Plan Verification ✅ (COMPLETE)
+- **Last Updated:** 2026-02-02 07:00 PM
+- **Last Session:** Session 61 - Claude Code Infrastructure Setup ✅ (COMPLETE)
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -53,6 +53,31 @@
   - **Estado:** FASES 1-6 completas y funcionando
 
 ### Recently Completed
+
+#### Session 61 (2026-02-02 07:00 PM)
+
+**Tema:** 🔧 Claude Code Infrastructure Setup
+
+**Completado:**
+
+- ✅ **Claude Code Scripts**
+  - Agregado script de limpieza: `clean-other-agents.sh`
+  - Documentación completa en `.claude/scripts/README.md`
+  - Script elimina directorios de otros AI assistants (40+ agents)
+  - Mantiene solo carpetas esenciales de Claude Code
+
+- ✅ **Skills Symlinks**
+  - Creados 8 symlinks para Claude Code skills
+  - Skills: error-handling, nextjs-patterns, production-audit, secrets-management, security-scanning, react-best-practices, wcag-audit
+  - Ubicación: `.claude/skills/` y `.github/skills/`
+
+**Commits:**
+
+- `93f007f` - chore: add Claude Code scripts and skills symlinks (10 files, 160 insertions)
+
+**Estado:** Claude Code infrastructure configurado correctamente
+
+---
 
 #### Session 60 (2026-02-02 06:30 PM)
 

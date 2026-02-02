@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+
+# claude-kit CLI
+# Lightweight command-line interface for Claude Starter Kit utilities
+
+set -e
+
+VERSION="1.0.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CLI_SCRIPTS_DIR="$SCRIPT_DIR/.claude/scripts/cli"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Helper functions
+print_error() {
+  echo -e "${RED}❌ Error: $1${NC}" >&2
+}
+
+print_success() {
+  echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_info() {
+  echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+print_warning() {
+  echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+# Show help
+show_help() {
+  cat << EOF
+claude-kit v${VERSION}
+Lightweight CLI for Claude Starter Kit utilities
+
+Usage:
+  claude-kit <command> [options]
+
+Commands:
+  doctor              Health check for your project
+  skills add <name>   Install a new skill
+  skills list         List all installed skills
+  skills update       Update managed skills
+  config validate     Validate .claude/config.json
+  version             Show version information
+  help                Show this help message
+
+Examples:
+  claude-kit doctor
+  claude-kit skills add vercel/web-guidelines
+  claude-kit skills list
+  claude-kit config validate
+
+For more information, visit:
+https://github.com/your-repo/claude-starter-kit
+EOF
+}
+
+# Show version
+show_version() {
+  echo "claude-kit v${VERSION}"
+}
+
+# Main command router
+main() {
+  if [ $# -eq 0 ]; then
+    show_help
+    exit 0
+  fi
+
+  local command="$1"
+  shift
+
+  case "$command" in
+    doctor)
+      bash "$CLI_SCRIPTS_DIR/doctor.sh" "$@"
+      ;;
+    skills)
+      if [ $# -eq 0 ]; then
+        print_error "skills command requires a subcommand"
+        echo "Try: claude-kit skills add <name>"
+        exit 1
+      fi
+      local subcommand="$1"
+      shift
+      case "$subcommand" in
+        add)
+          bash "$CLI_SCRIPTS_DIR/skills-add.sh" "$@"
+          ;;
+        list)
+          bash "$CLI_SCRIPTS_DIR/skills-list.sh" "$@"
+          ;;
+        update)
+          bash "$CLI_SCRIPTS_DIR/skills-update.sh" "$@"
+          ;;
+        *)
+          print_error "Unknown skills subcommand: $subcommand"
+          echo "Available: add, list, update"
+          exit 1
+          ;;
+      esac
+      ;;
+    config)
+      if [ $# -eq 0 ]; then
+        print_error "config command requires a subcommand"
+        echo "Try: claude-kit config validate"
+        exit 1
+      fi
+      local subcommand="$1"
+      shift
+      case "$subcommand" in
+        validate)
+          bash "$CLI_SCRIPTS_DIR/config-validate.sh" "$@"
+          ;;
+        *)
+          print_error "Unknown config subcommand: $subcommand"
+          echo "Available: validate"
+          exit 1
+          ;;
+      esac
+      ;;
+    version|--version|-v)
+      show_version
+      ;;
+    help|--help|-h)
+      show_help
+      ;;
+    *)
+      print_error "Unknown command: $command"
+      echo ""
+      show_help
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

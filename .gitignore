@@ -43,3 +43,7 @@ next-env.d.ts
 .agents/
 .claude/plans/
 .playwright-mcp/
+
+# Claude Code - Skills
+.claude/skills/custom/
+.claude/skills-backup-*/
