@@ -10,6 +10,7 @@ import {
   LogOut,
   Shield,
   Settings,
+  Share2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Negocios', href: '/admin/negocios', icon: Building2 },
   { name: 'Pagos', href: '/admin/pagos', icon: CreditCard },
+  { name: 'Referencias', href: '/admin/referencias', icon: Share2 },
   { name: 'Configuración', href: '/admin/configuracion', icon: Settings },
 ]
 

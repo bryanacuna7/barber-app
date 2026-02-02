@@ -12,6 +12,7 @@ import {
   UserRound,
   Shield,
   TrendingUp,
+  Share2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Barberos', href: '/barberos', icon: UserRound },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Analíticas', href: '/analiticas', icon: TrendingUp },
+  { name: 'Referencias', href: '/referencias', icon: Share2 },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
 
