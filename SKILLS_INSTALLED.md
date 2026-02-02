@@ -1,17 +1,27 @@
-# 🎯 Skills de skills.sh Instalados
+# 🎯 Skills Instalados - Claude Starter Kit
 
-Instalación completada el 2026-01-28
+Última actualización: **2026-02-02**
 
 ---
 
-## ✅ Skills Instalados (3 skills)
+## 📊 Resumen
 
-### 1. **web-design-guidelines** (47.4K installs)
+```
+✅ Total de skills: 10 skills
+   📦 Vercel Labs (skills.sh): 4 skills
+   🚀 Antigravity Awesome Skills: 6 skills
+✅ Complementan: 20 skills custom existentes
+✅ Auto-activación: Configurada
+✅ Status: Listos para usar
+```
 
-**Ubicación:**
+---
 
-- `claude-starter-kit/.agents/skills/web-design-guidelines/`
-- `barber-app/.agents/skills/web-design-guidelines/`
+## 🔷 Skills de Vercel Labs (4 skills)
+
+### 1. **web-design-guidelines** (64K installs) ✅
+
+**Ubicación:** `.agents/skills/web-design-guidelines/`
 
 **Qué hace:**
 Auditoría automática de UI con 100+ reglas cubriendo:
@@ -20,8 +30,7 @@ Auditoría automática de UI con 100+ reglas cubriendo:
 - ⚡ Performance
 - 🎨 UX best practices
 
-**Cómo se activa:**
-El skill se activa automáticamente cuando el usuario dice:
+**Triggers:**
 
 - "review my UI"
 - "check accessibility"
@@ -29,36 +38,23 @@ El skill se activa automáticamente cuando el usuario dice:
 - "review UX"
 - "check my site against best practices"
 
-**Funcionamiento:**
-
-1. Fetcha las guidelines más recientes desde:
-   ```
-   https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
-   ```
-2. Lee los archivos especificados
-3. Aplica todas las reglas
-4. Reporta hallazgos en formato `file:line`
-
-**Ejemplo de uso:**
+**Ejemplo:**
 
 ```
 Usuario: "Revisa la accesibilidad de mi header"
-Claude: [Activa web-design-guidelines automáticamente]
+Claude: 🤖 Loading web-design-guidelines...
 
-        Findings:
-        src/components/Header.tsx:12 - Missing alt text on logo image
-        src/components/Header.tsx:24 - Button missing aria-label
-        src/components/Header.tsx:45 - Low contrast ratio (3.2:1, needs 4.5:1)
+Findings:
+src/components/Header.tsx:12 - Missing alt text on logo image
+src/components/Header.tsx:24 - Button missing aria-label
+src/components/Header.tsx:45 - Low contrast ratio (3.2:1, needs 4.5:1)
 ```
 
 ---
 
-### 2. **vercel-composition-patterns**
+### 2. **vercel-composition-patterns** (17.1K installs) ✅
 
-**Ubicación:**
-
-- `claude-starter-kit/.agents/skills/vercel-composition-patterns/`
-- `barber-app/.agents/skills/vercel-composition-patterns/`
+**Ubicación:** `.agents/skills/vercel-composition-patterns/`
 
 **Qué hace:**
 Patrones arquitectónicos de React para componentes escalables:
@@ -68,8 +64,7 @@ Patrones arquitectónicos de React para componentes escalables:
 - 🎯 Composition over boolean props
 - ⚛️ React 19 API updates
 
-**Cómo se activa:**
-El skill se activa cuando el usuario menciona:
+**Triggers:**
 
 - "refactor component"
 - "too many props"
@@ -77,30 +72,14 @@ El skill se activa cuando el usuario menciona:
 - "context provider"
 - "component architecture"
 
-**Categorías de Reglas:**
-
-| Prioridad | Categoría               | Reglas                                           |
-| --------- | ----------------------- | ------------------------------------------------ |
-| HIGH      | Component Architecture  | Evitar boolean props, usar compound components   |
-| MEDIUM    | State Management        | Desacoplar implementación, context interface     |
-| MEDIUM    | Implementation Patterns | Explicit variants, children over render props    |
-| MEDIUM    | React 19 APIs           | No forwardRef, usar use() en vez de useContext() |
-
-**Ejemplo de uso:**
+**Ejemplo:**
 
 ```
 Usuario: "Este componente tiene demasiados props boolean"
-
-Claude: [Activa vercel-composition-patterns]
+Claude: 🤖 Loading vercel-composition-patterns...
 
 ❌ Antes (boolean prop hell):
-<Modal
-  isOpen={true}
-  hasCloseButton={true}
-  isFullScreen={false}
-  hasOverlay={true}
-  isDismissable={true}
-/>
+<Modal isOpen={true} hasCloseButton={true} isFullScreen={false} />
 
 ✅ Después (compound components):
 <Modal.Root open>
@@ -114,12 +93,9 @@ Claude: [Activa vercel-composition-patterns]
 
 ---
 
-### 3. **vercel-react-native-skills**
+### 3. **vercel-react-native-skills** (12.8K installs) ✅
 
-**Ubicación:**
-
-- `claude-starter-kit/.agents/skills/vercel-react-native-skills/`
-- `barber-app/.agents/skills/vercel-react-native-skills/`
+**Ubicación:** `.agents/skills/vercel-react-native-skills/`
 
 **Qué hace:**
 Best practices para React Native y Expo:
@@ -128,109 +104,253 @@ Best practices para React Native y Expo:
 - 🎬 Animaciones fluidas
 - ⚡ List rendering optimization
 - 🔌 Native modules integration
-- 🎯 Platform-specific APIs (iOS/Android)
 
-**Cómo se activa:**
-El skill se activa cuando el usuario menciona:
+**Triggers:**
 
 - "React Native component"
 - "optimize list performance"
 - "mobile animations"
 - "Expo app"
 - "native module"
-- "iOS/Android specific"
 
-**Categorías de Best Practices:**
+---
 
-| Prioridad | Área             | Ejemplos                              |
-| --------- | ---------------- | ------------------------------------- |
-| HIGH      | List Performance | FlatList optimization, virtualization |
-| HIGH      | Animations       | Reanimated 2/3, gesture handlers      |
-| MEDIUM    | Navigation       | React Navigation best practices       |
-| MEDIUM    | State Management | Redux, Zustand, Context patterns      |
-| MEDIUM    | Native Modules   | Expo modules, bridging                |
+### 4. **vercel-react-best-practices** (84.5K installs) 🆕 ⭐
 
-**Ejemplo de uso:**
+**Ubicación:** `.agents/skills/vercel-react-best-practices/`
 
-```
-Usuario: "Esta FlatList se siente lenta al hacer scroll"
+**Qué hace:**
+React y Next.js performance optimization desde Vercel Engineering:
 
-Claude: [Activa vercel-react-native-skills]
+- ⚡ +40 reglas en 8 categorías (ordenadas por impacto)
+- 🎯 Ejemplos concretos de código
+- 📦 Bundle size optimization
+- 🔄 Data fetching patterns
+- 🚀 Server Components best practices
 
-❌ Antes (problemas de performance):
-<FlatList
-  data={largeDataset}
-  renderItem={({ item }) => <ComplexComponent item={item} />}
-/>
+**Triggers:**
 
-✅ Después (optimizado):
-<FlatList
-  data={largeDataset}
-  renderItem={renderItem}
-  keyExtractor={keyExtractor}
-  windowSize={10}
-  maxToRenderPerBatch={10}
-  initialNumToRender={10}
-  removeClippedSubviews={true}
-  getItemLayout={getItemLayout}
-/>
+- "optimize React performance"
+- "improve Next.js speed"
+- "reduce bundle size"
+- "Server Components"
+- "data fetching patterns"
 
-const renderItem = useCallback(({ item }) => (
-  <MemoizedComplexComponent item={item} />
-), []);
-```
+**Por qué es importante:**
+
+- Skill **más popular** de Vercel Labs (84.5K installs)
+- Complementa `react-patterns` con optimizaciones específicas
+- Incluye conocimiento de 10 años de React/Next.js
+
+---
+
+## 🚀 Skills de Antigravity Awesome Skills (6 skills)
+
+**Repositorio completo:** `.agents/skills/antigravity-awesome-skills/` (626 skills disponibles)
+
+### 5. **nextjs-app-router-patterns** 🆕
+
+**Ubicación:** `.claude/skills/nextjs-app-router-patterns` → `antigravity-awesome-skills/skills/`
+
+**Qué hace:**
+Next.js 14+ App Router avanzado:
+
+- 🏗️ Server Components architecture
+- 🔄 Streaming patterns
+- 🎯 Parallel routes
+- ⚡ Suspense boundaries
+- 📦 Route handlers
+- 🔐 Middleware patterns
+
+**Triggers:**
+
+- "Next.js App Router"
+- "Server Components"
+- "streaming"
+- "parallel routes"
+- "Next.js 14/15"
+
+**Complementa:** Tu skill `nextjs-best-practices` (básico) con patrones avanzados
+
+---
+
+### 6. **production-code-audit** 🆕
+
+**Ubicación:** `.claude/skills/production-code-audit` → `antigravity-awesome-skills/skills/`
+
+**Qué hace:**
+Scan autónomo del codebase para estándares production-grade:
+
+- 🔍 Code quality analysis
+- 🏗️ Architecture patterns
+- 📊 Performance bottlenecks
+- 🐛 Anti-patterns detection
+- 📚 Documentation coverage
+
+**Triggers:**
+
+- "audit codebase"
+- "production ready check"
+- "code quality review"
+- "pre-deployment audit"
+
+**Complementa:** Tu comando `/code-review` con análisis más profundo
+
+---
+
+### 7. **wcag-audit-patterns** 🆕
+
+**Ubicación:** `.claude/skills/wcag-audit-patterns` → `antigravity-awesome-skills/skills/`
+
+**Qué hace:**
+WCAG 2.2 accessibility audits automatizados:
+
+- ♿ ARIA labels validation
+- 🎨 Color contrast checking (WCAG AA/AAA)
+- ⌨️ Keyboard navigation
+- 📱 Screen reader compatibility
+- 🏷️ Semantic HTML validation
+
+**Triggers:**
+
+- "WCAG audit"
+- "accessibility check"
+- "a11y compliance"
+- "screen reader test"
+
+**Complementa:** `web-design-guidelines` con validación WCAG específica
+
+---
+
+### 8. **error-handling-patterns** 🆕
+
+**Ubicación:** `.claude/skills/error-handling-patterns` → `antigravity-awesome-skills/skills/`
+
+**Qué hace:**
+Error propagation resiliente multi-lenguaje:
+
+- 🛡️ Try-catch patterns
+- 🔄 Retry logic
+- 📊 Error tracking (Sentry, etc.)
+- 🚨 Graceful degradation
+- 📝 Error logging best practices
+
+**Triggers:**
+
+- "error handling"
+- "exception management"
+- "retry logic"
+- "error boundaries"
+
+**Lenguajes:** TypeScript, Python, Go, Rust, Java
+
+---
+
+### 9. **secrets-management** 🆕
+
+**Ubicación:** `.claude/skills/secrets-management` → `antigravity-awesome-skills/skills/`
+
+**Qué hace:**
+Gestión segura de secrets y credentials:
+
+- 🔐 .env file patterns
+- 🚫 Hardcoded secrets detection
+- 🔑 Vault integration patterns
+- ☁️ Cloud secrets managers (AWS, GCP, Azure)
+- 🛡️ Rotation strategies
+
+**Triggers:**
+
+- "secrets management"
+- "API keys security"
+- "environment variables"
+- "vault integration"
+
+**Crítico para:** Auth, payment, API integrations
+
+---
+
+### 10. **security-scanning-security-sast** 🆕
+
+**Ubicación:** `.claude/skills/security-scanning-security-sast` → `antigravity-awesome-skills/skills/`
+
+**Qué hace:**
+Static Application Security Testing automatizado:
+
+- 🔍 SQL injection detection
+- 🛡️ XSS vulnerability scanning
+- 🔐 Authentication flaws
+- 📦 Dependency vulnerabilities
+- 🚨 OWASP Top 10 checks
+
+**Triggers:**
+
+- "security scan"
+- "SAST analysis"
+- "vulnerability check"
+- "SQL injection test"
+
+**Complementa:** Tu agent `security-auditor` con scanning automatizado
 
 ---
 
 ## 📂 Estructura de Archivos
 
 ```
-.agents/
-└── skills/
-    ├── vercel-composition-patterns/
-    │   ├── SKILL.md              # Metadata y descripción
-    │   ├── AGENTS.md             # Guía completa compilada
-    │   └── rules/                # Reglas individuales
-    │       ├── architecture-avoid-boolean-props.md
-    │       ├── state-context-interface.md
-    │       └── ...
-    ├── vercel-react-native-skills/
-    │   ├── SKILL.md              # Metadata y triggers
-    │   ├── AGENTS.md             # Guía completa
-    │   └── rules/                # Best practices mobile
-    │       ├── list-performance.md
-    │       ├── animations.md
-    │       └── ...
-    └── web-design-guidelines/
-        └── SKILL.md              # Metadata y trigger
+claude-starter-kit/
+├── .claude/
+│   └── skills/                     # Symlinks a skills (31 skills)
+│       ├── react-patterns/         # Custom (20 skills)
+│       ├── api-patterns/
+│       ├── ...
+│       ├── vercel-react-best-practices@    # Vercel Labs (4 skills)
+│       ├── web-design-guidelines@
+│       ├── vercel-composition-patterns@
+│       ├── vercel-react-native-skills@
+│       ├── nextjs-app-router-patterns@     # Antigravity (6 skills)
+│       ├── production-code-audit@
+│       ├── wcag-audit-patterns@
+│       ├── error-handling-patterns@
+│       ├── secrets-management@
+│       └── security-scanning-security-sast@
+│
+└── .agents/
+    └── skills/                     # Source de skills externos
+        ├── vercel-react-best-practices/
+        ├── web-design-guidelines/
+        ├── vercel-composition-patterns/
+        ├── vercel-react-native-skills/
+        └── antigravity-awesome-skills/    # 626 skills disponibles
+            ├── skills/
+            │   ├── nextjs-app-router-patterns/
+            │   ├── production-code-audit/
+            │   ├── wcag-audit-patterns/
+            │   ├── error-handling-patterns/
+            │   ├── secrets-management/
+            │   ├── security-scanning-security-sast/
+            │   └── ... (otros 620 skills)
+            └── docs/
+                ├── BUNDLES.md
+                └── CATALOG.md
 ```
-
-**Nota:** Los nuevos skills usan `.agents/skills/` en lugar de `.claude/skills/` (formato skills.sh)
 
 ---
 
-## 🎯 Diferencia con Skills Existentes
+## 🎯 Complementariedad con Skills Existentes
 
-### Skills Existentes (`.claude/skills/`)
+| Tu Skill Custom         | Nuevo Skill                       | Relación                              |
+| ----------------------- | --------------------------------- | ------------------------------------- |
+| `react-patterns`        | `vercel-react-best-practices`     | ✅ Patterns vs Performance            |
+| `react-patterns`        | `vercel-composition-patterns`     | ✅ General vs Advanced Composition    |
+| `nextjs-best-practices` | `nextjs-app-router-patterns`      | ✅ Básico vs App Router Avanzado      |
+| `ui-ux-designer`        | `web-design-guidelines`           | ✅ Design vs Audit                    |
+| `ui-ux-designer`        | `wcag-audit-patterns`             | ✅ Design vs WCAG Compliance          |
+| `security-hardening`    | `secrets-management`              | ✅ General vs Secrets Específico      |
+| `security-hardening`    | `security-scanning-security-sast` | ✅ Manual vs Automated SAST           |
+| `/code-review`          | `production-code-audit`           | ✅ General Review vs Production Audit |
+| `mobile-development`    | `vercel-react-native-skills`      | ✅ General vs Vercel Best Practices   |
 
-- Creados manualmente para el starter kit
-- Formato markdown simple
-- Siempre activos
-
-### Skills de skills.sh (`.agents/skills/`)
-
-- Instalados desde repositorios externos
-- Formato con metadata YAML
-- Se activan bajo condiciones específicas (triggers)
-- Auto-actualizables
-
-**Complementan tus skills existentes:**
-
-| Tu Skill             | Nuevo Skill                   | Relación                                             |
-| -------------------- | ----------------------------- | ---------------------------------------------------- |
-| `react-patterns`     | `vercel-composition-patterns` | ✅ Complementario - Composition vs Patterns          |
-| `ui-ux-designer`     | `web-design-guidelines`       | ✅ Complementario - Design vs Audit                  |
-| `mobile-development` | `vercel-react-native-skills`  | ✅ Complementario - General vs Vercel Best Practices |
+**Resultado:** Los skills se complementan sin duplicarse. Cada uno aporta expertise específico.
 
 ---
 
@@ -238,87 +358,127 @@ const renderItem = useCallback(({ item }) => (
 
 ### Activación Automática
 
-Los skills se activan automáticamente cuando detectan keywords relevantes:
+Los skills se activan cuando Claude detecta keywords relevantes:
 
 ```
-Usuario: "Necesito refactorizar este Modal, tiene muchos props"
-Claude: 🤖 Using @frontend-specialist...
-        📦 Loading vercel-composition-patterns...
+Usuario: "Optimiza el performance de este componente React"
+Claude: 🤖 Using @performance-profiler...
+        📦 Loading vercel-react-best-practices...
 
-        Detecté que tienes boolean prop proliferation.
-        Te sugiero usar compound components...
+        Detecté 3 optimizaciones prioritarias:
+        1. Componente re-renderiza innecesariamente
+        2. Data fetching no usa Server Components
+        3. Bundle incluye librerías no usadas
 ```
 
 ### Activación Manual
 
-Puedes también mencionarlos explícitamente:
+Menciona el skill explícitamente:
 
 ```
-Usuario: "Usa web-design-guidelines para revisar mi componente"
-Claude: 📦 Loading web-design-guidelines...
+Usuario: "@nextjs-app-router-patterns ayúdame con streaming"
+Claude: 📦 Loading nextjs-app-router-patterns...
 ```
+
+### Bundles Recomendados (Antigravity)
+
+Si necesitas más skills, usa los bundles curados:
+
+```bash
+# Explorar bundles
+cat .agents/skills/antigravity-awesome-skills/docs/BUNDLES.md
+
+# Agregar skill individual (crear symlink manualmente)
+cd .claude/skills
+ln -s ../../.agents/skills/antigravity-awesome-skills/skills/[nombre-skill] [nombre-skill]
+```
+
+**Bundles útiles:**
+
+- 🚀 **Essentials Starter Pack**: concise-planning, lint-and-validate, systematic-debugging
+- 🌐 **Web Wizard Pack**: frontend-design, form-cro, seo-audit
+- 🛡️ **Security Engineer Pack**: ethical-hacking-methodology, burp-suite-testing, vulnerability-scanner
+- ⚡ **Full-Stack Developer Pack**: senior-fullstack, stripe-integration, database-design
 
 ---
 
 ## 🔄 Actualización de Skills
 
-Para actualizar a las últimas versiones:
+### Vercel Labs (npx skills)
 
 ```bash
-# Claude-starter-kit
-cd /Users/bryanacuna/Documents/claude-starter-kit
-npx skills add vercel-labs/agent-skills --skill web-design-guidelines --update
+# Actualizar skill específico
+npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices --update
 
-# Barber-app
-cd /Users/bryanacuna/Desktop/barber-app
-npx skills add vercel-labs/agent-skills --skill web-design-guidelines --update
+# Ver skills disponibles
+npx skills list vercel-labs/agent-skills
+```
+
+### Antigravity Awesome Skills (git pull)
+
+```bash
+cd .agents/skills/antigravity-awesome-skills
+git pull origin main
 ```
 
 ---
 
-## 📊 Resumen de Instalación
+## 📈 Stats del Proyecto
 
 ```
-✅ Instalados en: 2 proyectos
-✅ Total de skills: 3 skills nuevos
-   - web-design-guidelines (UI/UX audit)
-   - vercel-composition-patterns (React architecture)
-   - vercel-react-native-skills (Mobile development)
-✅ Complementan: 20 skills existentes
-✅ Auto-activación: Configurada
-✅ Status: Listos para usar
+🎯 Skills Totales: 31 skills activos
+   📦 Custom (tuyos): 20 skills
+   🔷 Vercel Labs: 4 skills (178.4K installs combinados)
+   🚀 Antigravity: 6 skills activos (de 626 disponibles)
 
-Proyectos:
-- /Users/bryanacuna/Documents/claude-starter-kit
-- /Users/bryanacuna/Desktop/barber-app
+🤖 Agentes: 15 agentes especializados
+⚙️ Commands: 20 workflows automatizados
+🔌 MCPs: 3 (Memory, Playwright, GitHub)
+
+💾 Espacio: ~150MB (.agents/skills/antigravity-awesome-skills)
 ```
 
 ---
 
 ## 🆕 Próximos Skills Recomendados
 
-Si en el futuro necesitas más capabilities:
+Si necesitas expandir en el futuro:
+
+### Alta Prioridad (según uso)
+
+- **stripe-integration** - Payments y subscriptions (si usas Stripe)
+- **seo-audit** - SEO automatizado (si necesitas tráfico orgánico)
+- **systematic-debugging** - Metodología de debugging avanzada
 
 ### Media Prioridad
 
-- **remotion-best-practices** (44.9K installs) - Video creation
-- **agent-browser** (11.7K installs) - Web scraping
+- **form-cro** - Optimización de forms para conversión
+- **frontend-design** - UI guidelines y aesthetics
+- **api-security-best-practices** - Patrones de API segura
 
-### Baja Prioridad (según necesidad)
+### Explorar por dominio
 
-- **pdf/pptx/xlsx/docx** - Document generation
-- **vercel-react-native-skills** - Mobile development
+```bash
+# Ver todos los skills por categoría
+cat .agents/skills/antigravity-awesome-skills/docs/BUNDLES.md
+
+# Buscar skills por keyword
+ls .agents/skills/antigravity-awesome-skills/skills/ | grep [keyword]
+```
 
 ---
 
 ## 🔗 Referencias
 
-- [Skills.sh Platform](https://skills.sh)
 - [Vercel Agent Skills Repo](https://github.com/vercel-labs/agent-skills)
-- [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines)
+- [Skills.sh Platform](https://skills.sh/vercel-labs/agent-skills)
+- [Antigravity Awesome Skills](https://github.com/sickn33/antigravity-awesome-skills)
 - [Skills CLI Documentation](https://github.com/vercel-labs/skills)
+- [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines)
+- [Vercel Changelog: Introducing Skills](https://vercel.com/changelog/introducing-skills-the-open-agent-skills-ecosystem)
 
 ---
 
-**Último update:** 2026-01-28
-**Instalado por:** Claude Code con antigravity-kit features
+**Instalado por:** Claude Code
+**Última actualización:** 2026-02-02
+**Versión:** v2.0.0 (expanded edition)

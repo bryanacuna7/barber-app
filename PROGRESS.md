@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-02 01:30 PM
-- **Last Session:** Session 57 - FASE 6 del sistema de referencias (Super Admin Dashboard) ✅ (COMPLETE)
+- **Last Updated:** 2026-02-02 03:00 PM
+- **Last Session:** Session 58 - Navigation & Layout Fixes + Client Referral Planning ✅ (COMPLETE)
 
 ---
 
@@ -42,6 +42,60 @@
     7. ⏳ Testing & QA (próximo)
 
 ### Recently Completed
+
+#### Session 58 (2026-02-02 03:00 PM)
+
+**Tema:** 🔧 Navigation & Layout Fixes + Client Referral Dashboard Planning
+
+**Completado:**
+
+- ✅ **npm security vulnerabilities resolved** - 0 vulnerabilities (tar package updated)
+
+- ✅ **Navigation Fixed (2 sidebars)**
+  - Business Dashboard Sidebar: Agregado link "Referencias" con Share2 icon
+  - Super Admin Sidebar: Agregado link "Referencias" con Share2 icon
+  - Ahora ambos dashboards tienen acceso a sus respectivas páginas de referencias
+
+- ✅ **Layout Group Fix - Critical**
+  - **Problema:** `/admin/referencias` estaba en `(dashboard)` layout group → usaba sidebar de business
+  - **Solución:** Movido a `(admin)` layout group → ahora usa sidebar de super admin correctamente
+  - **Resultado:** Super Admin sidebar (negro con Shield icon) se mantiene al navegar a Referencias
+
+- ✅ **Client Referral Dashboard - Planning Complete**
+  - Documento: `CLIENT_REFERRAL_DASHBOARD_PLAN.md` (plan completo de implementación)
+  - 3 API endpoints planeados (my-code, stats, list)
+  - 4 componentes frontend diseñados
+  - Página `/referidos` especificada para clientes
+  - ~770 líneas de código estimadas
+
+**Archivos modificados (5):**
+
+- `src/components/dashboard/sidebar.tsx` - Agregado link Referencias
+- `src/components/admin/admin-sidebar.tsx` - Agregado link Referencias
+- `src/app/(admin)/admin/referencias/page.tsx` - Movido de (dashboard) a (admin)
+- `package.json` + `package-lock.json` - Dependencies actualizadas (npm audit fix)
+
+**Archivos creados (1):**
+
+- `CLIENT_REFERRAL_DASHBOARD_PLAN.md` - Plan completo del dashboard de referidos para clientes
+
+**Issues resueltos:**
+
+1. ❌ → ✅ Links de referencias no eran accesibles desde navegación
+2. ❌ → ✅ Admin sidebar no persistía al navegar a /admin/referencias
+3. ❌ → ✅ npm vulnerabilities (tar package)
+4. ❌ → 📋 Sistema de referidos clientes sin UI (ahora planeado)
+
+**Commit:** `0a578a2` - 20 archivos, 2173 insertions
+
+**Estado:** ✅ Navegación completa, layout correcto, sistema listo para testing
+
+**Siguiente paso:**
+
+- **Opción A:** Implementar Client Referral Dashboard (~3-4 horas, 8 archivos)
+- **Opción B:** FASE 7 - Testing & QA del Business Referral System
+
+---
 
 #### Session 57 (2026-02-02 01:30 PM)
 
@@ -261,7 +315,7 @@
 | File                                                     | Purpose                                       |
 | -------------------------------------------------------- | --------------------------------------------- |
 | `src/app/(dashboard)/referencias/page.tsx`               | Dashboard de referencias para business owners |
-| `src/app/(dashboard)/admin/referencias/page.tsx`         | Admin dashboard con vista global del programa |
+| `src/app/(admin)/admin/referencias/page.tsx`             | Admin dashboard con vista global del programa |
 | `src/app/(auth)/register/page.tsx`                       | Signup page con integración de referidos      |
 | `src/components/referrals/referral-code-card.tsx`        | Card con código único + QR + compartir        |
 | `src/components/referrals/referrer-banner.tsx`           | Banner que muestra quién refirió (signup)     |
@@ -301,9 +355,9 @@
 
 ### Continue With
 
-**🎯 FASE 7: Testing & QA del Sistema de Referencias**
+**Opción A: 🎯 FASE 7 - Testing & QA del Business Referral System** (Recomendado)
 
-Sistema de referencias completo (FASE 1-6 ✅). Ahora verificar que todo funciona correctamente end-to-end.
+Sistema de referencias business-to-business completo (FASE 1-6 ✅ + navegación fixed). Ahora verificar que todo funciona correctamente end-to-end.
 
 **Objetivo:** Validar funcionamiento completo del sistema de referencias desde signup hasta admin dashboard.
 
@@ -336,22 +390,27 @@ Sistema de referencias completo (FASE 1-6 ✅). Ahora verificar que todo funcion
 **Comandos útiles:**
 
 ```bash
-# Verificar compilación
-npx tsc --noEmit
-
-# Verificar servidor
-lsof -i :3000
-
-# Aplicar migrations (si es necesario)
-supabase db push
+npm run dev  # Servidor en http://localhost:3000
+npx tsc --noEmit  # Verificar compilación TypeScript
+lsof -i :3000  # Verificar servidor
 ```
 
-**Features opcionales para futuro:**
+**Opción B: 👥 Implementar Client Referral Dashboard** (3-4 horas)
 
-- Export CSV de conversiones
-- Filtros avanzados en admin dashboard
-- Real-time updates con Supabase subscriptions
-- Email notifications para milestones
+Sistema de referidos cliente-a-cliente (backend ya existe, falta UI).
+
+**Plan completo en:** `CLIENT_REFERRAL_DASHBOARD_PLAN.md`
+
+**Sprint 1 (2-3 horas):**
+
+1. Crear 3 API routes (my-code, stats, list)
+2. Testing de APIs
+
+**Sprint 2 (2-3 horas):** 3. Crear 4 componentes frontend 4. Crear página `/referidos`
+
+**Sprint 3 (1 hora):** 5. Integrar link en sidebar 6. Testing end-to-end 7. Visual verification
+
+**Total:** ~770 líneas de código (8 archivos nuevos)
 
 ---
 
