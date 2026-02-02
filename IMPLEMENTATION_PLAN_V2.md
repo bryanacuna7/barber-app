@@ -1,11 +1,52 @@
 # Plan de Implementación: Mejoras al Sistema de Reservas y Rebranding
 
 **Proyecto:** BarberShop Pro → Salon Booking Platform
-**Fecha:** 2026-02-02 (Actualizado con Staff Experience)
-**Estimado Total:** 98-124 horas (5-6 semanas)
-**Archivos Afectados:** ~175 archivos
-**Complejidad:** Alta (6 áreas principales)
-**Versión:** 2.3 (con Staff Experience - Vista Solo Hoy)
+**Fecha:** 2026-02-02 (Actualizado con Technical Debt Fixes)
+**Estimado Total:** 102-130 horas (5-6 semanas)
+**Archivos Afectados:** ~180 archivos
+**Complejidad:** Alta (Área 0 + 6 áreas principales)
+**Versión:** 2.4 (con Technical Debt & Pre-Implementation Fixes)
+
+---
+
+## 📑 Table of Contents
+
+> **Nota:** Este archivo es grande (4,500+ líneas). Considera partirlo en archivos separados cuando se completen áreas individuales.
+
+### Quick Navigation
+
+- [⚠️ Changelog](#️-cambios-importantes-v20--v21) - Historial de versiones
+- [🚀 Pre-Implementation Tasks](#-pre-implementation-tasks-hacer-antes-de-implementar) - Setup inicial
+- [Área 0: Technical Debt Fixes](#área-0-technical-debt--pre-implementation-fixes) - Bloqueadores técnicos (HACER PRIMERO)
+- [Área 1: Client Subscription & Basic Plan](#área-1-client-subscription--basic-plan-system) - Sistema de subscripciones
+- [Área 2: Advance Payments & No-Show](#área-2-advance-payments--no-show-prevention) - SINPE Móvil + prevención no-show
+- [Área 3: Rebranding (Barber → Staff)](#área-3-rebranding-barber--staff) - Renombrado masivo
+- [Área 4: Client Referrals Dashboard](#área-4-sistema-de-referidos-cliente-a-cliente) - Dashboard de referidos clientes
+- [Área 4B: Full Client Dashboard](#área-4b-full-client-dashboard-layout-nuevo) - Layout completo cliente
+- [Área 5: Web Push Notifications](#área-5-web-push-notifications-nuevo) - Notificaciones PWA
+- [Área 6: Staff Experience](#área-6-staff-experience---vista-mi-día-nuevo) - Vista "Mi Día" para staff
+
+### Estimated Time by Area
+
+| Área      | Descripción                | Estimado    | Estado        |
+| --------- | -------------------------- | ----------- | ------------- |
+| 0         | Technical Debt Fixes       | 4-6h        | ⏳ Bloqueante |
+| 1         | Subscriptions & Basic Plan | 18-22h      | 🔄 Current    |
+| 2         | Advance Payments           | 12-16h      | ⏳ Pending    |
+| 3         | Rebranding                 | 24-30h      | ⏳ Pending    |
+| 4         | Client Referrals           | 6-8h        | ⏳ Pending    |
+| 4B        | Client Dashboard           | 8-10h       | ⏳ Pending    |
+| 5         | Web Push                   | 12-16h      | ⏳ Pending    |
+| 6         | Staff Experience           | 8-10h       | ⏳ Pending    |
+| **Total** |                            | **92-118h** | **5-6 weeks** |
+
+### How to Use This Document
+
+1. **Start with Pre-Implementation Tasks** - Setup git, branches, cleanup
+2. **Complete Área 0 FIRST** - Fix TypeScript errors and technical debt (blocker)
+3. **Work through areas sequentially** - Each area builds on previous work
+4. **Archive completed areas** - Move to `docs/specs/area-X-[name].md` when done
+5. **Update PROGRESS.md** - Auto-saved after each completion
 
 ---
 
@@ -47,7 +88,7 @@
   - Referidos (ya planeado en v2.1)
 - ✅ Corregido: Layout `(client-dashboard)` necesario (no existía)
 
-**v2.3 (ACTUAL):**
+**v2.3:**
 
 - ✅ Agregado: Staff Experience (Área 6) - Vista simplificada para barberos/staff
   - Vista "Mi Día" - solo citas de hoy
@@ -56,6 +97,17 @@
   - Total del día visible
   - PWA-optimizado para uso en móvil
 - ✅ Agregado: Botones de compartir WhatsApp en booking pages
+
+**v2.4 (ACTUAL):**
+
+- ✅ Agregado: Área 0 - Technical Debt & Pre-Implementation Fixes (basado en code audit)
+  - Fix 49+ errores de TypeScript que bloquean build real
+  - Remover `@ts-nocheck` de 30+ archivos
+  - Agregar rate limiting a APIs públicas (seguridad)
+  - Eliminar archivos duplicados y cleanup de código
+  - Completar TODOs pendientes críticos
+- ✅ Actualizado: Estimado total +4-6 horas por fixes técnicos
+- ✅ Nota: Estos fixes son BLOQUEANTES - deben hacerse antes de cualquier área
 
 ---
 
@@ -149,13 +201,20 @@ RESEND_API_KEY=... # O el email provider que uses
 
 ## Resumen Ejecutivo
 
-Este plan aborda **5 áreas críticas** para transformar la aplicación de un sistema específico para barberías a una plataforma genérica para salones de belleza, con mejoras en monetización y retención de clientes:
+Este plan aborda **7 áreas** para transformar la aplicación de un sistema específico para barberías a una plataforma genérica para salones de belleza, con mejoras en monetización y retención de clientes:
+
+**🔴 BLOQUEANTE (hacer primero):**
+
+0. **Technical Debt Fixes** - Corregir errores TypeScript, seguridad, y cleanup (4-6h)
+
+**Áreas principales:**
 
 1. **Sistema de Clientes con Plan Básico** - Incentivos para registro + límites de demo + PWA bloqueado
 2. **Pagos Anticipados** - Reducir no-shows con depósitos opcionales + bonificación de puntos
 3. **Rebranding Barber → Staff** - Cambiar terminología en 95+ archivos
 4. **Sistema de No-Show** - Detección automática + penalizaciones configurables
-5. **Sistema de Referidos Cliente-a-Cliente** - Dashboard para clientes + milestones + rewards (NUEVO)
+5. **Sistema de Referidos Cliente-a-Cliente** - Dashboard para clientes + milestones + rewards
+6. **Staff Experience** - Vista "Mi Día" para barberos/staff
 
 ---
 
@@ -188,6 +247,219 @@ Este plan aborda **5 áreas críticas** para transformar la aplicación de un si
 - **Término genérico:** "Staff" / "Personal" / "Equipo"
 - **Enfoque:** Híbrido - mantener DB, cambiar código/UI
 - **Scope:** 81 archivos TypeScript + 40 strings en español
+
+---
+
+## 🔴 Área 0: Technical Debt & Pre-Implementation Fixes (BLOQUEANTE)
+
+**Objetivo:** Estabilizar el codebase antes de agregar nuevas features. Estos fixes son **BLOQUEANTES** - el build actual usa `SKIP_TYPE_CHECK=true` para evitar errores.
+
+**Tiempo estimado:** 4-6 horas
+**Prioridad:** CRÍTICA - Hacer ANTES de cualquier otra área
+**Basado en:** Code Audit realizado 2026-02-02
+
+### 0.1 TypeScript Type Safety (2-3 horas)
+
+**Estado actual:** 49+ errores de TypeScript, build real falla sin `SKIP_TYPE_CHECK=true`
+
+#### Archivos con errores críticos:
+
+| Archivo                                                  | Errores | Problema                | Solución                                  |
+| -------------------------------------------------------- | ------- | ----------------------- | ----------------------------------------- |
+| `src/app/(admin)/admin/referencias/page.tsx`             | 33      | Type 'never' en queries | Tipar respuesta de Supabase correctamente |
+| `src/app/(dashboard)/barberos/page.tsx`                  | 3       | Missing 'id' on `{}`    | Tipar `business` response                 |
+| `src/app/(dashboard)/barberos/desafios/page.tsx`         | 2       | Missing 'id' on `{}`    | Tipar `business` response                 |
+| `src/app/(dashboard)/barberos/logros/page.tsx`           | 2       | Missing 'id' on `{}`    | Tipar `business` response                 |
+| `src/app/(dashboard)/lealtad/configuracion/page.tsx`     | 10      | Type 'never' issues     | Tipar loyalty program response            |
+| `src/app/(auth)/register/page.tsx:168`                   | 1       | Empty object type       | Add proper typing to business creation    |
+| `src/app/(dashboard)/admin-referencias-preview/page.tsx` | 1       | BadgeVariant type       | Fix variant prop type                     |
+
+#### Remover `@ts-nocheck` de archivos:
+
+**API Routes (alta prioridad):**
+
+```
+src/app/api/appointments/route.ts
+src/app/api/appointments/[id]/route.ts
+src/app/api/public/[slug]/book/route.ts
+src/app/api/admin/payments/route.ts
+src/app/api/referrals/*/route.ts (5 archivos)
+src/app/api/gamification/barber/*/route.ts (3 archivos)
+```
+
+**Componentes (media prioridad):**
+
+```
+src/components/loyalty/*.tsx
+src/components/gamification/*.tsx
+src/lib/gamification/loyalty-calculator-server.ts
+src/lib/notifications.ts
+```
+
+**Acción:** Agregar tipos correctos en lugar de `@ts-nocheck`
+
+### 0.2 Security Hardening (1 hora)
+
+#### Rate Limiting para APIs públicas
+
+**Problema:** El endpoint `/api/public/[slug]/book` no tiene rate limiting, vulnerable a spam de reservas.
+
+**Solución:** Implementar rate limiting con Upstash o similar
+
+**Archivo a modificar:** `src/app/api/public/[slug]/book/route.ts`
+
+```typescript
+// Agregar al inicio del archivo
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '1 m'), // 5 bookings per minute per IP
+  analytics: true,
+})
+
+export async function POST(request: Request, { params }) {
+  // Rate limit check
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1'
+  const { success, limit, reset, remaining } = await ratelimit.limit(ip)
+
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': reset.toString(),
+        },
+      }
+    )
+  }
+
+  // ... resto del código existente
+}
+```
+
+**Variables de entorno necesarias:**
+
+```bash
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
+```
+
+**Alternativa sin Upstash:** Usar in-memory rate limiting (solo para single-instance deployments):
+
+```typescript
+// Simple in-memory rate limiter (NOT for production with multiple instances)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+```
+
+### 0.3 Code Cleanup (30 min)
+
+#### Eliminar archivos duplicados/innecesarios:
+
+```bash
+# Archivo duplicado con espacio en nombre (probablemente backup accidental)
+rm "src/lib/referrals 2.ts"
+
+# Verificar y consolidar componentes refactorizados:
+# Si existen ambas versiones, eliminar la vieja:
+# - src/components/ui/toast.tsx vs toast-refactored.tsx
+# - src/components/ui/button.tsx vs button-refactored.tsx
+# - src/components/ui/card.tsx vs card-refactored.tsx
+```
+
+#### Limpiar console.log antes de producción:
+
+**Estado actual:** 161 console statements en 73 archivos
+
+**Estrategia:**
+
+1. **Mantener** `console.error` en catch blocks (útil para debugging)
+2. **Eliminar** `console.log` de debugging
+3. **Convertir** logs importantes a un logger estructurado (futuro)
+
+**Comando para encontrar:**
+
+```bash
+# Ver todos los console.log
+grep -r "console.log" src/ --include="*.ts" --include="*.tsx" | wc -l
+```
+
+**Acción inmediata:** Eliminar console.log obvios de debugging, mantener error logging.
+
+### 0.4 Completar TODOs Críticos (1 hora)
+
+| Archivo                                          | Línea   | TODO                                           | Prioridad | Acción                                                                      |
+| ------------------------------------------------ | ------- | ---------------------------------------------- | --------- | --------------------------------------------------------------------------- |
+| `src/app/api/appointments/[id]/route.ts`         | 158     | Update client stats when appointment completed | ALTA      | Implementar actualización de `total_visits`, `total_spent`, `last_visit_at` |
+| `src/app/api/referrals/claim-reward/route.ts`    | 141     | Apply actual discount/credit to subscription   | MEDIA     | Implementar lógica de descuento                                             |
+| `src/components/dashboard/dashboard-content.tsx` | 40      | Get subscription status                        | BAJA      | Ya existe hook, solo conectar                                               |
+| `src/app/api/referrals/generate-code/route.ts`   | 72      | Generate QR code                               | BAJA      | Opcional, puede posponerse                                                  |
+| `src/app/(public)/reservar/[slug]/page.tsx`      | 275-279 | Account creation/sign in flow                  | MEDIA     | Parte de Área 1                                                             |
+
+**Implementación del TODO más crítico:**
+
+```typescript
+// src/app/api/appointments/[id]/route.ts - línea 158
+// Después de marcar appointment como 'completed':
+
+if (result.data.status === 'completed' && result.data.client_id) {
+  // Update client stats
+  const { data: client } = await supabase
+    .from('clients')
+    .select('total_visits, total_spent')
+    .eq('id', result.data.client_id)
+    .single()
+
+  if (client) {
+    await supabase
+      .from('clients')
+      .update({
+        total_visits: (client.total_visits || 0) + 1,
+        total_spent: (client.total_spent || 0) + result.data.price,
+        last_visit_at: new Date().toISOString(),
+      })
+      .eq('id', result.data.client_id)
+  }
+}
+```
+
+### 0.5 Verificación Post-Fixes
+
+**Checklist obligatorio antes de continuar con Área 1:**
+
+```bash
+# 1. TypeScript compila sin errores
+npm run build
+# (NO usar build:skip-ts)
+
+# 2. Lint pasa
+npm run lint
+
+# 3. Tests unitarios pasan
+npm run test:unit
+
+# 4. No hay archivos duplicados
+ls "src/lib/referrals 2.ts" 2>/dev/null && echo "DELETE THIS FILE"
+
+# 5. Verificar que rate limiting funciona (manual)
+# Hacer 6 bookings seguidos, el 6to debe fallar con 429
+```
+
+### 0.6 Archivos Afectados (Resumen)
+
+| Categoría        | Archivos         | Acción                             |
+| ---------------- | ---------------- | ---------------------------------- |
+| TypeScript fixes | ~15              | Agregar tipos, remover @ts-nocheck |
+| Rate limiting    | 1                | Agregar middleware                 |
+| Cleanup          | 1-4              | Eliminar duplicados                |
+| TODOs            | 2                | Implementar lógica faltante        |
+| **Total**        | **~20 archivos** |                                    |
+
+**Estimated LOC:** ~300 líneas de cambios
 
 ---
 
@@ -4283,6 +4555,56 @@ Agregar link a "Mi Día" para usuarios que son barberos.
 
 ---
 
+## 📝 Document Management Strategy
+
+### Current State
+
+- **File Size:** 4,500+ lines (~136KB)
+- **Structure:** Single unified plan
+- **Status:** Active implementation (Área 1 in progress)
+
+### Future Splitting Strategy
+
+**When to split:** After each area is completed and tested
+
+**Process:**
+
+```bash
+# 1. Extract completed area to separate spec
+# Move detailed implementation to docs/specs/
+cat IMPLEMENTATION_PLAN_V2.md | sed -n '/^## Área X/,/^## Área/p' > docs/specs/area-X-[name].md
+
+# 2. Update main plan with reference
+# Replace detailed section with summary + link
+
+# 3. Archive when all areas complete
+mv IMPLEMENTATION_PLAN_V2.md docs/archive/implementation-plan-v2-complete.md
+```
+
+**Benefits:**
+
+- Keeps main plan focused on active/pending work
+- Archives completed work for reference
+- Reduces file size over time
+- Maintains clear history
+
+### Recommended File Structure (Post-Implementation)
+
+```
+docs/specs/
+├── implementation-plan-v2-summary.md      # High-level overview
+├── area-0-technical-debt.md               # ✅ Completed
+├── area-1-subscriptions.md                # ✅ Completed
+├── area-2-advance-payments.md             # ✅ Completed
+├── area-3-rebranding.md                   # ✅ Completed
+├── area-4-client-referrals.md             # ✅ Completed
+├── area-4b-client-dashboard.md            # ✅ Completed
+├── area-5-web-push.md                     # ✅ Completed
+└── area-6-staff-experience.md             # ✅ Completed
+```
+
+---
+
 **Plan creado:** 2026-02-02
-**Actualizado:** 2026-02-02 (v2.3 con Staff Experience - Vista Mi Día)
+**Actualizado:** 2026-02-02 (v2.4 - Added TOC & Document Management Strategy)
 **Próximo paso:** Aprobar plan y comenzar implementación

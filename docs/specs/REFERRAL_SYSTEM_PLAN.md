@@ -14,13 +14,13 @@ Implementar sistema de referencias para dueños de barberías con recompensas es
 
 ## 📊 Sistema de Milestones (Recompensas Escalonadas)
 
-| Milestone | Referidos | Recompensa                  | Valor Real   | Badge              |
-| --------- | --------- | --------------------------- | ------------ | ------------------ |
-| 1         | 1         | 20% descuento próximo mes   | Ahorras ~$6  | 🥉 First Partner   |
-| 2         | 3         | 1 mes gratis del Plan Pro   | Ahorras $29  | 🥈 Growth Partner  |
-| 3         | 5         | 2 meses gratis del Plan Pro | Ahorras $58  | 🥇 Network Builder |
-| 4         | 10        | 4 meses gratis del Plan Pro | Ahorras $116 | 💎 Super Connector |
-| 5         | 20        | 1 año gratis del Plan Pro   | Ahorras $348 | ⭐ Network King    |
+| Milestone | Referidos                  | Recompensa                   | Valor Real   | Badge              |
+| --------- | -------------------------- | ---------------------------- | ------------ | ------------------ |
+| 1         | 1                          | 20% descuento próximo mes    | Ahorras ~$6  | 🥉 First Partner   |
+| 2         | 3                          | 1 mes gratis del Plan Pro    | Ahorras $29  | 🥈 Growth Partner  |
+| 3         | 5                          | 2 meses gratis del Plan Pro  | Ahorras $58  | 🥇 Network Builder |
+| 4         | 10                         | 4 meses gratis del Plan Pro  | Ahorras $116 | 💎 Super Connector |
+| 5         | 20 que permanezcan 3 meses | 12 meses gratis del Plan Pro | Ahorras $348 | ⭐ Network King    |
 
 ---
 
