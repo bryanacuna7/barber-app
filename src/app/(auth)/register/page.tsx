@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -17,9 +17,17 @@ import {
 } from '@/components/ui/card'
 import { useFormValidation } from '@/hooks/use-form-validation'
 import { registerSchema } from '@/lib/validations/auth'
+import { ReferrerBanner } from '@/components/referrals/referrer-banner'
+import {
+  saveReferralCode,
+  getReferralCode,
+  clearReferralCode,
+  trackReferralConversion,
+} from '@/lib/referrals'
 
 export default function RegisterPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -30,9 +38,46 @@ export default function RegisterPage() {
   const [showPasswords, setShowPasswords] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [referrerInfo, setReferrerInfo] = useState<{
+    businessName: string
+    businessSlug?: string
+  } | null>(null)
+  const [loadingReferrer, setLoadingReferrer] = useState(false)
 
   const { getFieldError, markFieldTouched, validateForm, clearErrors } =
     useFormValidation(registerSchema)
+
+  // Detectar código de referido en query params
+  useEffect(() => {
+    const refCode = searchParams.get('ref')
+    if (!refCode) return
+
+    // Guardar código en cookie
+    saveReferralCode(refCode)
+
+    // Fetch info del referrer
+    const fetchReferrerInfo = async () => {
+      setLoadingReferrer(true)
+      try {
+        const response = await fetch(`/api/referrals/info?code=${refCode}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.isValid) {
+            setReferrerInfo({
+              businessName: data.businessName,
+              businessSlug: data.businessSlug,
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching referrer info:', error)
+      } finally {
+        setLoadingReferrer(false)
+      }
+    }
+
+    fetchReferrerInfo()
+  }, [searchParams])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -101,16 +146,29 @@ export default function RegisterPage() {
     // 2. Create business
     const slug = generateSlug(formData.businessName)
 
-    const { error: businessError } = await supabase.from('businesses').insert({
-      owner_id: authData.user.id,
-      name: formData.businessName,
-      slug: slug,
-    })
+    const { data: businessData, error: businessError } = await supabase
+      .from('businesses')
+      .insert({
+        owner_id: authData.user.id,
+        name: formData.businessName,
+        slug: slug,
+      })
+      .select()
+      .single()
 
-    if (businessError) {
+    if (businessError || !businessData) {
       setError('Error al crear el negocio. El nombre puede estar en uso.')
       setIsLoading(false)
       return
+    }
+
+    // 3. Track referral conversion if exists
+    const referralCode = getReferralCode()
+    if (referralCode) {
+      const tracked = await trackReferralConversion(referralCode, businessData.id)
+      if (tracked) {
+        clearReferralCode() // Clear cookie after successful tracking
+      }
     }
 
     clearErrors()
@@ -127,6 +185,14 @@ export default function RegisterPage() {
 
       <form onSubmit={handleRegister}>
         <CardContent className="space-y-4">
+          {/* Referrer Banner */}
+          {referrerInfo && (
+            <ReferrerBanner
+              businessName={referrerInfo.businessName}
+              businessSlug={referrerInfo.businessSlug}
+            />
+          )}
+
           {error && (
             <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {error}
