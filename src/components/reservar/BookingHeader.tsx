@@ -1,5 +1,39 @@
-import { Scissors, MapPin, Phone, MessageCircle } from 'lucide-react'
+'use client'
+
+import { Scissors, MapPin, Phone, MessageCircle, Share2 } from 'lucide-react'
 import type { Business } from '@/types'
+
+function ShareButton({ business }: { business: Business }) {
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const text = `¡Reserva tu cita en ${business.name}! 💈`
+
+    // Try native share first (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: business.name, text, url })
+        return
+      } catch {
+        // User cancelled or not supported, fall through to WhatsApp
+      }
+    }
+
+    // Fallback to WhatsApp share
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${text}\n👉 ${url}`)}`
+    window.open(whatsappUrl, '_blank')
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-[13px] font-semibold text-blue-700 ios-press dark:bg-blue-900/30 dark:text-blue-400"
+      aria-label="Compartir link de reservas"
+    >
+      <Share2 className="h-3.5 w-3.5" />
+      <span>Compartir</span>
+    </button>
+  )
+}
 
 interface BookingHeaderProps {
   business: Business
@@ -64,6 +98,7 @@ export function BookingHeader({ business }: BookingHeaderProps) {
               <span>WhatsApp</span>
             </a>
           )}
+          <ShareButton business={business} />
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, MessageCircle } from 'lucide-react'
+import { CheckCircle, MessageCircle, Share2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Service, Business } from '@/types'
@@ -113,6 +113,38 @@ export function BookingSuccess({
               Enviar mensaje por WhatsApp
             </a>
           )}
+
+          {/* Share button for viral growth */}
+          <button
+            onClick={() => {
+              const url =
+                typeof window !== 'undefined'
+                  ? window.location.origin + `/reservar/${business?.slug}`
+                  : ''
+              const text = `¡Acabo de reservar en ${business?.name}! Reserva tu cita también 💈`
+
+              if (navigator.share) {
+                navigator
+                  .share({ title: business?.name || 'Reserva tu cita', text, url })
+                  .catch(() => {
+                    window.open(
+                      `https://wa.me/?text=${encodeURIComponent(`${text}\n👉 ${url}`)}`,
+                      '_blank'
+                    )
+                  })
+              } else {
+                window.open(
+                  `https://wa.me/?text=${encodeURIComponent(`${text}\n👉 ${url}`)}`,
+                  '_blank'
+                )
+              }
+            }}
+            className="flex items-center justify-center gap-2.5 rounded-2xl bg-zinc-200/80 px-5 py-4 text-[17px] font-semibold text-zinc-700 ios-press dark:bg-zinc-700 dark:text-zinc-200"
+          >
+            <Share2 className="h-5 w-5" />
+            Recomendar a un amigo
+          </button>
+
           <p className="text-center text-[13px] text-zinc-500 dark:text-zinc-400">
             Te enviaremos un recordatorio antes de tu cita.
           </p>
