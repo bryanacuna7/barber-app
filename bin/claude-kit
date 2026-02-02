@@ -44,6 +44,7 @@ Usage:
 
 Commands:
   doctor              Health check for your project
+  maintain            Update skills + health check (all-in-one)
   skills add <name>   Install a new skill
   skills list         List all installed skills
   skills update       Update managed skills
@@ -80,6 +81,9 @@ main() {
   case "$command" in
     doctor)
       bash "$CLI_SCRIPTS_DIR/doctor.sh" "$@"
+      ;;
+    maintain)
+      bash "$CLI_SCRIPTS_DIR/maintain.sh" "$@"
       ;;
     skills)
       if [ $# -eq 0 ]; then
