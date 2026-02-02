@@ -40,5 +40,6 @@ coverage/
 next-env.d.ts
 
 # Claude/Playwright temp folders
-.agent/
+.agents/
+.claude/plans/
 .playwright-mcp/
