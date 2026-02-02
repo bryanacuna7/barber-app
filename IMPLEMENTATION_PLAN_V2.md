@@ -1,11 +1,11 @@
 # Plan de Implementación: Mejoras al Sistema de Reservas y Rebranding
 
 **Proyecto:** BarberShop Pro → Salon Booking Platform
-**Fecha:** 2026-02-02 (Actualizado con Web Push + Full Client Dashboard)
-**Estimado Total:** 95-120 horas (5-6 semanas)
-**Archivos Afectados:** ~170 archivos
-**Complejidad:** Alta (5 áreas principales)
-**Versión:** 2.2 (con Web Push Notifications + Full Client Dashboard)
+**Fecha:** 2026-02-02 (Actualizado con Staff Experience)
+**Estimado Total:** 98-124 horas (5-6 semanas)
+**Archivos Afectados:** ~175 archivos
+**Complejidad:** Alta (6 áreas principales)
+**Versión:** 2.3 (con Staff Experience - Vista Solo Hoy)
 
 ---
 
@@ -33,7 +33,7 @@
 - ✅ Agregado: PWA bloqueado para Plan Básico
 - ✅ Agregado: Sección Pre-Implementation Tasks (git, branches, docs)
 
-**v2.2 (ACTUAL):**
+**v2.2:**
 
 - ✅ Agregado: Web Push Notifications (Área 5) - notificaciones nativas de PWA
   - Service Worker con push handling
@@ -46,6 +46,16 @@
   - Mis Puntos (balance de loyalty)
   - Referidos (ya planeado en v2.1)
 - ✅ Corregido: Layout `(client-dashboard)` necesario (no existía)
+
+**v2.3 (ACTUAL):**
+
+- ✅ Agregado: Staff Experience (Área 6) - Vista simplificada para barberos/staff
+  - Vista "Mi Día" - solo citas de hoy
+  - Próximo cliente destacado
+  - Botones de acción rápida (WhatsApp, marcar llegada)
+  - Total del día visible
+  - PWA-optimizado para uso en móvil
+- ✅ Agregado: Botones de compartir WhatsApp en booking pages
 
 ---
 
@@ -3713,9 +3723,444 @@ if (FEATURES.ADVANCE_PAYMENTS) {
 
 ---
 
+## Área 6: Staff Experience - Vista "Mi Día" (NUEVO)
+
+**Objetivo:** Crear una vista ultra-simplificada para barberos/staff que muestre solo lo esencial del día actual, facilitando la adopción por personal no técnico.
+
+**Problema que resuelve:**
+
+> Barbero abre app → Ve dashboard completo → Se confunde → Cierra app → Vuelve a WhatsApp
+
+**Solución:**
+
+> Barbero abre app → Ve solo: "Próximo: Carlos, 2:30pm, Fade" → Usa la app
+
+### 6.1 Database Changes
+
+**No se requieren cambios de base de datos** - usa tablas existentes (appointments, clients, services).
+
+### 6.2 API Endpoint
+
+**New File:** `src/app/api/barber/today/route.ts`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+import { startOfDay, endOfDay } from 'date-fns'
+
+export async function GET() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Get barber info
+  const { data: barber } = await supabase
+    .from('barbers')
+    .select('id, name, business_id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!barber) {
+    return NextResponse.json({ error: 'Not a barber' }, { status: 403 })
+  }
+
+  const today = new Date()
+  const dayStart = startOfDay(today).toISOString()
+  const dayEnd = endOfDay(today).toISOString()
+
+  // Get today's appointments
+  const { data: appointments } = await supabase
+    .from('appointments')
+    .select(
+      `
+      id,
+      scheduled_at,
+      status,
+      client:clients(id, name, phone),
+      service:services(id, name, duration_minutes, price)
+    `
+    )
+    .eq('barber_id', barber.id)
+    .gte('scheduled_at', dayStart)
+    .lte('scheduled_at', dayEnd)
+    .order('scheduled_at', { ascending: true })
+
+  // Calculate totals
+  const completed = appointments?.filter((a) => a.status === 'completed') || []
+  const pending = appointments?.filter((a) => ['confirmed', 'pending'].includes(a.status)) || []
+
+  const totalRevenue = completed.reduce((sum, a) => sum + (a.service?.price || 0), 0)
+  const projectedRevenue = appointments?.reduce((sum, a) => sum + (a.service?.price || 0), 0) || 0
+
+  // Find next appointment
+  const now = new Date()
+  const nextAppointment = pending.find((a) => new Date(a.scheduled_at) > now)
+
+  return NextResponse.json({
+    barber: { id: barber.id, name: barber.name },
+    today: {
+      date: today.toISOString(),
+      totalAppointments: appointments?.length || 0,
+      completed: completed.length,
+      pending: pending.length,
+      totalRevenue,
+      projectedRevenue,
+    },
+    nextAppointment,
+    appointments: appointments || [],
+  })
+}
+```
+
+### 6.3 Page Component
+
+**New File:** `src/app/(dashboard)/mi-dia/page.tsx`
+
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { TodayView } from '@/components/barber/today-view'
+
+export default async function MiDiaPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  // Check if user is a barber
+  const { data: barber } = await supabase
+    .from('barbers')
+    .select('id, name')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!barber) {
+    redirect('/dashboard') // Not a barber, go to owner dashboard
+  }
+
+  return <TodayView barberId={barber.id} barberName={barber.name} />
+}
+```
+
+### 6.4 Today View Component
+
+**New File:** `src/components/barber/today-view.tsx`
+
+```typescript
+'use client'
+
+import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import {
+  Clock,
+  User,
+  Phone,
+  MessageCircle,
+  CheckCircle,
+  Calendar,
+  DollarSign,
+  RefreshCw
+} from 'lucide-react'
+
+interface TodayViewProps {
+  barberId: string
+  barberName: string
+}
+
+interface Appointment {
+  id: string
+  scheduled_at: string
+  status: string
+  client: { id: string; name: string; phone: string }
+  service: { id: string; name: string; duration_minutes: number; price: number }
+}
+
+interface TodayData {
+  barber: { id: string; name: string }
+  today: {
+    date: string
+    totalAppointments: number
+    completed: number
+    pending: number
+    totalRevenue: number
+    projectedRevenue: number
+  }
+  nextAppointment: Appointment | null
+  appointments: Appointment[]
+}
+
+export function TodayView({ barberId, barberName }: TodayViewProps) {
+  const [data, setData] = useState<TodayData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch('/api/barber/today')
+      if (res.ok) {
+        const json = await res.json()
+        setData(json)
+      }
+    } catch (error) {
+      console.error('Error fetching today data:', error)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+    // Refresh every 2 minutes
+    const interval = setInterval(fetchData, 120000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleRefresh = () => {
+    setRefreshing(true)
+    fetchData()
+  }
+
+  const markAsArrived = async (appointmentId: string) => {
+    await fetch(`/api/appointments/${appointmentId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'in_progress' }),
+    })
+    fetchData()
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
+  const today = new Date()
+
+  return (
+    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#1C1C1E] p-4 pb-20">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+              👋 Hola, {barberName}
+            </h1>
+            <p className="text-zinc-500 dark:text-zinc-400">
+              {format(today, "EEEE d 'de' MMMM", { locale: es })}
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="p-2 rounded-full bg-white dark:bg-zinc-800 shadow-sm"
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Next Appointment - Hero Card */}
+      {data?.nextAppointment ? (
+        <div className="mb-6 rounded-3xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white shadow-lg">
+          <p className="text-sm font-medium text-blue-100 uppercase tracking-wide">
+            Próximo Cliente
+          </p>
+          <div className="mt-3 flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
+              <Clock className="h-7 w-7" />
+            </div>
+            <div className="flex-1">
+              <p className="text-3xl font-bold">
+                {format(new Date(data.nextAppointment.scheduled_at), 'h:mm a')}
+              </p>
+              <p className="text-lg font-semibold">{data.nextAppointment.client.name}</p>
+              <p className="text-blue-100">
+                {data.nextAppointment.service.name} • {data.nextAppointment.service.duration_minutes} min
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mt-4 flex gap-3">
+            {data.nextAppointment.client.phone && (
+              <a
+                href={`https://wa.me/${data.nextAppointment.client.phone.replace(/\D/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white/20 py-3 font-semibold"
+              >
+                <MessageCircle className="h-5 w-5" />
+                WhatsApp
+              </a>
+            )}
+            <button
+              onClick={() => markAsArrived(data.nextAppointment!.id)}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white py-3 font-semibold text-blue-600"
+            >
+              <CheckCircle className="h-5 w-5" />
+              Llegó
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-6 rounded-3xl bg-zinc-100 dark:bg-zinc-800 p-6 text-center">
+          <Calendar className="h-12 w-12 mx-auto text-zinc-400" />
+          <p className="mt-3 text-lg font-semibold text-zinc-700 dark:text-zinc-300">
+            No hay más citas hoy
+          </p>
+          <p className="text-zinc-500">¡Buen trabajo! 🎉</p>
+        </div>
+      )}
+
+      {/* Today Stats */}
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        <div className="rounded-2xl bg-white dark:bg-zinc-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase text-zinc-400">Citas hoy</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+            {data?.today.completed}/{data?.today.totalAppointments}
+          </p>
+        </div>
+        <div className="rounded-2xl bg-white dark:bg-zinc-800 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase text-zinc-400">Ganado hoy</p>
+          <p className="text-2xl font-bold text-emerald-600">
+            ₡{(data?.today.totalRevenue || 0).toLocaleString()}
+          </p>
+        </div>
+      </div>
+
+      {/* Remaining Appointments */}
+      {data?.appointments && data.appointments.length > 0 && (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold uppercase text-zinc-400">
+            Agenda de hoy ({data.today.pending} pendientes)
+          </h2>
+          <div className="space-y-2">
+            {data.appointments
+              .filter(a => ['confirmed', 'pending'].includes(a.status))
+              .map((appointment) => (
+                <div
+                  key={appointment.id}
+                  className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800 p-4 shadow-sm"
+                >
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                      {format(new Date(appointment.scheduled_at), 'h:mm')}
+                    </p>
+                    <p className="text-xs text-zinc-400">
+                      {format(new Date(appointment.scheduled_at), 'a')}
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-zinc-900 dark:text-white truncate">
+                      {appointment.client.name}
+                    </p>
+                    <p className="text-sm text-zinc-500 truncate">
+                      {appointment.service.name}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+                    ₡{appointment.service.price.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Completed Today */}
+      {data?.today.completed && data.today.completed > 0 && (
+        <div className="mt-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase text-zinc-400">
+            Completados hoy ({data.today.completed})
+          </h2>
+          <div className="space-y-2 opacity-60">
+            {data.appointments
+              .filter(a => a.status === 'completed')
+              .map((appointment) => (
+                <div
+                  key={appointment.id}
+                  className="flex items-center gap-3 rounded-2xl bg-white dark:bg-zinc-800 p-3"
+                >
+                  <CheckCircle className="h-5 w-5 text-emerald-500" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      {appointment.client.name} - {appointment.service.name}
+                    </p>
+                  </div>
+                  <p className="text-sm text-emerald-600">
+                    ₡{appointment.service.price.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+### 6.5 Navigation Link
+
+**Modify:** `src/components/dashboard/sidebar.tsx`
+
+Agregar link a "Mi Día" para usuarios que son barberos.
+
+```typescript
+// Add to sidebar links (conditional for barbers)
+{isBarber && (
+  <SidebarLink
+    href="/mi-dia"
+    icon={<Calendar className="h-5 w-5" />}
+    label="Mi Día"
+  />
+)}
+```
+
+### 6.6 Files Summary
+
+| Archivo                                | Tipo   | LOC      |
+| -------------------------------------- | ------ | -------- |
+| `src/app/api/barber/today/route.ts`    | NEW    | ~70      |
+| `src/app/(dashboard)/mi-dia/page.tsx`  | NEW    | ~30      |
+| `src/components/barber/today-view.tsx` | NEW    | ~220     |
+| `src/components/dashboard/sidebar.tsx` | MODIFY | ~10      |
+| **Total**                              |        | **~330** |
+
+### 6.7 Success Criteria
+
+- ✅ Barbero ve vista simplificada al acceder a `/mi-dia`
+- ✅ Próximo cliente destacado con botones de acción
+- ✅ Lista de citas restantes del día
+- ✅ Total ganado visible
+- ✅ Auto-refresh cada 2 minutos
+- ✅ Funciona bien en móvil (PWA)
+
+### 6.8 Estimado
+
+| Tarea               | Horas |
+| ------------------- | ----- |
+| API endpoint        | 1     |
+| Page component      | 0.5   |
+| TodayView component | 2     |
+| Sidebar integration | 0.5   |
+| Testing             | 1     |
+| **Total**           | **5** |
+
+---
+
 ## Resumen Final
 
-### Estimados Totales (ACTUALIZADO v2.2)
+### Estimados Totales (ACTUALIZADO v2.3)
 
 | Área                                | Archivos | LOC        | Horas      |
 | ----------------------------------- | -------- | ---------- | ---------- |
@@ -3725,7 +4170,8 @@ if (FEATURES.ADVANCE_PAYMENTS) {
 | 4. Client Referrals (Backend)       | 11       | ~780       | 8-10       |
 | 4B. Full Client Dashboard           | 8        | ~550       | 6-8        |
 | 5. Web Push Notifications           | 14       | ~650       | 12-16      |
-| **TOTAL**                           | **170**  | **~8,680** | **90-118** |
+| 6. Staff Experience - Mi Día        | 4        | ~330       | 5          |
+| **TOTAL**                           | **174**  | **~9,010** | **95-123** |
 
 ### Archivos Nuevos Agregados por Versión
 
@@ -3745,7 +4191,7 @@ if (FEATURES.ADVANCE_PAYMENTS) {
 - `src/components/client-referrals/*.tsx` (4 NEW)
 - `src/app/(client-dashboard)/referidos/page.tsx` (NEW)
 
-**v2.2 (ACTUAL) - Client Dashboard + Web Push:**
+**v2.2 - Client Dashboard + Web Push:**
 
 - `src/app/(client-dashboard)/layout.tsx` (NEW)
 - `src/components/client-dashboard/sidebar.tsx` (NEW)
@@ -3759,15 +4205,24 @@ if (FEATURES.ADVANCE_PAYMENTS) {
 - `src/components/push/push-permission-prompt.tsx` (NEW)
 - `supabase/migrations/023_push_subscriptions.sql` (NEW)
 
+**v2.3 (ACTUAL) - Staff Experience:**
+
+- `src/app/api/barber/today/route.ts` (NEW)
+- `src/app/(dashboard)/mi-dia/page.tsx` (NEW)
+- `src/components/barber/today-view.tsx` (NEW)
+- `src/components/dashboard/sidebar.tsx` (MODIFY - add Mi Día link)
+
 ### Timeline
 
 - **Sprint 1 (Week 1):** Database migrations + Feature Gating
-- **Sprint 2 (Week 2):** Advance Payments + Referrals Backend
+- **Sprint 2 (Week 2):** Advance Payments + Referrals Backend + **Staff Experience (Área 6)**
 - **Sprint 3 (Week 3):** Client Dashboard + Web Push
 - **Sprint 4 (Week 4):** Rebranding
 - **Sprint 5-6 (Week 5-6):** Testing + Polish
 
-**Total:** 5-6 semanas (90-118 horas)
+**Total:** 5-6 semanas (95-123 horas)
+
+> **Nota:** Área 6 (Staff Experience) es independiente y puede implementarse en cualquier momento. Se sugiere Sprint 2 por su bajo esfuerzo (5 horas) y alto impacto en adopción.
 
 ### Success Criteria
 
@@ -3806,6 +4261,15 @@ if (FEATURES.ADVANCE_PAYMENTS) {
 - ✅ Recordatorio de cita 24h antes
 - ✅ Feature gating: Básico no puede suscribirse
 
+**Área 6 - Staff Experience:**
+
+- ✅ Vista `/mi-dia` muestra solo citas de hoy
+- ✅ Próximo cliente destacado con botones de acción
+- ✅ WhatsApp y "Llegó" funcionan correctamente
+- ✅ Auto-refresh cada 2 minutos
+- ✅ Total ganado del día visible
+- ✅ Funciona bien en móvil (PWA optimizado)
+
 ### Pre-Implementation Checklist
 
 - [ ] Backup production database
@@ -3820,5 +4284,5 @@ if (FEATURES.ADVANCE_PAYMENTS) {
 ---
 
 **Plan creado:** 2026-02-02
-**Actualizado:** 2026-02-02 (v2.2 con Web Push + Full Client Dashboard)
+**Actualizado:** 2026-02-02 (v2.3 con Staff Experience - Vista Mi Día)
 **Próximo paso:** Aprobar plan y comenzar implementación
