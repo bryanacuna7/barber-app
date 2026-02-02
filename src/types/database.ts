@@ -450,6 +450,112 @@ export interface BarberChallengeInsert {
   is_active?: boolean
 }
 
+// ============================================================================
+// Business Referral System Types (Phase 3)
+// ============================================================================
+
+export type ReferralConversionStatus = 'pending' | 'trial' | 'active' | 'churned'
+export type ReferralRewardType = 'discount' | 'free_months' | 'feature_unlock'
+export type ReferralMilestoneTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'legendary'
+
+export interface BusinessReferral {
+  id: string
+  business_id: string
+  referral_code: string
+  qr_code_url: string | null
+  total_referrals: number
+  successful_referrals: number
+  current_milestone: number
+  points_balance: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ReferralConversion {
+  id: string
+  referrer_business_id: string
+  referred_business_id: string | null
+  referral_code: string
+  status: ReferralConversionStatus
+  converted_at: string | null
+  reward_claimed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ReferralMilestone {
+  id: string
+  milestone_number: number
+  referrals_required: number
+  reward_type: ReferralRewardType
+  reward_value: number
+  reward_description: string
+  badge_name: string
+  badge_icon: string | null
+  tier: ReferralMilestoneTier
+  display_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface ReferralRewardClaimed {
+  id: string
+  business_id: string
+  milestone_id: string
+  claimed_at: string
+  applied_at: string | null
+  expires_at: string | null
+  metadata: Json
+}
+
+// Extended types with relations
+export interface ReferralConversionWithBusiness extends ReferralConversion {
+  referred_business: Pick<Business, 'id' | 'name' | 'slug'> | null
+}
+
+export interface ReferralRewardClaimedWithMilestone extends ReferralRewardClaimed {
+  milestone: ReferralMilestone
+}
+
+// API response types
+export interface ReferralStatsResponse {
+  totalReferrals: number
+  successfulReferrals: number
+  currentMilestone: number
+  pointsBalance: number
+  conversionRate: string
+  referralCode: string | null
+  qrCodeUrl: string | null
+  signupUrl: string | null
+  nextMilestone: {
+    number: number
+    referralsRequired: number
+    remaining: number
+    reward: string
+    percentage: string
+  } | null
+  earnedBadges: ReferralRewardClaimedWithMilestone[]
+  conversions: ReferralConversionWithBusiness[]
+  milestones: ReferralMilestone[]
+  businessName: string
+}
+
+export interface ReferralCodeResponse {
+  referralCode: string
+  qrCodeUrl: string | null
+  signupUrl: string
+  isNew: boolean
+}
+
+export interface ReferralInfoResponse {
+  isValid: boolean
+  businessName?: string
+  businessId?: string
+  businessSlug?: string
+  referralCode?: string
+  error?: string
+}
+
 export type Database = {
   graphql_public: {
     Tables: Record<string, never>
