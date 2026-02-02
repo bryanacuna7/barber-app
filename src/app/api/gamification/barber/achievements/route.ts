@@ -23,6 +23,7 @@ export async function GET(request: Request) {
 
     let targetBarberId = barberId
 
+    // If no barberId provided, try to get the user's barber record
     if (!targetBarberId) {
       const { data: barber } = await supabase
         .from('barbers')
@@ -31,11 +32,12 @@ export async function GET(request: Request) {
         .eq('business_id', businessId)
         .single()
 
-      if (!barber) {
-        return NextResponse.json({ error: 'Barber not found' }, { status: 404 })
+      // If user is a barber, use their ID
+      if (barber) {
+        targetBarberId = barber.id
       }
-
-      targetBarberId = barber.id
+      // If user is not a barber (just owner), we'll show aggregated view
+      // targetBarberId remains null/undefined
     }
 
     const { data: allAchievements, error: achievementsError } = await supabase
@@ -48,20 +50,30 @@ export async function GET(request: Request) {
       throw achievementsError
     }
 
-    const { data: earnedAchievements, error: earnedError } = await supabase
-      .from('barber_earned_achievements')
-      .select('*, achievement:barber_achievements(*)')
-      .eq('barber_id', targetBarberId)
+    // Get earned achievements (if targetBarberId exists)
+    let earnedAchievements = null
+    if (targetBarberId) {
+      const { data, error: earnedError } = await supabase
+        .from('barber_earned_achievements')
+        .select('*, achievement:barber_achievements(*)')
+        .eq('barber_id', targetBarberId)
 
-    if (earnedError) {
-      throw earnedError
+      if (earnedError) {
+        throw earnedError
+      }
+      earnedAchievements = data
     }
 
-    const { data: stats } = await supabase
-      .from('barber_stats')
-      .select('*')
-      .eq('barber_id', targetBarberId)
-      .single()
+    // Get stats (if targetBarberId exists)
+    let stats = null
+    if (targetBarberId) {
+      const { data } = await supabase
+        .from('barber_stats')
+        .select('*')
+        .eq('barber_id', targetBarberId)
+        .single()
+      stats = data
+    }
 
     const achievementsWithProgress = allAchievements.map((achievement) => {
       const earned = earnedAchievements?.find((e) => e.achievement_id === achievement.id)

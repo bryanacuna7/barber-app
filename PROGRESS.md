@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-01 10:00 PM
-- **Last Session:** Session 49 - Phase 2: Barber Gamification System ✅ (COMPLETE)
+- **Last Updated:** 2026-02-01 7:10 PM
+- **Last Session:** Session 52 - Referral System UI Previews & Super Admin ✅ (COMPLETE)
 
 ---
 
@@ -22,17 +22,139 @@
 - [x] **Sistema de Gamificación Completo** 🎮
   - **Phase 1: Client Loyalty** ✅ (puntos, tiers, referidos, recompensas)
   - **Phase 2: Barber Gamification** ✅ (achievements, leaderboards, challenges)
+  - **Phase 3: SaaS Referral System** ⏳ (PRIORIDAD MÁXIMA - Crítico para lanzamiento)
 - [x] Integración de loyalty en booking flow
 - [x] PWA y branding personalizable
 - [x] Notificaciones automáticas
 
 ### In Progress
 
-- [ ] Aplicar migración 018_barber_gamification.sql en Supabase dashboard
-- [ ] Testing end-to-end del sistema de gamificación
-- [ ] Agregar links de navegación al sidebar para:
-  - `/lealtad/logros-barberos` - Achievements page
-  - `/lealtad/desafios` - Challenges page
+- [ ] 🚨 **PRIORIDAD MÁXIMA:** Phase 3 - Sistema de Referencias para Business Owners
+  - **Contexto:** Sistema crítico para impulsar el lanzamiento viral del SaaS
+  - **Objetivo:** Incentivar a dueños de barberías a referir otros negocios
+  - **Estado:** ✅ Plan completo | ✅ Previews visuales creados | ⏳ Listo para implementar
+  - **Opción seleccionada:** Option B - Recompensas Escalonadas + Gamificación
+  - **Documento:** `REFERRAL_SYSTEM_PLAN.md` (plan completo de 7 fases, 3-4 semanas)
+  - **Previews disponibles:**
+    - 👤 Vista Cliente: `/referencias-preview` (dashboard completo con datos de ejemplo)
+    - 👑 Vista Super Admin: `/admin-referencias-preview` (analytics, leaderboard, ROI)
+  - **7 Fases de implementación:**
+    1. Database Schema (1-2 días)
+    2. Backend API Routes (2-3 días)
+    3. Frontend Dashboard Cliente (3-4 días)
+    4. Integración Signup Flow (1-2 días)
+    5. Notificaciones (1 día)
+    6. Super Admin Dashboard (2-3 días)
+    7. Testing & QA (1-2 días)
+  - **5 milestones simplificados:**
+    - 1 referido → 20% descuento ($6)
+    - 3 referidos → 1 mes gratis ($29)
+    - 5 referidos → 2 meses gratis ($58)
+    - 10 referidos → 4 meses gratis ($116)
+    - 20 referidos → 1 año gratis ($348)
+  - **Siguiente sesión:** Iniciar implementación con `/create` (comenzar FASE 1: Database Schema)
+
+### Backlog (Post-Phase 3)
+
+- [ ] Testing end-to-end del sistema de gamificación (Phase 2)
+- [ ] Crear challenge de prueba y verificar leaderboard
+- [ ] Verificar auto-unlock de achievements al completar citas
+
+### Recently Completed
+
+#### Session 52 (2026-02-01)
+
+**Tema:** 🎨 Referral System - UI Previews & Super Admin Dashboard
+
+**Completado:**
+
+- ✅ Mockup visual completo del dashboard de referencias (vista cliente)
+  - Stats cards animadas (Total, Activos, Milestone, Conversión)
+  - Código de referido + QR code placeholder
+  - Botones funcionales: Copiar código, Copiar link, Compartir WhatsApp
+  - Progreso de milestones con barra animada
+  - 5 milestone cards (2 desbloqueados, 3 bloqueados)
+  - Badges showcase con animaciones
+  - Tabla de conversiones con datos de ejemplo
+- ✅ Mockup visual de Super Admin Dashboard
+  - Global stats (47 negocios, 156 referencias, ROI 348%)
+  - Top 5 referrers leaderboard con ranking
+  - Program health metrics (avg referidos, conversion time, churn)
+  - Milestone distribution (visualización de cuántos en cada nivel)
+  - Recent conversions table
+  - Insights automáticos (ROI analysis, power users, oportunidades)
+- ✅ Plan actualizado con FASE 6: Super Admin Dashboard
+- ✅ Componente Progress UI creado (custom, sin Radix UI)
+- ✅ Dark mode support en ambos previews
+- ✅ Responsive design completo
+
+**Archivos creados:**
+
+- `src/app/(dashboard)/referencias-preview/page.tsx`
+- `src/app/(dashboard)/admin-referencias-preview/page.tsx`
+- `src/components/ui/progress.tsx`
+
+**URLs de preview:**
+
+- Cliente: `http://localhost:3000/referencias-preview`
+- Admin: `http://localhost:3000/admin-referencias-preview`
+
+**Decisiones técnicas:**
+
+- Usar datos mockeados para demostración
+- Funcionalidad de compartir por WhatsApp implementada
+- Animaciones con Framer Motion
+- Toast notifications con Sonner
+
+**Próximo paso:** `/create` para empezar FASE 1 (Database Schema)
+
+---
+
+#### Session 51 (2026-02-01)
+
+**Tema:** 🧠 Referral System - Brainstorming & Planning
+
+**Completado:**
+
+- ✅ Brainstorming de sistema de referencias (4 opciones evaluadas)
+- ✅ Selección de Option B: Recompensas Escalonadas + Gamificación
+- ✅ Plan completo de implementación (6 fases, 3 semanas)
+- ✅ Documento detallado guardado: `REFERRAL_SYSTEM_PLAN.md`
+- ✅ Sistema de milestones SIMPLIFICADO (5 niveles: 1→3→5→10→20 referidos)
+- ✅ Rewards claros: 20% descuento → 1 mes → 2 meses → 4 meses → 1 año gratis
+- ✅ Componentes UI diseñados (dashboard, QR codes, badges, progress)
+
+**Decisiones clave:**
+
+- Sistema de milestones gamificado (no cash-back directo)
+- QR codes + códigos únicos para compartir
+- Badges coleccionables: First Partner → Growth Partner → Network Builder → Super Connector → Network King
+- Integración con signup flow para tracking automático
+- Notificaciones push en conversiones y milestones
+- Eliminado milestone 6 (Founding Partner) para simplicidad
+
+**Próximo paso:** `/plan` para plan técnico detallado → `/create` para implementar
+
+---
+
+#### Session 50 (2026-02-01)
+
+- [x] Sistema de tabs funcionando en `/barberos` ✅
+  - Tab "Equipo" - Gestión de barberos
+  - Tab "Logros" - Achievements con iconos y progreso
+  - Tab "Desafíos" - Challenges activos
+- [x] Reorganización completa de navegación:
+  - Movidas páginas de `/lealtad/logros-barberos` y `/lealtad/desafios` a `/barberos/`
+  - Tabs integrados DENTRO de `/barberos` (no en sidebar)
+  - Mantenidas rutas directas `/barberos/logros` y `/barberos/desafios` funcionando
+- [x] Fix crítico en achievements API:
+  - Resuelto error 404 cuando owner no es barber
+  - API ahora maneja correctamente caso sin barberId
+  - Owners ven achievements disponibles sin progreso personal
+- [x] Refactorización de arquitectura:
+  - Creado `BarbersManagement` component (client component)
+  - Página principal convertida a server component con tabs
+  - Mejor separación de responsabilidades
 
 ### Key Files
 
@@ -50,6 +172,10 @@
 | `src/lib/gamification/loyalty-calculator.ts`         | Lógica de cálculo de puntos                  |
 | `src/hooks/useBookingData.ts`                        | Hook para datos de reservas                  |
 | `src/app/(dashboard)/lealtad/configuracion/page.tsx` | Page con side-by-side layout                 |
+| `src/app/(dashboard)/barberos/page.tsx`              | Página con tabs: Equipo, Logros, Desafíos    |
+| `src/components/barbers/barbers-management.tsx`      | Client component para gestión de barberos    |
+| `src/components/gamification/achievements-view.tsx`  | Vista de achievements con progreso           |
+| `src/components/gamification/challenges-view.tsx`    | Vista de challenges activos                  |
 
 ---
 
@@ -209,22 +335,161 @@
 
 ### Continue With
 
-1. **Aplicar migración 018_barber_gamification.sql en Supabase:**
-   - Abrir Supabase Dashboard → SQL Editor
-   - Ejecutar `supabase/migrations/018_barber_gamification.sql`
-   - Verificar que se creen las 5 tablas
-   - Confirmar que se inserten los 17 achievements
-   - Probar función `check_barber_achievements()`
+## 🚨 SIGUIENTE SESIÓN - PRIORIDAD MÁXIMA
 
-2. **Agregar navegación al sidebar:**
-   - Agregar links para "Logros de Barberos" y "Desafíos"
-   - Ubicación sugerida: dentro de sección "Lealtad" o nueva sección "Gamificación"
+### Phase 3: Sistema de Referencias para Business Owners
 
-3. **Testing end-to-end:**
-   - Crear una cita de prueba
-   - Verificar que se actualicen barber_stats automáticamente
+**🎯 Contexto Crítico:**
+Este sistema es la pieza clave para el lanzamiento y crecimiento viral del SaaS. Incentiva a dueños de barberías a convertirse en embajadores del producto.
+
+**📋 Modo de Ejecución:**
+
+1. **Iniciar con `/plan`** - Crear plan de implementación detallado
+2. **Usar `/brainstorm`** - Explorar estrategias de incentivos y diseño
+3. **Agents:** @product-strategist + @ui-ux-designer + @fullstack-developer
+
+**🎨 Diseño:** BRUTAL - Este dashboard debe verse premium y motivar la acción
+
+---
+
+**🔧 Componentes a Implementar:**
+
+### 1. Código de Referido Único
+
+- [ ] Generación automática por barbería (código alfanumérico corto)
+- [ ] QR code downloadable para compartir físicamente
+- [ ] Link de referido personalizado: `barbershoppro.com/ref/ABC123`
+- [ ] Sistema de tracking de clicks y conversiones
+- [ ] Copiar al portapapeles con un click
+
+### 2. Sistema de Recompensas por Milestones
+
+- [ ] **Definir estructura de incentivos óptima:**
+  - Milestone 1: ¿X referencias → Descuento Y% o Z meses gratis?
+  - Milestone 2: ¿...?
+  - Milestone 3: ¿...?
+- [ ] **Tipos de recompensas:**
+  - % Descuento en próxima renovación
+  - Meses gratis de suscripción
+  - Features premium desbloqueados
+  - Badges especiales en perfil
+- [ ] Auto-aplicación de recompensas al alcanzar milestone
+- [ ] Notificaciones de nuevas recompensas ganadas
+
+### 3. Admin Panel - Dashboard de Referencias
+
+- [ ] **Vista principal:**
+  - Stats cards: Referencias totales, Conversiones, Recompensas ganadas
+  - Progreso hacia siguiente milestone (barra visual)
+  - Código de referido destacado (copyable)
+  - QR code para compartir
+- [ ] **Historial de referencias:**
+  - Lista de negocios referidos (nombre, fecha, estado)
+  - Estados: Pendiente, Activo (convertido), Trial, Premium
+  - Recompensa otorgada por cada conversión
+- [ ] **Leaderboard de referrers (opcional):**
+  - Top 10 barberías con más referencias
+  - Gamificación social para motivar competencia
+- [ ] **Recursos para compartir:**
+  - Templates de mensajes para WhatsApp/Instagram
+  - Imágenes promocionales descargables
+  - Scripts de pitch personalizables
+
+### 4. Base de Datos (Migration)
+
+```sql
+-- Tabla: referral_codes
+CREATE TABLE referral_codes (
+  id uuid PRIMARY KEY,
+  business_id uuid REFERENCES businesses(id),
+  code varchar(10) UNIQUE NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  total_clicks integer DEFAULT 0,
+  total_conversions integer DEFAULT 0
+);
+
+-- Tabla: referral_conversions
+CREATE TABLE referral_conversions (
+  id uuid PRIMARY KEY,
+  referrer_business_id uuid REFERENCES businesses(id),
+  referred_business_id uuid REFERENCES businesses(id),
+  referral_code varchar(10),
+  status varchar(20), -- 'pending', 'trial', 'active', 'churned'
+  converted_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Tabla: referral_rewards
+CREATE TABLE referral_rewards (
+  id uuid PRIMARY KEY,
+  business_id uuid REFERENCES businesses(id),
+  milestone_level integer,
+  reward_type varchar(20), -- 'discount', 'free_months', 'feature_unlock'
+  reward_value jsonb,
+  earned_at timestamptz DEFAULT now(),
+  redeemed_at timestamptz,
+  status varchar(20) DEFAULT 'active'
+);
+```
+
+### 5. API Routes Necesarias
+
+- [ ] `GET /api/referrals/code` - Obtener código de referido del negocio
+- [ ] `POST /api/referrals/generate` - Generar nuevo código (si no existe)
+- [ ] `GET /api/referrals/stats` - Estadísticas de referencias
+- [ ] `GET /api/referrals/conversions` - Historial de conversiones
+- [ ] `GET /api/referrals/rewards` - Recompensas ganadas
+- [ ] `POST /api/referrals/track-click` - Trackear click en link
+- [ ] `POST /api/referrals/track-conversion` - Trackear conversión exitosa
+
+### 6. Estrategia de Producto (Brainstorm Requerido)
+
+- [ ] **Definir incentivos óptimos:**
+  - ¿Qué es más atractivo: descuento o meses gratis?
+  - ¿Cuántas referencias justifican cada nivel de recompensa?
+  - ¿Recompensas progresivas o escaladas?
+- [ ] **Mecánica de conversión:**
+  - ¿Cuándo se marca una referencia como "convertida"?
+  - ¿Solo cuentan planes pagos o también trials?
+  - ¿Hay expiración del código de referido?
+- [ ] **Viralidad:**
+  - ¿Share buttons en dashboard?
+  - ¿Templates pre-escritos para facilitar sharing?
+  - ¿Incentivos extra por compartir en redes sociales?
+
+---
+
+**🎯 Objetivo de la Sesión:**
+Salir con un plan completo y empezar implementación del sistema de referencias que impulse el lanzamiento del SaaS.
+
+**💡 Output Esperado:**
+
+1. Plan de implementación detallado (con `/plan`)
+2. Estrategia de incentivos definida (con `/brainstorm`)
+3. Diseños de UI aprobados (mockups o wireframes)
+4. Migration script listo
+5. Primeras API routes funcionando
+
+---
+
+## Backlog (Post-Phase 3)
+
+1. **Testing end-to-end del sistema de gamificación:**
+   - Crear una cita de prueba y asignarla a un barber
+   - Completar la cita y verificar que se actualicen `barber_stats` automáticamente
    - Confirmar que se desbloqueen achievements al alcanzar thresholds
-   - Crear un challenge y verificar leaderboard
+   - Verificar que aparezcan en el tab "Logros" de `/barberos`
+
+2. **Crear challenge de prueba:**
+   - Usar API POST `/api/gamification/barber/challenges` para crear un challenge
+   - Tipos disponibles: revenue, appointments, clients, team_total
+   - Verificar que aparezca en tab "Desafíos"
+   - Comprobar leaderboard con múltiples barbers
+
+3. **Merge a main cuando esté listo:**
+   - Branch actual: `feature/gamification-system`
+   - Incluye todo el sistema de gamification Phase 2 + tabs integration
+   - Crear PR con descripción detallada
 
 4. **Verificar visualmente el rediseño de loyalty (OPCIONAL):**
    - **Branch actual:** `feature/gamification-system` (contiene el rediseño completo)
@@ -281,6 +546,52 @@ npm run dev  # Servidor en http://localhost:3000
 ---
 
 ## Session History
+
+### 2026-02-01 - Session 50 (Tabs Integration & Navigation Fix) ✅
+
+**Duration:** ~1 hour | **Agents:** @debugger | **Status:** ✅ Complete
+
+**Accomplished:**
+
+- 🎯 **Sistema de tabs implementado en `/barberos`**
+  - 3 tabs: Equipo (gestión), Logros (achievements), Desafíos (challenges)
+  - Tabs accesibles DENTRO de la página principal, no en sidebar
+  - Navegación limpia y UX mejorada
+
+- 📁 **Reorganización de rutas:**
+  - Movidas páginas: `/lealtad/logros-barberos` → `/barberos/logros`
+  - Movidas páginas: `/lealtad/desafios` → `/barberos/desafios`
+  - Rutas directas siguen funcionando para deep linking
+  - Revertidos cambios temporales en sidebar/bottom-nav
+
+- 🐛 **Fix crítico en achievements API:**
+  - **Problema:** Error 404 cuando owner no es barber
+  - **Causa raíz:** API asumía que todo usuario tiene registro en `barbers`
+  - **Solución:** API ahora maneja correctamente caso sin `barberId`
+  - **Resultado:** Owners ven achievements disponibles, barbers ven su progreso
+
+- ♻️ **Refactorización de arquitectura:**
+  - Creado `BarbersManagement` component (separación de concerns)
+  - Página principal ahora es server component con tabs
+  - Mejor organización y mantenibilidad del código
+
+**Files Modified (7):**
+
+1. `src/app/(dashboard)/barberos/page.tsx` - Nueva estructura con tabs (server component)
+2. `src/components/barbers/barbers-management.tsx` - Client component creado
+3. `src/app/api/gamification/barber/achievements/route.ts` - Fix de owner sin barber
+4. `src/components/dashboard/sidebar.tsx` - Revertidos links temporales
+5. `src/components/dashboard/bottom-nav.tsx` - Revertidas rutas temporales
+6. `src/components/dashboard/more-menu-drawer.tsx` - Revertidos menu items
+7. `PROGRESS.md` - Actualizado estado del proyecto
+
+**Next Steps:**
+
+- Testing end-to-end de achievements
+- Crear challenge de prueba
+- Verificar auto-unlock al completar citas
+
+---
 
 ### 2026-02-02 - Session 49 (Phase 2: Barber Gamification System) ✅
 
