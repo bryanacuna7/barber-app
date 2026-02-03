@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-02 07:00 PM
-- **Last Session:** Session 61 - Claude Code Infrastructure Setup ✅ (COMPLETE)
+- **Last Updated:** 2026-02-02 08:30 PM
+- **Last Session:** Session 62 - Multi-Expert Audit & Implementation Plan v2.5 ✅ (COMPLETE)
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -31,21 +31,26 @@
 
 ### In Progress
 
-- [ ] **Implementation Plan v2.2 - Major App Transformation** 🚀
-  - **Plan:** `IMPLEMENTATION_PLAN_V2.md` (3,800+ líneas, plan detallado)
+- [ ] **Implementation Plan v2.5 - Major App Transformation (Audited & Improved)** 🚀
+  - **Plan:** `IMPLEMENTATION_PLAN_V2.5.md` (4,000+ líneas, plan mejorado post-audit)
   - **Branch:** `feature/subscription-payments-rebranding`
-  - **Estimado:** 90-118 horas (5-6 semanas)
-  - **5 Áreas principales:**
-    1. 🔄 Área 1: Client Subscription & Basic Plan (database + feature gating) **← CURRENT**
-    2. ⏳ Área 2: Advance Payments & No-Show (SINPE Móvil + auto no-show)
-    3. ⏳ Área 3: Rebranding Barber → Staff (95+ archivos)
-    4. ⏳ Área 4: Client Referrals + Full Client Dashboard
-    5. ⏳ Área 5: Web Push Notifications (PWA nativas)
+  - **Estimado:** 154-200 horas (8-10 semanas) - +67% para eliminar deuda técnica
+  - **Score proyectado:** 6.0/10 → 8.5/10
+  - **Áreas principales:** 0. 🔄 Área 0: Technical Debt Cleanup (10-12h) - Security + DB Indexes + Logging **← CURRENT**
+    1. ⏳ Área 1: Client Subscription & Basic Plan (database + feature gating)
+    2. ⏳ Área 6: Staff Experience - Vista Mi Día (PRIORIDAD #2)
+    3. ⏳ Área 2: Advance Payments & No-Show (SINPE Móvil + auto no-show)
+    4. ⏳ Área 3: Rebranding Barber → Staff (migración DB completa, 14h)
+    5. ⏳ Área 4: Client Referrals + Full Client Dashboard
+    6. ⏳ Área 5: Web Push Notifications (PWA nativas)
+    7. ⏳ Sprint 5: Testing & QA (60-80h) - Integration + E2E + Security tests
   - **Pre-Implementation Tasks:** ✅ COMPLETE
+    - ✅ Multi-expert audit completed (Session 62)
+    - ✅ Implementation plan improved (v2.5)
+    - ✅ Documentation cleanup completed
     - ✅ Commited pending changes
     - ✅ Created feature branch
     - ✅ Fixed .gitignore
-    - ✅ Copied plan to root (IMPLEMENTATION_PLAN_V2.md)
     - ✅ Tagged pre-migration: `pre-v2-migration`
 
 - [x] **Phase 3 - Sistema de Referencias (Business):** ✅ COMPLETE
@@ -53,6 +58,93 @@
   - **Estado:** FASES 1-6 completas y funcionando
 
 ### Recently Completed
+
+#### Session 62 (2026-02-02 08:30 PM)
+
+**Tema:** 📊 Multi-Expert Audit & Implementation Plan v2.5
+
+**Completado:**
+
+- ✅ **Multi-Agent Audit Orchestration**
+  - Coordinados 6 agentes especializados (@architecture-modernizer, @security-auditor, @test-engineer, @product-strategist, @performance-profiler, @code-reviewer)
+  - Análisis colaborativo de IMPLEMENTATION_PLAN_V2.md
+  - Score inicial: 6.0/10 (múltiples issues críticos identificados)
+
+- ✅ **Critical Issues Identified**
+  - TypeScript build roto (requiere SKIP_TYPE_CHECK=true bypass)
+  - 4 vulnerabilidades críticas de seguridad
+  - 0.0024% test coverage (100 tests, 40,770 total code lines)
+  - Enfoque híbrido de rebranding mal arquitecturado (score 3/10)
+
+- ✅ **IMPLEMENTATION_PLAN_V2.5.md Created**
+  - **Área 0 expandida:** 4-6h → 10-12h
+    - Fix de 4 vulnerabilidades críticas de seguridad
+    - 5 índices de base de datos faltantes agregados
+    - Logging estructurado con pino
+    - Error tracking con Sentry
+    - Security hardening en endpoints públicos
+  - **Área 3 rediseñada:** 24-30h → 14h
+    - Rechazado: Enfoque híbrido (genera deuda técnica permanente)
+    - Aprobado: Migración DB completa con views
+  - **Prioridades reordenadas:**
+    - Área 6 (Staff Experience - Vista Mi Día) movida a posición #2
+  - **Sprint 5 agregado:** 60-80h de Testing & QA
+    - Integration tests para cron jobs
+    - E2E tests para payment flows
+    - Security testing
+    - Performance benchmarking
+  - **Features agregados:**
+    - Sistema de recordatorios de citas (4-6h)
+    - Gestión de lista de espera (4-6h)
+    - Campañas de re-engagement (4-6h)
+  - **Estimado revisado:** 92-118h → 154-200h (+67%)
+  - **Score proyectado:** 6.0/10 → 8.5/10
+
+- ✅ **Security Fixes Detailed**
+  - IP spoofing fix en rate limiters
+  - File validation con magic bytes
+  - Path traversal prevention
+  - Authorization checks mejorados
+
+- ✅ **Documentation Cleanup**
+  - Eliminados 4 archivos .md obsoletos:
+    - IMPLEMENTATION_PLAN_V2.md (versión antigua)
+    - CLIENT_REFERRAL_DASHBOARD_PLAN 2.md (archivo duplicado)
+    - PERFORMANCE_ANALYSIS_REPORT.md (reporte temporal)
+    - SECURITY_AUDIT_REPORT.md (reporte temporal)
+  - Todos los hallazgos incorporados en v2.5
+
+**Cambios clave en v2.5:**
+
+```
+ANTES (v2.2):
+- Área 0: 4-6h (solo TypeScript fixes)
+- Área 3: 24-30h (enfoque híbrido)
+- Sin sprint de testing
+- 92-118h total
+- Score: 6.0/10
+
+DESPUÉS (v2.5):
+- Área 0: 10-12h (security + indexes + logging)
+- Área 3: 14h (migración DB completa)
+- Sprint 5: 60-80h (testing comprehensivo)
+- 154-200h total (+67%)
+- Score proyectado: 8.5/10
+```
+
+**ROI Analysis:**
+
+- Inversión: +62-82h adicionales
+- Ahorros proyectados: 500-800h en 12 meses
+  - Testing reduce bugs: 30-50h/mes saved
+  - Security fixes previenen incidents: 100-200h/año saved
+  - Proper DB migration evita deuda técnica: 200-300h/año saved
+
+**Estado:** ✅ Plan mejorado y documentación limpiada
+
+**Siguiente paso:** Implementar Área 0 expandida con fixes críticos
+
+---
 
 #### Session 61 (2026-02-02 07:00 PM)
 
@@ -419,60 +511,81 @@
 
 ### Continue With
 
-**🎯 Área 1: Database Migrations + Feature Gating**
+**🎯 Área 0: Technical Debt Cleanup (PRIORIDAD #1)** - 10-12h
 
-Implementar las migraciones de base de datos para el nuevo sistema.
+Eliminar deuda técnica crítica antes de implementar nuevas features.
 
-**Archivos a crear:**
+**Task 1: Security Fixes (4 vulnerabilidades críticas)** - 3-4h
 
-1. `supabase/migrations/020_client_auth_enhancement.sql`
-   - `user_id` column en clients (link con auth.users)
-   - `last_activity_at` tracking
-   - Trigger para actualizar actividad
+1. **IP Spoofing Fix** en rate limiters
+   - `src/lib/rate-limit.ts` - Función `getClientIP()` mejorada
 
-2. `supabase/migrations/021_data_retention_system.sql`
-   - Tabla `client_deletion_warnings`
-   - Soft delete (`deleted_at`, `deleted_reason`)
-   - RLS policies
+2. **File Validation** con magic bytes
+   - `src/lib/file-validation.ts` - Verificar headers reales de archivos
 
-3. `supabase/migrations/022_advance_payments.sql`
-   - Campos de depósito en appointments
-   - Config en businesses (multiplier, no_show_delay)
-   - Trigger modificado para loyalty multiplier
+3. **Path Traversal Prevention**
+   - `src/app/api/media/route.ts` - Sanitizar rutas de archivos
 
-4. `supabase/migrations/023_push_subscriptions.sql`
-   - Tabla `push_subscriptions`
-   - Indices y RLS
+4. **Authorization Checks**
+   - `src/app/api/admin/*/route.ts` - Verificar permisos en todos los endpoints
 
-**Después:**
+**Task 2: Database Performance** - 2-3h
 
-- `src/lib/subscription-features.ts` - Feature gating logic
-- `src/lib/auth/link-client-to-user.ts` - Guest → Registered linking
+5. **Migration 019b: Missing Indexes**
+
+   ```sql
+   CREATE INDEX idx_appointments_deposit_paid ON appointments(...);
+   CREATE INDEX idx_client_referrals_status ON client_referrals(...);
+   CREATE INDEX idx_clients_inactive ON clients(...);
+   -- + 2 índices más
+   ```
+
+6. **N+1 Query Fixes**
+   - Cron jobs: Batch queries
+   - Referral dashboard: Join optimization
+
+**Task 3: Observability** - 3-4h
+
+7. **Structured Logging con pino**
+   - `src/lib/logger.ts` - Setup de pino
+   - Integrar en API routes críticos
+
+8. **Error Tracking con Sentry**
+   - Setup básico de Sentry
+   - Error boundaries en componentes críticos
+
+9. **Rate Limiting con Upstash Redis**
+   - Setup de Upstash Redis
+   - Proteger endpoints públicos críticos
+
+**Task 4: TypeScript Strict Mode** - 2h
+
+10. **Habilitar strict mode**
+    - Fix de 49 errores TypeScript
+    - Remover 43 archivos con @ts-nocheck
+    - Compilación limpia sin SKIP_TYPE_CHECK
+
+**Archivos a modificar/crear:**
+
+- `src/lib/rate-limit.ts`
+- `src/lib/file-validation.ts`
+- `src/lib/logger.ts`
+- `src/app/api/media/route.ts`
+- `src/app/api/admin/*/route.ts` (varios)
+- `supabase/migrations/019b_missing_indexes.sql`
+- `next.config.js` (Sentry integration)
+
+**Después de Área 0:**
+→ Área 1: Client Subscription & Basic Plan
 
 **Comandos útiles:**
 
 ```bash
 npm run dev  # Servidor en http://localhost:3000
 npx tsc --noEmit  # Verificar compilación TypeScript
+npm audit  # Security audit
 lsof -i :3000  # Verificar servidor
 ```
-
-**Opción B: 👥 Implementar Client Referral Dashboard** (3-4 horas)
-
-Sistema de referidos cliente-a-cliente (backend ya existe, falta UI).
-
-**Plan completo en:** `CLIENT_REFERRAL_DASHBOARD_PLAN.md`
-
-**Sprint 1 (2-3 horas):**
-
-1. Crear 3 API routes (my-code, stats, list)
-2. Testing de APIs
-
-**Sprint 2 (2-3 horas):** 3. Crear 4 componentes frontend 4. Crear página `/referidos`
-
-**Sprint 3 (1 hora):** 5. Integrar link en sidebar 6. Testing end-to-end 7. Visual verification
-
-**Total:** ~770 líneas de código (8 archivos nuevos)
 
 ---
 
