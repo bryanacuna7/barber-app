@@ -18,6 +18,7 @@ import { LoyaltyPreview } from '@/components/loyalty/loyalty-preview'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
+import type { ProgramType, ReferralRewardType } from '@/types'
 
 export const metadata = {
   title: 'Configuración de Lealtad | BarberShop Pro',
@@ -40,13 +41,13 @@ async function getLoyaltyProgram(businessId: string): Promise<LoyaltyProgram | n
     id: data.id,
     businessId: data.business_id,
     enabled: data.enabled,
-    programType: data.program_type,
+    programType: data.program_type as ProgramType,
     pointsPerCurrencyUnit: data.points_per_currency_unit,
     pointsExpiryDays: data.points_expiry_days,
     freeServiceAfterVisits: data.free_service_after_visits,
     discountAfterVisits: data.discount_after_visits,
     discountPercentage: data.discount_percentage,
-    referralRewardType: data.referral_reward_type,
+    referralRewardType: data.referral_reward_type as ReferralRewardType,
     referralRewardAmount: data.referral_reward_amount,
     refereeRewardAmount: data.referee_reward_amount,
     createdAt: data.created_at,

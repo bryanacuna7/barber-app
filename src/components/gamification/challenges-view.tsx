@@ -10,7 +10,12 @@ import { ChallengeCard } from './challenge-card'
 import { Loader2, Plus } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import type { BarberChallenge, BarberChallengeParticipant, Barber } from '@/types/database'
+import type {
+  BarberChallenge,
+  BarberChallengeParticipant,
+  Barber,
+  ChallengeType,
+} from '@/types/database'
 
 interface ChallengeWithParticipants extends BarberChallenge {
   participants: Array<
@@ -104,7 +109,7 @@ export function ChallengesView({ businessId, barberId }: ChallengesViewProps) {
             key={challenge.id}
             name={challenge.name}
             description={challenge.description}
-            challengeType={challenge.challenge_type}
+            challengeType={challenge.challenge_type as ChallengeType}
             targetValue={challenge.target_value}
             rewardDescription={challenge.reward_description}
             rewardAmount={challenge.reward_amount}

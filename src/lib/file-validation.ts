@@ -49,7 +49,7 @@ async function readFileBytes(file: File | Blob, numBytes: number): Promise<Uint8
 /**
  * Checks if byte array matches the expected signature
  */
-function matchesSignature(bytes: Uint8Array, signature: number[]): boolean {
+function matchesSignature(bytes: Uint8Array, signature: readonly number[]): boolean {
   if (bytes.length < signature.length) return false
 
   for (let i = 0; i < signature.length; i++) {

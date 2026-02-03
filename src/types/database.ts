@@ -1614,3 +1614,44 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// =============================================================================
+// Re-export custom types for backward compatibility
+// =============================================================================
+
+export type {
+  Business,
+  Barber,
+  BarberInvitation,
+  Client,
+  Appointment,
+  Service,
+  AdminUser,
+  PaymentReport,
+  BarberAchievement,
+  BarberChallenge,
+  BarberChallengeParticipant,
+  SubscriptionPlan,
+  SubscriptionStatus,
+  SubscriptionStatusResponse,
+  ExchangeRateValue,
+  ExchangeRateResponse,
+  UsdBankAccountValue,
+  SupportWhatsAppValue,
+  SinpeDetailsValue,
+  NotificationChannel,
+  NotificationPreferences,
+  DayHours,
+  OperatingHours,
+  AppointmentStatus,
+  AppointmentWithDetails,
+  AchievementTier,
+  AchievementCategory,
+  ChallengeType,
+  BadgeVariant,
+  ProgramType,
+  ReferralRewardType,
+  ReferralConversion,
+  AdminReferralConversion,
+  AchievementWithProgress,
+} from './custom'
