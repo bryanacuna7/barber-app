@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 import { NextResponse } from 'next/server'
 
 export async function GET() {

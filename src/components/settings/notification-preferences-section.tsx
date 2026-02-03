@@ -64,7 +64,10 @@ export function NotificationPreferencesSection() {
   }
 
   function handleChannelChange(channel: NotificationChannel) {
-    savePreferences({ channel })
+    // Only allow valid preference channels
+    const validChannel =
+      channel === 'app' || channel === 'email' || channel === 'both' ? channel : 'app'
+    savePreferences({ channel: validChannel })
   }
 
   function handleEmailAddressChange() {

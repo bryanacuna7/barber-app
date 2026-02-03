@@ -157,8 +157,10 @@ export type BadgeVariant =
   | 'primary'
   | 'success'
   | 'warning'
+  | 'danger'
   | 'error'
   | 'info'
+  | 'pending'
   | 'outline'
 
 // =============================================================================
@@ -217,7 +219,7 @@ export interface AchievementWithProgress {
   description: string
   icon: string
   tier: AchievementTier
-  category: string
+  category: AchievementCategory
   threshold: number
   reward_points: number
   unlocks_feature: string | null
@@ -226,4 +228,5 @@ export interface AchievementWithProgress {
   current: number
   is_earned: boolean
   earned_at: string | null
+  display_order?: number
 }

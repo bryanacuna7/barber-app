@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
+import type { BadgeVariant } from '@/types'
 
 // Mock data para preview
 const mockData = {
@@ -493,7 +494,10 @@ export default function ReferenciasPreviewPage() {
                           {milestone.reward_description.split('(')[0]}
                         </div>
                         {isCurrent && (
-                          <Badge className="mt-2 text-[10px] py-0.5" variant="secondary">
+                          <Badge
+                            className="mt-2 text-[10px] py-0.5"
+                            variant={'secondary' as BadgeVariant}
+                          >
                             Próximo
                           </Badge>
                         )}
@@ -533,7 +537,7 @@ export default function ReferenciasPreviewPage() {
                         {badge.milestone.badge_name}
                       </div>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant={'secondary' as BadgeVariant} className="text-xs">
                       {new Date(badge.claimed_at).toLocaleDateString('es-ES', {
                         month: 'short',
                         day: 'numeric',

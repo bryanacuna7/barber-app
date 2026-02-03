@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { canAddService } from '@/lib/subscription'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
 const serviceSchema = z.object({
   name: z.string().min(1),
@@ -11,27 +11,7 @@ const serviceSchema = z.object({
   price: z.number().min(0),
 })
 
-export async function GET() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // Get user's business
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!business) {
-    return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-  }
-
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   const { data: services, error } = await supabase
     .from('services')
     .select('*')
@@ -39,33 +19,13 @@ export async function GET() {
     .order('display_order', { ascending: true })
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 })
+    return errorResponse('Failed to fetch services')
   }
 
   return NextResponse.json(services)
-}
+})
 
-export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // Get user's business
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!business) {
-    return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-  }
-
+export const POST = withAuth(async (request, context, { business, supabase }) => {
   let body
   try {
     body = await request.json()
@@ -109,8 +69,8 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to create service' }, { status: 500 })
+    return errorResponse('Failed to create service')
   }
 
   return NextResponse.json(service)
-}
+})

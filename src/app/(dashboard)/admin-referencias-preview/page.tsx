@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import type { BadgeVariant } from '@/types'
 
 // Mock data para super admin
 const adminMockData = {
@@ -471,7 +472,13 @@ export default function AdminReferenciasPreviewPage() {
                         {new Date(conversion.date).toLocaleDateString('es-ES')}
                       </td>
                       <td className="py-3 px-4 text-sm">
-                        <Badge variant={conversion.status === 'active' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            (conversion.status === 'active'
+                              ? 'default'
+                              : 'secondary') as BadgeVariant
+                          }
+                        >
                           {conversion.status === 'active' ? 'Activo' : 'Trial'}
                         </Badge>
                       </td>

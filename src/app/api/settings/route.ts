@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 
 // GET public settings (exchange rate, USD bank account, etc.)
 export async function GET(request: Request) {

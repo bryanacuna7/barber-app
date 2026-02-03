@@ -115,6 +115,17 @@ export default async function ReferenciasPage() {
       }
     : null
 
+  // Format conversions with proper types
+  const formattedConversions =
+    conversions?.map((c) => ({
+      id: c.id,
+      referred_business: c.referred_business,
+      status: c.status as 'pending' | 'trial' | 'active' | 'churned',
+      created_at: c.created_at,
+      converted_at: c.converted_at,
+      referral_code: c.referral_code,
+    })) || []
+
   // Build data object
   const data = {
     totalReferrals,
@@ -129,7 +140,7 @@ export default async function ReferenciasPage() {
       : null,
     nextMilestone: progressToNext,
     earnedBadges: claimedRewards || [],
-    conversions: conversions || [],
+    conversions: formattedConversions,
     milestones: milestones || [],
     businessName: (business as any).name,
   }

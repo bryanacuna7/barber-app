@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 
 const updateServiceSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').optional(),

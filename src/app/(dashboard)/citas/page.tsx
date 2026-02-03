@@ -25,6 +25,7 @@ import {
   Banknote,
   CheckCircle2,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Components
 import { Card } from '@/components/ui/card'
@@ -159,25 +160,57 @@ export default function CitasPage() {
     })
   }, [appointments, statusFilter, search])
 
-  // Stats
+  // Stats - Optimized single-pass calculation
   const stats = useMemo(() => {
-    const today = appointments.filter((a) => isSameDay(new Date(a.scheduled_at), selectedDate))
-    const completed = today.filter((a) => a.status === 'completed')
-    const pending = today.filter((a) => a.status === 'pending' || a.status === 'confirmed')
-    const cancelled = today.filter((a) => a.status === 'cancelled')
-    const revenue = completed.reduce((sum, a) => sum + Number(a.price), 0)
-    const expectedRevenue = pending.reduce((sum, a) => sum + Number(a.price), 0)
-    const uniqueClients = new Set(today.map((a) => a.client_id)).size
+    const clientIds = new Set<string>()
 
-    return {
-      total: today.length,
-      completed: completed.length,
-      pending: pending.length,
-      cancelled: cancelled.length,
-      revenue,
-      expectedRevenue,
-      uniqueClients,
-    }
+    const result = appointments.reduce(
+      (acc, appointment) => {
+        // Only process appointments for selected date
+        if (!isSameDay(new Date(appointment.scheduled_at), selectedDate)) {
+          return acc
+        }
+
+        acc.total++
+
+        // Track unique clients
+        if (appointment.client_id) {
+          clientIds.add(appointment.client_id)
+        }
+
+        // Accumulate by status
+        const price = Number(appointment.price) || 0
+
+        switch (appointment.status) {
+          case 'completed':
+            acc.completed++
+            acc.revenue += price
+            break
+          case 'pending':
+          case 'confirmed':
+            acc.pending++
+            acc.expectedRevenue += price
+            break
+          case 'cancelled':
+            acc.cancelled++
+            break
+        }
+
+        return acc
+      },
+      {
+        total: 0,
+        completed: 0,
+        pending: 0,
+        cancelled: 0,
+        revenue: 0,
+        expectedRevenue: 0,
+        uniqueClients: 0,
+      }
+    )
+
+    result.uniqueClients = clientIds.size
+    return result
   }, [appointments, selectedDate])
 
   // Week days for quick navigation
@@ -194,6 +227,7 @@ export default function CitasPage() {
 
   // Handlers
   const handleStatusChange = async (id: string, status: AppointmentStatus) => {
+    console.log('📍 Changing appointment status:', { id, status })
     try {
       const response = await fetch(`/api/appointments/${id}`, {
         method: 'PATCH',
@@ -201,12 +235,42 @@ export default function CitasPage() {
         body: JSON.stringify({ status }),
       })
 
+      console.log('📍 Response status:', response.status)
+      console.log('📍 Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (response.ok) {
         const updated = await response.json()
+        console.log('✅ Updated appointment:', updated)
         setAppointments((prev) => prev.map((apt) => (apt.id === id ? updated : apt)))
+        toast.success(
+          status === 'completed'
+            ? 'Cita completada'
+            : status === 'confirmed'
+              ? 'Cita confirmada'
+              : status === 'cancelled'
+                ? 'Cita cancelada'
+                : status === 'no_show'
+                  ? 'Marcada como no-show'
+                  : 'Estado actualizado'
+        )
+      } else {
+        const responseText = await response.text()
+        console.error('❌ Error response status:', response.status)
+        console.error('❌ Error response text:', responseText)
+
+        let error
+        try {
+          error = JSON.parse(responseText)
+        } catch (e) {
+          error = { error: `Server error (${response.status}): ${responseText.slice(0, 100)}` }
+        }
+
+        console.error('❌ Parsed error:', error)
+        toast.error(error.error || `Error al actualizar el estado (${response.status})`)
       }
     } catch (error) {
-      console.error('Error updating status:', error)
+      console.error('❌ Error updating status:', error)
+      toast.error('Error de conexión. Intenta de nuevo.')
     }
   }
 

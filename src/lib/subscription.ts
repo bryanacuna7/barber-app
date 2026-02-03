@@ -107,11 +107,18 @@ export async function getSubscriptionStatus(
     )
   }
 
+  const isTrial = subscription.status === 'trial'
+  const hasAccess = ['trial', 'active'].includes(subscription.status)
+
   return {
     status: subscription.status as SubscriptionStatus,
     plan,
     trial_ends_at: subscription.trial_ends_at,
+    current_period_start: subscription.current_period_start,
     current_period_end: subscription.current_period_end,
+    is_trial: isTrial,
+    trial_days_left: isTrial ? daysRemaining : null,
+    has_access: hasAccess,
     days_remaining: daysRemaining,
     usage: {
       barbers: { current: barbersCount.count || 0, max: plan.max_barbers },

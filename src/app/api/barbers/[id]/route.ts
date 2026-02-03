@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 import { z } from 'zod'
 
 const barberSchema = z.object({
