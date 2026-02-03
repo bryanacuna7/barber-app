@@ -4,6 +4,7 @@
 
 import { render, RenderOptions } from '@testing-library/react'
 import { ReactElement } from 'react'
+import { vi } from 'vitest'
 import type {
   TodayAppointment,
   TodayAppointmentsResponse,

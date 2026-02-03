@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-03 (Session 65)
-> **Last Verified Against:** All migrations 001-019b
+> **Last Updated:** 2026-02-03 (Session 72)
+> **Last Verified Against:** All migrations 001-022
 
 ---
 
@@ -529,6 +529,39 @@ UNIQUE(referrer_business_id, referred_business_id)
 - expires_at        TIMESTAMPTZ
 UNIQUE(business_id, milestone_id)
 ```
+
+---
+
+## Database Functions
+
+### Atomic Operations
+
+#### `increment_client_stats(p_client_id, p_visits_increment, p_spent_increment, p_last_visit_timestamp)`
+
+**Created in:** `022_atomic_client_stats.sql`
+**Purpose:** Atomically increment client statistics to prevent race conditions (CWE-915)
+
+**Parameters:**
+
+- `p_client_id UUID` - Client to update
+- `p_visits_increment INT` - Number of visits to add (default: 1)
+- `p_spent_increment DECIMAL(10,2)` - Amount to add to total_spent (default: 0)
+- `p_last_visit_timestamp TIMESTAMPTZ` - Last visit timestamp (default: NOW())
+
+**Returns:** VOID
+
+**Usage:**
+
+```sql
+SELECT increment_client_stats(
+  '123e4567-e89b-12d3-a456-426614174000'::uuid,
+  1,
+  50.00,
+  NOW()
+);
+```
+
+**Security:** SECURITY DEFINER (bypasses RLS for atomic updates)
 
 ---
 

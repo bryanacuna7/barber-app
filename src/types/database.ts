@@ -1476,6 +1476,15 @@ export type Database = {
         Args: { business_slug: string; client_name: string }
         Returns: string
       }
+      increment_client_stats: {
+        Args: {
+          p_client_id: string
+          p_visits_increment?: number
+          p_spent_increment?: number
+          p_last_visit_timestamp?: string
+        }
+        Returns: undefined
+      }
       increment_loyalty_points: {
         Args: { p_client_id: string; p_points: number }
         Returns: undefined

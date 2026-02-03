@@ -74,7 +74,99 @@ $$;
 
 ---
 
-### 3. Stored Procedures Need Proper Error Handling
+### 3. Race Conditions in Fetch-Then-Update Patterns
+
+**Session:** 72
+**Problem:** Client stats (total_visits, total_spent) could be incorrect with concurrent appointment completions
+**Root Cause:** Fetch-then-update pattern creates race condition window
+
+**Vulnerable Code:**
+
+```typescript
+// ❌ BAD: Race condition vulnerability (CWE-915)
+const { data: client } = await supabase
+  .from('clients')
+  .select('total_visits, total_spent')
+  .eq('id', client_id)
+  .single()
+
+await supabase
+  .from('clients')
+  .update({
+    total_visits: (client.total_visits || 0) + 1,
+    total_spent: (client.total_spent || 0) + price,
+  })
+  .eq('id', client_id)
+```
+
+**Why It's Vulnerable:**
+
+```
+Time    Request A              Request B
+────────────────────────────────────────────
+T0      Fetch: visits=10
+T1                             Fetch: visits=10
+T2      Update: visits=11
+T3                             Update: visits=11  ❌ Lost increment!
+```
+
+**Solution:**
+
+```sql
+-- Create atomic database function
+CREATE OR REPLACE FUNCTION increment_client_stats(
+  p_client_id UUID,
+  p_visits_increment INT,
+  p_spent_increment DECIMAL
+)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE clients
+  SET
+    total_visits = COALESCE(total_visits, 0) + p_visits_increment,
+    total_spent = COALESCE(total_spent, 0) + p_spent_increment,
+    updated_at = NOW()
+  WHERE id = p_client_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+```typescript
+// ✅ GOOD: Atomic operation, no race condition
+await supabase.rpc('increment_client_stats', {
+  p_client_id: client_id,
+  p_visits_increment: 1,
+  p_spent_increment: price,
+})
+```
+
+**Rule:**
+
+- ✅ NEVER use fetch-then-update for counters or stats
+- ✅ ALWAYS use atomic database functions for increments
+- ✅ Use single SQL UPDATE with arithmetic operations
+- ✅ Add validation in function (NULL checks, negative values)
+- ✅ Include error handling with meaningful messages
+
+**Detection Pattern:**
+
+Watch for this anti-pattern:
+
+1. `SELECT` to read current value
+2. Calculate new value in application code
+3. `UPDATE` to write new value
+
+**Impact:** Data corruption in high-concurrency scenarios. Client loyalty stats and revenue tracking could be incorrect.
+
+**References:**
+
+- Migration: `022_atomic_client_stats.sql`
+- Documentation: `docs/security/race-condition-fix-client-stats.md`
+- CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes
+
+---
+
+### 4. Stored Procedures Need Proper Error Handling
 
 **Session:** 69
 **Problem:** Loyalty trigger failed silently, breaking appointment updates
@@ -330,15 +422,16 @@ WHERE status != 'cancelled';
 
 ---
 
-## 🎯 Summary - Top 5 Most Critical
+## 🎯 Summary - Top 6 Most Critical
 
 | #   | Lesson                                     | Impact                            | Session |
 | --- | ------------------------------------------ | --------------------------------- | ------- |
 | 1   | RLS + Triggers need SECURITY DEFINER       | Critical bug - broke appointments | 69      |
 | 2   | DATABASE_SCHEMA.md is source of truth      | Prevented production failure      | 65      |
-| 3   | Server Components: Use Supabase, not fetch | Broke entire page                 | 55      |
-| 4   | Regenerate types after migrations          | 125 errors resolved               | 67      |
-| 5   | Check for duplicate Next.js processes      | 30 min debugging wasted           | 55      |
+| 3   | Avoid fetch-then-update race conditions    | Data corruption in stats          | 72      |
+| 4   | Server Components: Use Supabase, not fetch | Broke entire page                 | 55      |
+| 5   | Regenerate types after migrations          | 125 errors resolved               | 67      |
+| 6   | Check for duplicate Next.js processes      | 30 min debugging wasted           | 55      |
 
 ---
 

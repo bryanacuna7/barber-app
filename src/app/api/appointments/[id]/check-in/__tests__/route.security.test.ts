@@ -11,6 +11,23 @@ import { PATCH } from '../route'
 import { NextRequest } from 'next/server'
 import { createMockSupabaseClient } from '@/test/test-utils'
 
+// Mock the middleware to expose the inner handler for testing
+vi.mock('@/lib/api/middleware', async () => {
+  const actual = await vi.importActual('@/lib/api/middleware')
+  return {
+    ...actual,
+    // Pass through the handler directly for testing (bypasses auth/rate-limit)
+    withAuthAndRateLimit: (handler: any) => handler,
+  }
+})
+
+// Type helper for test calls - allows calling with auth context
+type TestHandler = (
+  request: any,
+  context: any,
+  auth: { user: any; business: any; supabase: any }
+) => Promise<Response>
+
 describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
   let mockSupabase: ReturnType<typeof createMockSupabaseClient>
   let mockRequest: NextRequest
@@ -47,10 +64,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       expect(response.status).toBe(401)
@@ -85,10 +102,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         update: mockUpdate,
       })
 
-      await PATCH(
+      await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Update should NOT be called due to early return on auth failure
@@ -131,10 +148,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Should succeed without barberId validation
@@ -164,10 +181,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       expect(response.status).toBe(404)
@@ -216,10 +233,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       } as any)
 
-      await PATCH(
+      await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Verify business_id filter in fetch
@@ -233,6 +250,11 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
       const authenticatedBusiness = {
         id: 'business-a',
         name: 'Business A',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       mockRequest = new NextRequest(
@@ -251,10 +273,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-from-business-b' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       const body = await response.json()
@@ -292,10 +314,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       expect(response.status).toBe(400)
@@ -332,10 +354,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         update: mockUpdate,
       })
 
-      await PATCH(
+      await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Update should not be called
@@ -370,10 +392,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Should return 401 due to barber mismatch (SQL injection safely handled as string comparison)
@@ -415,10 +437,10 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
-      const response = await PATCH(
+      const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Should succeed (invalid JSON caught in try-catch, proceeds as owner)

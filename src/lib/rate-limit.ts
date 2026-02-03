@@ -17,7 +17,7 @@ import { NextRequest } from 'next/server'
 import { Redis } from '@upstash/redis'
 import { logger } from './logger'
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   interval: number // Time window in milliseconds
   maxRequests: number // Max requests per interval
 }

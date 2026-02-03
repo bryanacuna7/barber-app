@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
-import { withAuth, notFoundResponse, errorResponse } from '@/lib/api/middleware'
+import {
+  withAuth,
+  notFoundResponse,
+  errorResponse,
+  unauthorizedResponse,
+} from '@/lib/api/middleware'
 
 /**
  * Response types for Mi Dia staff view
@@ -57,39 +62,54 @@ interface RouteParams {
  * Fetch today's appointments for a specific barber.
  * Used by the "Mi Dia" staff view.
  *
+ * Security:
  * - Validates that the barber belongs to the authenticated user's business
+ * - IDOR Protection: Validates that the authenticated user IS this barber (via email match)
  * - Returns appointments ordered by scheduled_at ascending
  * - Includes client info, service details, and status
  */
-export const GET = withAuth<RouteParams>(async (request, { params }, { business, supabase }) => {
-  try {
-    const { id: barberId } = await params
+export const GET = withAuth<RouteParams>(
+  async (request, { params }, { user, business, supabase }) => {
+    try {
+      const { id: barberId } = await params
 
-    // 1. Verify barber exists and belongs to this business
-    const { data: barber, error: barberError } = await supabase
-      .from('barbers')
-      .select('id, name, business_id')
-      .eq('id', barberId)
-      .eq('business_id', business.id)
-      .single()
+      // 1. Verify barber exists and belongs to this business
+      const { data: barber, error: barberError } = await supabase
+        .from('barbers')
+        .select('id, name, email, business_id')
+        .eq('id', barberId)
+        .eq('business_id', business.id)
+        .single()
 
-    if (barberError || !barber) {
-      return notFoundResponse('Barbero no encontrado')
-    }
+      if (barberError || !barber) {
+        return notFoundResponse('Barbero no encontrado')
+      }
 
-    // 2. Get today's date range in business timezone (or UTC if not set)
-    // Note: We use UTC for server-side date calculations
-    const now = new Date()
-    const startOfDay = new Date(now)
-    startOfDay.setUTCHours(0, 0, 0, 0)
-    const endOfDay = new Date(now)
-    endOfDay.setUTCHours(23, 59, 59, 999)
+      // 2. IDOR PROTECTION: Verify authenticated user is this barber OR business owner
+      // Barbers can only view their own appointments, business owners can view all
+      const isBusinessOwner = business.owner_id === user.id
+      const isThisBarber = barber.email === user.email
 
-    // 3. Fetch today's appointments for this barber
-    const { data: appointments, error: appointmentsError } = await supabase
-      .from('appointments')
-      .select(
-        `
+      if (!isBusinessOwner && !isThisBarber) {
+        console.warn(
+          `⚠️ IDOR attempt blocked: User ${user.email} tried to access appointments for barber ${barber.email}`
+        )
+        return unauthorizedResponse('No tienes permiso para ver las citas de este barbero')
+      }
+
+      // 3. Get today's date range in business timezone (or UTC if not set)
+      // Note: We use UTC for server-side date calculations
+      const now = new Date()
+      const startOfDay = new Date(now)
+      startOfDay.setUTCHours(0, 0, 0, 0)
+      const endOfDay = new Date(now)
+      endOfDay.setUTCHours(23, 59, 59, 999)
+
+      // 4. Fetch today's appointments for this barber
+      const { data: appointments, error: appointmentsError } = await supabase
+        .from('appointments')
+        .select(
+          `
         id,
         scheduled_at,
         duration_minutes,
@@ -100,64 +120,65 @@ export const GET = withAuth<RouteParams>(async (request, { params }, { business,
         client:clients(id, name, phone, email),
         service:services(id, name, duration_minutes, price)
       `
-      )
-      .eq('barber_id', barberId)
-      .eq('business_id', business.id)
-      .gte('scheduled_at', startOfDay.toISOString())
-      .lte('scheduled_at', endOfDay.toISOString())
-      .order('scheduled_at', { ascending: true })
+        )
+        .eq('barber_id', barberId)
+        .eq('business_id', business.id)
+        .gte('scheduled_at', startOfDay.toISOString())
+        .lte('scheduled_at', endOfDay.toISOString())
+        .order('scheduled_at', { ascending: true })
 
-    if (appointmentsError) {
-      console.error('Error fetching appointments:', appointmentsError)
-      return errorResponse('Error al obtener las citas')
-    }
+      if (appointmentsError) {
+        console.error('Error fetching appointments:', appointmentsError)
+        return errorResponse('Error al obtener las citas')
+      }
 
-    // 4. Calculate stats
-    const stats = {
-      total: appointments?.length || 0,
-      pending: 0,
-      confirmed: 0,
-      completed: 0,
-      cancelled: 0,
-      no_show: 0,
-    }
+      // 5. Calculate stats
+      const stats = {
+        total: appointments?.length || 0,
+        pending: 0,
+        confirmed: 0,
+        completed: 0,
+        cancelled: 0,
+        no_show: 0,
+      }
 
-    if (appointments) {
-      for (const apt of appointments) {
-        switch (apt.status) {
-          case 'pending':
-            stats.pending++
-            break
-          case 'confirmed':
-            stats.confirmed++
-            break
-          case 'completed':
-            stats.completed++
-            break
-          case 'cancelled':
-            stats.cancelled++
-            break
-          case 'no_show':
-            stats.no_show++
-            break
+      if (appointments) {
+        for (const apt of appointments) {
+          switch (apt.status) {
+            case 'pending':
+              stats.pending++
+              break
+            case 'confirmed':
+              stats.confirmed++
+              break
+            case 'completed':
+              stats.completed++
+              break
+            case 'cancelled':
+              stats.cancelled++
+              break
+            case 'no_show':
+              stats.no_show++
+              break
+          }
         }
       }
-    }
 
-    // 5. Build response
-    const response: TodayAppointmentsResponse = {
-      appointments: (appointments || []) as TodayAppointment[],
-      barber: {
-        id: barber.id,
-        name: barber.name,
-      },
-      date: startOfDay.toISOString().split('T')[0],
-      stats,
-    }
+      // 6. Build response
+      const response: TodayAppointmentsResponse = {
+        appointments: (appointments || []) as TodayAppointment[],
+        barber: {
+          id: barber.id,
+          name: barber.name,
+        },
+        date: startOfDay.toISOString().split('T')[0],
+        stats,
+      }
 
-    return NextResponse.json(response)
-  } catch (error) {
-    console.error('Unexpected error in GET /api/barbers/[id]/appointments/today:', error)
-    return errorResponse('Error interno del servidor')
+      return NextResponse.json(response)
+    } catch (error) {
+      console.error('Unexpected error in GET /api/barbers/[id]/appointments/today:', error)
+      return errorResponse('Error interno del servidor')
+    }
   }
-})
+)

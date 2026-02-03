@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import {
-  withAuth,
+  withAuthAndRateLimit,
   notFoundResponse,
   errorResponse,
   unauthorizedResponse,
@@ -41,64 +41,80 @@ export interface AppointmentStatusUpdateResponse {
  * Mark an appointment as completed.
  * Used by barbers in the "Mi Dia" staff view.
  *
- * Validations:
+ * Security (IDOR Protection):
  * - Appointment must exist and belong to the business
- * - Optionally validates barber ownership (if barberId provided in body)
+ * - MANDATORY: Validates barber ownership via authenticated user's email
+ * - Business owners can complete any appointment
+ * - Barbers can ONLY complete their own appointments
  * - Appointment must be in 'pending' or 'confirmed' status to complete
+ *
+ * Rate Limiting:
+ * - 10 requests per minute per user
+ * - Prevents accidental double-clicks or abuse
  *
  * Side effects:
  * - Updates client stats (total_visits, total_spent, last_visit_at)
  * - Updates barber stats if gamification is enabled
  */
-export const PATCH = withAuth<RouteParams>(async (request, { params }, { business, supabase }) => {
-  try {
-    const { id: appointmentId } = await params
-
-    // Parse optional body for barber validation
-    let barberId: string | undefined
+export const PATCH = withAuthAndRateLimit<RouteParams>(
+  async (request, { params }, { user, business, supabase }) => {
     try {
-      const body = await request.json()
-      barberId = body.barberId
-    } catch {
-      // No body provided, which is fine
-    }
+      const { id: appointmentId } = await params
 
-    // 1. Fetch the appointment with client info
-    const { data: appointment, error: fetchError } = await supabase
-      .from('appointments')
-      .select('id, status, barber_id, business_id, client_id, price')
-      .eq('id', appointmentId)
-      .eq('business_id', business.id)
-      .single()
+      // 1. Fetch the appointment with barber info
+      const { data: appointment, error: fetchError } = await supabase
+        .from('appointments')
+        .select(
+          `
+        id,
+        status,
+        barber_id,
+        business_id,
+        client_id,
+        price,
+        barber:barbers!appointments_barber_id_fkey(id, email)
+      `
+        )
+        .eq('id', appointmentId)
+        .eq('business_id', business.id)
+        .single()
 
-    if (fetchError || !appointment) {
-      return notFoundResponse('Cita no encontrada')
-    }
+      if (fetchError || !appointment) {
+        return notFoundResponse('Cita no encontrada')
+      }
 
-    // 2. Validate barber ownership if barberId provided
-    if (barberId && appointment.barber_id !== barberId) {
-      return unauthorizedResponse('Esta cita no pertenece a este barbero')
-    }
+      // 2. IDOR PROTECTION: Verify authenticated user can modify this appointment
+      // Business owners can modify any appointment, barbers only their own
+      const isBusinessOwner = business.owner_id === user.id
+      const barberEmail = (appointment.barber as any)?.email
+      const isAssignedBarber = barberEmail === user.email
 
-    // 3. Validate current status - only pending or confirmed can be completed
-    if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
-      return NextResponse.json(
-        {
-          error: 'Estado invalido',
-          message: `No se puede completar una cita con estado "${appointment.status}". Solo citas pendientes o confirmadas pueden completarse.`,
-        },
-        { status: 400 }
-      )
-    }
+      if (!isBusinessOwner && !isAssignedBarber) {
+        console.warn(
+          `⚠️ IDOR attempt blocked: User ${user.email} tried to complete appointment for barber ${barberEmail}`
+        )
+        return unauthorizedResponse('Esta cita no pertenece a este barbero')
+      }
 
-    // 4. Update status to completed
-    const { data: updatedAppointment, error: updateError } = await supabase
-      .from('appointments')
-      .update({ status: 'completed' })
-      .eq('id', appointmentId)
-      .eq('business_id', business.id)
-      .select(
-        `
+      // 3. Validate current status - only pending or confirmed can be completed
+      if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
+        return NextResponse.json(
+          {
+            error: 'Estado invalido',
+            message: `No se puede completar una cita con estado "${appointment.status}". Solo citas pendientes o confirmadas pueden completarse.`,
+          },
+          { status: 400 }
+        )
+      }
+
+      // 4. Update status to completed
+      const { data: updatedAppointment, error: updateError } = await supabase
+        .from('appointments')
+        .update({ status: 'completed' })
+        .eq('id', appointmentId)
+        .eq('business_id', business.id)
+        .select(
+          `
         id,
         status,
         scheduled_at,
@@ -109,58 +125,51 @@ export const PATCH = withAuth<RouteParams>(async (request, { params }, { busines
         client:clients(id, name, phone, email),
         service:services(id, name, duration_minutes, price)
       `
-      )
-      .single()
+        )
+        .single()
 
-    if (updateError) {
-      console.error('Error updating appointment status:', updateError)
-      return errorResponse('Error al actualizar el estado de la cita')
-    }
+      if (updateError) {
+        console.error('Error updating appointment status:', updateError)
+        return errorResponse('Error al actualizar el estado de la cita')
+      }
 
-    // 5. Update client stats (total_visits, total_spent, last_visit_at)
-    if (appointment.client_id) {
-      const { error: clientUpdateError } = await supabase
-        .from('clients')
-        .update({
-          total_visits: supabase.rpc('increment', { x: 1 }) as unknown as number,
-          total_spent: supabase.rpc('increment', {
-            x: appointment.price || 0,
-          }) as unknown as number,
-          last_visit_at: new Date().toISOString(),
+      // 5. Update client stats atomically to prevent race conditions (CWE-915)
+      // Using atomic database function instead of fetch-then-update pattern
+      if (appointment.client_id) {
+        const { error: statsError } = await supabase.rpc('increment_client_stats', {
+          p_client_id: appointment.client_id,
+          p_visits_increment: 1,
+          p_spent_increment: appointment.price || 0,
+          p_last_visit_timestamp: new Date().toISOString(),
         })
-        .eq('id', appointment.client_id)
 
-      // Use raw SQL update as fallback if RPC doesn't exist
-      if (clientUpdateError) {
-        // Fallback: fetch current values and increment manually
-        const { data: client } = await supabase
-          .from('clients')
-          .select('total_visits, total_spent')
-          .eq('id', appointment.client_id)
-          .single()
-
-        if (client) {
-          await supabase
-            .from('clients')
-            .update({
-              total_visits: (client.total_visits || 0) + 1,
-              total_spent: (client.total_spent || 0) + (appointment.price || 0),
-              last_visit_at: new Date().toISOString(),
-            })
-            .eq('id', appointment.client_id)
+        if (statsError) {
+          // Log error but don't fail the appointment completion
+          // Stats can be recalculated later if needed
+          console.error(
+            `Failed to update client stats for client ${appointment.client_id}:`,
+            statsError
+          )
+          // Note: We don't return error response here because the appointment
+          // was already marked as completed. Stats inconsistency is less critical
+          // than losing the completion status.
         }
       }
+
+      // 6. Update barber stats if gamification is enabled
+      // Note: This is handled by database triggers in migration 018_barber_gamification.sql
+      // The trigger automatically updates barber_stats when appointment status changes to 'completed'
+
+      console.log(`Complete: Appointment ${appointmentId} status changed to completed`)
+
+      return NextResponse.json(updatedAppointment as AppointmentStatusUpdateResponse)
+    } catch (error) {
+      console.error('Unexpected error in PATCH /api/appointments/[id]/complete:', error)
+      return errorResponse('Error interno del servidor')
     }
-
-    // 6. Update barber stats if gamification is enabled
-    // Note: This is handled by database triggers in migration 018_barber_gamification.sql
-    // The trigger automatically updates barber_stats when appointment status changes to 'completed'
-
-    console.log(`Complete: Appointment ${appointmentId} status changed to completed`)
-
-    return NextResponse.json(updatedAppointment as AppointmentStatusUpdateResponse)
-  } catch (error) {
-    console.error('Unexpected error in PATCH /api/appointments/[id]/complete:', error)
-    return errorResponse('Error interno del servidor')
+  },
+  {
+    interval: 60 * 1000, // 1 minute
+    maxRequests: 10, // 10 requests per minute per user
   }
-})
+)

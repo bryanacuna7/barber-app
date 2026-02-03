@@ -232,7 +232,7 @@ test.describe('Mi Día Feature - E2E Tests', () => {
         .first()
 
       if (!(await confirmedCard.isVisible())) {
-        test.skip('No confirmed appointments available')
+        test.skip(true, 'No confirmed appointments available')
       }
 
       const appointmentId = await confirmedCard.getAttribute('data-appointment-id')

@@ -6,7 +6,7 @@ import type { TodayAppointment, AppointmentStatusUpdateResponse } from '@/types/
 type AppointmentAction = 'check-in' | 'complete' | 'no-show'
 
 interface UseAppointmentActionsOptions {
-  barberId: string
+  barberId: string | null
   onSuccess?: (action: AppointmentAction, appointment: TodayAppointment) => void
   onError?: (action: AppointmentAction, error: Error) => void
 }
@@ -37,6 +37,16 @@ export function useAppointmentActions({
       appointmentId: string,
       action: AppointmentAction
     ): Promise<AppointmentStatusUpdateResponse | null> => {
+      // Guard: Don't execute if barberId is not available
+      if (!barberId) {
+        const error = new Error('ID de barbero no disponible')
+        setError(error)
+        if (onError) {
+          onError(action, error)
+        }
+        return null
+      }
+
       setIsLoading(true)
       setLoadingAppointmentId(appointmentId)
       setError(null)

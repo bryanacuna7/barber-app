@@ -129,7 +129,7 @@ describe('useBarberAppointments', () => {
         json: async () => {
           throw new Error('Invalid JSON')
         },
-      } as Response)
+      } as unknown as Response)
 
       const { result } = renderHook(() =>
         useBarberAppointments({

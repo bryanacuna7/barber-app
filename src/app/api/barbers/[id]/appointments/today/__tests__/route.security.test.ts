@@ -12,6 +12,23 @@ import { GET } from '../route'
 import { NextRequest } from 'next/server'
 import { createMockSupabaseClient } from '@/test/test-utils'
 
+// Mock the middleware to expose the inner handler for testing
+vi.mock('@/lib/api/middleware', async () => {
+  const actual = await vi.importActual('@/lib/api/middleware')
+  return {
+    ...actual,
+    // Pass through the handler directly for testing (bypasses auth)
+    withAuth: (handler: any) => handler,
+  }
+})
+
+// Type helper for test calls - allows calling with auth context
+type TestHandler = (
+  request: any,
+  context: any,
+  auth: { user: any; business: any; supabase: any }
+) => Promise<Response>
+
 describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
   let mockSupabase: ReturnType<typeof createMockSupabaseClient>
   let mockRequest: NextRequest
@@ -28,6 +45,11 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         name: 'Test Business',
       }
 
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
       // Requesting barber-b-456 but authenticated as business that only has barber-a-123
       mockSupabase.from.mockReturnValue({
         ...mockSupabase.from(),
@@ -37,10 +59,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         }),
       })
 
-      const response = await GET(
+      const response = await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-b-456' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       expect(response.status).toBe(404)
@@ -56,6 +78,11 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         name: 'Business A',
       }
 
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
       // Simulate query that filters by business_id
       mockSupabase.from.mockReturnValue({
         ...mockSupabase.from(),
@@ -66,10 +93,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         }),
       })
 
-      const response = await GET(
+      const response = await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-from-business-b' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       expect(response.status).toBe(404)
@@ -99,10 +126,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         }),
       })
 
-      await GET(
+      await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Verify that business_id filter was applied
@@ -115,6 +142,11 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         name: 'Business A',
       }
 
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
       // Barber exists but belongs to business-b
       mockSupabase.from.mockReturnValue({
         select: vi.fn().mockReturnThis(),
@@ -125,10 +157,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         }),
       })
 
-      const response = await GET(
+      const response = await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-from-business-b' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       expect(response.status).toBe(404)
@@ -138,6 +170,11 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
       const authenticatedBusiness = {
         id: 'business-a',
         name: 'Business A',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       // Setup: barber not found (filtered by business_id)
@@ -150,10 +187,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         }),
       })
 
-      const response = await GET(
+      const response = await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-b' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       const body = await response.json()
@@ -186,6 +223,11 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         name: 'Test Business',
       }
 
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
       // Attempt SQL injection in barber ID
       const maliciousId = "'; DROP TABLE barbers; --"
 
@@ -199,10 +241,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         }),
       })
 
-      await GET(
+      await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: maliciousId }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       // Supabase uses parameterized queries, so the malicious input is treated as a literal string
@@ -243,10 +285,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         .mockReturnValueOnce(mockBarberQuery as any)
         .mockReturnValueOnce(mockAppointmentsQuery as any)
 
-      await GET(
+      await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       // Verify appointments query includes business_id filter
@@ -292,10 +334,10 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         .mockReturnValueOnce(mockBarberQuery as any)
         .mockReturnValueOnce(mockAppointmentsQuery as any)
 
-      const response = await GET(
+      const response = await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any }
+        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
       )
 
       const body = await response.json()

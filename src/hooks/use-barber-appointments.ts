@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { TodayAppointmentsResponse } from '@/types/custom'
 
 interface UseBarberAppointmentsOptions {
-  barberId: string
+  barberId: string | null
   enabled?: boolean
   autoRefresh?: boolean
   refreshInterval?: number // in milliseconds
