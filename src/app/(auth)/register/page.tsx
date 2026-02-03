@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -25,9 +25,51 @@ import {
   trackReferralConversion,
 } from '@/lib/referrals'
 
-export default function RegisterPage() {
-  const router = useRouter()
+// Component that uses useSearchParams - must be wrapped in Suspense
+function ReferralDetector({
+  onReferrerInfo,
+}: {
+  onReferrerInfo: (info: { businessName: string; businessSlug?: string } | null) => void
+}) {
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const refCode = searchParams.get('ref')
+    if (!refCode) return
+
+    // Guardar código en cookie
+    saveReferralCode(refCode)
+
+    // Fetch info del referrer
+    const fetchReferrerInfo = async () => {
+      try {
+        const response = await fetch(`/api/referrals/info?code=${refCode}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.isValid) {
+            onReferrerInfo({
+              businessName: data.businessName,
+              businessSlug: data.businessSlug,
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching referrer info:', error)
+      }
+    }
+
+    fetchReferrerInfo()
+  }, [searchParams, onReferrerInfo])
+
+  return null
+}
+
+function RegisterForm({
+  referrerInfo,
+}: {
+  referrerInfo: { businessName: string; businessSlug?: string } | null
+}) {
+  const router = useRouter()
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -38,46 +80,8 @@ export default function RegisterPage() {
   const [showPasswords, setShowPasswords] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [referrerInfo, setReferrerInfo] = useState<{
-    businessName: string
-    businessSlug?: string
-  } | null>(null)
-  const [loadingReferrer, setLoadingReferrer] = useState(false)
-
   const { getFieldError, markFieldTouched, validateForm, clearErrors } =
     useFormValidation(registerSchema)
-
-  // Detectar código de referido en query params
-  useEffect(() => {
-    const refCode = searchParams.get('ref')
-    if (!refCode) return
-
-    // Guardar código en cookie
-    saveReferralCode(refCode)
-
-    // Fetch info del referrer
-    const fetchReferrerInfo = async () => {
-      setLoadingReferrer(true)
-      try {
-        const response = await fetch(`/api/referrals/info?code=${refCode}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.isValid) {
-            setReferrerInfo({
-              businessName: data.businessName,
-              businessSlug: data.businessSlug,
-            })
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching referrer info:', error)
-      } finally {
-        setLoadingReferrer(false)
-      }
-    }
-
-    fetchReferrerInfo()
-  }, [searchParams])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -165,7 +169,8 @@ export default function RegisterPage() {
     // 3. Track referral conversion if exists
     const referralCode = getReferralCode()
     if (referralCode) {
-      const tracked = await trackReferralConversion(referralCode, businessData.id)
+      const businessId = (businessData as { id: string }).id
+      const tracked = await trackReferralConversion(referralCode, businessId)
       if (tracked) {
         clearReferralCode() // Clear cookie after successful tracking
       }
@@ -288,6 +293,45 @@ export default function RegisterPage() {
           </p>
         </CardFooter>
       </form>
+    </Card>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterFormSkeleton />}>
+      <RegisterPageContent />
+    </Suspense>
+  )
+}
+
+function RegisterPageContent() {
+  const [referrerInfo, setReferrerInfo] = useState<{
+    businessName: string
+    businessSlug?: string
+  } | null>(null)
+
+  return (
+    <>
+      <ReferralDetector onReferrerInfo={setReferrerInfo} />
+      <RegisterForm referrerInfo={referrerInfo} />
+    </>
+  )
+}
+
+function RegisterFormSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+        <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+      </CardContent>
     </Card>
   )
 }

@@ -1,601 +1,34 @@
-import type { Json } from './json'
-
-export interface Business {
-  id: string
-  created_at: string
-  updated_at: string
-  owner_id: string
-  name: string
-  slug: string
-  phone: string | null
-  whatsapp: string | null
-  address: string | null
-  timezone: string
-  operating_hours: OperatingHours
-  booking_buffer_minutes: number
-  advance_booking_days: number
-  is_active: boolean
-  brand_primary_color: string
-  brand_secondary_color: string | null
-  logo_url: string | null
-}
-
-export interface OperatingHours {
-  mon?: DayHours | null
-  tue?: DayHours | null
-  wed?: DayHours | null
-  thu?: DayHours | null
-  fri?: DayHours | null
-  sat?: DayHours | null
-  sun?: DayHours | null
-}
-
-export interface DayHours {
-  open: string
-  close: string
-}
-
-export interface Service {
-  id: string
-  business_id: string
-  created_at: string
-  updated_at: string
-  name: string
-  description: string | null
-  duration_minutes: number
-  price: number
-  display_order: number
-  is_active: boolean
-}
-
-export interface Client {
-  id: string
-  business_id: string
-  created_at: string
-  updated_at: string
-  name: string
-  phone: string
-  email: string | null
-  notes: string | null
-  total_visits: number
-  total_spent: number
-  last_visit_at: string | null
-}
-
-export interface Barber {
-  id: string
-  created_at: string
-  updated_at: string
-  user_id: string | null
-  business_id: string
-  name: string
-  email: string
-  bio: string | null
-  photo_url: string | null
-  is_active: boolean
-  display_order: number
-}
-
-export interface BarberInvitation {
-  id: string
-  created_at: string
-  business_id: string
-  email: string
-  token: string
-  expires_at: string
-  used_at: string | null
-}
-
-export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
-
-export interface Appointment {
-  id: string
-  business_id: string
-  client_id: string | null
-  service_id: string | null
-  created_at: string
-  updated_at: string
-  scheduled_at: string
-  duration_minutes: number
-  price: number
-  status: AppointmentStatus
-  confirmation_sent_at: string | null
-  reminder_sent_at: string | null
-  client_notes: string | null
-  internal_notes: string | null
-  barber_id: string | null
-}
-
-export interface AppointmentWithDetails extends Appointment {
-  client: Client | null
-  service: Service | null
-  barber: Barber | null
-}
-
-// Insert types - only required fields, optional fields have DB defaults
-export interface BusinessInsert {
-  owner_id: string
-  name: string
-  slug: string
-  phone?: string | null
-  whatsapp?: string | null
-  address?: string | null
-  timezone?: string
-  operating_hours?: Json
-  booking_buffer_minutes?: number
-  advance_booking_days?: number
-  is_active?: boolean
-  brand_primary_color?: string
-  brand_secondary_color?: string | null
-  logo_url?: string | null
-}
-
-export interface ServiceInsert {
-  business_id: string
-  name: string
-  price: number
-  description?: string | null
-  duration_minutes?: number
-  display_order?: number
-  is_active?: boolean
-}
-
-export interface ClientInsert {
-  business_id: string
-  name: string
-  phone: string
-  email?: string | null
-  notes?: string | null
-}
-
-export interface AppointmentInsert {
-  business_id: string
-  scheduled_at: string
-  duration_minutes: number
-  price: number
-  client_id?: string | null
-  service_id?: string | null
-  status?: string
-  confirmation_sent_at?: string | null
-  reminder_sent_at?: string | null
-  client_notes?: string | null
-  internal_notes?: string | null
-  barber_id?: string | null
-}
-
-export interface BarberInsert {
-  business_id: string
-  name: string
-  email: string
-  user_id?: string | null
-  bio?: string | null
-  photo_url?: string | null
-  is_active?: boolean
-  display_order?: number
-}
-
-// Admin types
-export interface AdminUser {
-  id: string
-  user_id: string
-  created_at: string
-}
-
-// Business with stats for admin panel
-export interface BusinessWithStats extends Business {
-  barber_count?: number
-  service_count?: number
-  appointment_count?: number
-  total_revenue?: number
-  owner_email?: string
-}
-
-// ============================================================================
-// Subscription Types (Phase 3)
-// ============================================================================
-
-export interface SubscriptionPlan {
-  id: string
-  name: 'basic' | 'pro'
-  display_name: string
-  price_usd: number
-  max_barbers: number | null // null = ilimitado
-  max_services: number | null
-  max_clients: number | null
-  has_branding: boolean
-  is_active: boolean
-  created_at: string
-}
-
-export type SubscriptionStatus = 'trial' | 'active' | 'expired' | 'cancelled'
-
-export interface BusinessSubscription {
-  id: string
-  business_id: string
-  plan_id: string
-  status: SubscriptionStatus
-  trial_ends_at: string | null
-  current_period_start: string | null
-  current_period_end: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface BusinessSubscriptionWithPlan extends BusinessSubscription {
-  plan: SubscriptionPlan
-}
-
-export type PaymentReportStatus = 'pending' | 'approved' | 'rejected'
-
-export interface PaymentReport {
-  id: string
-  business_id: string
-  plan_id: string
-  amount_usd: number
-  proof_url: string | null
-  notes: string | null
-  status: PaymentReportStatus
-  reviewed_by: string | null
-  reviewed_at: string | null
-  admin_notes: string | null
-  created_at: string
-}
-
-export interface PaymentReportWithDetails extends PaymentReport {
-  plan: SubscriptionPlan
-  business: Pick<Business, 'id' | 'name' | 'slug'>
-}
-
-// Subscription insert types
-export interface PaymentReportInsert {
-  business_id: string
-  plan_id: string
-  amount_usd: number
-  proof_url?: string | null
-  notes?: string | null
-}
-
-// Subscription status response (for frontend)
-export interface SubscriptionStatusResponse {
-  status: SubscriptionStatus
-  plan: SubscriptionPlan
-  trial_ends_at: string | null
-  current_period_end: string | null
-  days_remaining: number | null
-  usage: {
-    barbers: { current: number; max: number | null }
-    services: { current: number; max: number | null }
-    clients: { current: number; max: number | null }
-  }
-  can_use_branding: boolean
-}
-
-// ============================================================================
-// System Settings Types (Exchange Rate, etc.)
-// ============================================================================
-
-export interface SystemSetting {
-  id: string
-  key: string
-  value: Record<string, unknown>
-  updated_by: string | null
-  updated_at: string
-  created_at: string
-}
-
-export interface ExchangeRateValue {
-  usd_to_crc: number
-  last_updated: string
-  notes?: string
-}
-
-export interface UsdBankAccountValue {
-  enabled: boolean
-  bank_name: string
-  account_number: string
-  account_holder: string
-  notes?: string
-}
-
-// Exchange rate response for frontend
-export interface ExchangeRateResponse {
-  usd_to_crc: number
-  last_updated: string
-  notes?: string
-}
-
-export interface SupportWhatsAppValue {
-  number: string
-  display_number: string
-  message_template?: string
-}
-
-export interface SinpeDetailsValue {
-  phone_number: string
-  account_name: string
-  notes?: string
-}
-
-// ============================================================================
-// Notification Preferences Types
-// ============================================================================
-
-export type NotificationChannel = 'email' | 'app' | 'both'
-
-export interface NotificationPreferences {
-  id: string
-  business_id: string
-  channel: NotificationChannel
-  email_address: string | null
-
-  // Preferencias por tipo (business owner)
-  email_trial_expiring: boolean
-  email_subscription_expiring: boolean
-  email_payment_status: boolean
-  email_new_appointment: boolean
-  email_appointment_reminder: boolean
-
-  // Preferencias admin
-  email_new_business: boolean
-  email_payment_pending: boolean
-
-  created_at: string
-  updated_at: string
-}
-
-export interface NotificationPreferencesInsert {
-  business_id: string
-  channel?: NotificationChannel
-  email_address?: string | null
-  email_trial_expiring?: boolean
-  email_subscription_expiring?: boolean
-  email_payment_status?: boolean
-  email_new_appointment?: boolean
-  email_appointment_reminder?: boolean
-  email_new_business?: boolean
-  email_payment_pending?: boolean
-}
-
-// ============================================================================
-// Barber Gamification Types (Phase 2)
-// ============================================================================
-
-export type AchievementCategory = 'revenue' | 'appointments' | 'clients' | 'streak' | 'special'
-export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'legendary'
-export type ChallengeType = 'revenue' | 'appointments' | 'clients' | 'team_total'
-
-export interface BarberStats {
-  id: string
-  barber_id: string
-  business_id: string
-  total_appointments: number
-  total_revenue: number
-  total_clients: number
-  avg_rating: number
-  current_streak_days: number
-  best_streak_days: number
-  last_appointment_date: string | null
-  revenue_rank: number | null
-  appointments_rank: number | null
-  clients_rank: number | null
-  created_at: string
-  updated_at: string
-}
-
-export interface BarberAchievement {
-  id: string
-  key: string
-  name: string
-  description: string
-  icon: string
-  category: AchievementCategory
-  unlock_conditions: {
-    type: string
-    threshold: number
-  }
-  tier: AchievementTier
-  display_order: number
-  is_active: boolean
-  created_at: string
-}
-
-export interface BarberEarnedAchievement {
-  id: string
-  barber_id: string
-  achievement_id: string
-  earned_at: string
-  progress?: Json
-}
-
-export interface BarberChallenge {
-  id: string
-  business_id: string
-  name: string
-  description: string | null
-  challenge_type: ChallengeType
-  target_value: number
-  target_metric: string
-  reward_description: string | null
-  reward_amount: number | null
-  starts_at: string
-  ends_at: string
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface BarberChallengeParticipant {
-  id: string
-  challenge_id: string
-  barber_id: string
-  current_value: number
-  target_value: number
-  completed_at: string | null
-  rank: number | null
-  created_at: string
-  updated_at: string
-}
-
-export interface BarberChallengeInsert {
-  business_id: string
-  name: string
-  description?: string | null
-  challenge_type: ChallengeType
-  target_value: number
-  target_metric: string
-  reward_description?: string | null
-  reward_amount?: number | null
-  starts_at: string
-  ends_at: string
-  is_active?: boolean
-}
-
-// ============================================================================
-// Business Referral System Types (Phase 3)
-// ============================================================================
-
-export type ReferralConversionStatus = 'pending' | 'trial' | 'active' | 'churned'
-export type ReferralRewardType = 'discount' | 'free_months' | 'feature_unlock'
-export type ReferralMilestoneTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'legendary'
-
-export interface BusinessReferral {
-  id: string
-  business_id: string
-  referral_code: string
-  qr_code_url: string | null
-  total_referrals: number
-  successful_referrals: number
-  current_milestone: number
-  points_balance: number
-  created_at: string
-  updated_at: string
-}
-
-export interface ReferralConversion {
-  id: string
-  referrer_business_id: string
-  referred_business_id: string | null
-  referral_code: string
-  status: ReferralConversionStatus
-  converted_at: string | null
-  reward_claimed_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface ReferralMilestone {
-  id: string
-  milestone_number: number
-  referrals_required: number
-  reward_type: ReferralRewardType
-  reward_value: number
-  reward_description: string
-  badge_name: string
-  badge_icon: string | null
-  tier: ReferralMilestoneTier
-  display_order: number
-  is_active: boolean
-  created_at: string
-}
-
-export interface ReferralRewardClaimed {
-  id: string
-  business_id: string
-  milestone_id: string
-  claimed_at: string
-  applied_at: string | null
-  expires_at: string | null
-  metadata: Json
-}
-
-// Extended types with relations
-export interface ReferralConversionWithBusiness extends ReferralConversion {
-  referred_business: Pick<Business, 'id' | 'name' | 'slug'> | null
-}
-
-export interface ReferralRewardClaimedWithMilestone extends ReferralRewardClaimed {
-  milestone: ReferralMilestone
-}
-
-// API response types
-export interface ReferralStatsResponse {
-  totalReferrals: number
-  successfulReferrals: number
-  currentMilestone: number
-  pointsBalance: number
-  conversionRate: string
-  referralCode: string | null
-  qrCodeUrl: string | null
-  signupUrl: string | null
-  nextMilestone: {
-    number: number
-    referralsRequired: number
-    remaining: number
-    reward: string
-    percentage: string
-  } | null
-  earnedBadges: ReferralRewardClaimedWithMilestone[]
-  conversions: ReferralConversionWithBusiness[]
-  milestones: ReferralMilestone[]
-  businessName: string
-}
-
-export interface ReferralCodeResponse {
-  referralCode: string
-  qrCodeUrl: string | null
-  signupUrl: string
-  isNew: boolean
-}
-
-export interface ReferralInfoResponse {
-  isValid: boolean
-  businessName?: string
-  businessId?: string
-  businessSlug?: string
-  referralCode?: string
-  error?: string
-}
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: Record<string, never>
-    Views: Record<string, never>
-    Functions: {
-      graphql: {
-        Args: {
-          operationName?: string
-          query?: string
-          variables?: Json
-          extensions?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: Record<string, never>
-    CompositeTypes: Record<string, never>
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: '14.1'
   }
   public: {
     Tables: {
       admin_users: {
         Row: {
+          created_at: string | null
           id: string
           user_id: string
-          created_at: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
           user_id: string
-          created_at?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
           user_id?: string
-          created_at?: string | null
         }
         Relationships: []
       }
       appointments: {
         Row: {
+          barber_id: string | null
           business_id: string
           client_id: string | null
           client_notes: string | null
@@ -610,9 +43,9 @@ export type Database = {
           service_id: string | null
           status: string | null
           updated_at: string | null
-          barber_id: string | null
         }
         Insert: {
+          barber_id?: string | null
           business_id: string
           client_id?: string | null
           client_notes?: string | null
@@ -627,9 +60,9 @@ export type Database = {
           service_id?: string | null
           status?: string | null
           updated_at?: string | null
-          barber_id?: string | null
         }
         Update: {
+          barber_id?: string | null
           business_id?: string
           client_id?: string | null
           client_notes?: string | null
@@ -644,9 +77,15 @@ export type Database = {
           service_id?: string | null
           status?: string | null
           updated_at?: string | null
-          barber_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: 'appointments_barber_id_fkey'
+            columns: ['barber_id']
+            isOneToOne: false
+            referencedRelation: 'barbers'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'appointments_business_id_fkey'
             columns: ['business_id']
@@ -668,11 +107,302 @@ export type Database = {
             referencedRelation: 'services'
             referencedColumns: ['id']
           },
+        ]
+      }
+      barber_achievements: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          name: string
+          tier: string | null
+          unlock_conditions: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          name: string
+          tier?: string | null
+          unlock_conditions: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          name?: string
+          tier?: string | null
+          unlock_conditions?: Json
+        }
+        Relationships: []
+      }
+      barber_challenge_participants: {
+        Row: {
+          barber_id: string
+          challenge_id: string
+          completed_at: string | null
+          created_at: string | null
+          current_value: number | null
+          id: string
+          rank: number | null
+          target_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          barber_id: string
+          challenge_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          rank?: number | null
+          target_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          barber_id?: string
+          challenge_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          rank?: number | null
+          target_value?: number
+          updated_at?: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: 'appointments_barber_id_fkey'
+            foreignKeyName: 'barber_challenge_participants_barber_id_fkey'
             columns: ['barber_id']
             isOneToOne: false
             referencedRelation: 'barbers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'barber_challenge_participants_challenge_id_fkey'
+            columns: ['challenge_id']
+            isOneToOne: false
+            referencedRelation: 'barber_challenges'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      barber_challenges: {
+        Row: {
+          business_id: string
+          challenge_type: string
+          created_at: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          reward_amount: number | null
+          reward_description: string | null
+          starts_at: string
+          target_metric: string
+          target_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          challenge_type: string
+          created_at?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          reward_amount?: number | null
+          reward_description?: string | null
+          starts_at: string
+          target_metric: string
+          target_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          challenge_type?: string
+          created_at?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          reward_amount?: number | null
+          reward_description?: string | null
+          starts_at?: string
+          target_metric?: string
+          target_value?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'barber_challenges_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      barber_earned_achievements: {
+        Row: {
+          achievement_id: string
+          barber_id: string
+          earned_at: string | null
+          id: string
+          progress: Json | null
+        }
+        Insert: {
+          achievement_id: string
+          barber_id: string
+          earned_at?: string | null
+          id?: string
+          progress?: Json | null
+        }
+        Update: {
+          achievement_id?: string
+          barber_id?: string
+          earned_at?: string | null
+          id?: string
+          progress?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'barber_earned_achievements_achievement_id_fkey'
+            columns: ['achievement_id']
+            isOneToOne: false
+            referencedRelation: 'barber_achievements'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'barber_earned_achievements_barber_id_fkey'
+            columns: ['barber_id']
+            isOneToOne: false
+            referencedRelation: 'barbers'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      barber_invitations: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          email: string
+          expires_at: string | null
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          email: string
+          expires_at?: string | null
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          email?: string
+          expires_at?: string | null
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'barber_invitations_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      barber_stats: {
+        Row: {
+          appointments_rank: number | null
+          avg_rating: number | null
+          barber_id: string
+          best_streak_days: number | null
+          business_id: string
+          clients_rank: number | null
+          created_at: string | null
+          current_streak_days: number | null
+          id: string
+          last_appointment_date: string | null
+          revenue_rank: number | null
+          total_appointments: number | null
+          total_clients: number | null
+          total_revenue: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          appointments_rank?: number | null
+          avg_rating?: number | null
+          barber_id: string
+          best_streak_days?: number | null
+          business_id: string
+          clients_rank?: number | null
+          created_at?: string | null
+          current_streak_days?: number | null
+          id?: string
+          last_appointment_date?: string | null
+          revenue_rank?: number | null
+          total_appointments?: number | null
+          total_clients?: number | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          appointments_rank?: number | null
+          avg_rating?: number | null
+          barber_id?: string
+          best_streak_days?: number | null
+          business_id?: string
+          clients_rank?: number | null
+          created_at?: string | null
+          current_streak_days?: number | null
+          id?: string
+          last_appointment_date?: string | null
+          revenue_rank?: number | null
+          total_appointments?: number | null
+          total_clients?: number | null
+          total_revenue?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'barber_stats_barber_id_fkey'
+            columns: ['barber_id']
+            isOneToOne: true
+            referencedRelation: 'barbers'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'barber_stats_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
             referencedColumns: ['id']
           },
         ]
@@ -727,40 +457,138 @@ export type Database = {
           },
         ]
       }
-      barber_invitations: {
+      business_onboarding: {
+        Row: {
+          business_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          skipped: boolean
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          skipped?: boolean
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          skipped?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'business_onboarding_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: true
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      business_referrals: {
         Row: {
           business_id: string
           created_at: string | null
-          email: string
-          expires_at: string | null
+          current_milestone: number | null
           id: string
-          token: string
-          used_at: string | null
+          points_balance: number | null
+          qr_code_url: string | null
+          referral_code: string
+          successful_referrals: number | null
+          total_referrals: number | null
+          updated_at: string | null
         }
         Insert: {
           business_id: string
           created_at?: string | null
-          email: string
-          expires_at?: string | null
+          current_milestone?: number | null
           id?: string
-          token?: string
-          used_at?: string | null
+          points_balance?: number | null
+          qr_code_url?: string | null
+          referral_code: string
+          successful_referrals?: number | null
+          total_referrals?: number | null
+          updated_at?: string | null
         }
         Update: {
           business_id?: string
           created_at?: string | null
-          email?: string
-          expires_at?: string | null
+          current_milestone?: number | null
           id?: string
-          token?: string
-          used_at?: string | null
+          points_balance?: number | null
+          qr_code_url?: string | null
+          referral_code?: string
+          successful_referrals?: number | null
+          total_referrals?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'barber_invitations_business_id_fkey'
+            foreignKeyName: 'business_referrals_business_id_fkey'
             columns: ['business_id']
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      business_subscriptions: {
+        Row: {
+          business_id: string
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          status: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'business_subscriptions_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: true
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'business_subscriptions_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'subscription_plans'
             referencedColumns: ['id']
           },
         ]
@@ -825,6 +653,140 @@ export type Database = {
         }
         Relationships: []
       }
+      client_loyalty_status: {
+        Row: {
+          business_id: string
+          client_id: string
+          created_at: string | null
+          current_tier: string | null
+          id: string
+          last_points_earned_at: string | null
+          last_reward_redeemed_at: string | null
+          lifetime_points: number | null
+          points_balance: number | null
+          referral_code: string | null
+          referred_by_client_id: string | null
+          updated_at: string | null
+          user_id: string
+          visit_count: number | null
+        }
+        Insert: {
+          business_id: string
+          client_id: string
+          created_at?: string | null
+          current_tier?: string | null
+          id?: string
+          last_points_earned_at?: string | null
+          last_reward_redeemed_at?: string | null
+          lifetime_points?: number | null
+          points_balance?: number | null
+          referral_code?: string | null
+          referred_by_client_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          visit_count?: number | null
+        }
+        Update: {
+          business_id?: string
+          client_id?: string
+          created_at?: string | null
+          current_tier?: string | null
+          id?: string
+          last_points_earned_at?: string | null
+          last_reward_redeemed_at?: string | null
+          lifetime_points?: number | null
+          points_balance?: number | null
+          referral_code?: string | null
+          referred_by_client_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          visit_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'client_loyalty_status_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'client_loyalty_status_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: true
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'client_loyalty_status_referred_by_client_id_fkey'
+            columns: ['referred_by_client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      client_referrals: {
+        Row: {
+          business_id: string
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          referral_code: string
+          referred_client_id: string | null
+          referred_reward_claimed_at: string | null
+          referrer_client_id: string
+          referrer_reward_claimed_at: string | null
+          status: string
+        }
+        Insert: {
+          business_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code: string
+          referred_client_id?: string | null
+          referred_reward_claimed_at?: string | null
+          referrer_client_id: string
+          referrer_reward_claimed_at?: string | null
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code?: string
+          referred_client_id?: string | null
+          referred_reward_claimed_at?: string | null
+          referrer_client_id?: string
+          referrer_reward_claimed_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'client_referrals_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'client_referrals_referred_client_id_fkey'
+            columns: ['referred_client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'client_referrals_referrer_client_id_fkey'
+            columns: ['referrer_client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       clients: {
         Row: {
           business_id: string
@@ -838,6 +800,7 @@ export type Database = {
           total_spent: number | null
           total_visits: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           business_id: string
@@ -851,6 +814,7 @@ export type Database = {
           total_spent?: number | null
           total_visits?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           business_id?: string
@@ -864,6 +828,7 @@ export type Database = {
           total_spent?: number | null
           total_visits?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -875,13 +840,450 @@ export type Database = {
           },
         ]
       }
+      loyalty_programs: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          discount_after_visits: number | null
+          discount_percentage: number | null
+          enabled: boolean | null
+          free_service_after_visits: number | null
+          id: string
+          points_expiry_days: number | null
+          points_per_currency_unit: number | null
+          program_type: string
+          referee_reward_amount: number | null
+          referral_reward_amount: number | null
+          referral_reward_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          discount_after_visits?: number | null
+          discount_percentage?: number | null
+          enabled?: boolean | null
+          free_service_after_visits?: number | null
+          id?: string
+          points_expiry_days?: number | null
+          points_per_currency_unit?: number | null
+          program_type?: string
+          referee_reward_amount?: number | null
+          referral_reward_amount?: number | null
+          referral_reward_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          discount_after_visits?: number | null
+          discount_percentage?: number | null
+          enabled?: boolean | null
+          free_service_after_visits?: number | null
+          id?: string
+          points_expiry_days?: number | null
+          points_per_currency_unit?: number | null
+          program_type?: string
+          referee_reward_amount?: number | null
+          referral_reward_amount?: number | null
+          referral_reward_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'loyalty_programs_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: true
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      loyalty_transactions: {
+        Row: {
+          amount_delta: number | null
+          business_id: string
+          client_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          points_delta: number
+          related_appointment_id: string | null
+          related_referral_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount_delta?: number | null
+          business_id: string
+          client_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          points_delta: number
+          related_appointment_id?: string | null
+          related_referral_id?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount_delta?: number | null
+          business_id?: string
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          points_delta?: number
+          related_appointment_id?: string | null
+          related_referral_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'loyalty_transactions_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'loyalty_transactions_client_id_fkey'
+            columns: ['client_id']
+            isOneToOne: false
+            referencedRelation: 'clients'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'loyalty_transactions_related_appointment_id_fkey'
+            columns: ['related_appointment_id']
+            isOneToOne: false
+            referencedRelation: 'appointments'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          business_id: string
+          channel: string | null
+          created_at: string | null
+          email_address: string | null
+          email_appointment_reminder: boolean | null
+          email_new_appointment: boolean | null
+          email_new_business: boolean | null
+          email_payment_pending: boolean | null
+          email_payment_status: boolean | null
+          email_subscription_expiring: boolean | null
+          email_trial_expiring: boolean | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: string
+          channel?: string | null
+          created_at?: string | null
+          email_address?: string | null
+          email_appointment_reminder?: boolean | null
+          email_new_appointment?: boolean | null
+          email_new_business?: boolean | null
+          email_payment_pending?: boolean | null
+          email_payment_status?: boolean | null
+          email_subscription_expiring?: boolean | null
+          email_trial_expiring?: boolean | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string
+          channel?: string | null
+          created_at?: string | null
+          email_address?: string | null
+          email_appointment_reminder?: boolean | null
+          email_new_appointment?: boolean | null
+          email_new_business?: boolean | null
+          email_payment_pending?: boolean | null
+          email_payment_status?: boolean | null
+          email_subscription_expiring?: boolean | null
+          email_trial_expiring?: boolean | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notification_preferences_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: true
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          read_at: string | null
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          read_at?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          read_at?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      payment_reports: {
+        Row: {
+          admin_notes: string | null
+          amount_usd: number
+          business_id: string
+          created_at: string
+          delete_after: string | null
+          id: string
+          notes: string | null
+          plan_id: string
+          proof_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount_usd: number
+          business_id: string
+          created_at?: string
+          delete_after?: string | null
+          id?: string
+          notes?: string | null
+          plan_id: string
+          proof_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount_usd?: number
+          business_id?: string
+          created_at?: string
+          delete_after?: string | null
+          id?: string
+          notes?: string | null
+          plan_id?: string
+          proof_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'payment_reports_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payment_reports_plan_id_fkey'
+            columns: ['plan_id']
+            isOneToOne: false
+            referencedRelation: 'subscription_plans'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'payment_reports_reviewed_by_fkey'
+            columns: ['reviewed_by']
+            isOneToOne: false
+            referencedRelation: 'admin_users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      referral_conversions: {
+        Row: {
+          converted_at: string | null
+          created_at: string | null
+          id: string
+          referral_code: string
+          referred_business_id: string | null
+          referrer_business_id: string
+          reward_claimed_at: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code: string
+          referred_business_id?: string | null
+          referrer_business_id: string
+          reward_claimed_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code?: string
+          referred_business_id?: string | null
+          referrer_business_id?: string
+          reward_claimed_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'referral_conversions_referred_business_id_fkey'
+            columns: ['referred_business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'referral_conversions_referrer_business_id_fkey'
+            columns: ['referrer_business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      referral_milestones: {
+        Row: {
+          badge_icon: string | null
+          badge_name: string
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          milestone_number: number
+          referrals_required: number
+          reward_description: string
+          reward_type: string
+          reward_value: number
+          tier: string
+        }
+        Insert: {
+          badge_icon?: string | null
+          badge_name: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          milestone_number: number
+          referrals_required: number
+          reward_description: string
+          reward_type: string
+          reward_value: number
+          tier: string
+        }
+        Update: {
+          badge_icon?: string | null
+          badge_name?: string
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          milestone_number?: number
+          referrals_required?: number
+          reward_description?: string
+          reward_type?: string
+          reward_value?: number
+          tier?: string
+        }
+        Relationships: []
+      }
+      referral_rewards_claimed: {
+        Row: {
+          applied_at: string | null
+          business_id: string
+          claimed_at: string | null
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          milestone_id: string
+        }
+        Insert: {
+          applied_at?: string | null
+          business_id: string
+          claimed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          milestone_id: string
+        }
+        Update: {
+          applied_at?: string | null
+          business_id?: string
+          claimed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          milestone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'referral_rewards_claimed_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'referral_rewards_claimed_milestone_id_fkey'
+            columns: ['milestone_id']
+            isOneToOne: false
+            referencedRelation: 'referral_milestones'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       services: {
         Row: {
           business_id: string
           created_at: string | null
           description: string | null
           display_order: number | null
-          duration_minutes: number | null
+          duration_minutes: number
           id: string
           is_active: boolean | null
           name: string
@@ -893,7 +1295,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
-          duration_minutes?: number | null
+          duration_minutes?: number
           id?: string
           is_active?: boolean | null
           name: string
@@ -905,7 +1307,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
-          duration_minutes?: number | null
+          duration_minutes?: number
           id?: string
           is_active?: boolean | null
           name?: string
@@ -922,35 +1324,293 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          display_name: string
+          has_branding: boolean
+          id: string
+          is_active: boolean
+          max_barbers: number | null
+          max_clients: number | null
+          max_services: number | null
+          name: string
+          price_usd: number
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          has_branding?: boolean
+          id?: string
+          is_active?: boolean
+          max_barbers?: number | null
+          max_clients?: number | null
+          max_services?: number | null
+          name: string
+          price_usd: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          has_branding?: boolean
+          id?: string
+          is_active?: boolean
+          max_barbers?: number | null
+          max_clients?: number | null
+          max_services?: number | null
+          name?: string
+          price_usd?: number
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'system_settings_updated_by_fkey'
+            columns: ['updated_by']
+            isOneToOne: false
+            referencedRelation: 'admin_users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      tour_progress: {
+        Row: {
+          business_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          tour_id: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          tour_id: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          tour_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tour_progress_business_id_fkey'
+            columns: ['business_id']
+            isOneToOne: false
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
-    CompositeTypes: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      check_and_expire_trials: { Args: never; Returns: undefined }
+      check_barber_achievements: {
+        Args: { p_barber_id: string }
+        Returns: {
+          awarded_achievement_id: string
+          awarded_achievement_name: string
+          newly_earned: boolean
+        }[]
+      }
+      check_referral_milestones: {
+        Args: { p_business_id: string }
+        Returns: {
+          milestone_achieved: number
+          newly_unlocked: boolean
+          reward_description: string
+        }[]
+      }
+      create_notification: {
+        Args: {
+          p_business_id?: string
+          p_message?: string
+          p_metadata?: Json
+          p_reference_id?: string
+          p_reference_type?: string
+          p_title?: string
+          p_type?: string
+          p_user_id?: string
+        }
+        Returns: string
+      }
+      generate_business_referral_code: {
+        Args: { p_business_slug: string }
+        Returns: string
+      }
+      generate_referral_code: {
+        Args: { business_slug: string; client_name: string }
+        Returns: string
+      }
+      increment_loyalty_points: {
+        Args: { p_client_id: string; p_points: number }
+        Returns: undefined
+      }
+      increment_referral_count: {
+        Args: { p_amount?: number; p_business_id: string; p_column: string }
+        Returns: undefined
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
+
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (Database['public']['Tables'] & Database['public']['Views'])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-        Database[PublicTableNameOrOptions['schema']]['Views'])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database['public']['Tables'] &
-        Database['public']['Views'])
-    ? (Database['public']['Tables'] &
-        Database['public']['Views'])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] & DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
       : never
     : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema['Enums']
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema['CompositeTypes']
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

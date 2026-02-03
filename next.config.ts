@@ -126,7 +126,9 @@ export default sentryEnabled
 
       // Upload source maps only in production builds
       widenClientFileUpload: true,
-      hideSourceMaps: true,
+      sourcemaps: {
+        disable: false,
+      },
       disableLogger: true,
 
       // Automatically annotate React components for better error tracking
