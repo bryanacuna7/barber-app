@@ -230,3 +230,77 @@ export interface AchievementWithProgress {
   earned_at: string | null
   display_order?: number
 }
+
+// =============================================================================
+// Mi Dia (Staff View) Types
+// =============================================================================
+
+/**
+ * Client info included in today's appointments
+ */
+export interface TodayAppointmentClient {
+  id: string
+  name: string
+  phone: string | null
+  email: string | null
+}
+
+/**
+ * Service info included in today's appointments
+ */
+export interface TodayAppointmentService {
+  id: string
+  name: string
+  duration_minutes: number
+  price: number
+}
+
+/**
+ * Single appointment in the Mi Dia view
+ */
+export interface TodayAppointment {
+  id: string
+  scheduled_at: string
+  duration_minutes: number
+  price: number
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+  client_notes: string | null
+  internal_notes: string | null
+  client: TodayAppointmentClient | null
+  service: TodayAppointmentService | null
+}
+
+/**
+ * Response from GET /api/barbers/[id]/appointments/today
+ */
+export interface TodayAppointmentsResponse {
+  appointments: TodayAppointment[]
+  barber: {
+    id: string
+    name: string
+  }
+  date: string
+  stats: {
+    total: number
+    pending: number
+    confirmed: number
+    completed: number
+    cancelled: number
+    no_show: number
+  }
+}
+
+/**
+ * Response from appointment status update actions (check-in, complete, no-show)
+ */
+export interface AppointmentStatusUpdateResponse {
+  id: string
+  status: string
+  scheduled_at: string
+  duration_minutes: number
+  price: number
+  client_notes: string | null
+  internal_notes: string | null
+  client: TodayAppointmentClient | null
+  service: TodayAppointmentService | null
+}
