@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next'
 import bundleAnalyzer from '@next/bundle-analyzer'
+import { withSentryConfig } from '@sentry/nextjs'
 
 // Bundle analyzer (run with ANALYZE=true npm run build)
 const withBundleAnalyzer = bundleAnalyzer({
@@ -43,8 +44,8 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https://*.supabase.co",
               // Allow fonts from self and data URIs
               "font-src 'self' data:",
-              // Allow connections to self, Supabase, and Resend
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com",
+              // Allow connections to self, Supabase, Resend, and Sentry
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://*.sentry.io",
               // Allow frames from self only
               "frame-src 'self'",
               // Allow media from self and Supabase
@@ -110,4 +111,31 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withBundleAnalyzer(nextConfig)
+// Wrap with Sentry config if DSN is provided
+const configWithPlugins = withBundleAnalyzer(nextConfig)
+
+// Only enable Sentry in production or if explicitly configured
+const sentryEnabled = Boolean(process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN)
+
+export default sentryEnabled
+  ? withSentryConfig(configWithPlugins, {
+      // Sentry Webpack Plugin options
+      silent: true, // Suppresses all logs
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+
+      // Upload source maps only in production builds
+      widenClientFileUpload: true,
+      hideSourceMaps: true,
+      disableLogger: true,
+
+      // Automatically annotate React components for better error tracking
+      reactComponentAnnotation: {
+        enabled: true,
+      },
+
+      // Disable automatic instrumentation in development
+      autoInstrumentServerFunctions: process.env.NODE_ENV === 'production',
+      autoInstrumentMiddleware: process.env.NODE_ENV === 'production',
+    })
+  : configWithPlugins
