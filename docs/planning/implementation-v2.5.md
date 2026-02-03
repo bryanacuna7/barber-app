@@ -1293,30 +1293,113 @@ jobs:
 
 ## 🎯 IMPLEMENTATION CHECKLIST
 
+**Last Updated:** 2026-02-03 (Session 71)
+**Current Status:** Área 0 ~85% complete
+
 ### Before Starting
 
-- [ ] Read full IMPLEMENTATION_PLAN_V2.5.md
-- [ ] Read audit reports (SECURITY_AUDIT_REPORT.md, PERFORMANCE_ANALYSIS_REPORT.md)
-- [ ] Backup database
-- [ ] Set up Sentry account
-- [ ] Set up Upstash Redis (rate limiting)
-- [ ] Create new branch: feature/subscription-payments-rebranding-v2.5
+- [x] Read full IMPLEMENTATION_PLAN_V2.5.md
+- [x] Read audit reports (SECURITY_AUDIT_REPORT.md, PERFORMANCE_ANALYSIS_REPORT.md)
+- [x] Backup database
+- [x] Set up Sentry account
+- [x] Set up Upstash Redis (rate limiting)
+- [x] Create new branch: feature/subscription-payments-rebranding
 
-### Área 0 (BLOCKER - Week 1)
+### Área 0 (BLOCKER - Week 1) - 🔄 85% COMPLETE
 
-- [ ] Enable TypeScript strict mode
-- [ ] Fix all 49+ TypeScript errors
-- [ ] Remove @ts-nocheck from 43 files
-- [ ] Fix 4 critical security vulnerabilities
-- [ ] Add rate limiting to ALL public endpoints
-- [ ] Set up structured logging (pino)
-- [ ] Set up error tracking (Sentry)
-- [ ] Add 5 missing database indexes
-- [ ] Remove all 156 debug console.log
+**0.1-0.3: Security & Infrastructure** ✅ **COMPLETED**
+
+- [x] Fix 4 critical security vulnerabilities (Session 68)
+- [x] Add rate limiting to ALL public endpoints (Session 68)
+- [x] Set up structured logging (pino) (Session 68)
+- [x] Set up error tracking (Sentry) (Session 68)
+- [x] Add 7 missing database indexes (Session 68)
+- [x] Fix N+1 queries in cron jobs (Session 68)
+
+**0.4: TypeScript Type Safety** 🔄 **80% COMPLETE**
+
+- [x] Enable TypeScript strict mode (Session 67)
+- [x] Fix 34+ TypeScript errors (Sessions 66-67)
+- [ ] Fix remaining 15 TypeScript errors (~2-3h)
+- [ ] Remove @ts-nocheck from remaining files
 - [ ] Verify build passes without SKIP_TYPE_CHECK
-- [ ] All 0.6 verification checks pass
 
-### Área 6 (Week 1-2)
+**0.5: Code Verbosity Refactoring** ✅ **COMPLETED (Session 71)**
+
+- [x] Verbosity audit (4 agents, 43,500 LOC analyzed)
+- [x] Performance optimization: CitasPage (-86% CPU, -71% render time)
+- [x] API Middleware: Created `withAuth()` helper
+- [x] Refactored 5 API routes (10 methods, -390 lines)
+- [x] Documented patterns for incremental refactoring
+- [ ] Continue API middleware to remaining 46 routes (~4-6h)
+- [ ] Refactor configuracion/page.tsx (825 → 120 lines, ~3h)
+- [ ] Refactor clientes/page.tsx (792 → 200 lines, ~2h)
+
+**0.6: Code Cleanup** ⏳ **PENDING**
+
+- [ ] Remove debug console.log statements
+- [ ] Delete duplicate files with "2" in name
+- [ ] Clean up unused imports
+
+**0.7: Verification** ⏳ **PENDING**
+
+- [ ] TypeScript compiles without errors (NO SKIP)
+- [ ] npm run lint passes
+- [ ] Rate limiting works (test with 11 requests)
+- [ ] Sentry captures errors (test error)
+- [ ] Structured logging works (check JSON format)
+- [ ] No console.log in source (grep check)
+
+**Área 0 Summary:**
+
+- **Time Invested:** ~12h (Security + Observability + TypeScript 80% + Verbosity)
+- **Time Remaining:** ~3-5h (TypeScript final 15 errors + Cleanup + Verification)
+- **Blockers:** Must complete TypeScript + Verification before moving to Área 1-6
+
+---
+
+## 📍 CURRENT STATUS & NEXT STEPS
+
+### Progress Summary (As of 2026-02-03)
+
+**Completed Sessions:**
+
+- ✅ Session 68: Security Hardening (4 vulnerabilities fixed)
+- ✅ Session 68: DB Performance (7 indexes, N+1 queries)
+- ✅ Session 68: Observability (Pino, Sentry, Redis)
+- ✅ Session 67: TypeScript 80% (34 errors fixed)
+- ✅ Session 71: Code Verbosity Refactoring (-440 lines, +71% performance)
+
+**Current Blockers:**
+
+1. 🔴 **TypeScript Final 15 Errors** (~2-3h)
+   - Must complete before Área 1-6
+   - Build must pass without SKIP_TYPE_CHECK
+
+2. 🟡 **Code Cleanup** (~1h)
+   - Remove console.log statements
+   - Clean up duplicate files
+
+**Immediate Next Steps (This Week):**
+
+1. Complete TypeScript strict mode (15 errors remaining)
+2. Run verification checklist (0.7)
+3. Begin Área 6: Staff Experience
+
+**Optional Improvements (Can be done incrementally):**
+
+- API Middleware: 46 routes remaining (~4-6h total, can do 1-2 per day)
+- Component Refactoring: configuracion + clientes pages (~5h total)
+
+**Documentation Created:**
+
+- [VERBOSITY_AUDIT_REPORT.md](VERBOSITY_AUDIT_REPORT.md) - Full analysis
+- [REFACTORING_SESSION_SUMMARY.md](REFACTORING_SESSION_SUMMARY.md) - Session 71 details
+- [QUICK_WINS_IMPLEMENTED.md](QUICK_WINS_IMPLEMENTED.md) - Quick wins guide
+
+---
+
+### Área 6 (Week 1-2) ⏳ **NEXT PRIORITY AFTER ÁREA 0**
 
 - [ ] Implement "Mi Día" staff view
 - [ ] Test on mobile (PWA-optimized)
