@@ -1,5 +1,16 @@
 # Plan de Implementación v2.5: Mejoras al Sistema de Reservas y Rebranding
 
+> ⚠️ **DEPRECATED - Historical Reference Only**
+>
+> Este plan fue reemplazado por [IMPLEMENTATION_ROADMAP_FINAL.md](IMPLEMENTATION_ROADMAP_FINAL.md) después de la revisión del panel de expertos (Session 75).
+>
+> **Para `/continue` y trabajo futuro, usa [IMPLEMENTATION_ROADMAP_FINAL.md](IMPLEMENTATION_ROADMAP_FINAL.md)**
+>
+> Este archivo se mantiene solo como referencia histórica del plan original (222-289h, Score 6.0/10 → 8.5/10).
+> El nuevo plan incluye FASE 2.5 (retention features), ajustes de tiempo realistas (451-598h), y Score 9.2/10.
+
+---
+
 **🔥 VERSIÓN AUDITADA Y OPTIMIZADA**
 
 **Proyecto:** BarberShop Pro → Salon Booking Platform
@@ -27,6 +38,50 @@
 **COMPOSITE SCORE: 6.0/10 → 8.5/10** ✅
 
 **Decision:** ✅ **APPROVED WITH MANDATORY REVISIONS IMPLEMENTED**
+
+---
+
+## 🎯 EXECUTIVE SUMMARY - TWO PHASES
+
+**⚠️ IMPORTANTE:** Este plan tiene DOS fases complementarias:
+
+### FASE 1: v2.5 - Technical Excellence (154-200h)
+
+**Líneas 1-1679 de este documento**
+
+Enfoque: Deuda técnica, seguridad, testing, optimización
+
+- ✅ Área 0: Security hardening + performance
+- ✅ Área 6: Staff Experience (Mi Día)
+- ✅ Áreas 1-5: Subscriptions, Payments, Push, Referrals
+- ✅ Sprint 5: Testing & QA (40-50 test files)
+
+**Estado:** 85% completo (Área 0 casi terminada)
+
+### FASE 2: Competitive Enhancements (68-89h) ⚡ CRÍTICO
+
+**Líneas 1680-2236 de este documento**
+
+**Enfoque:** Eliminar brechas competitivas vs Agendando.app
+
+**4 Prioridades Estratégicas:**
+
+1. ✅ **Calendario Completo (24-31h):** Vista Semana + Vista Mes (CRÍTICO)
+2. ✅ **Settings Modernos (14-19h):** Card Grid + Cmd+K search (CRÍTICO)
+3. ✅ **Sistema de Roles (12-16h):** 6 roles + permisos granulares (IMPORTANTE)
+4. ✅ **Business Types + Kash (18-23h):** 22+ verticales + Kash payment (NICE-TO-HAVE)
+
+**Ver análisis competitivo detallado en línea 1680** ⬇️
+
+### Totales Combinados
+
+| Métrica      | FASE 1        | FASE 2          | TOTAL                 |
+| ------------ | ------------- | --------------- | --------------------- |
+| **Horas**    | 154-200h      | 68-89h          | **222-289h**          |
+| **Semanas**  | 7-9 semanas   | 3.4-4.5 semanas | **10.5-13.5 semanas** |
+| **Archivos** | ~200 archivos | ~50 archivos    | **~250 archivos**     |
+
+**Veredicto:** Tu app superará a Agendando.app en tecnología, seguridad Y features de producto.
 
 ---
 
@@ -124,6 +179,8 @@
 
 ### Quick Navigation
 
+**FASE 1: v2.5 Technical Excellence (154-200h)**
+
 - [⚠️ Changelog v2.4 → v2.5](#️-changelog-v24--v25)
 - [🚀 Pre-Implementation](#-pre-implementation-tasks-hacer-antes)
 - [🔴 Área 0: Technical Debt EXPANDED](#área-0-technical-debt-fixes-expanded-10-12h)
@@ -136,6 +193,14 @@
 - [Área 4B: Simplified Client Dashboard](#área-4b-simplified-client-dashboard-single-page)
 - [Área 3: Proper DB Migration](#área-3-proper-database-migration-for-rebranding)
 - [Sprint 5: Testing & QA](#sprint-5-testing--qa-mandatory)
+
+**FASE 2: Competitive Enhancements (68-89h) ⚡ CRÍTICO**
+
+- [🎯 FASE 2: Overview](#-fase-2-competitive-enhancement-initiatives-post-v25)
+- [Priority 1: Sistema de Calendario (Semana + Mes)](#priority-1-sistema-de-calendario-triple-vista-24-31h--crítico)
+- [Priority 2: Settings Menu Clase Mundial](#priority-2-settings-menu-clase-mundial-14-19h--crítico)
+- [Priority 3: Sistema de Roles Robusto](#priority-3-sistema-de-roles-robusto-12-16h--importante)
+- [Priority 4: Business Types + Kash](#priority-4-business-type-onboarding--kash-18-23h--nice-to-have)
 
 ### Estimated Time by Area (REVISED)
 
@@ -1675,11 +1740,598 @@ jobs:
 
 ---
 
-**END OF IMPLEMENTATION_PLAN_V2.5.md**
+---
+
+## 🎯 FASE 2: Competitive Enhancement Initiatives (POST v2.5)
+
+**Status:** Ready for Implementation
+**Estimado Total Fase 2:** 68-89 horas (3.4-4.5 semanas)
+**Prioridad:** URGENTE - Eliminación de brechas competitivas
+**Inicio:** Después de completar Sprint 5 (Testing & QA)
+
+### Análisis Competitivo Ejecutivo
+
+**Competidor Analizado:** agendando.app
+**Fecha de Análisis:** 2026-02-03
+**Veredicto:** Tu app es superior en tecnología, seguridad y features avanzados. Solo necesitas 4 mejoras estratégicas para dominar completamente el mercado.
+
+| Feature                 | Tu App                  | Agendando.app       | Ganador    | Gap a Cerrar    |
+| ----------------------- | ----------------------- | ------------------- | ---------- | --------------- |
+| **Vista Día**           | ✅ Hour grid avanzado   | ✅ Hour grid básico | **TÚ**     | -               |
+| **Vista Semana**        | ❌ No existe            | ✅ 7-day grid       | **ELLOS**  | ⚠️ CRÍTICO      |
+| **Vista Mes**           | ❌ No existe            | ✅ Month calendar   | **ELLOS**  | ⚠️ CRÍTICO      |
+| **Vista Lista**         | ✅ Swipeable cards      | ✅ Basic list       | **TÚ**     | -               |
+| **Vista Timeline**      | ✅ Con dots/status      | ❌ No tiene         | **TÚ**     | -               |
+| **Mi Día (Staff)**      | ✅ Vista especializada  | ❌ No tiene         | **TÚ**     | -               |
+| **Settings Menu**       | ⚠️ Tabs monolíticos     | ✅ Card grid visual | **ELLOS**  | ⚠️ IMPORTANTE   |
+| **Sistema de Roles**    | ⚠️ Solo Owner/Staff     | ✅ Multiple roles   | **ELLOS**  | ⚠️ IMPORTANTE   |
+| **Business Types**      | ⚠️ Solo "Barbería"      | ✅ 22+ tipos        | **ELLOS**  | 🟡 NICE-TO-HAVE |
+| **Payment Methods**     | ✅ SINPE + Bank         | ✅ SINPE + Kash     | **EMPATE** | 🟡 NICE-TO-HAVE |
+| **Dark Mode**           | ✅ Full support         | ❌ Light only       | **TÚ**     | -               |
+| **Security (RLS)**      | ✅ Multi-tenant robusto | ⚠️ Unknown          | **TÚ**     | -               |
+| **Subscription System** | ✅ Trial/Grace robusto  | ✅ Trial básico     | **TÚ**     | -               |
+
+---
+
+## Priority 1: Sistema de Calendario Triple Vista (24-31h) ⚡ CRÍTICO
+
+**Impacto:** Alto - Feature parity competitiva
+**ROI:** Eliminates major competitive disadvantage
+
+### Objetivo
+
+Implementar vistas completas de calendario (DÍA/SEMANA/MES) para igualar y superar al competidor.
+
+### Vista Semana (Week View)
+
+**Desktop Layout (≥768px):** 7-column grid con hour slots
+**Mobile Layout (<768px):** Day tabs con swipeable navigation
+**Componente Principal:** `src/components/appointments/week-schedule.tsx`
+
+**Features Clave:**
+
+- ✅ Current time indicator (red horizontal line)
+- ✅ Weekend shading (Sáb/Dom con fondo gris claro)
+- ✅ Today highlight (borde azul en columna actual)
+- ✅ Empty slot hover → show "+" button
+- ✅ Appointment overflow → stack vertically, show "+X más"
+- ✅ Click appointment → open edit modal
+- ✅ Click empty slot → open create modal con fecha/hora pre-filled
+
+### Vista Mes (Month View)
+
+**Desktop Layout:** Calendar grid con appointment dots/pills
+**Mobile Layout (<640px):** Dots + bottom sheet on day click
+**Componente Principal:** `src/components/appointments/month-calendar.tsx`
+
+**Features Clave:**
+
+- ✅ 3+ appointments show "+X" count
+- ✅ Desktop: Popover with day details on click
+- ✅ Mobile: Bottom sheet with appointments
+- ✅ Weekend shading
+- ✅ Today highlight
+
+### Archivos a Crear/Modificar - Calendario
+
+**Nuevos Archivos (7):**
+
+1. `src/components/appointments/week-schedule.tsx` - Week grid component
+2. `src/components/appointments/week-day-header.tsx` - Day header cell
+3. `src/components/appointments/week-time-slot.tsx` - Time slot cell
+4. `src/components/appointments/month-calendar.tsx` - Month grid component
+5. `src/components/appointments/month-day-cell.tsx` - Day cell component
+6. `src/components/appointments/month-day-details-sheet.tsx` - Mobile bottom sheet
+7. `src/components/appointments/appointment-pill.tsx` - Mini appointment card
+
+**Archivos Modificados (2):**
+
+1. `src/app/(dashboard)/citas/page.tsx` - View toggle + navigation + render
+2. `src/app/api/appointments/route.ts` - Verify range query support
+
+**Total:** 7 nuevos + 2 modificados = **9 archivos**
+
+### Estimación de Tiempo - Calendario
+
+| Fase        | Componente               | Horas           |
+| ----------- | ------------------------ | --------------- |
+| **Phase 1** | Week View Desktop        | 4-5h            |
+| **Phase 2** | Week View Mobile         | 2-3h            |
+| **Phase 3** | Month View Desktop       | 5-6h            |
+| **Phase 4** | Month View Mobile        | 3-4h            |
+| **Phase 5** | Integration (citas page) | 4-5h            |
+| **Phase 6** | Polish & Features        | 3-4h            |
+| **Phase 7** | Testing (unit + E2E)     | 3-4h            |
+| **TOTAL**   |                          | **24-31 horas** |
+
+---
+
+## Priority 2: Settings Menu Clase Mundial (14-19h) ⚡ CRÍTICO
+
+**Impacto:** Alto - UX moderna y profesional
+**ROI:** Reduces support tickets, improves perceived quality
+
+### Objetivo
+
+Rediseñar el menú de configuración siguiendo principios de diseño de Apple, Linear y Stripe - superando al competidor.
+
+### Recommended Architecture: Hybrid Adaptive
+
+**Desktop (≥1024px):** Sidebar + Content Panel (Linear/Stripe style)
+**Mobile (<768px):** Card Grid + Search-First
+
+### Recommended Category Structure (7 categorías)
+
+```
+1. 🏢 Negocio
+   ├─ Perfil (name, address, timezone)
+   ├─ Horario de Atención
+   └─ Ubicación
+
+2. 📅 Reservaciones
+   ├─ Ventana de Reserva
+   ├─ Buffer Time
+   ├─ Política de Cancelación
+   └─ Confirmación Automática
+
+3. ✂️ Equipo
+   ├─ Barberos/Staff
+   ├─ Invitar Colaborador
+   ├─ Roles y Permisos
+   └─ Horarios Individuales
+
+4. 💳 Pagos y Facturación
+   ├─ Suscripción Actual
+   ├─ Métodos de Pago
+   ├─ Configuración de Anticipos
+   └─ Historial de Pagos
+
+5. 🔔 Notificaciones
+   ├─ Recordatorios de Citas
+   ├─ Alertas de Staff
+   ├─ Reportes Diarios
+   └─ Canales
+
+6. 🔗 Integraciones (PRO)
+   ├─ Google Calendar
+   ├─ WhatsApp Business API
+   ├─ Zapier
+   └─ API Keys
+
+7. ⚙️ Avanzado
+   ├─ Marca (colores, logo)
+   ├─ Link Público de Reservas
+   ├─ Zona de Peligro
+   └─ Exportar Datos
+```
+
+### Implementation Plan
+
+#### Phase 1: Foundation (4-5h)
+
+- Create layout structure
+- Sidebar navigation component
+- Mobile card grid
+
+#### Phase 2: Migrate Existing Settings (6-8h)
+
+- Extract forms from current 825-line page
+- Create category pages
+- Reusable SettingsSection component
+
+#### Phase 3: Search Functionality (2-3h)
+
+- Fuse.js fuzzy search
+- Cmd+K shortcut
+- Search results UI
+
+#### Phase 4: Progressive Disclosure (2-3h)
+
+- Advanced settings hidden by default
+- Polish and UX improvements
+
+### Files to Create/Modify - Settings
+
+**New Files (15):**
+
+1. `src/app/(dashboard)/configuracion/layout.tsx` - Sidebar layout
+2. `src/app/(dashboard)/configuracion/page.tsx` - Mobile card grid / desktop redirect
+3. `src/app/(dashboard)/configuracion/negocio/page.tsx` - Business settings
+4. `src/app/(dashboard)/configuracion/reservaciones/page.tsx` - Booking settings
+5. `src/app/(dashboard)/configuracion/equipo/page.tsx` - Team settings
+6. `src/app/(dashboard)/configuracion/pagos/page.tsx` - Payment settings
+7. `src/app/(dashboard)/configuracion/notificaciones/page.tsx` - Notification settings
+8. `src/app/(dashboard)/configuracion/integraciones/page.tsx` - Integrations (PRO)
+9. `src/app/(dashboard)/configuracion/avanzado/page.tsx` - Advanced settings
+10. `src/components/settings/settings-sidebar.tsx` - Desktop sidebar nav
+11. `src/components/settings/settings-section.tsx` - Reusable card section
+12. `src/components/settings/settings-search.tsx` - Search with Cmd+K
+13. `src/components/settings/business-profile-form.tsx` - Extracted form
+14. `src/components/settings/operating-hours-form.tsx` - Extracted form
+15. `src/components/settings/branding-form.tsx` - Extracted form
+
+**Modified Files (1):**
+
+1. `src/app/(dashboard)/configuracion/page.tsx` - Replace with new structure
+
+**Dependencies:**
+
+```bash
+npm install fuse.js @headlessui/react cmdk
+```
+
+**Total:** 15 new + 1 replaced = **16 archivos**
+
+### Time Estimate - Settings
+
+| Phase       | Task                      | Hours           |
+| ----------- | ------------------------- | --------------- |
+| **Phase 1** | Foundation                | 4-5h            |
+| **Phase 2** | Migrate existing settings | 6-8h            |
+| **Phase 3** | Search functionality      | 2-3h            |
+| **Phase 4** | Progressive disclosure    | 2-3h            |
+| **TOTAL**   |                           | **14-19 horas** |
+
+---
+
+## Priority 3: Sistema de Roles Robusto (12-16h) 🔒 IMPORTANTE
+
+**Impacto:** Medio-Alto - Enterprise readiness
+**ROI:** Enables larger organizations (5-15 staff)
+
+### Objetivo
+
+Implementar un sistema flexible de roles y permisos que soporte múltiples niveles de acceso.
+
+### Recommended Approach: Hybrid RBAC
+
+**Why Hybrid?**
+
+- Simple for 90% of cases (just assign a role)
+- Flexible for edge cases (override individual permissions)
+- Performant (role-based RLS with proper indexes)
+- Scalable (easy to add new roles/permissions)
+
+### System Roles (6 predefined)
+
+1. **Owner** - Acceso completo (wildcard `*`)
+2. **Manager** - Gestión de citas, staff y clientes
+3. **Staff** - Gestiona sus propias citas
+4. **Receptionist** - Gestiona citas para todos los barberos
+5. **Limited Staff** - Solo ve sus propias citas
+6. **Accountant** - Acceso solo a reportes financieros
+
+### Permission System (40+ Permissions)
+
+**Categories:**
+
+- Appointments (12 permissions)
+- Clients (6 permissions)
+- Staff (8 permissions)
+- Finance (5 permissions)
+- Services (4 permissions)
+- Settings (4 permissions)
+- Reports (3 permissions)
+
+### Database Schema
+
+```sql
+-- Migration 025: Role-Based Access Control
+CREATE TABLE roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  display_name TEXT NOT NULL,
+  description TEXT,
+  permissions JSONB NOT NULL DEFAULT '[]'::jsonb,
+  is_system_role BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(business_id, name)
+);
+
+ALTER TABLE barbers
+ADD COLUMN role_id UUID REFERENCES roles(id),
+ADD COLUMN permission_overrides JSONB DEFAULT '{}'::jsonb;
+```
+
+### Files to Create/Modify - Roles
+
+**New Files (10):**
+
+1. `supabase/migrations/025_rbac_system.sql`
+2. `src/lib/permissions/definitions.ts`
+3. `src/lib/permissions/system-roles.ts`
+4. `src/lib/permissions/check-permission.ts`
+5. `src/components/settings/role-management.tsx`
+6. `src/components/settings/role-selector.tsx`
+7. `src/components/settings/permission-override-modal.tsx`
+8. `src/components/settings/permission-guard.tsx`
+9. `src/app/(dashboard)/configuracion/equipo/roles/page.tsx`
+10. `scripts/migrate-barbers-to-roles.ts`
+
+**Modified Files (3):**
+
+1. `src/lib/api/middleware.ts` - Add `withPermission()` wrapper
+2. `src/types/database.ts` - Add Role types
+3. `DATABASE_SCHEMA.md` - Document new tables
+
+**Total:** 10 new + 3 modified = **13 archivos**
+
+### Time Estimate - Roles
+
+| Phase       | Task                          | Hours           |
+| ----------- | ----------------------------- | --------------- |
+| **Phase 1** | Database + RLS policies       | 4-5h            |
+| **Phase 2** | Backend (permission checking) | 3-4h            |
+| **Phase 3** | Frontend (role management UI) | 3-4h            |
+| **Phase 4** | Testing + Docs                | 2-3h            |
+| **TOTAL**   |                               | **12-16 horas** |
+
+---
+
+## Priority 4: Business Type Onboarding + Kash (18-23h) 🟢 NICE-TO-HAVE
+
+**Impacto:** Medio - Market expansion
+**ROI:** Opens app to non-barber verticals
+
+### Part 1: Business Type System (10-12h)
+
+**Curated Business Types (22 total):**
+
+| Category                   | Types                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Beauty & Personal Care** | Barbería, Peluquería, Salón de Belleza, Estética, Maquillaje, Salón de Uñas, Estilista          |
+| **Health & Wellness**      | Clínica, Consultorio, Odontología, Psicología, Fisioterapia, Medicina Alternativa               |
+| **Fitness & Sports**       | Gimnasio, Crossfit, Pilates, Personal Trainer, Entrenamiento Funcional, Danza, Centro Deportivo |
+| **Education**              | Clases, Tutoría                                                                                 |
+| **Other**                  | Otro                                                                                            |
+
+**Default Presets per Type:**
+
+- Staff term (barbero vs entrenador vs doctor)
+- Default services with typical durations and prices
+- Operating hours
+- Booking buffer minutes
+- Advance booking days
+
+**Database:**
+
+```sql
+-- Migration 026: Business Types
+ALTER TABLE businesses
+ADD COLUMN business_type TEXT DEFAULT 'barberia',
+ADD COLUMN staff_term TEXT DEFAULT 'barber',
+ADD COLUMN staff_term_es TEXT DEFAULT 'barbero';
+```
+
+### Part 2: Kash Payment Integration (6-8h)
+
+**What is Kash:**
+
+- Costa Rican digital wallet by Grupo Monge
+- Phone number based (like SINPE)
+- Popular among unbanked population
+
+**Database:**
+
+```sql
+-- Migration 027: Kash Payment Method
+INSERT INTO system_settings (key, value, description)
+VALUES ('kash_details', '{...}'::jsonb, 'Kash payment configuration');
+
+ALTER TABLE payment_reports
+ADD COLUMN payment_method TEXT
+CHECK (payment_method IN ('sinpe', 'kash', 'transfer', 'card', 'cash'));
+```
+
+### Files to Create/Modify - Business Types + Kash
+
+**New Files (7):**
+
+1. `supabase/migrations/026_business_types.sql`
+2. `supabase/migrations/027_kash_payment.sql`
+3. `src/lib/business-types/definitions.ts`
+4. `src/lib/business-types/presets.ts`
+5. `src/app/(auth)/register/steps/business-type-step.tsx`
+6. `src/components/admin/kash-configuration.tsx`
+7. `scripts/apply-business-type-presets.ts`
+
+**Modified Files (4):**
+
+1. `src/components/subscription/payment-form-modal.tsx`
+2. `src/app/(dashboard)/configuracion/pagos/page.tsx`
+3. `src/types/database.ts`
+4. `DATABASE_SCHEMA.md`
+
+**Total:** 7 new + 4 modified = **11 archivos**
+
+### Time Estimate - Business Types + Kash
+
+| Part        | Task                           | Hours           |
+| ----------- | ------------------------------ | --------------- |
+| **Part 1**  | Business types + onboarding UI | 10-12h          |
+| **Part 2**  | Kash integration               | 6-8h            |
+| **Testing** | E2E tests                      | 2-3h            |
+| **TOTAL**   |                                | **18-23 horas** |
+
+---
+
+## Implementation Timeline - Fase 2
+
+### Recommended Sequence
+
+**Week 1-2: Calendario (P1) - 24-31h**
+
+- High impact, high visibility
+- Eliminates competitive disadvantage
+
+**Week 3: Settings Menu (P2) - 14-19h**
+
+- Improves perceived quality
+- Reduces support burden
+
+**Week 4: Sistema de Roles (P3) - 12-16h**
+
+- Enables enterprise customers
+- Backend-heavy, less UI work
+
+**Week 5: Business Types + Kash (P4) - 18-23h**
+
+- Market expansion
+- Can be done incrementally
+
+**Total: 4-5 weeks @ 20 hours/week**
+
+---
+
+## Total Estimado: v2.5 + Competitive Enhancements
+
+| Fase                 | Descripción                         | Horas        | Semanas @ 20h/wk      |
+| -------------------- | ----------------------------------- | ------------ | --------------------- |
+| **v2.5 (Áreas 0-6)** | Technical debt + features + testing | 154-200h     | 7-9 semanas           |
+| **Fase 2 - P1**      | Sistema de Calendario Triple Vista  | 24-31h       | 1.2-1.6 semanas       |
+| **Fase 2 - P2**      | Settings Menu Clase Mundial         | 14-19h       | 0.7-1.0 semanas       |
+| **Fase 2 - P3**      | Sistema de Roles Robusto            | 12-16h       | 0.6-0.8 semanas       |
+| **Fase 2 - P4**      | Business Types + Kash               | 18-23h       | 0.9-1.2 semanas       |
+| **FASE 2 TOTAL**     | **Competitive Enhancements**        | **68-89h**   | **3.4-4.5 semanas**   |
+| **GRAN TOTAL**       | **v2.5 + Fase 2**                   | **222-289h** | **10.5-13.5 semanas** |
+
+### ROI Analysis - Fase 2
+
+**Investment:** +68-89 horas (+44% sobre v2.5)
+
+**Returns:**
+
+- **Calendar Views:** Feature parity with competition (eliminates major disadvantage)
+- **Settings UX:** Exceeds competitor (Apple-class vs basic grid)
+- **Role System:** Enables enterprise market (5-15 staff businesses)
+- **Business Types:** Opens 22+ vertical markets beyond barberías
+- **Expected Revenue Impact:** +40% customer acquisition, +30% expansion revenue
+
+**Net Impact Over 12 Months:** Clear market leader position, ~600-1000 hours saved in future feature development (modular settings architecture)
+
+---
+
+## 🎯 Success Metrics - Fase 2
+
+### Calendar Views
+
+- [ ] Week view adoption: >40% of users
+- [ ] Month view adoption: >25% of users
+- [ ] Time to create appointment: <30 seconds
+- [ ] Mobile responsiveness score: 95+
+
+### Settings Menu
+
+- [ ] Time to find setting: <10 seconds (from 20s)
+- [ ] Settings search usage: >30% of visits
+- [ ] Support tickets about settings: -50%
+
+### Role System
+
+- [ ] Businesses with 5+ staff using roles: >70%
+- [ ] Custom roles created: >15% of businesses
+- [ ] Adoption of Manager role: >40%
+
+### Business Types + Kash
+
+- [ ] Non-barber signups: >20% of new registrations
+- [ ] Kash payment usage: >15% in Costa Rica
+- [ ] Onboarding completion: >85% (from 70%)
+
+---
+
+## 📁 Files Overview - Fase 2
+
+### Total Files Impact
+
+| Category                   | New Files | Modified Files | Total           |
+| -------------------------- | --------- | -------------- | --------------- |
+| Calendario (P1)            | 7         | 2              | 9               |
+| Settings Menu (P2)         | 15        | 1              | 16              |
+| Sistema de Roles (P3)      | 10        | 3              | 13              |
+| Business Types + Kash (P4) | 7         | 4              | 11              |
+| **FASE 2 TOTAL**           | **39**    | **10**         | **49 archivos** |
+
+### Critical Dependencies - Fase 2
+
+```bash
+# Calendario
+npm install @tanstack/react-query
+
+# Settings Menu
+npm install fuse.js @headlessui/react cmdk
+```
+
+---
+
+## 🔐 Security Checklist - Fase 2
+
+- [ ] All new API routes use `withAuth()` middleware
+- [ ] Role system enforced at RLS level (not just API)
+- [ ] Permission checks use `hasPermission()` consistently
+- [ ] File uploads validated server-side
+- [ ] Rate limiting on all public endpoints
+- [ ] Audit log for permission changes
+- [ ] IDOR protection on all data access
+
+---
+
+## 📝 Testing Strategy - Fase 2
+
+### Unit Tests (40-50 tests)
+
+- Week/Month calendar rendering
+- Permission checking logic
+- Business type preset application
+- Payment method validation
+
+### Integration Tests (15-20 tests)
+
+- Calendar data fetching (ranges)
+- Role assignment and checks
+- Settings save/load
+- Kash payment submission
+
+### E2E Tests (10-15 scenarios)
+
+- Complete appointment creation (all views)
+- Settings navigation
+- Role management
+- Business type onboarding
+- Kash payment reporting
+
+**Target Coverage:** >80% for critical paths
+
+---
+
+## 🎉 Expected Impact - Competitive Position
+
+### Before Fase 2
+
+- **Strengths:** Technology, security, dark mode, Mi Día
+- **Weaknesses:** No week/month views, monolithic settings, basic roles, single vertical
+
+### After Fase 2
+
+- **Calendar:** ✅ Parity + superior UX (mobile optimized)
+- **Settings:** ✅ Exceeds competitor (Apple-class design)
+- **Roles:** ✅ Exceeds competitor (6 roles + custom + audit)
+- **Market:** ✅ 22+ verticals vs 1 vertical
+
+**Result:** Clear market leader in features, UX, and technology
+
+---
+
+**END OF IMPLEMENTATION_PLAN_V2.5.md (WITH FASE 2 INTEGRATED)**
 
 **Ready to implement:** ✅
 **Audit approved:** ✅
 **ROI justified:** ✅
+**Competitive analysis complete:** ✅
 **Team informed:** ⏳ (You're reading this!)
 
-**Next Step:** Complete Área 0 (blocker) before any other work.
+**Next Steps:**
+
+1. **Immediate:** Complete Área 0 (blocker) before any other work
+2. **After v2.5:** Proceed with Fase 2 in order (P1 → P2 → P3 → P4)
