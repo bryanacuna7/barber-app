@@ -14,6 +14,7 @@ Al iniciar una nueva sesión, **EJECUTA AUTOMÁTICAMENTE** el comando `/continue
    - Qué sigue
 
 2. Muestra resumen breve:
+
    ```
    📋 Sesión anterior: [resumen 1 línea]
    ➡️  Siguiente: [próxima tarea]
@@ -31,33 +32,48 @@ Al iniciar una nueva sesión, **EJECUTA AUTOMÁTICAMENTE** el comando `/continue
 
 Estas reglas son **OBLIGATORIAS**, no sugerencias:
 
-### 1. SIEMPRE verificar cambios UI visualmente
+### 1. NUNCA asumir columnas de base de datos sin verificar
+
+```
+⚠️ ANTES de crear migrations, queries, o indexes:
+1. Leer DATABASE_SCHEMA.md (única fuente de verdad)
+2. Verificar que columnas/tablas EXISTEN
+3. NUNCA asumir features futuras están implementadas
+
+PROHIBIDO:
+❌ Crear migration sin leer DATABASE_SCHEMA.md primero
+❌ Asumir columnas como deposit_paid, last_activity_at sin verificar
+❌ Usar tablas que no están documentadas en DATABASE_SCHEMA.md
+```
+
+### 2. SIEMPRE verificar cambios UI visualmente
 
 ```
 Después de modificar CSS/componentes → Playwright screenshot OBLIGATORIO
 NUNCA decir "debería verse bien" sin verificar
 ```
 
-### 2. SIEMPRE mostrar qué agente se usa
+### 3. SIEMPRE mostrar qué agente se usa
 
 ```
 Antes de trabajar → "🤖 Using @[agente]..."
 Leer .claude/agents/[agente].md para instrucciones específicas
 ```
 
-### 3. SIEMPRE verificar el dev server antes de preview
+### 4. SIEMPRE verificar el dev server antes de preview
 
 ```
 lsof -i :3000 | grep LISTEN
 Si no corre → iniciar automáticamente
 ```
 
-### 4. NUNCA asumir que el código funciona
+### 5. NUNCA asumir que el código funciona
 
 ```
 Cambio de UI → screenshot
 Cambio de lógica → test o verificación
 Fix de bug → confirmar que está resuelto
+Cambio de DB → verificar contra DATABASE_SCHEMA.md
 ```
 
 ---
@@ -763,10 +779,57 @@ Changes to these require extra review:
 
 Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
+## Database Change Protocol
+
+> ⚠️ **CRITICAL:** This protocol is MANDATORY for ALL database-related work
+
+### Before ANY database change (migrations, queries, indexes):
+
+```
+MANDATORY CHECKLIST:
+
+□ 1. Read DATABASE_SCHEMA.md completely
+□ 2. Verify tables exist in the schema document
+□ 3. Verify columns exist with EXACT names
+□ 4. Check "Tables That DO NOT Exist" section
+□ 5. Never assume future features are implemented
+
+IF creating a migration:
+□ 6. List all tables/columns to be used
+□ 7. Cross-reference each one with DATABASE_SCHEMA.md
+□ 8. If column doesn't exist → STOP, don't assume it
+□ 9. After creating migration → update DATABASE_SCHEMA.md
+□ 10. Commit both files together
+```
+
+### Common Mistakes to Avoid:
+
+```
+❌ Assuming deposit_paid exists (it doesn't - future feature)
+❌ Assuming push_subscriptions table exists (it doesn't - Área 5)
+❌ Using last_activity_at instead of last_visit_at in clients
+❌ Creating indexes for columns that don't exist
+❌ Trusting IMPLEMENTATION_PLAN_V2.5.md for current schema
+   (the plan describes FUTURE state, not current state)
+```
+
+### If Column Doesn't Exist:
+
+```
+1. DO NOT create the migration with that column
+2. DO NOT assume it's a mistake in documentation
+3. DO check if it's a future feature in IMPLEMENTATION_PLAN_V2.5.md
+4. DO create migration only with existing columns
+5. DO inform user which features aren't implemented yet
+```
+
+---
+
 ## Required Reading Before Changes
 
-1. **GUARDRAILS.md** - Non-negotiable behavior
-2. **DECISIONS.md** - Design rationale
+1. **DATABASE_SCHEMA.md** - Current database structure (ALWAYS check for DB work)
+2. **GUARDRAILS.md** - Non-negotiable behavior
+3. **DECISIONS.md** - Design rationale
 
 ## Available Commands
 
