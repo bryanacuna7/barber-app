@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 07:30 PM
-- **Last Session:** Session 66 - Observability System (Área 0 Task 3) ✅ (COMPLETE)
+- **Last Updated:** 2026-02-03 09:45 PM
+- **Last Session:** Session 67 - TypeScript Fixes (Área 0 Task 4 Partial) ✅
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -36,7 +36,7 @@
   - **Branch:** `feature/subscription-payments-rebranding`
   - **Estimado:** 154-200 horas (8-10 semanas) - +67% para eliminar deuda técnica
   - **Score proyectado:** 6.0/10 → 8.5/10
-  - **Áreas principales:** 0. 🔄 Área 0: Technical Debt Cleanup (10-12h) - ✅ Task 1: Security (DONE) + ✅ Task 2: DB Performance (DONE) + ✅ Task 3: Observability (DONE) + Task 4: TypeScript (2h) **← CURRENT**
+  - **Áreas principales:** 0. 🔄 Área 0: Technical Debt Cleanup (10-12h) - ✅ Task 1: Security (DONE) + ✅ Task 2: DB Performance (DONE) + ✅ Task 3: Observability (DONE) + 🔄 Task 4: TypeScript (Partial: 63% done, 3-4h remaining) **← CURRENT**
     1. ⏳ Área 1: Client Subscription & Basic Plan (database + feature gating)
     2. ⏳ Área 6: Staff Experience - Vista Mi Día (PRIORIDAD #2)
     3. ⏳ Área 2: Advance Payments & No-Show (SINPE Móvil + auto no-show)
@@ -145,6 +145,75 @@
 **Estado:** ✅ Task 3 completado (3-4h estimadas → 2h real)
 
 **Siguiente paso:** Task 4 - TypeScript Strict Mode (Fix 49 errores TypeScript, remover 43 @ts-nocheck, 2h)
+
+---
+
+#### Session 67 (2026-02-03 09:45 PM)
+
+**Tema:** 🔧 TypeScript Fixes - Task 4 of Área 0 (Partial Completion)
+
+**Completado:**
+
+**PARTE 1: Suspense Fix en /register**
+
+- ✅ **useSearchParams Suspense Boundary**
+  - Componente `ReferralDetector` extraído para manejar searchParams
+  - Wrapped en Suspense boundary con loading skeleton
+  - Componente `RegisterPageContent` orquesta Suspense + detector + form
+  - Fix de build blocker: "useSearchParams() should be wrapped in a suspense boundary"
+
+**PARTE 2: Regeneración de Tipos Supabase**
+
+- ✅ **Database Types Regeneration (1,624 líneas)**
+  - Ejecutado: `npx supabase gen types typescript --project-id bwelkcqqzkiiaxrkoslb`
+  - Tipos actualizados para todas las tablas nuevas:
+    - `business_referrals`
+    - `referral_conversions`
+    - `barber_achievements`
+    - `barber_challenges`
+    - `barber_challenge_participants`
+    - `loyalty_programs`, `client_points`, `client_tiers`
+  - **Impact:** 125 errores TypeScript resueltos automáticamente (62% reducción)
+
+**PARTE 3: Sentry Config Fix**
+
+- ✅ **next.config.ts Sentry Options Update**
+  - Fixed deprecated `hideSourceMaps` option
+  - Updated to `sourcemaps: { disable: false }`
+  - Resolved TS2561 error
+
+**Impacto Total:**
+
+| Métrica                 | Antes | Después | Mejora |
+| ----------------------- | ----- | ------- | ------ |
+| Errores TypeScript      | 201   | 75      | -63%   |
+| Build blockers          | 1     | 0       | ✅     |
+| Database types accuracy | ~40%  | ~95%    | +55%   |
+
+**Archivos modificados (3):**
+
+- `src/app/(auth)/register/page.tsx` - Suspense refactor (~60 líneas)
+- `src/types/database.ts` - Regeneración completa (1,624 líneas)
+- `next.config.ts` - Sentry config fix
+
+**Commits (5 total):**
+
+1. `➕ chore: add observability dependencies`
+2. `📊 feat: implement observability infrastructure`
+3. `🔗 feat: integrate logging and distributed rate limiting`
+4. `💾 docs: save Session 66 complete progress`
+5. `🔧 fix: partial TypeScript fixes (Área 0 Task 4)`
+
+**Trabajo Restante (75 errores TS):**
+
+- 47 TS2305: Custom types faltantes (SubscriptionPlan, ExchangeRateValue, etc.)
+- 14 TS2339: Property access errors
+- 14 TS2345/TS2322: Type assertion issues
+- **Estimado:** 3-4h adicionales
+
+**Estado:** 🔄 Task 4 parcialmente completado (63% done)
+
+**Siguiente paso:** Completar Task 4 (crear custom types) o pasar a Área 1
 
 ---
 
@@ -762,22 +831,23 @@ DESPUÉS (v2.5):
 
 ### Key Files
 
-| File                                               | Purpose                                    |
-| -------------------------------------------------- | ------------------------------------------ |
-| `src/lib/logger.ts`                                | Structured logging utility (pino)          |
-| `src/lib/rate-limit.ts`                            | Rate limiting (Upstash Redis + in-memory)  |
-| `src/lib/file-validation.ts`                       | File validation con magic bytes            |
-| `src/lib/path-security.ts`                         | Path traversal prevention                  |
-| `src/components/error-boundary.tsx`                | React Error Boundary reutilizable          |
-| `src/app/global-error.tsx`                         | Global error handler con Sentry            |
-| `sentry.client.config.ts`                          | Sentry client configuration                |
-| `sentry.server.config.ts`                          | Sentry server configuration                |
-| `src/app/api/public/[slug]/book/route.ts`          | Booking endpoint (con logging)             |
-| `src/app/api/subscription/report-payment/route.ts` | Payment reporting (con logging)            |
-| `src/app/api/referrals/track-conversion/route.ts`  | Referral conversion tracking (con logging) |
-| `DATABASE_SCHEMA.md`                               | Single source of truth para DB schema      |
-| `IMPLEMENTATION_PLAN_V2.5.md`                      | Plan completo de transformación            |
-| `supabase/migrations/019b_missing_indexes.sql`     | Performance indexes para queries críticos  |
+| File                                               | Purpose                                       |
+| -------------------------------------------------- | --------------------------------------------- |
+| `src/lib/logger.ts`                                | Structured logging utility (pino)             |
+| `src/lib/rate-limit.ts`                            | Rate limiting (Upstash Redis + in-memory)     |
+| `src/lib/file-validation.ts`                       | File validation con magic bytes               |
+| `src/lib/path-security.ts`                         | Path traversal prevention                     |
+| `src/components/error-boundary.tsx`                | React Error Boundary reutilizable             |
+| `src/app/global-error.tsx`                         | Global error handler con Sentry               |
+| `sentry.client.config.ts`                          | Sentry client configuration                   |
+| `sentry.server.config.ts`                          | Sentry server configuration                   |
+| `src/app/api/public/[slug]/book/route.ts`          | Booking endpoint (con logging)                |
+| `src/app/api/subscription/report-payment/route.ts` | Payment reporting (con logging)               |
+| `src/app/api/referrals/track-conversion/route.ts`  | Referral conversion tracking (con logging)    |
+| `src/types/database.ts`                            | Tipos de Supabase (1,624 líneas, regenerados) |
+| `DATABASE_SCHEMA.md`                               | Single source of truth para DB schema         |
+| `IMPLEMENTATION_PLAN_V2.5.md`                      | Plan completo de transformación               |
+| `supabase/migrations/019b_missing_indexes.sql`     | Performance indexes para queries críticos     |
 
 ---
 
@@ -793,7 +863,11 @@ DESPUÉS (v2.5):
 
 ### Known Issues
 
-- ⚠️ TypeScript errors pendientes en varios archivos (database types no registrados en Database['public']['Tables'])
+- ⚠️ **75 TypeScript errors restantes** (down from 201, 63% reducción)
+  - 47 custom types faltantes (SubscriptionPlan, etc.)
+  - 14 property access errors
+  - 14 type assertion issues
+  - Build funciona con SKIP_TYPE_CHECK=true
 - ⚠️ No actualizar a Next.js 16 hasta que Turbopack esté más estable (esperar 16.2+)
 - ⚠️ Migraciones pendientes de aplicar en producción:
   - 015_fix_notification_trigger.sql
@@ -808,36 +882,48 @@ DESPUÉS (v2.5):
 
 ### Continue With
 
-**🎯 Área 0: Technical Debt Cleanup (PRIORIDAD #1)** - 2h restantes
+**🎯 Área 0: Technical Debt Cleanup** - 3-4h restantes
 
 ✅ **Task 1: Security Fixes** - COMPLETADO (Session 64)
 ✅ **Task 2: Database Performance** - COMPLETADO (Session 65)
 ✅ **Task 3: Observability** - COMPLETADO (Session 66)
+🔄 **Task 4: TypeScript Strict Mode** - PARCIAL (Session 67, 63% done)
 
-**Task 4: TypeScript Strict Mode** - 2h
+**Task 4 Continuación (3-4h estimadas):**
 
-1. **Fix useSearchParams issue en /register**
-   - Wrap useSearchParams en Suspense boundary
-   - Fix build error: "useSearchParams() should be wrapped in a suspense boundary"
+✅ **Completado:**
 
-2. **Habilitar strict mode**
-   - Fix de 49 errores TypeScript
-   - Remover 43 archivos con @ts-nocheck
-   - Actualizar types de Database para tables nuevas
+- useSearchParams Suspense fix en /register
+- Tipos de Supabase regenerados (1,624 líneas)
+- Sentry config actualizado
+- 125 errores resueltos (201 → 75)
 
-3. **Verificar compilación**
-   - `npm run build` sin SKIP_TYPE_CHECK
-   - Compilación limpia sin errores
+**Pendiente (75 errores):**
 
-**Archivos a modificar:**
+1. **Crear archivo de tipos custom** `src/types/custom.ts`
+   - 47 tipos faltantes: SubscriptionPlan, ExchangeRateValue, etc.
+   - Tipos para JSON fields, enums, y API responses
 
-- `src/app/(auth)/register/page.tsx` - Fix Suspense
-- 43 archivos con @ts-nocheck - Remover y fix types
-- `src/types/database.ts` - Actualizar types si es necesario
-- `tsconfig.json` - Habilitar strict mode
+2. **Fix type assertions** (14 errores)
+   - Property access en objetos de Supabase
+   - Type casting donde sea necesario
+
+3. **Fix type mismatches** (14 errores)
+   - BadgeVariant issues
+   - ProgramType/ReferralRewardType enums
+
+4. **Remover @ts-nocheck** (49 archivos)
+   - Verificar que compilación funciona sin bypass
+
+5. **Habilitar strict mode en tsconfig.json**
+
+**Opciones:**
+
+- **A:** Completar Task 4 ahora (3-4h)
+- **B:** Pasar a Área 1 y dejar Task 4 como tech debt (build funciona con SKIP_TYPE_CHECK)
 
 **Después de Área 0:**
-→ Área 1: Client Subscription & Basic Plan (database migrations + feature gating)
+→ Área 1: Client Subscription & Basic Plan
 
 **Comandos útiles:**
 
