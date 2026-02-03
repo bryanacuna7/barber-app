@@ -1,0 +1,63 @@
+#!/bin/bash
+# Git Post-Commit Hook (OPCIONAL)
+#
+# Para activar este hook:
+# 1. cp .claude/hooks/post-commit.example .git/hooks/post-commit
+# 2. chmod +x .git/hooks/post-commit
+#
+# Este hook se ejecuta DESPUÉS de cada commit y puede recordarte
+# guardar información importante en Memory MCP.
+
+# Obtener mensaje del último commit
+COMMIT_MSG=$(git log -1 --pretty=%B)
+
+# Colores para output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Detectar si el commit tiene información valiosa para memoria
+should_remember=false
+
+# Check for bug fixes
+if echo "$COMMIT_MSG" | grep -qiE "fix|bug|error|issue"; then
+    echo -e "${YELLOW}🐛 Bug fix detected${NC}"
+    should_remember=true
+fi
+
+# Check for security changes
+if echo "$COMMIT_MSG" | grep -qiE "security|vulnerability|auth|permission"; then
+    echo -e "${YELLOW}🔒 Security change detected${NC}"
+    should_remember=true
+fi
+
+# Check for architectural changes
+if echo "$COMMIT_MSG" | grep -qiE "refactor|migrate|architecture|breaking"; then
+    echo -e "${YELLOW}🏗️  Architectural change detected${NC}"
+    should_remember=true
+fi
+
+# Check for performance improvements
+if echo "$COMMIT_MSG" | grep -qiE "perf|optimize|speed|performance"; then
+    echo -e "${YELLOW}⚡ Performance improvement detected${NC}"
+    should_remember=true
+fi
+
+# Si detectamos algo importante, sugerir usar /remember
+if [ "$should_remember" = true ]; then
+    echo ""
+    echo -e "${GREEN}💾 Consider using /remember to save this to Memory MCP${NC}"
+    echo -e "${GREEN}   Example: /remember bug: [description of fix]${NC}"
+    echo ""
+fi
+
+# Check for specific memory tag
+if echo "$COMMIT_MSG" | grep -q "memory:"; then
+    # Extract the memory note
+    MEMORY_NOTE=$(echo "$COMMIT_MSG" | grep -o "memory:.*" | sed 's/memory://')
+    echo -e "${GREEN}📝 Memory note found: $MEMORY_NOTE${NC}"
+    echo -e "${GREEN}   This will be auto-saved by Claude in next session${NC}"
+fi
+
+# Success
+exit 0
