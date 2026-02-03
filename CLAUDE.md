@@ -823,6 +823,35 @@ IF creating a migration:
 5. DO inform user which features aren't implemented yet
 ```
 
+### Advanced: Direct Supabase Verification (When Available)
+
+If you have Supabase connection, you can verify schema directly:
+
+```sql
+-- List all tables
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public';
+
+-- List columns for a specific table
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'appointments';
+
+-- Check if column exists
+SELECT EXISTS (
+  SELECT 1 FROM information_schema.columns
+  WHERE table_name = 'appointments' AND column_name = 'deposit_paid'
+);
+```
+
+**Process:**
+
+1. Read DATABASE_SCHEMA.md (always start here)
+2. If unsure, verify with Supabase directly
+3. Update DATABASE_SCHEMA.md if discrepancy found
+4. Never trust plan documents for current schema
+
 ---
 
 ## Required Reading Before Changes
