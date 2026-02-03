@@ -24,9 +24,13 @@ Critical patterns extracted from real bugs. **Read before coding.**
 
 ### Development
 
-- [Testing Guide](testing.md) - Test strategies, coverage, E2E
-- [GitHub Actions](github-actions.md) - CI/CD workflows
-- [Skills Installed](skills-installed.md) - Available Claude Code skills
+- [Testing Guide](TESTING.md) - Test strategies, coverage, E2E
+- [Playwright Trace Viewer](PLAYWRIGHT_TRACE_GUIDE.md) - Complete trace viewer guide
+- [Trace Quick Start](TRACE_QUICK_START.md) - 3-step trace viewer guide
+- [UI Exploration](UI_EXPLORATION_GUIDE.md) - Manual testing & competitor analysis
+- [Playwright Profiles](playwright-profiles.md) - Trace recording configurations
+- [GitHub Actions](GITHUB_ACTIONS.md) - CI/CD workflows
+- [Skills Installed](SKILLS_INSTALLED.md) - Available Claude Code skills
 
 ### Design & UX
 
@@ -43,14 +47,18 @@ Critical patterns extracted from real bugs. **Read before coding.**
 
 ## Quick Reference
 
-| Topic          | File                                               | Description                         |
-| -------------- | -------------------------------------------------- | ----------------------------------- |
-| Bug Prevention | [lessons-learned.md](lessons-learned.md)           | 11 critical patterns from real bugs |
-| Testing        | [testing.md](testing.md)                           | Jest, Vitest, E2E strategies        |
-| Accessibility  | [accessibility.md](accessibility.md)               | WCAG AA compliance                  |
-| Performance    | [performance-baseline.md](performance-baseline.md) | Load time, bundle size targets      |
-| Security       | [security-headers.md](security-headers.md)         | Header configuration                |
-| Design System  | [design-tokens.md](design-tokens.md)               | Design token reference              |
+| Topic          | File                                                   | Description                            |
+| -------------- | ------------------------------------------------------ | -------------------------------------- |
+| Bug Prevention | [lessons-learned.md](lessons-learned.md)               | 11 critical patterns from real bugs    |
+| Testing        | [TESTING.md](TESTING.md)                               | Jest, Vitest, E2E strategies           |
+| Trace Viewer   | [TRACE_QUICK_START.md](TRACE_QUICK_START.md)           | Playwright trace viewer (3-step guide) |
+| Trace Guide    | [PLAYWRIGHT_TRACE_GUIDE.md](PLAYWRIGHT_TRACE_GUIDE.md) | Complete trace viewer documentation    |
+| UI Exploration | [UI_EXPLORATION_GUIDE.md](UI_EXPLORATION_GUIDE.md)     | Manual testing & competitor analysis   |
+| Trace Profiles | [playwright-profiles.md](playwright-profiles.md)       | Recording configurations               |
+| Accessibility  | [ACCESSIBILITY.md](ACCESSIBILITY.md)                   | WCAG AA compliance                     |
+| Performance    | [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md)     | Load time, bundle size targets         |
+| Security       | [SECURITY_HEADERS.md](SECURITY_HEADERS.md)             | Header configuration                   |
+| Design System  | [DESIGN_TOKENS.md](DESIGN_TOKENS.md)                   | Design token reference                 |
 
 ---
 

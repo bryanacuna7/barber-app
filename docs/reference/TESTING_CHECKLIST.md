@@ -12,7 +12,7 @@
 
 - [ ] **Action:** Open http://localhost:3000/mi-dia in incognito/private window
 - [ ] **Expected:** Redirects to `/login` page
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ### 1.2 Authenticated as Barber Test
 
@@ -23,7 +23,7 @@
   - Today's date displayed
   - List of appointments (or "No hay citas" message)
   - Loading spinner briefly, then content
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 - [ ] **Screenshot:** (optional - take a screenshot for documentation)
 
 ### 1.3 Non-Barber User Test (if applicable)
@@ -31,7 +31,7 @@
 - [ ] **Action:** Login with a regular user (non-barber)
 - [ ] **Action:** Navigate to http://localhost:3000/mi-dia
 - [ ] **Expected:** Error message: "No tienes un perfil de barbero"
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ---
 
@@ -59,14 +59,14 @@
     "error": "No tienes permiso para ver las citas de este barbero"
   }
   ```
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ### 2.2 Business Owner Override Test (if you're owner)
 
 - [ ] **Action:** Login as business owner
 - [ ] **Action:** Navigate to http://localhost:3000/mi-dia
 - [ ] **Expected:** Can see appointments (may need to select a barber)
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ---
 
@@ -81,7 +81,7 @@
   - Status changes to "En Progreso" (blue/yellow)
   - Success message/toast appears
   - Page updates without full reload
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ### 3.2 Complete Flow
 
@@ -92,7 +92,7 @@
   - Status changes to "Completada" (green/gray)
   - Client stats updated in database (check below)
   - Success message appears
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ### 3.3 Verify Atomic Stats Update
 
@@ -102,7 +102,7 @@
   // Then verify stats were incremented
   ```
 - [ ] **Expected:** Client's `total_visits` and `total_spent` incremented
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ### 3.4 No-Show Flow (optional)
 
@@ -111,7 +111,7 @@
 - [ ] **Expected:**
   - Status changes to "No Show" or "Ausente"
   - Appointment marked appropriately
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ---
 
@@ -153,7 +153,7 @@
   - Error message: "Demasiadas solicitudes"
   - Headers include: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `Retry-After`
 
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 - [ ] **Console Screenshot:** (recommended)
 
 ---
@@ -172,7 +172,7 @@
   - ✅ No JavaScript errors
   - ℹ️ Info/debug logs are OK
   - ⚠️ Warnings are OK (unless security-related)
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 - [ ] **Errors Found:** (list any errors)
 
 ### 5.2 Network Tab Check
@@ -184,7 +184,7 @@
   - ✅ All API calls return 200 OK (or expected status)
   - ✅ No failed requests (red)
   - ✅ Response times < 1 second
-- [ ] **Pass/Fail:** ****\_\_\_****
+- [ ] **Pass/Fail:** \***\*\_\_\_\*\***
 
 ---
 
@@ -312,8 +312,8 @@ git push origin feature/subscription-payments-rebranding
 
 ---
 
-**Testing Date:** ****\_\_\_****
-**Tester:** ****\_\_\_****
+**Testing Date:** \***\*\_\_\_\*\***
+**Tester:** \***\*\_\_\_\*\***
 **Environment:** Development (localhost:3000)
 **Result:** ⬜ Pass / ⬜ Fail
 
