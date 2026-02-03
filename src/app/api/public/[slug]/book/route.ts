@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { processAppointmentLoyalty } from '@/lib/gamification/loyalty-calculator-server'
+import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
 
 const bookingSchema = z.object({
   service_id: z.string().uuid(),
@@ -16,6 +17,18 @@ const bookingSchema = z.object({
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+
+  // Rate limiting - prevent booking spam/abuse (30 requests per minute)
+  const rateLimitResult = await rateLimit(request as any, RateLimitPresets.moderate)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many booking requests. Please try again later.' },
+      {
+        status: 429,
+        headers: rateLimitResult.headers,
+      }
+    )
+  }
 
   let body
   try {

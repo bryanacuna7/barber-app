@@ -1,9 +1,10 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { validateImageFile } from '@/lib/file-validation'
+import { sanitizeFilename } from '@/lib/path-security'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -53,16 +54,19 @@ export async function POST(request: Request) {
 
   // Upload proof image if provided
   if (proof && proof.size > 0) {
-    if (proof.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'El archivo es muy grande (máximo 5MB)' }, { status: 400 })
+    // Validate file using magic bytes (secure validation)
+    const validation = await validateImageFile(proof, MAX_FILE_SIZE)
+    if (!validation.valid) {
+      return NextResponse.json(
+        { error: validation.error || 'Archivo de pago inválido' },
+        { status: 400 }
+      )
     }
 
-    if (!ALLOWED_TYPES.includes(proof.type)) {
-      return NextResponse.json({ error: 'Tipo de archivo no permitido' }, { status: 400 })
-    }
-
-    const fileExt = proof.name.split('.').pop()
-    const fileName = `${business.id}/${Date.now()}.${fileExt}`
+    // Use detected file type for extension and sanitize filename
+    const fileExt = validation.detectedType === 'jpeg' ? 'jpg' : validation.detectedType
+    const sanitizedName = sanitizeFilename(`payment_${Date.now()}.${fileExt}`)
+    const fileName = `${business.id}/${sanitizedName}`
 
     const { error: uploadError } = await supabase.storage
       .from('payment-proofs')

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
 
 /**
  * POST /api/referrals/track-conversion
@@ -18,6 +19,18 @@ import { NextResponse } from 'next/server'
  * - 'churned': Usuario canceló suscripción
  */
 export async function POST(request: Request) {
+  // Strict rate limiting - prevent fake conversions (5 requests per 15 min)
+  const rateLimitResult = await rateLimit(request as any, RateLimitPresets.strict)
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many conversion tracking requests. Please try again later.' },
+      {
+        status: 429,
+        headers: rateLimitResult.headers,
+      }
+    )
+  }
+
   try {
     const supabase = await createClient()
     const { referralCode, referredBusinessId, status } = await request.json()

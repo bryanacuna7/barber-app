@@ -10,6 +10,7 @@
 
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
+import { extractSafePathFromUrl } from '@/lib/path-security'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -74,15 +75,15 @@ export async function GET(request: Request) {
 
     for (const payment of allPaymentsToClean) {
       try {
-        // Extract file path from URL
+        // Extract file path from URL with security validation
         // URL format: https://xxx.supabase.co/storage/v1/object/public/payment-proofs/path/to/file.jpg
         const paymentData = payment as any
         const proofUrl = paymentData.proof_url
-        const path = extractPathFromUrl(proofUrl)
+        const path = extractSafePathFromUrl(proofUrl, 'payment-proofs')
 
         if (!path) {
-          console.warn(`Could not extract path from URL: ${proofUrl}`)
-          errors.push({ id: paymentData.id, error: 'Invalid URL format' })
+          console.warn(`Could not extract safe path from URL: ${proofUrl}`)
+          errors.push({ id: paymentData.id, error: 'Invalid or unsafe URL format' })
           continue
         }
 
@@ -143,19 +144,4 @@ export async function GET(request: Request) {
   }
 }
 
-/**
- * Extract file path from Supabase Storage URL
- * @param url - Full storage URL
- * @returns File path or null
- */
-function extractPathFromUrl(url: string | null): string | null {
-  if (!url) return null
-
-  try {
-    // Pattern: /storage/v1/object/public/payment-proofs/[path]
-    const match = url.match(/\/storage\/v1\/object\/public\/payment-proofs\/(.+)$/)
-    return match ? match[1] : null
-  } catch {
-    return null
-  }
-}
+// Note: extractPathFromUrl replaced with extractSafePathFromUrl from path-security.ts

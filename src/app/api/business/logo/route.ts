@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { validateImageFile, getMimeType } from '@/lib/file-validation'
+import { sanitizeFilename, extractSafePathFromUrl } from '@/lib/path-security'
 
-const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
 const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 
 // POST - Upload logo
@@ -34,19 +35,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No se proporcionó archivo' }, { status: 400 })
   }
 
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json(
-      { error: 'Tipo de archivo no permitido. Usa PNG, JPG, WebP o SVG.' },
-      { status: 400 }
-    )
+  // Validate file using magic bytes (secure, cannot be spoofed)
+  const validation = await validateImageFile(file, MAX_SIZE)
+  if (!validation.valid) {
+    return NextResponse.json({ error: validation.error || 'Archivo inválido' }, { status: 400 })
   }
 
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'El archivo es muy grande. Máximo 2MB.' }, { status: 400 })
-  }
+  // Use detected file type (from magic bytes) for extension
+  const ext = validation.detectedType === 'jpeg' ? 'jpg' : validation.detectedType
 
-  const ext = file.name.split('.').pop() || 'png'
-  const filePath = `${business.id}/logo.${ext}`
+  // Sanitize filename to prevent path traversal
+  const sanitizedFilename = sanitizeFilename(`logo.${ext}`)
+  const filePath = `${business.id}/${sanitizedFilename}`
 
   // Upload to storage
   const { error: uploadError } = await supabase.storage.from('logos').upload(filePath, file, {
@@ -101,11 +101,12 @@ export async function DELETE() {
   }
 
   if (business.logo_url) {
-    // Extract path from URL
-    const url = new URL(business.logo_url)
-    const pathMatch = url.pathname.match(/\/storage\/v1\/object\/public\/logos\/(.+)/)
-    if (pathMatch) {
-      await supabase.storage.from('logos').remove([pathMatch[1]])
+    // Extract path from URL with security validation
+    const safePath = extractSafePathFromUrl(business.logo_url, 'logos')
+    if (safePath) {
+      await supabase.storage.from('logos').remove([safePath])
+    } else {
+      console.warn('Could not extract safe path from logo URL:', business.logo_url)
     }
   }
 
