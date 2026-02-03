@@ -809,7 +809,7 @@ IF creating a migration:
 ❌ Assuming push_subscriptions table exists (it doesn't - Área 5)
 ❌ Using last_activity_at instead of last_visit_at in clients
 ❌ Creating indexes for columns that don't exist
-❌ Trusting IMPLEMENTATION_PLAN_V2.5.md for current schema
+❌ Trusting docs/planning/implementation-v2.5.md for current schema
    (the plan describes FUTURE state, not current state)
 ```
 
@@ -818,7 +818,7 @@ IF creating a migration:
 ```
 1. DO NOT create the migration with that column
 2. DO NOT assume it's a mistake in documentation
-3. DO check if it's a future feature in IMPLEMENTATION_PLAN_V2.5.md
+3. DO check if it's a future feature in docs/planning/implementation-v2.5.md
 4. DO create migration only with existing columns
 5. DO inform user which features aren't implemented yet
 ```
@@ -857,8 +857,9 @@ SELECT EXISTS (
 ## Required Reading Before Changes
 
 1. **DATABASE_SCHEMA.md** - Current database structure (ALWAYS check for DB work)
-2. **GUARDRAILS.md** - Non-negotiable behavior
-3. **DECISIONS.md** - Design rationale
+2. **docs/reference/lessons-learned.md** - Critical bug patterns (prevent repeated mistakes)
+3. **GUARDRAILS.md** - Non-negotiable behavior
+4. **DECISIONS.md** - Design rationale
 
 ## Available Commands
 
