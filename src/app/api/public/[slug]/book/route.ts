@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { processAppointmentLoyalty } from '@/lib/gamification/loyalty-calculator-server'
 import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
+import { logger, logRequest, logResponse, logBusiness, logSecurity } from '@/lib/logger'
 
 const bookingSchema = z.object({
   service_id: z.string().uuid(),
@@ -16,11 +17,18 @@ const bookingSchema = z.object({
 })
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  const startTime = Date.now()
   const { slug } = await params
+
+  // Log incoming request
+  logRequest(request, { slug, endpoint: 'public_booking' })
 
   // Rate limiting - prevent booking spam/abuse (30 requests per minute)
   const rateLimitResult = await rateLimit(request as any, RateLimitPresets.moderate)
   if (!rateLimitResult.success) {
+    logSecurity('rate_limit', 'medium', { slug, endpoint: 'public_booking' })
+    logResponse(request, 429, Date.now() - startTime)
+
     return NextResponse.json(
       { error: 'Too many booking requests. Please try again later.' },
       {
@@ -33,12 +41,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   let body
   try {
     body = await request.json()
-  } catch {
+  } catch (error) {
+    logger.warn({ slug, error }, 'Invalid JSON in booking request')
+    logResponse(request, 400, Date.now() - startTime)
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
   const parsed = bookingSchema.safeParse(body)
   if (!parsed.success) {
+    logger.warn({ slug, errors: parsed.error.flatten() }, 'Invalid booking data')
+    logResponse(request, 400, Date.now() - startTime)
     return NextResponse.json(
       { error: 'Invalid request', details: parsed.error.flatten() },
       { status: 400 }
@@ -59,6 +71,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     .single()
 
   if (businessError || !business) {
+    logger.warn({ slug, error: businessError }, 'Business not found for booking')
+    logResponse(request, 404, Date.now() - startTime)
     return NextResponse.json({ error: 'Business not found' }, { status: 404 })
   }
 
@@ -72,6 +86,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     .single()
 
   if (serviceError || !service) {
+    logger.warn(
+      { slug, businessId: business.id, serviceId: service_id, error: serviceError },
+      'Service not found'
+    )
+    logResponse(request, 404, Date.now() - startTime)
     return NextResponse.json({ error: 'Service not found' }, { status: 404 })
   }
 
@@ -85,6 +104,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     .single()
 
   if (barberError || !barber) {
+    logger.warn(
+      { slug, businessId: business.id, barberId: barber_id, error: barberError },
+      'Barber not found or inactive'
+    )
+    logResponse(request, 404, Date.now() - startTime)
     return NextResponse.json({ error: 'Barber not found or inactive' }, { status: 404 })
   }
 
@@ -99,6 +123,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
   if (existingClient) {
     client = existingClient
+    logger.debug(
+      { clientId: client.id, businessId: business.id },
+      'Existing client found for booking'
+    )
   } else {
     const { data: newClient, error: clientError } = await supabase
       .from('clients')
@@ -112,9 +140,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       .single()
 
     if (clientError) {
+      logger.error({ businessId: business.id, error: clientError }, 'Failed to create client')
+      logResponse(request, 500, Date.now() - startTime)
       return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
     }
     client = newClient
+    logBusiness('client_created', business.id, { clientId: client.id, clientPhone: client_phone })
   }
 
   // Create appointment
@@ -135,7 +166,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     .single()
 
   if (appointmentError) {
-    console.error('[Book API] Appointment creation error:', appointmentError)
+    logger.error(
+      {
+        businessId: business.id,
+        clientId: client.id,
+        serviceId: service.id,
+        barberId: barber_id,
+        error: appointmentError,
+      },
+      'Failed to create appointment'
+    )
+    logResponse(request, 500, Date.now() - startTime)
     return NextResponse.json(
       {
         error: 'Failed to create appointment',
@@ -145,15 +186,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     )
   }
 
+  // Log successful booking
+  logBusiness('appointment_created', business.id, {
+    appointmentId: appointment.id,
+    clientId: client.id,
+    serviceId: service.id,
+    barberId: barber_id,
+    price: service.price,
+    scheduledAt: scheduled_at,
+  })
+
   // Process loyalty points and rewards
   // Note: This runs asynchronously and doesn't block the booking response
   // If it fails, the booking is still successful
   processAppointmentLoyalty(appointment.id, client.id, business.id, service.price).catch(
     (error) => {
-      console.error('[Book API] Loyalty processing error:', error)
-      // Log error but don't fail the booking
+      logger.error(
+        {
+          appointmentId: appointment.id,
+          clientId: client.id,
+          businessId: business.id,
+          error,
+        },
+        'Loyalty processing error (booking still successful)'
+      )
     }
   )
+
+  const duration = Date.now() - startTime
+  logResponse(request, 200, duration, {
+    appointmentId: appointment.id,
+    clientId: client.id,
+  })
 
   return NextResponse.json({
     success: true,

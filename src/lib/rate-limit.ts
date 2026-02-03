@@ -5,10 +5,17 @@
  * - Safe IP detection with header validation
  * - Protection against IP spoofing attacks
  * - Multiple header fallback with priority order
- * - In-memory storage with automatic cleanup
+ * - Distributed rate limiting with Upstash Redis (optional)
+ * - Fallback to in-memory storage when Redis not configured
+ *
+ * Setup:
+ * - Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for distributed rate limiting
+ * - Without Redis, uses in-memory Map (works for single-instance deployments)
  */
 
 import { NextRequest } from 'next/server'
+import { Redis } from '@upstash/redis'
+import { logger } from './logger'
 
 interface RateLimitConfig {
   interval: number // Time window in milliseconds
@@ -20,21 +27,40 @@ interface RateLimitStore {
   resetTime: number
 }
 
-// In-memory store (use Redis in production for distributed systems)
+// Initialize Redis client if credentials are available
+let redis: Redis | null = null
+
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  try {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+    logger.info('Rate limiting using Upstash Redis (distributed)')
+  } catch (error) {
+    logger.error({ error }, 'Failed to initialize Upstash Redis, falling back to in-memory')
+  }
+} else {
+  logger.info('Rate limiting using in-memory store (set UPSTASH_REDIS_REST_URL for distributed)')
+}
+
+// In-memory store fallback (used when Redis not configured)
 const rateLimitStore = new Map<string, RateLimitStore>()
 
-// Cleanup old entries every 5 minutes
-setInterval(
-  () => {
-    const now = Date.now()
-    for (const [key, value] of rateLimitStore.entries()) {
-      if (now > value.resetTime) {
-        rateLimitStore.delete(key)
+// Cleanup old entries every 5 minutes (only for in-memory store)
+if (!redis) {
+  setInterval(
+    () => {
+      const now = Date.now()
+      for (const [key, value] of rateLimitStore.entries()) {
+        if (now > value.resetTime) {
+          rateLimitStore.delete(key)
+        }
       }
-    }
-  },
-  5 * 60 * 1000
-)
+    },
+    5 * 60 * 1000
+  )
+}
 
 /**
  * Safely extracts client IP address from request headers
@@ -100,7 +126,7 @@ export function getClientIP(request: NextRequest): string {
 }
 
 /**
- * Rate limiting middleware
+ * Rate limiting middleware with Redis support
  *
  * Usage:
  * ```ts
@@ -135,6 +161,78 @@ export async function rateLimit(
   const key = identifier || `rate_limit:${ip}:${request.nextUrl.pathname}`
 
   const now = Date.now()
+
+  // Use Redis if available
+  if (redis) {
+    return rateLimitWithRedis(key, config, now)
+  }
+
+  // Fallback to in-memory
+  return rateLimitInMemory(key, config, now)
+}
+
+/**
+ * Rate limiting using Upstash Redis (distributed)
+ */
+async function rateLimitWithRedis(
+  key: string,
+  config: RateLimitConfig,
+  now: number
+): Promise<{
+  success: boolean
+  limit: number
+  remaining: number
+  reset: number
+  headers: Record<string, string>
+}> {
+  try {
+    // Use Redis INCR with EXPIRE for atomic rate limiting
+    const count = await redis!.incr(key)
+
+    // Set expiration on first request
+    if (count === 1) {
+      await redis!.expire(key, Math.ceil(config.interval / 1000))
+    }
+
+    const ttl = await redis!.ttl(key)
+    const resetTime = now + ttl * 1000
+
+    const remaining = Math.max(0, config.maxRequests - count)
+    const success = count <= config.maxRequests
+
+    return {
+      success,
+      limit: config.maxRequests,
+      remaining,
+      reset: resetTime,
+      headers: {
+        'X-RateLimit-Limit': config.maxRequests.toString(),
+        'X-RateLimit-Remaining': remaining.toString(),
+        'X-RateLimit-Reset': new Date(resetTime).toISOString(),
+        ...(success ? {} : { 'Retry-After': ttl.toString() }),
+      },
+    }
+  } catch (error) {
+    // If Redis fails, log error and fall back to in-memory
+    logger.error({ error, key }, 'Redis rate limit error, falling back to in-memory')
+    return rateLimitInMemory(key, config, now)
+  }
+}
+
+/**
+ * Rate limiting using in-memory Map (single-instance)
+ */
+function rateLimitInMemory(
+  key: string,
+  config: RateLimitConfig,
+  now: number
+): {
+  success: boolean
+  limit: number
+  remaining: number
+  reset: number
+  headers: Record<string, string>
+} {
   const store = rateLimitStore.get(key)
 
   if (!store || now > store.resetTime) {

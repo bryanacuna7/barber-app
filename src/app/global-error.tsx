@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import * as Sentry from '@sentry/nextjs'
 
 interface GlobalErrorProps {
   error: Error & { digest?: string }
@@ -10,8 +11,18 @@ interface GlobalErrorProps {
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    // Log critical error to monitoring service
-    console.error('Critical error caught by global boundary:', error)
+    // Report to Sentry
+    Sentry.captureException(error, {
+      level: 'fatal',
+      tags: {
+        errorBoundary: 'global',
+      },
+    })
+
+    // Log to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Critical error caught by global boundary:', error)
+    }
   }, [error])
 
   return (

@@ -3,10 +3,14 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateImageFile } from '@/lib/file-validation'
 import { sanitizeFilename } from '@/lib/path-security'
+import { logger, logRequest, logResponse, logPayment, logSecurity } from '@/lib/logger'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export async function POST(request: Request) {
+  const startTime = Date.now()
+  logRequest(request, { endpoint: 'report_payment' })
+
   const supabase = await createClient()
 
   const {
@@ -14,6 +18,8 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    logSecurity('unauthorized', 'medium', { endpoint: 'report_payment' })
+    logResponse(request, 401, Date.now() - startTime)
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -25,6 +31,8 @@ export async function POST(request: Request) {
     .single()
 
   if (!business) {
+    logger.warn({ userId: user.id }, 'Business not found for payment report')
+    logResponse(request, 404, Date.now() - startTime)
     return NextResponse.json({ error: 'Business not found' }, { status: 404 })
   }
 
@@ -36,6 +44,11 @@ export async function POST(request: Request) {
   const proof = formData.get('proof') as File | null
 
   if (!planId || !amount) {
+    logger.warn(
+      { businessId: business.id, planId, amount },
+      'Missing required fields for payment report'
+    )
+    logResponse(request, 400, Date.now() - startTime)
     return NextResponse.json({ error: 'Plan ID and amount are required' }, { status: 400 })
   }
 
@@ -47,6 +60,8 @@ export async function POST(request: Request) {
     .single()
 
   if (!plan) {
+    logger.warn({ businessId: business.id, planId }, 'Plan not found for payment report')
+    logResponse(request, 404, Date.now() - startTime)
     return NextResponse.json({ error: 'Plan not found' }, { status: 404 })
   }
 
@@ -57,6 +72,13 @@ export async function POST(request: Request) {
     // Validate file using magic bytes (secure validation)
     const validation = await validateImageFile(proof, MAX_FILE_SIZE)
     if (!validation.valid) {
+      logSecurity('invalid_file', 'medium', {
+        businessId: business.id,
+        fileSize: proof.size,
+        fileName: proof.name,
+        error: validation.error,
+      })
+      logResponse(request, 400, Date.now() - startTime)
       return NextResponse.json(
         { error: validation.error || 'Archivo de pago inválido' },
         { status: 400 }
@@ -76,13 +98,20 @@ export async function POST(request: Request) {
       })
 
     if (uploadError) {
-      console.error('Upload error:', uploadError)
+      logger.error(
+        { businessId: business.id, fileName, error: uploadError },
+        'Failed to upload payment proof'
+      )
       // Continue without proof URL - not critical
     } else {
       const {
         data: { publicUrl },
       } = supabase.storage.from('payment-proofs').getPublicUrl(fileName)
       proofUrl = publicUrl
+      logger.info(
+        { businessId: business.id, fileName, proofUrl },
+        'Payment proof uploaded successfully'
+      )
     }
   }
 
@@ -102,9 +131,24 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
-    console.error('Error creating payment report:', error)
+    logger.error(
+      { businessId: business.id, planId, amount, error },
+      'Failed to create payment report'
+    )
+    logResponse(request, 500, Date.now() - startTime)
     return NextResponse.json({ error: 'Failed to create payment report' }, { status: 500 })
   }
+
+  // Log successful payment report
+  logPayment('initiated', business.id, parseFloat(amount), {
+    paymentId: payment.id,
+    planId,
+    hasProof: !!proofUrl,
+  })
+
+  logResponse(request, 201, Date.now() - startTime, {
+    paymentId: payment.id,
+  })
 
   return NextResponse.json(payment, { status: 201 })
 }
