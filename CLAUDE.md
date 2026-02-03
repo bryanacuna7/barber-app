@@ -119,6 +119,96 @@ Automáticamente actualiza `PROGRESS.md` cuando:
 
 - `/continue` - Forzar lectura de PROGRESS.md
 - `/save-progress` - Forzar guardado manual
+- `/remember [info]` - Guardar información específica en Memory MCP
+
+---
+
+## 🧠 Memory Auto-Save (Memoria Persistente)
+
+Claude puede recordar información importante entre sesiones usando Memory MCP.
+
+### Qué se guarda automáticamente:
+
+**Triggers de auto-save** (sin intervención del usuario):
+
+1. **Después de /commit:**
+   - Si el mensaje menciona "fix bug", "security", "breaking change"
+   - Guardar patrón en `lessons_learned` entity
+   - Ejemplo: "Session 73: Race condition fixed with atomic DB function"
+
+2. **Después de /create o /enhance:**
+   - Decisiones arquitectónicas tomadas
+   - Nuevos patrones implementados
+   - Dependencias agregadas a `tech_stack`
+
+3. **Cuando usuario corrige mi código:**
+   - Detectar patrón: "No, usa X en lugar de Y"
+   - Guardar en `code_style_preferences` o entity relevante
+   - Ejemplo: "User prefers const over let for immutable values"
+
+4. **Después de /deploy:**
+   - Actualizar `current_implementation_status`
+   - Features deployadas
+
+5. **Cuando se modifican archivos críticos:**
+   - `DATABASE_SCHEMA.md` → actualizar `database_architecture`
+   - `DECISIONS.md` → nuevas decisiones arquitectónicas
+   - `package.json` → actualizar `tech_stack`
+
+### Detección de Información Valiosa:
+
+Claude detecta y guarda automáticamente cuando el usuario dice:
+
+| Patrón detectado        | Ejemplo                             | Entity actualizada       |
+| ----------------------- | ----------------------------------- | ------------------------ |
+| Preferencia de código   | "prefiero usar X", "siempre usa Y"  | `code_style_preferences` |
+| Decisión arquitectónica | "vamos a usar X para Y porque..."   | `architecture_pattern`   |
+| Bug pattern             | "esto causó un bug antes"           | `lessons_learned`        |
+| Seguridad               | "NUNCA hagas X porque..."           | `security_pattern`       |
+| Workflow                | "cuando hagas X, siempre Y primero" | `workflow`               |
+
+### Comando Manual /remember:
+
+Para guardar explícitamente:
+
+```
+/remember "prefiero Playwright para UI testing"
+/remember decision: usar WebSocket en lugar de polling
+/remember bug: last_activity_at debe ser last_visit_at
+/remember security: validar business_id en TODAS las queries
+```
+
+### Confirmación:
+
+Cuando se guarda algo en memoria, mostrar brevemente:
+
+```
+💾 Saved to memory: [entity_name]
+```
+
+**No mostrar confirmación** si es parte de auto-save silencioso (post-commit, post-feature).
+
+### Entidades en Memoria:
+
+El proyecto barber-app tiene **32 entidades principales** en memoria:
+
+- `barber_app_project` - Identidad del proyecto
+- `tech_stack` - Stack tecnológico
+- `database_architecture` - Arquitectura de BD
+- `auth_middleware_pattern` - Patrones de auth
+- `code_style_preferences` - Estilos de código
+- `lessons_learned` - Lecciones de bugs
+- `automation_preferences` - Preferencias de automatización
+- `immediate_priorities` - Prioridades actuales
+- ... (ver grafo completo con `mcp__memory__read_graph`)
+
+### Beneficios:
+
+- ✅ Claude recuerda preferencias entre sesiones
+- ✅ No repite errores pasados (lessons_learned)
+- ✅ Aplica convenciones del proyecto automáticamente
+- ✅ Conoce el estado actual sin preguntar
+- ✅ Sigue patrones de seguridad críticos
 
 ---
 
