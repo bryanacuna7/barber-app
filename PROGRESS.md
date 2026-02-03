@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 03:45 PM
-- **Last Session:** Session 65 - Security + DB Performance + Critical Fix (Área 0 Tasks 1-2) ✅ (COMPLETE)
+- **Last Updated:** 2026-02-03 07:30 PM
+- **Last Session:** Session 66 - Observability System (Área 0 Task 3) ✅ (COMPLETE)
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -36,7 +36,7 @@
   - **Branch:** `feature/subscription-payments-rebranding`
   - **Estimado:** 154-200 horas (8-10 semanas) - +67% para eliminar deuda técnica
   - **Score proyectado:** 6.0/10 → 8.5/10
-  - **Áreas principales:** 0. 🔄 Área 0: Technical Debt Cleanup (10-12h) - ✅ Task 1: Security (DONE) + ✅ Task 2: DB Performance (DONE) + Task 3: Observability (3-4h) + Task 4: TypeScript (2h) **← CURRENT**
+  - **Áreas principales:** 0. 🔄 Área 0: Technical Debt Cleanup (10-12h) - ✅ Task 1: Security (DONE) + ✅ Task 2: DB Performance (DONE) + ✅ Task 3: Observability (DONE) + Task 4: TypeScript (2h) **← CURRENT**
     1. ⏳ Área 1: Client Subscription & Basic Plan (database + feature gating)
     2. ⏳ Área 6: Staff Experience - Vista Mi Día (PRIORIDAD #2)
     3. ⏳ Área 2: Advance Payments & No-Show (SINPE Móvil + auto no-show)
@@ -58,6 +58,95 @@
   - **Estado:** FASES 1-6 completas y funcionando
 
 ### Recently Completed
+
+#### Session 66 (2026-02-03 07:30 PM)
+
+**Tema:** 📊 Observability System - Task 3 of Área 0 (Technical Debt Cleanup)
+
+**Completado:**
+
+**PARTE 1: Structured Logging con Pino**
+
+- ✅ **Logger Utility Created (`src/lib/logger.ts` - ~370 líneas)**
+  - Logging estructurado JSON en producción, pretty-print en desarrollo
+  - Funciones especializadas: `logRequest`, `logResponse`, `logAuth`, `logPayment`, `logReferral`, `logSecurity`, `logPerformance`, `logCron`
+  - Helpers: `withLogging` (wrapper para API routes), `measureAsync` (performance tracking)
+  - Redacción automática de campos sensibles (passwords, tokens, auth headers)
+  - Integración con pino + pino-pretty
+
+- ✅ **Logging Integrado en 3 Endpoints Críticos**
+  - `/api/public/[slug]/book` - Booking público (logs de negocio + performance)
+  - `/api/subscription/report-payment` - Payment reporting (logs de transacciones)
+  - `/api/referrals/track-conversion` - Referral tracking (logs de conversiones + milestones)
+  - Eliminados ~15 console.error/console.log reemplazados con structured logging
+
+**PARTE 2: Sentry Error Tracking**
+
+- ✅ **Sentry Configuration (~200 líneas)**
+  - `sentry.client.config.ts` - Cliente config con Replay integration
+  - `sentry.server.config.ts` - Server config con sanitización de headers sensibles
+  - `sentry.edge.config.ts` - Edge runtime config
+  - Solo activo en producción, logs a consola en development
+  - Sample rates configurados: 10% traces, 100% errors
+
+- ✅ **Next.js Integration**
+  - `next.config.ts` - Integrado withSentryConfig
+  - CSP headers actualizados para permitir Sentry (\*.sentry.io)
+  - Source maps upload configurado para producción
+
+- ✅ **Error Boundaries**
+  - `src/components/error-boundary.tsx` - Componente React Error Boundary reutilizable
+  - `src/app/global-error.tsx` - Global error handler integrado con Sentry
+  - Fallback UI con error details en development
+  - Auto-reporting a Sentry con contexto completo
+
+**PARTE 3: Upstash Redis Rate Limiting**
+
+- ✅ **Distributed Rate Limiting (`src/lib/rate-limit.ts` - ~150 líneas)**
+  - Soporte para Upstash Redis (distributed rate limiting para multi-instance)
+  - Fallback automático a in-memory Map cuando Redis no configurado
+  - Atomic operations: INCR + EXPIRE en Redis
+  - Graceful error handling con fallback a in-memory
+  - Logging de inicialización y errores
+
+**Archivos creados (5):**
+
+- `src/lib/logger.ts` (~370 líneas)
+- `src/components/error-boundary.tsx` (~150 líneas)
+- `sentry.client.config.ts` (~55 líneas)
+- `sentry.server.config.ts` (~50 líneas)
+- `sentry.edge.config.ts` (~20 líneas)
+
+**Archivos modificados (7):**
+
+- `src/app/api/public/[slug]/book/route.ts` - Structured logging
+- `src/app/api/subscription/report-payment/route.ts` - Structured logging
+- `src/app/api/referrals/track-conversion/route.ts` - Structured logging
+- `src/app/global-error.tsx` - Sentry integration
+- `src/lib/rate-limit.ts` - Upstash Redis support + logging
+- `next.config.ts` - Sentry plugin + CSP update
+- `.env.example` - Nuevas variables documentadas
+
+**Dependencias instaladas (3):**
+
+- `pino` + `pino-pretty` - Structured logging
+- `@sentry/nextjs` - Error tracking
+- `@upstash/redis` - Distributed rate limiting
+
+**Impacto de Task 3:**
+
+| Área           | Mejora                                          | Archivos |
+| -------------- | ----------------------------------------------- | -------- |
+| Observability  | Structured logging en 3 endpoints críticos      | 4        |
+| Error Tracking | Sentry integrado (client + server + boundaries) | 5        |
+| Rate Limiting  | Distributed con Redis + fallback to in-memory   | 1        |
+| Documentation  | Variables de entorno completas (.env.example)   | 1        |
+
+**Estado:** ✅ Task 3 completado (3-4h estimadas → 2h real)
+
+**Siguiente paso:** Task 4 - TypeScript Strict Mode (Fix 49 errores TypeScript, remover 43 @ts-nocheck, 2h)
+
+---
 
 #### Session 65 (2026-02-03 03:45 PM)
 
@@ -673,19 +762,22 @@ DESPUÉS (v2.5):
 
 ### Key Files
 
-| File                                                     | Purpose                                       |
-| -------------------------------------------------------- | --------------------------------------------- |
-| `src/app/(dashboard)/referencias/page.tsx`               | Dashboard de referencias para business owners |
-| `src/app/(admin)/admin/referencias/page.tsx`             | Admin dashboard con vista global del programa |
-| `src/app/(auth)/register/page.tsx`                       | Signup page con integración de referidos      |
-| `src/components/referrals/referral-code-card.tsx`        | Card con código único + QR + compartir        |
-| `src/components/referrals/referrer-banner.tsx`           | Banner que muestra quién refirió (signup)     |
-| `src/components/admin/referrals/global-stats-cards.tsx`  | 6 métricas globales para admin                |
-| `src/components/admin/referrals/top-referrers-table.tsx` | Ranking de top referrers                      |
-| `src/lib/referrals.ts`                                   | Utilidades para cookies y tracking            |
-| `src/app/api/referrals/info/route.ts`                    | API para obtener info del referrer            |
-| `src/app/api/admin/referrals/overview/route.ts`          | Admin API - Stats globales                    |
-| `supabase/migrations/019_business_referral_system.sql`   | Schema completo del sistema de referencias    |
+| File                                               | Purpose                                    |
+| -------------------------------------------------- | ------------------------------------------ |
+| `src/lib/logger.ts`                                | Structured logging utility (pino)          |
+| `src/lib/rate-limit.ts`                            | Rate limiting (Upstash Redis + in-memory)  |
+| `src/lib/file-validation.ts`                       | File validation con magic bytes            |
+| `src/lib/path-security.ts`                         | Path traversal prevention                  |
+| `src/components/error-boundary.tsx`                | React Error Boundary reutilizable          |
+| `src/app/global-error.tsx`                         | Global error handler con Sentry            |
+| `sentry.client.config.ts`                          | Sentry client configuration                |
+| `sentry.server.config.ts`                          | Sentry server configuration                |
+| `src/app/api/public/[slug]/book/route.ts`          | Booking endpoint (con logging)             |
+| `src/app/api/subscription/report-payment/route.ts` | Payment reporting (con logging)            |
+| `src/app/api/referrals/track-conversion/route.ts`  | Referral conversion tracking (con logging) |
+| `DATABASE_SCHEMA.md`                               | Single source of truth para DB schema      |
+| `IMPLEMENTATION_PLAN_V2.5.md`                      | Plan completo de transformación            |
+| `supabase/migrations/019b_missing_indexes.sql`     | Performance indexes para queries críticos  |
 
 ---
 
@@ -716,58 +808,36 @@ DESPUÉS (v2.5):
 
 ### Continue With
 
-**🎯 Área 0: Technical Debt Cleanup (PRIORIDAD #1)** - 7-9h restantes
+**🎯 Área 0: Technical Debt Cleanup (PRIORIDAD #1)** - 2h restantes
 
-✅ **Task 1: Security Fixes** - COMPLETADO (3-4h)
-
-**Task 2: Database Performance** - 2-3h
-
-5. **Migration 019b: Missing Indexes**
-
-   ```sql
-   CREATE INDEX idx_appointments_deposit_paid ON appointments(...);
-   CREATE INDEX idx_client_referrals_status ON client_referrals(...);
-   CREATE INDEX idx_clients_inactive ON clients(...);
-   -- + 2 índices más
-   ```
-
-6. **N+1 Query Fixes**
-   - Cron jobs: Batch queries
-   - Referral dashboard: Join optimization
-
-**Task 3: Observability** - 3-4h
-
-7. **Structured Logging con pino**
-   - `src/lib/logger.ts` - Setup de pino
-   - Integrar en API routes críticos
-
-8. **Error Tracking con Sentry**
-   - Setup básico de Sentry
-   - Error boundaries en componentes críticos
-
-9. **Rate Limiting con Upstash Redis**
-   - Setup de Upstash Redis
-   - Proteger endpoints públicos críticos
+✅ **Task 1: Security Fixes** - COMPLETADO (Session 64)
+✅ **Task 2: Database Performance** - COMPLETADO (Session 65)
+✅ **Task 3: Observability** - COMPLETADO (Session 66)
 
 **Task 4: TypeScript Strict Mode** - 2h
 
-10. **Habilitar strict mode**
-    - Fix de 49 errores TypeScript
-    - Remover 43 archivos con @ts-nocheck
-    - Compilación limpia sin SKIP_TYPE_CHECK
+1. **Fix useSearchParams issue en /register**
+   - Wrap useSearchParams en Suspense boundary
+   - Fix build error: "useSearchParams() should be wrapped in a suspense boundary"
 
-**Archivos a modificar/crear:**
+2. **Habilitar strict mode**
+   - Fix de 49 errores TypeScript
+   - Remover 43 archivos con @ts-nocheck
+   - Actualizar types de Database para tables nuevas
 
-- `src/lib/rate-limit.ts`
-- `src/lib/file-validation.ts`
-- `src/lib/logger.ts`
-- `src/app/api/media/route.ts`
-- `src/app/api/admin/*/route.ts` (varios)
-- `supabase/migrations/019b_missing_indexes.sql`
-- `next.config.js` (Sentry integration)
+3. **Verificar compilación**
+   - `npm run build` sin SKIP_TYPE_CHECK
+   - Compilación limpia sin errores
+
+**Archivos a modificar:**
+
+- `src/app/(auth)/register/page.tsx` - Fix Suspense
+- 43 archivos con @ts-nocheck - Remover y fix types
+- `src/types/database.ts` - Actualizar types si es necesario
+- `tsconfig.json` - Habilitar strict mode
 
 **Después de Área 0:**
-→ Área 1: Client Subscription & Basic Plan
+→ Área 1: Client Subscription & Basic Plan (database migrations + feature gating)
 
 **Comandos útiles:**
 
