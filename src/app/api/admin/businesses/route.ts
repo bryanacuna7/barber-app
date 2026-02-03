@@ -60,37 +60,51 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
-    // Get stats for each business
-    const businessesWithStats = await Promise.all(
-      (businesses || []).map(async (business) => {
-        // Get barber count
-        const { count: barberCount } = await serviceClient
-          .from('barbers')
-          .select('*', { count: 'exact', head: true })
-          .eq('business_id', business.id)
+    // PERFORMANCE OPTIMIZATION: Batch queries to avoid N+1 problem
+    // Instead of N queries per business (3N queries), do 3 queries total
+    const businessIds = (businesses || []).map((b) => b.id)
 
-        // Get service count
-        const { count: serviceCount } = await serviceClient
-          .from('services')
-          .select('*', { count: 'exact', head: true })
-          .eq('business_id', business.id)
+    // Batch query all stats in parallel
+    const [barberStats, serviceStats, appointmentStats] = await Promise.all([
+      // Get all barbers for these businesses
+      serviceClient.from('barbers').select('business_id').in('business_id', businessIds),
 
-        // Get appointment count (all time)
-        const { count: appointmentCount } = await serviceClient
-          .from('appointments')
-          .select('*', { count: 'exact', head: true })
-          .eq('business_id', business.id)
+      // Get all services for these businesses
+      serviceClient.from('services').select('business_id').in('business_id', businessIds),
 
-        return {
-          ...business,
-          stats: {
-            barbers: barberCount || 0,
-            services: serviceCount || 0,
-            appointments: appointmentCount || 0,
-          },
-        }
-      })
-    )
+      // Get all appointments for these businesses
+      serviceClient.from('appointments').select('business_id').in('business_id', businessIds),
+    ])
+
+    // Group stats by business_id in memory (O(n) complexity)
+    const barberCounts = new Map<string, number>()
+    const serviceCounts = new Map<string, number>()
+    const appointmentCounts = new Map<string, number>()
+
+    barberStats.data?.forEach((barber) => {
+      const count = barberCounts.get(barber.business_id) || 0
+      barberCounts.set(barber.business_id, count + 1)
+    })
+
+    serviceStats.data?.forEach((service) => {
+      const count = serviceCounts.get(service.business_id) || 0
+      serviceCounts.set(service.business_id, count + 1)
+    })
+
+    appointmentStats.data?.forEach((appointment) => {
+      const count = appointmentCounts.get(appointment.business_id) || 0
+      appointmentCounts.set(appointment.business_id, count + 1)
+    })
+
+    // Attach stats to businesses (O(n) complexity)
+    const businessesWithStats = (businesses || []).map((business) => ({
+      ...business,
+      stats: {
+        barbers: barberCounts.get(business.id) || 0,
+        services: serviceCounts.get(business.id) || 0,
+        appointments: appointmentCounts.get(business.id) || 0,
+      },
+    }))
 
     return NextResponse.json({
       businesses: businessesWithStats,
