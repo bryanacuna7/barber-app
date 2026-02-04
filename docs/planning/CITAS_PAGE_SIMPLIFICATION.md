@@ -2,8 +2,9 @@
 
 **Status:** Draft
 **Created:** 2026-02-03 (Session 84)
+**Updated:** 2026-02-03 (Session 84) - Added granular drag-drop feature
 **Priority:** Medium (Post-FASE 0, Pre-FASE 1 features)
-**Estimated Effort:** 28-40 hours (3 phases)
+**Estimated Effort:** 34-48 hours (3 phases, includes 15-min drag-drop)
 
 ---
 
@@ -18,7 +19,7 @@ The appointments page (`citas/page.tsx`) has grown to **953 lines** with **5 vie
 
 **Recommended Solution:** Progressive 3-phase simplification reducing views from 5→3, splitting into route-based pages, and cutting main component from 953→~300 lines.
 
-**ROI:** 28-40h investment → 15-20h saved per new calendar feature → Break-even after 2 features.
+**ROI:** 34-48h investment → 15-20h saved per new calendar feature → Break-even after 2-3 features.
 
 ---
 
@@ -386,9 +387,9 @@ export const useAppointmentsStore = create((set, get) => ({
 
 ---
 
-#### Phase 2: Architecture (12-16h) - Week 2
+#### Phase 2: Architecture (15-20h) - Week 2
 
-**Goal:** Split into route-based pages with shared state.
+**Goal:** Split into route-based pages with shared state, plus granular 15-minute drag-drop.
 
 **Structure:**
 
@@ -636,7 +637,9 @@ const [modalState, setModalState] = useState({
 
 ---
 
-### Phase 2: Architecture (Week 2)
+### Phase 2: Architecture (Week 2) - 15-20h total
+
+**Includes:** Zustand store, route splitting, granular drag-drop with 15-minute intervals
 
 #### Day 1-2: Create Zustand Store (4-5h)
 
@@ -899,6 +902,159 @@ function WeekView() {
 - Selecting a date in one view updates other views
 - No console warnings about missing props
 - Performance is equal or better (no unnecessary re-renders)
+
+---
+
+#### Day 6: Implement Granular Drag-Drop (3-4h)
+
+**Goal:** Enable precise appointment positioning with 15-minute intervals (Google Calendar style)
+
+**Current Behavior:**
+
+- Drag-drop works in Week/Month views
+- Snaps to 1-hour blocks only (09:00, 10:00, 11:00)
+- No visual feedback for fractional hours
+
+**New Behavior:**
+
+- Drag-drop with 15-minute precision (09:00, 09:15, 09:30, 09:45)
+- Visual time indicator shows exact drop position while dragging
+- Smooth snapping to nearest 15-minute interval
+
+**Implementation Details:**
+
+**1. Calculate Drop Time from Mouse Position:**
+
+```typescript
+// In week-view.tsx or drag-drop hook
+function getTimeFromPosition(mouseY: number, containerTop: number, hourHeight: number): Date {
+  const relativeY = mouseY - containerTop
+  const totalMinutes = (relativeY / hourHeight) * 60
+
+  // Round to nearest 15 minutes
+  const roundedMinutes = Math.round(totalMinutes / 15) * 15
+
+  // Convert to hours and minutes
+  const hours = Math.floor(roundedMinutes / 60)
+  const minutes = roundedMinutes % 60
+
+  return setHours(setMinutes(new Date(), minutes), hours)
+}
+```
+
+**2. Update Drag Handler:**
+
+```typescript
+const handleDragOver = (e: DragEvent, dayIndex: number) => {
+  e.preventDefault()
+
+  const rect = e.currentTarget.getBoundingClientRect()
+  const dropTime = getTimeFromPosition(e.clientY, rect.top, HOUR_HEIGHT)
+
+  // Show visual indicator
+  setDragPreview({
+    day: dayIndex,
+    time: dropTime,
+    visible: true,
+  })
+}
+
+const handleDrop = async (e: DragEvent, dayIndex: number) => {
+  const rect = e.currentTarget.getBoundingClientRect()
+  const dropTime = getTimeFromPosition(e.clientY, rect.top, HOUR_HEIGHT)
+
+  const draggedAppt = JSON.parse(e.dataTransfer.getData('appointment'))
+
+  await updateAppointment({
+    ...draggedAppt,
+    scheduled_at: dropTime.toISOString(),
+  })
+
+  setDragPreview({ visible: false })
+}
+```
+
+**3. Visual Feedback Component:**
+
+```typescript
+// Drag preview indicator
+{dragPreview.visible && (
+  <div
+    className="absolute left-0 right-0 h-[30px] bg-violet-100 border-2 border-violet-500 rounded pointer-events-none z-50"
+    style={{
+      top: `${calculatePosition(dragPreview.time)}px`
+    }}
+  >
+    <span className="text-xs font-semibold text-violet-700 px-2">
+      {format(dragPreview.time, 'HH:mm')}
+    </span>
+  </div>
+)}
+```
+
+**4. Time Grid Lines (Optional Enhancement):**
+
+```typescript
+// Add 15-minute grid lines for visual guidance
+<div className="absolute inset-0 pointer-events-none">
+  {Array.from({ length: 24 * 4 }).map((_, i) => {
+    const minutes = i * 15
+    const isHour = minutes % 60 === 0
+
+    return (
+      <div
+        key={i}
+        className={cn(
+          'absolute left-0 right-0 border-t',
+          isHour
+            ? 'border-zinc-200 dark:border-zinc-700'
+            : 'border-zinc-100 dark:border-zinc-800'
+        )}
+        style={{ top: `${(minutes / 60) * HOUR_HEIGHT}px` }}
+      />
+    )
+  })}
+</div>
+```
+
+**5. Backend API Update:**
+
+Ensure the API accepts minute-level precision:
+
+```typescript
+// API route: /api/appointments/[id]
+const scheduled_at = new Date(body.scheduled_at)
+
+// Validate time is on 15-minute boundary
+const minutes = scheduled_at.getMinutes()
+if (minutes % 15 !== 0) {
+  return NextResponse.json({ error: 'Time must be on 15-minute intervals' }, { status: 400 })
+}
+```
+
+**Tasks:**
+
+- [ ] Extract drag-drop logic to custom hook `useDragDropScheduler`
+- [ ] Implement `getTimeFromPosition` with 15-minute rounding
+- [ ] Add drag preview visual indicator
+- [ ] Update `handleDrop` to use precise time calculation
+- [ ] Add 15-minute grid lines (optional)
+- [ ] Validate API accepts minute-level precision
+- [ ] Test edge cases (drag to 23:45, drag across day boundaries)
+
+**Testing:**
+
+- Dragging appointment to 09:00 → drops at exactly 09:00
+- Dragging appointment to 09:13 → snaps to 09:15
+- Dragging appointment to 09:22 → snaps to 09:15
+- Dragging appointment to 09:23 → snaps to 09:30
+- Visual preview shows correct time while dragging
+- Grid lines visible at 15-minute intervals
+- No appointments can be scheduled at invalid times (e.g., 09:17)
+
+**Estimated Effort:** 3-4 hours
+
+**Dependencies:** Requires Phase 2 Day 1-5 to be complete (Zustand store + route architecture)
 
 ---
 

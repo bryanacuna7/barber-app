@@ -3,7 +3,8 @@
 **Project:** BarberShop Pro → Salon Booking Platform
 **Version:** 2.5 (Post Multi-Expert Panel Review)
 **Date:** 2026-02-03
-**Total Estimated:** 340-445 hours (17-22 weeks @ 20h/week)
+**Last Updated:** 2026-02-03 (Session 84) - Added Citas Page Simplification
+**Total Estimated:** 485-632 hours (24-32 weeks @ 20h/week)
 **Decision:** ✅ OPTION B - Complete Launch (All features included)
 
 ---
@@ -30,20 +31,20 @@
 
 ## 📊 TOTAL TIME BREAKDOWN
 
-| Phase                   | Hours             | Weeks @ 20h/wk      | Description                              |
-| ----------------------- | ----------------- | ------------------- | ---------------------------------------- |
-| **FASE 1: v2.5 Core**   | 167-208h          | 8-10 weeks          | Technical excellence + security          |
-| **FASE 2: Competitive** | 115-151h          | 6-8 weeks           | Calendar, Settings, RBAC, Business Types |
-| **FASE 2.5: Retention** | 30-44h            | 1.5-2 weeks         | CRM Lite, Rebooking, WhatsApp            |
-| **FASE 3: Rebranding**  | 40-60h            | 2-3 weeks           | Complete barber → staff migration        |
-| **Performance Fixes**   | ~~4.5h~~ ✅ 0.25h | ~~0.25 weeks~~ DONE | Critical bottlenecks (Session 78)        |
-| **Security Hardening**  | 31h               | 1.5 weeks           | FASE 2 vulnerabilities                   |
-| **UX Refinement**       | 12-16h            | 0.5-1 week          | Dieter Rams polish                       |
-| **BUFFER (15%)**        | 51-67h            | 2.5-3 weeks         | Contingency for unknowns                 |
-| **GRAND TOTAL**         | **447-594h**      | **22-30 weeks**     | Full implementation (4h saved)           |
+| Phase                   | Hours             | Weeks @ 20h/wk      | Description                                        |
+| ----------------------- | ----------------- | ------------------- | -------------------------------------------------- |
+| **FASE 1: v2.5 Core**   | 201-256h          | 10-13 weeks         | Technical excellence + citas simplification        |
+| **FASE 2: Competitive** | 115-151h          | 6-8 weeks           | Calendar, Settings, RBAC, Business Types           |
+| **FASE 2.5: Retention** | 30-44h            | 1.5-2 weeks         | CRM Lite, Rebooking, WhatsApp                      |
+| **FASE 3: Rebranding**  | 40-60h            | 2-3 weeks           | Complete barber → staff migration                  |
+| **Performance Fixes**   | ~~4.5h~~ ✅ 0.25h | ~~0.25 weeks~~ DONE | Critical bottlenecks (Session 78)                  |
+| **Security Hardening**  | 31h               | 1.5 weeks           | FASE 2 vulnerabilities                             |
+| **UX Refinement**       | 12-16h            | 0.5-1 week          | Dieter Rams polish                                 |
+| **BUFFER (15%)**        | 56-74h            | 3-4 weeks           | Contingency for unknowns (+5-7h for new work)      |
+| **GRAND TOTAL**         | **485-632h**      | **24-32 weeks**     | Full implementation (+38h avg from simplification) |
 
-**Conservative Estimate @ 20h/week:** 22.5-30 weeks (5.5-7.5 months)
-**Aggressive Estimate @ 30h/week:** 15-20 weeks (3.5-5 months)
+**Conservative Estimate @ 20h/week:** 24-32 weeks (6-8 months)
+**Aggressive Estimate @ 30h/week:** 16-21 weeks (4-5.25 months)
 
 ---
 
@@ -69,7 +70,9 @@
 
 ---
 
-### FASE 1: v2.5 Technical Excellence (Weeks 2-11) - 167-208h
+### FASE 1: v2.5 Technical Excellence (Weeks 2-15) - 201-256h
+
+**Updated:** +34-48h for Citas Page Simplification (Week 4-6)
 
 #### Week 2-3: Área 6 Security Fixes (22h)
 
@@ -92,7 +95,77 @@
 
 ---
 
-#### Week 4: NEW - Appointment Reminders (4-6h)
+#### Week 4-6: NEW - Citas Page Simplification (34-48h)
+
+**Why Now:** Calendar views are 90% complete but complex (953 lines, 5 views, 11 state variables). Simplifying now will accelerate all future calendar features by 15-20%.
+
+**ROI:** 34-48h investment → saves 15-20h per new calendar feature → break-even after 2-3 features.
+
+**Phase 1: Quick Wins (8-12h) - Week 4**
+
+- [ ] Merge List + Calendar views into unified Day view (3-4h)
+  - Consolidate duplicate date filtering logic
+  - Single component for daily appointments
+- [ ] Merge Calendar + Timeline into Day view variants (2-3h)
+  - Timeline becomes "list" variant of Day view
+- [ ] Reduce state variables from 11 → 7 (2-3h)
+  - Combine form-related state into `modalState` object
+  - Remove `isMobile` state (use Tailwind breakpoints)
+- [ ] Mobile/Desktop consolidation (1-2h)
+  - Replace conditional rendering with responsive Tailwind
+
+**Result:** 5 views → 3 views (Day, Week, Month), 953 lines → ~750 lines
+
+**Phase 2: Architecture (15-20h) - Week 5**
+
+- [ ] Create Zustand store for shared state (4-5h)
+  - Move appointments, services, clients to store
+  - Computed getters: filteredAppointments, dayAppointments, stats
+  - DevTools integration
+- [ ] Split into route-based pages (6-8h)
+  - `/citas` → Day view (default)
+  - `/citas/week` → Week view route
+  - `/citas/month` → Month view route
+  - Shared layout with filters + stats
+- [ ] **NEW: Granular Drag-Drop (3-4h)**
+  - 15-minute time slot intervals (9:00, 9:15, 9:30, 9:45)
+  - Google Calendar-style precise positioning
+  - Visual time indicator during drag
+  - Backend minute-level precision support
+- [ ] Migrate components to use store (2-3h)
+  - Remove prop drilling
+  - Direct store access in all views
+
+**Result:** 750 lines → ~450 lines, clean architecture, granular scheduling
+
+**Phase 3: Polish (8-12h) - Week 6**
+
+- [ ] Simplify keyboard shortcuts (2-3h)
+  - Keep: ←/→ (navigate days), T (today), N (new)
+  - Remove: ↑/↓, 1/2/3 view switching
+- [ ] Optimize memoization (2-3h)
+  - Move useMemo computations to Zustand getters
+- [ ] Final testing + documentation (4-6h)
+  - E2E tests with Playwright for all 3 views
+  - Update developer documentation
+  - Performance benchmarks (before/after)
+
+**Result:** ~300-350 lines main component, maintainable, fast
+
+**Deliverables:**
+
+- ✅ 953 → ~300 lines (67% reduction)
+- ✅ 5 → 3 views (simpler UX)
+- ✅ 11 → 5 state variables (cleaner code)
+- ✅ Route-based architecture (scalable)
+- ✅ 15-minute drag-drop precision (Google Calendar parity)
+- ✅ 15-20h faster development for future calendar features
+
+**Reference:** See [docs/planning/CITAS_PAGE_SIMPLIFICATION.md](./CITAS_PAGE_SIMPLIFICATION.md) for detailed implementation guide
+
+---
+
+#### Week 7: NEW - Appointment Reminders (4-6h)
 
 **ROI:** Reduces no-shows by 30-50%
 
@@ -109,7 +182,7 @@
 
 ---
 
-#### Week 5-6: Área 2 - Advance Payments (12-16h)
+#### Week 8-9: Área 2 - Advance Payments (12-16h)
 
 **No changes from original plan**
 
@@ -122,7 +195,7 @@
 
 ---
 
-#### Week 7-8: Área 5 - Web Push Notifications (12-16h)
+#### Week 10-11: Área 5 - Web Push Notifications (12-16h)
 
 **No changes from original plan**
 
@@ -135,7 +208,7 @@
 
 ---
 
-#### Week 9: Área 4 - Client Referrals (8-10h)
+#### Week 12: Área 4 - Client Referrals (8-10h)
 
 **No changes from original plan**
 
@@ -148,7 +221,7 @@
 
 ---
 
-#### Week 10: Área 1 - Simplified Subscriptions (14-18h)
+#### Week 13: Área 1 - Simplified Subscriptions (14-18h)
 
 **Changed:** No auto-deletion, no client limits
 
@@ -161,7 +234,7 @@
 
 ---
 
-#### Week 11-12: Sprint 5 - Testing & QA (83-105h) ⚠️ MANDATORY
+#### Week 14-15: Sprint 5 - Testing & QA (83-105h) ⚠️ MANDATORY
 
 **Adjusted:** +23-25h from original (was 60-80h)
 
@@ -206,9 +279,9 @@
 
 ---
 
-### FASE 2: Competitive Features (Weeks 13-20) - 115-151h
+### FASE 2: Competitive Features (Weeks 16-23) - 115-151h
 
-#### Week 13-15: Priority 1 - Calendar Views (34-44h)
+#### Week 16-18: Priority 1 - Calendar Views (34-44h)
 
 **Adjusted:** +10-13h from original (was 24-31h)
 **Includes:** +2h performance fixes (N+1 queries)
@@ -250,7 +323,7 @@
 
 ---
 
-#### Week 16: Priority 2 - Settings Menu (18-23h)
+#### Week 19: Priority 2 - Settings Menu (18-23h)
 
 **Adjusted:** +4-5h from original (was 14-19h)
 **Includes:** +4h security hardening
@@ -291,7 +364,7 @@
 
 ---
 
-#### Week 17-18: Priority 3 - RBAC System (22-30h)
+#### Week 20-21: Priority 3 - RBAC System (22-30h)
 
 **Adjusted:** +10-14h from original (was 12-16h)
 **Includes:** +8h critical security fixes
@@ -345,7 +418,7 @@
 
 ---
 
-#### Week 19-20: Priority 4 - Business Types + Kash (24-29h)
+#### Week 22-23: Priority 4 - Business Types + Kash (24-29h)
 
 **Adjusted:** +6h from original (was 18-23h)
 **Includes:** +3h security validation, BLOCKED until Área 3 complete
@@ -398,9 +471,9 @@
 
 ---
 
-### FASE 2.5: Retention Features (Weeks 21-22) - 30-44h
+### FASE 2.5: Retention Features (Weeks 24-25) - 30-44h
 
-#### Week 21: CRM Lite (10-14h)
+#### Week 24: CRM Lite (10-14h)
 
 **ROI:** +25-40% client retention
 
@@ -436,7 +509,7 @@
 
 ---
 
-#### Week 22: Rebooking Automation (8-12h)
+#### Week 25: Rebooking Automation (8-12h)
 
 **ROI:** +75% rebooking rate (30% → 60%)
 
@@ -473,7 +546,7 @@
 
 ---
 
-#### Week 22: WhatsApp Smart Links (4-6h)
+#### Week 25: WhatsApp Smart Links (4-6h)
 
 **ROI:** Regional standard (not having it is disadvantage)
 
@@ -539,7 +612,7 @@
 
 ---
 
-### FASE 3: Complete Rebranding (Weeks 23-25) - 40-60h
+### FASE 3: Complete Rebranding (Weeks 26-28) - 40-60h
 
 **Decision:** Full migration (NOT hybrid approach)
 
