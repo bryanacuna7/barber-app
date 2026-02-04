@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, memo } from 'react'
 import {
   format,
   startOfMonth,
@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
+import { useIsMobile } from '@/hooks/use-is-mobile'
 import type { Appointment } from '@/types'
 
 type AppointmentWithRelations = Appointment & {
@@ -104,7 +105,7 @@ function DayDetailsPopover({ date, appointments, onClose, onAppointmentClick }: 
   )
 }
 
-export function MonthView({
+export const MonthView = memo(function MonthView({
   selectedDate,
   appointments,
   onDateSelect,
@@ -113,6 +114,7 @@ export function MonthView({
 }: MonthViewProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate)
   const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+  const isMobile = useIsMobile()
 
   // Generate calendar days (including padding days from prev/next month)
   const calendarDays = useMemo(() => {
@@ -173,29 +175,30 @@ export function MonthView({
     setSelectedDay(null)
   }, [])
 
-  // Weekday headers
-  const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+  // Weekday headers - Desktop: full names, Mobile: first letter only
+  const weekDaysFull = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+  const weekDaysShort = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
   return (
     <div className="flex flex-col h-full">
       {/* Month Header */}
-      <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-700">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between p-2 md:p-4 border-b border-zinc-200 dark:border-zinc-700">
+        <div className="flex items-center gap-1 md:gap-2">
           <Button variant="ghost" size="sm" onClick={goToPreviousMonth}>
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </Button>
           <button
             onClick={goToToday}
-            className="px-4 py-2 text-lg font-bold text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+            className="px-2 md:px-4 py-1 md:py-2 text-sm md:text-lg font-bold text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
           >
             {format(currentMonth, 'MMMM yyyy', { locale: es })}
           </button>
           <Button variant="ghost" size="sm" onClick={goToNextMonth}>
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </Button>
         </div>
 
-        <Button variant="outline" size="sm" onClick={goToToday}>
+        <Button variant="outline" size="sm" onClick={goToToday} className="text-xs md:text-sm">
           Hoy
         </Button>
       </div>
@@ -204,12 +207,13 @@ export function MonthView({
       <div className="flex-1 overflow-auto">
         <div className="grid grid-cols-7 h-full">
           {/* Weekday headers */}
-          {weekDays.map((day) => (
+          {weekDaysFull.map((day, index) => (
             <div
               key={day}
-              className="p-2 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase border-b border-zinc-200 dark:border-zinc-700"
+              className="p-1 md:p-2 text-center text-[10px] md:text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase border-b border-zinc-200 dark:border-zinc-700"
             >
-              {day}
+              <span className="hidden md:inline">{day}</span>
+              <span className="md:hidden">{weekDaysShort[index]}</span>
             </div>
           ))}
 
@@ -220,15 +224,17 @@ export function MonthView({
             const isCurrentMonth = isSameMonth(day, currentMonth)
             const isCurrentDay = isToday(day)
             const hasAppointments = dayAppointments.length > 0
-            const visibleAppointments = dayAppointments.slice(0, maxVisibleAppointments)
-            const hiddenCount = Math.max(0, dayAppointments.length - maxVisibleAppointments)
+            // Mobile: show 1 appointment, Desktop: show 3
+            const maxVisible = isMobile ? 1 : maxVisibleAppointments
+            const visibleAppointments = dayAppointments.slice(0, maxVisible)
+            const hiddenCount = Math.max(0, dayAppointments.length - maxVisible)
 
             return (
               <button
                 key={day.toISOString()}
                 onClick={() => handleDayClick(day)}
                 className={cn(
-                  'min-h-[100px] p-2 border-b border-r border-zinc-200 dark:border-zinc-700',
+                  'min-h-[60px] md:min-h-[100px] p-1 md:p-2 border-b border-r border-zinc-200 dark:border-zinc-700',
                   'text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors',
                   !isCurrentMonth && 'bg-zinc-50/50 dark:bg-zinc-900/50',
                   isCurrentDay && 'bg-blue-50 dark:bg-blue-950/30'
@@ -237,12 +243,12 @@ export function MonthView({
                 {/* Day number */}
                 <div
                   className={cn(
-                    'text-sm font-semibold mb-1',
+                    'text-xs md:text-sm font-semibold mb-0.5 md:mb-1',
                     isCurrentMonth
                       ? 'text-zinc-900 dark:text-white'
                       : 'text-zinc-400 dark:text-zinc-600',
                     isCurrentDay &&
-                      'inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white'
+                      'inline-flex items-center justify-center w-5 h-5 md:w-7 md:h-7 rounded-full bg-blue-600 text-white'
                   )}
                 >
                   {format(day, 'd')}
@@ -250,7 +256,7 @@ export function MonthView({
 
                 {/* Appointment pills */}
                 {hasAppointments && (
-                  <div className="space-y-1">
+                  <div className="space-y-0.5 md:space-y-1">
                     {visibleAppointments.map((apt) => {
                       const aptTime = format(new Date(apt.scheduled_at), 'HH:mm')
 
@@ -271,20 +277,23 @@ export function MonthView({
                         <div
                           key={apt.id}
                           className={cn(
-                            'text-[10px] font-medium px-1.5 py-0.5 rounded truncate',
+                            'text-[9px] md:text-[10px] font-medium px-1 md:px-1.5 py-0.5 rounded truncate',
                             statusColors[apt.status]
                           )}
                           title={`${aptTime} - ${apt.client?.name || 'Sin cliente'}`}
                         >
-                          {aptTime} {apt.client?.name || 'Sin cliente'}
+                          <span className="hidden md:inline">
+                            {aptTime} {apt.client?.name || 'Sin cliente'}
+                          </span>
+                          <span className="md:hidden">{aptTime}</span>
                         </div>
                       )
                     })}
 
                     {/* +X more indicator */}
                     {hiddenCount > 0 && (
-                      <div className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 px-1.5">
-                        +{hiddenCount} más
+                      <div className="text-[9px] md:text-[10px] font-medium text-zinc-500 dark:text-zinc-400 px-1 md:px-1.5">
+                        +{hiddenCount}
                       </div>
                     )}
                   </div>
@@ -309,4 +318,4 @@ export function MonthView({
       )}
     </div>
   )
-}
+})

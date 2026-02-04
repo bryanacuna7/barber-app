@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import {
   format,
@@ -11,6 +12,8 @@ import {
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
+  parseISO,
+  isValid,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -76,19 +79,49 @@ function getDateLabel(date: Date): string {
   return format(date, 'EEEE', { locale: es })
 }
 
-export default function CitasPage() {
+function CitasPageContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  // Initialize state from URL params
+  const initialDate = useMemo(() => {
+    const dateParam = searchParams.get('date')
+    if (dateParam) {
+      const parsed = parseISO(dateParam)
+      if (isValid(parsed)) return parsed
+    }
+    return new Date()
+  }, [searchParams])
+
+  const initialView = useMemo(() => {
+    const viewParam = searchParams.get('view')
+    const validViews: ViewMode[] = ['list', 'calendar', 'week', 'month', 'timeline']
+    if (viewParam && validViews.includes(viewParam as ViewMode)) {
+      return viewParam as ViewMode
+    }
+    return 'list'
+  }, [searchParams])
+
   // State
   const [appointments, setAppointments] = useState<AppointmentWithRelations[]>([])
   const [services, setServices] = useState<Service[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [selectedDate, setSelectedDate] = useState(initialDate)
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all')
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Update URL when view or date changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('view', viewMode)
+    params.set('date', format(selectedDate, 'yyyy-MM-dd'))
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }, [viewMode, selectedDate, router, searchParams])
 
   // Detect mobile viewport
   useEffect(() => {
@@ -154,6 +187,85 @@ export default function CitasPage() {
     }
     loadData()
   }, [fetchAppointments])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      // Ignore if modal is open
+      if (isFormOpen) return
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault()
+          setSelectedDate((prev) => addDays(prev, -1))
+          break
+
+        case 'ArrowRight':
+          e.preventDefault()
+          setSelectedDate((prev) => addDays(prev, 1))
+          break
+
+        case 'ArrowUp':
+          e.preventDefault()
+          if (viewMode === 'week' || viewMode === 'month') {
+            setSelectedDate((prev) => addDays(prev, -7))
+          }
+          break
+
+        case 'ArrowDown':
+          e.preventDefault()
+          if (viewMode === 'week' || viewMode === 'month') {
+            setSelectedDate((prev) => addDays(prev, 7))
+          }
+          break
+
+        case 't':
+        case 'T':
+          e.preventDefault()
+          setSelectedDate(new Date())
+          break
+
+        case 'n':
+        case 'N':
+          e.preventDefault()
+          setIsFormOpen(true)
+          break
+
+        case '1':
+          e.preventDefault()
+          setViewMode('list')
+          break
+
+        case '2':
+          e.preventDefault()
+          setViewMode('calendar')
+          break
+
+        case '3':
+          e.preventDefault()
+          setViewMode('week')
+          break
+
+        case '4':
+          e.preventDefault()
+          setViewMode('month')
+          break
+
+        case '5':
+          e.preventDefault()
+          setViewMode('timeline')
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [viewMode, isFormOpen])
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {
@@ -773,5 +885,25 @@ export default function CitasPage() {
         />
       </div>
     </CitasTourWrapper>
+  )
+}
+
+// Wrapper with Suspense for useSearchParams
+import { Suspense } from 'react'
+
+export default function CitasPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCw className="h-8 w-8 animate-spin text-zinc-400" />
+            <p className="text-sm text-zinc-500">Cargando citas...</p>
+          </div>
+        </div>
+      }
+    >
+      <CitasPageContent />
+    </Suspense>
   )
 }
