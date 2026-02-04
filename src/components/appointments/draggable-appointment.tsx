@@ -51,6 +51,9 @@ export const DraggableAppointment = memo(function DraggableAppointment({
   // Remove absolute positioning during drag to prevent compound transform offset
   const style = {
     top: isDragging ? undefined : `${topPosition}px`,
+    left: isDragging ? 0 : undefined,
+    right: isDragging ? undefined : undefined,
+    width: isDragging ? '140px' : undefined,
     height: `${Math.max(height, 40)}px`,
     ...(transform && {
       transform: CSS.Translate.toString(transform),
@@ -65,7 +68,9 @@ export const DraggableAppointment = memo(function DraggableAppointment({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'absolute left-0.5 right-0.5 md:left-1 md:right-1 rounded-md border-l-4 p-1 md:p-2 pointer-events-auto',
+        !isDragging && 'absolute left-0.5 right-0.5 md:left-1 md:right-1',
+        isDragging && 'relative',
+        'rounded-md border-l-4 p-1 md:p-2 pointer-events-auto',
         'text-left text-[10px] md:text-xs overflow-hidden',
         'transition-all duration-150',
         statusColors[appointment.status],
