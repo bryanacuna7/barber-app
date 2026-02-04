@@ -24,6 +24,8 @@ import {
   RefreshCw,
   Banknote,
   CheckCircle2,
+  CalendarDays,
+  CalendarRange,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -40,6 +42,8 @@ import { AppointmentCard } from '@/components/appointments/appointment-card'
 import { MiniCalendar } from '@/components/appointments/mini-calendar'
 import { AppointmentFilters } from '@/components/appointments/appointment-filters'
 import { DaySchedule } from '@/components/appointments/day-schedule'
+import { WeekView } from '@/components/appointments/week-view'
+import { MonthView } from '@/components/appointments/month-view'
 import { CitasTourWrapper } from '@/components/tours/citas-tour-wrapper'
 
 // Lazy load AppointmentForm (heavy modal component)
@@ -59,7 +63,7 @@ import { cn } from '@/lib/utils/cn'
 // Types
 import type { Appointment, Service, Client } from '@/types'
 
-type ViewMode = 'list' | 'calendar' | 'timeline'
+type ViewMode = 'list' | 'calendar' | 'week' | 'month' | 'timeline'
 
 type AppointmentWithRelations = Appointment & {
   client?: { id: string; name: string; phone: string; email?: string } | null
@@ -566,10 +570,12 @@ export default function CitasPage() {
               {/* View Toggle - Compact pills */}
               <div className="flex bg-zinc-100 dark:bg-zinc-800/60 rounded-xl p-1 border border-zinc-200 dark:border-zinc-700/40">
                 {[
-                  { value: 'list', icon: List },
-                  { value: 'calendar', icon: LayoutGrid },
-                  { value: 'timeline', icon: Clock },
-                ].map(({ value, icon: Icon }) => (
+                  { value: 'list', icon: List, label: 'Lista' },
+                  { value: 'calendar', icon: LayoutGrid, label: 'Día' },
+                  { value: 'week', icon: CalendarRange, label: 'Semana' },
+                  { value: 'month', icon: CalendarDays, label: 'Mes' },
+                  { value: 'timeline', icon: Clock, label: 'Timeline' },
+                ].map(({ value, icon: Icon, label }) => (
                   <button
                     key={value}
                     onClick={() => setViewMode(value as ViewMode)}
@@ -579,6 +585,7 @@ export default function CitasPage() {
                         ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
                         : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300'
                     )}
+                    title={label}
                   >
                     <Icon className="w-4 h-4" />
                   </button>
@@ -686,6 +693,39 @@ export default function CitasPage() {
                       onEdit={handleEdit}
                       onDelete={handleDelete}
                       onWhatsApp={handleWhatsApp}
+                    />
+                  </Card>
+                )}
+
+                {/* Week View */}
+                {viewMode === 'week' && (
+                  <Card className="h-[600px] overflow-hidden">
+                    <WeekView
+                      selectedDate={selectedDate}
+                      appointments={appointments}
+                      onAppointmentClick={handleEdit}
+                      onTimeSlotClick={(date) => {
+                        setSelectedDate(date)
+                        setEditingAppointment(null)
+                        setIsFormOpen(true)
+                      }}
+                    />
+                  </Card>
+                )}
+
+                {/* Month View */}
+                {viewMode === 'month' && (
+                  <Card className="h-[600px] overflow-hidden">
+                    <MonthView
+                      selectedDate={selectedDate}
+                      appointments={appointments}
+                      onDateSelect={(date) => {
+                        setSelectedDate(date)
+                        setEditingAppointment(null)
+                        setIsFormOpen(true)
+                      }}
+                      onAppointmentClick={handleEdit}
+                      maxVisibleAppointments={3}
                     />
                   </Card>
                 )}
