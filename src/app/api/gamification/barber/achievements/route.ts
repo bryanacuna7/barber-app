@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { getBarberIdFromUserId } from '@/lib/rbac'
 
 export async function GET(request: Request) {
   try {
@@ -25,16 +26,11 @@ export async function GET(request: Request) {
 
     // If no barberId provided, try to get the user's barber record
     if (!targetBarberId) {
-      const { data: barber } = await supabase
-        .from('barbers')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('business_id', businessId)
-        .single()
+      const barberId = await getBarberIdFromUserId(supabase, user.id, businessId)
 
       // If user is a barber, use their ID
-      if (barber) {
-        targetBarberId = barber.id
+      if (barberId) {
+        targetBarberId = barberId
       }
       // If user is not a barber (just owner), we'll show aggregated view
       // targetBarberId remains null/undefined

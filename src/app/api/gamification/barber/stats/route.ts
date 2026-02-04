@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { BarberStats } from '@/lib/gamification/barber-gamification'
+import { getBarberIdFromUserId } from '@/lib/rbac'
 
 /**
  * GET /api/gamification/barber/stats
@@ -35,18 +36,11 @@ export async function GET(request: Request) {
 
     // If no barberId provided, find barber by user_id
     if (!targetBarberId) {
-      const { data: barber } = await supabase
-        .from('barbers')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('business_id', businessId)
-        .single()
+      targetBarberId = await getBarberIdFromUserId(supabase, user.id, businessId)
 
-      if (!barber) {
+      if (!targetBarberId) {
         return NextResponse.json({ error: 'Barber not found' }, { status: 404 })
       }
-
-      targetBarberId = barber.id
     }
 
     // Get stats

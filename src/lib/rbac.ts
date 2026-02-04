@@ -8,6 +8,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
+import { logger } from '@/lib/logger'
 
 // =====================================================
 // TYPES
@@ -303,13 +304,13 @@ export async function getBarberIdFromUserId(
       .single()
 
     if (error) {
-      console.error('❌ Error fetching barber ID:', error)
+      logger.error({ userId, businessId, error }, 'Error fetching barber ID from user ID')
       return null
     }
 
     return data?.id || null
   } catch (error) {
-    console.error('❌ Unexpected error in getBarberIdFromUserId:', error)
+    logger.error({ userId, businessId, error }, 'Unexpected error in getBarberIdFromUserId')
     return null
   }
 }
@@ -371,7 +372,10 @@ export async function canAccessBarberAppointments(
 
     return false
   } catch (error) {
-    console.error('❌ Unexpected error in canAccessBarberAppointments:', error)
+    logger.error(
+      { userId, barberId, businessId, error },
+      'Unexpected error in canAccessBarberAppointments'
+    )
     return false
   }
 }
@@ -437,7 +441,10 @@ export async function canModifyBarberAppointments(
 
     return false
   } catch (error) {
-    console.error('❌ Unexpected error in canModifyBarberAppointments:', error)
+    logger.error(
+      { userId, barberId, businessId, error },
+      'Unexpected error in canModifyBarberAppointments'
+    )
     return false
   }
 }

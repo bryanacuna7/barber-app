@@ -10,7 +10,7 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-03 (Session 88 - IDOR #2 Fixed)
+> **Last Updated:** 2026-02-03 (Session 91 - Auth Integration Complete)
 > **Last Verified Against:** All migrations 001-023
 
 ---
@@ -907,6 +907,75 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
 - ⚠️ Tests require refactoring (middleware mocking issue)
 - ✅ Rate limiting verified working in production code
 - 📝 TODO: Refactor tests to not mock `withAuthAndRateLimit` middleware
+
+---
+
+### Auth Integration (Session 91)
+
+**User-to-Barber Mapping Implementation**
+
+The system uses `user_id` column in `barbers` table to map authenticated users to their barber records. This enables proper authorization checks and prevents unauthorized access.
+
+**Database Schema:**
+
+```sql
+-- Added in migration 023_rbac_system.sql
+ALTER TABLE barbers
+  ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+
+-- Index for performance
+CREATE INDEX idx_barbers_user_id ON barbers(user_id);
+```
+
+**Core Function (src/lib/rbac.ts):**
+
+```typescript
+/**
+ * Get barber ID from user ID
+ * Used internally by RBAC functions to map authenticated user → barber record
+ */
+export async function getBarberIdFromUserId(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  businessId: string
+): Promise<string | null>
+```
+
+**Usage in RBAC:**
+
+Both main RBAC functions use this mapping internally:
+
+1. **`canAccessBarberAppointments()`** (line 375)
+   - Maps `user.id` → `barber.id` to check if user is the barber themselves
+   - Used for read operations (viewing appointments)
+
+2. **`canModifyBarberAppointments()`** (line 440)
+   - Maps `user.id` → `barber.id` to check if user can modify appointments
+   - Used for write operations (complete, check-in, no-show)
+
+**Refactored Endpoints:**
+
+The following gamification endpoints were refactored to use the centralized `getBarberIdFromUserId()` function instead of inline queries:
+
+| Endpoint                                    | Before              | After                     | Benefit                  |
+| ------------------------------------------- | ------------------- | ------------------------- | ------------------------ |
+| `GET /api/gamification/barber/stats`        | Inline query (9 L)  | `getBarberIdFromUserId()` | DRY, centralized logging |
+| `GET /api/gamification/barber/achievements` | Inline query (11 L) | `getBarberIdFromUserId()` | DRY, centralized logging |
+
+**Key Improvements:**
+
+- ✅ No `BARBER_ID_PLACEHOLDER` in codebase (verified)
+- ✅ All authentication uses `user_id` mapping (not email)
+- ✅ Structured logging with Pino (replaced all `console.error`)
+- ✅ Centralized auth logic in `src/lib/rbac.ts`
+- ✅ Consistent error handling across all endpoints
+- ✅ TypeScript: 0 errors
+
+**Migration Status:**
+
+- ✅ Migration 023 executed in production (Session 87)
+- ⚠️ `user_id` column may need population for existing barbers
+- ⚠️ New barbers should have `user_id` set during creation
 
 ---
 
