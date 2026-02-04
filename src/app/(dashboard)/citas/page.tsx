@@ -117,11 +117,11 @@ function CitasPageContent() {
 
   // Update URL when view or date changes
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams()
     params.set('view', viewMode)
     params.set('date', format(selectedDate, 'yyyy-MM-dd'))
     router.replace(`?${params.toString()}`, { scroll: false })
-  }, [viewMode, selectedDate, router, searchParams])
+  }, [viewMode, selectedDate, router])
 
   // Detect mobile viewport
   useEffect(() => {
