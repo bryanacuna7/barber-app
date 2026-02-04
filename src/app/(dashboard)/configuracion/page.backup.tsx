@@ -21,7 +21,7 @@ import {
   ArrowRight,
   Search,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
@@ -33,6 +33,7 @@ import { ColorPicker } from '@/components/ui/color-picker'
 import { NotificationPreferencesSection } from '@/components/settings/notification-preferences-section'
 import { SettingsSearchModal } from '@/components/settings/settings-search-modal'
 import { AdvancedSettingsSection } from '@/components/settings/advanced-settings-section'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { FAB } from '@/components/ui/fab'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -80,10 +81,8 @@ export default function ConfiguracionPage() {
 
   // Search modal state
   const [searchModalOpen, setSearchModalOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('general') // Keep for search navigation compatibility
-
-  // Sheet navigation state
-  const [openSheet, setOpenSheet] = useState<'general' | 'horario' | 'branding' | 'avanzado' | null>(null)
+  const [activeTab, setActiveTab] = useState('general')
+  const tabsRef = useRef<HTMLDivElement>(null)
 
   // Calculate contrast colors for preview
   const contrastColors = useMemo(
@@ -350,162 +349,26 @@ export default function ConfiguracionPage() {
         </div>
       </FadeInUp>
 
-      {/* iOS-Style Navigation Cards */}
-      <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-        {/* Card 1: General */}
-        <motion.button
-          type="button"
-          onClick={() => setOpenSheet('general')}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-sm hover:shadow-md text-left group"
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 group-hover:bg-blue-500/20 dark:group-hover:bg-blue-500/30 transition-colors">
-              <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
-                Información General
-              </h3>
-              <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
-                Nombre, teléfono, dirección y enlace de reservas
-              </p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-zinc-400 dark:text-zinc-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0 mt-1" />
-          </div>
-        </motion.button>
-
-        {/* Card 2: Horario */}
-        <motion.button
-          type="button"
-          onClick={() => setOpenSheet('horario')}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all shadow-sm hover:shadow-md text-left group"
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 group-hover:bg-purple-500/20 dark:group-hover:bg-purple-500/30 transition-colors">
-              <Clock className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
-                Horario de Atención
-              </h3>
-              <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
-                Días y horas de operación, tiempos de buffer
-              </p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-zinc-400 dark:text-zinc-500 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors flex-shrink-0 mt-1" />
-          </div>
-        </motion.button>
-
-        {/* Card 3: Branding */}
-        <motion.button
-          type="button"
-          onClick={() => setOpenSheet('branding')}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-pink-300 dark:hover:border-pink-600 transition-all shadow-sm hover:shadow-md text-left group"
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-pink-500/10 dark:bg-pink-500/20 group-hover:bg-pink-500/20 dark:group-hover:bg-pink-500/30 transition-colors">
-              <Palette className="h-6 w-6 text-pink-600 dark:text-pink-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
-                Marca y Estilo
-              </h3>
-              <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
-                Colores, logo y personalización visual
-              </p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-zinc-400 dark:text-zinc-500 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors flex-shrink-0 mt-1" />
-          </div>
-        </motion.button>
-
-        {/* Card 4: Avanzado */}
-        <motion.button
-          type="button"
-          onClick={() => setOpenSheet('avanzado')}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-amber-300 dark:hover:border-amber-600 transition-all shadow-sm hover:shadow-md text-left group"
-        >
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 group-hover:bg-amber-500/20 dark:group-hover:bg-amber-500/30 transition-colors">
-              <Settings className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
-                Configuración Avanzada
-              </h3>
-              <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
-                Notificaciones, lealtad y opciones avanzadas
-              </p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-zinc-400 dark:text-zinc-500 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors flex-shrink-0 mt-1" />
-          </div>
-        </motion.button>
-      </div>
-
-      {/* Sheets with content */}
       <form onSubmit={handleSubmit}>
-        {/* General Sheet */}
-        <AnimatePresence>
-          {openSheet === 'general' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              onClick={() => setOpenSheet(null)}
-            >
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
-              >
-                {/* Sheet Header */}
-                <div className="sticky top-0 z-10 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20">
-                        <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <h2 className="text-[20px] font-bold text-zinc-900 dark:text-white">
-                        Información General
-                      </h2>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenSheet(null)}
-                      className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    >
-                      <X className="h-5 w-5 text-zinc-500" />
-                    </button>
-                  </div>
-                </div>
+        {/* Tabs - Mobile optimized */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" ref={tabsRef}>
+          <TabsList className="w-full overflow-x-auto scrollbar-hide">
+            <TabsTrigger value="general" icon={<Building2 className="h-4 w-4" />}>
+              General
+            </TabsTrigger>
+            <TabsTrigger value="horario" icon={<Clock className="h-4 w-4" />}>
+              Horario
+            </TabsTrigger>
+            <TabsTrigger value="branding" icon={<Palette className="h-4 w-4" />}>
+              Branding
+            </TabsTrigger>
+            <TabsTrigger value="avanzado" icon={<Settings className="h-4 w-4" />}>
+              Avanzado
+            </TabsTrigger>
+          </TabsList>
 
-                {/* Sheet Content */}
-                <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
-                  <div className="space-y-6">
+          {/* Tab 1: General */}
+          <TabsContent value="general" className="space-y-6">
             {/* Public Booking Link */}
             <FadeInUp delay={0.05}>
               <Card
@@ -604,69 +467,10 @@ export default function ConfiguracionPage() {
                 </CardContent>
               </Card>
             </FadeInUp>
-                  </div>
+          </TabsContent>
 
-                  {/* Sheet Footer with Save Button */}
-                  <div className="sticky bottom-0 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                    <Button
-                      type="submit"
-                      isLoading={saving}
-                      className="w-full h-12 text-[15px] font-semibold"
-                      onClick={() => setOpenSheet(null)}
-                    >
-                      <Save className="h-5 w-5 mr-2" />
-                      Guardar Cambios
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Horario Sheet */}
-        <AnimatePresence>
-          {openSheet === 'horario' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              onClick={() => setOpenSheet(null)}
-            >
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
-              >
-                {/* Sheet Header */}
-                <div className="sticky top-0 z-10 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/10 dark:bg-purple-500/20">
-                        <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <h2 className="text-[20px] font-bold text-zinc-900 dark:text-white">
-                        Horario de Atención
-                      </h2>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenSheet(null)}
-                      className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    >
-                      <X className="h-5 w-5 text-zinc-500" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Sheet Content */}
-                <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
-                  <div className="space-y-6">
+          {/* Tab 2: Horario */}
+          <TabsContent value="horario" className="space-y-6">
             {/* Operating Hours */}
             <FadeInUp delay={0.1}>
               <Card>
@@ -790,69 +594,10 @@ export default function ConfiguracionPage() {
                 </div>
               </AdvancedSettingsSection>
             </FadeInUp>
-                  </div>
+          </TabsContent>
 
-                  {/* Sheet Footer with Save Button */}
-                  <div className="sticky bottom-0 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                    <Button
-                      type="submit"
-                      isLoading={saving}
-                      className="w-full h-12 text-[15px] font-semibold"
-                      onClick={() => setOpenSheet(null)}
-                    >
-                      <Save className="h-5 w-5 mr-2" />
-                      Guardar Cambios
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Branding Sheet */}
-        <AnimatePresence>
-          {openSheet === 'branding' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              onClick={() => setOpenSheet(null)}
-            >
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
-              >
-                {/* Sheet Header */}
-                <div className="sticky top-0 z-10 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-pink-500/10 dark:bg-pink-500/20">
-                        <Palette className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-                      </div>
-                      <h2 className="text-[20px] font-bold text-zinc-900 dark:text-white">
-                        Marca y Estilo
-                      </h2>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenSheet(null)}
-                      className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    >
-                      <X className="h-5 w-5 text-zinc-500" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Sheet Content */}
-                <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
-                  <div className="space-y-6">
+          {/* Tab 3: Branding */}
+          <TabsContent value="branding" className="space-y-6">
             {/* Brand Customization */}
             <FadeInUp delay={0.1}>
               <Card className="overflow-hidden">
@@ -1057,69 +802,10 @@ export default function ConfiguracionPage() {
                 </CardContent>
               </Card>
             </FadeInUp>
-                  </div>
+          </TabsContent>
 
-                  {/* Sheet Footer with Save Button */}
-                  <div className="sticky bottom-0 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                    <Button
-                      type="submit"
-                      isLoading={saving}
-                      className="w-full h-12 text-[15px] font-semibold"
-                      onClick={() => setOpenSheet(null)}
-                    >
-                      <Save className="h-5 w-5 mr-2" />
-                      Guardar Cambios
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Avanzado Sheet */}
-        <AnimatePresence>
-          {openSheet === 'avanzado' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              onClick={() => setOpenSheet(null)}
-            >
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
-              >
-                {/* Sheet Header */}
-                <div className="sticky top-0 z-10 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-amber-500/20">
-                        <Settings className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <h2 className="text-[20px] font-bold text-zinc-900 dark:text-white">
-                        Configuración Avanzada
-                      </h2>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenSheet(null)}
-                      className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    >
-                      <X className="h-5 w-5 text-zinc-500" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Sheet Content */}
-                <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
-                  <div className="space-y-6">
+          {/* Tab 4: Avanzado */}
+          <TabsContent value="avanzado" className="space-y-6">
             {/* Notification Preferences */}
             <NotificationPreferencesSection />
 
@@ -1168,25 +854,27 @@ export default function ConfiguracionPage() {
                 </CardContent>
               </Card>
             </FadeInUp>
-                  </div>
+          </TabsContent>
+        </Tabs>
 
-                  {/* Sheet Footer with Save Button */}
-                  <div className="sticky bottom-0 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg">
-                    <Button
-                      type="submit"
-                      isLoading={saving}
-                      className="w-full h-12 text-[15px] font-semibold"
-                      onClick={() => setOpenSheet(null)}
-                    >
-                      <Save className="h-5 w-5 mr-2" />
-                      Guardar Cambios
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
+        {/* FAB - Mobile only */}
+        <FAB icon={<Save className="h-5 w-5" />} label="Guardar" isLoading={saving} type="submit" />
+
+        {/* Desktop Save Button */}
+        <FadeInUp delay={0.25}>
+          <div className="hidden lg:flex lg:justify-end lg:mt-6">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                type="submit"
+                isLoading={saving}
+                className="h-12 px-8 gap-2 text-[15px] font-semibold"
+              >
+                <Save className="h-5 w-5" />
+                Guardar Cambios
+              </Button>
             </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        </FadeInUp>
       </form>
 
       {/* iOS Time Picker Sheet */}
