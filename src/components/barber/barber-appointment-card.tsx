@@ -181,6 +181,7 @@ export function BarberAppointmentCard({
               disabled={!canCheckIn || isLoading}
               className="text-xs"
               aria-label="Marcar como confirmada"
+              data-testid="check-in-button"
             >
               <Check className="h-4 w-4" aria-hidden="true" />
               Check-in
@@ -193,6 +194,7 @@ export function BarberAppointmentCard({
               disabled={!canComplete || isLoading}
               className="text-xs"
               aria-label="Marcar como completada"
+              data-testid="complete-button"
             >
               <Check className="h-4 w-4" aria-hidden="true" />
               Completar
@@ -205,6 +207,7 @@ export function BarberAppointmentCard({
               disabled={!canNoShow || isLoading}
               className="text-xs text-amber-700 hover:text-amber-800 dark:text-amber-400"
               aria-label="Marcar como no asistió"
+              data-testid="no-show-button"
             >
               <UserX className="h-4 w-4" aria-hidden="true" />
               No Show

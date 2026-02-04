@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   BarChart3,
@@ -13,9 +13,11 @@ import {
   ExternalLink,
   ChevronRight,
   Gift,
+  LogOut,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
+import { createClient } from '@/lib/supabase/client'
 
 interface MoreMenuDrawerProps {
   isOpen: boolean
@@ -82,12 +84,21 @@ const externalLinks = [
 
 export function MoreMenuDrawer({ isOpen, onClose }: MoreMenuDrawerProps) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const handleLinkClick = () => {
     // Close drawer after navigation
     setTimeout(() => {
       onClose()
     }, 200)
+  }
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    onClose()
+    router.push('/login')
+    router.refresh()
   }
 
   return (
@@ -146,6 +157,38 @@ export function MoreMenuDrawer({ isOpen, onClose }: MoreMenuDrawerProps) {
             )
           })}
         </div>
+
+        {/* Divider */}
+        <div className="border-t border-zinc-200 dark:border-zinc-800" />
+
+        {/* Logout Button */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: menuItems.length * 0.05 }}
+        >
+          <button
+            onClick={handleLogout}
+            data-testid="logout-button"
+            className={cn(
+              'flex w-full items-center gap-4 rounded-2xl p-4 transition-all duration-200',
+              'border border-zinc-200 dark:border-zinc-800',
+              'hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800'
+            )}
+          >
+            {/* Icon */}
+            <div className="rounded-xl bg-red-100 dark:bg-red-900/30 p-3">
+              <LogOut className="h-6 w-6 text-red-600 dark:text-red-400" strokeWidth={2} />
+            </div>
+
+            {/* Text */}
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+                Cerrar Sesión
+              </p>
+            </div>
+          </button>
+        </motion.div>
 
         {/* Divider */}
         <div className="border-t border-zinc-200 dark:border-zinc-800" />

@@ -70,6 +70,7 @@ export function MiDiaTimeline({
           'bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700',
           className
         )}
+        data-testid="mi-dia-empty-state"
       >
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-4">
           <Calendar className="h-8 w-8 text-zinc-400 dark:text-zinc-600" aria-hidden="true" />
@@ -85,7 +86,7 @@ export function MiDiaTimeline({
   }
 
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn('relative', className)} data-testid="mi-dia-timeline">
       {/* Timeline Line */}
       <div
         className="absolute left-5 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800"
@@ -127,6 +128,7 @@ export function MiDiaTimeline({
                 layout: { duration: 0.3 },
               }}
               role="listitem"
+              data-testid={`appointment-${appointment.id}`}
             >
               {/* Timeline Dot */}
               <div

@@ -84,27 +84,36 @@ function ResetPasswordForm() {
   }
 
   return (
-    <Card>
+    <Card data-testid="reset-password-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Nueva contraseña</CardTitle>
         <CardDescription>Crea una contraseña segura para tu cuenta.</CardDescription>
       </CardHeader>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} data-testid="reset-password-form">
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <div
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+              data-testid="reset-password-error"
+            >
               {error}
             </div>
           )}
           {message && (
-            <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+            <div
+              className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+              data-testid="reset-password-success"
+            >
               {message}
             </div>
           )}
 
           {isSessionValid === false && (
-            <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+            <div
+              className="rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
+              data-testid="reset-password-invalid-token"
+            >
               Solicita un nuevo enlace de recuperación para continuar.
             </div>
           )}
@@ -112,23 +121,27 @@ function ResetPasswordForm() {
           <Input
             label="Nueva contraseña"
             type={showPasswords ? 'text' : 'password'}
+            name="password"
             placeholder="Mínimo 6 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="new-password"
             disabled={isSessionValid !== true}
+            data-testid="reset-password-new-password"
           />
 
           <Input
             label="Confirmar contraseña"
             type={showPasswords ? 'text' : 'password'}
+            name="confirmPassword"
             placeholder="Repite tu contraseña"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             autoComplete="new-password"
             disabled={isSessionValid !== true}
+            data-testid="reset-password-confirm-password"
           />
 
           <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
@@ -138,6 +151,7 @@ function ResetPasswordForm() {
               onChange={(e) => setShowPasswords(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
               disabled={isSessionValid !== true}
+              data-testid="reset-password-show-passwords"
             />
             Mostrar contraseñas
           </label>
@@ -149,12 +163,17 @@ function ResetPasswordForm() {
             className="w-full"
             isLoading={isLoading}
             disabled={isSessionValid !== true}
+            data-testid="reset-password-submit"
           >
             Guardar contraseña
           </Button>
 
           <p className="text-center text-sm text-zinc-500">
-            <Link href="/forgot-password" className="text-zinc-900 underline dark:text-white">
+            <Link
+              href="/forgot-password"
+              className="text-zinc-900 underline dark:text-white"
+              data-testid="request-new-link"
+            >
               Solicitar nuevo enlace
             </Link>
           </p>

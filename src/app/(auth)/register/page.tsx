@@ -182,13 +182,13 @@ function RegisterForm({
   }
 
   return (
-    <Card>
+    <Card data-testid="register-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
         <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
       </CardHeader>
 
-      <form onSubmit={handleRegister}>
+      <form onSubmit={handleRegister} data-testid="register-form">
         <CardContent className="space-y-4">
           {/* Referrer Banner */}
           {referrerInfo && (
@@ -199,7 +199,10 @@ function RegisterForm({
           )}
 
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <div
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+              data-testid="register-error"
+            >
               {error}
             </div>
           )}
@@ -217,6 +220,7 @@ function RegisterForm({
               formData.businessName && !getFieldError('businessName') ? 'Nombre válido' : undefined
             }
             required
+            data-testid="register-business-name"
           />
 
           <Input
@@ -231,6 +235,7 @@ function RegisterForm({
             success={formData.email && !getFieldError('email') ? 'Correo válido' : undefined}
             required
             autoComplete="email"
+            data-testid="register-email"
           />
 
           <div className="space-y-2">
@@ -245,6 +250,7 @@ function RegisterForm({
               error={getFieldError('password')}
               required
               autoComplete="new-password"
+              data-testid="register-password"
             />
             {formData.password && <PasswordStrength password={formData.password} />}
           </div>
@@ -267,6 +273,7 @@ function RegisterForm({
             }
             required
             autoComplete="new-password"
+            data-testid="register-confirm-password"
           />
 
           <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
@@ -275,19 +282,29 @@ function RegisterForm({
               checked={showPasswords}
               onChange={(e) => setShowPasswords(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+              data-testid="register-show-passwords"
             />
             Mostrar contraseñas
           </label>
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button
+            type="submit"
+            className="w-full"
+            isLoading={isLoading}
+            data-testid="register-submit"
+          >
             Crear Cuenta
           </Button>
 
           <p className="text-center text-sm text-zinc-500">
             ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="text-zinc-900 underline dark:text-white">
+            <Link
+              href="/login"
+              className="text-zinc-900 underline dark:text-white"
+              data-testid="login-link"
+            >
               Inicia sesión
             </Link>
           </p>

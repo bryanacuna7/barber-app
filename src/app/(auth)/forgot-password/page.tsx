@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card>
+    <Card data-testid="forgot-password-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Recuperar contraseña</CardTitle>
         <CardDescription>
@@ -55,15 +55,21 @@ export default function ForgotPasswordPage() {
         </CardDescription>
       </CardHeader>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} data-testid="forgot-password-form">
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <div
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+              data-testid="forgot-password-error"
+            >
               {error}
             </div>
           )}
           {message && (
-            <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+            <div
+              className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+              data-testid="forgot-password-success"
+            >
               {message}
             </div>
           )}
@@ -71,22 +77,33 @@ export default function ForgotPasswordPage() {
           <Input
             label="Correo electrónico"
             type="email"
+            name="email"
             placeholder="tu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
+            data-testid="forgot-password-email"
           />
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button
+            type="submit"
+            className="w-full"
+            isLoading={isLoading}
+            data-testid="forgot-password-submit"
+          >
             Enviar enlace
           </Button>
 
           <p className="text-center text-sm text-zinc-500">
             ¿Ya recordaste?{' '}
-            <Link href="/login" className="text-zinc-900 underline dark:text-white">
+            <Link
+              href="/login"
+              className="text-zinc-900 underline dark:text-white"
+              data-testid="back-to-login-link"
+            >
               Inicia sesión
             </Link>
           </p>

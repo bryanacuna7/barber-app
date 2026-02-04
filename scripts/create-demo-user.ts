@@ -13,7 +13,7 @@ async function createDemoUser() {
 
   // Check if user exists
   const { data: existingUsers } = await supabase.auth.admin.listUsers()
-  const existingUser = existingUsers?.users?.find((u) => u.email === email) ?? null
+  const existingUser = (existingUsers?.users || []).find((u) => u.email === email) ?? null
 
   if (existingUser) {
     console.log('Demo user already exists, updating password...')

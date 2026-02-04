@@ -99,6 +99,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               scale: isFocused ? 1.01 : 1,
             }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            aria-invalid={error ? 'true' : 'false'}
+            aria-describedby={error ? `${inputId}-error` : undefined}
             {...props}
           />
 
@@ -152,6 +154,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               className="overflow-hidden"
             >
               <p
+                id={error ? `${inputId}-error` : undefined}
                 className={cn(
                   'mt-2 text-[13px] font-medium',
                   error && 'text-red-500',

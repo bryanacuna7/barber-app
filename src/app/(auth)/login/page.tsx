@@ -70,16 +70,19 @@ function LoginForm() {
   }
 
   return (
-    <Card>
+    <Card data-testid="login-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
         <CardDescription>Ingresa a tu cuenta de BarberShop Pro</CardDescription>
       </CardHeader>
 
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} data-testid="login-form">
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <div
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+              data-testid="login-error"
+            >
               {error}
             </div>
           )}
@@ -87,6 +90,7 @@ function LoginForm() {
           <Input
             label="Correo electrónico"
             type="email"
+            name="email"
             placeholder="tu@email.com"
             value={email}
             onChange={(e) => {
@@ -98,11 +102,13 @@ function LoginForm() {
             success={email && !getFieldError('email') ? 'Correo válido' : undefined}
             required
             autoComplete="email"
+            data-testid="login-email"
           />
 
           <Input
             label="Contraseña"
             type={showPassword ? 'text' : 'password'}
+            name="password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => {
@@ -113,6 +119,7 @@ function LoginForm() {
             error={getFieldError('password')}
             required
             autoComplete="current-password"
+            data-testid="login-password"
           />
           <div className="flex flex-wrap items-center gap-2 text-[13px] text-zinc-500 dark:text-zinc-400">
             <label className="flex items-center gap-2 font-medium">
@@ -121,12 +128,14 @@ function LoginForm() {
                 checked={showPassword}
                 onChange={(e) => setShowPassword(e.target.checked)}
                 className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                data-testid="login-show-password"
               />
               Mostrar contraseña
             </label>
             <Link
               href="/forgot-password"
               className="ml-auto whitespace-nowrap font-semibold text-zinc-900 dark:text-white"
+              data-testid="forgot-password-link"
             >
               ¿Olvidaste tu contraseña?
             </Link>
@@ -134,13 +143,17 @@ function LoginForm() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button type="submit" className="w-full" isLoading={isLoading} data-testid="login-submit">
             Iniciar Sesión
           </Button>
 
           <p className="text-center text-sm text-zinc-500">
             ¿No tienes cuenta?{' '}
-            <Link href="/register" className="text-zinc-900 underline dark:text-white">
+            <Link
+              href="/register"
+              className="text-zinc-900 underline dark:text-white"
+              data-testid="register-link"
+            >
               Regístrate
             </Link>
           </p>

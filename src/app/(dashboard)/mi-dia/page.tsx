@@ -264,6 +264,7 @@ export default function MiDiaPage() {
             disabled={isRefreshing}
             className="gap-2"
             aria-label="Actualizar citas"
+            data-testid="refresh-button"
           >
             <RefreshCw
               className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}

@@ -14,6 +14,7 @@ import { AlertTriangle } from 'lucide-react'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
+
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || ''
 

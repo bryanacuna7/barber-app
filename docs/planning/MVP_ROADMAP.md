@@ -136,7 +136,7 @@ Full subscription system was already implemented in Migration 005 with:
 
 ### Sprint 5: MVP Testing (Weeks 4-5) - 40-50h
 
-**Status:** 🟡 In Progress - 13h/40-50h (26-33% complete)
+**Status:** 🟡 In Progress - 16h/40-50h (32-40% complete)
 
 **Completed Sessions:**
 
@@ -144,6 +144,7 @@ Full subscription system was already implemented in Migration 005 with:
 - ✅ Session 96: E2E test suite created (24 tests, 575 lines) (~3h)
 - ✅ Session 97: Infrastructure complete - data-testid + seeding (~2h)
 - ✅ Session 98: Booking Flow E2E 70% complete (~5h)
+- 🟡 Session 99: Authentication E2E started 37.5% complete (~3h)
 
 **Scope:** Focus on CRITICAL paths only (not 80% full coverage)
 
@@ -169,13 +170,21 @@ Full subscription system was already implemented in Migration 005 with:
   - 4 Error Cases (validation/error messages)
   - 2 UX improvements (service highlight, ARIA labels)
 
-**Priority 2: Authentication (6-8h)**
+**Priority 2: Authentication (6-8h) - 🟡 37.5% Complete (3h/6-8h)**
 
-- [ ] E2E test: Sign up flow
-- [ ] E2E test: Login flow
-- [ ] E2E test: Password reset
-- [ ] Integration test: Session management
-- [ ] Integration test: RLS policies (basic)
+- [x] E2E test suite created: 24 tests (Session 99) ✅
+  - [x] Sign up flow (7 tests) - 1/7 passing
+  - [x] Login flow (6 tests) - 4/6 passing ✅
+  - [x] Password reset (5 tests) - 3/5 passing ✅
+  - [x] Session management (4 tests) - 1/4 passing
+  - [x] RLS policies (2 tests) - 0/2 passing
+- [x] All auth pages have data-testid attributes (Session 99) ✅
+- [x] Test execution: **9/24 passing (37.5%)** 🟡
+- [ ] Fix failing tests (15 tests) - **IN PROGRESS** (3-4h)
+  - Input validation (aria-invalid support)
+  - Supabase auth configuration
+  - Logout functionality
+  - Session persistence
 
 **Priority 3: Mi Día (4-5h)**
 
@@ -351,27 +360,27 @@ See [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) for:
 
 **Remaining:**
 
-- 🟡 Sprint 5: MVP Testing (27-37h remaining of 40-50h) **IN PROGRESS**
-  - Authentication E2E (6-8h)
+- 🟡 Sprint 5: MVP Testing (24-34h remaining of 40-50h) **IN PROGRESS**
+  - Authentication E2E (3-5h) - 37% complete
   - Mi Día E2E (4-5h)
   - Security Testing (8-10h)
   - Performance Testing (4-6h)
   - Remaining Infrastructure (5-8h)
 
-**Progress:** 61.5-65.5h / 98-128h = 48-67% complete
+**Progress:** 64.5-68.5h / 98-128h = 50-70% complete
 
 ### This Week (IMMEDIATE)
 
 1. ✅ Review MVP scope
 2. ✅ Approve MVP definition
-3. 🟡 **Sprint 5 In Progress: MVP Testing** (13h done, 27-37h remaining)
+3. 🟡 **Sprint 5 In Progress: MVP Testing** (16h done, 24-34h remaining)
 
 ### Weeks 4-5 (Current)
 
-1. 🟡 Execute Sprint 5 testing plan (13h done)
-2. ✅ Critical Path Tests (13h/20-25h) - **Booking Flow 70% Complete** ✅
-3. [ ] Authentication E2E (6-8h) - **NEXT**
-4. [ ] Mi Día E2E (4-5h)
+1. 🟡 Execute Sprint 5 testing plan (16h done)
+2. ✅ Critical Path Tests (16h/20-25h) - **Booking Flow 70% + Auth 37%** 🟡
+3. 🟡 Authentication E2E (3h/6-8h) - **IN PROGRESS** - Fix 15 failing tests
+4. [ ] Mi Día E2E (4-5h) - **NEXT**
 5. [ ] Security Testing (8-10h) - Already have 28+ tests from Área 6
 6. [ ] Performance Testing (4-6h)
 7. [x] Test Infrastructure (8-10h) - **DONE** ✅
@@ -385,15 +394,15 @@ See [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) for:
 
 ---
 
-**STATUS:** 🚀 MVP In Progress - Sprint 5 Testing 48-67% Complete
-**COMPLETED:** FASE 0 + Área 6 + Área 1 + Sprint 5 (partial) = 61.5-65.5h ✅
-**REMAINING:** Sprint 5 (27-37h remaining) = 27-37h
+**STATUS:** 🚀 MVP In Progress - Sprint 5 Testing 50-70% Complete
+**COMPLETED:** FASE 0 + Área 6 + Área 1 + Sprint 5 (partial) = 64.5-68.5h ✅
+**REMAINING:** Sprint 5 (24-34h remaining) = 24-34h
 **TOTAL TIME:** 98-128 hours (5-6 weeks)
 **LAUNCH TARGET:** 1-1.5 weeks remaining
 **POST-MVP:** 387-504 hours remaining (organized separately)
 
-**Progress:** 61.5-65.5h / 98-128h = 48-67% complete
+**Progress:** 64.5-68.5h / 98-128h = 50-70% complete
 
-**Last Updated:** Session 98 (2026-02-04) - Booking E2E 70% complete (14/20 tests passing) ✅
+**Last Updated:** Session 99 (2026-02-04) - Auth E2E 37% complete (9/24 tests passing) 🟡
 
-**Core booking flow is production-ready! 🎉 Next: Authentication E2E**
+**Authentication E2E infrastructure complete! Next: Fix 15 failing tests to reach 80% coverage**

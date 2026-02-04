@@ -52,16 +52,25 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
         'px-4 py-5 sm:px-6',
         className
       )}
+      data-testid="mi-dia-header"
     >
       {/* Title Section */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white truncate">Mi Día</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 truncate">{barberName}</p>
+          <p
+            className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 truncate"
+            data-testid="barber-name"
+          >
+            {barberName}
+          </p>
         </div>
 
         {/* Date Badge */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+        <div
+          className="flex items-center gap-2 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl"
+          data-testid="current-date"
+        >
           <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
           <span className="text-sm font-medium text-zinc-900 dark:text-white capitalize">
             {formatDate(date)}
@@ -76,6 +85,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
           className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5"
+          data-testid="stat-total"
         >
           <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Total</p>
           <p className="text-2xl font-bold text-zinc-900 dark:text-white mt-0.5">{stats.total}</p>
@@ -86,6 +96,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15 }}
           className="bg-blue-50 dark:bg-blue-950/30 rounded-xl px-3 py-2.5"
+          data-testid="stat-pending"
         >
           <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">Pendientes</p>
           <p className="text-2xl font-bold text-blue-900 dark:text-blue-300 mt-0.5">
@@ -98,6 +109,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
           className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl px-3 py-2.5"
+          data-testid="stat-completed"
         >
           <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Completadas</p>
           <p className="text-2xl font-bold text-emerald-900 dark:text-emerald-300 mt-0.5">
@@ -110,6 +122,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.25 }}
           className="bg-amber-50 dark:bg-amber-950/30 rounded-xl px-3 py-2.5"
+          data-testid="stat-no-show"
         >
           <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">No asistió</p>
           <p className="text-2xl font-bold text-amber-900 dark:text-amber-300 mt-0.5">
