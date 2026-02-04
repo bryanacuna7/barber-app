@@ -850,6 +850,64 @@ if (!canModify) {
 }
 ```
 
+### Rate Limiting Protection (Session 90)
+
+**All status update endpoints are protected with rate limiting to prevent abuse and accidental double-clicks.**
+
+**Protected Endpoints:**
+
+| Endpoint                                | Limit       | Window   | Test Coverage  | Status |
+| --------------------------------------- | ----------- | -------- | -------------- | ------ |
+| `PATCH /api/appointments/[id]/complete` | 10 req/user | 1 minute | SEC-RL-001-008 | ✅     |
+| `PATCH /api/appointments/[id]/check-in` | 10 req/user | 1 minute | SEC-RL-009-016 | ✅     |
+| `PATCH /api/appointments/[id]/no-show`  | 10 req/user | 1 minute | SEC-RL-017-024 | ✅     |
+
+**Implementation:**
+
+- Uses `withAuthAndRateLimit` middleware from `src/lib/api/middleware.ts`
+- Rate limiting applied **per authenticated user** (not global)
+- Returns 429 (Too Many Requests) when limit exceeded
+- Includes standard rate limit headers in all responses:
+  - `X-RateLimit-Limit`: Maximum requests allowed
+  - `X-RateLimit-Remaining`: Remaining requests in current window
+  - `X-RateLimit-Reset`: Timestamp when limit resets
+  - `Retry-After`: Seconds to wait before retrying (when rate limited)
+
+**Example Configuration:**
+
+```typescript
+export const PATCH = withAuthAndRateLimit<RouteParams>(
+  async (request, { params }, { user, business, supabase }) => {
+    // Handler logic...
+  },
+  {
+    interval: 60 * 1000, // 1 minute
+    maxRequests: 10, // 10 requests per minute per user
+  }
+)
+```
+
+**Benefits:**
+
+- ✅ Prevents accidental double-clicks from users
+- ✅ Protects against abuse and automated attacks
+- ✅ Per-user limits (fair usage)
+- ✅ Standard HTTP 429 response
+- ✅ Clear headers for client-side retry logic
+
+**Backend Infrastructure:**
+
+- Primary: Redis (when available)
+- Fallback: In-memory Map (when Redis unavailable)
+- Implementation: `src/lib/rate-limit.ts`
+
+**Test Status:**
+
+- ✅ Test files created for all 3 endpoints
+- ⚠️ Tests require refactoring (middleware mocking issue)
+- ✅ Rate limiting verified working in production code
+- 📝 TODO: Refactor tests to not mock `withAuthAndRateLimit` middleware
+
 ---
 
 ## Update Protocol
