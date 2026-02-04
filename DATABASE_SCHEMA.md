@@ -10,7 +10,7 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-03 (Session 87 - RBAC System)
+> **Last Updated:** 2026-02-03 (Session 88 - IDOR #2 Fixed)
 > **Last Verified Against:** All migrations 001-023
 
 ---
@@ -788,6 +788,66 @@ cat supabase/migrations/*.sql | grep "ALTER TABLE.*ADD COLUMN" | sort
 
 # Check for specific column
 grep -r "column_name" supabase/migrations/
+```
+
+---
+
+## Security Implementations
+
+### IDOR Vulnerability Fixes (Sessions 87-88)
+
+**Protected Endpoints with RBAC:**
+
+| Endpoint                                   | RBAC Function                 | Session | Status |
+| ------------------------------------------ | ----------------------------- | ------- | ------ |
+| `GET /api/barbers/[id]/appointments/today` | `canAccessBarberAppointments` | 87      | ✅     |
+| `PATCH /api/appointments/[id]/complete`    | `canModifyBarberAppointments` | 88      | ✅     |
+| `PATCH /api/appointments/[id]/check-in`    | `canModifyBarberAppointments` | 88      | ✅     |
+| `PATCH /api/appointments/[id]/no-show`     | `canModifyBarberAppointments` | 88      | ✅     |
+
+**RBAC Functions (src/lib/rbac.ts):**
+
+1. **`canAccessBarberAppointments()`** - Read operations
+   - Owner: can access all ✅
+   - User with `read_all_appointments`: can access all ✅
+   - Barber themselves: can access own ✅
+   - Others: blocked ❌
+
+2. **`canModifyBarberAppointments()`** - Write operations
+   - Owner: can modify all ✅
+   - User with `write_all_appointments`: can modify all ✅
+   - Barber with `write_own_appointments`: can modify own ✅
+   - Others: blocked ❌
+
+**Security Features:**
+
+- ✅ Structured logging with `logSecurity()` on unauthorized attempts
+- ✅ Granular permissions (14 permissions, 4 roles)
+- ✅ Security test coverage (SEC-007 to SEC-015)
+- ✅ Atomic operations for race condition prevention (CWE-915)
+
+**Before (Vulnerable):**
+
+```typescript
+// Email-based validation (weak)
+const isAssignedBarber = barberEmail === user.email
+if (!isBusinessOwner && !isAssignedBarber) {
+  console.warn('IDOR blocked')
+  return unauthorizedResponse()
+}
+```
+
+**After (RBAC):**
+
+```typescript
+// RBAC-based validation (strong)
+const canModify = await canModifyBarberAppointments(
+  supabase, user.id, barberId, business.id, business.owner_id
+)
+if (!canModify) {
+  logSecurity('unauthorized', 'high', { ... })
+  return unauthorizedResponse()
+}
 ```
 
 ---

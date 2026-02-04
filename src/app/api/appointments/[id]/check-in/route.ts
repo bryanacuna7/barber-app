@@ -5,7 +5,8 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from '@/lib/api/middleware'
-import { logger } from '@/lib/logger'
+import { logger, logSecurity } from '@/lib/logger'
+import { canModifyBarberAppointments } from '@/lib/rbac'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -67,7 +68,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         status,
         barber_id,
         business_id,
-        barber:barbers!appointments_barber_id_fkey(id, email)
+        barber:barbers!appointments_barber_id_fkey(id, name)
       `
         )
         .eq('id', appointmentId)
@@ -79,16 +80,30 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       }
 
       // 2. IDOR PROTECTION: Verify authenticated user can modify this appointment
-      // Business owners can modify any appointment, barbers only their own
-      const isBusinessOwner = business.owner_id === user.id
-      const barberEmail = (appointment.barber as any)?.email
-      const isAssignedBarber = barberEmail === user.email
+      // Uses RBAC system to check:
+      // - Business owner (can modify all)
+      // - User has write_all_appointments permission (admin, recepcionista)
+      // - User is the barber themselves with write_own_appointments permission
+      const canModify = await canModifyBarberAppointments(
+        supabase,
+        user.id,
+        appointment.barber_id,
+        business.id,
+        business.owner_id
+      )
 
-      if (!isBusinessOwner && !isAssignedBarber) {
-        console.warn(
-          `⚠️ IDOR attempt blocked: User ${user.email} tried to check-in appointment for barber ${barberEmail}`
-        )
-        return unauthorizedResponse('Esta cita no pertenece a este barbero')
+      if (!canModify) {
+        logSecurity('unauthorized', 'high', {
+          userId: user.id,
+          userEmail: user.email,
+          requestedBarberId: appointment.barber_id,
+          barberName: (appointment.barber as any)?.name,
+          appointmentId,
+          businessId: business.id,
+          endpoint: '/api/appointments/[id]/check-in',
+          action: 'check_in_appointment',
+        })
+        return unauthorizedResponse('No tienes permiso para hacer check-in de esta cita')
       }
 
       // 3. Validate current status - only pending appointments can be checked in

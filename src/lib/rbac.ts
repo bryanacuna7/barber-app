@@ -376,6 +376,72 @@ export async function canAccessBarberAppointments(
   }
 }
 
+/**
+ * Check if user can modify barber's appointments (write operations)
+ *
+ * Validates:
+ * 1. User is business owner (can modify all)
+ * 2. User has write_all_appointments permission (admin, recepcionista)
+ * 3. User is the barber themselves AND has write_own_appointments permission
+ *
+ * Used for: complete, check-in, no-show, cancel endpoints
+ *
+ * @param supabase - Supabase client
+ * @param userId - User ID requesting modification
+ * @param barberId - Barber ID whose appointments are being modified
+ * @param businessId - Business ID
+ * @param businessOwnerId - Business owner ID
+ * @returns true if user can modify appointments
+ *
+ * @example
+ * ```typescript
+ * const canModify = await canModifyBarberAppointments(
+ *   supabase,
+ *   user.id,
+ *   barberId,
+ *   business.id,
+ *   business.owner_id
+ * )
+ *
+ * if (!canModify) {
+ *   logSecurity('unauthorized', 'high', { ... })
+ *   return unauthorizedResponse('No tienes permiso para modificar esta cita')
+ * }
+ * ```
+ */
+export async function canModifyBarberAppointments(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  barberId: string,
+  businessId: string,
+  businessOwnerId: string
+): Promise<boolean> {
+  try {
+    // 1. Check if user is business owner
+    if (userId === businessOwnerId) {
+      return true
+    }
+
+    // 2. Check if user has write_all_appointments permission
+    const hasWriteAll = await hasPermission(supabase, userId, 'write_all_appointments')
+    if (hasWriteAll) {
+      return true
+    }
+
+    // 3. Check if user is the barber themselves AND has write_own_appointments
+    const userBarberId = await getBarberIdFromUserId(supabase, userId, businessId)
+    if (userBarberId === barberId) {
+      const hasWriteOwn = await hasPermission(supabase, userId, 'write_own_appointments')
+      return hasWriteOwn
+    }
+
+    return false
+  } catch (error) {
+    console.error('❌ Unexpected error in canModifyBarberAppointments:', error)
+    return false
+  }
+}
+
 // =====================================================
 // ROLE METADATA
 // =====================================================
