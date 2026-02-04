@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import {
@@ -889,8 +889,6 @@ function CitasPageContent() {
 }
 
 // Wrapper with Suspense for useSearchParams
-import { Suspense } from 'react'
-
 export default function CitasPage() {
   return (
     <Suspense
