@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * API Route: Notification Preferences
  * GET - Get notification preferences for current business
@@ -7,7 +6,7 @@
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import type { NotificationPreferencesInsert } from '@/types/database'
+import type { NotificationPreferences } from '@/types/database'
 
 export async function GET(request: Request) {
   try {
@@ -105,7 +104,7 @@ export async function PATCH(request: Request) {
     }
 
     // Parse request body
-    const body: Partial<NotificationPreferencesInsert> = await request.json()
+    const body: Partial<NotificationPreferences> = await request.json()
 
     // Validate channel if provided
     if (body.channel && !['email', 'app', 'both'].includes(body.channel)) {

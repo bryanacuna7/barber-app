@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 /**
  * API Route: Revenue Series
  * Returns time-series revenue data for charts

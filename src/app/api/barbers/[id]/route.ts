@@ -1,7 +1,7 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 import { z } from 'zod'
+import { createClient } from '@/lib/supabase/server'
 
 const barberSchema = z.object({
   name: z.string().min(1),

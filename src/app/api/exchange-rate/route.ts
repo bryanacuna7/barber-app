@@ -1,11 +1,10 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import type { ExchangeRateResponse } from '@/types/database'
+import type { ExchangeRateValue } from '@/types/custom'
 
 // Type for system_settings value column
 interface SystemSettingRow {
-  value: ExchangeRateResponse
+  value: ExchangeRateValue
 }
 
 // GET current exchange rate (public endpoint)
@@ -20,12 +19,12 @@ export async function GET() {
 
   if (error || !data) {
     // Return default if not found
-    return NextResponse.json<ExchangeRateResponse>({
+    return NextResponse.json<ExchangeRateValue>({
       usd_to_crc: 510,
       last_updated: new Date().toISOString().split('T')[0],
       notes: 'Default rate',
     })
   }
 
-  return NextResponse.json<ExchangeRateResponse>(data.value)
+  return NextResponse.json<ExchangeRateValue>(data.value)
 }

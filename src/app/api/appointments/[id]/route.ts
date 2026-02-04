@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withAuth, notFoundResponse, errorResponse } from '@/lib/api/middleware'
@@ -53,7 +52,6 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
 
     // Parse and validate request body
     const body = await request.json()
-    console.log('📍 API: Update appointment request:', { id, body })
     const result = updateAppointmentSchema.safeParse(body)
 
     if (!result.success) {
@@ -73,8 +71,6 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
     if (result.data.client_notes !== undefined) updateData.client_notes = result.data.client_notes
     if (result.data.internal_notes !== undefined)
       updateData.internal_notes = result.data.internal_notes
-
-    console.log('📍 API: Update data:', updateData)
 
     // If service changed, update duration and price
     if (result.data.service_id) {
@@ -129,13 +125,6 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
       console.error('❌ API: Appointment not found after update')
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
     }
-
-    console.log(
-      '✅ API: Appointment updated successfully:',
-      appointment.id,
-      'status:',
-      appointment.status
-    )
 
     // TODO: Update client stats when appointment completed
     // This will be implemented when we add the increment_client_stats RPC function

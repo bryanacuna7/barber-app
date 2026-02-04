@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { calculateAvailableSlots } from '@/lib/utils/availability'
@@ -59,9 +58,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     .in('status', ['pending', 'confirmed'])
 
   // Calculate available slots
+  const operatingHours = business.operating_hours
+    ? (business.operating_hours as unknown as OperatingHours)
+    : ({} as OperatingHours)
+
   const slots = calculateAvailableSlots({
     date,
-    operatingHours: (business.operating_hours as OperatingHours) || {},
+    operatingHours,
     existingAppointments: appointments || [],
     serviceDuration: service.duration_minutes ?? 30,
     bufferMinutes: business.booking_buffer_minutes ?? 15,

@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 /**
  * API Route: Cleanup Storage
  * Daily cron job to delete expired payment proofs
@@ -74,11 +72,12 @@ export async function GET(request: Request) {
     const errors: Array<{ id: string; error: string }> = []
 
     for (const payment of allPaymentsToClean) {
+      // Extract file path from URL with security validation
+      // URL format: https://xxx.supabase.co/storage/v1/object/public/payment-proofs/path/to/file.jpg
+      const paymentData = payment as any
+      const proofUrl = paymentData.proof_url
+
       try {
-        // Extract file path from URL with security validation
-        // URL format: https://xxx.supabase.co/storage/v1/object/public/payment-proofs/path/to/file.jpg
-        const paymentData = payment as any
-        const proofUrl = paymentData.proof_url
         const path = extractSafePathFromUrl(proofUrl, 'payment-proofs')
 
         if (!path) {

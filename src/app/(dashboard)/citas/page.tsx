@@ -236,7 +236,6 @@ export default function CitasPage() {
 
   // Handlers
   const handleStatusChange = async (id: string, status: AppointmentStatus) => {
-    console.log('📍 Changing appointment status:', { id, status })
     try {
       const response = await fetch(`/api/appointments/${id}`, {
         method: 'PATCH',
@@ -244,12 +243,8 @@ export default function CitasPage() {
         body: JSON.stringify({ status }),
       })
 
-      console.log('📍 Response status:', response.status)
-      console.log('📍 Response headers:', Object.fromEntries(response.headers.entries()))
-
       if (response.ok) {
         const updated = await response.json()
-        console.log('✅ Updated appointment:', updated)
         setAppointments((prev) => prev.map((apt) => (apt.id === id ? updated : apt)))
         toast.success(
           status === 'completed'

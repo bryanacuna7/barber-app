@@ -91,14 +91,11 @@ export function useBarberAppointments({
         },
         (payload) => {
           // Real-time update received - refetch to get full data with relations
-          console.log('Realtime update received:', payload.eventType)
           fetchAppointments()
         }
       )
       .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('✅ Realtime subscription active')
-        } else if (status === 'CHANNEL_ERROR') {
+        if (status === 'CHANNEL_ERROR') {
           console.error('❌ Realtime subscription error - falling back to polling')
           // Fallback to polling if Realtime fails
           const interval = setInterval(() => {

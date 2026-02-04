@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 /**
  * API Route: Service Performance Analytics
  * Returns top performing services by revenue and bookings

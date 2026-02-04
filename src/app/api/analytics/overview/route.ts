@@ -1,5 +1,3 @@
-// @ts-nocheck
-// @ts-nocheck
 /**
  * API Route: Analytics Overview
  * Returns KPI summary for the current business

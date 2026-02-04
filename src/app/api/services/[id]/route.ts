@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 
