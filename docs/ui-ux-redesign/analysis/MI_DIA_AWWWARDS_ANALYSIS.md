@@ -59,6 +59,7 @@ Awwwards:
 ```
 
 **Por qué falla:**
+
 - No hay jerarquía visual dramática
 - El ojo no sabe dónde ir primero
 - Usa solo 60% del espacio disponible en desktop
@@ -82,12 +83,14 @@ Con gradientes, animaciones, micro-interacciones
 ```
 
 **Por qué falla:**
+
 - No prioriza qué stat es MÁS importante
 - Stats genéricos (cualquier SaaS se ve igual)
 - Falta data visualization (charts, progress bars)
 - No hay "at-a-glance" insight (necesitas leer números)
 
 **Mejoras necesarias:**
+
 - Hero card para "Próxima Cita" con countdown
 - Mini charts para tendencias (vs ayer, vs semana pasada)
 - Progress bars para % completado del día
@@ -105,12 +108,14 @@ Awwwards: Timeline HORIZONTAL con visual time blocks
 ```
 
 **Por qué falla:**
+
 - No aprovecha el formato timeline (debería ser visual)
 - No muestra gaps entre citas
 - No muestra "ahora" en el contexto del día completo
 - Falta sentido de urgencia
 
 **Solución propuesta:**
+
 ```
 ┌─────────────────────────────────────────┐
 │ 08:00 ░░░░ 09:00 ▓▓▓▓ 10:00 ░░░░ 11:00 │
@@ -129,12 +134,14 @@ Visual time blocks (Google Calendar style)
 **Problema:** Mucha información apretada, difícil de escanear.
 
 **Por qué falla:**
+
 - Jerarquía tipográfica débil (todo 14-16px)
 - Iconos muy pequeños (4x4)
 - Actions buttons muy pequeños (difícil tocar en mobile)
 - No hay espacio para respirar
 
 **Mejoras necesarias:**
+
 - Cliente name: 20px bold (protagonista)
 - Servicio: 16px (secundario)
 - Hora: 24px bold (crítico)
@@ -156,12 +163,14 @@ transition={{ type: 'spring', stiffness: 400, damping: 25 }}
 ```
 
 **Por qué falla:**
+
 - Animaciones mecánicas, no orgánicas
 - No hay "personality"
 - Falta micro-interacciones sorprendentes
 - No usa layout animations (Framer Motion layout prop)
 
 **Mejoras necesarias:**
+
 - Cards que "respiran" (subtle scale pulse)
 - Hover con magnetic effect
 - Check-in → Success animation con confetti
@@ -187,12 +196,14 @@ Awwwards:
 ```
 
 **Por qué falla:**
+
 - Paleta genérica (cualquier dashboard)
 - No hay gradientes sofisticados
 - Falta ambient lighting
 - No comunica "estado del día"
 
 **Solución propuesta:**
+
 ```css
 /* Gradiente dinámico según hora */
 Morning (6am-12pm): from-amber-50 to-orange-50
@@ -230,6 +241,7 @@ Awwwards Desktop:
 ```
 
 **Por qué falla:**
+
 - Solo usa 40% del ancho disponible
 - No hay sidebar para navegación rápida
 - No aprovecha para mostrar más contexto
@@ -241,6 +253,7 @@ Awwwards Desktop:
 **Problema:** Es web responsiva, no se siente nativa.
 
 **Lo que falta:**
+
 - Swipe entre días (← hoy | mañana →)
 - Pull-down-to-refresh visual (solo tiene botón)
 - Bottom sheet para detalles de cita
@@ -248,6 +261,7 @@ Awwwards Desktop:
 - Long-press para quick actions
 
 **Awwwards mobile tiene:**
+
 ```typescript
 // Swipe gestures
 <motion.div drag="x" onDragEnd={handleSwipe} />
@@ -266,12 +280,14 @@ navigator.vibrate([50])
 **Problema:** Solo ves "hoy" - no hay sentido de pasado/futuro.
 
 **Lo que falta:**
+
 - Mini calendario para navegar días
 - Vista de "esta semana" compacta
 - Indicador de días con alta ocupación
 - Comparación con días anteriores
 
 **Awwwards tendría:**
+
 ```
 ┌─────────────────────────────────┐
 │ Esta Semana                     │
@@ -302,6 +318,7 @@ No Show → Shake to confirm (prevent accidental)
 ```
 
 **Por qué falla:**
+
 - Acciones críticas (especialmente No Show) no tienen protección
 - No hay confirmation step
 - Muy fácil equivocarse (fat finger)
@@ -353,6 +370,7 @@ Mobile Layout:
 ```
 
 **Características:**
+
 - ✅ Hero card con próxima cita (countdown dramático)
 - ✅ Bento grid para stats (asimétrico)
 - ✅ Timeline horizontal visual
@@ -392,6 +410,7 @@ Bottom Tabs Navigation
 ```
 
 **Características:**
+
 - ✅ Sidebar permanente con navegación
 - ✅ Preview panel con contexto del cliente
 - ✅ Inline editing (no modales)
@@ -446,6 +465,7 @@ Mobile Layout:
 ```
 
 **Características:**
+
 - ✅ Timeline horizontal VISUAL
 - ✅ Time blocks (no solo lista)
 - ✅ Hero card próxima cita
@@ -464,6 +484,7 @@ Mobile Layout:
 #### ✨ Lo MEJOR:
 
 **1. Jerarquía Visual Dramática**
+
 ```typescript
 // Hero card 2x más grande
 <div className="lg:col-span-8 lg:row-span-2">
@@ -477,6 +498,7 @@ Mobile Layout:
 ```
 
 **2. Bento Grid Asimétrico**
+
 ```
 ┌────────────┬─────┬─────┐
 │            │  2  │  3  │
@@ -492,6 +514,7 @@ Mobile Layout:
 ```
 
 **3. Gradientes Mesh Sofisticados**
+
 ```css
 background:
   radial-gradient(at 20% 30%, #667eea 0%, transparent 50%),
@@ -500,6 +523,7 @@ background:
 ```
 
 **4. Micro-interacciones Everywhere**
+
 - Stats cards con breathing animation
 - Hover con 3D tilt
 - Click con ripple effect
@@ -507,6 +531,7 @@ background:
 - Timeline dot pulse para próxima cita
 
 **5. Timeline Horizontal Visual**
+
 ```
 08:00 ─── 10:00 ─── 12:00 ─── 14:00 ─── 16:00
   ░░░     ▓▓▓▓     ░░░░     ▓▓▓      ░░░
@@ -520,6 +545,7 @@ background:
 - **Mobile:** Grid necesita adaptación cuidadosa
 
 #### 🎯 Mejor para:
+
 - Apps que priorizan impresión visual
 - Dashboard que debe "impresionar"
 - Usuarios que valoran diseño premium
@@ -531,6 +557,7 @@ background:
 #### ✨ Lo MEJOR:
 
 **1. Sidebar Permanente**
+
 ```typescript
 <aside className="w-64 border-r">
   <nav>
@@ -545,6 +572,7 @@ background:
 ```
 
 **2. Preview Panel**
+
 ```typescript
 // Click appointment → Preview panel shows
 <aside className="w-96 border-l">
@@ -557,12 +585,14 @@ background:
 ```
 
 **3. Inline Editing**
+
 - No modales
 - Edit time directly en timeline
 - Drag-drop para reschedule
 - Keyboard shortcuts
 
 **4. Multi-Select Actions**
+
 ```typescript
 // Checkbox mode
 <Checkbox onSelect={addToSelection} />
@@ -580,6 +610,7 @@ background:
 - **Complejidad:** Preview panel requiere más trabajo
 
 #### 🎯 Mejor para:
+
 - Power users que configuran mucho
 - Barberos con muchas citas diarias
 - Workflow optimizado sobre estética
@@ -591,6 +622,7 @@ background:
 #### ✨ Lo MEJOR:
 
 **1. Timeline es el Protagonista**
+
 ```typescript
 // Horizontal visual timeline
 <TimelineCanvas>
@@ -607,6 +639,7 @@ background:
 ```
 
 **2. Hero Card Próxima Cita**
+
 ```typescript
 <NextAppointmentHero
   countdown={<Countdown target={nextAppointment.time} />}
@@ -623,6 +656,7 @@ background:
 ```
 
 **3. Scroll-Linked Animations**
+
 ```typescript
 // Timeline parallax
 const scrollProgress = useScroll()
@@ -632,6 +666,7 @@ const scrollProgress = useScroll()
 ```
 
 **4. Progressive Disclosure**
+
 - Próxima cita expanded (hero)
 - Resto collapsed (compact)
 - Click → Expand in-place
@@ -643,6 +678,7 @@ const scrollProgress = useScroll()
 - **Scroll behavior** - Requiere scroll horizontal en mobile
 
 #### 🎯 Mejor para:
+
 - Balance perfecto visual/funcional
 - Timeline-centric workflows
 - Apps que valoran narrative UX
@@ -651,15 +687,15 @@ const scrollProgress = useScroll()
 
 ## 📊 COMPARACIÓN LADO A LADO
 
-| Aspecto | A: Bento Grid | B: Split Pro | C: Timeline Cinema |
-|---------|---------------|--------------|-------------------|
-| **Visual Impact** | ⭐⭐⭐⭐⭐ 9.5/10 | ⭐⭐ 7/10 | ⭐⭐⭐⭐ 8.5/10 |
-| **Funcionalidad** | ⭐⭐⭐ 7/10 | ⭐⭐⭐⭐⭐ 9/10 | ⭐⭐⭐⭐ 8/10 |
-| **Mobile UX** | ⭐⭐⭐ 7/10 | ⭐⭐ 6/10 | ⭐⭐⭐⭐⭐ 9/10 |
-| **Desktop UX** | ⭐⭐⭐⭐ 8/10 | ⭐⭐⭐⭐⭐ 9/10 | ⭐⭐⭐⭐ 8/10 |
-| **Performance** | ⭐⭐ 6/10 | ⭐⭐⭐⭐⭐ 9/10 | ⭐⭐⭐⭐ 8/10 |
-| **Complejidad Dev** | ⭐⭐ 6/10 | ⭐⭐ 6/10 | ⭐⭐⭐ 7/10 |
-| **Awwwards Ready** | ✅ SÍ | ❌ NO | ✅ CASI |
+| Aspecto             | A: Bento Grid     | B: Split Pro    | C: Timeline Cinema |
+| ------------------- | ----------------- | --------------- | ------------------ |
+| **Visual Impact**   | ⭐⭐⭐⭐⭐ 9.5/10 | ⭐⭐ 7/10       | ⭐⭐⭐⭐ 8.5/10    |
+| **Funcionalidad**   | ⭐⭐⭐ 7/10       | ⭐⭐⭐⭐⭐ 9/10 | ⭐⭐⭐⭐ 8/10      |
+| **Mobile UX**       | ⭐⭐⭐ 7/10       | ⭐⭐ 6/10       | ⭐⭐⭐⭐⭐ 9/10    |
+| **Desktop UX**      | ⭐⭐⭐⭐ 8/10     | ⭐⭐⭐⭐⭐ 9/10 | ⭐⭐⭐⭐ 8/10      |
+| **Performance**     | ⭐⭐ 6/10         | ⭐⭐⭐⭐⭐ 9/10 | ⭐⭐⭐⭐ 8/10      |
+| **Complejidad Dev** | ⭐⭐ 6/10         | ⭐⭐ 6/10       | ⭐⭐⭐ 7/10        |
+| **Awwwards Ready**  | ✅ SÍ             | ❌ NO           | ✅ CASI            |
 
 ---
 
@@ -668,6 +704,7 @@ const scrollProgress = useScroll()
 ### **Si eliges OPCIÓN A (Bento Grid):**
 
 **Must Have:**
+
 1. ✅ Hero card próxima cita con countdown
 2. ✅ Stats en bento grid (asimétrico 2-3-2-3)
 3. ✅ Timeline horizontal con visual blocks
@@ -675,25 +712,18 @@ const scrollProgress = useScroll()
 5. ✅ 3D hover en todas las cards
 6. ✅ Spring physics en animaciones
 
-**Should Have:**
-7. Swipe gestures mobile
-8. Haptic feedback
-9. Confetti en success actions
-10. Magnetic hover effects
+**Should Have:** 7. Swipe gestures mobile 8. Haptic feedback 9. Confetti en success actions 10. Magnetic hover effects
 
-**Could Have:**
-11. Sound effects
-12. Particles background
-13. Easter eggs
+**Could Have:** 11. Sound effects 12. Particles background 13. Easter eggs
 
-**Won't Have:**
-14. 3D WebGL (overkill para dashboard)
+**Won't Have:** 14. 3D WebGL (overkill para dashboard)
 
 ---
 
 ### **Si eliges OPCIÓN B (Split Pro):**
 
 **Must Have:**
+
 1. ✅ Sidebar con navegación días
 2. ✅ Preview panel toggleable
 3. ✅ Inline editing timeline
@@ -701,17 +731,14 @@ const scrollProgress = useScroll()
 5. ✅ Multi-select mode
 6. ✅ Drag-drop reschedule
 
-**Should Have:**
-7. Bottom tabs mobile
-8. Filter/sort options
-9. Bulk actions
-10. Export data
+**Should Have:** 7. Bottom tabs mobile 8. Filter/sort options 9. Bulk actions 10. Export data
 
 ---
 
 ### **Si eliges OPCIÓN C (Timeline Cinema):**
 
 **Must Have:**
+
 1. ✅ Timeline horizontal visual
 2. ✅ Hero card próxima cita
 3. ✅ Scroll-linked animations
@@ -719,22 +746,18 @@ const scrollProgress = useScroll()
 5. ✅ Layout animations
 6. ✅ Swipe navigation días
 
-**Should Have:**
-7. Parallax effects
-8. Cinematic transitions
-9. Story-driven flow
-10. Ambient animations
+**Should Have:** 7. Parallax effects 8. Cinematic transitions 9. Story-driven flow 10. Ambient animations
 
 ---
 
 ## 💰 ESFUERZO ESTIMADO
 
-| Fase | A: Bento Grid | B: Split Pro | C: Timeline Cinema |
-|------|---------------|--------------|-------------------|
-| **Crear demo** | 4-5h | 4-5h | 5-6h |
-| **Implementar** | 12-16h | 14-18h | 10-14h |
-| **Testing** | 3-4h | 3-4h | 3-4h |
-| **Total** | **19-25h** | **21-27h** | **18-24h** |
+| Fase            | A: Bento Grid | B: Split Pro | C: Timeline Cinema |
+| --------------- | ------------- | ------------ | ------------------ |
+| **Crear demo**  | 4-5h          | 4-5h         | 5-6h               |
+| **Implementar** | 12-16h        | 14-18h       | 10-14h             |
+| **Testing**     | 3-4h          | 3-4h         | 3-4h               |
+| **Total**       | **19-25h**    | **21-27h**   | **18-24h**         |
 
 ---
 
@@ -745,6 +768,7 @@ const scrollProgress = useScroll()
 **OPCIÓN A (Bento Grid Command Center)** ⭐⭐⭐
 
 **Por qué:**
+
 1. ✅ Mi Día es la HOME - debe impresionar
 2. ✅ Es el dashboard más visto (10-20x por día)
 3. ✅ Bento grid perfecto para stats + próxima cita
@@ -752,12 +776,14 @@ const scrollProgress = useScroll()
 5. ✅ Timeline horizontal aprovecha mejor el espacio
 
 **Ventajas específicas para Mi Día:**
+
 - Barberos ven la próxima cita ENORME (no se la pierden)
 - Stats at-a-glance sin scroll
 - Timeline visual muestra gaps disponibles
 - Swipe mobile entre días (rápido navegar)
 
 **Consideraciones:**
+
 - Requiere optimización para animaciones
 - Mobile grid necesita collapse inteligente
 
@@ -768,15 +794,16 @@ const scrollProgress = useScroll()
 **¿Procedo a crear las 3 demos de Mi Día?**
 
 **Timeline estimado:**
+
 - Demo A: 4-5h
 - Demo B: 4-5h
 - Demo C: 5-6h
 - **Total:** 13-16h (2 días de trabajo)
 
 **O prefieres:**
+
 - Ver análisis de otro módulo primero (Citas, Clientes)
 - Ir directo con Demo A (ahorras 8-10h)
 - Ajustar el análisis
 
 **Dime cómo quieres proceder** 🚀
-

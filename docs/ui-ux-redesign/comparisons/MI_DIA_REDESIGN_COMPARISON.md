@@ -8,16 +8,16 @@
 
 ## 📊 Quick Decision Matrix
 
-| Criteria | Demo A: Bento Grid | Demo B: Split Pro | Demo C: Cinema | Winner |
-|----------|-------------------|-------------------|----------------|---------|
-| **Awwwards Score** | 9.5/10 | 7.0/10 | 8.5/10 | 🏆 A |
-| **Visual Impact** | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | 🏆 A |
-| **Desktop Efficiency** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | 🏆 B |
-| **Mobile UX** | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | 🏆 C |
-| **Storytelling** | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | 🏆 C |
-| **Implementation Time** | 19-25h | 21-27h | 18-24h | 🏆 C |
-| **Learning Curve** | Low | Medium | Low | 🏆 A/C |
-| **Scalability (many apts)** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | 🏆 B |
+| Criteria                    | Demo A: Bento Grid | Demo B: Split Pro | Demo C: Cinema | Winner |
+| --------------------------- | ------------------ | ----------------- | -------------- | ------ |
+| **Awwwards Score**          | 9.5/10             | 7.0/10            | 8.5/10         | 🏆 A   |
+| **Visual Impact**           | ⭐⭐⭐⭐⭐         | ⭐⭐              | ⭐⭐⭐⭐       | 🏆 A   |
+| **Desktop Efficiency**      | ⭐⭐⭐             | ⭐⭐⭐⭐⭐        | ⭐⭐⭐         | 🏆 B   |
+| **Mobile UX**               | ⭐⭐⭐⭐           | ⭐⭐              | ⭐⭐⭐⭐⭐     | 🏆 C   |
+| **Storytelling**            | ⭐⭐⭐             | ⭐⭐              | ⭐⭐⭐⭐⭐     | 🏆 C   |
+| **Implementation Time**     | 19-25h             | 21-27h            | 18-24h         | 🏆 C   |
+| **Learning Curve**          | Low                | Medium            | Low            | 🏆 A/C |
+| **Scalability (many apts)** | ⭐⭐⭐⭐           | ⭐⭐⭐⭐⭐        | ⭐⭐⭐         | 🏆 B   |
 
 ---
 
@@ -382,6 +382,7 @@
 ### Secondary Option: **Demo C - Timeline Cinema** (8.5/10)
 
 **When to choose:**
+
 - If mobile usage is very high (50%+)
 - If storytelling/narrative is important
 - If you want something unique but less "flashy"
@@ -390,12 +391,14 @@
 ### Not Recommended: **Demo B - Split Dashboard Pro** (7/10)
 
 **When to choose:**
+
 - Only if barbers have 15+ appointments per day (high volume)
 - Only if 95%+ usage is desktop with large monitors
 - Only if power users explicitly request keyboard shortcuts
 - For enterprise/corporate contexts (not applicable here)
 
 **Why not for Mi Día:**
+
 - Too utilitarian for a consumer-facing product
 - Looks like old CRM/admin tools
 - No emotional engagement
@@ -407,58 +410,58 @@
 
 ### Visual Design Quality
 
-| Aspect | Demo A | Demo B | Demo C |
-|--------|--------|--------|--------|
-| Color Psychology | ✅ Excellent - Mesh gradients create energy | ❌ Minimal - Generic gray palette | ✅ Good - Gradient hero banner |
-| Typography Hierarchy | ✅ Clear - Large countdown, varied sizes | ⚠️ Functional - All similar sizes | ✅ Strong - Hero time is massive |
-| White Space | ✅ Balanced - Bento grid has breathing room | ✅ Good - Clean panels | ⚠️ Tight - Horizontal scroll dense |
-| Animations | ✅ Premium - Spring physics, breathing | ❌ Minimal - Basic transitions | ✅ Cinematic - Scroll-linked effects |
-| Shadows & Depth | ✅ Layered - Glows, blurs, 3D hover | ❌ Flat - Basic shadows | ✅ Good - Glows on hover |
+| Aspect               | Demo A                                      | Demo B                            | Demo C                               |
+| -------------------- | ------------------------------------------- | --------------------------------- | ------------------------------------ |
+| Color Psychology     | ✅ Excellent - Mesh gradients create energy | ❌ Minimal - Generic gray palette | ✅ Good - Gradient hero banner       |
+| Typography Hierarchy | ✅ Clear - Large countdown, varied sizes    | ⚠️ Functional - All similar sizes | ✅ Strong - Hero time is massive     |
+| White Space          | ✅ Balanced - Bento grid has breathing room | ✅ Good - Clean panels            | ⚠️ Tight - Horizontal scroll dense   |
+| Animations           | ✅ Premium - Spring physics, breathing      | ❌ Minimal - Basic transitions    | ✅ Cinematic - Scroll-linked effects |
+| Shadows & Depth      | ✅ Layered - Glows, blurs, 3D hover         | ❌ Flat - Basic shadows           | ✅ Good - Glows on hover             |
 
 **Winner:** Demo A (superior visual design)
 
 ### Functionality & UX
 
-| Aspect | Demo A | Demo B | Demo C |
-|--------|--------|--------|--------|
-| Quick Actions | ✅ Embedded in hero card | ✅ Dedicated panel + inline | ✅ In hero banner + cards |
-| Information Density | ⚠️ Medium - Prioritizes hero | ✅ High - All visible at once | ⚠️ Medium - Sequential scroll |
-| Navigation Speed | ⚠️ Scroll required | ✅ Instant - Keyboard shortcuts | ⚠️ Horizontal scroll |
-| Multi-tasking | ❌ Single focus | ✅ Multiple panels | ❌ Single focus |
-| Search/Filter | ❌ Not included | ✅ Integrated search bar | ❌ Not included |
+| Aspect              | Demo A                       | Demo B                          | Demo C                        |
+| ------------------- | ---------------------------- | ------------------------------- | ----------------------------- |
+| Quick Actions       | ✅ Embedded in hero card     | ✅ Dedicated panel + inline     | ✅ In hero banner + cards     |
+| Information Density | ⚠️ Medium - Prioritizes hero | ✅ High - All visible at once   | ⚠️ Medium - Sequential scroll |
+| Navigation Speed    | ⚠️ Scroll required           | ✅ Instant - Keyboard shortcuts | ⚠️ Horizontal scroll          |
+| Multi-tasking       | ❌ Single focus              | ✅ Multiple panels              | ❌ Single focus               |
+| Search/Filter       | ❌ Not included              | ✅ Integrated search bar        | ❌ Not included               |
 
 **Winner:** Demo B (maximum efficiency for power users)
 
 ### Mobile Experience
 
-| Aspect | Demo A | Demo B | Demo C |
-|--------|--------|--------|--------|
-| Responsive Layout | ✅ Stack to vertical | ❌ Doesn't adapt well | ✅ Native horizontal scroll |
-| Touch Gestures | ✅ Scroll, tap | ❌ Desktop-focused | ✅ Swipe-optimized |
-| One-handed Use | ✅ Possible | ❌ Requires two hands | ✅ Easy |
-| Screen Size Adaptation | ✅ Works on 375px+ | ❌ Needs 768px+ | ✅ Works on 375px+ |
+| Aspect                 | Demo A               | Demo B                | Demo C                      |
+| ---------------------- | -------------------- | --------------------- | --------------------------- |
+| Responsive Layout      | ✅ Stack to vertical | ❌ Doesn't adapt well | ✅ Native horizontal scroll |
+| Touch Gestures         | ✅ Scroll, tap       | ❌ Desktop-focused    | ✅ Swipe-optimized          |
+| One-handed Use         | ✅ Possible          | ❌ Requires two hands | ✅ Easy                     |
+| Screen Size Adaptation | ✅ Works on 375px+   | ❌ Needs 768px+       | ✅ Works on 375px+          |
 
 **Winner:** Demo C (best mobile UX)
 
 ### Performance
 
-| Aspect | Demo A | Demo B | Demo C |
-|--------|--------|--------|--------|
-| Initial Load | ⚠️ Medium - Many animations | ✅ Fast - Simple layout | ⚠️ Medium - Scroll animations |
-| Re-render Cost | ⚠️ High - Mesh gradients | ✅ Low - Static panels | ⚠️ Medium - Scroll listeners |
-| Animation Performance | ✅ Good - GPU-accelerated | ✅ Minimal animations | ✅ Good - Transform-based |
-| Memory Usage | ⚠️ Higher - Multiple layers | ✅ Lower - Simpler DOM | ⚠️ Medium - Scroll refs |
+| Aspect                | Demo A                      | Demo B                  | Demo C                        |
+| --------------------- | --------------------------- | ----------------------- | ----------------------------- |
+| Initial Load          | ⚠️ Medium - Many animations | ✅ Fast - Simple layout | ⚠️ Medium - Scroll animations |
+| Re-render Cost        | ⚠️ High - Mesh gradients    | ✅ Low - Static panels  | ⚠️ Medium - Scroll listeners  |
+| Animation Performance | ✅ Good - GPU-accelerated   | ✅ Minimal animations   | ✅ Good - Transform-based     |
+| Memory Usage          | ⚠️ Higher - Multiple layers | ✅ Lower - Simpler DOM  | ⚠️ Medium - Scroll refs       |
 
 **Winner:** Demo B (best performance)
 
 ### Scalability
 
-| Appointments/Day | Demo A | Demo B | Demo C |
-|------------------|--------|--------|--------|
-| **1-5 (Low)** | ✅ Perfect | ⚠️ Overkill | ✅ Great |
-| **6-10 (Medium)** | ✅ Excellent | ✅ Good | ✅ Good |
-| **11-20 (High)** | ⚠️ Timeline gets long | ✅ Handles well | ⚠️ Very wide scroll |
-| **21+ (Very High)** | ❌ Too much scrolling | ✅ Best option | ❌ Unwieldy |
+| Appointments/Day    | Demo A                | Demo B          | Demo C              |
+| ------------------- | --------------------- | --------------- | ------------------- |
+| **1-5 (Low)**       | ✅ Perfect            | ⚠️ Overkill     | ✅ Great            |
+| **6-10 (Medium)**   | ✅ Excellent          | ✅ Good         | ✅ Good             |
+| **11-20 (High)**    | ⚠️ Timeline gets long | ✅ Handles well | ⚠️ Very wide scroll |
+| **21+ (Very High)** | ❌ Too much scrolling | ✅ Best option  | ❌ Unwieldy         |
 
 **Winner:** Demo B for high volume, Demo A for typical volume
 
@@ -503,33 +506,33 @@
 
 ### User Satisfaction
 
-| Demo | First Impression | Daily Use Satisfaction | Long-term Retention |
-|------|-----------------|----------------------|-------------------|
-| A | 9.5/10 - "Wow!" | 8.5/10 - Stays engaging | High - Memorable |
-| B | 6/10 - "Functional" | 9/10 - Very efficient | Medium - Gets boring |
-| C | 8.5/10 - "Interesting" | 8/10 - Stays fresh | High - Unique |
+| Demo | First Impression       | Daily Use Satisfaction  | Long-term Retention  |
+| ---- | ---------------------- | ----------------------- | -------------------- |
+| A    | 9.5/10 - "Wow!"        | 8.5/10 - Stays engaging | High - Memorable     |
+| B    | 6/10 - "Functional"    | 9/10 - Very efficient   | Medium - Gets boring |
+| C    | 8.5/10 - "Interesting" | 8/10 - Stays fresh      | High - Unique        |
 
 ### Business Metrics Impact
 
-| Metric | Demo A | Demo B | Demo C |
-|--------|--------|--------|--------|
-| Conversion Rate | +35-50% | +10-15% | +25-35% |
-| User Retention | +25-35% | +15-20% | +20-30% |
-| Pricing Power | +20-30% | +5-10% | +15-20% |
-| Support Tickets | -30-40% | -20-30% | -25-35% |
-| Viral Sharing | High | Low | Medium-High |
+| Metric          | Demo A  | Demo B  | Demo C      |
+| --------------- | ------- | ------- | ----------- |
+| Conversion Rate | +35-50% | +10-15% | +25-35%     |
+| User Retention  | +25-35% | +15-20% | +20-30%     |
+| Pricing Power   | +20-30% | +5-10%  | +15-20%     |
+| Support Tickets | -30-40% | -20-30% | -25-35%     |
+| Viral Sharing   | High    | Low     | Medium-High |
 
 **Winner:** Demo A (best business impact)
 
 ### Development & Maintenance
 
-| Aspect | Demo A | Demo B | Demo C |
-|--------|--------|--------|--------|
-| Initial Development | 19-25h | 21-27h | 18-24h |
-| Code Complexity | Medium-High | Medium | Medium |
-| Future Modifications | Medium effort | Easy | Medium effort |
-| Bug Risk | Low-Medium | Low | Low-Medium |
-| Performance Tuning Needed | Yes - Animations | No | Yes - Scroll |
+| Aspect                    | Demo A           | Demo B | Demo C        |
+| ------------------------- | ---------------- | ------ | ------------- |
+| Initial Development       | 19-25h           | 21-27h | 18-24h        |
+| Code Complexity           | Medium-High      | Medium | Medium        |
+| Future Modifications      | Medium effort    | Easy   | Medium effort |
+| Bug Risk                  | Low-Medium       | Low    | Low-Medium    |
+| Performance Tuning Needed | Yes - Animations | No     | Yes - Scroll  |
 
 **Winner:** Demo C (fastest to build), Demo B (easiest to maintain)
 
@@ -613,23 +616,23 @@ None of these apply to typical barbershop use case.
 
 ## 📊 Side-by-Side Feature Comparison
 
-| Feature | Demo A | Demo B | Demo C |
-|---------|--------|--------|--------|
-| **Layout** | Bento Grid | 3-Column Split | Horizontal Timeline |
-| **Next Appointment Display** | Hero card 2x size | In timeline list | Hero banner full-width |
-| **Stats Presentation** | Asymmetric cards | Vertical sidebar list | Horizontal pill bar |
-| **Timeline View** | Horizontal scroll | Vertical sidebar | Horizontal scroll (main) |
-| **Animations** | Spring + 3D + Mesh | Minimal transitions | Scroll-linked + Parallax |
-| **Quick Actions** | Embedded in cards | Dedicated panel | Embedded in cards |
-| **Search** | ❌ Not included | ✅ Integrated | ❌ Not included |
-| **Keyboard Shortcuts** | ❌ Not included | ✅ j/k navigation | ❌ Not included |
-| **Inline Editing** | ❌ Not included | ✅ Simulated | ❌ Not included |
-| **Real-time Updates** | ✅ WebSocket | ✅ WebSocket | ✅ WebSocket |
-| **Mobile Support** | ✅ Responsive stack | ❌ Desktop only | ✅ Touch-optimized |
-| **Desktop Support** | ✅ Optimized | ✅ Optimized | ✅ Good |
-| **Accessibility** | ✅ ARIA labels | ✅ Keyboard nav | ✅ ARIA labels |
-| **Loading States** | ✅ Skeletons | ✅ Skeletons | ✅ Skeletons |
-| **Error Handling** | ✅ Full | ✅ Full | ✅ Full |
+| Feature                      | Demo A              | Demo B                | Demo C                   |
+| ---------------------------- | ------------------- | --------------------- | ------------------------ |
+| **Layout**                   | Bento Grid          | 3-Column Split        | Horizontal Timeline      |
+| **Next Appointment Display** | Hero card 2x size   | In timeline list      | Hero banner full-width   |
+| **Stats Presentation**       | Asymmetric cards    | Vertical sidebar list | Horizontal pill bar      |
+| **Timeline View**            | Horizontal scroll   | Vertical sidebar      | Horizontal scroll (main) |
+| **Animations**               | Spring + 3D + Mesh  | Minimal transitions   | Scroll-linked + Parallax |
+| **Quick Actions**            | Embedded in cards   | Dedicated panel       | Embedded in cards        |
+| **Search**                   | ❌ Not included     | ✅ Integrated         | ❌ Not included          |
+| **Keyboard Shortcuts**       | ❌ Not included     | ✅ j/k navigation     | ❌ Not included          |
+| **Inline Editing**           | ❌ Not included     | ✅ Simulated          | ❌ Not included          |
+| **Real-time Updates**        | ✅ WebSocket        | ✅ WebSocket          | ✅ WebSocket             |
+| **Mobile Support**           | ✅ Responsive stack | ❌ Desktop only       | ✅ Touch-optimized       |
+| **Desktop Support**          | ✅ Optimized        | ✅ Optimized          | ✅ Good                  |
+| **Accessibility**            | ✅ ARIA labels      | ✅ Keyboard nav       | ✅ ARIA labels           |
+| **Loading States**           | ✅ Skeletons        | ✅ Skeletons          | ✅ Skeletons             |
+| **Error Handling**           | ✅ Full             | ✅ Full               | ✅ Full                  |
 
 ---
 
@@ -659,6 +662,7 @@ Once you've tested all 3 demos and selected your preferred option:
 ### Integration with Existing Features
 
 All 3 demos preserve:
+
 - ✅ Real-time WebSocket updates (Supabase Realtime)
 - ✅ Optimistic UI for instant feedback
 - ✅ Quick action buttons (Check-in, Complete, No-show)
@@ -669,18 +673,21 @@ All 3 demos preserve:
 ### Design System Implications
 
 **If you choose Demo A:**
+
 - Will set precedent for bento grid layouts
 - Mesh gradients become part of brand
 - 3D hover effects should be used consistently
 - Spring animations become standard
 
 **If you choose Demo B:**
+
 - Will set precedent for split-panel layouts
 - Minimal style should continue to other modules
 - Keyboard shortcuts expected everywhere
 - Sidebar navigation becomes pattern
 
 **If you choose Demo C:**
+
 - Horizontal scrolling might be used in other modules
 - Hero banners become pattern
 - Scroll animations should be consistent

@@ -12,6 +12,7 @@
 **Usuarios primarios:** Barberos (profesionales)
 **Frecuencia de uso:** Múltiples veces al día (10-30x)
 **Caso de uso crítico:**
+
 - Ver agenda del día/semana completa
 - Confirmar/completar citas rápidamente
 - Buscar cita específica por cliente
@@ -27,14 +28,17 @@
 ### 🔴 CRÍTICOS (Impacto Alto)
 
 #### 1. **Stats Pills占an Espacio Premium Sin Valor Escaneable**
+
 **Problema:** Cards de stats (0 citas, 0 pendientes, 0 listas) ocupan 30% del espacio above-the-fold pero solo muestran números estáticos.
 
 **Por qué es crítico:**
+
 - En día ocupado (15-25 citas), barbers necesitan ver CUÁLES citas tienen problemas
 - Números agregados (total: 15) no ayudan a ACTUAR
 - Stats actuales no muestran REVENUE - métrica clave para barbers
 
 **Datos:**
+
 - Current: 3 stats cards = 180px height
 - Users scan stats < 1 segundo antes de ir a lista
 - 75% del valor está en la LISTA de citas, no en totales
@@ -44,14 +48,17 @@
 ---
 
 #### 2. **Search Bar Enterrado Debajo de View Toggles**
+
 **Problema:** Barra de búsqueda está en 4ta prioridad visual (después de stats, week nav, view toggles).
 
 **Por qué es crítico:**
+
 - Buscar cliente es acción FRECUENTE (30% de interacciones)
 - Barber pregunta: "¿A qué hora viene Roberto?" → necesita search INMEDIATO
 - Actualmente: scroll + encontrar search bar + escribir = 3 pasos
 
 **Benchmark:**
+
 - Google Calendar: Search en header permanente
 - Calendly: Search es primer input visible
 - Apple Calendar: ⌘K global search
@@ -61,14 +68,17 @@
 ---
 
 #### 3. **6 Status Filter Pills = Sobrecarga Cognitiva**
+
 **Problema:** "Todas", "Pendientes", "Confirmadas", "Completadas", "Canceladas", "No asistió" - 6 opciones cuando el 80% del tiempo solo se usa 2.
 
 **Por qué es crítico:**
+
 - 80% de uso: "Todas" (default) o "Pendientes" (para confirmar)
 - 6 pills ocupan 50px de altura + crean fatiga de decisión
 - Mobile: Pills wrap to 2 líneas (100px wasted)
 
 **Datos de uso esperado:**
+
 - Todas: 60%
 - Pendientes: 20%
 - Confirmadas: 10%
@@ -79,14 +89,17 @@
 ---
 
 #### 4. **No Hay Visualización de Densidad de Tiempo**
+
 **Problema:** Imposible ver a simple vista si día está "packed" o tiene gaps.
 
 **Por qué es crítico:**
+
 - Barber necesita saber: "¿Puedo meter una cita a las 3pm?"
 - Actualmente: debe revisar lista línea por línea mentalmente calculando gaps
 - Vista de calendario (DaySchedule) existe PERO requiere cambiar de view mode
 
 **Benchmark:**
+
 - Google Calendar: Visualización de bloques de tiempo por defecto
 - Calendly: Timeline con gaps visibles
 - Outlook: Time density heatmap
@@ -96,14 +109,17 @@
 ---
 
 #### 5. **Empty State Sin CTA Accionable**
+
 **Problema:** Cuando no hay citas, solo muestra ícono de calendario gris.
 
 **Por qué es crítico:**
+
 - Nuevo user: "¿Ahora qué hago?"
 - No hay guidance: "Crea tu primera cita" con botón
 - Oportunidad perdida de onboarding
 
 **Benchmark:**
+
 - Notion: Empty state con sugerencias + templates
 - Linear: "Create your first issue" con shortcut
 - Figma: Tutorial interactivo en empty state
@@ -115,14 +131,17 @@
 ### 🟡 IMPORTANTES (Impacto Medio)
 
 #### 6. **View Mode Icons Sin Labels**
+
 **Problema:** 3 íconos pequeños (list/grid/timeline) sin texto explicativo.
 
 **Por qué importa:**
+
 - Primera vez: trial & error para descubrir cada view
 - Íconos list/grid se parecen mucho
 - Timeline icon no es obvio (clock icon)
 
 **Solución esperada:**
+
 - Tabs con labels: "Lista | Calendario | Semana"
 - O tooltips en hover
 
@@ -131,9 +150,11 @@
 ---
 
 #### 7. **Week Navigation Redundante**
+
 **Problema:** "19 ene - 25 ene" text + day pills (LUN 19, MAR 20...) = información duplicada.
 
 **Por qué importa:**
+
 - Week range no es interactivo - solo informativo
 - Ocupa espacio que podría ser search o filters
 - Day pills YA muestran las fechas
@@ -143,14 +164,17 @@
 ---
 
 #### 8. **No Batch Actions para Multi-Select**
+
 **Problema:** Cada cita requiere acción individual - no hay checkbox multi-select.
 
 **Por qué importa:**
+
 - Barber confirma 10 citas en la mañana: 10 clicks individuales
 - Cancelar múltiples citas por clima: una por una
 - Ineficiente para usuarios power
 
 **Benchmark:**
+
 - Gmail: Checkbox + bulk actions (archive, delete, label)
 - Notion: Multi-select con Space key
 - Trello: Drag múltiples cards
@@ -160,14 +184,17 @@
 ---
 
 #### 9. **Keyboard Shortcuts Ocultos**
+
 **Problema:** Shortcuts existen (arrows, t, n, 1-5) pero NO hay hint visual.
 
 **Por qué importa:**
+
 - Power users NO saben que existen
 - Sin legend: discoverability = 0%
 - Oportunidad de delightful UX perdida
 
 **Solución esperada:**
+
 - "?" key abre shortcut legend
 - O badge sutil: "Press ? for shortcuts"
 
@@ -176,9 +203,11 @@
 ---
 
 #### 10. **Mobile Bottom Nav Duplica Top Navigation**
+
 **Problema:** Bottom nav tiene "Citas" tab cuando ya estás EN página de Citas.
 
 **Por qué importa:**
+
 - Ocupa 60px de viewport vertical valuable
 - En mobile landscape: pierde 15% de pantalla
 - Bottom nav debería ser para CROSS-module navigation, no within-module
@@ -190,9 +219,11 @@
 ### 🟢 MENORES (Impacto Bajo)
 
 #### 11. **Stats Labels Vagos**
+
 **Problema:** "0 listas" - ¿Qué significa "listas"? ¿Confirmadas? ¿Pendientes?
 
 **Por qué importa:**
+
 - Ambigüedad en terminología
 - "Pendientes" vs "Listas" no es clara distinción
 - Debería ser: "Confirmadas", "Por confirmar", "Completadas"
@@ -202,9 +233,11 @@
 ---
 
 #### 12. **No Revenue Tracking Visible**
+
 **Problema:** Stats muestran COUNT de citas, pero no revenue esperado del día.
 
 **Por qué importa:**
+
 - Barbers piensan en términos de ₡: "¿Cuánto voy a hacer hoy?"
 - Revenue total + proyección ayuda a motivar
 - Actualmente: debe calcular mentalmente
@@ -215,16 +248,16 @@
 
 ## 📊 SCORING ACTUAL
 
-| Criterio | Score | Justificación |
-|----------|-------|---------------|
-| **Visual Design** | 6/10 | Dark mode funcional pero stats pills genéricos, no hay jerarquía visual sofisticada |
-| **Information Hierarchy** | 5/10 | Search enterrado, stats en top priority cuando deberían ser citas |
-| **Efficiency** | 6/10 | Múltiples view modes ✅ pero no batch actions, shortcuts ocultos |
-| **Visual Feedback** | 7/10 | Pills, empty state básicos - funcional pero sin delight |
-| **Mobile UX** | 6/10 | Compact pero bottom nav ocupa espacio innecesario |
-| **Accessibility** | 7/10 | Keyboard shortcuts existen pero hidden, focus states OK |
-| **Innovation** | 5/10 | Vista week es única, pero overall approach es conservador |
-| **Performance** | 8/10 | Optimized queries, lazy loading - muy bueno técnicamente |
+| Criterio                  | Score | Justificación                                                                       |
+| ------------------------- | ----- | ----------------------------------------------------------------------------------- |
+| **Visual Design**         | 6/10  | Dark mode funcional pero stats pills genéricos, no hay jerarquía visual sofisticada |
+| **Information Hierarchy** | 5/10  | Search enterrado, stats en top priority cuando deberían ser citas                   |
+| **Efficiency**            | 6/10  | Múltiples view modes ✅ pero no batch actions, shortcuts ocultos                    |
+| **Visual Feedback**       | 7/10  | Pills, empty state básicos - funcional pero sin delight                             |
+| **Mobile UX**             | 6/10  | Compact pero bottom nav ocupa espacio innecesario                                   |
+| **Accessibility**         | 7/10  | Keyboard shortcuts existen pero hidden, focus states OK                             |
+| **Innovation**            | 5/10  | Vista week es única, pero overall approach es conservador                           |
+| **Performance**           | 8/10  | Optimized queries, lazy loading - muy bueno técnicamente                            |
 
 **SCORE TOTAL: 6.25/10** ⭐️⭐️⭐️⭐️⭐️⭐️ (Funcional pero sin wow factor)
 
@@ -239,6 +272,7 @@
 **Concepto:** Línea de tiempo horizontal como control center, inspirado en DAWs (Digital Audio Workstations) y editors de video profesionales.
 
 **Hero Visual:**
+
 ```
 +-------------------------------------------------------------------------+
 |  CITAS                    [🔍 Search ⌘K]           HOY 24 ENE    ₡125k |
@@ -283,6 +317,7 @@
    - Barber ve instantáneamente: "3pm tengo slot libre"
 
 **Estilo visual:**
+
 - **Brutalist Professional** (black/white con orange accents)
 - Timeline con grid lines estilo DAW (Pro Tools, Ableton)
 - Monospace font para times (Fira Code)
@@ -290,6 +325,7 @@
 - Orange (₡ revenue) vs Blue (time blocks)
 
 **Tech stack:**
+
 - Framer Motion para drag & drop smooth
 - Radix UI Command palette para search
 - Virtual scrolling para timeline (60+ appointments)
@@ -300,6 +336,7 @@
 **Best for:** Power users que gestionan 15+ citas/día
 
 **Inspiración:**
+
 - Linear (command palette)
 - Ableton Live (timeline density)
 - Superhuman (keyboard-first)
@@ -311,6 +348,7 @@
 **Concepto:** Calendario como experiencia cinematográfica - cada cita es una "scene" con visual storytelling.
 
 **Hero Visual:**
+
 ```
 +-------------------------------------------------------------------------+
 |                    MIÉRCOLES 24 DE ENERO                                |
@@ -361,6 +399,7 @@
    - Weather context: "☀️ 28°C - Alta probabilidad de no-shows"
 
 **Estilo visual:**
+
 - **Glassmorphism Cinema** (frosted glass cards con depth)
 - Mesh gradients background (blue → purple)
 - Large typography para dates y times
@@ -368,6 +407,7 @@
 - Animated progress bars (spring physics)
 
 **Tech stack:**
+
 - Framer Motion para scroll-linked animations
 - Chart.js para occupancy bars
 - Intersection Observer para lazy load cards
@@ -378,6 +418,7 @@
 **Best for:** Barbers que optimizan revenue y quieren insights de scheduling
 
 **Inspiración:**
+
 - Stripe Dashboard (data storytelling)
 - Apple Fitness (progress visualization)
 - Arc Browser (command-first UX)
@@ -389,6 +430,7 @@
 **Concepto:** Kanban board híbrido con calendar - citas se mueven por ESTADOS en lugar de solo por TIEMPO.
 
 **Hero Visual:**
+
 ```
 +-------------------------------------------------------------------------+
 |  CITAS - MIÉ 24 ENE                        [⌘K Search]    ₡180k / ₡200k |
@@ -438,6 +480,7 @@
    - Presence indicators: "👤 Juan está editando esta cita"
 
 **Estilo visual:**
+
 - **Bento Grid Kanban** (cards con rounded corners, soft shadows)
 - Pastel backgrounds por status (yellow pending, blue confirmed, green completed)
 - Card hover: lift effect con shadow-xl
@@ -445,6 +488,7 @@
 - Smooth drag animations (Framer Motion)
 
 **Tech stack:**
+
 - @dnd-kit/core para drag & drop accessible
 - Radix UI Dropdown Menu para quick actions
 - Optimistic updates con React Query
@@ -455,6 +499,7 @@
 **Best for:** Multi-barber shops con colaboración y handoffs frecuentes
 
 **Inspiración:**
+
 - Notion Database views
 - Linear Issues board
 - Height Task Manager
@@ -463,17 +508,17 @@
 
 ## 📋 COMPARACIÓN RÁPIDA
 
-| Criterio | A: Timeline Command | B: Calendar Cinema | C: Grid Kanban |
-|----------|---------------------|-----------------------|-----------------|
-| **Visual Impact** | 8/10 (Brutalist Pro) | 9/10 (Glassmorphism) | 7.5/10 (Bento Grid) |
-| **Eficiencia** | 9/10 (Keyboard-first) | 7/10 (Click-heavy) | 8.5/10 (Drag workflow) |
-| **Learning Curve** | Medio (shortcuts) | Bajo (intuitivo) | Medio (Kanban concept) |
-| **Mobile UX** | 7/10 (horizontal scroll) | 8/10 (vertical scroll) | 6/10 (many columns) |
-| **Revenue Focus** | ✅ Header permanente | ✅ Storytelling | ✅ Por card |
-| **Time Visualization** | ✅✅ Timeline blocks | ✅✅ Occupancy bars | ⚠️ Indirecto |
-| **Multi-barber** | ❌ Single-user | ⚠️ Filters por barber | ✅ Presence tracking |
-| **Awwwards Score** | **8.5/10** | **9/10** | **8/10** |
-| **Esfuerzo** | 28-35h | 32-40h | 30-38h |
+| Criterio               | A: Timeline Command      | B: Calendar Cinema     | C: Grid Kanban         |
+| ---------------------- | ------------------------ | ---------------------- | ---------------------- |
+| **Visual Impact**      | 8/10 (Brutalist Pro)     | 9/10 (Glassmorphism)   | 7.5/10 (Bento Grid)    |
+| **Eficiencia**         | 9/10 (Keyboard-first)    | 7/10 (Click-heavy)     | 8.5/10 (Drag workflow) |
+| **Learning Curve**     | Medio (shortcuts)        | Bajo (intuitivo)       | Medio (Kanban concept) |
+| **Mobile UX**          | 7/10 (horizontal scroll) | 8/10 (vertical scroll) | 6/10 (many columns)    |
+| **Revenue Focus**      | ✅ Header permanente     | ✅ Storytelling        | ✅ Por card            |
+| **Time Visualization** | ✅✅ Timeline blocks     | ✅✅ Occupancy bars    | ⚠️ Indirecto           |
+| **Multi-barber**       | ❌ Single-user           | ⚠️ Filters por barber  | ✅ Presence tracking   |
+| **Awwwards Score**     | **8.5/10**               | **9/10**               | **8/10**               |
+| **Esfuerzo**           | 28-35h                   | 32-40h                 | 30-38h                 |
 
 ---
 
@@ -490,6 +535,7 @@
 5. **Mejor balance** entre belleza (9/10) y eficiencia (7/10)
 
 **Trade-off aceptado:**
+
 - Menos keyboard-first que A
 - Más clicks que A para power users
 - PERO: más intuitivo para todos los barbers
@@ -530,18 +576,21 @@
 #### 1. **Multiple View Modes** (como Google Calendar)
 
 **TODAY View:**
+
 - Time blocks mejorados con mini-timeline horizontal
 - Occupancy bars por bloque (MAÑANA/MEDIODÍA/TARDE)
 - Gap opportunities integrados en cada bloque
 - Revenue progress bar hacia meta diaria
 
 **WEEK View:**
+
 - Grid de 7 días (LUN-DOM)
 - Cada día muestra: count de citas, revenue total, preview de primeras 3 citas
 - Click en día → navega a TODAY view de ese día
 - Día actual con ring azul destacado
 
 **MONTH View:**
+
 - Calendario completo estilo Google Calendar
 - Cada día muestra dots de color por status (green=completed, blue=confirmed, orange=pending)
 - Click en día → navega a TODAY view
@@ -578,13 +627,13 @@
 
 ### 🎯 Awwwards Score Enhanced
 
-| Criterio | Cinema Base | Cinema Enhanced | Delta |
-|----------|-------------|-----------------|-------|
-| Visual Design | 9/10 | 9.5/10 | +0.5 |
-| Functionality | 7/10 | 9/10 | +2 |
-| Mobile UX | 8/10 | 9/10 | +1 |
-| Flexibility | 6/10 | 9/10 | +3 |
-| Innovation | 8/10 | 9/10 | +1 |
+| Criterio      | Cinema Base | Cinema Enhanced | Delta |
+| ------------- | ----------- | --------------- | ----- |
+| Visual Design | 9/10        | 9.5/10          | +0.5  |
+| Functionality | 7/10        | 9/10            | +2    |
+| Mobile UX     | 8/10        | 9/10            | +1    |
+| Flexibility   | 6/10        | 9/10            | +3    |
+| Innovation    | 8/10        | 9/10            | +1    |
 
 **SCORE ENHANCED: 9.3/10** ⭐⭐⭐⭐⭐⭐⭐⭐⭐
 

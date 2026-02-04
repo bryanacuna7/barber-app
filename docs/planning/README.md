@@ -4,11 +4,37 @@ Implementation plans and project roadmaps.
 
 ---
 
-## Active Plans
+## 📋 Roadmap Hierarchy (Which to Use When)
+
+### 1. [MVP_ROADMAP.md](MVP_ROADMAP.md) - PRIMARY for MVP Launch 🎯
+
+**Use for:** Getting to production with core business features
+**Status:** Active - Pre-launch
+**Scope:** Essential barbershop operations (appointments, clients, services, payments)
+**Timeline:** Launch-critical features only
+
+### 2. [POST_MVP_ROADMAP.md](POST_MVP_ROADMAP.md) - Post-Launch Features 🚀
+
+**Use for:** Features to build AFTER MVP is live
+**Status:** Planned - Post-launch
+**Scope:** Advanced features (analytics, marketing, advanced automation)
+**Timeline:** After stable production deployment
+
+### 3. [UI/UX Redesign Roadmap](../ui-ux-redesign/UI_UX_REDESIGN_ROADMAP.md) - Visual Transformation 🎨
+
+**Use for:** Awwwards-level UI/UX improvements (9.3/10 target)
+**Status:** Design phase complete (7/7 modules decided)
+**Scope:** Visual redesign of all 7 main modules
+**Timeline:** Can run in parallel with Post-MVP Tier 1 OR after MVP launch
+**See also:** [UI/UX Redesign README](../ui-ux-redesign/README.md) for all 7 winning demos
+
+---
+
+## Active Implementation Plans
 
 ### [Implementation Plan v2.5](implementation-v2.5.md)
 
-**Status:** Active
+**Status:** Active - Technical Debt Cleanup
 **Scope:** Major app transformation (Audited & Improved)
 **Estimated:** 154-200 hours (8-10 weeks)
 **Score:** 6.0/10 → 8.5/10 projected

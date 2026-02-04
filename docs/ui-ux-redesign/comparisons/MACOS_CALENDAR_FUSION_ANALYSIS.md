@@ -118,6 +118,7 @@
 ## 🎯 ELEMENTOS A FUSIONAR CON DEMO B ENHANCED
 
 ### ✅ YA TENEMOS (mantener):
+
 - Multiple view modes (TODAY/WEEK/MONTH)
 - View switcher en header
 - Drag & drop
@@ -129,6 +130,7 @@
 ### 🔥 AGREGAR de macOS Calendar:
 
 #### 1. **Mini Calendar Sidebar (RIGHT)** - CRÍTICO
+
 ```tsx
 <div className="fixed top-20 right-6 w-64 bg-[#1C1C1E] rounded-xl border border-[#2C2C2E] p-4">
   {/* Monthly calendar grid */}
@@ -137,14 +139,18 @@
 ```
 
 **Por qué es crítico:**
+
 - Context permanente de dónde estás en el mes/año
 - Quick navigation a cualquier día sin cambiar views
 - Familiar pattern de todos los calendars profesionales
 
 #### 2. **Current Time Indicator Mejorado**
+
 ```tsx
-{/* Red line across entire width */}
-<div className="absolute inset-x-0 h-0.5 bg-[#FF3B30] z-30" style={{top: position}}>
+{
+  /* Red line across entire width */
+}
+;<div className="absolute inset-x-0 h-0.5 bg-[#FF3B30] z-30" style={{ top: position }}>
   {/* Red dot */}
   <div className="absolute left-0 w-2 h-2 bg-[#FF3B30] rounded-full -translate-y-1/2" />
   {/* Time label */}
@@ -155,11 +161,13 @@
 ```
 
 **Mejoras:**
+
 - Más visible (red vs orange)
 - Label con tiempo actual
 - Pulso animado en dot
 
 #### 3. **Large Date Header (Day View)**
+
 ```tsx
 <div className="flex items-baseline gap-3">
   <div className="text-7xl font-bold text-white">4</div>
@@ -170,6 +178,7 @@
 **Hero visual** que refuerza "enfócate en HOY"
 
 #### 4. **Cleaner Background Color**
+
 ```tsx
 // Replace: bg-gradient-to-br from-slate-900 via-purple-900...
 // With: bg-[#1C1C1E]
@@ -178,31 +187,33 @@
 ```
 
 **Por qué:**
+
 - #1C1C1E es profesional, Apple-quality
 - Mesh gradients como accent, no como base
 - Mejora legibilidad
 
 #### 5. **Week View con Timeline Vertical (LEFT)**
+
 ```tsx
 <div className="grid grid-cols-[60px_repeat(7,1fr)]">
   {/* Column 1: Timeline labels */}
   <div>9 AM, 10 AM, 11 AM...</div>
 
   {/* Columns 2-8: Days */}
-  {weekDays.map(day => (
-    <div className="border-l border-[#2C2C2E]">
-      {/* Hourly slots */}
-    </div>
+  {weekDays.map((day) => (
+    <div className="border-l border-[#2C2C2E]">{/* Hourly slots */}</div>
   ))}
 </div>
 ```
 
 **Ventaja:**
+
 - Una timeline shared por todos los días
 - Más space-efficient que 7 timelines repetidas
 - Scanning horizontal natural
 
 #### 6. **"All Day" Section**
+
 ```tsx
 <div className="border-b border-[#2C2C2E] p-4 min-h-[40px]">
   <span className="text-xs text-gray-500">All Day</span>
@@ -211,17 +222,19 @@
 ```
 
 **Use case:**
+
 - Días festivos
 - Eventos especiales (cumpleaños, aniversarios)
 - Separado del timeline hourly
 
 #### 7. **Month View - Spacious Grid**
+
 ```tsx
 // Current: dots para events
 // macOS: Clean cells con más espacio
 
 <div className="grid grid-cols-7 gap-px bg-[#2C2C2E]">
-  {monthDays.map(day => (
+  {monthDays.map((day) => (
     <div className="bg-[#1C1C1E] aspect-square p-2">
       <div className="text-sm">{day.date.getDate()}</div>
       {/* Event indicators (max 3 dots) */}
@@ -231,11 +244,13 @@
 ```
 
 **Mejora:**
+
 - Gap-based grid (borders con bg color) = cleaner
 - Aspect-square cells = mejor proporción
 - Max 3 indicators por día + "+N more"
 
 #### 8. **Subtle Grid Lines**
+
 ```tsx
 // Horizontal lines cada hora:
 border-t border-[#2C2C2E]
@@ -247,6 +262,7 @@ border-l border-[#2C2C2E]
 ```
 
 **Profesionalismo:**
+
 - Lines casi invisibles (#2C2C2E sobre #1C1C1E)
 - Solo se ven cuando las necesitas
 - No compiten con contenido
@@ -287,6 +303,7 @@ border-l border-[#2C2C2E]
 **Score Final:** 9.5/10 → **9.8/10** 🎯
 
 **Por qué sube:**
+
 - **Familiarity +0.2:** Mini calendar + macOS UX patterns = cero learning curve
 - **Professional Polish +0.1:** Color scheme y grid lines más refinados
 - **Mantiene diferenciación:** Revenue, gaps, time blocks (no es clon de macOS)
@@ -298,18 +315,21 @@ border-l border-[#2C2C2E]
 ## 🛠️ IMPLEMENTATION PLAN
 
 ### Prioridad 1 (Must-Have):
+
 1. Mini calendar sidebar (RIGHT)
 2. Current time indicator mejorado (red line + dot + label)
 3. Large date header en day view
 4. Cleaner background (#1C1C1E)
 
 ### Prioridad 2 (Nice-to-Have):
+
 5. Week view grid layout (shared timeline LEFT)
 6. All Day section
 7. Subtle grid lines (#2C2C2E)
 8. Month view spacious cells
 
 ### Prioridad 3 (Polish):
+
 9. Smooth transitions entre views
 10. Keyboard shortcuts (← → para days, ⌘1/2/3 para views)
 11. Hover states refinados
@@ -320,6 +340,7 @@ border-l border-[#2C2C2E]
 **¿Implemento la fusión completa ahora?**
 
 Esto llevará Demo B Enhanced de **9.3/10 → 9.8/10** combinando:
+
 - Belleza y storytelling de Cinema
 - Professional polish de macOS Calendar
 - Business metrics (revenue, gaps) únicos de nuestra app
