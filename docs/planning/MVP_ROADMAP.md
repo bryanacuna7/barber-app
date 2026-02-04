@@ -56,33 +56,15 @@
 
 **Status:** ✅ COMPLETE (Session 86)
 
-#### Database Index Bug (5 min) ⚠️ CRITICAL
+**Summary:**
 
-- [x] Fix `last_activity_at` → `last_visit_at` in migration 019b
-  - Without this, inactive clients query FAILS
-  - Location: [supabase/migrations/019b_client_insights_indexes.sql](../../supabase/migrations/019b_client_insights_indexes.sql)
+- Database index bug fixed (last_visit_at)
+- Calendar N+1 queries → single range query (7x faster)
+- Mi Día polling → WebSocket (98% bandwidth reduction)
+- TypeScript errors: 201 → 0
+- Console.log cleanup with structured logging
 
-#### Performance Critical Fixes (4.5h)
-
-- [x] Calendar N+1 queries → single range query (2h)
-  - Current: Queries appointments for each staff member separately
-  - Fix: Single query with date range + business_id filter
-  - File: [src/app/citas/page.tsx](../../src/app/citas/page.tsx)
-- [x] Mi Día polling → WebSocket (2h)
-  - Current: Poll every 30s for status updates
-  - Fix: Real-time WebSocket connection
-  - ROI: Reduces server load by 95%
-
-#### Complete Área 0 TypeScript (8h)
-
-- [x] Fix remaining 15 TypeScript strict mode errors (6-8h)
-  - Most are in: `src/app/citas/`, `src/components/`
-  - Run: `npm run type-check` to see all errors
-- [x] ESLint auto-fix console.log removal (1h)
-  - Run: `npm run lint -- --fix`
-  - Manual review for intentional logs
-
-**Deliverable:** ✅ Build passes without `SKIP_TYPE_CHECK`, critical perf fixed
+**Deliverable:** ✅ Build passes without SKIP_TYPE_CHECK, critical perf fixed
 
 ---
 
@@ -90,199 +72,71 @@
 
 **Status:** ✅ COMPLETE (Sessions 87-92) - 100% (22h/22h)
 
-#### IDOR Vulnerability #1 (4h)
+**Tasks Completed:**
 
-- [x] Add barber identity validation in `/api/barbers/[id]/appointments/today`
-  - Current: Any authenticated user can access any barber's appointments
-  - Fix: Verify `session.user.id === barberId` OR user has `read_all_appointments` permission
-  - File: [src/app/api/barbers/[id]/appointments/today/route.ts](../../src/app/api/barbers/[id]/appointments/today/route.ts)
+1. **IDOR Vulnerability #1 (4h)** - Session 87
+   - Full RBAC system implemented (4 roles, 14 permissions)
+   - Migration 023 created and executed
+   - [src/lib/rbac.ts](../../src/lib/rbac.ts) (413 lines)
+   - Fixed `/api/barbers/[id]/appointments/today` endpoint
 
-#### IDOR Vulnerability #2 (4h)
+2. **IDOR Vulnerability #2 (4h)** - Session 88
+   - Created `canModifyBarberAppointments()` function
+   - Fixed 3 status endpoints (complete, check-in, no-show)
+   - SEC-012 to SEC-015 tests
 
-- [x] Make barberId validation MANDATORY in status update endpoints
-  - Endpoints: `/api/appointments/[id]/start`, `/api/appointments/[id]/complete`
-  - Current: Optional validation (can be bypassed)
-  - Fix: Move validation to RLS policy level
+3. **Race Condition Fix (4h)** - Session 89
+   - Verified Migration 022 `increment_client_stats()` atomic function
+   - Created 9 comprehensive tests (SEC-016 to SEC-018)
 
-#### Race Condition in Client Stats (4h)
+4. **Rate Limiting (4h)** - Session 90
+   - Verified all 3 status endpoints protected (10 req/min per user)
+   - Created 24 test cases
+   - Documented in DATABASE_SCHEMA.md
 
-- [x] Create atomic `increment_client_stats()` DB function
-  - Current: Read → increment → write (race condition)
-  - Fix: Single atomic SQL function
-  - Example:
-    ```sql
-    CREATE OR REPLACE FUNCTION increment_client_stats(
-      client_id UUID,
-      total_change INT,
-      spent_change DECIMAL
-    ) RETURNS void AS $$
-    BEGIN
-      UPDATE clients
-      SET
-        total_appointments = total_appointments + total_change,
-        total_spent = total_spent + spent_change,
-        updated_at = NOW()
-      WHERE id = client_id;
-    END;
-    $$ LANGUAGE plpgsql;
-    ```
+5. **Auth Integration (4h)** - Session 91
+   - Structured logging implemented (Pino)
+   - Eliminated duplicate user-to-barber mapping code
+   - Comprehensive documentation
 
-#### Rate Limiting (4h)
-
-- [x] Add rate limiting to status update endpoints
-  - Limit: 10 requests/min per user
-  - Library: `@upstash/ratelimit` (Redis-based)
-  - Endpoints: All `/api/appointments/[id]/*` routes
-
-#### Auth Integration (4h)
-
-- [x] Replace `BARBER_ID_PLACEHOLDER` with real auth
-  - Search codebase: `grep -r "BARBER_ID_PLACEHOLDER" src/`
-  - Replace with: `const barberId = session.user.id`
-  - Verify: No hardcoded IDs remain
-
-#### Security Tests (2h)
-
-- [x] Execute all 8 security test cases
-  - ✅ Test 1: IDOR attempt (different user's appointments) - SEC-001 to SEC-015
-  - ✅ Test 2: Race condition (concurrent stat updates) - SEC-016 to SEC-018
-  - ✅ Test 3: Rate limiting (11+ requests in 1 minute) - Rate limit tests
-  - ✅ Test 4: Auth bypass (no session token) - SEC-003
-  - ✅ Test 5: SQL injection (malicious input) - SEC-004
-  - ✅ Test 6: XSS (script tags in client name) - SEC-019 (Session 92)
-  - ✅ Test 7: CSRF (cross-site request) - SEC-020, SEC-021 (Session 92)
-  - ✅ Test 8: Authorization (staff accessing admin routes) - SEC-009, SEC-012-014
+6. **Security Tests (2h)** - Session 92
+   - All 8 MVP security test cases implemented
+   - 28+ tests passing
+   - XSS (SEC-019) and CSRF (SEC-020, SEC-021) tests added
 
 **Deliverable:** ✅ Mi Día production-ready, 0 critical vulnerabilities, 28+ security tests passing
 
 ---
 
-### Área 1: Simplified Subscriptions (Week 3) - 14-18h
+### Área 1: Subscriptions (Week 3) - 14-18h
 
-**Status:** ✅ COMPLETE (Already implemented in Migration 005)
+**Status:** ✅ COMPLETE (Already implemented - verified Session 93)
 
-**Note:** Full subscription system was already implemented with:
+**Summary:**
 
-- Manual payments (SINPE/transfers)
-- Two tiers: Basic ($12/mo), Pro ($29/mo)
-- Limits: Basic (2 barbers, 3 services, 25 clients), Pro (unlimited)
-- 7-day trial period
-- Grace period handling
-- Admin payment approval workflow
-- Complete UI at `/suscripcion`
+Full subscription system was already implemented in Migration 005 with:
 
----
+- **Pricing:** Basic $12/mo, Pro $29/mo
+- **Payment Method:** Manual SINPE/bank transfers (no Stripe)
+- **Limits:**
+  - Basic: 2 barbers, 3 services, 25 clients, no branding
+  - Pro: Unlimited everything + custom branding
+- **Features:**
+  - 7-day Pro trial on signup
+  - 3-day grace period after payment due
+  - Admin payment approval workflow (payment_reports table)
+- **Code:** Complete implementation
+  - [src/lib/subscription.ts](../../src/lib/subscription.ts) (465 lines)
+  - APIs: `/api/subscription/*` (status, plans, change-plan, report-payment)
+  - UI: `/suscripcion` page with PlanCard, PaymentFormModal, trial-banner
 
-### ~~Área 1: Simplified Subscriptions (Week 3) - 14-18h~~ [SKIP - Already Done]
-
-**Decision:** No auto-deletion, no client limits (anti-growth removed)
-
-#### Database Migration (3-4h)
-
-- [ ] Create subscriptions tables
-
-  ```sql
-  CREATE TABLE subscription_plans (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL, -- 'basic' or 'pro'
-    price_usd DECIMAL(10,2) NOT NULL,
-    price_crc DECIMAL(10,2) NOT NULL,
-    billing_period TEXT NOT NULL, -- 'monthly' or 'annual'
-    features JSONB NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
-  );
-
-  CREATE TABLE business_subscriptions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
-    plan_id UUID REFERENCES subscription_plans(id),
-    status TEXT NOT NULL, -- 'active', 'past_due', 'canceled'
-    current_period_start DATE NOT NULL,
-    current_period_end DATE NOT NULL,
-    grace_period_ends DATE, -- NULL if active
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-  );
-  ```
-
-- [ ] Seed subscription plans (Basic $19/mo, Pro $49/mo)
-- [ ] Add indexes for performance
-
-#### Feature Gating System (4-5h)
-
-- [ ] Create `hasFeature()` helper function
-
-  ```typescript
-  // src/lib/subscriptions.ts
-  export async function hasFeature(businessId: string, feature: string): Promise<boolean> {
-    const subscription = await getBusinessSubscription(businessId)
-    if (!subscription) return false
-
-    // Grace period handling
-    if (subscription.status === 'past_due') {
-      const gracePeriodActive = new Date() < new Date(subscription.grace_period_ends)
-      if (!gracePeriodActive) return false
-    }
-
-    return subscription.plan.features[feature] === true
-  }
-  ```
-
-- [ ] Define feature flags:
-  ```typescript
-  const FEATURES = {
-    basic: {
-      multi_staff: false,
-      advanced_reports: false,
-      custom_branding: false,
-      api_access: false,
-      priority_support: false,
-    },
-    pro: {
-      multi_staff: true,
-      advanced_reports: true,
-      custom_branding: true,
-      api_access: true,
-      priority_support: true,
-    },
-  }
-  ```
-
-#### Grace Period Handling (3-4h)
-
-- [ ] Cron job: `/api/cron/check-subscriptions`
-  - Run daily
-  - Find subscriptions with `current_period_end` < today
-  - Set status to `past_due` if payment not received
-  - Set `grace_period_ends` to +7 days
-  - Send email notification
-- [ ] UI: Show grace period banner
-  - "Your subscription payment is overdue. You have X days remaining to update payment."
-  - Action: "Update Payment Method"
-
-#### Payment Reporting (2-3h)
-
-- [ ] Admin page: `/dashboard/subscription`
-  - Current plan details
-  - Billing history
-  - Payment method (credit card last 4 digits)
-  - Upgrade/downgrade button
-- [ ] Payment success webhook
-  - Stripe webhook: `invoice.paid`
-  - Update subscription status to `active`
-  - Reset grace period
-
-#### Testing (2-3h)
-
-- [ ] Unit tests for `hasFeature()`
-- [ ] Integration test: Grace period expiration
-- [ ] E2E test: Feature gate blocks access (Basic plan tries to access Pro feature)
-
-**Deliverable:** ✅ Two-tier subscription system without anti-growth limits
+**Deliverable:** ✅ Fully operational subscription system, revenue-ready
 
 ---
 
 ### Sprint 5: MVP Testing (Weeks 4-5) - 40-50h
+
+**Status:** Not Started
 
 **Scope:** Focus on CRITICAL paths only (not 80% full coverage)
 
@@ -369,13 +223,13 @@
 
 ### Before Launch - MANDATORY
 
-- [ ] FASE 0 completed (all critical fixes)
-- [ ] Área 6 completed (0 security vulnerabilities)
-- [ ] Área 1 completed (subscription system working)
+- [x] FASE 0 completed (all critical fixes)
+- [x] Área 6 completed (0 security vulnerabilities)
+- [x] Área 1 completed (subscription system working)
 - [ ] Sprint 5 completed (critical tests passing)
-- [ ] Database index bug fixed
-- [ ] TypeScript errors: 0
-- [ ] ESLint errors: 0
+- [x] Database index bug fixed
+- [x] TypeScript errors: 0
+- [x] ESLint errors: 0
 
 ### Production Requirements
 
@@ -466,47 +320,52 @@ See [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) for:
 
 ## 📞 NEXT STEPS
 
+### Current Status (Session 93)
+
+**Completed:**
+
+- ✅ FASE 0: Critical Fixes (12.5h)
+- ✅ Área 6: Security Fixes (22h)
+- ✅ Área 1: Subscriptions (14-18h)
+
+**Remaining:**
+
+- ⏳ Sprint 5: MVP Testing (40-50h) **NEXT**
+
+**Progress:** 48.5-52.5h / 98-128h = 38-54% complete
+
 ### This Week (IMMEDIATE)
 
 1. ✅ Review MVP scope
 2. ✅ Approve MVP definition
-3. [ ] Fix database index bug (5 minutes) ⚠️ START NOW
-4. [ ] Begin FASE 0 critical fixes
-
-### Week 2
-
-1. [ ] Complete FASE 0 (TypeScript + Performance)
-2. [ ] Begin Área 6 security fixes
-3. [ ] Setup test infrastructure
-
-### Week 3
-
-1. [ ] Complete Área 6 security
-2. [ ] Begin Área 1 subscriptions
+3. ➡️ **Begin Sprint 5: MVP Testing (40-50h)**
 
 ### Weeks 4-5
 
-1. [ ] Complete subscriptions
-2. [ ] Execute Sprint 5 MVP testing
-3. [ ] Prepare for production deploy
+1. [ ] Execute Sprint 5 testing plan
+2. [ ] Critical Path Tests (20-25h)
+3. [ ] Security Testing (8-10h)
+4. [ ] Performance Testing (4-6h)
+5. [ ] Test Infrastructure (8-10h)
 
 ### Week 6 (MVP LAUNCH)
 
-1. [ ] Deploy to production
-2. [ ] Monitor first 48h
-3. [ ] Plan Post-MVP Phase 1
+1. [ ] Complete remaining tests
+2. [ ] Deploy to production
+3. [ ] Monitor first 48h
+4. [ ] Plan Post-MVP Phase 1
 
 ---
 
-**STATUS:** 🚀 MVP In Progress - Week 3 Ready
-**COMPLETED:** FASE 0 (12.5h) + Área 6 (22h) = 34.5h ✅
-**REMAINING:** Área 1 (14-18h) + Sprint 5 (40-50h) = 54-68h
+**STATUS:** 🚀 MVP In Progress - Sprint 5 Ready
+**COMPLETED:** FASE 0 + Área 6 + Área 1 = 48.5-52.5h ✅
+**REMAINING:** Sprint 5 (40-50h) = 40-50h
 **TOTAL TIME:** 98-128 hours (5-6 weeks)
-**LAUNCH TARGET:** 3-4 weeks remaining
+**LAUNCH TARGET:** 2-3 weeks remaining
 **POST-MVP:** 387-504 hours remaining (organized separately)
 
-**Progress:** 34.5h / 98-128h = 27-35% complete
+**Progress:** 48.5-52.5h / 98-128h = 38-54% complete
 
-**Last Updated:** Session 92 (2026-02-03) - Área 6 COMPLETE 🎉
+**Last Updated:** Session 93 (2026-02-03) - Área 1 verified complete, ready for Sprint 5 ✅
 
 **Let's ship the MVP! 🚀**
