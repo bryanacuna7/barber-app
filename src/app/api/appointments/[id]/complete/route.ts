@@ -5,6 +5,7 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -160,7 +161,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       // Note: This is handled by database triggers in migration 018_barber_gamification.sql
       // The trigger automatically updates barber_stats when appointment status changes to 'completed'
 
-      console.log(`Complete: Appointment ${appointmentId} status changed to completed`)
+      logger.info({ appointmentId, status: 'completed' }, 'Appointment status changed to completed')
 
       return NextResponse.json(updatedAppointment as AppointmentStatusUpdateResponse)
     } catch (error) {

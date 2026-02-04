@@ -5,6 +5,7 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -127,7 +128,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         return errorResponse('Error al actualizar el estado de la cita')
       }
 
-      console.log(`No-show: Appointment ${appointmentId} status changed to no_show`)
+      logger.info({ appointmentId, status: 'no_show' }, 'Appointment marked as no-show')
 
       return NextResponse.json(updatedAppointment as AppointmentStatusUpdateResponse)
     } catch (error) {
