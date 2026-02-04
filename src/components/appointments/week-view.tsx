@@ -358,7 +358,7 @@ export const WeekView = memo(function WeekView({
                   className="h-[60px] border-b border-zinc-200 dark:border-zinc-700 text-right pr-1 md:pr-2 pt-1"
                 >
                   <span className="text-[10px] md:text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    {format(setHours(new Date(), hour), 'HH:mm')}
+                    {format(setMinutes(setHours(new Date(), hour), 0), 'HH:mm')}
                   </span>
                 </div>
               ))}
