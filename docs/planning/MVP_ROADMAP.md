@@ -38,8 +38,8 @@
 
 | Phase                      | Hours   | Weeks @ 20h/wk | Status      |
 | -------------------------- | ------- | -------------- | ----------- |
-| **FASE 0: Critical Fixes** | 12.5h   | 0.5 weeks      | In Progress |
-| **Área 6: Security**       | 22h     | 1 week         | Blocked     |
+| **FASE 0: Critical Fixes** | 12.5h   | 0.5 weeks      | ✅ Complete |
+| **Área 6: Security**       | 22h     | 1 week         | ✅ Complete |
 | **Área 1: Subscriptions**  | 14-18h  | 0.75-1 week    | Not Started |
 | **Sprint 5: MVP Testing**  | 40-50h  | 2-2.5 weeks    | Not Started |
 | **Buffer (15%)**           | 10-20h  | 0.5-1 week     | -           |
@@ -54,31 +54,31 @@
 
 ### FASE 0: Critical Fixes (Week 1) - 12.5h
 
-**Status:** BLOCKER - Must complete before all other work
+**Status:** ✅ COMPLETE (Session 86)
 
 #### Database Index Bug (5 min) ⚠️ CRITICAL
 
-- [ ] Fix `last_activity_at` → `last_visit_at` in migration 019b
+- [x] Fix `last_activity_at` → `last_visit_at` in migration 019b
   - Without this, inactive clients query FAILS
   - Location: [supabase/migrations/019b_client_insights_indexes.sql](../../supabase/migrations/019b_client_insights_indexes.sql)
 
 #### Performance Critical Fixes (4.5h)
 
-- [ ] Calendar N+1 queries → single range query (2h)
+- [x] Calendar N+1 queries → single range query (2h)
   - Current: Queries appointments for each staff member separately
   - Fix: Single query with date range + business_id filter
   - File: [src/app/citas/page.tsx](../../src/app/citas/page.tsx)
-- [ ] Mi Día polling → WebSocket (2h)
+- [x] Mi Día polling → WebSocket (2h)
   - Current: Poll every 30s for status updates
   - Fix: Real-time WebSocket connection
   - ROI: Reduces server load by 95%
 
 #### Complete Área 0 TypeScript (8h)
 
-- [ ] Fix remaining 15 TypeScript strict mode errors (6-8h)
+- [x] Fix remaining 15 TypeScript strict mode errors (6-8h)
   - Most are in: `src/app/citas/`, `src/components/`
   - Run: `npm run type-check` to see all errors
-- [ ] ESLint auto-fix console.log removal (1h)
+- [x] ESLint auto-fix console.log removal (1h)
   - Run: `npm run lint -- --fix`
   - Manual review for intentional logs
 
@@ -88,25 +88,25 @@
 
 ### Área 6: Security Fixes (Week 2) - 22h
 
-**Status:** 90% complete, BLOCKED by security vulnerabilities
+**Status:** ✅ COMPLETE (Sessions 87-92) - 100% (22h/22h)
 
 #### IDOR Vulnerability #1 (4h)
 
-- [ ] Add barber identity validation in `/api/barbers/[id]/appointments/today`
+- [x] Add barber identity validation in `/api/barbers/[id]/appointments/today`
   - Current: Any authenticated user can access any barber's appointments
   - Fix: Verify `session.user.id === barberId` OR user has `read_all_appointments` permission
   - File: [src/app/api/barbers/[id]/appointments/today/route.ts](../../src/app/api/barbers/[id]/appointments/today/route.ts)
 
 #### IDOR Vulnerability #2 (4h)
 
-- [ ] Make barberId validation MANDATORY in status update endpoints
+- [x] Make barberId validation MANDATORY in status update endpoints
   - Endpoints: `/api/appointments/[id]/start`, `/api/appointments/[id]/complete`
   - Current: Optional validation (can be bypassed)
   - Fix: Move validation to RLS policy level
 
 #### Race Condition in Client Stats (4h)
 
-- [ ] Create atomic `increment_client_stats()` DB function
+- [x] Create atomic `increment_client_stats()` DB function
   - Current: Read → increment → write (race condition)
   - Fix: Single atomic SQL function
   - Example:
@@ -129,31 +129,31 @@
 
 #### Rate Limiting (4h)
 
-- [ ] Add rate limiting to status update endpoints
+- [x] Add rate limiting to status update endpoints
   - Limit: 10 requests/min per user
   - Library: `@upstash/ratelimit` (Redis-based)
   - Endpoints: All `/api/appointments/[id]/*` routes
 
 #### Auth Integration (4h)
 
-- [ ] Replace `BARBER_ID_PLACEHOLDER` with real auth
+- [x] Replace `BARBER_ID_PLACEHOLDER` with real auth
   - Search codebase: `grep -r "BARBER_ID_PLACEHOLDER" src/`
   - Replace with: `const barberId = session.user.id`
   - Verify: No hardcoded IDs remain
 
 #### Security Tests (2h)
 
-- [ ] Execute all 8 security test cases
-  - Test 1: IDOR attempt (different user's appointments)
-  - Test 2: Race condition (concurrent stat updates)
-  - Test 3: Rate limiting (11+ requests in 1 minute)
-  - Test 4: Auth bypass (no session token)
-  - Test 5: SQL injection (malicious input)
-  - Test 6: XSS (script tags in client name)
-  - Test 7: CSRF (cross-site request)
-  - Test 8: Authorization (staff accessing admin routes)
+- [x] Execute all 8 security test cases
+  - ✅ Test 1: IDOR attempt (different user's appointments) - SEC-001 to SEC-015
+  - ✅ Test 2: Race condition (concurrent stat updates) - SEC-016 to SEC-018
+  - ✅ Test 3: Rate limiting (11+ requests in 1 minute) - Rate limit tests
+  - ✅ Test 4: Auth bypass (no session token) - SEC-003
+  - ✅ Test 5: SQL injection (malicious input) - SEC-004
+  - ✅ Test 6: XSS (script tags in client name) - SEC-019 (Session 92)
+  - ✅ Test 7: CSRF (cross-site request) - SEC-020, SEC-021 (Session 92)
+  - ✅ Test 8: Authorization (staff accessing admin routes) - SEC-009, SEC-012-014
 
-**Deliverable:** ✅ Mi Día production-ready, 0 critical vulnerabilities
+**Deliverable:** ✅ Mi Día production-ready, 0 critical vulnerabilities, 28+ security tests passing
 
 ---
 
@@ -482,9 +482,15 @@ See [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) for:
 
 ---
 
-**STATUS:** ✅ MVP Scope Defined
+**STATUS:** 🚀 MVP In Progress - Week 3 Ready
+**COMPLETED:** FASE 0 (12.5h) + Área 6 (22h) = 34.5h ✅
+**REMAINING:** Área 1 (14-18h) + Sprint 5 (40-50h) = 54-68h
 **TOTAL TIME:** 98-128 hours (5-6 weeks)
-**LAUNCH TARGET:** 6 weeks from start
+**LAUNCH TARGET:** 3-4 weeks remaining
 **POST-MVP:** 387-504 hours remaining (organized separately)
+
+**Progress:** 34.5h / 98-128h = 27-35% complete
+
+**Last Updated:** Session 92 (2026-02-03) - Área 6 COMPLETE 🎉
 
 **Let's ship the MVP! 🚀**
