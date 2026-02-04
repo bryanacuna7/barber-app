@@ -455,6 +455,40 @@ function CitasPageContent() {
     setIsFormOpen(true)
   }
 
+  // Handle drag-and-drop reschedule in Week View
+  const handleAppointmentReschedule = async (appointmentId: string, newScheduledAt: string) => {
+    // Optimistic update
+    const previousAppointments = [...appointments]
+    setAppointments((prev) =>
+      prev.map((apt) => (apt.id === appointmentId ? { ...apt, scheduled_at: newScheduledAt } : apt))
+    )
+
+    try {
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scheduled_at: newScheduledAt }),
+      })
+
+      if (!response.ok) {
+        // Rollback on error
+        setAppointments(previousAppointments)
+        const error = await response.json()
+        throw new Error(error.error || 'Error al reprogramar')
+      }
+
+      // Update with server response to ensure consistency
+      const updated = await response.json()
+      setAppointments((prev) => prev.map((apt) => (apt.id === updated.id ? updated : apt)))
+    } catch (error) {
+      // Rollback already done above if response not ok
+      if (error instanceof Error && error.message !== 'Error al reprogramar') {
+        setAppointments(previousAppointments)
+      }
+      throw error // Re-throw so WeekView can show the error toast
+    }
+  }
+
   // Navigation
   const goToPreviousDay = () => setSelectedDate((prev) => addDays(prev, -1))
   const goToNextDay = () => setSelectedDate((prev) => addDays(prev, 1))
@@ -771,7 +805,7 @@ function CitasPageContent() {
                         </div>
                       </PullToRefresh>
                     ) : (
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2 max-w-3xl mx-auto">
                         {filteredAppointments
                           .sort(
                             (a, b) =>
@@ -821,6 +855,7 @@ function CitasPageContent() {
                         setEditingAppointment(null)
                         setIsFormOpen(true)
                       }}
+                      onAppointmentReschedule={handleAppointmentReschedule}
                     />
                   </Card>
                 )}

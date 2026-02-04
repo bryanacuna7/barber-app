@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 (Session 81 - Calendar Views: Mobile + Features)
-- **Last Session:** Session 81 - FASE 1: Mobile responsive + URL sync + keyboard shortcuts complete
+- **Last Updated:** 2026-02-03 (Session 82 - Week View Drag-and-Drop)
+- **Last Session:** Session 82 - FASE 1: Drag-and-drop appointment rescheduling complete
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -134,6 +134,123 @@
 
 ## Recent Sessions (Condensed)
 
+### Session 82: Week View Drag-and-Drop Rescheduling (2026-02-03)
+
+**Status:** Implementation Complete - Testing Pending
+
+**Time:** ~1.5 hours
+
+**Objective:** Implement drag-and-drop appointment rescheduling in Week View
+
+**Agent Used:** @fullstack-developer
+
+**Actions Completed:**
+
+1. **Library Selection & Installation**
+   - Evaluated: @dnd-kit/core (modern, accessible), react-beautiful-dnd (deprecated), react-dnd (complex)
+   - Selected: `@dnd-kit/core` + `@dnd-kit/modifiers` + `@dnd-kit/utilities`
+   - Reasons: 15KB bundle, React 18+ support, WCAG AA accessibility, active maintenance
+   - Installed via npm
+
+2. **Week View Enhancement (`src/components/appointments/week-view.tsx`)**
+   - Added DndContext wrapper with sensor configuration
+   - PointerSensor (8px activation distance)
+   - TouchSensor (250ms delay for mobile)
+   - KeyboardSensor for accessibility
+   - Implemented drag handlers: handleDragStart, handleDragOver, handleDragEnd
+   - Added conflict detection for time slots
+   - Optimistic updates with rollback on error
+   - Visual feedback during drag (DragOverlay component)
+
+3. **Created Draggable Appointment Component (`src/components/appointments/draggable-appointment.tsx`)**
+   - Uses @dnd-kit/core useDraggable hook
+   - Drag handle indicator (grip icon)
+   - Cursor changes: grab (idle), grabbing (dragging)
+   - Opacity reduction for original during drag
+   - Only pending/confirmed appointments are draggable
+   - Completed/cancelled appointments cannot be moved
+
+4. **Created Droppable Time Slot Component (`src/components/appointments/droppable-time-slot.tsx`)**
+   - Uses @dnd-kit/core useDroppable hook
+   - Visual states:
+     - Default: hover highlights
+     - Dragging: light blue background
+     - Valid drop: green highlight + "Soltar aqui" text
+     - Invalid drop (conflict): red highlight + "Horario ocupado" text
+
+5. **API Integration (citas/page.tsx)**
+   - Added `handleAppointmentReschedule` function
+   - Optimistic UI update (immediate visual feedback)
+   - PATCH request to `/api/appointments/[id]` with new `scheduled_at`
+   - Rollback on error with toast notification
+   - Passed handler to WeekView via `onAppointmentReschedule` prop
+
+**Files Created:**
+
+- `src/components/appointments/draggable-appointment.tsx` (100 lines)
+- `src/components/appointments/droppable-time-slot.tsx` (75 lines)
+- `e2e/week-view-drag.spec.ts` (200 lines) - E2E test suite
+
+**Files Modified:**
+
+- `src/components/appointments/week-view.tsx` (complete rewrite with DnD)
+- `src/app/(dashboard)/citas/page.tsx` (+35 lines for reschedule handler)
+- `package.json` (+3 dependencies)
+
+**Dependencies Added:**
+
+- `@dnd-kit/core` - Drag-and-drop primitives
+- `@dnd-kit/modifiers` - restrictToWindowEdges modifier
+- `@dnd-kit/utilities` - CSS transform utilities
+
+**Validation Rules Implemented:**
+
+- Cannot drop outside business hours
+- Conflict detection (overlapping appointments)
+- Only pending/confirmed appointments can be moved
+- Appointment duration preserved when rescheduling
+
+**Build Status:** Passed (0 errors, only pre-existing warnings)
+
+**Testing:**
+
+- Created E2E test suite with 8 test scenarios
+- Tests require authentication to run
+- Manual testing checklist available
+
+**Progress on FASE 1 Calendar Views (50-52h estimated):**
+
+- Week View Desktop (8-10h) - Complete
+- Month View Desktop (8-11h) - Complete
+- View Toggle (4-5h) - Complete
+- Week View Mobile (2-3h) - Complete
+- Month View Mobile (3-4h) - Complete
+- URL State Sync (4-5h) - Complete
+- Keyboard Shortcuts (2-3h) - Complete
+- Performance Optimization (2h) - Complete
+- **Drag-drop rescheduling (8-10h) - Complete** (actual: 1.5h)
+- Testing (6-8h) - Pending
+
+**Current Completion:** ~90% of Calendar Views feature
+
+**Key Features Implemented:**
+
+- Drag appointment to new time slot in Week View
+- Visual feedback during drag (ghost preview)
+- Drop zone highlighting (green=valid, red=conflict)
+- Mobile-friendly touch sensors (250ms hold to drag)
+- Keyboard accessibility support
+- Optimistic UI with rollback on error
+- Toast notifications for success/error
+
+**Next Steps:**
+
+1. E2E tests for drag-drop (requires auth setup)
+2. Add drag-drop to DaySchedule component (optional)
+3. Continue with next FASE 1 feature from roadmap
+
+---
+
 ### Session 81: Calendar Views - Mobile Responsive + Power Features (2026-02-03)
 
 **Status:** ✅ Complete - Mobile views + URL sync + keyboard shortcuts + fixes
@@ -202,10 +319,10 @@
 - ✅ URL State Sync (4-5h) → Complete ⭐
 - ✅ Keyboard Shortcuts (2-3h) → Complete ⭐
 - ✅ Performance Optimization (2h) → Complete ⭐
+- ✅ Drag-drop rescheduling (8-10h) → Complete ⭐ (Session 82)
 - ❌ Testing (6-8h) → Pending
-- ❌ Drag-drop rescheduling (8-10h) → Pending (optional)
 
-**Current Completion:** ~85% of Calendar Views feature (44h of 50-52h)
+**Current Completion:** ~90% of Calendar Views feature (48h of 50-52h)
 
 **Key Features:**
 

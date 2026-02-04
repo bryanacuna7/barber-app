@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   Clock,
@@ -16,6 +15,7 @@ import {
   CalendarCheck,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
 import { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel } from '@/components/ui/dropdown'
 import { cn } from '@/lib/utils/cn'
@@ -44,8 +44,6 @@ export function AppointmentCard({
   variant = 'default',
   className,
 }: AppointmentCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
-
   const scheduledTime = new Date(appointment.scheduled_at)
   const endTime = new Date(scheduledTime.getTime() + appointment.duration_minutes * 60000)
 
@@ -65,6 +63,13 @@ export function AppointmentCard({
 
     return (
       <div className="relative rounded-xl overflow-hidden">
+        {/* Swipe affordance indicator */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-0.5 opacity-20 pointer-events-none z-0">
+          <div className="w-1 h-6 rounded-full bg-zinc-400" />
+          <div className="w-1 h-6 rounded-full bg-zinc-400" />
+          <div className="w-1 h-6 rounded-full bg-zinc-400" />
+        </div>
+
         {/* Swipeable content */}
         <motion.div
           drag="x"
@@ -202,116 +207,102 @@ export function AppointmentCard({
         statusColors[appointment.status as AppointmentStatus],
         className
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="p-5">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 flex items-center justify-center flex-shrink-0">
-              <User className="w-6 h-6 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                {appointment.client?.name || 'Cliente sin nombre'}
-              </h3>
-              {appointment.client?.phone && (
-                <button
-                  onClick={() => onWhatsApp?.(appointment.client!.phone)}
-                  className="flex items-center gap-1 text-sm text-zinc-500 hover:text-emerald-600 transition-colors"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  {appointment.client.phone}
-                </button>
-              )}
-            </div>
-          </div>
-
-          <Dropdown
-            trigger={
-              <button
-                className={cn(
-                  'p-2 rounded-lg transition-all duration-200',
-                  'hover:bg-zinc-100 dark:hover:bg-zinc-800',
-                  'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
-                  isHovered ? 'opacity-100' : 'opacity-0'
-                )}
-              >
-                <MoreVertical className="w-5 h-5" />
-              </button>
-            }
-            align="right"
-          >
-            <DropdownLabel>Cambiar estado</DropdownLabel>
-            {appointment.status !== 'confirmed' && (
-              <DropdownItem
-                icon={<CalendarCheck className="w-4 h-4" />}
-                onClick={() => onStatusChange?.(appointment.id, 'confirmed')}
-              >
-                Confirmar
-              </DropdownItem>
-            )}
-            {appointment.status !== 'completed' && (
-              <DropdownItem
-                icon={<Check className="w-4 h-4" />}
-                onClick={() => onStatusChange?.(appointment.id, 'completed')}
-              >
-                Completar
-              </DropdownItem>
-            )}
-            {appointment.status !== 'no_show' && (
-              <DropdownItem
-                icon={<X className="w-4 h-4" />}
-                onClick={() => onStatusChange?.(appointment.id, 'no_show')}
-              >
-                No asistió
-              </DropdownItem>
-            )}
-            <DropdownSeparator />
-            {appointment.client?.phone && (
-              <DropdownItem
-                icon={<MessageCircle className="w-4 h-4" />}
-                onClick={() => onWhatsApp?.(appointment.client!.phone)}
-              >
-                WhatsApp
-              </DropdownItem>
-            )}
-            <DropdownItem icon={<Edit className="w-4 h-4" />} onClick={() => onEdit?.(appointment)}>
-              Editar
-            </DropdownItem>
-            <DropdownSeparator />
-            <DropdownItem
-              icon={<Trash2 className="w-4 h-4" />}
-              danger
-              onClick={() => onDelete?.(appointment.id)}
+        <div className="mb-3">
+          <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">
+            {appointment.client?.name || 'Cliente sin nombre'}
+          </h3>
+          {appointment.client?.phone && (
+            <button
+              onClick={() => onWhatsApp?.(appointment.client!.phone)}
+              className="flex items-center gap-1 text-sm text-zinc-500 hover:text-emerald-600 transition-colors mt-0.5"
             >
-              Eliminar
-            </DropdownItem>
-          </Dropdown>
+              <Phone className="w-3.5 h-3.5" />
+              {appointment.client.phone}
+            </button>
+          )}
         </div>
 
         {/* Service & Time */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-            <Scissors className="w-4 h-4 text-zinc-500" />
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {appointment.service?.name || 'Servicio'}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-            <Clock className="w-4 h-4 text-zinc-500" />
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {formatTime(scheduledTime)} - {formatTime(endTime)}
-            </span>
-          </div>
+        <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <Scissors className="w-4 h-4" />
+          <span>{appointment.service?.name || 'Servicio'}</span>
+          <span className="text-zinc-400">•</span>
+          <Clock className="w-4 h-4" />
+          <span>
+            {formatTime(scheduledTime)} - {formatTime(endTime)}
+          </span>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800">
-          <StatusBadge status={appointment.status as AppointmentStatus} />
-          <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+        {/* Footer with inline quick actions */}
+        <div className="flex items-center justify-between gap-2 pt-3 mt-3 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2">
+            {appointment.status === 'pending' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onStatusChange?.(appointment.id, 'confirmed')}
+                className="text-xs"
+              >
+                <CalendarCheck className="w-3.5 h-3.5 mr-1" />
+                Confirmar
+              </Button>
+            )}
+            {(appointment.status === 'confirmed' || appointment.status === 'pending') && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onStatusChange?.(appointment.id, 'completed')}
+                className="text-xs"
+              >
+                <Check className="w-3.5 h-3.5 mr-1" />
+                Completar
+              </Button>
+            )}
+            <Dropdown
+              trigger={
+                <button className="p-1.5 rounded-lg transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+              }
+              align="left"
+            >
+              <DropdownLabel>Más acciones</DropdownLabel>
+              {appointment.client?.phone && (
+                <DropdownItem
+                  icon={<MessageCircle className="w-4 h-4" />}
+                  onClick={() => onWhatsApp?.(appointment.client!.phone)}
+                >
+                  WhatsApp
+                </DropdownItem>
+              )}
+              <DropdownItem
+                icon={<Edit className="w-4 h-4" />}
+                onClick={() => onEdit?.(appointment)}
+              >
+                Editar
+              </DropdownItem>
+              {appointment.status !== 'no_show' && (
+                <DropdownItem
+                  icon={<X className="w-4 h-4" />}
+                  onClick={() => onStatusChange?.(appointment.id, 'no_show')}
+                >
+                  No asistió
+                </DropdownItem>
+              )}
+              <DropdownSeparator />
+              <DropdownItem
+                icon={<Trash2 className="w-4 h-4" />}
+                danger
+                onClick={() => onDelete?.(appointment.id)}
+              >
+                Eliminar
+              </DropdownItem>
+            </Dropdown>
+          </div>
+          <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
             {formatCurrency(Number(appointment.price))}
           </span>
         </div>
