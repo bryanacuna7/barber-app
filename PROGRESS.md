@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 (Session 82 - Week View Drag-and-Drop)
-- **Last Session:** Session 82 - FASE 1: Drag-and-drop appointment rescheduling complete
+- **Last Updated:** 2026-02-03 (Session 83 - UX Improvements + Drag-Drop Debugging)
+- **Last Session:** Session 83 - List view UX enhanced + drag-drop offset debugging (4 fixes attempted)
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -133,6 +133,108 @@
 - Payback: 2-3 months for FASE 2.5 features alone
 
 ## Recent Sessions (Condensed)
+
+### Session 83: List View UX + Drag-Drop Debugging (2026-02-03)
+
+**Status:** ⚠️ Partial - UX improvements complete, drag-drop offset UNRESOLVED
+
+**Time:** ~2.5 hours
+
+**Objective:** Improve List view UX based on @ui-ux-designer recommendations + fix drag-drop cursor offset
+
+**Agents Used:** @ui-ux-designer, @fullstack-developer, @debugger
+
+**Actions Completed:**
+
+1. ✅ **List View UX Improvements**
+   - **Single column layout (desktop):** Changed from 2-column grid to single column max-w-3xl
+     - Preserves chronological flow (no zigzag reading)
+     - Better temporal scanning and conflict detection
+   - **Swipe affordance indicator (mobile):** Added 3-dot grip on compact cards
+     - Makes swipe actions discoverable (iOS pattern)
+     - Subtle 20% opacity, pointer-events-none
+   - **Simplified card design:** Removed visual clutter
+     - Removed decorative avatar
+     - Removed redundant status badge (border-left already shows status)
+     - Simplified service/time from pills to clean text with icons
+     - Reduced elements from 9-10 to 5-6 per card
+   - **Inline quick actions (desktop):** Added visible Confirm/Complete buttons
+     - Reduced clicks from 2 → 1 for common operations
+     - Context-aware: only shows relevant buttons per status
+     - Dropdown moved to footer for secondary actions
+
+2. ❌ **Drag-Drop Offset Bug - UNRESOLVED** (4 attempted fixes)
+   - **User report:** "When dragging appointment, element jumps/shifts to the right immediately"
+   - **Diagnosis:** Compound transform issue (absolute positioning + @dnd-kit transform)
+
+   **Attempted Fixes:**
+   - Fix #1: Conditional `top` positioning (`top: isDragging ? undefined : topPosition`)
+   - Fix #2: Removed `restrictToWindowEdges` modifier from DndContext
+   - Fix #3: Removed `distance: 8` activation constraint (prevented initial jump)
+   - Fix #4: Changed from `absolute` to `relative` positioning during drag
+
+   **Result:** Issue persists - element still has offset when dragging
+
+   **Root Cause (suspected):**
+   - Possible CSS transform interference
+   - DragOverlay positioning mismatch
+   - Parent container positioning affecting child transform
+   - Browser-specific rendering issue
+
+**Files Modified:**
+
+- `src/app/(dashboard)/citas/page.tsx` - Single column layout
+- `src/components/appointments/appointment-card.tsx` - Simplified design + inline actions
+- `src/components/appointments/draggable-appointment.tsx` - 4 offset fixes (unsuccessful)
+- `src/components/appointments/week-view.tsx` - Removed modifiers and constraints
+
+**Commits (5 total):**
+
+- `76c5d74` ✨ feat(citas): enhance List view UX + add drag-drop rescheduling
+- `6301c98` 🐛 fix(drag-drop): resolve cursor offset issue in appointment dragging
+- `cf5b198` 🐛 fix(drag-drop): remove restrictToWindowEdges modifier causing offset
+- `da24ad6` 🐛 fix(drag-drop): remove distance constraint causing initial jump
+- `e1bd545` 🐛 fix(drag-drop): remove left/right positioning during drag
+
+**Build Status:** ✅ Passed (0 TypeScript errors)
+
+**Known Issues:**
+
+⚠️ **CRITICAL - Drag-Drop Offset:**
+
+- Symptom: Appointment element has visual offset from cursor when dragging
+- Impact: Makes drag-drop feature difficult to use accurately
+- Attempted 4 different fixes, none resolved the issue
+- **Next steps for debugging:**
+  - Check browser DevTools during drag (inspect computed styles)
+  - Test in different browsers (Chrome vs Firefox vs Safari)
+  - Add console.log to track transform values during drag
+  - Review @dnd-kit/core documentation for positioning edge cases
+  - Consider alternative: use `snapCenterToCursor` modifier
+  - Fallback: Revert to simpler drag implementation without DragOverlay
+
+**UX Improvements Delivered:**
+
+| Improvement           | Before        | After                         |
+| --------------------- | ------------- | ----------------------------- |
+| Desktop layout        | 2-column grid | Single column (chronological) |
+| Swipe discoverability | Hidden        | 3-dot indicator               |
+| Card elements         | 9-10 items    | 5-6 items (cleaner)           |
+| Action clicks         | 2 clicks      | 1 click (inline buttons)      |
+
+**Next Session Priorities:**
+
+1. 🔴 **FIX DRAG-DROP OFFSET** - Critical UX blocker
+2. Verify List view improvements visually with Playwright
+3. Continue with FASE 1 roadmap after drag-drop is resolved
+
+**Testing Notes:**
+
+- List view improvements NOT visually verified (need Playwright screenshots)
+- Drag-drop needs manual testing with real appointments
+- Consider creating test appointments if none exist
+
+---
 
 ### Session 82: Week View Drag-and-Drop Rescheduling (2026-02-03)
 
