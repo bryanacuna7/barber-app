@@ -11,49 +11,49 @@ async function createDemoUser() {
   const email = 'demo@barbershop.com'
   const password = 'demo123456'
 
-  // Check if user exists
-  const { data: existingUsers } = await supabase.auth.admin.listUsers()
-  const existingUser = (existingUsers?.users || []).find((u) => u.email === email) ?? null
+  let userId: string | null = null
 
-  if (existingUser) {
-    console.log('Demo user already exists, updating password...')
-    const { error } = await supabase.auth.admin.updateUserById(existingUser.id, {
-      password: password,
-    })
-    if (error) {
-      console.error('Error updating:', error.message)
-      return
-    }
-    console.log('✅ Password updated!')
-    console.log(`\nCredentials:\n  Email: ${email}\n  Password: ${password}`)
-
-    const business = await getOrCreateBusiness(existingUser.id)
-    if (business) {
-      await seedServices(business.id)
-      await seedBarbers(business.id)
-    }
-    return
-  }
-
-  // Create new user
-  const { data, error } = await supabase.auth.admin.createUser({
+  // Try to create user first
+  const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
     email: email,
     password: password,
     email_confirm: true,
   })
 
-  if (error) {
-    console.error('Error creating user:', error.message)
+  if (newUser?.user) {
+    console.log('✅ Demo user created!')
+    console.log(`\nCredentials:\n  Email: ${email}\n  Password: ${password}`)
+    userId = newUser.user.id
+  } else if (createError?.message.includes('already been registered')) {
+    // User exists, find their ID via business table
+    console.log('✅ Demo user already exists')
+
+    // Look for existing business with slug 'demo'
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('owner_id')
+      .eq('slug', 'demo')
+      .single()
+
+    if (business?.owner_id) {
+      userId = business.owner_id
+      console.log(`\nCredentials:\n  Email: ${email}\n  Password: ${password}`)
+      console.log(`   User ID: ${userId}`)
+    } else {
+      console.error('❌ User exists but could not find ID via business table')
+      console.log('💡 Try manually finding the user ID in Supabase Dashboard')
+      return
+    }
+  } else {
+    console.error('Error:', createError?.message)
     return
   }
 
-  console.log('✅ Demo user created!')
-  console.log(`\nCredentials:\n  Email: ${email}\n  Password: ${password}`)
-
-  const business = await getOrCreateBusiness(data.user.id)
+  // Setup business and data for the user (new or existing)
+  const business = await getOrCreateBusiness(userId!)
   if (business) {
     await seedServices(business.id)
-    await seedBarbers(business.id)
+    await seedBarbers(business.id, userId!)
   }
 }
 
@@ -160,7 +160,7 @@ async function seedServices(businessId: string) {
   console.log('✅ Demo services seeded!')
 }
 
-async function seedBarbers(businessId: string) {
+async function seedBarbers(businessId: string, userId: string) {
   const { count } = await supabase
     .from('barbers')
     .select('*', { count: 'exact', head: true })
@@ -168,35 +168,55 @@ async function seedBarbers(businessId: string) {
 
   if ((count || 0) > 0) {
     console.log('✅ Demo barbers already seeded!')
+
+    // Link the first barber to the demo user if not already linked
+    const { data: existingBarbers } = await supabase
+      .from('barbers')
+      .select('id, user_id')
+      .eq('business_id', businessId)
+      .order('display_order', { ascending: true })
+      .limit(1)
+
+    if (existingBarbers && existingBarbers.length > 0 && !existingBarbers[0].user_id) {
+      await supabase
+        .from('barbers')
+        .update({ user_id: userId, email: 'demo@barbershop.com' })
+        .eq('id', existingBarbers[0].id)
+      console.log('✅ Linked demo user to first barber')
+    }
     return
   }
 
-  const { error } = await supabase.from('barbers').insert([
-    {
-      business_id: businessId,
-      name: 'Marco Rivera',
-      email: 'marco@barbershop.com',
-      bio: 'Especialista en fades y diseño de barba.',
-      display_order: 1,
-      is_active: true,
-    },
-    {
-      business_id: businessId,
-      name: 'Andrés Vega',
-      email: 'andres@barbershop.com',
-      bio: 'Cortes clásicos y styling premium.',
-      display_order: 2,
-      is_active: true,
-    },
-    {
-      business_id: businessId,
-      name: 'Diego Mora',
-      email: 'diego@barbershop.com',
-      bio: 'Color y estilos modernos.',
-      display_order: 3,
-      is_active: true,
-    },
-  ])
+  const { error, data: newBarbers } = await supabase
+    .from('barbers')
+    .insert([
+      {
+        business_id: businessId,
+        name: 'Marco Rivera',
+        email: 'demo@barbershop.com', // Link to demo user
+        bio: 'Especialista en fades y diseño de barba.',
+        display_order: 1,
+        is_active: true,
+        user_id: userId, // Link to demo user
+      },
+      {
+        business_id: businessId,
+        name: 'Andrés Vega',
+        email: 'andres@barbershop.com',
+        bio: 'Cortes clásicos y styling premium.',
+        display_order: 2,
+        is_active: true,
+      },
+      {
+        business_id: businessId,
+        name: 'Diego Mora',
+        email: 'diego@barbershop.com',
+        bio: 'Color y estilos modernos.',
+        display_order: 3,
+        is_active: true,
+      },
+    ])
+    .select()
 
   if (error) {
     console.error('Error seeding barbers:', error.message)
@@ -204,4 +224,5 @@ async function seedBarbers(businessId: string) {
   }
 
   console.log('✅ Demo barbers seeded!')
+  console.log(`✅ Marco Rivera linked to demo user (${userId})`)
 }

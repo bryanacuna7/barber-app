@@ -10,26 +10,38 @@
 import { test, expect, type Page } from '@playwright/test'
 
 // Test data setup
-const TEST_BARBER = {
-  id: 'test-barber-123',
-  name: 'Carlos Test',
-  email: 'carlos@test.com',
-}
-
-const TEST_BUSINESS = {
-  id: 'test-business-123',
-  name: 'Test Barbershop',
+// Using demo user created by scripts/create-demo-user.ts
+const DEMO_USER = {
+  email: 'demo@barbershop.com',
+  password: 'demo123456',
 }
 
 // Helper functions
 async function loginAsBarber(page: Page) {
-  // TODO: Implement actual auth flow
-  // For now, mock the session
   await page.goto('/login')
-  await page.fill('[name="email"]', TEST_BARBER.email)
-  await page.fill('[name="password"]', 'test-password')
+  await page.fill('[data-testid="login-email"]', DEMO_USER.email)
+  await page.fill('[data-testid="login-password"]', DEMO_USER.password)
   await page.click('button[type="submit"]')
-  await page.waitForURL('/dashboard')
+
+  // Wait for dashboard to load - Turbopack compilation can take 90s
+  await page.waitForURL('**/dashboard', { timeout: 10000 })
+
+  // Wait for dashboard content to appear (handles on-demand compilation)
+  try {
+    await page.waitForSelector('text=Próximas Citas Hoy', {
+      timeout: 90000,
+      state: 'visible',
+    })
+  } catch {
+    // If not found, wait for greeting text
+    await page.waitForSelector('text=/Buenos días|Buenas tardes|Buenas noches/i', {
+      timeout: 90000,
+      state: 'visible',
+    })
+  }
+
+  // Extra wait for all content to render
+  await page.waitForTimeout(500)
 }
 
 async function setupTestAppointments(page: Page) {
