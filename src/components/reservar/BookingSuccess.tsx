@@ -68,16 +68,21 @@ export function BookingSuccess({
   }, [business?.id, clientId])
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-[#F2F2F7] dark:bg-[#1C1C1E]">
-      <div className="w-full max-w-md ios-card overflow-hidden ios-spring-in">
+      <div
+        data-testid="booking-success"
+        className="w-full max-w-md ios-card overflow-hidden ios-spring-in"
+      >
         {/* Success animation - iOS style */}
         <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 px-6 py-10 text-center text-white">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white/20 backdrop-blur-xl">
             <CheckCircle className="h-12 w-12" />
           </div>
-          <h2 className="mt-5 text-[28px] font-bold">¡Cita Reservada!</h2>
+          <h2 data-testid="confirmation-message" className="mt-5 text-[28px] font-bold">
+            ¡Cita Reservada!
+          </h2>
           <p className="mt-1 text-[15px] text-emerald-100">Te esperamos</p>
         </div>
-        <div className="p-6 space-y-4">
+        <div data-testid="booking-summary" className="p-6 space-y-4">
           <div className="rounded-2xl bg-zinc-100/80 p-4 dark:bg-zinc-800/80">
             <p className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
               Servicio

@@ -48,6 +48,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
             return (
               <button
                 key={service.id}
+                data-testid="service-card"
                 onClick={() => onSelectService(service)}
                 disabled={noBarbers}
                 className={cn(
@@ -64,7 +65,10 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                   <Scissors className="h-6 w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate">
+                  <p
+                    data-testid="service-name"
+                    className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate"
+                  >
                     {service.name}
                   </p>
                   {service.description && (
@@ -72,13 +76,19 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                       {service.description}
                     </p>
                   )}
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[13px] text-zinc-400">
+                  <div
+                    data-testid="service-duration"
+                    className="mt-1.5 flex items-center gap-1.5 text-[13px] text-zinc-400"
+                  >
                     <Clock className="h-3.5 w-3.5" />
                     <span>{service.duration_minutes} min</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <p className="text-[20px] font-bold text-zinc-900 dark:text-white">
+                  <p
+                    data-testid="service-price"
+                    className="text-[20px] font-bold text-zinc-900 dark:text-white"
+                  >
                     {formatCurrency(Number(service.price))}
                   </p>
                   <ChevronRight className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />

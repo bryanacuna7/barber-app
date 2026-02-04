@@ -41,7 +41,10 @@ interface BookingHeaderProps {
 
 export function BookingHeader({ business }: BookingHeaderProps) {
   return (
-    <div className="ios-glass sticky top-0 z-50 border-b border-black/5 dark:border-white/5">
+    <div
+      data-testid="booking-header"
+      className="ios-glass sticky top-0 z-50 border-b border-black/5 dark:border-white/5"
+    >
       <div className="mx-auto max-w-2xl px-4 py-4 sm:py-5">
         <div className="flex items-center gap-4">
           {business.logo_url ? (
@@ -63,7 +66,10 @@ export function BookingHeader({ business }: BookingHeaderProps) {
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <h1 className="text-[22px] font-bold tracking-tight text-zinc-900 dark:text-white truncate">
+            <h1
+              data-testid="business-name"
+              className="text-[22px] font-bold tracking-tight text-zinc-900 dark:text-white truncate"
+            >
               {business.name}
             </h1>
             <p className="text-[15px] text-zinc-500 dark:text-zinc-400">Reserva tu cita</p>

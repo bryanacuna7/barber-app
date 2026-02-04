@@ -44,6 +44,7 @@ export function ClientInfoForm({
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
+        data-testid="back-button"
         onClick={onBack}
         className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
       >
@@ -52,7 +53,7 @@ export function ClientInfoForm({
       </button>
 
       {/* Booking Summary - iOS Card */}
-      <div className="ios-card p-4">
+      <div data-testid="booking-summary" className="ios-card p-4">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 to-violet-200 text-violet-600 dark:from-violet-900/40 dark:to-violet-800/40 dark:text-violet-400">
             <Scissors className="h-6 w-6" />
@@ -68,7 +69,7 @@ export function ClientInfoForm({
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form data-testid="client-info-form" onSubmit={onSubmit} className="space-y-4">
         <div className="px-1">
           <h3 className="text-[20px] font-bold text-zinc-900 dark:text-white">Tus datos</h3>
           <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
@@ -77,12 +78,16 @@ export function ClientInfoForm({
         </div>
 
         {error && (
-          <div className="rounded-2xl bg-red-50 p-4 text-[15px] font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          <div
+            data-testid="booking-error"
+            className="rounded-2xl bg-red-50 p-4 text-[15px] font-medium text-red-600 dark:bg-red-900/20 dark:text-red-400"
+          >
             {error}
           </div>
         )}
 
         <Input
+          name="name"
           label="Nombre completo"
           type="text"
           placeholder="Tu nombre"
@@ -92,6 +97,7 @@ export function ClientInfoForm({
         />
 
         <Input
+          name="phone"
           label="Teléfono"
           type="tel"
           placeholder="8 dígitos (ej: 87175866)"
@@ -101,6 +107,7 @@ export function ClientInfoForm({
         />
 
         <Input
+          name="email"
           label="Email (opcional)"
           type="email"
           placeholder="tu@email.com"
@@ -113,6 +120,7 @@ export function ClientInfoForm({
             Notas (opcional)
           </label>
           <textarea
+            name="notes"
             placeholder="Alguna petición especial o preferencia..."
             value={notes}
             onChange={(e) => onChangeNotes(e.target.value)}
@@ -123,7 +131,13 @@ export function ClientInfoForm({
 
         {/* Submit Button with Safe Area */}
         <div className="pt-4 ios-safe-bottom">
-          <Button type="submit" className="w-full" size="lg" isLoading={submitting}>
+          <Button
+            data-testid="submit-booking"
+            type="submit"
+            className="w-full"
+            size="lg"
+            isLoading={submitting}
+          >
             Confirmar Reservación · {formatCurrency(Number(service.price))}
           </Button>
         </div>

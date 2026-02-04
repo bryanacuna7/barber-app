@@ -2,6 +2,8 @@
  * Unit tests for useBarberAppointments hook
  *
  * Coverage Target: 90%+
+ *
+ * FIXED: Removed fake timers from non-timer tests to prevent Promise blocking
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -11,13 +13,11 @@ import { createMockAppointmentsResponse, mockFetch, mockFetchError } from '@/tes
 
 describe('useBarberAppointments', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
     vi.clearAllMocks()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
-    vi.useRealTimers()
   })
 
   describe('Initial fetch behavior', () => {
@@ -36,9 +36,12 @@ describe('useBarberAppointments', () => {
       expect(result.current.isLoading).toBe(true)
       expect(result.current.data).toBeNull()
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.data).toEqual(mockResponse)
       expect(result.current.error).toBeNull()
@@ -49,7 +52,7 @@ describe('useBarberAppointments', () => {
     it('should NOT fetch when enabled=false', async () => {
       mockFetch(createMockAppointmentsResponse())
 
-      renderHook(() =>
+      const { result } = renderHook(() =>
         useBarberAppointments({
           barberId: 'barber-123',
           enabled: false,
@@ -59,13 +62,14 @@ describe('useBarberAppointments', () => {
       // Wait a bit to ensure no fetch
       await new Promise((resolve) => setTimeout(resolve, 100))
 
+      expect(result.current.isLoading).toBe(false)
       expect(global.fetch).not.toHaveBeenCalled()
     })
 
     it('should NOT fetch when barberId is empty', async () => {
       mockFetch(createMockAppointmentsResponse())
 
-      renderHook(() =>
+      const { result } = renderHook(() =>
         useBarberAppointments({
           barberId: '',
           enabled: true,
@@ -74,6 +78,7 @@ describe('useBarberAppointments', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100))
 
+      expect(result.current.isLoading).toBe(false)
       expect(global.fetch).not.toHaveBeenCalled()
     })
   })
@@ -90,9 +95,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.error).toBeInstanceOf(Error)
       expect(result.current.error?.message).toBe(errorMessage)
@@ -113,9 +121,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.error).toBeInstanceOf(Error)
       expect(result.current.error?.message).toBe('Barber not found')
@@ -138,9 +149,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.error).toBeInstanceOf(Error)
       expect(result.current.error?.message).toBe('Error desconocido')
@@ -159,9 +173,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       // Clear previous calls
       vi.clearAllMocks()
@@ -175,9 +192,12 @@ describe('useBarberAppointments', () => {
       // Trigger refetch
       await result.current.refetch()
 
-      await waitFor(() => {
-        expect(result.current.data?.stats.completed).toBe(5)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.data?.stats.completed).toBe(5)
+        },
+        { timeout: 3000 }
+      )
 
       expect(global.fetch).toHaveBeenCalledTimes(1)
     })
@@ -192,21 +212,27 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       const firstTimestamp = result.current.lastUpdated
 
       // Wait a bit
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       // Refetch
       await result.current.refetch()
 
-      await waitFor(() => {
-        expect(result.current.lastUpdated).not.toBe(firstTimestamp)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.lastUpdated).not.toBe(firstTimestamp)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.lastUpdated!.getTime()).toBeGreaterThan(firstTimestamp!.getTime())
     })
@@ -221,9 +247,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       vi.clearAllMocks()
 
@@ -240,6 +269,14 @@ describe('useBarberAppointments', () => {
   })
 
   describe('Auto-refresh functionality', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
     it('should auto-refresh when autoRefresh=true', async () => {
       mockFetch(createMockAppointmentsResponse())
 
@@ -252,25 +289,21 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1)
-      })
+      // Wait for initial fetch
+      await vi.runAllTimersAsync()
+      expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
 
       // Fast-forward time by 30 seconds
-      vi.advanceTimersByTime(30000)
+      await vi.advanceTimersByTimeAsync(30000)
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1)
-      })
+      expect(global.fetch).toHaveBeenCalledTimes(1)
 
       // Fast-forward again
-      vi.advanceTimersByTime(30000)
+      await vi.advanceTimersByTimeAsync(30000)
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(2)
-      })
+      expect(global.fetch).toHaveBeenCalledTimes(2)
     })
 
     it('should NOT auto-refresh when autoRefresh=false', async () => {
@@ -284,14 +317,13 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1)
-      })
+      await vi.runAllTimersAsync()
+      expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
 
       // Fast-forward time
-      vi.advanceTimersByTime(60000)
+      await vi.advanceTimersByTimeAsync(60000)
 
       // Should not trigger any additional fetches
       expect(global.fetch).not.toHaveBeenCalled()
@@ -309,18 +341,15 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1)
-      })
+      await vi.runAllTimersAsync()
+      expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
 
       // Fast-forward by 10 seconds
-      vi.advanceTimersByTime(10000)
+      await vi.advanceTimersByTimeAsync(10000)
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1)
-      })
+      expect(global.fetch).toHaveBeenCalledTimes(1)
     })
 
     it('should clean up interval on unmount', async () => {
@@ -335,9 +364,8 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledTimes(1)
-      })
+      await vi.runAllTimersAsync()
+      expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
 
@@ -345,7 +373,7 @@ describe('useBarberAppointments', () => {
       unmount()
 
       // Fast-forward time
-      vi.advanceTimersByTime(60000)
+      await vi.advanceTimersByTimeAsync(60000)
 
       // Should not trigger any fetches after unmount
       expect(global.fetch).not.toHaveBeenCalled()
@@ -364,7 +392,7 @@ describe('useBarberAppointments', () => {
       )
 
       // Fast-forward time
-      vi.advanceTimersByTime(30000)
+      await vi.advanceTimersByTimeAsync(30000)
 
       // Should not fetch at all
       expect(global.fetch).not.toHaveBeenCalled()
@@ -395,9 +423,12 @@ describe('useBarberAppointments', () => {
         json: async () => createMockAppointmentsResponse(),
       })
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
     })
 
     it('should reset error when starting new fetch', async () => {
@@ -411,18 +442,24 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.error).not.toBeNull()
-      })
+      await waitFor(
+        () => {
+          expect(result.current.error).not.toBeNull()
+        },
+        { timeout: 3000 }
+      )
 
       // Second fetch succeeds
       mockFetch(createMockAppointmentsResponse())
 
       await result.current.refetch()
 
-      await waitFor(() => {
-        expect(result.current.error).toBeNull()
-      })
+      await waitFor(
+        () => {
+          expect(result.current.error).toBeNull()
+        },
+        { timeout: 3000 }
+      )
     })
   })
 
@@ -443,9 +480,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.data).toEqual(mockResponse)
       expect(result.current.data?.barber.name).toBe('Juan Perez')
@@ -470,9 +510,12 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(result.current.data?.appointments).toEqual([])
       expect(result.current.data?.stats.total).toBe(0)
@@ -486,9 +529,12 @@ describe('useBarberAppointments', () => {
         { initialProps: { barberId: 'barber-1' } }
       )
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false)
-      })
+      await waitFor(
+        () => {
+          expect(result.current.isLoading).toBe(false)
+        },
+        { timeout: 3000 }
+      )
 
       expect(global.fetch).toHaveBeenCalledWith('/api/barbers/barber-1/appointments/today')
 
@@ -497,9 +543,12 @@ describe('useBarberAppointments', () => {
       // Change barberId
       rerender({ barberId: 'barber-2' })
 
-      await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('/api/barbers/barber-2/appointments/today')
-      })
+      await waitFor(
+        () => {
+          expect(global.fetch).toHaveBeenCalledWith('/api/barbers/barber-2/appointments/today')
+        },
+        { timeout: 3000 }
+      )
     })
   })
 })

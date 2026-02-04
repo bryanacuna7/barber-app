@@ -19,6 +19,7 @@ export function BarberSelection({
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
+        data-testid="back-button"
         onClick={onBack}
         className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
       >
@@ -50,6 +51,7 @@ export function BarberSelection({
         {barbers.map((barber) => (
           <button
             key={barber.id}
+            data-testid="barber-card"
             onClick={() => onSelectBarber(barber)}
             className="ios-card w-full flex items-center gap-4 p-4 text-left ios-press"
           >
@@ -65,7 +67,10 @@ export function BarberSelection({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              <p
+                data-testid="barber-name"
+                className="text-[17px] font-semibold text-zinc-900 dark:text-white"
+              >
                 {barber.name}
               </p>
               {barber.bio && (

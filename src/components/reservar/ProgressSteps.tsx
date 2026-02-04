@@ -21,7 +21,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
   const stepIndex = stepKeys.indexOf(currentStep)
 
   return (
-    <div className="sticky top-[108px] sm:top-[116px] z-40 px-4 py-3">
+    <div className="sticky top-[108px] sm:top-[116px] z-40 px-4 py-3" data-testid="progress-steps">
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-center gap-2 rounded-2xl bg-white/80 backdrop-blur-xl p-2 shadow-sm dark:bg-zinc-900/80">
           {stepLabels.map((label, i) => {
@@ -31,6 +31,9 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
             return (
               <div key={label} className="flex items-center">
                 <div
+                  data-testid={`step-${stepKeys[i]}`}
+                  data-active={isCurrent ? 'true' : undefined}
+                  data-completed={isCompleted ? 'true' : undefined}
                   className={cn(
                     'flex items-center gap-2 rounded-full px-3 py-2 transition-all duration-300',
                     isCurrent && 'bg-zinc-900 dark:bg-white',
@@ -39,6 +42,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
                   )}
                 >
                   <div
+                    data-testid={`step-indicator-${stepKeys[i]}`}
                     className={cn(
                       'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
                       isCurrent && 'bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white',
