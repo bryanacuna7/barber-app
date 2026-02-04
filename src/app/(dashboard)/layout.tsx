@@ -125,7 +125,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <MobileHeader businessName={businessName} logoUrl={logoUrl} />
 
         {/* Main content */}
-        <main className="lg:pl-64">
+        <main id="main-content" className="lg:pl-64">
           <div className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-8">
             <TrialBanner />
             {children}

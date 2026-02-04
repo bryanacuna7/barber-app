@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Save,
   Building2,
   Clock,
-  Calendar,
   Globe,
   ExternalLink,
   Copy,
@@ -20,6 +19,7 @@ import {
   Settings,
   Gift,
   ArrowRight,
+  Search,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,8 @@ import { IOSToggle } from '@/components/ui/ios-toggle'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
 import { ColorPicker } from '@/components/ui/color-picker'
 import { NotificationPreferencesSection } from '@/components/settings/notification-preferences-section'
+import { SettingsSearchModal } from '@/components/settings/settings-search-modal'
+import { AdvancedSettingsSection } from '@/components/settings/advanced-settings-section'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { FAB } from '@/components/ui/fab'
 import { cn } from '@/lib/utils'
@@ -77,6 +79,11 @@ export default function ConfiguracionPage() {
     field: 'open',
   })
 
+  // Search modal state
+  const [searchModalOpen, setSearchModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('general')
+  const tabsRef = useRef<HTMLDivElement>(null)
+
   // Calculate contrast colors for preview
   const contrastColors = useMemo(
     () => ({
@@ -108,6 +115,19 @@ export default function ConfiguracionPage() {
   useEffect(() => {
     fetchBusiness()
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Cmd+K / Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchModalOpen(true)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   async function fetchBusiness() {
@@ -254,6 +274,25 @@ export default function ConfiguracionPage() {
     router.refresh()
   }
 
+  // Navigate from search modal
+  function handleSearchNavigate(tabId: string, settingId: string) {
+    // Change tab
+    setActiveTab(tabId)
+
+    // Wait for tab content to render, then scroll to element
+    setTimeout(() => {
+      const element = document.getElementById(settingId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Highlight effect
+        element.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2')
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2')
+        }, 2000)
+      }
+    }, 100)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -279,19 +318,40 @@ export default function ConfiguracionPage() {
     <div className="min-h-screen pb-20">
       {/* Header */}
       <FadeInUp>
-        <div className="mb-6">
-          <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
-            Configuración
-          </h1>
-          <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
-            Administra los datos y preferencias de tu negocio
-          </p>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
+              Configuración
+            </h1>
+            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
+              Administra los datos y preferencias de tu negocio
+            </p>
+          </div>
+          {/* Search Button */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setSearchModalOpen(true)}
+            className="flex items-center gap-2 h-10 px-4 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+            aria-label="Buscar configuraciones"
+          >
+            <Search className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+            <span className="hidden sm:inline text-[13px] text-zinc-600 dark:text-zinc-400 font-medium">
+              Buscar
+            </span>
+            <kbd className="hidden lg:inline px-1.5 py-0.5 rounded bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-[11px] font-mono text-zinc-500">
+              {typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Mac') !== -1
+                ? '⌘'
+                : 'Ctrl'}
+              K
+            </kbd>
+          </motion.button>
         </div>
       </FadeInUp>
 
       <form onSubmit={handleSubmit}>
         {/* Tabs - Mobile optimized */}
-        <Tabs defaultValue="general" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" ref={tabsRef}>
           <TabsList className="w-full overflow-x-auto scrollbar-hide">
             <TabsTrigger value="general" icon={<Building2 className="h-4 w-4" />}>
               General
@@ -311,7 +371,10 @@ export default function ConfiguracionPage() {
           <TabsContent value="general" className="space-y-6">
             {/* Public Booking Link */}
             <FadeInUp delay={0.05}>
-              <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50/50 dark:border-violet-900 dark:from-violet-950/30 dark:to-purple-950/20 overflow-hidden">
+              <Card
+                id="booking-link"
+                className="border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50/50 dark:border-violet-900 dark:from-violet-950/30 dark:to-purple-950/20 overflow-hidden transition-all"
+              >
                 <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-[17px] text-violet-900 dark:text-violet-300">
@@ -357,7 +420,7 @@ export default function ConfiguracionPage() {
 
             {/* Business Info */}
             <FadeInUp delay={0.1}>
-              <Card>
+              <Card id="business-name" className="transition-all">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-[17px]">
                     <Building2 className="h-5 w-5" />
@@ -469,21 +532,17 @@ export default function ConfiguracionPage() {
               </Card>
             </FadeInUp>
 
-            {/* Booking Settings */}
+            {/* Booking Settings - With Progressive Disclosure */}
             <FadeInUp delay={0.15}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-[17px]">
-                    <Calendar className="h-5 w-5" />
-                    Configuracion de Reservas
-                  </CardTitle>
-                  <CardDescription>
-                    Controla como los clientes pueden reservar citas
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
+              <AdvancedSettingsSection
+                title="Configuración Avanzada de Reservas"
+                description="Personaliza tiempos de buffer y anticipación de reservas"
+                badge="Avanzado"
+                defaultExpanded={false}
+              >
+                <div className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
+                    <div id="buffer-time">
                       <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                         Tiempo entre citas
                       </label>
@@ -503,10 +562,13 @@ export default function ConfiguracionPage() {
                         <option value={15}>15 minutos</option>
                         <option value={30}>30 minutos</option>
                       </select>
+                      <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+                        Tiempo adicional entre citas para preparación o limpieza
+                      </p>
                     </div>
-                    <div>
+                    <div id="advance-booking">
                       <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                        Dias de anticipacion
+                        Días de anticipación
                       </label>
                       <select
                         value={formData.advance_booking_days}
@@ -524,10 +586,13 @@ export default function ConfiguracionPage() {
                         <option value={30}>1 mes</option>
                         <option value={60}>2 meses</option>
                       </select>
+                      <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+                        Con cuánta anticipación los clientes pueden reservar
+                      </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </AdvancedSettingsSection>
             </FadeInUp>
           </TabsContent>
 
@@ -819,6 +884,13 @@ export default function ConfiguracionPage() {
         value={currentTimeValue}
         onChange={handleTimeChange}
         title={timePicker.field === 'open' ? 'Hora de apertura' : 'Hora de cierre'}
+      />
+
+      {/* Settings Search Modal */}
+      <SettingsSearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        onNavigate={handleSearchNavigate}
       />
     </div>
   )

@@ -43,8 +43,10 @@ export function BottomNav() {
                   key={item.name}
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
+                  aria-label={item.name}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
                     isActive
                       ? 'text-blue-500 dark:text-blue-300'
                       : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -94,11 +96,14 @@ export function BottomNav() {
               onClick={() => setIsMoreOpen(true)}
               className={cn(
                 'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
                 isMoreActive
                   ? 'text-blue-500 dark:text-blue-300'
                   : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
               )}
               aria-label="Más opciones"
+              aria-haspopup="true"
+              aria-expanded={isMoreOpen}
             >
               {isMoreActive && (
                 <motion.div
