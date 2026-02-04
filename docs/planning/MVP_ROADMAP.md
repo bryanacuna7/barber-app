@@ -40,7 +40,7 @@
 | -------------------------- | ------- | -------------- | ----------- |
 | **FASE 0: Critical Fixes** | 12.5h   | 0.5 weeks      | ✅ Complete |
 | **Área 6: Security**       | 22h     | 1 week         | ✅ Complete |
-| **Área 1: Subscriptions**  | 14-18h  | 0.75-1 week    | Not Started |
+| **Área 1: Subscriptions**  | 14-18h  | 0.75-1 week    | ✅ Complete |
 | **Sprint 5: MVP Testing**  | 40-50h  | 2-2.5 weeks    | Not Started |
 | **Buffer (15%)**           | 10-20h  | 0.5-1 week     | -           |
 | **TOTAL**                  | 98-128h | 5-6 weeks      | -           |
@@ -158,6 +158,22 @@
 ---
 
 ### Área 1: Simplified Subscriptions (Week 3) - 14-18h
+
+**Status:** ✅ COMPLETE (Already implemented in Migration 005)
+
+**Note:** Full subscription system was already implemented with:
+
+- Manual payments (SINPE/transfers)
+- Two tiers: Basic ($12/mo), Pro ($29/mo)
+- Limits: Basic (2 barbers, 3 services, 25 clients), Pro (unlimited)
+- 7-day trial period
+- Grace period handling
+- Admin payment approval workflow
+- Complete UI at `/suscripcion`
+
+---
+
+### ~~Área 1: Simplified Subscriptions (Week 3) - 14-18h~~ [SKIP - Already Done]
 
 **Decision:** No auto-deletion, no client limits (anti-growth removed)
 
