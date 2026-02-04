@@ -48,12 +48,10 @@ export const DraggableAppointment = memo(function DraggableAppointment({
     },
   })
 
-  // Remove absolute positioning during drag to prevent compound transform offset
+  // During drag, remove absolute positioning to prevent compound transform offset
+  // Only use transform for positioning when dragging
   const style = {
     top: isDragging ? undefined : `${topPosition}px`,
-    left: isDragging ? 0 : undefined,
-    right: isDragging ? undefined : undefined,
-    width: isDragging ? '140px' : undefined,
     height: `${Math.max(height, 40)}px`,
     ...(transform && {
       transform: CSS.Translate.toString(transform),

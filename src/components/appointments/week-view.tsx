@@ -26,6 +26,7 @@ import {
   type DragOverEvent,
   closestCenter,
 } from '@dnd-kit/core'
+import { snapCenterToCursor } from '@dnd-kit/modifiers'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils/cn'
 import type { Appointment } from '@/types'
@@ -285,6 +286,7 @@ export const WeekView = memo(function WeekView({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      modifiers={[snapCenterToCursor]}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
