@@ -11,6 +11,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { GET } from '../route'
 import { NextRequest } from 'next/server'
 import { createMockSupabaseClient } from '@/test/test-utils'
+import { canAccessBarberAppointments } from '@/lib/rbac'
+import { logSecurity } from '@/lib/logger'
 
 // Mock the middleware to expose the inner handler for testing
 vi.mock('@/lib/api/middleware', async () => {
@@ -21,6 +23,19 @@ vi.mock('@/lib/api/middleware', async () => {
     withAuth: (handler: any) => handler,
   }
 })
+
+// Mock RBAC functions
+vi.mock('@/lib/rbac', () => ({
+  canAccessBarberAppointments: vi.fn(),
+}))
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    error: vi.fn(),
+  },
+  logSecurity: vi.fn(),
+}))
 
 // Type helper for test calls - allows calling with auth context
 type TestHandler = (
@@ -349,6 +364,348 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
       })
       expect(body.barber).not.toHaveProperty('email')
       expect(body.barber).not.toHaveProperty('phone')
+    })
+  })
+
+  describe('SEC-007: RBAC - Owner can access any barber', () => {
+    it('should allow business owner to access any barber appointments', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'owner-user-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'owner-user-123', // Owner user
+        email: 'owner@example.com',
+      }
+
+      const mockBarberQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'barber-456',
+            name: 'Staff Barber',
+            business_id: 'business-123',
+            email: 'staff@example.com',
+          },
+          error: null,
+        }),
+      }
+
+      const mockAppointmentsQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: [],
+          error: null,
+        }),
+      }
+
+      mockSupabase.from
+        .mockReturnValueOnce(mockBarberQuery as any)
+        .mockReturnValueOnce(mockAppointmentsQuery as any)
+
+      // Mock RBAC - owner should have access
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(true)
+
+      const response = await (GET as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'barber-456' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(200)
+      expect(canAccessBarberAppointments).toHaveBeenCalledWith(
+        mockSupabase,
+        'owner-user-123',
+        'barber-456',
+        'business-123',
+        'owner-user-123'
+      )
+    })
+  })
+
+  describe('SEC-008: RBAC - Recepcionista can access any barber', () => {
+    it('should allow recepcionista to access any barber appointments', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'owner-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'recep-user-123', // Recepcionista user
+        email: 'recepcionista@example.com',
+      }
+
+      const mockBarberQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'barber-456',
+            name: 'Staff Barber',
+            business_id: 'business-123',
+            email: 'staff@example.com',
+          },
+          error: null,
+        }),
+      }
+
+      const mockAppointmentsQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: [],
+          error: null,
+        }),
+      }
+
+      mockSupabase.from
+        .mockReturnValueOnce(mockBarberQuery as any)
+        .mockReturnValueOnce(mockAppointmentsQuery as any)
+
+      // Mock RBAC - recepcionista has read_all_appointments permission
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(true)
+
+      const response = await (GET as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'barber-456' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(200)
+      expect(canAccessBarberAppointments).toHaveBeenCalledWith(
+        mockSupabase,
+        'recep-user-123',
+        'barber-456',
+        'business-123',
+        'owner-123'
+      )
+    })
+  })
+
+  describe('SEC-009: RBAC - Staff can only access own appointments', () => {
+    it('should allow staff to access their own appointments', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'owner-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'staff-user-123', // Staff user
+        email: 'staff@example.com',
+      }
+
+      const mockBarberQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'barber-123',
+            name: 'Staff Barber',
+            business_id: 'business-123',
+            email: 'staff@example.com',
+            user_id: 'staff-user-123', // Same user
+          },
+          error: null,
+        }),
+      }
+
+      const mockAppointmentsQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: [],
+          error: null,
+        }),
+      }
+
+      mockSupabase.from
+        .mockReturnValueOnce(mockBarberQuery as any)
+        .mockReturnValueOnce(mockAppointmentsQuery as any)
+
+      // Mock RBAC - staff accessing their own barber record
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(true)
+
+      const response = await (GET as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'barber-123' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should block staff from accessing other staff appointments', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'owner-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'staff-user-123', // Staff user A
+        email: 'staffa@example.com',
+      }
+
+      const mockBarberQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'barber-456',
+            name: 'Staff Barber B',
+            business_id: 'business-123',
+            email: 'staffb@example.com',
+            user_id: 'staff-user-456', // Different user
+          },
+          error: null,
+        }),
+      }
+
+      mockSupabase.from.mockReturnValueOnce(mockBarberQuery as any)
+
+      // Mock RBAC - staff NOT allowed to access other staff
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(false)
+
+      const response = await (GET as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'barber-456' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(401)
+      const body = await response.json()
+      expect(body.error).toBe('No tienes permiso para ver las citas de este barbero')
+
+      // Should log security event
+      expect(logSecurity).toHaveBeenCalledWith(
+        'unauthorized',
+        'high',
+        expect.objectContaining({
+          userId: 'staff-user-123',
+          requestedBarberId: 'barber-456',
+        })
+      )
+    })
+  })
+
+  describe('SEC-010: RBAC - Admin can access any barber', () => {
+    it('should allow admin to access any barber appointments', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'owner-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'admin-user-123', // Admin user
+        email: 'admin@example.com',
+      }
+
+      const mockBarberQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'barber-456',
+            name: 'Staff Barber',
+            business_id: 'business-123',
+            email: 'staff@example.com',
+          },
+          error: null,
+        }),
+      }
+
+      const mockAppointmentsQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        order: vi.fn().mockResolvedValue({
+          data: [],
+          error: null,
+        }),
+      }
+
+      mockSupabase.from
+        .mockReturnValueOnce(mockBarberQuery as any)
+        .mockReturnValueOnce(mockAppointmentsQuery as any)
+
+      // Mock RBAC - admin has read_all_appointments permission
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(true)
+
+      const response = await (GET as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'barber-456' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(200)
+    })
+  })
+
+  describe('SEC-011: RBAC - Security logging', () => {
+    it('should log unauthorized access attempts with context', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'owner-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'staff-user-123',
+        email: 'staff@example.com',
+      }
+
+      const mockBarberQuery = {
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'barber-456',
+            name: 'Other Staff',
+            business_id: 'business-123',
+            email: 'other@example.com',
+          },
+          error: null,
+        }),
+      }
+
+      mockSupabase.from.mockReturnValueOnce(mockBarberQuery as any)
+
+      // Mock RBAC - access denied
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(false)
+
+      await (GET as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'barber-456' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      // Verify security logging
+      expect(logSecurity).toHaveBeenCalledWith(
+        'unauthorized',
+        'high',
+        expect.objectContaining({
+          userId: 'staff-user-123',
+          userEmail: 'staff@example.com',
+          requestedBarberId: 'barber-456',
+          barberEmail: 'other@example.com',
+          businessId: 'business-123',
+          endpoint: '/api/barbers/[id]/appointments/today',
+        })
+      )
     })
   })
 })

@@ -5,6 +5,8 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from '@/lib/api/middleware'
+import { canAccessBarberAppointments } from '@/lib/rbac'
+import { logger, logSecurity } from '@/lib/logger'
 
 /**
  * Response types for Mi Dia staff view
@@ -85,15 +87,28 @@ export const GET = withAuth<RouteParams>(
         return notFoundResponse('Barbero no encontrado')
       }
 
-      // 2. IDOR PROTECTION: Verify authenticated user is this barber OR business owner
-      // Barbers can only view their own appointments, business owners can view all
-      const isBusinessOwner = business.owner_id === user.id
-      const isThisBarber = barber.email === user.email
+      // 2. IDOR PROTECTION: Verify authenticated user can access this barber's appointments
+      // Uses RBAC system to check:
+      // - Business owner (can access all)
+      // - User has read_all_appointments permission (recepcionista, admin)
+      // - User is the barber themselves (read own appointments)
+      const canAccess = await canAccessBarberAppointments(
+        supabase,
+        user.id,
+        barberId,
+        business.id,
+        business.owner_id
+      )
 
-      if (!isBusinessOwner && !isThisBarber) {
-        console.warn(
-          `⚠️ IDOR attempt blocked: User ${user.email} tried to access appointments for barber ${barber.email}`
-        )
+      if (!canAccess) {
+        logSecurity('unauthorized', 'high', {
+          userId: user.id,
+          userEmail: user.email,
+          requestedBarberId: barberId,
+          barberEmail: barber.email,
+          businessId: business.id,
+          endpoint: '/api/barbers/[id]/appointments/today',
+        })
         return unauthorizedResponse('No tienes permiso para ver las citas de este barbero')
       }
 
@@ -128,7 +143,14 @@ export const GET = withAuth<RouteParams>(
         .order('scheduled_at', { ascending: true })
 
       if (appointmentsError) {
-        console.error('Error fetching appointments:', appointmentsError)
+        logger.error(
+          {
+            err: appointmentsError,
+            barberId,
+            businessId: business.id,
+          },
+          'Error fetching appointments'
+        )
         return errorResponse('Error al obtener las citas')
       }
 
@@ -177,7 +199,15 @@ export const GET = withAuth<RouteParams>(
 
       return NextResponse.json(response)
     } catch (error) {
-      console.error('Unexpected error in GET /api/barbers/[id]/appointments/today:', error)
+      logger.error(
+        {
+          err: error,
+          barberId: await params.then((p) => p.id),
+          userId: user.id,
+          businessId: business.id,
+        },
+        'Unexpected error in GET /api/barbers/[id]/appointments/today'
+      )
       return errorResponse('Error interno del servidor')
     }
   }

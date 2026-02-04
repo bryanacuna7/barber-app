@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-03 (Session 72)
-> **Last Verified Against:** All migrations 001-022
+> **Last Updated:** 2026-02-03 (Session 87 - RBAC System)
+> **Last Verified Against:** All migrations 001-023
 
 ---
 
@@ -116,6 +116,7 @@ UNIQUE(business_id, phone)
 ### `barbers`
 
 **Created in:** `002_multi_barber.sql`
+**Modified in:** `023_rbac_system.sql`
 
 ```sql
 - id            UUID PRIMARY KEY
@@ -128,8 +129,15 @@ UNIQUE(business_id, phone)
 - role          TEXT CHECK (role IN ('owner', 'barber'))
 - is_active     BOOLEAN
 - avatar_url    TEXT
+- user_id       UUID REFERENCES auth.users(id) (added in 023)
+- role_id       UUID REFERENCES roles(id) (added in 023)
 UNIQUE(business_id, email)
 ```
+
+**Indexes:**
+
+- `idx_barbers_user_id` on `user_id` (added in 023)
+- `idx_barbers_role_id` on `role_id` (added in 023)
 
 ---
 
@@ -146,6 +154,107 @@ UNIQUE(business_id, email)
 - email         TEXT UNIQUE
 - is_active     BOOLEAN
 ```
+
+### `roles`
+
+**Created in:** `023_rbac_system.sql`
+
+```sql
+- id            UUID PRIMARY KEY
+- name          TEXT UNIQUE CHECK (name IN ('owner', 'admin', 'staff', 'recepcionista'))
+- description   TEXT
+- created_at    TIMESTAMPTZ
+- updated_at    TIMESTAMPTZ
+```
+
+**Initial Data:**
+
+- `owner` - Business owner with full access
+- `admin` - System administrator with almost full access
+- `staff` - Staff member (barber/stylist) who can view own appointments
+- `recepcionista` - Receptionist who can view all appointments and manage bookings
+
+### `permissions`
+
+**Created in:** `023_rbac_system.sql`
+
+```sql
+- id            UUID PRIMARY KEY
+- name          TEXT UNIQUE
+- description   TEXT
+- resource      TEXT CHECK (resource IN ('appointments', 'barbers', 'clients', 'services', 'reports', 'business'))
+- created_at    TIMESTAMPTZ
+```
+
+**Available Permissions:**
+
+**Appointments:**
+
+- `read_all_appointments` - View all appointments across all barbers
+- `read_own_appointments` - View only own appointments
+- `write_all_appointments` - Create/edit any appointment
+- `write_own_appointments` - Create/edit only own appointments
+- `delete_appointments` - Delete appointments
+
+**Barbers/Staff:**
+
+- `manage_barbers` - Create/edit/delete staff members
+- `view_barbers` - View list of staff members
+
+**Clients:**
+
+- `manage_clients` - Create/edit/delete clients
+- `view_clients` - View client information
+
+**Services:**
+
+- `manage_services` - Create/edit/delete services
+- `view_services` - View services list
+
+**Reports:**
+
+- `view_all_reports` - View reports for all staff members
+- `view_own_reports` - View only own reports and statistics
+
+**Business:**
+
+- `manage_business_settings` - Manage business settings and configuration
+
+### `role_permissions`
+
+**Created in:** `023_rbac_system.sql`
+
+```sql
+- role_id       UUID REFERENCES roles(id) ON DELETE CASCADE
+- permission_id UUID REFERENCES permissions(id) ON DELETE CASCADE
+- created_at    TIMESTAMPTZ
+PRIMARY KEY (role_id, permission_id)
+```
+
+**Permission Mappings:**
+
+| Permission               | owner | admin | staff | recepcionista |
+| ------------------------ | ----- | ----- | ----- | ------------- |
+| read_all_appointments    | ✅    | ✅    | ❌    | ✅            |
+| read_own_appointments    | ✅    | ✅    | ✅    | ✅            |
+| write_all_appointments   | ✅    | ✅    | ❌    | ✅            |
+| write_own_appointments   | ✅    | ✅    | ✅    | ❌            |
+| delete_appointments      | ✅    | ✅    | ❌    | ❌            |
+| manage_barbers           | ✅    | ✅    | ❌    | ❌            |
+| view_barbers             | ✅    | ✅    | ✅    | ✅            |
+| manage_clients           | ✅    | ✅    | ❌    | ✅            |
+| view_clients             | ✅    | ✅    | ✅    | ✅            |
+| manage_services          | ✅    | ✅    | ❌    | ❌            |
+| view_services            | ✅    | ✅    | ✅    | ✅            |
+| view_all_reports         | ✅    | ✅    | ❌    | ❌            |
+| view_own_reports         | ✅    | ✅    | ✅    | ✅            |
+| manage_business_settings | ✅    | ✅    | ❌    | ❌            |
+
+**Helper Functions:**
+
+- `user_has_permission(p_user_id UUID, p_permission_name TEXT)` - Check if user has permission
+- `get_user_permissions(p_user_id UUID)` - Get all permissions for a user
+- `get_user_role(p_user_id UUID)` - Get user's role name
 
 ### `barber_invitations`
 

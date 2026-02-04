@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 (Session 85 - MVP/POST-MVP Split)
-- **Last Session:** Session 85 - Roadmap reorganized into MVP (5-6 weeks) + POST-MVP (19-25 weeks)
+- **Last Updated:** 2026-02-03 (Session 86 - FASE 0 Complete)
+- **Last Session:** Session 86 - FASE 0 Critical Fixes completed (TypeScript + console.log cleanup)
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -66,14 +66,15 @@
 
 **Current Progress:**
 
-- ✅ **Área 0:** 100% COMPLETE ✅
+- ✅ **FASE 0 (Área 0):** 100% COMPLETE ✅ (Session 86)
   - ✅ Security fixes (4 vulnerabilities) - Session 68
-  - ✅ DB Performance (7 indexes) - Session 68
+  - ✅ DB Performance (7 indexes) - Session 68, 78
   - ✅ Observability (Pino, Sentry, Redis) - Session 68
-  - ✅ TypeScript 100% (201 → 0 errors) - Sessions 67-68, 79
+  - ✅ TypeScript 100% (201 → 0 errors) - Sessions 67-68, 79, 86
   - ✅ **Critical perf fixes (Session 78)** - Calendar + Mi Día optimization (7-10x faster)
   - ✅ TypeScript strict mode (Session 79) - All @ts-nocheck removed
   - ✅ Code cleanup + verification (Session 79)
+  - ✅ **FASE 0 MVP tasks (Session 86)** - Final TypeScript fix + console.log cleanup
 
 - 🟡 **Calendar Views:** 92% complete (Session 84: Bug fixes + planning)
   - Implementation: Desktop + Mobile views complete
@@ -89,6 +90,71 @@
 ---
 
 ## Recent Sessions
+
+### Session 86: FASE 0 Complete - MVP Sprint Started (2026-02-03)
+
+**Status:** ✅ Complete - FASE 0 critical fixes done, ready for Área 6
+
+**Time:** ~30 minutes
+
+**Objective:** Complete FASE 0 critical fixes from MVP roadmap (Week 1)
+
+**Actions Completed:**
+
+1. ✅ **Verified Database Index Bug** - Already fixed in Session 65
+   - Migration 019b_missing_indexes.sql uses correct column name (`last_visit_at`)
+   - No action needed
+
+2. ✅ **Verified Calendar N+1 Queries** - Already optimized in Session 78
+   - Frontend uses week range query (start_date + end_date params)
+   - Backend uses single range query (.gte() + .lte())
+   - Result: 7x faster (550ms → 70ms)
+
+3. ✅ **Verified Mi Día WebSocket** - Already implemented in Session 78
+   - Replaced polling with Supabase Realtime WebSocket
+   - Result: 98% bandwidth reduction (60MB/hr → <1MB/hr)
+
+4. ✅ **Fixed TypeScript Error** - [scripts/create-demo-user.ts:16](scripts/create-demo-user.ts#L16)
+   - Fixed type inference error (`never` type issue)
+   - Added `?? null` to make type explicit
+   - Result: **0 TypeScript errors** ✅
+
+5. ✅ **Cleaned up console.log** - 3 API routes
+   - Replaced `console.log` with structured logger (Pino)
+   - Added context: `{ appointmentId, status }`
+   - Files modified:
+     - [src/app/api/appointments/[id]/complete/route.ts](src/app/api/appointments/[id]/complete/route.ts#L163)
+     - [src/app/api/appointments/[id]/check-in/route.ts](src/app/api/appointments/[id]/check-in/route.ts#L130)
+     - [src/app/api/appointments/[id]/no-show/route.ts](src/app/api/appointments/[id]/no-show/route.ts#L130)
+
+**Key Insight:**
+
+Most of FASE 0 work was already completed in previous sessions (65, 78, 79). Today only needed to fix 1 TypeScript error and replace 3 console.log statements.
+
+**Commits:**
+
+- `297f925` ✅ feat(fase-0): complete critical fixes - TypeScript + console.log cleanup
+
+**FASE 0 Status (MVP Week 1):**
+
+- ✅ Database index bug (5 min) - Already fixed
+- ✅ Calendar N+1 queries (2h) - Already fixed
+- ✅ Mi Día WebSocket (2h) - Already fixed
+- ✅ TypeScript errors (6-8h) - Fixed 1 error today
+- ✅ Console.log removal (1h) - Fixed 3 statements today
+
+**Actual Time:** ~30 minutes (vs 12.5h estimated - 96% already done)
+
+**Next Steps:**
+
+1. Begin Área 6: Security Fixes (Week 2, 22h)
+2. IDOR vulnerabilities (8h)
+3. Race condition fix (4h)
+4. Rate limiting (4h)
+5. Auth integration (4h)
+6. Security tests (2h)
+
+---
 
 ### Session 85: MVP/POST-MVP Roadmap Split (2026-02-03)
 
@@ -354,10 +420,14 @@ Months 7-9: Execute Tier 4 (Strategic)
 - **Calendar views:** Day/Week/Month/List/Timeline all working
 - **Date filtering:** Fixed in Session 84
 - **Hour labels:** Fixed in Session 84
+- **FASE 0:** ✅ 100% Complete (Session 86)
+  - TypeScript: 0 errors
+  - Performance: Calendar 7x faster, Mi Día 98% bandwidth reduction
+  - Logging: Structured logging with Pino
 - Sistema de loyalty integrado
 - Sistema de referencias (B2B) completo
 - Observability infrastructure (logging, error tracking)
-- Security hardening (4 vulnerabilities fixed)
+- Security hardening (4 vulnerabilities fixed in Session 68)
 
 ### Known Issues ⚠️
 
@@ -378,29 +448,41 @@ Months 7-9: Execute Tier 4 (Strategic)
 
 ## Next Session
 
-### Recommended: Begin MVP Sprint (5-6 weeks to launch)
+### Continue With: Área 6 - Security Fixes (Week 2)
 
-**Status:** MVP scope defined, 98-128h execution plan ready
-
-**Option A: Begin MVP Sprint (RECOMMENDED)**
+**Status:** ✅ FASE 0 Complete (Session 86), ready for security work
 
 **Read First:**
 
-1. [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md) - Your 5-6 week launch plan
+1. [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md) - Área 6 section (lines 89-157)
 
-**Week 1: FASE 0 - Critical Fixes (12.5h)**
+**Área 6: Security Fixes (22h estimated)**
 
-1. Fix database index bug (5 min) ⚠️ CRITICAL
-2. Calendar N+1 queries → range query (2h)
-3. Mi Día polling → WebSocket (2h)
-4. Complete TypeScript fixes (8h)
+1. **IDOR Vulnerability #1** (4h) - [src/app/api/barbers/[id]/appointments/today/route.ts](src/app/api/barbers/[id]/appointments/today/route.ts)
+   - Add barber identity validation
+   - Verify `session.user.id === barberId` OR `read_all_appointments` permission
 
-**Week 2: Área 6 - Security Fixes (22h)**
+2. **IDOR Vulnerability #2** (4h) - Status update endpoints
+   - Make barberId validation MANDATORY
+   - Move validation to RLS policy level
+   - Files: `/api/appointments/[id]/start`, `/api/appointments/[id]/complete`
 
-1. Fix IDOR vulnerabilities (8h)
-2. Implement rate limiting (4h)
-3. Auth integration (4h)
-4. Security tests (2h)
+3. **Race Condition Fix** (4h) - Create atomic DB function
+   - Create `increment_client_stats()` atomic function
+   - Replace read → increment → write pattern
+   - File: `supabase/migrations/023_atomic_client_stats.sql`
+
+4. **Rate Limiting** (4h) - Add to status update endpoints
+   - Use `@upstash/ratelimit` (Redis-based)
+   - Limit: 10 requests/min per user
+   - Endpoints: All `/api/appointments/[id]/*` routes
+
+5. **Auth Integration** (4h) - Replace placeholders
+   - Search: `grep -r "BARBER_ID_PLACEHOLDER" src/`
+   - Replace with: `const barberId = session.user.id`
+
+6. **Security Tests** (2h) - Execute 8 test cases
+   - IDOR, race condition, rate limiting, auth bypass, SQL injection, XSS, CSRF, authorization
 
 **Week 3: Área 1 - Subscriptions (14-18h)**
 
