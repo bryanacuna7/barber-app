@@ -267,7 +267,7 @@ function CitasPageContent() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [viewMode, isFormOpen])
 
-  // Filter appointments
+  // Filter appointments by status and search
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
       if (statusFilter !== 'all' && apt.status !== statusFilter) {
@@ -284,6 +284,13 @@ function CitasPageContent() {
       return true
     })
   }, [appointments, statusFilter, search])
+
+  // Additional filter by selected date for List and Timeline views
+  const dayFilteredAppointments = useMemo(() => {
+    return filteredAppointments.filter((apt) => {
+      return isSameDay(new Date(apt.scheduled_at), selectedDate)
+    })
+  }, [filteredAppointments, selectedDate])
 
   // Stats - Optimized single-pass calculation
   const stats = useMemo(() => {
@@ -669,7 +676,7 @@ function CitasPageContent() {
               <div className="grid grid-cols-2 gap-2">
                 {(['pending', 'confirmed', 'completed', 'cancelled'] as AppointmentStatus[]).map(
                   (status) => {
-                    const count = filteredAppointments.filter((a) => a.status === status).length
+                    const count = dayFilteredAppointments.filter((a) => a.status === status).length
                     return (
                       <div
                         key={status}
@@ -754,7 +761,11 @@ function CitasPageContent() {
               <div className="flex items-center justify-center py-20">
                 <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin dark:border-zinc-600 dark:border-t-white" />
               </div>
-            ) : filteredAppointments.length === 0 ? (
+            ) : (
+                viewMode === 'list' || viewMode === 'timeline' || viewMode === 'calendar'
+                  ? dayFilteredAppointments.length === 0
+                  : filteredAppointments.length === 0
+              ) ? (
               <Card>
                 <EmptyState
                   icon={CalendarIcon}
@@ -785,7 +796,7 @@ function CitasPageContent() {
                     {isMobile ? (
                       <PullToRefresh onRefresh={fetchAppointments}>
                         <div className="space-y-2">
-                          {filteredAppointments
+                          {dayFilteredAppointments
                             .sort(
                               (a, b) =>
                                 new Date(a.scheduled_at).getTime() -
@@ -806,7 +817,7 @@ function CitasPageContent() {
                       </PullToRefresh>
                     ) : (
                       <div className="space-y-2 max-w-3xl mx-auto">
-                        {filteredAppointments
+                        {dayFilteredAppointments
                           .sort(
                             (a, b) =>
                               new Date(a.scheduled_at).getTime() -
@@ -881,7 +892,7 @@ function CitasPageContent() {
                 {viewMode === 'timeline' && (
                   <Card className="p-4 sm:p-6">
                     <div className="space-y-0">
-                      {filteredAppointments
+                      {dayFilteredAppointments
                         .sort(
                           (a, b) =>
                             new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
