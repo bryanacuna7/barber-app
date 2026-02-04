@@ -30,17 +30,17 @@
 
 ## 📊 TOTAL TIME BREAKDOWN
 
-| Phase                   | Hours        | Weeks @ 20h/wk    | Description                              |
-| ----------------------- | ------------ | ----------------- | ---------------------------------------- |
-| **FASE 1: v2.5 Core**   | 167-208h     | 8-10 weeks        | Technical excellence + security          |
-| **FASE 2: Competitive** | 115-151h     | 6-8 weeks         | Calendar, Settings, RBAC, Business Types |
-| **FASE 2.5: Retention** | 30-44h       | 1.5-2 weeks       | CRM Lite, Rebooking, WhatsApp            |
-| **FASE 3: Rebranding**  | 40-60h       | 2-3 weeks         | Complete barber → staff migration        |
-| **Performance Fixes**   | 4.5h         | 0.25 weeks        | Critical bottlenecks                     |
-| **Security Hardening**  | 31h          | 1.5 weeks         | FASE 2 vulnerabilities                   |
-| **UX Refinement**       | 12-16h       | 0.5-1 week        | Dieter Rams polish                       |
-| **BUFFER (15%)**        | 51-67h       | 2.5-3 weeks       | Contingency for unknowns                 |
-| **GRAND TOTAL**         | **451-598h** | **22.5-30 weeks** | Full implementation                      |
+| Phase                   | Hours             | Weeks @ 20h/wk      | Description                              |
+| ----------------------- | ----------------- | ------------------- | ---------------------------------------- |
+| **FASE 1: v2.5 Core**   | 167-208h          | 8-10 weeks          | Technical excellence + security          |
+| **FASE 2: Competitive** | 115-151h          | 6-8 weeks           | Calendar, Settings, RBAC, Business Types |
+| **FASE 2.5: Retention** | 30-44h            | 1.5-2 weeks         | CRM Lite, Rebooking, WhatsApp            |
+| **FASE 3: Rebranding**  | 40-60h            | 2-3 weeks           | Complete barber → staff migration        |
+| **Performance Fixes**   | ~~4.5h~~ ✅ 0.25h | ~~0.25 weeks~~ DONE | Critical bottlenecks (Session 78)        |
+| **Security Hardening**  | 31h               | 1.5 weeks           | FASE 2 vulnerabilities                   |
+| **UX Refinement**       | 12-16h            | 0.5-1 week          | Dieter Rams polish                       |
+| **BUFFER (15%)**        | 51-67h            | 2.5-3 weeks         | Contingency for unknowns                 |
+| **GRAND TOTAL**         | **447-594h**      | **22-30 weeks**     | Full implementation (4h saved)           |
 
 **Conservative Estimate @ 20h/week:** 22.5-30 weeks (5.5-7.5 months)
 **Aggressive Estimate @ 30h/week:** 15-20 weeks (3.5-5 months)

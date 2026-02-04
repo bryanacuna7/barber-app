@@ -889,8 +889,28 @@ IF creating a migration:
 □ 7. Cross-reference each one with DATABASE_SCHEMA.md
 □ 8. If column doesn't exist → STOP, don't assume it
 □ 9. After creating migration → update DATABASE_SCHEMA.md
-□ 10. Commit both files together
+□ 10. Guide user to execute migration in Supabase
+□ 11. Wait for confirmation of success
+□ 12. Commit both files together
 ```
+
+### After Creating Migration - Guide User:
+
+**ALWAYS guide the user to execute the migration:**
+
+```
+✅ Migration created: supabase/migrations/019c_calendar_indexes.sql
+
+**Next step:** Execute this migration in Supabase Dashboard:
+1. Go to your Supabase project
+2. Navigate to SQL Editor
+3. Run the migration file
+4. Confirm success (check for ✅ message)
+
+Let me know when it's done so we can proceed!
+```
+
+**NEVER assume the migration is applied automatically.**
 
 ### Common Mistakes to Avoid:
 
