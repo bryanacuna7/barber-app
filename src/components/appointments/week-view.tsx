@@ -86,11 +86,7 @@ export const WeekView = memo(function WeekView({
 
   // Configure sensors for different input methods
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // 8px movement required to start drag
-      },
-    }),
+    useSensor(PointerSensor),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 250, // 250ms hold to start drag on touch
