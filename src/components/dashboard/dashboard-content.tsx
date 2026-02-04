@@ -11,11 +11,11 @@ import { useDashboardStats } from '@/hooks/use-dashboard-stats'
 import { useDashboardAppointments } from '@/hooks/use-dashboard-appointments'
 
 export function DashboardContent() {
-  const { data: stats, isLoading: statsLoading } = useDashboardStats()
+  const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats()
   const { data: appointmentsData, isLoading: appointmentsLoading } = useDashboardAppointments()
 
-  // Show loading state
-  if (statsLoading || appointmentsLoading) {
+  // Show loading state only for stats (appointments load lazily)
+  if (statsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -26,11 +26,14 @@ export function DashboardContent() {
     )
   }
 
-  if (!stats) {
+  // Show error state if stats failed to load
+  if (statsError || !stats) {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold">Error</h1>
-        <p className="text-zinc-500 mt-2">No se pudieron cargar los datos</p>
+        <p className="text-zinc-500 mt-2">
+          {statsError instanceof Error ? statsError.message : 'No se pudieron cargar los datos'}
+        </p>
       </div>
     )
   }
@@ -100,7 +103,26 @@ export function DashboardContent() {
             </Link>
           </CardHeader>
           <CardContent className="p-0">
-            {upcomingAppointments.length === 0 ? (
+            {appointmentsLoading ? (
+              // Loading skeleton
+              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 animate-pulse">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-zinc-200 dark:bg-zinc-700" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-32 bg-zinc-200 dark:bg-zinc-700 rounded" />
+                        <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-700 rounded" />
+                      </div>
+                    </div>
+                    <div className="text-right space-y-2">
+                      <div className="h-5 w-16 bg-zinc-200 dark:bg-zinc-700 rounded ml-auto" />
+                      <div className="h-3 w-20 bg-zinc-200 dark:bg-zinc-700 rounded ml-auto" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : upcomingAppointments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4 relative">
                 {/* Círculo decorativo de fondo */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

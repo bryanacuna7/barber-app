@@ -63,14 +63,25 @@ export async function getNotifications(
     return { notifications: [], stats: { total: 0, unread: 0 } }
   }
 
-  // Build query
-  let query = (supabase as AnySupabase)
-    .from('notifications')
-    .select('*', { count: 'exact' })
-    .or(
-      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
-    )
-    .order('created_at', { ascending: false })
+  // First, get business_id for the user
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('owner_id', user.id)
+    .single()
+
+  const businessId = business?.id
+
+  // Build query - check both user_id and business_id
+  let query = (supabase as AnySupabase).from('notifications').select('*', { count: 'exact' })
+
+  if (businessId) {
+    query = query.or(`user_id.eq.${user.id},business_id.eq.${businessId}`)
+  } else {
+    query = query.eq('user_id', user.id)
+  }
+
+  query = query.order('created_at', { ascending: false })
 
   if (unreadOnly) {
     query = query.eq('is_read', false)
@@ -84,13 +95,17 @@ export async function getNotifications(
   }
 
   // Get unread count separately
-  const { count: unreadCount } = await (supabase as AnySupabase)
+  let unreadQuery = (supabase as AnySupabase)
     .from('notifications')
     .select('*', { count: 'exact', head: true })
-    .or(
-      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
-    )
-    .eq('is_read', false)
+
+  if (businessId) {
+    unreadQuery = unreadQuery.or(`user_id.eq.${user.id},business_id.eq.${businessId}`)
+  } else {
+    unreadQuery = unreadQuery.eq('user_id', user.id)
+  }
+
+  const { count: unreadCount } = await unreadQuery.eq('is_read', false)
 
   return {
     notifications: (data as Notification[]) || [],
@@ -129,16 +144,27 @@ export async function markAllAsRead(supabase: SupabaseClient<Database>): Promise
 
   if (!user) return false
 
-  const { error } = await (supabase as AnySupabase)
-    .from('notifications')
-    .update({
-      is_read: true,
-      read_at: new Date().toISOString(),
-    })
-    .or(
-      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
-    )
-    .eq('is_read', false)
+  // Get business_id for the user
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('owner_id', user.id)
+    .single()
+
+  const businessId = business?.id
+
+  let query = (supabase as AnySupabase).from('notifications').update({
+    is_read: true,
+    read_at: new Date().toISOString(),
+  })
+
+  if (businessId) {
+    query = query.or(`user_id.eq.${user.id},business_id.eq.${businessId}`)
+  } else {
+    query = query.eq('user_id', user.id)
+  }
+
+  const { error } = await query.eq('is_read', false)
 
   return !error
 }
@@ -153,13 +179,26 @@ export async function getUnreadCount(supabase: SupabaseClient<Database>): Promis
 
   if (!user) return 0
 
-  const { count } = await (supabase as AnySupabase)
+  // Get business_id for the user
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('owner_id', user.id)
+    .single()
+
+  const businessId = business?.id
+
+  let query = (supabase as AnySupabase)
     .from('notifications')
     .select('*', { count: 'exact', head: true })
-    .or(
-      `user_id.eq.${user.id},business_id.in.(select id from businesses where owner_id = '${user.id}')`
-    )
-    .eq('is_read', false)
+
+  if (businessId) {
+    query = query.or(`user_id.eq.${user.id},business_id.eq.${businessId}`)
+  } else {
+    query = query.eq('user_id', user.id)
+  }
+
+  const { count } = await query.eq('is_read', false)
 
   return count || 0
 }
