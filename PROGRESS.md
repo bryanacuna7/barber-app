@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 (Session 90 - Rate Limiting COMPLETE)
-- **Last Session:** Session 88 - RBAC-based protection for appointment status update endpoints
+- **Last Updated:** 2026-02-03 (Session 91 - Auth Integration COMPLETE)
+- **Last Session:** Session 91 - User-to-barber mapping standardized + structured logging
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -82,18 +82,123 @@
   - Simplification plan: Created 42-page detailed plan (Session 84)
   - Status: Production-ready, refactoring planned for Week 4-6
 
-- 🔄 **Área 6:** 73% complete (Session 90: Rate Limiting Complete)
+- 🔄 **Área 6:** 91% complete (Session 91: Auth Integration Complete)
   - ✅ **IDOR Vulnerability #1** (Session 87) - Full RBAC system implemented
   - ✅ **IDOR Vulnerability #2** (Session 88) - Status update endpoints protected with RBAC
   - ✅ **Race Condition Fix** (Session 89) - Atomic DB function verified + 9 tests added
   - ✅ **Rate Limiting** (Session 90) - All 3 endpoints verified + tests created + documented
-  - ⏳ Auth Integration - Replace BARBER_ID_PLACEHOLDER (Next)
-  - ⏳ Security Tests - Complete remaining test cases
-  - Status: 4/6 tasks complete (16h / 22h = 73%), MVP Week 2 in progress
+  - ✅ **Auth Integration** (Session 91) - User-to-barber mapping standardized + structured logging
+  - ⏳ Security Tests - Complete remaining test cases (Next)
+  - Status: 5/6 tasks complete (20h / 22h = 91%), MVP Week 2 near completion
 
 ---
 
 ## Recent Sessions
+
+### Session 91: Auth Integration COMPLETE - User-to-Barber Mapping Standardized (2026-02-03)
+
+**Status:** ✅ Complete - All authentication uses centralized user_id mapping, structured logging implemented
+
+**Time:** ~1.5 hours
+
+**Objective:** Standardize authentication integration by eliminating duplicate code and implementing structured logging
+
+**Agents Used:** @security-auditor + @fullstack-developer
+
+**Actions Completed:**
+
+1. ✅ **Verified BARBER_ID_PLACEHOLDER Removal**
+   - Searched entire codebase: 0 instances in `src/` ✅
+   - Only documentation references remain (expected)
+   - Verified all endpoints use proper authentication
+
+2. ✅ **Implemented Structured Logging in RBAC** - [src/lib/rbac.ts](src/lib/rbac.ts)
+   - Replaced 4 `console.error` calls with Pino structured logging
+   - Added logger import from `@/lib/logger`
+   - Functions updated:
+     - `getBarberIdFromUserId()` (lines 307, 317)
+     - `canAccessBarberAppointments()` (line 383)
+     - `canModifyBarberAppointments()` (line 454)
+   - All errors now logged with context: `{ userId, barberId, businessId, error }`
+
+3. ✅ **Refactored Gamification Endpoints** - Eliminated duplicate code
+   - [stats/route.ts](src/app/api/gamification/barber/stats/route.ts) - Replaced 9-line inline query with `getBarberIdFromUserId()`
+   - [achievements/route.ts](src/app/api/gamification/barber/achievements/route.ts) - Replaced 11-line inline query with `getBarberIdFromUserId()`
+   - Benefits: DRY principle, centralized logging, consistent error handling
+
+4. ✅ **Comprehensive Documentation** - [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)
+   - Added "Auth Integration (Session 91)" section
+   - Documented user-to-barber mapping architecture
+   - Listed all RBAC usage locations
+   - Noted migration status and warnings
+   - Updated "Last Updated" to Session 91
+
+**Key Findings:**
+
+**Auth Integration was already largely complete:**
+
+- ✅ Migration 023 added `user_id` column to `barbers` table (Session 87)
+- ✅ `getBarberIdFromUserId()` function exists and works
+- ✅ RBAC functions (`canAccessBarberAppointments`, `canModifyBarberAppointments`) already use it internally
+- ✅ All protected endpoints use RBAC correctly
+- ⚠️ Some endpoints had duplicate inline mapping code
+
+**What Was Improved:**
+
+- Replaced all `console.error` → structured logging (Pino)
+- Eliminated duplicate user-to-barber mapping code (20 lines saved)
+- Centralized all auth logic in `src/lib/rbac.ts`
+- Added comprehensive documentation in DATABASE_SCHEMA.md
+
+**Architecture Overview:**
+
+```
+User Authentication Flow:
+1. User logs in → auth.users.id (Supabase Auth)
+2. getBarberIdFromUserId(user.id) → barbers.id (via user_id column)
+3. RBAC functions validate permissions using barber.id
+4. Endpoints use canAccessBarberAppointments() / canModifyBarberAppointments()
+```
+
+**Files Modified:**
+
+1. `src/lib/rbac.ts` - Structured logging (4 locations)
+2. `src/app/api/gamification/barber/stats/route.ts` - Use centralized function
+3. `src/app/api/gamification/barber/achievements/route.ts` - Use centralized function
+4. `DATABASE_SCHEMA.md` - Added Auth Integration section
+5. `PROGRESS.md` - This file
+
+**Commits:**
+
+- `6dea4f6` 🔐 feat(security): complete auth integration - user-to-barber mapping standardized
+
+**Build Status:** ✅ TypeScript: 0 errors, Linting: passed
+
+**Área 6 Progress (MVP Week 2):**
+
+- [x] IDOR Vulnerability #1 (4h) ✅ COMPLETE (Session 87)
+- [x] IDOR Vulnerability #2 (4h) ✅ COMPLETE (Session 88)
+- [x] Race Condition Fix (4h) ✅ COMPLETE (Session 89)
+- [x] Rate Limiting (4h) ✅ COMPLETE (Session 90)
+- [x] Auth Integration (4h) ✅ COMPLETE (Session 91)
+- [ ] Security Tests (2h) - Next
+
+**Progress:** 5/6 tasks complete (20h / 22h = 91%)
+
+**Next Steps:**
+
+1. ✅ ~~Complete Auth Integration~~ DONE
+2. ➡️ Security Tests - Execute all 8 security test cases from MVP roadmap
+3. Complete Área 6 (MVP Week 2) with final security testing
+4. Move to Week 3: Área 1 - Subscriptions
+
+**Notes:**
+
+- ⚠️ `user_id` column in `barbers` table may need population for existing demo barbers
+- ⚠️ New barbers created via UI should automatically set `user_id` during creation
+- ✅ All production endpoints now use centralized, tested, logged authentication
+
+---
 
 ### Session 87: Full RBAC System - IDOR Vulnerability #1 FIXED (2026-02-03)
 
@@ -212,6 +317,8 @@ Implemented complete RBAC system in one session instead of quick fix. This provi
 ### Session 90: Rate Limiting COMPLETE - Protection Added to All Status Endpoints (2026-02-03)
 
 **Status:** ✅ Complete - Rate limiting verified and documented for all 3 status update endpoints
+
+**Note:** Full details preserved below, see Session 91 above for most recent work
 
 **Time:** ~1 hour
 
