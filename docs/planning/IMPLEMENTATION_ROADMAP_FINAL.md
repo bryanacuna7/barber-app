@@ -1,11 +1,17 @@
 # Implementation Roadmap - FINAL MASTER PLAN
 
+> **⚠️ IMPORTANT:** This is the COMPLETE master plan. For focused execution:
+>
+> - **Start here:** [MVP_ROADMAP.md](./MVP_ROADMAP.md) - 5-6 week launch plan
+> - **Then read:** [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) - Feature expansion
+> - **This document:** Full historical context + comprehensive view
+
 **Project:** BarberShop Pro → Salon Booking Platform
 **Version:** 2.5 (Post Multi-Expert Panel Review)
 **Date:** 2026-02-03
-**Last Updated:** 2026-02-03 (Session 84) - Added Citas Page Simplification
+**Last Updated:** 2026-02-03 (Session 85) - MVP/POST-MVP Split
 **Total Estimated:** 485-632 hours (24-32 weeks @ 20h/week)
-**Decision:** ✅ OPTION B - Complete Launch (All features included)
+**Decision:** ✅ OPTION B - Complete Launch (All features included, phased delivery)
 
 ---
 
@@ -59,6 +65,81 @@
 - Performance: 8.5/10 (After optimizations)
 - UX Design: 8.0/10 (After refinements)
 - Competitive Position: 9.0/10 (Market leader)
+
+---
+
+## 🎯 MVP vs POST-MVP SPLIT
+
+**IMPORTANT UPDATE (2026-02-03):** This roadmap has been reorganized into two focused plans:
+
+### 📦 [MVP_ROADMAP.md](./MVP_ROADMAP.md) - Launch Ready (5-6 weeks)
+
+**Total:** 98-128 hours
+
+**Includes:**
+
+- ✅ FASE 0: Critical Fixes (12.5h)
+- ✅ Área 6: Security Fixes (22h)
+- ✅ Área 1: Subscriptions (14-18h)
+- ✅ Sprint 5: MVP Testing (40-50h)
+
+**Launch Criteria:**
+
+- Core booking system working
+- 0 critical vulnerabilities
+- Subscription revenue model active
+- TypeScript strict mode passing
+- 80% critical path test coverage
+
+**Why MVP First:**
+
+- Ship in 5-6 weeks (not 24-32 weeks)
+- Validate market fit early
+- Start generating revenue
+- Gather real user feedback
+- Iterate based on data
+
+---
+
+### 🚀 [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) - Feature Expansion (19-25 weeks)
+
+**Total:** 387-504 hours across 4 priority tiers
+
+**Tier 1: High Priority (Month 2)** - 56-83h
+
+- Appointment Reminders (4-6h)
+- Calendar Refinement (8-10h)
+- Settings Menu (18-23h)
+- Citas Simplification (26-44h)
+
+**Tier 2: Medium Priority (Months 3-4)** - 78-105h
+
+- Advance Payments (12-16h)
+- Push Notifications (12-16h)
+- Referrals (8-10h)
+- RBAC System (22-30h)
+- Business Types + Kash (24-29h)
+
+**Tier 3: Low Priority (Months 5-6)** - 110-162h
+
+- Retention Features (30-44h)
+- Extended Testing (43-55h)
+- UX Refinement (12-16h)
+
+**Tier 4: Strategic (Months 7-9)** - 143-199h
+
+- Complete Rebranding (40-60h)
+- Performance Optimizations (15-20h)
+- Security Hardening Phase 2 (16-19h)
+- Accessibility (12-16h)
+- API & Integrations (60-84h)
+
+**Key Benefits:**
+
+- Nothing is lost - everything organized by priority
+- Clear ROI per feature
+- Dependencies mapped
+- Flexible execution based on feedback
 
 ---
 
@@ -983,27 +1064,46 @@ Week 28: Production Launch 🚀
 
 ## 📞 NEXT STEPS
 
+### Immediate Action Required
+
+**READ FIRST:**
+
+1. ✅ [MVP_ROADMAP.md](./MVP_ROADMAP.md) - Your 5-6 week launch plan
+2. ✅ [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) - Feature expansion after launch
+
 ### This Week (IMMEDIATE)
 
-1. ✅ Review this roadmap
-2. ✅ Approve final plan
-3. ✅ Fix database index bug (5 minutes)
-4. ✅ Start FASE 0 critical fixes
+1. [ ] Review MVP scope (see [MVP_ROADMAP.md](./MVP_ROADMAP.md))
+2. [ ] Approve MVP definition
+3. [ ] Fix database index bug (5 minutes) ⚠️ START NOW
+4. [ ] Begin FASE 0 critical fixes
 
-### Next Week
+### Weeks 1-6: MVP Sprint
 
-1. ✅ Complete FASE 0
-2. ✅ Begin Área 6 security fixes
-3. ✅ Set up project tracking (update PROGRESS.md weekly)
+**Follow:** [MVP_ROADMAP.md](./MVP_ROADMAP.md) for detailed plan
 
-### Monthly Milestones
+- **Week 1:** FASE 0 - Critical fixes
+- **Week 2:** Área 6 - Security fixes
+- **Week 3:** Área 1 - Subscriptions
+- **Weeks 4-5:** Sprint 5 - MVP Testing
+- **Week 6:** MVP LAUNCH 🚀
 
-- **End of Month 1:** Core foundation complete
-- **End of Month 2:** All v2.5 features built
-- **End of Month 3:** Testing complete, staging deployed
-- **End of Month 4:** Competitive features complete
-- **End of Month 5:** Retention features + rebranding complete
-- **End of Month 6:** Production launch 🚀
+### Post-Launch: Feature Expansion
+
+**Follow:** [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) for priority tiers
+
+- **Month 2 (Tier 1):** High-priority features (56-83h)
+- **Months 3-4 (Tier 2):** Medium-priority features (78-105h)
+- **Months 5-6 (Tier 3):** Low-priority features (110-162h)
+- **Months 7-9 (Tier 4):** Strategic features (143-199h)
+
+### Monthly Milestones (Updated)
+
+- **End of Week 6:** MVP Launch 🚀
+- **End of Month 2:** Tier 1 features (reminders, settings, simplification)
+- **End of Month 4:** Tier 2 features (payments, RBAC, multi-vertical)
+- **End of Month 6:** Tier 3 features (retention, UX polish)
+- **End of Month 9:** Tier 4 features (API, rebranding, advanced)
 
 ---
 

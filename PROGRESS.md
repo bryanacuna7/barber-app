@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 (Session 84 - Citas Bug Fixes + Simplification Planning)
-- **Last Session:** Session 84 - Date filtering fix, hour labels fix, simplification plan created
+- **Last Updated:** 2026-02-03 (Session 85 - MVP/POST-MVP Split)
+- **Last Session:** Session 85 - Roadmap reorganized into MVP (5-6 weeks) + POST-MVP (19-25 weeks)
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -32,27 +32,37 @@
 - [x] **Performance Optimization** ✅ (7 índices DB, N+1 queries fixed)
 - [x] **Observability Infrastructure** ✅ (Pino logging, Sentry, Redis rate limiting)
 
-### 🚀 CURRENT IMPLEMENTATION: Final Master Plan (APPROVED)
+### 🚀 CURRENT IMPLEMENTATION: MVP-First Approach (APPROVED)
 
-**✅ USER DECISION:** **Option B - Complete Launch** (All features included)
+**✅ NEW STRATEGY (Session 85):** **MVP First (5-6 weeks), then iterate**
 
-**Master Plan:** [IMPLEMENTATION_ROADMAP_FINAL.md](docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md)
+**MVP Plan:** [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md) ⭐ **START HERE**
+**Post-MVP Plan:** [POST_MVP_ROADMAP.md](docs/planning/POST_MVP_ROADMAP.md)
+**Master Reference:** [IMPLEMENTATION_ROADMAP_FINAL.md](docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md)
 **Branch:** `feature/subscription-payments-rebranding`
-**Total Estimated:** 485-632 hours (24-32 weeks @ 20h/week) - Updated Session 84
-**Score:** 6.0/10 → 9.2/10 (World-class with all adjustments)
 
-**Phase Breakdown (Updated Session 84):**
+**MVP Scope (98-128h, 5-6 weeks):**
 
-- **FASE 0:** Critical Fixes (12.5h) - Week 1
-- **FASE 1:** v2.5 Technical Excellence (201-256h) - Weeks 2-15
-  - **Week 4-6: Citas Page Simplification (34-48h)** ⭐ NEW
-- **FASE 2:** Competitive Features (115-151h) - Weeks 16-23
-- **FASE 2.5:** Retention Features (30-44h) - Weeks 24-25
-- **FASE 3:** Complete Rebranding (40-60h) - Weeks 26-28
-- **Performance Fixes:** Critical bottlenecks (4.5h) - Week 1
-- **Security Hardening:** FASE 2 vulnerabilities (31h) - Integrated
-- **UX Refinement:** Dieter Rams polish (12-16h) - Week 26
-- **Buffer (15%):** Contingency (56-74h)
+- **Week 1:** FASE 0 - Critical Fixes (12.5h)
+- **Week 2:** Área 6 - Security Fixes (22h)
+- **Week 3:** Área 1 - Subscriptions (14-18h)
+- **Weeks 4-5:** Sprint 5 - MVP Testing (40-50h)
+- **Week 6:** MVP LAUNCH 🚀
+
+**Post-MVP Scope (387-504h, 19-25 weeks):**
+
+- **Tier 1 (Month 2):** High Priority (56-83h) - Reminders, Settings, Simplification
+- **Tier 2 (Months 3-4):** Medium Priority (78-105h) - Payments, RBAC, Multi-vertical
+- **Tier 3 (Months 5-6):** Low Priority (110-162h) - Retention, Testing, UX
+- **Tier 4 (Months 7-9):** Strategic (143-199h) - Rebranding, API, Advanced
+
+**Benefits:**
+
+- ✅ Launch in 5-6 weeks (not 24-32 weeks)
+- ✅ Start revenue immediately (subscriptions)
+- ✅ Validate market fit early
+- ✅ Iterate based on real user data
+- ✅ All features preserved (organized by priority)
 
 **Current Progress:**
 
@@ -79,6 +89,128 @@
 ---
 
 ## Recent Sessions
+
+### Session 85: MVP/POST-MVP Roadmap Split (2026-02-03)
+
+**Status:** ✅ Complete - Master plan reorganized into focused execution documents
+
+**Time:** ~1 hour
+
+**Objective:** Separate MVP (5-6 weeks) from POST-MVP features (19-25 weeks) without losing any work
+
+**Actions Completed:**
+
+1. ✅ **Created MVP_ROADMAP.md**
+   - **File:** [docs/planning/MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md)
+   - **Scope:** 98-128h (5-6 weeks @ 20h/week)
+   - **Includes:**
+     - FASE 0: Critical Fixes (12.5h)
+     - Área 6: Security Fixes (22h)
+     - Área 1: Subscriptions (14-18h)
+     - Sprint 5: MVP Testing (40-50h)
+   - **Launch Criteria:** Core booking + security + subscriptions + testing
+   - **Benefits:** Ship in 5-6 weeks, validate market fit early, start revenue
+
+2. ✅ **Created POST_MVP_ROADMAP.md**
+   - **File:** [docs/planning/POST_MVP_ROADMAP.md](docs/planning/POST_MVP_ROADMAP.md)
+   - **Scope:** 387-504h (19-25 weeks @ 20h/week)
+   - **Organized by 4 Priority Tiers:**
+     - **Tier 1 (High Priority - Month 2):** 56-83h
+       - Appointment Reminders (4-6h)
+       - Calendar Refinement (8-10h)
+       - Settings Menu (18-23h)
+       - Citas Simplification (26-44h)
+     - **Tier 2 (Medium Priority - Months 3-4):** 78-105h
+       - Advance Payments (12-16h)
+       - Push Notifications (12-16h)
+       - Referrals (8-10h)
+       - RBAC System (22-30h)
+       - Business Types + Kash (24-29h)
+     - **Tier 3 (Low Priority - Months 5-6):** 110-162h
+       - Retention Features (30-44h)
+       - Extended Testing (43-55h)
+       - UX Refinement (12-16h)
+     - **Tier 4 (Strategic - Months 7-9):** 143-199h
+       - Complete Rebranding (40-60h)
+       - Performance Optimizations (15-20h)
+       - Security Hardening Phase 2 (16-19h)
+       - Accessibility (12-16h)
+       - API & Integrations (60-84h)
+   - **Benefits:** Clear priorities, ROI per feature, flexible based on feedback
+
+3. ✅ **Updated IMPLEMENTATION_ROADMAP_FINAL.md**
+   - **Added:** MVP vs POST-MVP split section at top
+   - **Updated:** "Next Steps" section to reference new documents
+   - **Updated:** Last updated to Session 85
+   - **Note:** Master plan remains as comprehensive reference
+
+**Key Insight:**
+
+**Before:** 485-632h monolithic plan (24-32 weeks before launch)
+**After:**
+
+- MVP: 98-128h (5-6 weeks to launch)
+- POST-MVP: 387-504h (19-25 weeks post-launch, prioritized)
+
+**Nothing Lost:**
+
+- ✅ All 17 features preserved in POST-MVP document
+- ✅ All effort estimates preserved
+- ✅ All details and implementation plans preserved
+- ✅ Organized by priority tier (High/Medium/Low/Strategic)
+- ✅ Clear dependencies mapped
+- ✅ ROI analysis per feature
+
+**Files Created:**
+
+1. `docs/planning/MVP_ROADMAP.md` - NEW (98-128h, 5-6 weeks)
+2. `docs/planning/POST_MVP_ROADMAP.md` - NEW (387-504h, 19-25 weeks)
+
+**Files Modified:**
+
+1. `docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md` - Added split section + references
+2. `PROGRESS.md` - This file (Session 85 added)
+
+**Decision Rationale:**
+
+**Why MVP First:**
+
+1. **Market Validation:** Test fit in 5-6 weeks, not 24-32 weeks
+2. **Revenue:** Start generating subscription revenue immediately
+3. **User Feedback:** Iterate based on real data, not assumptions
+4. **Risk Mitigation:** Smaller initial investment ($7,350-$9,600 vs $33,825-$44,850)
+5. **Flexibility:** Adjust priorities based on user needs
+
+**Next Steps:**
+
+1. Review MVP_ROADMAP.md (5-6 week plan)
+2. Approve MVP scope
+3. Begin FASE 0 Critical Fixes
+4. Execute MVP sprint
+5. Launch MVP
+6. Gather feedback
+7. Execute POST-MVP tiers based on priorities
+
+**Execution Model:**
+
+```
+Week 0    : Review & approve MVP scope
+Weeks 1-6 : Execute MVP
+Week 6    : MVP LAUNCH 🚀
+Week 7-8  : Monitor, gather feedback, adjust POST-MVP priorities
+Month 2   : Execute Tier 1 (High Priority)
+Months 3-4: Execute Tier 2 (Medium Priority)
+Months 5-6: Execute Tier 3 (Low Priority)
+Months 7-9: Execute Tier 4 (Strategic)
+```
+
+**Impact on Timeline:**
+
+- **Before:** 24-32 weeks until launch
+- **After:** 5-6 weeks until MVP launch, then iterative feature releases
+- **Advantage:** Start generating value 18-26 weeks earlier
+
+---
 
 ### Session 84: Citas Bug Fixes + Simplification Planning (2026-02-03)
 
@@ -198,15 +330,17 @@
 
 ## Key Files Reference
 
-| File                                                                             | Purpose                             |
-| -------------------------------------------------------------------------------- | ----------------------------------- |
-| [IMPLEMENTATION_ROADMAP_FINAL.md](docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md) | Master plan (485-632h, 24-32 weeks) |
-| [CITAS_PAGE_SIMPLIFICATION.md](docs/planning/CITAS_PAGE_SIMPLIFICATION.md)       | Week 4-6 detailed plan (42 pages)   |
-| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)                                         | Database schema (source of truth)   |
-| [LESSONS_LEARNED.md](LESSONS_LEARNED.md)                                         | Critical patterns & bugs            |
-| [src/lib/logger.ts](src/lib/logger.ts)                                           | Structured logging (pino)           |
-| [src/lib/rate-limit.ts](src/lib/rate-limit.ts)                                   | Rate limiting (Redis + in-memory)   |
-| [src/types/custom.ts](src/types/custom.ts)                                       | Custom TypeScript types (30+)       |
+| File                                                                             | Purpose                                         |
+| -------------------------------------------------------------------------------- | ----------------------------------------------- |
+| [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md)                                   | **MVP plan (98-128h, 5-6 weeks)** ⭐ READ FIRST |
+| [POST_MVP_ROADMAP.md](docs/planning/POST_MVP_ROADMAP.md)                         | Post-launch features (387-504h, 19-25 weeks)    |
+| [IMPLEMENTATION_ROADMAP_FINAL.md](docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md) | Master plan (comprehensive reference)           |
+| [CITAS_PAGE_SIMPLIFICATION.md](docs/planning/CITAS_PAGE_SIMPLIFICATION.md)       | Citas refactoring plan (42 pages, POST-MVP)     |
+| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)                                         | Database schema (source of truth)               |
+| [LESSONS_LEARNED.md](LESSONS_LEARNED.md)                                         | Critical patterns & bugs                        |
+| [src/lib/logger.ts](src/lib/logger.ts)                                           | Structured logging (pino)                       |
+| [src/lib/rate-limit.ts](src/lib/rate-limit.ts)                                   | Rate limiting (Redis + in-memory)               |
+| [src/types/custom.ts](src/types/custom.ts)                                       | Custom TypeScript types (30+)                   |
 
 ---
 
@@ -244,43 +378,57 @@
 
 ## Next Session
 
-### Recommended: Begin Week 4-6 Citas Simplification
+### Recommended: Begin MVP Sprint (5-6 weeks to launch)
 
-**Status:** Comprehensive plan ready, bugs fixed, production-ready baseline
+**Status:** MVP scope defined, 98-128h execution plan ready
 
-**Option A: Begin Simplification (Recommended)**
+**Option A: Begin MVP Sprint (RECOMMENDED)**
 
-**Week 4: Phase 1 - Quick Wins (8-12h)**
+**Read First:**
 
-1. Remove Timeline view
-2. Merge List + Calendar into unified Day view
-3. Reduce state variables from 11 → 7
-4. Mobile/Desktop consolidation
+1. [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md) - Your 5-6 week launch plan
 
-**Week 5: Phase 2 - Architecture (15-20h)**
+**Week 1: FASE 0 - Critical Fixes (12.5h)**
 
-1. Create Zustand store (4-5h)
-2. Split into route-based pages (6-8h)
-3. Implement granular drag-drop (3-4h) ⭐
-4. Migrate components to store (2-3h)
+1. Fix database index bug (5 min) ⚠️ CRITICAL
+2. Calendar N+1 queries → range query (2h)
+3. Mi Día polling → WebSocket (2h)
+4. Complete TypeScript fixes (8h)
 
-**Week 6: Phase 3 - Polish (8-12h)**
+**Week 2: Área 6 - Security Fixes (22h)**
 
-1. Simplify keyboard shortcuts (2-3h)
-2. Optimize memoization (2-3h)
-3. Final testing + documentation (4-6h)
+1. Fix IDOR vulnerabilities (8h)
+2. Implement rate limiting (4h)
+3. Auth integration (4h)
+4. Security tests (2h)
+
+**Week 3: Área 1 - Subscriptions (14-18h)**
+
+1. Database migration (3-4h)
+2. Feature gating system (4-5h)
+3. Grace period handling (3-4h)
+4. Payment reporting (2-3h)
+
+**Weeks 4-5: Sprint 5 - MVP Testing (40-50h)**
+
+1. Critical path tests (20-25h)
+2. Security testing (8-10h)
+3. Performance testing (4-6h)
+4. Test infrastructure (8-10h)
+
+**Week 6: MVP LAUNCH 🚀**
 
 **Benefits:**
 
-- 67% code reduction (953 → ~300 lines)
-- 15-20h faster for future calendar features
-- Google Calendar parity (15-min drag-drop)
-- Clean, maintainable architecture
-- Route-based views (/citas, /citas/week, /citas/month)
+- Launch in 5-6 weeks (not 24-32 weeks)
+- Start generating revenue immediately
+- Validate market fit early
+- Iterate based on real user feedback
+- Smaller initial investment ($7,350-$9,600)
 
-**Option B: Continue Other FASE 1 Features**
+**Option B: Continue Planning & Refinement**
 
-Continue with next priority from [IMPLEMENTATION_ROADMAP_FINAL.md](docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md)
+Review [POST_MVP_ROADMAP.md](docs/planning/POST_MVP_ROADMAP.md) for post-launch features
 
 ### Quick Commands
 
