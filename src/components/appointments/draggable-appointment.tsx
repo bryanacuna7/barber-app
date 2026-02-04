@@ -48,23 +48,22 @@ export const DraggableAppointment = memo(function DraggableAppointment({
     },
   })
 
-  const style = transform
-    ? {
-        transform: CSS.Translate.toString(transform),
-        zIndex: 50,
-      }
-    : undefined
+  // Remove absolute positioning during drag to prevent compound transform offset
+  const style = {
+    top: isDragging ? undefined : `${topPosition}px`,
+    height: `${Math.max(height, 40)}px`,
+    ...(transform && {
+      transform: CSS.Translate.toString(transform),
+      zIndex: 50,
+    }),
+  }
 
   const aptDate = new Date(appointment.scheduled_at)
 
   return (
     <div
       ref={setNodeRef}
-      style={{
-        ...style,
-        top: `${topPosition}px`,
-        height: `${Math.max(height, 40)}px`, // Minimum 40px for visibility
-      }}
+      style={style}
       className={cn(
         'absolute left-0.5 right-0.5 md:left-1 md:right-1 rounded-md border-l-4 p-1 md:p-2 pointer-events-auto',
         'text-left text-[10px] md:text-xs overflow-hidden',
