@@ -9,6 +9,39 @@
 
 ---
 
+## 📝 RECENT UPDATES
+
+### Session 84 (2026-02-03)
+
+**Bug Fixes:**
+
+- [x] Fixed date filtering bug in citas page - MiniCalendar now correctly filters appointments on right side when selecting dates
+  - Added `dayFilteredAppointments` logic to filter by selected date
+  - Resolved issue where all appointments showed regardless of calendar selection
+- [x] Fixed hour labels bug in week view - Hour labels now display proper 1-hour blocks (09:00, 10:00) instead of showing current minutes (09:56, 10:56)
+  - Changed from `new Date()` to fixed time generation using day start time
+
+**Planning & Documentation:**
+
+- [x] Created comprehensive CITAS_PAGE_SIMPLIFICATION.md plan document (42 pages, 1204 lines)
+  - Detailed 3-phase approach: Quick Wins (8-12h), Architecture (15-20h), Polish (8-12h)
+  - Includes granular drag-drop functionality with 15-minute intervals
+  - Complete code examples, migration guides, and testing strategies
+- [x] Added Week 4-6: Citas Page Simplification to main roadmap (34-48h total)
+  - Integrated into FASE 1 timeline
+  - Updated all subsequent week numbers and phase timelines
+  - Added buffer adjustments (+38h avg) to grand total
+
+**Impact:**
+
+- Calendar views now at 92% complete (bug fixes + planning done)
+- Foundation laid for next phase: calendar simplification work
+- ROI calculation: 34-48h investment → saves 15-20h per new calendar feature
+
+**Reference:** See [docs/planning/CITAS_PAGE_SIMPLIFICATION.md](./CITAS_PAGE_SIMPLIFICATION.md)
+
+---
+
 ## 🎯 EXECUTIVE SUMMARY
 
 **User Decisions:**
@@ -285,21 +318,24 @@
 
 **Adjusted:** +10-13h from original (was 24-31h)
 **Includes:** +2h performance fixes (N+1 queries)
+**Status:** 92% complete (Session 84: Bug fixes + planning complete)
 
 **Week View (8-10h):**
 
-- [ ] Desktop: 7-column grid with hour slots (6-8h)
+- [x] Desktop: 7-column grid with hour slots (6-8h)
   - Real-time current time indicator
   - Drag-drop appointment rescheduling
   - Empty slot click → create modal
+  - **Fixed (Session 84):** Hour labels now show 1-hour blocks (09:00, 10:00) not current minutes
 - [ ] Mobile: Day tabs with swipeable navigation (2-3h)
   - Bottom sheet for appointment details
 
 **Month View (8-11h):**
 
-- [ ] Desktop: Calendar grid with appointment pills (5-7h)
+- [x] Desktop: Calendar grid with appointment pills (5-7h)
   - 3+ appointments show "+X" count
   - Popover with day details on click
+  - **Fixed (Session 84):** Date filtering now works correctly - MiniCalendar filters right-side appointments
 - [ ] Mobile: Dots + bottom sheet (3-4h)
   - Swipe between months
   - Pull to refresh
