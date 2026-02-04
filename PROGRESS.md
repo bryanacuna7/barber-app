@@ -8,8 +8,8 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-03 (Session 86 - FASE 0 Complete)
-- **Last Session:** Session 86 - FASE 0 Critical Fixes completed (TypeScript + console.log cleanup)
+- **Last Updated:** 2026-02-03 (Session 87 - RBAC System Implemented)
+- **Last Session:** Session 87 - Full RBAC system + IDOR vulnerability #1 FIXED
 - **Current Branch:** `feature/subscription-payments-rebranding`
 - **Pre-Migration Tag:** `pre-v2-migration`
 
@@ -82,14 +82,131 @@
   - Simplification plan: Created 42-page detailed plan (Session 84)
   - Status: Production-ready, refactoring planned for Week 4-6
 
-- ✅ **Área 6:** 90% complete (BLOCKED by security - Session 73 fixes applied)
-  - Implementation: 40+ files, ~7,400 LOC
-  - Security vulnerabilities: ALL FIXED ✅
-  - Status: PRODUCTION READY
+- 🔄 **Área 6:** 18% complete (Session 87: RBAC + IDOR #1 fixed)
+  - ✅ **IDOR Vulnerability #1** (Session 87) - Full RBAC system implemented
+  - ⏳ IDOR Vulnerability #2 - Status update endpoints (Next)
+  - ⏳ Race Condition Fix - Atomic DB function
+  - ⏳ Rate Limiting - Protect status endpoints
+  - ⏳ Auth Integration - Replace placeholders
+  - ⏳ Security Tests - 8 test cases
+  - Status: 1/6 tasks complete, MVP Week 2 in progress
 
 ---
 
 ## Recent Sessions
+
+### Session 87: Full RBAC System - IDOR Vulnerability #1 FIXED (2026-02-03)
+
+**Status:** ✅ Complete - RBAC system implemented, IDOR #1 resolved
+
+**Time:** ~4 hours
+
+**Objective:** Implement complete Role-Based Access Control (RBAC) system to fix IDOR vulnerability in barber appointments endpoint
+
+**Actions Completed:**
+
+1. ✅ **Created Full RBAC System**
+   - Migration 023_rbac_system.sql (350 lines)
+   - 4 roles: owner, admin, staff, recepcionista
+   - 14 granular permissions (appointments, barbers, clients, services, reports, business)
+   - 3 SQL helper functions (user_has_permission, get_user_permissions, get_user_role)
+   - Permission matrix mapping all roles to permissions
+
+2. ✅ **Created TypeScript RBAC Library** - [src/lib/rbac.ts](src/lib/rbac.ts) (413 lines)
+   - `hasPermission()`, `hasAnyPermission()`, `hasAllPermissions()`
+   - `getUserRole()`, `getUserPermissions()`
+   - `canAccessBarberAppointments()` - Main IDOR protection function
+   - `getBarberIdFromUserId()` - Helper for user-to-barber mapping
+   - Full TypeScript types for roles and permissions
+
+3. ✅ **Fixed IDOR Vulnerability #1** - [src/app/api/barbers/[id]/appointments/today/route.ts](src/app/api/barbers/[id]/appointments/today/route.ts)
+   - Replaced weak email-based validation with RBAC
+   - Uses `canAccessBarberAppointments()` to validate access
+   - Validates: owner OR read_all_appointments permission OR same barber
+   - Added structured security logging with `logSecurity()` (Pino)
+   - Replaced all `console.warn`/`console.error` with structured logger
+
+4. ✅ **Comprehensive Security Tests**
+   - SEC-007: Owner can access any barber ✅
+   - SEC-008: Recepcionista can access any barber ✅
+   - SEC-009: Staff can only access own appointments ✅ (2 tests)
+   - SEC-010: Admin can access any barber ✅
+   - SEC-011: Security logging ✅
+   - Total: 6 new security tests added
+
+5. ✅ **Updated Documentation**
+   - DATABASE_SCHEMA.md - Added RBAC tables, permission matrix, helper functions
+   - Updated `barbers` table schema (added user_id, role_id)
+   - Documented all 14 permissions and 4 roles
+   - Session 87 added to PROGRESS.md
+
+**Key Insight:**
+
+Implemented complete RBAC system in one session instead of quick fix. This provides:
+
+- Scalable architecture for future endpoints
+- Granular permissions (14 vs binary owner/staff)
+- Security event logging for audit trails
+- Comprehensive test coverage
+
+**Security Impact:**
+
+**BEFORE:** Any authenticated user could access any barber's appointments (email-based validation)
+
+**AFTER:** Granular RBAC with 4 roles:
+
+- owner: Full access to all appointments
+- admin: Almost full access
+- staff: Own appointments only
+- recepcionista: All appointments + client management
+
+**Files Created:**
+
+1. `supabase/migrations/023_rbac_system.sql` - Complete RBAC database schema
+2. `src/lib/rbac.ts` - TypeScript RBAC helper library
+
+**Files Modified:**
+
+1. `src/app/api/barbers/[id]/appointments/today/route.ts` - IDOR vulnerability fixed
+2. `DATABASE_SCHEMA.md` - RBAC system documented
+3. `src/app/api/barbers/[id]/appointments/today/__tests__/route.security.test.ts` - 6 new tests
+4. `PROGRESS.md` - This file
+
+**Commits:**
+
+- `331c7b7` 🔐 feat(security): implement full RBAC system - IDOR vulnerability #1 fixed
+
+**Build Status:** ✅ TypeScript: 0 errors
+
+**⚠️ CRITICAL ACTION REQUIRED:**
+
+**Migration 023 MUST be executed in Supabase Dashboard before continuing:**
+
+1. Go to Supabase Dashboard → SQL Editor
+2. Copy/paste `supabase/migrations/023_rbac_system.sql`
+3. Execute migration
+4. Verify: `SELECT * FROM roles;` (should show 4 roles)
+
+Without this migration, the RBAC functions will not exist and the endpoint will fail.
+
+**Next Steps:**
+
+1. **Execute migration 023 in Supabase** (CRITICAL)
+2. Populate user_id and role_id for existing barbers
+3. Begin IDOR Vulnerability #2 (status update endpoints)
+
+**Área 6 Progress (MVP Week 2):**
+
+- [x] IDOR Vulnerability #1 (4h) ✅ COMPLETE
+- [ ] IDOR Vulnerability #2 (4h) - Next
+- [ ] Race Condition Fix (4h)
+- [ ] Rate Limiting (4h)
+- [ ] Auth Integration (4h)
+- [ ] Security Tests (2h)
+
+**Progress:** 1/6 tasks complete (4h / 22h = 18%)
+
+---
 
 ### Session 86: FASE 0 Complete - MVP Sprint Started (2026-02-03)
 
@@ -448,69 +565,68 @@ Months 7-9: Execute Tier 4 (Strategic)
 
 ## Next Session
 
-### Continue With: Área 6 - Security Fixes (Week 2)
+### ⚠️ CRITICAL FIRST STEP: Execute Migration 023
 
-**Status:** ✅ FASE 0 Complete (Session 86), ready for security work
+**BEFORE continuing with any code work:**
+
+```bash
+# 1. Go to Supabase Dashboard
+# 2. Navigate to SQL Editor
+# 3. Copy/paste: supabase/migrations/023_rbac_system.sql
+# 4. Execute migration
+# 5. Verify: SELECT * FROM roles; (should return 4 rows)
+```
+
+**Why Critical:** The RBAC endpoint uses SQL functions that don't exist until migration runs. Without it, the app will fail.
+
+---
+
+### Continue With: Área 6 - IDOR Vulnerability #2 (Week 2)
+
+**Status:** ✅ IDOR #1 Complete (Session 87), 1/6 tasks done (18%)
 
 **Read First:**
 
-1. [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md) - Área 6 section (lines 89-157)
+1. [MVP_ROADMAP.md](docs/planning/MVP_ROADMAP.md) - Área 6 section (lines 100-106)
 
-**Área 6: Security Fixes (22h estimated)**
+**Next Task: IDOR Vulnerability #2 (4h)**
 
-1. **IDOR Vulnerability #1** (4h) - [src/app/api/barbers/[id]/appointments/today/route.ts](src/app/api/barbers/[id]/appointments/today/route.ts)
-   - Add barber identity validation
-   - Verify `session.user.id === barberId` OR `read_all_appointments` permission
+**Files to fix:**
 
-2. **IDOR Vulnerability #2** (4h) - Status update endpoints
-   - Make barberId validation MANDATORY
-   - Move validation to RLS policy level
-   - Files: `/api/appointments/[id]/start`, `/api/appointments/[id]/complete`
+- `/api/appointments/[id]/start`
+- `/api/appointments/[id]/complete`
+- `/api/appointments/[id]/check-in`
+- `/api/appointments/[id]/no-show`
 
-3. **Race Condition Fix** (4h) - Create atomic DB function
-   - Create `increment_client_stats()` atomic function
-   - Replace read → increment → write pattern
-   - File: `supabase/migrations/023_atomic_client_stats.sql`
+**Problem:** Optional barberId validation can be bypassed
 
-4. **Rate Limiting** (4h) - Add to status update endpoints
-   - Use `@upstash/ratelimit` (Redis-based)
-   - Limit: 10 requests/min per user
-   - Endpoints: All `/api/appointments/[id]/*` routes
+**Solution:**
 
-5. **Auth Integration** (4h) - Replace placeholders
-   - Search: `grep -r "BARBER_ID_PLACEHOLDER" src/`
-   - Replace with: `const barberId = session.user.id`
+1. Make barberId validation MANDATORY
+2. Use RBAC: `canAccessBarberAppointments()` (already created)
+3. Add structured logging with `logSecurity()`
+4. Move validation to RLS policy level (if needed)
 
+**Pattern to follow:** See [src/app/api/barbers/[id]/appointments/today/route.ts](src/app/api/barbers/[id]/appointments/today/route.ts) for reference
+
+---
+
+### Remaining Área 6 Tasks (Week 2)
+
+3. **Race Condition Fix** (4h) - Create atomic `increment_client_stats()` function
+4. **Rate Limiting** (4h) - Add to all appointment status endpoints
+5. **Auth Integration** (4h) - Replace `BARBER_ID_PLACEHOLDER` with real auth
 6. **Security Tests** (2h) - Execute 8 test cases
-   - IDOR, race condition, rate limiting, auth bypass, SQL injection, XSS, CSRF, authorization
 
-**Week 3: Área 1 - Subscriptions (14-18h)**
+**Total Remaining:** 18h (4.5 days @ 4h/day)
 
-1. Database migration (3-4h)
-2. Feature gating system (4-5h)
-3. Grace period handling (3-4h)
-4. Payment reporting (2-3h)
+---
 
-**Weeks 4-5: Sprint 5 - MVP Testing (40-50h)**
+### Week 3+: After Área 6
 
-1. Critical path tests (20-25h)
-2. Security testing (8-10h)
-3. Performance testing (4-6h)
-4. Test infrastructure (8-10h)
-
-**Week 6: MVP LAUNCH 🚀**
-
-**Benefits:**
-
-- Launch in 5-6 weeks (not 24-32 weeks)
-- Start generating revenue immediately
-- Validate market fit early
-- Iterate based on real user feedback
-- Smaller initial investment ($7,350-$9,600)
-
-**Option B: Continue Planning & Refinement**
-
-Review [POST_MVP_ROADMAP.md](docs/planning/POST_MVP_ROADMAP.md) for post-launch features
+- **Week 3:** Área 1 - Subscriptions (14-18h)
+- **Weeks 4-5:** Sprint 5 - MVP Testing (40-50h)
+- **Week 6:** MVP LAUNCH 🚀
 
 ### Quick Commands
 
@@ -531,5 +647,5 @@ lsof -i :3000            # Verify server process
 
 ---
 
-**Total Size:** ~350 lines (Session 84 update)
-**Last Update:** Session 84 (2026-02-03)
+**Total Size:** ~650 lines (Session 87 update)
+**Last Update:** Session 87 (2026-02-03)
