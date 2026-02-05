@@ -25,10 +25,10 @@ interface UseRealtimeServicesOptions {
 export function useRealtimeServices({
   businessId,
   enabled = true,
-  onError,
 }: UseRealtimeServicesOptions) {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState<RealtimeStatus>('CONNECTING')
+  const [isPolling, setIsPolling] = useState(false)
   const channelRef = useRef<RealtimeChannel | null>(null)
   const reconnectCountRef = useRef(0)
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -39,6 +39,7 @@ export function useRealtimeServices({
     if (pollingIntervalRef.current) return
 
     console.log('[Services Real-time] Starting polling fallback (60s interval)')
+    setIsPolling(true)
 
     pollingIntervalRef.current = setInterval(() => {
       console.log('[Services Real-time] Polling for changes...')
@@ -86,6 +87,7 @@ export function useRealtimeServices({
           if (pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current)
             pollingIntervalRef.current = null
+            setIsPolling(false)
           }
           reconnectCountRef.current = 0
           console.log('[Services Real-time] ✅ WebSocket connected')
@@ -116,6 +118,7 @@ export function useRealtimeServices({
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current)
         pollingIntervalRef.current = null
+        setIsPolling(false)
       }
     }
   }, [businessId, enabled, queryClient, startPolling])
@@ -123,6 +126,6 @@ export function useRealtimeServices({
   return {
     status,
     isConnected: status === 'SUBSCRIBED',
-    isPolling: !!pollingIntervalRef.current,
+    isPolling,
   }
 }
