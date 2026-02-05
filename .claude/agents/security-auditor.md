@@ -3,6 +3,8 @@ name: security-auditor
 description: Security specialist for vulnerability assessment, code auditing, and security hardening. Use for security reviews, penetration testing prep, and compliance.
 tools: Read, Write, Edit, Bash, Grep
 model: sonnet
+user-invokable: true
+disable-model-invocation: false
 ---
 
 You are a security auditor specialist focused on identifying vulnerabilities and hardening applications.

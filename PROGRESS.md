@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-05 (Session 121 - Phase 1 Week 1-2: COMPLETE ✅ - Clientes + Citas Modernized)
+- **Last Updated:** 2026-02-05 (Session 124 - ALL 5 PAGES MODERNIZED ✅ - Phase 1 + Phase 2 Complete)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Phase 1 - High Priority Pages (Week 1-2 COMPLETE - 100%)
+- **Current Phase:** Phase 2 COMPLETE - All Dashboard Pages Modernized (100%)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 
 ---
@@ -73,6 +73,71 @@
 
 ## Recent Sessions
 
+### Session 124: Phase 1 & 2 Commits + Configuración Modernized (2026-02-05)
+
+**Status:** ✅ 100% Complete (3 commits, 38 files total - ~2h)
+
+**Objective:** Commit Phase 1 changes and complete Phase 2 (Configuración page)
+
+**Actions Taken:**
+
+**1. Phase 1 Committed** ✅ (3 commits)
+
+- **Commit 1:** `1048e29` - Phase 1 COMPLETE (26 files)
+  - Clientes, Citas, Servicios, Barberos modernized
+  - React Query + Real-time + Error Boundaries
+  - Business Context Provider created
+  - 4 Feature flags added
+- **Commit 2:** `8ec130c` - React hooks fix (1 file)
+  - use-realtime-services: useState for isPolling (React rules compliance)
+  - Removed unused onError parameter
+- **Commit 3:** `ec10860` - Phase 2 COMPLETE (9 files)
+  - Configuración page modernized (1,209 lines)
+  - React Query integration with existing hooks
+  - Feature flag: NEXT_PUBLIC_FF_NEW_CONFIGURACION
+
+**2. Configuración Page Modernized** ✅ (2h - faster than 3-4h estimate!)
+
+- **File:** `src/app/(dashboard)/configuracion/page-v2.tsx`
+- **Pattern:** React Query + Business Context + Error Boundaries
+- **Changes:**
+  - Replaced fetch('/api/business') with useBusinessSettings(businessId)
+  - Replaced manual PATCH with useUpdateBusinessSettings() mutation
+  - Added ComponentErrorBoundary (top-level)
+  - Synced form state with React Query data
+  - All UI preserved (iOS cards, sheets, modals - 7 sections)
+- **Hooks Used:**
+  - `useBusiness()` - Business Context for businessId
+  - `useBusinessSettings(businessId)` - Data fetching (already existed)
+  - `useUpdateBusinessSettings()` - Mutations (already existed)
+- **Feature Flag:** `NEXT_PUBLIC_FF_NEW_CONFIGURACION=true`
+
+**Deliverables:**
+
+- ✅ 3 commits pushed to feature/ui-ux-redesign
+- ✅ 38 files total modified/created (Phase 1 + Phase 2)
+- ✅ 5 Feature flags ready:
+  - NEXT_PUBLIC_FF_NEW_CLIENTES
+  - NEXT_PUBLIC_FF_NEW_CITAS
+  - NEXT_PUBLIC_FF_NEW_SERVICIOS
+  - NEXT_PUBLIC_FF_NEW_BARBEROS
+  - NEXT_PUBLIC_FF_NEW_CONFIGURACION (NEW!)
+- ✅ TypeScript 0 errors
+- ✅ All 5 dashboard pages modernized with consistent pattern
+
+**Progress:**
+
+- **Phase 1:** 4/4 pages complete (100%) ✅ COMMITTED
+- **Phase 2:** 1/1 page complete (100%) ✅ COMMITTED
+- **TOTAL:** All 5 dashboard pages modernized! 🎉
+- **Time Spent:** ~17-19h total (Phase 1: 13-15h + Phase 2: 2h + commits: 2h)
+
+**Next:** Manual testing of all 5 pages OR Create PR for modernization
+
+**Time:** ~2h total (commit prep + Phase 2 implementation)
+
+---
+
 ### Session 123: Phase 1 Week 3-4 COMPLETE - Servicios + Barberos Modernized (2026-02-05)
 
 **Status:** ✅ 100% Complete (12 files modified/created - ~3-5h)
@@ -82,6 +147,7 @@
 **Actions Taken:**
 
 **1. Servicios Page Modernized** ✅ (550 lines)
+
 - **Feature flag router:** `NEXT_PUBLIC_FF_NEW_SERVICIOS=true`
 - **Files created:**
   - `src/app/(dashboard)/servicios/page.tsx` - Router
@@ -103,6 +169,7 @@
   - All UI preserved: modals, swipe gestures, pull to refresh, grid/list views
 
 **2. Barberos Page Modernized** ✅ (Client Component)
+
 - **Feature flag router:** `NEXT_PUBLIC_FF_NEW_BARBEROS=true`
 - **Files created:**
   - `src/app/(dashboard)/barberos/page.tsx` - Router
@@ -135,10 +202,12 @@
 - ✅ TypeScript 0 errors in all new files
 
 **Files Modified/Created:** 12 total
+
 - 7 new files (routers, v2 pages, backups, hooks)
 - 5 modified (hooks, adapters)
 
 **Feature Flags:**
+
 - `NEXT_PUBLIC_FF_NEW_SERVICIOS=true` ✅ Ready
 - `NEXT_PUBLIC_FF_NEW_BARBEROS=true` ✅ Ready
 
@@ -163,6 +232,7 @@
 **Actions Taken:**
 
 **1. Clientes Page Modernized** ✅ (877 lines)
+
 - **Feature flag router:** `NEXT_PUBLIC_FF_NEW_CLIENTES=true`
 - **Files created:**
   - `src/app/(dashboard)/clientes/page.tsx` - Router
@@ -176,6 +246,7 @@
 - **Updated hook:** `src/hooks/queries/useClients.ts` (+240 lines)
 
 **2. Citas (Calendar) Page Modernized** ✅ (710 lines)
+
 - **Feature flag router:** `NEXT_PUBLIC_FF_NEW_CITAS=true`
 - **Files created:**
   - `src/app/(dashboard)/citas/page.tsx` - Router
@@ -192,6 +263,7 @@
   - All features preserved: keyboard shortcuts, filters, stats, 5 views (list, calendar, week, month, timeline)
 
 **3. Architectural Fix: Business Context Provider** ✅
+
 - **Problem:** Both pages were fetching `/api/auth/session` (doesn't exist) causing JSON parse errors
 - **Solution:** Created React Context for auth data
   - **File created:** `src/contexts/business-context.tsx`
@@ -203,6 +275,7 @@
   - Reusable pattern for all client pages
 
 **4. Supabase Import Pattern Fixed** ✅
+
 - **Problem:** 4 hooks using wrong import (`@/lib/supabase` doesn't exist)
 - **Solution:** Updated to `createClient()` from `@/lib/supabase/client`
 - **Files fixed:**
@@ -212,6 +285,7 @@
   - `src/hooks/queries/useCalendar.ts`
 
 **5. WeekView Drag & Drop Fixed** ✅
+
 - **Problems identified from screenshot:**
   1. Drag too sensitive (prevented clicking)
   2. Lost minute precision (09:30 → 09:00)
@@ -227,6 +301,7 @@
   - Separated drag vs. static positioning logic
 
 **6. Calendar Visual Bugs Fixed** ✅ (Session 122)
+
 - **Problems reported by user:**
   1. Appointments overlapping visually (despite not overlapping in time)
   2. Date selector not dynamic for different view modes
@@ -246,10 +321,10 @@
   - **Visual duration concept** in [week-view.tsx:158-162](src/components/appointments/week-view.tsx) - Use `Math.max(duration, 30)` for collision detection
   - **Reduced min height** in [draggable-appointment.tsx:66,73](src/components/appointments/draggable-appointment.tsx) - From 40px to 30px
   - **Grid alignment fix** in [droppable-time-slot.tsx:45](src/components/appointments/droppable-time-slot.tsx) - Set `display: block`, removed padding
-  - **Dynamic date selector** already implemented in [page-v2.tsx:111-137](src/app/(dashboard)/citas/page-v2.tsx) - Shows week range for week view, month for month view
+  - **Dynamic date selector** already implemented in [page-v2.tsx:111-137](<src/app/(dashboard)/citas/page-v2.tsx>) - Shows week range for week view, month for month view
   - **UX improvement** in [draggable-appointment.tsx:84-87,124-150](src/components/appointments/draggable-appointment.tsx) - Show only client name (not redundant hour), tooltip with full details
   - **Increased spacing** in [draggable-appointment.tsx:57,106](src/components/appointments/draggable-appointment.tsx) - Gap: 6-8px, Padding: 8-12px
-  - **Modal date/time fix** in [page-v2.tsx:141,639-642,687-691](src/app/(dashboard)/citas/page-v2.tsx) + [appointment-form.tsx:71,98](src/components/appointments/appointment-form.tsx) - Capture and pass clicked slot date/time
+  - **Modal date/time fix** in [page-v2.tsx:141,639-642,687-691](<src/app/(dashboard)/citas/page-v2.tsx>) + [appointment-form.tsx:71,98](src/components/appointments/appointment-form.tsx) - Capture and pass clicked slot date/time
 - **UX Decision (@ui-ux-designer):**
   - Small appointments (< 50px): Client name only
   - Medium appointments (50-70px): Client name only
@@ -271,10 +346,12 @@
 - ✅ TypeScript 0 errors in all new files
 
 **Files Modified/Created:** 20 total
+
 - 15 modified (hooks, config, layout, routers, components)
 - 5 new (context, backups, v2 pages)
 
 **Feature Flags:**
+
 - `NEXT_PUBLIC_FF_NEW_CLIENTES=true` ✅ Active
 - `NEXT_PUBLIC_FF_NEW_CITAS=true` ✅ Active
 
@@ -1272,6 +1349,7 @@ Same successful pattern as Mi Día:
 - ⏸️ **Pending commit** (all changes unstaged)
 
 **Test Credentials Available:**
+
 - 📧 Email: `bryn.acuna7@gmail.com`
 - 🔑 Password: `admin`
 
@@ -1339,6 +1417,7 @@ Same successful pattern as Mi Día:
 **ESTIMADO DE TESTING MANUAL:** 2-3 horas para test completo de ambas páginas (AL FINAL DE PHASE 1)
 
 **CREDENCIALES DE TEST:**
+
 - Email: bryn.acuna7@gmail.com
 - Password: admin
 
@@ -1347,6 +1426,7 @@ Same successful pattern as Mi Día:
 **Next Steps - 3 Options:**
 
 **Option A: Test & Commit** (Recommended - POSTPONED)
+
 1. Manual testing with credentials
 2. Visual verification (Clientes + Citas pages)
 3. Test drag & drop in WeekView
@@ -1356,6 +1436,7 @@ Same successful pattern as Mi Día:
 **Option B: Continue Phase 1** (Medium Priority Pages) ⬅️ **SELECTED**
 
 **Week 3: Servicios - MEDIUM PRIORITY**
+
 - **Time:** 6-8h
 - **Pattern:** Same proven pattern (React Query + Real-time + Error Boundaries)
 - **Hooks:** `useCalendarAppointments`, `useAvailableSlots`
