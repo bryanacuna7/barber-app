@@ -70,7 +70,9 @@ export function useRealtimeClients({
         },
         (payload) => {
           // Real-time update received - invalidate React Query cache
-          console.log('📡 Client change detected:', payload.eventType, payload.new?.id)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('📡 Client change detected:', payload.eventType, payload.new?.id)
+          }
 
           // Invalidate clients queries
           invalidateQueries.afterClientChange(queryClient)
@@ -80,7 +82,9 @@ export function useRealtimeClients({
         }
       )
       .subscribe((status) => {
-        console.log('🔌 Realtime subscription status (clients):', status)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔌 Realtime subscription status (clients):', status)
+        }
 
         if (status === 'SUBSCRIBED') {
           // Successfully connected - clear any polling fallback
@@ -89,39 +93,51 @@ export function useRealtimeClients({
             pollingIntervalRef.current = undefined
           }
           reconnectAttempts.current = 0
-          console.log('✅ Real-time clients active')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Real-time clients active')
+          }
         }
 
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           reconnectAttempts.current++
 
-          console.error(
-            `❌ Realtime error (clients, attempt ${reconnectAttempts.current}/${maxReconnectAttempts}):`,
-            status
-          )
+          if (process.env.NODE_ENV === 'development') {
+            console.error(
+              `❌ Realtime error (clients, attempt ${reconnectAttempts.current}/${maxReconnectAttempts}):`,
+              status
+            )
+          }
 
           // Fallback to polling after max attempts
           if (reconnectAttempts.current >= maxReconnectAttempts) {
-            console.warn(
-              `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
-            )
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(
+                `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
+              )
+            }
 
             // Start polling fallback
             pollingIntervalRef.current = setInterval(() => {
-              console.log('🔄 Polling clients (WebSocket fallback)')
+              if (process.env.NODE_ENV === 'development') {
+                console.log('🔄 Polling clients (WebSocket fallback)')
+              }
               invalidateQueries.afterClientChange(queryClient)
             }, pollingInterval)
           }
         }
 
         if (status === 'CLOSED') {
-          console.log('🔌 Realtime subscription closed (clients)')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🔌 Realtime subscription closed (clients)')
+          }
         }
       })
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('🧹 Cleaning up real-time clients subscription')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🧹 Cleaning up real-time clients subscription')
+      }
       supabase.removeChannel(channel)
 
       // Clear polling if active

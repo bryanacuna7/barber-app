@@ -29,6 +29,8 @@ interface DraggableAppointmentProps {
   isDragEnabled: boolean
   isBeingDragged: boolean
   onClick: () => void
+  columnIndex?: number
+  totalColumns?: number
 }
 
 export const DraggableAppointment = memo(function DraggableAppointment({
@@ -39,6 +41,8 @@ export const DraggableAppointment = memo(function DraggableAppointment({
   isDragEnabled,
   isBeingDragged,
   onClick,
+  columnIndex = 0,
+  totalColumns = 1,
 }: DraggableAppointmentProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: appointment.id,
@@ -48,34 +52,58 @@ export const DraggableAppointment = memo(function DraggableAppointment({
     },
   })
 
+  // Calculate width and left position for concurrent appointments
+  // Use calc() to account for padding/margins between appointments
+  const gapSize = totalColumns > 1 ? 6 : 8 // 6px gap for multiple, 8px for single
+  const columnWidthPercent = 100 / totalColumns
+  const leftPositionPercent = columnIndex * columnWidthPercent
+
   // During drag, remove absolute positioning to prevent compound transform offset
   // Only use transform for positioning when dragging
-  const style = {
-    top: isDragging ? undefined : `${topPosition}px`,
-    height: `${Math.max(height, 40)}px`,
-    ...(transform && {
-      transform: CSS.Translate.toString(transform),
-      zIndex: 50,
-    }),
-  }
+  const style: React.CSSProperties = isDragging
+    ? {
+        // When dragging, remove top positioning and only use transform
+        height: `${Math.max(height, 30)}px`,
+        transform: transform ? CSS.Translate.toString(transform) : undefined,
+        zIndex: 50,
+      }
+    : {
+        // When not dragging, use absolute positioning with column-based width/left
+        top: `${topPosition}px`,
+        height: `${Math.max(height, 30)}px`,
+        left: `calc(${leftPositionPercent}% + ${gapSize / 2}px)`,
+        width: `calc(${columnWidthPercent}% - ${gapSize}px)`,
+      }
 
   const aptDate = new Date(appointment.scheduled_at)
+
+  // Dynamic content based on appointment height for better readability
+  const showCompactView = height < 50
+  const showMediumView = height >= 50 && height < 70
+
+  // Build tooltip with full appointment details
+  const serviceName = appointment.service?.name || 'Servicio no especificado'
+  const duration = appointment.service?.duration_minutes || appointment.duration_minutes || 60
+  const tooltipText = `${format(aptDate, 'HH:mm')} - ${appointment.client?.name || 'Sin cliente'}\n${serviceName} (${duration} min)`
 
   return (
     <div
       ref={setNodeRef}
       style={style}
+      title={tooltipText}
       className={cn(
-        !isDragging && 'absolute left-0.5 right-0.5 md:left-1 md:right-1',
+        !isDragging && 'absolute',
         isDragging && 'relative',
-        'rounded-md border-l-4 p-1 md:p-2 pointer-events-auto',
-        'text-left text-[10px] md:text-xs overflow-hidden',
+        'rounded-md border-l-4 pointer-events-auto',
+        'text-left overflow-hidden',
         'transition-all duration-150',
         statusColors[appointment.status],
         isDragEnabled && 'cursor-grab hover:shadow-md hover:scale-[1.02]',
         isDragging && 'opacity-50 shadow-lg scale-105 cursor-grabbing',
         isBeingDragged && !isDragging && 'opacity-30',
-        !isDragEnabled && 'cursor-pointer'
+        !isDragEnabled && 'cursor-pointer',
+        // Dynamic padding based on size - increased for better breathing room
+        showCompactView ? 'px-2 py-1.5' : 'p-3'
       )}
       onClick={(e) => {
         // Only trigger click if not dragging
@@ -87,19 +115,38 @@ export const DraggableAppointment = memo(function DraggableAppointment({
       {...(isDragEnabled ? { ...attributes, ...listeners } : {})}
     >
       {/* Drag handle indicator for draggable appointments */}
-      {isDragEnabled && (
+      {isDragEnabled && !showCompactView && (
         <div className="absolute top-1 right-1 opacity-40 hover:opacity-70 hidden md:block">
           <GripVertical className="w-3 h-3" />
         </div>
       )}
 
-      <div className="font-semibold truncate pr-4">
-        {format(aptDate, 'HH:mm')} - {appointment.client?.name || 'Sin cliente'}
-      </div>
-      {appointment.service && (
-        <div className="text-[9px] md:text-[10px] opacity-80 truncate">
-          {appointment.service.name}
+      {/* Compact view: Client name only (for small appointments) */}
+      {showCompactView && (
+        <div className="font-semibold text-[9px] leading-tight truncate pr-4">
+          {appointment.client?.name || 'Sin cliente'}
         </div>
+      )}
+
+      {/* Medium view: Client name, one line (for medium appointments) */}
+      {showMediumView && (
+        <div className="font-semibold text-[10px] leading-tight truncate pr-4">
+          {appointment.client?.name || 'Sin cliente'}
+        </div>
+      )}
+
+      {/* Full view: Client name + service (for large appointments) */}
+      {!showCompactView && !showMediumView && (
+        <>
+          <div className="font-semibold text-[10px] md:text-xs leading-tight truncate pr-4">
+            {appointment.client?.name || 'Sin cliente'}
+          </div>
+          {appointment.service && (
+            <div className="text-[9px] opacity-75 truncate mt-0.5">
+              {appointment.service.name}
+            </div>
+          )}
+        </>
       )}
 
       {/* Visual indicator that appointment is not draggable */}

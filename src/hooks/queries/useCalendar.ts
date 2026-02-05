@@ -5,7 +5,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { startOfDay, endOfDay } from 'date-fns'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { queryKeys } from '@/lib/react-query/config'
 import { getCalendarQuery, adaptToCalendarEvent } from '@/lib/adapters/calendar'
 
@@ -15,6 +15,7 @@ export function useCalendarEvents(date: Date, businessId: string, barberId?: str
       ? queryKeys.calendar.view(date.toISOString(), barberId)
       : queryKeys.calendar.view(date.toISOString()),
     queryFn: async () => {
+      const supabase = createClient()
       const startDate = startOfDay(date)
       const endDate = endOfDay(date)
 

@@ -175,6 +175,31 @@ export function showSuccessToast(message: string, description?: string): void {
 }
 
 /**
+ * Error Toast for Mutations
+ *
+ * Standard error message for failed mutations.
+ *
+ * Usage:
+ * ```tsx
+ * const { mutate } = useMutation({
+ *   mutationFn: deleteAppointment,
+ *   onError: (error) => {
+ *     showErrorToast('Error al eliminar cita', error.message)
+ *   },
+ * })
+ * ```
+ */
+export function showErrorToast(message: string, description?: string): void {
+  toast.error(message, {
+    description,
+    action: {
+      label: 'Cerrar',
+      onClick: () => {},
+    },
+  })
+}
+
+/**
  * Loading Toast for Long Operations
  *
  * Shows a loading toast for operations that take more than 1 second.

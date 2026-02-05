@@ -87,7 +87,11 @@ export const WeekView = memo(function WeekView({
 
   // Configure sensors for different input methods
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Must move 8px before drag starts (prevents accidental drags)
+      },
+    }),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 250, // 250ms hold to start drag on touch
@@ -133,6 +137,87 @@ export const WeekView = memo(function WeekView({
     return grouped
   }, [appointments, weekDays])
 
+  // Calculate concurrent appointment positioning for each day
+  // This detects overlapping appointments and assigns column positions
+  const appointmentPositions = useMemo(() => {
+    const positions = new Map<string, { columnIndex: number; totalColumns: number }>()
+
+    appointmentsByDay.forEach((dayAppointments, dayKey) => {
+      // Sort appointments by start time
+      const sorted = [...dayAppointments].sort((a, b) => {
+        return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+      })
+
+      // Track which columns are occupied at each time
+      const columns: AppointmentWithRelations[][] = []
+
+      sorted.forEach((apt) => {
+        const aptStart = new Date(apt.scheduled_at)
+        const duration = apt.service?.duration_minutes || apt.duration_minutes || 60
+
+        // Use visual duration (minimum 30 mins) for layout collision detection
+        // This ensures that appointments that are expanded visually don't overlap
+        const visualDuration = Math.max(duration, 30)
+
+        const aptEnd = new Date(aptStart.getTime() + visualDuration * 60000)
+
+        // Find the first column where this appointment fits
+        let columnIndex = 0
+        for (let i = 0; i < columns.length; i++) {
+          const column = columns[i]
+          // Check if this column is free for our appointment
+          const hasConflict = column.some((existingApt) => {
+            const existingStart = new Date(existingApt.scheduled_at)
+            const existingDuration =
+              existingApt.service?.duration_minutes || existingApt.duration_minutes || 60
+            const existingVisualDuration = Math.max(existingDuration, 30)
+            const existingEnd = new Date(existingStart.getTime() + existingVisualDuration * 60000)
+            // Check if time ranges overlap
+            return aptStart < existingEnd && aptEnd > existingStart
+          })
+
+          if (!hasConflict) {
+            columnIndex = i
+            break
+          }
+
+          // If we checked all columns and found conflicts, we need a new column
+          if (i === columns.length - 1) {
+            columnIndex = columns.length
+          }
+        }
+
+        // Create new column if needed
+        if (columnIndex >= columns.length) {
+          columns.push([])
+        }
+
+        // Add appointment to column
+        columns[columnIndex].push(apt)
+
+        // Store position info
+        positions.set(apt.id, {
+          columnIndex,
+          totalColumns: columns.length,
+        })
+      })
+
+      // Second pass: update totalColumns for all appointments in this day
+      // (now that we know the final column count)
+      dayAppointments.forEach((apt) => {
+        const pos = positions.get(apt.id)
+        if (pos) {
+          positions.set(apt.id, {
+            columnIndex: pos.columnIndex,
+            totalColumns: columns.length,
+          })
+        }
+      })
+    })
+
+    return positions
+  }, [appointmentsByDay])
+
   // Get active appointment being dragged
   const activeAppointment = useMemo(() => {
     if (!activeId) return null
@@ -140,11 +225,29 @@ export const WeekView = memo(function WeekView({
   }, [activeId, appointments])
 
   // Check if a time slot has a conflict
+  // This checks if ANY part of an existing appointment overlaps with the target hour slot
   const hasConflict = useCallback(
-    (dayKey: string, hour: number, excludeAppointmentId?: string) => {
+    (
+      dayKey: string,
+      hour: number,
+      excludeAppointmentId?: string,
+      draggedAppointment?: AppointmentWithRelations
+    ) => {
       const dayAppointments = appointmentsByDay.get(dayKey) || []
-      const slotStart = hour * 60
-      const slotEnd = (hour + 1) * 60
+
+      // Calculate the exact time range we're checking
+      // If we have a dragged appointment, use its original minutes and duration
+      let checkStartMinutes = hour * 60
+      let checkEndMinutes = (hour + 1) * 60
+
+      if (draggedAppointment) {
+        const originalDate = new Date(draggedAppointment.scheduled_at)
+        const originalMinutes = originalDate.getMinutes()
+        const duration =
+          draggedAppointment.service?.duration_minutes || draggedAppointment.duration_minutes || 60
+        checkStartMinutes = hour * 60 + originalMinutes
+        checkEndMinutes = checkStartMinutes + duration
+      }
 
       return dayAppointments.some((apt) => {
         if (apt.id === excludeAppointmentId) return false
@@ -152,8 +255,8 @@ export const WeekView = memo(function WeekView({
         const aptStartMinutes = aptDate.getHours() * 60 + aptDate.getMinutes()
         const aptEndMinutes =
           aptStartMinutes + (apt.service?.duration_minutes || apt.duration_minutes || 60)
-        // Check overlap
-        return aptStartMinutes < slotEnd && aptEndMinutes > slotStart
+        // Check overlap: two time ranges overlap if one starts before the other ends
+        return aptStartMinutes < checkEndMinutes && aptEndMinutes > checkStartMinutes
       })
     },
     [appointmentsByDay]
@@ -202,21 +305,23 @@ export const WeekView = memo(function WeekView({
         return
       }
 
-      // Check for conflicts
-      if (hasConflict(dayKey, hour, appointmentId)) {
+      // Check for conflicts with precise minute-level checking
+      if (hasConflict(dayKey, hour, appointmentId, appointment)) {
         toast.error('Ya existe una cita en ese horario')
         return
       }
 
       // Create new scheduled_at timestamp
+      // PRESERVE original minutes from the appointment to avoid snapping to hour boundaries
+      const currentScheduled = new Date(appointment.scheduled_at)
+      const originalMinutes = currentScheduled.getMinutes()
       const newDate = parseISO(dayKey)
-      const newScheduledAt = setMinutes(setHours(newDate, hour), 0)
+      const newScheduledAt = setMinutes(setHours(newDate, hour), originalMinutes)
       const newScheduledAtISO = newScheduledAt.toISOString()
 
       // Check if the time actually changed
-      const currentScheduled = new Date(appointment.scheduled_at)
-      if (currentScheduled.getHours() === hour && isSameDay(currentScheduled, newScheduledAt)) {
-        return // No change needed
+      if (currentScheduled.getTime() === newScheduledAt.getTime()) {
+        return // No change needed (exact same timestamp)
       }
 
       // Call the reschedule handler
@@ -298,7 +403,7 @@ export const WeekView = memo(function WeekView({
         )}
       >
         {/* Week Header - Desktop: all days, Mobile: 3 days centered on today */}
-        <div className="grid border-b border-zinc-200 dark:border-zinc-700 sticky top-0 bg-white dark:bg-zinc-900 z-10 grid-cols-[60px_repeat(3,1fr)] md:grid-cols-[80px_repeat(7,1fr)]">
+        <div className="grid border-b border-zinc-200 dark:border-zinc-700 sticky top-0 bg-white dark:bg-zinc-900 z-10 grid-cols-[60px_repeat(3,minmax(120px,1fr))] md:grid-cols-[80px_repeat(7,minmax(120px,1fr))]">
           {/* Time column header */}
           <div className="p-1 md:p-2 text-[10px] md:text-xs font-medium text-zinc-500 text-right">
             Hora
@@ -349,7 +454,7 @@ export const WeekView = memo(function WeekView({
 
         {/* Week Grid */}
         <div className="flex-1 overflow-y-auto overflow-x-auto relative">
-          <div className="grid grid-cols-[60px_repeat(3,minmax(100px,1fr))] md:grid-cols-[80px_repeat(7,1fr)]">
+          <div className="grid grid-cols-[60px_repeat(3,minmax(120px,1fr))] md:grid-cols-[80px_repeat(7,minmax(120px,1fr))]">
             {/* Hour labels column */}
             <div className="relative sticky left-0 bg-white dark:bg-zinc-900 z-[5]">
               {hourSlots.map((hour) => (
@@ -385,7 +490,12 @@ export const WeekView = memo(function WeekView({
                   {hourSlots.map((hour) => {
                     const droppableId = `${dayKey}_${hour}`
                     const isOver = overId === droppableId
-                    const hasExistingConflict = hasConflict(dayKey, hour, activeId || undefined)
+                    const hasExistingConflict = hasConflict(
+                      dayKey,
+                      hour,
+                      activeId || undefined,
+                      activeAppointment || undefined
+                    )
 
                     return (
                       <DroppableTimeSlot
@@ -411,6 +521,10 @@ export const WeekView = memo(function WeekView({
                       )
                       const isDragEnabled = apt.status === 'pending' || apt.status === 'confirmed'
                       const isBeingDragged = activeId === apt.id
+                      const position = appointmentPositions.get(apt.id) || {
+                        columnIndex: 0,
+                        totalColumns: 1,
+                      }
 
                       return (
                         <DraggableAppointment
@@ -422,6 +536,8 @@ export const WeekView = memo(function WeekView({
                           isDragEnabled={isDragEnabled && !!onAppointmentReschedule}
                           isBeingDragged={isBeingDragged}
                           onClick={() => !isDragging && onAppointmentClick?.(apt)}
+                          columnIndex={position.columnIndex}
+                          totalColumns={position.totalColumns}
                         />
                       )
                     })}
@@ -458,7 +574,7 @@ export const WeekView = memo(function WeekView({
             )}
             style={{
               width: '140px',
-              height: `${Math.max(getAppointmentHeight(activeAppointment.service?.duration_minutes || activeAppointment.duration_minutes || 60), 40)}px`,
+              height: `${Math.max(getAppointmentHeight(activeAppointment.service?.duration_minutes || activeAppointment.duration_minutes || 60), 30)}px`,
             }}
           >
             <div className="font-semibold truncate">

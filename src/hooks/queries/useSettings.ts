@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptBusinessSettings, adaptTeamMembers } from '@/lib/adapters/settings'
 
@@ -12,6 +12,7 @@ export function useBusinessSettings(businessId: string) {
   return useQuery({
     queryKey: queryKeys.settings.business(),
     queryFn: async () => {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('businesses')
         .select('*')
@@ -28,6 +29,7 @@ export function useTeamMembers(businessId: string) {
   return useQuery({
     queryKey: queryKeys.settings.team(),
     queryFn: async () => {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('barbers')
         .select('*')
@@ -44,6 +46,7 @@ export function useUpdateBusinessSettings() {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('businesses')
         .update(updates)

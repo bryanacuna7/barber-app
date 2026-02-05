@@ -42,6 +42,7 @@ export const DroppableTimeSlot = memo(function DroppableTimeSlot({
       onClick={onClick}
       className={cn(
         'w-full h-[60px] border-b border-zinc-200 dark:border-zinc-700',
+        'block p-0 outline-none', // Enforce block and remove potential padding
         'transition-colors duration-150',
         'text-left text-xs text-zinc-400',
         // Default hover state (when not dragging)

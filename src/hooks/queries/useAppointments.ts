@@ -226,3 +226,103 @@ export function useBarberDayAppointments(barberId: string | null) {
     staleTime: 1000 * 60, // 1 minute - will be refreshed by real-time hook anyway
   })
 }
+
+/**
+ * Fetch appointments for a date range (week/month view)
+ * Used in Citas (Calendar) page for multi-day views
+ *
+ * Returns appointments with client and service relations
+ *
+ * @example
+ * ```tsx
+ * // Fetch week's appointments
+ * const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+ * const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
+ * const { data: appointments } = useCalendarAppointments(weekStart, weekEnd, businessId)
+ * ```
+ */
+export function useCalendarAppointments(
+  startDate: Date,
+  endDate: Date,
+  businessId: string | null
+) {
+  const startDateStr = format(startDate, 'yyyy-MM-dd')
+  const endDateStr = format(endDate, 'yyyy-MM-dd')
+
+  return useQuery({
+    queryKey: queryKeys.appointments.range(startDateStr, endDateStr),
+    queryFn: async () => {
+      if (!businessId) throw new Error('Business ID is required')
+
+      const supabase = createClient()
+
+      // Fetch appointments with full relations (client, service)
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(
+          `
+          id,
+          scheduled_at,
+          duration_minutes,
+          price,
+          status,
+          client_notes,
+          internal_notes,
+          barber_id,
+          client_id,
+          service_id,
+          client:clients!appointments_client_id_fkey (
+            id,
+            name,
+            phone,
+            email
+          ),
+          service:services!appointments_service_id_fkey (
+            id,
+            name,
+            duration_minutes,
+            price
+          )
+        `
+        )
+        .eq('business_id', businessId)
+        .gte('scheduled_at', startOfDay(startDate).toISOString())
+        .lte('scheduled_at', endOfDay(endDate).toISOString())
+        .order('scheduled_at', { ascending: true })
+
+      if (error) throw error
+
+      // Return appointments with proper typing
+      return (data || []).map((appt: any) => ({
+        id: appt.id,
+        scheduled_at: appt.scheduled_at,
+        duration_minutes: appt.duration_minutes,
+        price: appt.price,
+        status: appt.status,
+        client_notes: appt.client_notes,
+        internal_notes: appt.internal_notes,
+        barber_id: appt.barber_id,
+        client_id: appt.client_id,
+        service_id: appt.service_id,
+        client: appt.client
+          ? {
+              id: appt.client.id,
+              name: appt.client.name,
+              phone: appt.client.phone,
+              email: appt.client.email,
+            }
+          : null,
+        service: appt.service
+          ? {
+              id: appt.service.id,
+              name: appt.service.name,
+              duration_minutes: appt.service.duration_minutes,
+              price: appt.service.price,
+            }
+          : null,
+      }))
+    },
+    enabled: !!businessId,
+    staleTime: 1000 * 60 * 2, // 2 minutes - calendar views change less frequently
+  })
+}

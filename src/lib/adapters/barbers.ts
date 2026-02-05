@@ -19,6 +19,7 @@ export interface UIBarber {
   name: string
   email: string
   phone: string
+  userId?: string // Link to auth user
   role: 'owner' | 'barber'
   isActive: boolean
   avatarUrl?: string
@@ -55,6 +56,7 @@ export function adaptBarber(
     name: row.name,
     email: row.email,
     phone: row.phone || '',
+    userId: row.user_id || undefined,
     role: row.role as 'owner' | 'barber',
     isActive: row.is_active,
     avatarUrl: row.avatar_url || undefined,

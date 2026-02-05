@@ -67,6 +67,8 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.appointments.details(), id] as const,
     barberToday: (barberId: string) =>
       [...queryKeys.appointments.all, 'barber-today', barberId] as const,
+    range: (startDate: string, endDate: string) =>
+      [...queryKeys.appointments.all, 'range', startDate, endDate] as const,
   },
 
   // Services (Servicios)
