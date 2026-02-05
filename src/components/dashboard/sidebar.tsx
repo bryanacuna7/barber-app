@@ -131,7 +131,7 @@ export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
       {/* Desktop sidebar only - mobile uses bottom nav */}
       <aside
         data-tour="sidebar"
-        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200 lg:bg-white dark:lg:border-zinc-800 dark:lg:bg-zinc-900"
+        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200 dark:lg:border-zinc-800 lg:bg-white/80 dark:lg:bg-zinc-900/80 backdrop-blur-xl transition-colors duration-300"
       >
         <SidebarContent
           businessName={businessName}
