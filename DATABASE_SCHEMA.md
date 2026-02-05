@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-03 (Session 91 - Auth Integration Complete)
-> **Last Verified Against:** All migrations 001-023
+> **Last Updated:** 2026-02-05 (Session [current] - Realtime Configuration)
+> **Last Verified Against:** All migrations 001-024
 
 ---
 
@@ -62,7 +62,7 @@
 ### `clients`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `014_loyalty_system.sql`
+**Modified in:** `014_loyalty_system.sql`, `024_enable_realtime.sql`
 
 ```sql
 - id                UUID PRIMARY KEY
@@ -80,6 +80,8 @@
 UNIQUE(business_id, phone)
 ```
 
+**Realtime:** ✅ Enabled (REPLICA IDENTITY FULL)
+
 **❌ DOES NOT HAVE:**
 
 - `last_activity_at` (uses `last_visit_at` instead)
@@ -87,7 +89,7 @@ UNIQUE(business_id, phone)
 ### `appointments`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `002_multi_barber.sql`
+**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`
 
 ```sql
 - id                      UUID PRIMARY KEY
@@ -106,6 +108,8 @@ UNIQUE(business_id, phone)
 - internal_notes          TEXT
 - barber_id               UUID REFERENCES barbers(id) (added in 002)
 ```
+
+**Realtime:** ✅ Enabled (REPLICA IDENTITY FULL)
 
 **❌ DOES NOT HAVE:**
 
@@ -296,6 +300,7 @@ UNIQUE(business_id, email)
 ### `business_subscriptions`
 
 **Created in:** `005_subscriptions.sql`
+**Modified in:** `024_enable_realtime.sql`
 
 ```sql
 - id                UUID PRIMARY KEY
@@ -308,6 +313,8 @@ UNIQUE(business_id, email)
 - current_period_end    TIMESTAMPTZ
 - cancel_at_period_end  BOOLEAN
 ```
+
+**Realtime:** ✅ Enabled (REPLICA IDENTITY FULL)
 
 ### `payment_reports`
 
@@ -976,6 +983,49 @@ The following gamification endpoints were refactored to use the centralized `get
 - ✅ Migration 023 executed in production (Session 87)
 - ⚠️ `user_id` column may need population for existing barbers
 - ⚠️ New barbers should have `user_id` set during creation
+
+---
+
+## Realtime Configuration (Session [current])
+
+**Supabase Realtime** enables WebSocket subscriptions for instant UI updates.
+
+### Tables with Realtime Enabled
+
+**Migration:** `024_enable_realtime.sql`
+
+| Table                    | Hook                       | Use Case                       | Status |
+| ------------------------ | -------------------------- | ------------------------------ | ------ |
+| `appointments`           | `useRealtimeAppointments`  | Calendar & Mi Día live updates | ✅     |
+| `clients`                | `useRealtimeClients`       | New bookings from public page  | ✅     |
+| `business_subscriptions` | `useRealtimeSubscriptions` | Feature gating & plan changes  | ✅     |
+
+### Configuration Details
+
+**REPLICA IDENTITY:** FULL (all column values in change events)
+
+**Publication:** `supabase_realtime`
+
+**Benefits:**
+
+- ✅ Instant UI updates across devices
+- ✅ No polling needed for real-time data
+- ✅ Automatic React Query cache invalidation
+- ✅ 3-attempt reconnection with polling fallback
+
+### Verification
+
+To verify Realtime is working:
+
+1. Go to `/test-realtime` page
+2. Open console logs
+3. Look for: `✅ Real-time [table] active`
+4. Update a record in Supabase Dashboard
+5. Verify event appears in UI logs
+
+**Expected:** `🔌 Realtime subscription status: SUBSCRIBED`
+
+**If error occurs:** Check that table is in publication (Dashboard → Database → Replication)
 
 ---
 

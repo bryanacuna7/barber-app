@@ -495,7 +495,7 @@ export default function PreviewBPage() {
                   return (
                     <div
                       key={date.toISOString()}
-                      className={`aspect-square rounded-lg ${intensity} flex items-center justify-center text-xs font-medium text-zinc-900 dark:text-white hover:ring-2 hover:ring-blue-500 transition-all cursor-pointer`}
+                      className={`aspect-square rounded-lg ${intensity} flex items-center justify-center text-xs font-medium text-zinc-900 dark:text-white hover:ring-2 hover:ring-inset hover:ring-blue-500 hover:brightness-110 transition-all cursor-pointer`}
                       title={`${format(date, 'dd MMM', { locale: es })}: ${count} visitas`}
                     >
                       {format(date, 'd')}
