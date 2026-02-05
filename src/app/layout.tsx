@@ -4,6 +4,7 @@ import { ToastProvider } from '@/components/ui/toast'
 import { QueryProvider } from '@/providers/query-provider'
 import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register'
 import { SkipToContent } from '@/components/accessibility/skip-to-content'
+import { PremiumBackground } from '@/components/ui/premium-background'
 import './globals.css'
 
 const geistSans = Geist({
@@ -60,6 +61,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <PremiumBackground />
         <SkipToContent />
         <ServiceWorkerRegister />
         <QueryProvider>

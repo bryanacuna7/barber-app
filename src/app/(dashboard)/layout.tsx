@@ -45,7 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
     // If regular user without business, show error message
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
             <AlertTriangle className="h-8 w-8 text-zinc-600 dark:text-zinc-400" />
@@ -92,7 +92,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // If business is inactive, show suspended message
   if (!isActive && !isAdmin) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
             <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -117,13 +117,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <BusinessProvider
-      businessId={business.id}
-      userId={user.id}
-      userEmail={user.email}
-    >
+    <BusinessProvider businessId={business.id} userId={user.id} userEmail={user.email}>
       <TourProvider businessId={business.id}>
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+        <div className="min-h-screen">
           <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
           <Sidebar businessName={businessName} logoUrl={logoUrl} isAdmin={isAdmin} />
 
