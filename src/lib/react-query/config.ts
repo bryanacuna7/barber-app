@@ -65,6 +65,8 @@ export const queryKeys = {
     list: (filters: string) => [...queryKeys.appointments.lists(), filters] as const,
     details: () => [...queryKeys.appointments.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.appointments.details(), id] as const,
+    barberToday: (barberId: string) =>
+      [...queryKeys.appointments.all, 'barber-today', barberId] as const,
   },
 
   // Services (Servicios)
@@ -100,10 +102,14 @@ export const queryKeys = {
   // Analytics (Reportes)
   analytics: {
     all: ['analytics'] as const,
+    // Legacy: date range based (start/end ISO strings)
     period: (start: string, end: string) =>
       [...queryKeys.analytics.all, 'period', start, end] as const,
     insights: (start: string, end: string) =>
       [...queryKeys.analytics.period(start, end), 'insights'] as const,
+    // Modern: period based ('week' | 'month' | 'year')
+    byPeriod: (period: 'week' | 'month' | 'year') =>
+      [...queryKeys.analytics.all, 'by-period', period] as const,
   },
 
   // Calendar (Citas)
