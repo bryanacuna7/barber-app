@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-05 (Session 126 - Bug Fixes + Realtime Config ✅)
+- **Last Updated:** 2026-02-05 (Session 129 - Servicios Demo D Implemented 🎯)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Bug Fixes & Infrastructure - Realtime Enabled
+- **Current Phase:** Demo Implementation - Servicios Demo D Complete
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 
 ---
@@ -30,6 +30,323 @@
 ---
 
 ## Recent Sessions
+
+### Session 129: Servicios Demo D Implementation (2026-02-05)
+
+**Status:** ✅ 100% Complete (~2h)
+
+**Objective:** Implement Demo D (Simplified Hybrid) for Servicios page - 100% fidelity to demo
+
+**User Requirement:**
+
+- "debe ser 100% fiel al demo, lo que vas a implementar FYI"
+- Demo chosen: Preview D - Simplified Hybrid (9.5/10 score)
+
+**Actions Taken:**
+
+**1. Demo D Implementation** ✅ (1,077 lines)
+
+- **File:** `src/app/(dashboard)/servicios/page-v2.tsx`
+- **Pattern:** React Query + Real-time + Error Boundaries (maintained)
+- **Design:** Table view + insights sidebar (320px) + CRUD-first
+
+**Features Implemented:**
+
+- **Header:** Gradient title (violet → purple → blue) + "Agregar Servicio" button
+- **Mesh Gradients:** Animated background (15% opacity, violet/blue + purple/pink blobs)
+- **Toolbar:**
+  - Search bar with icon
+  - Category filters (all, corte, barba, combo, facial) with gradient active state
+- **Table (Sortable):**
+  - 7 columns: Servicio, Categoría, Reservas, Duración, Precio, Rating, Acciones
+  - Sort icons (ChevronsUpDown, ChevronUp, ChevronDown) with violet accent
+  - Emoji icons + service names
+  - Category badges with color coding
+  - Growth indicators (green/red percentages)
+  - Star ratings (filled amber)
+  - Edit/Delete actions on hover
+- **Sidebar (320px, hidden mobile):**
+  - 3 stat cards:
+    - Servicios Activos (violet/blue gradient icon)
+    - Más Popular (amber/orange gradient icon)
+    - Rating Promedio (emerald/green gradient icon)
+  - Top 5 chart with animated progress bars (colored by category)
+- **Mock Data:**
+  - 10 services across 4 categories
+  - Bookings, revenue, ratings, barberos
+  - Icons (emojis + Lucide fallbacks)
+- **Modals:**
+  - Add/Edit service form (maintained from v1)
+  - Delete confirmation with warning icon
+- **Animations:**
+  - Framer Motion: stagger, scale, hover effects
+  - Smooth transitions (spring physics)
+
+**2. Hover Bug Fix** ✅
+
+- **Problem:** Category filter buttons had "extraño" hover effect
+- **Root Cause:** Conflict between `whileHover={{ scale: 1.05 }}` and Tailwind `hover:bg-zinc-200`
+- **Fix Applied:**
+  - Added `layout` prop to motion.button
+  - Reduced scale: `1.05 → 1.02` (less aggressive)
+  - Removed Tailwind hover classes (eliminated conflict)
+  - Added spring transition: `stiffness: 400, damping: 25`
+- **Result:** Smooth hover without glitches
+
+**Deliverables:**
+
+- ✅ 1 file implemented (servicios/page-v2.tsx - 1,077 lines)
+- ✅ 100% fidelity to Demo D original
+- ✅ React Query + Real-time + Error Boundaries maintained
+- ✅ Mock data with 10 services (categories, bookings, ratings)
+- ✅ Sortable table (5 fields)
+- ✅ Sidebar with stats + chart
+- ✅ Hover bug fixed (user feedback incorporated)
+- ✅ TypeScript 0 errors
+
+**Key Learnings:**
+
+1. **100% fidelity requirement** - When user says "100% fiel", implement exactly as shown including mock data
+2. **Framer Motion + Tailwind conflicts** - `whileHover` can conflict with Tailwind hover classes, use one or the other
+3. **Layout prop for scale animations** - Adding `layout` prop helps Framer Motion handle layout shifts smoothly
+4. **Subtle animations work better** - scale: 1.02 feels smoother than 1.05 for small buttons
+5. **User visual feedback critical** - Screenshot sharing helped identify exact issue ("se ve extraño")
+6. **Mesh gradients pattern** - 15% opacity, animated blobs, adds depth without distraction
+7. **Sidebar 320px is optimal** - Width balances content visibility and space for main table
+8. **Mock data during demo phase** - Use full mock data first, connect real data later
+
+**Progress:**
+
+- **Demo Implementation:**
+  - ✅ Clientes (Session 125) - Demo Fusion
+  - ✅ Citas (Session 127) - Demo B Fusion
+  - ✅ Servicios (Session 129) - Demo D Simplified Hybrid ⬅️ **NEW**
+  - ⏳ Barberos - Visual CRM demo
+  - ⏳ Configuración - Bento Grid demo
+
+**Next:** Continue with Barberos Visual CRM demo OR commit Servicios changes
+
+**Time:** ~2h total (1.5h implementation + 0.5h hover fix + progress save)
+
+---
+
+### Session 128: Citas Mobile Responsive Fixes (2026-02-05)
+
+**Status:** ✅ 90% Complete (~1.5h)
+
+**Objective:** Fix mobile UX issues in Citas page (week view + navigation)
+
+**User Feedback:**
+
+- "por cierto la pag http://localhost:3000/citas no se ve bien en mobile necesito resolver esto de la mejor manera analizando el mejor UX posible"
+- "el mes donde dice febrero 2026 se ve mal, pero hicimos un gran avance"
+- "en mobile el view de week se ve mal, apple soluciona esto mostrando solo dos dias y el user puede irse moviendo por los dias, me explico?"
+- "tambien el boton de < today > se ve mal en mobile"
+
+**Actions Taken:**
+
+**1. Fixed Header "febrero 2026" Spacing** ✅
+
+- **Problem:** Month/year text too small and cramped on mobile
+- **Solution:** Made responsive with better sizing
+
+  ```tsx
+  // Before
+  <div className="text-sm text-zinc-500 dark:text-[#8E8E93]">
+
+  // After
+  <div className="text-xs lg:text-sm font-medium text-zinc-600 dark:text-[#8E8E93] min-w-0 flex-shrink-0">
+  ```
+
+**2. Implemented Mobile Week View (Apple Calendar Pattern)** ✅
+
+- **Problem:** Week view showed all 7 days on mobile (unreadable, ~50px columns)
+- **Solution:** Show 3 days on mobile (current + next 2), keep 7 days on desktop
+- **Pattern:** Apple Calendar mobile UX
+  - Mobile: 3 visible days with navigation arrows
+  - Desktop (lg:): Full 7-day week grid
+
+**Implementation:**
+
+```tsx
+// New computed value for mobile
+const mobileWeekDays = useMemo(() => {
+  if (viewMode !== 'week' || weekDays.length === 0) return []
+  const selectedIndex = weekDays.findIndex((day) => isSameDay(day.date, selectedDate))
+  if (selectedIndex === -1) return weekDays.slice(0, 3)
+  return weekDays.slice(selectedIndex, Math.min(selectedIndex + 3, weekDays.length))
+}, [viewMode, selectedDate, weekDays])
+
+// Responsive grid rendering
+// Mobile: grid-cols-[60px_repeat(3,1fr)] with mobileWeekDays
+// Desktop: grid-cols-[60px_repeat(7,1fr)] with weekDays
+```
+
+**3. Mobile-Responsive Grid Structure** ✅
+
+- **All Day section:** Separate mobile/desktop grids
+- **Day headers:** Separate mobile/desktop grids
+- **Timeline:** Separate mobile/desktop grids (14 hour rows)
+- **Navigation:** Existing arrows work for week-by-week navigation
+
+**What Works:**
+
+- ✅ Header "febrero 2026" readable on mobile
+- ✅ Week view shows 3 days instead of 7 on mobile
+- ✅ Desktop still shows full 7-day view
+- ✅ Data rendering correctly (verified with Playwright snapshot)
+- ✅ Navigation arrows move by week
+
+**Pending Issues:**
+
+- ⚠️ Navigation buttons (< Today >) need mobile optimization (mentioned by user)
+- ⚠️ Week view columns rendering but layout needs verification
+
+**Deliverables:**
+
+- ✅ 1 file modified (citas/page-v2.tsx)
+- ✅ Mobile-first responsive design implemented
+- ✅ Apple Calendar UX pattern followed
+- ✅ Tailwind responsive breakpoints (lg:)
+
+**Key Learnings:**
+
+1. **Apple Calendar mobile pattern** - Show 2-3 days with navigation, not all 7
+2. **Responsive grid approach** - Render separate mobile/desktop grids with `lg:hidden` and `hidden lg:grid`
+3. **Grid template columns** - `grid-cols-[60px_repeat(3,1fr)]` for mobile, `grid-cols-[60px_repeat(7,1fr)]` for desktop
+4. **User feedback critical** - "no puedo creer que me digas que el resultado esta bien" taught me to verify visually first
+5. **Playwright verification mandatory** - Never assume UI changes work without screenshot
+6. **Mobile-first breakpoints** - Start with mobile layout, add `lg:` for desktop
+
+**Next:** Fix navigation buttons spacing on mobile + full mobile testing
+
+**Time:** ~1.5h
+
+---
+
+### Session 127: Citas Demo B Fusion Complete + Commits (2026-02-05)
+
+**Status:** ✅ 100% Complete (~4h)
+
+**Objective:** Commit pending changes + Implement Demo B Fusion for Citas page
+
+**Actions Taken:**
+
+**1. Committed 3 Previous Sessions** ✅ (3 commits)
+
+- **Commit 1:** `eca5d44` - Session 125 Complete (5 files)
+  - Clientes Demo Fusion 100% implemented
+  - 4 auxiliary components (LoyaltyRing, RelationshipStrength, SpendingTier, ActivityItem)
+  - Master-detail cards view + Calendar heatmap
+  - Banner "Acciones Sugeridas"
+  - Tabs + filters unified layout
+
+- **Commit 2:** `e8f91b2` - Session 126 Complete (4 files)
+  - Heatmap hover bug fixed (ring-inset + removed scale)
+  - Realtime migration created (024_enable_realtime.sql)
+  - DATABASE_SCHEMA.md updated with realtime config
+  - REPLICA IDENTITY enabled for 3 tables
+
+- **Commit 3:** `d9c7a3e` - Cleanup (1 file)
+  - Fixed pre-commit errors in Clientes page
+  - Moved SortIndicator component outside render
+  - Replaced Math.random() with fixed mock array
+  - Removed unused imports
+
+**2. Demo B Fusion Implementation** ✅ (Calendar Cinema + macOS Polish, Score 9.8/10)
+
+- **File:** `src/app/(dashboard)/citas/page-v2.tsx` (1,017 lines - complete rewrite)
+- **Pattern:** React Query + Real-time + Error Boundaries
+- **Design:** macOS dark theme (#1C1C1E) + mesh gradients + glass morphism
+
+**Features Implemented:**
+
+- **Layout:** Full-height dark background with animated mesh gradients
+- **Header:** View switcher (Day/Week/Month) + Large date display + Revenue projection
+- **Time Blocks:** 3 blocks (Morning/Midday/Afternoon) with:
+  - Lucide icons (Sunrise, Sun, Moon) with color coding
+  - Occupancy percentage bars (green/purple gradient)
+  - Appointment cards with client info + service + barbero
+  - Gap detection between appointments
+- **Quick Actions:** Suggest appointments for detected gaps
+- **Week View:** 7-day timeline grid with hourly slots
+- **Month View:** Calendar with day cells showing appointment count
+- **Right Sidebar:** Mini calendar + Today's stats (Pending/Confirmed/Completed/Revenue)
+- **Appointment Modal:** Full detail view with status, client, service, barbero, notes
+
+**3. Critical Bug Fixes** ✅
+
+- **Error:** `RangeError: Invalid time value` at useCalendarAppointments
+- **Root Cause:** Hook expects 3 parameters (startDate, endDate, businessId), was passing 2 in wrong order
+- **Fix:** Created dateRange useMemo that calculates correct ranges based on view mode
+  ```typescript
+  const dateRange = useMemo(() => {
+    if (viewMode === 'day') {
+      return { start: startOfDay(selectedDate), end: endOfDay(selectedDate) }
+    } else if (viewMode === 'week') {
+      return {
+        start: startOfWeek(selectedDate, { weekStartsOn: 1 }),
+        end: endOfWeek(selectedDate, { weekStartsOn: 1 }),
+      }
+    } else {
+      return {
+        start: startOfMonth(selectedDate),
+        end: endOfMonth(selectedDate),
+      }
+    }
+  }, [viewMode, selectedDate])
+  ```
+
+**4. UI Polish - Lucide Icons** ✅
+
+- **Problem:** Emoji icons (🌅 ☀️ 🌆) not premium enough
+- **Solution:** Replaced with Lucide React icons
+  - Morning: `<Sunrise className="text-violet-400" />`
+  - Midday: `<Sun className="text-amber-400" />`
+  - Afternoon: `<Moon className="text-blue-400" />`
+- **Result:** Professional vector icons consistent with macOS design
+
+**Deliverables:**
+
+- ✅ 3 commits pushed (Sessions 125, 126, cleanup)
+- ✅ Citas Demo B Fusion 100% implemented (1,017 lines)
+- ✅ All features from demo working (time blocks, gaps, week/month views, sidebar, modal)
+- ✅ Real-time updates integrated (useRealtimeAppointments)
+- ✅ Error Boundaries added (ComponentErrorBoundary, CalendarErrorBoundary)
+- ✅ Lucide icons for premium look
+- ✅ TypeScript 0 errors
+- ✅ Visual verification via Playwright
+
+**Files Modified/Created:** 2 total (+ 3 commits with 10 files)
+
+- 1 page rewritten (src/app/(dashboard)/citas/page-v2.tsx)
+- 3 commits with 10 files (clientes components, migrations, schema docs, bug fixes)
+
+**Key Learnings:**
+
+1. **Hook signatures matter** - Always verify exact parameter order and count
+2. **Date ranges by view mode** - useMemo pattern for calculating date ranges based on view
+3. **Emoji vs Vector icons** - Lucide icons look more premium than system emojis
+4. **Pre-commit hooks catch critical errors** - Math.random() in render, components inside render
+5. **100% demo accuracy requires careful reading** - User emphasized avoiding back-and-forth by implementing exactly as shown
+6. **macOS color palette** - Consistent use of #1C1C1E, #2C2C2E, #3A3A3C for dark theme
+7. **Occupancy bars** - Visual feedback with gradient colors based on utilization
+8. **Gap detection** - Smart feature to suggest appointments in free time slots
+
+**Progress:**
+
+- **Demo Implementation:**
+  - ✅ Clientes (Session 125)
+  - ✅ Citas (Session 127)
+  - ⏳ Servicios (Hybrid demo)
+  - ⏳ Barberos (Visual CRM demo)
+  - ⏳ Configuración (Bento Grid demo)
+
+**Next:** Commit Citas Demo B Fusion OR continue with Servicios demo
+
+**Time:** ~4h total (1h commits + 3h implementation)
+
+---
 
 ### Session 126: Bug Fixes + Realtime Configuration (2026-02-05)
 
@@ -253,6 +570,7 @@
 | [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)                                               | Database schema (source of truth)       |
 | [LESSONS_LEARNED.md](LESSONS_LEARNED.md)                                               | Critical patterns & bugs                |
 | [src/app/(dashboard)/clientes/page-v2.tsx](<src/app/(dashboard)/clientes/page-v2.tsx>) | Clientes with Demo Fusion (Session 125) |
+| [src/app/(dashboard)/citas/page-v2.tsx](<src/app/(dashboard)/citas/page-v2.tsx>)       | Citas with Demo B Fusion (Session 127)  |
 | [src/components/clients/](src/components/clients/)                                     | Client auxiliary components (4 files)   |
 | [src/lib/feature-flags.ts](src/lib/feature-flags.ts)                                   | Feature flag system                     |
 | [src/hooks/queries/](src/hooks/queries/)                                               | React Query hooks (7 modules)           |
@@ -264,12 +582,20 @@
 ### Working ✅
 
 - App running at http://localhost:3000
-- **Clientes Demo Fusion 100% implemented** ✅ **NEW**
+- **Clientes Demo Fusion 100% implemented** ✅ (Session 125)
   - Master-detail cards view (demo-accurate)
   - Calendar heatmap view
   - Banner "Acciones Sugeridas"
   - Tabs + filters unified layout
   - 4 auxiliary components created
+- **Citas Demo B Fusion 100% implemented** ✅ **NEW** (Session 127)
+  - Calendar Cinema + macOS Polish (score 9.8/10)
+  - Time blocks with Lucide icons (Morning/Midday/Afternoon)
+  - Occupancy bars + Gap detection + Quick Actions
+  - Week View timeline + Month View calendar
+  - Sidebar with mini calendar + Today's stats
+  - Appointment detail modal
+  - Real-time updates integrated
 - **All 5 Dashboard Pages Modernized:** Clientes, Citas, Servicios, Barberos, Configuración
 - **Real-time Infrastructure:** 3 WebSocket hooks with graceful degradation
 - **Error Boundaries:** 4 error boundaries with custom fallbacks
@@ -281,22 +607,22 @@
 
 Apply remaining 3 demos to other pages:
 
-1. **Citas:** Calendar Cinema demo
-2. **Servicios:** Hybrid demo
-3. **Barberos:** Visual CRM demo
-4. **Configuración:** Bento Grid demo
+1. **Servicios:** Hybrid demo (est. 3-4h)
+2. **Barberos:** Visual CRM demo (est. 3-4h)
+3. **Configuración:** Bento Grid demo (est. 3-4h)
 
-**Estimated:** 12-15h total for all 4 pages
+**Estimated:** 9-12h total for remaining 3 pages
 
-**Option B: Commit Clientes Changes**
+**Option B: Commit Citas Demo B Fusion**
 
-- Stage and commit 5 new files
-- Create PR for demo implementation
+- Stage and commit 1 file (citas/page-v2.tsx)
+- Create PR for Citas implementation
 - Manual testing with Playwright
+- Then continue with remaining demos
 
 ---
 
-**Last Update:** Session 126 (2026-02-05)
-**Recent:** ✅ Bug Fixes + Realtime Config (~1h)
-**Status:** 🔧 **HEATMAP FIXED + REALTIME ENABLED!** (Infrastructure improved)
-**Next:** Commit fixes OR continue with other demos (Citas, Servicios, Barberos) 🚀
+**Last Update:** Session 128 (2026-02-05)
+**Recent:** ✅ Citas Mobile Responsive Fixes (~1.5h)
+**Status:** 📱 **CITAS MOBILE OPTIMIZED!** (Apple Calendar 3-day pattern + Header fixes)
+**Next:** Fix navigation buttons mobile OR commit changes + continue with remaining demos 🚀
