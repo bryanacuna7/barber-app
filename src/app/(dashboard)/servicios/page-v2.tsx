@@ -1,22 +1,46 @@
 /**
- * Servicios Page V2 - Modernized with React Query + Real-time + Error Boundaries
+ * Servicios Page V2 - Demo D: Simplified Hybrid
  *
- * Pattern: React Query for state + Real-time WebSocket + Error boundaries
+ * Pattern: React Query + Real-time + Error Boundaries
+ * Design: Table view + insights sidebar (320px) + CRUD-first
  * Feature flag: NEXT_PUBLIC_FF_NEW_SERVICIOS=true
  */
 
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, Clock, Scissors, AlertTriangle } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  Clock,
+  Star,
+  TrendingUp,
+  Award,
+  Package,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  Scissors,
+  Sparkles,
+  Zap,
+  Users,
+  Wind,
+  Waves,
+  Flame,
+  Gift,
+  Crown,
+  CircleDot,
+  Sparkle,
+  AlertTriangle,
+  type LucideIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Modal } from '@/components/ui/modal'
-import { PullToRefresh } from '@/components/ui/pull-to-refresh'
+import { Input } from '@/components/ui/input'
 import { formatCurrency } from '@/lib/utils'
-import { FadeInUp, StaggeredList, StaggeredItem, ScaleOnHover } from '@/components/ui/motion'
 import type { UIService } from '@/lib/adapters/services'
 import {
   useServices,
@@ -29,47 +53,294 @@ import { ComponentErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
 import { useRealtimeServices } from '@/hooks/use-realtime-services'
 
-// Service color palette
-const SERVICE_COLORS = [
+// ============================================================================
+// MOCK DATA (Demo D - For UI exploration)
+// ============================================================================
+
+type ServiceCategory = 'corte' | 'barba' | 'combo' | 'facial'
+type SortField = 'name' | 'category' | 'bookings' | 'price' | 'duration'
+type SortDirection = 'asc' | 'desc'
+
+interface MockService {
+  id: string
+  name: string
+  description: string
+  category: ServiceCategory
+  duration_minutes: number
+  price: number
+  bookings_this_month: number
+  bookings_last_month: number
+  revenue_this_month: number
+  avg_rating: number
+  total_reviews: number
+  barber_names: string[]
+  icon: string // Emoji for demo
+  iconName: string // Lucide icon name
+  color: string
+}
+
+const mockServices: MockService[] = [
   {
-    bg: 'bg-violet-100 dark:bg-violet-900/30',
-    text: 'text-violet-700 dark:text-violet-400',
-    border: 'border-violet-200 dark:border-violet-800',
-    gradient: 'from-violet-500 to-purple-600',
+    id: '1',
+    name: 'Corte Clásico',
+    description: 'Corte tradicional con máquina y tijera',
+    category: 'corte',
+    duration_minutes: 30,
+    price: 8000,
+    bookings_this_month: 87,
+    bookings_last_month: 79,
+    revenue_this_month: 696000,
+    avg_rating: 4.8,
+    total_reviews: 234,
+    barber_names: ['Juan', 'Carlos', 'Roberto'],
+    icon: '✂️',
+    iconName: 'Scissors',
+    color: 'blue',
   },
   {
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
-    text: 'text-blue-700 dark:text-blue-400',
-    border: 'border-blue-200 dark:border-blue-800',
-    gradient: 'from-blue-500 to-cyan-600',
+    id: '2',
+    name: 'Corte Premium',
+    description: 'Corte personalizado con asesoría de estilo',
+    category: 'corte',
+    duration_minutes: 45,
+    price: 12000,
+    bookings_this_month: 52,
+    bookings_last_month: 48,
+    revenue_this_month: 624000,
+    avg_rating: 4.9,
+    total_reviews: 156,
+    barber_names: ['Juan', 'Roberto'],
+    icon: '✨',
+    iconName: 'Sparkles',
+    color: 'purple',
   },
   {
-    bg: 'bg-emerald-100 dark:bg-emerald-900/30',
-    text: 'text-emerald-700 dark:text-emerald-400',
-    border: 'border-emerald-200 dark:border-emerald-800',
-    gradient: 'from-emerald-500 to-teal-600',
+    id: '3',
+    name: 'Fade Moderno',
+    description: 'Degradado profesional con línea definida',
+    category: 'corte',
+    duration_minutes: 40,
+    price: 10000,
+    bookings_this_month: 64,
+    bookings_last_month: 58,
+    revenue_this_month: 640000,
+    avg_rating: 4.7,
+    total_reviews: 189,
+    barber_names: ['Roberto', 'Carlos'],
+    icon: '⚡',
+    iconName: 'Zap',
+    color: 'amber',
   },
   {
-    bg: 'bg-amber-100 dark:bg-amber-900/30',
-    text: 'text-amber-700 dark:text-amber-400',
-    border: 'border-amber-200 dark:border-amber-800',
-    gradient: 'from-amber-500 to-orange-600',
+    id: '4',
+    name: 'Barba Completa',
+    description: 'Perfilado y arreglo de barba profesional',
+    category: 'barba',
+    duration_minutes: 25,
+    price: 6000,
+    bookings_this_month: 45,
+    bookings_last_month: 42,
+    revenue_this_month: 270000,
+    avg_rating: 4.6,
+    total_reviews: 145,
+    barber_names: ['Carlos', 'Miguel'],
+    icon: '🔥',
+    iconName: 'Flame',
+    color: 'red',
   },
   {
-    bg: 'bg-rose-100 dark:bg-rose-900/30',
-    text: 'text-rose-700 dark:text-rose-400',
-    border: 'border-rose-200 dark:border-rose-800',
-    gradient: 'from-rose-500 to-pink-600',
+    id: '5',
+    name: 'Afeitado Clásico',
+    description: 'Afeitado con navaja y toalla caliente',
+    category: 'barba',
+    duration_minutes: 30,
+    price: 8000,
+    bookings_this_month: 38,
+    bookings_last_month: 35,
+    revenue_this_month: 304000,
+    avg_rating: 4.9,
+    total_reviews: 98,
+    barber_names: ['Carlos'],
+    icon: '🌊',
+    iconName: 'Waves',
+    color: 'cyan',
+  },
+  {
+    id: '6',
+    name: 'Combo VIP',
+    description: 'Corte + Barba + Tratamiento capilar',
+    category: 'combo',
+    duration_minutes: 60,
+    price: 18000,
+    bookings_this_month: 29,
+    bookings_last_month: 25,
+    revenue_this_month: 522000,
+    avg_rating: 5.0,
+    total_reviews: 67,
+    barber_names: ['Juan', 'Roberto'],
+    icon: '👑',
+    iconName: 'Crown',
+    color: 'gold',
+  },
+  {
+    id: '7',
+    name: 'Combo Rápido',
+    description: 'Corte + Barba express',
+    category: 'combo',
+    duration_minutes: 45,
+    price: 14000,
+    bookings_this_month: 41,
+    bookings_last_month: 38,
+    revenue_this_month: 574000,
+    avg_rating: 4.7,
+    total_reviews: 112,
+    barber_names: ['Todos'],
+    icon: '🎁',
+    iconName: 'Gift',
+    color: 'emerald',
+  },
+  {
+    id: '8',
+    name: 'Facial Hidratante',
+    description: 'Limpieza facial + hidratación profunda',
+    category: 'facial',
+    duration_minutes: 50,
+    price: 15000,
+    bookings_this_month: 22,
+    bookings_last_month: 19,
+    revenue_this_month: 330000,
+    avg_rating: 4.8,
+    total_reviews: 54,
+    barber_names: ['Miguel'],
+    icon: '💆',
+    iconName: 'Sparkle',
+    color: 'green',
+  },
+  {
+    id: '9',
+    name: 'Corte Niño',
+    description: 'Corte especial para niños menores de 12 años',
+    category: 'corte',
+    duration_minutes: 20,
+    price: 6000,
+    bookings_this_month: 56,
+    bookings_last_month: 52,
+    revenue_this_month: 336000,
+    avg_rating: 4.5,
+    total_reviews: 178,
+    barber_names: ['Juan', 'Miguel'],
+    icon: '👦',
+    iconName: 'Users',
+    color: 'blue',
+  },
+  {
+    id: '10',
+    name: 'Cejas',
+    description: 'Perfilado y arreglo de cejas',
+    category: 'facial',
+    duration_minutes: 15,
+    price: 3000,
+    bookings_this_month: 34,
+    bookings_last_month: 31,
+    revenue_this_month: 102000,
+    avg_rating: 4.4,
+    total_reviews: 89,
+    barber_names: ['Miguel', 'Carlos'],
+    icon: '👁️',
+    iconName: 'CircleDot',
+    color: 'zinc',
   },
 ]
 
+// Icon mapping
+const iconMap: Record<string, LucideIcon> = {
+  Scissors,
+  Sparkles,
+  Zap,
+  Users,
+  Wind,
+  Waves,
+  Flame,
+  Gift,
+  Crown,
+  CircleDot,
+  Sparkle,
+  Star,
+}
+
+// Service Icon Component
+function ServiceIcon({ iconName, className }: { iconName: string; className?: string }) {
+  const Icon = iconMap[iconName] || Scissors
+  return <Icon className={className} />
+}
+
+// Helper functions
+function getCategoryLabel(category: ServiceCategory): string {
+  const labels: Record<ServiceCategory, string> = {
+    corte: 'Corte',
+    barba: 'Barba',
+    combo: 'Combo',
+    facial: 'Facial',
+  }
+  return labels[category]
+}
+
+function getCategoryColor(category: ServiceCategory) {
+  const colors: Record<
+    ServiceCategory,
+    { bg: string; text: string; ring: string; gradient: string }
+  > = {
+    corte: {
+      bg: 'bg-blue-100 dark:bg-blue-900/30',
+      text: 'text-blue-700 dark:text-blue-400',
+      ring: 'ring-blue-500',
+      gradient: 'from-blue-500 to-cyan-600',
+    },
+    barba: {
+      bg: 'bg-amber-100 dark:bg-amber-900/30',
+      text: 'text-amber-700 dark:text-amber-400',
+      ring: 'ring-amber-500',
+      gradient: 'from-amber-500 to-orange-600',
+    },
+    combo: {
+      bg: 'bg-purple-100 dark:bg-purple-900/30',
+      text: 'text-purple-700 dark:text-purple-400',
+      ring: 'ring-purple-500',
+      gradient: 'from-purple-500 to-pink-600',
+    },
+    facial: {
+      bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+      text: 'text-emerald-700 dark:text-emerald-400',
+      ring: 'ring-emerald-500',
+      gradient: 'from-emerald-500 to-teal-600',
+    },
+  }
+  return colors[category]
+}
+
+function calculateGrowth(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0
+  return Math.round(((current - previous) / previous) * 100)
+}
+
+function getActiveServices() {
+  return mockServices.filter((s) => s.bookings_this_month > 0)
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 function ServiciosContent() {
   const { businessId } = useBusiness()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | 'all'>('all')
+  const [sortField, setSortField] = useState<SortField>('bookings')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState('')
   const [editingService, setEditingService] = useState<UIService | null>(null)
-  const [deleteService, setDeleteService] = useState<UIService | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [deleteService, setDeleteService] = useState<MockService | null>(null)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -79,17 +350,9 @@ function ServiciosContent() {
     business_id: businessId,
   })
 
-  // Detect mobile viewport
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
   // React Query hooks
   const {
-    data: services = [],
+    data: realServices = [],
     isLoading: loading,
     isError,
     error: queryError,
@@ -105,11 +368,82 @@ function ServiciosContent() {
     enabled: !!businessId,
   })
 
-  // Pull to refresh handler
-  const handleRefresh = async () => {
-    await refetch()
+  // Filter and sort services (using mock data for demo)
+  let filteredServices =
+    selectedCategory === 'all'
+      ? mockServices
+      : mockServices.filter((s) => s.category === selectedCategory)
+
+  if (searchQuery) {
+    filteredServices = filteredServices.filter((s) =>
+      s.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   }
 
+  const sortedServices = useMemo(() => {
+    return [...filteredServices].sort((a, b) => {
+      let comparison = 0
+
+      switch (sortField) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name)
+          break
+        case 'category':
+          comparison = a.category.localeCompare(b.category)
+          break
+        case 'bookings':
+          comparison = a.bookings_this_month - b.bookings_this_month
+          break
+        case 'price':
+          comparison = a.price - b.price
+          break
+        case 'duration':
+          comparison = a.duration_minutes - b.duration_minutes
+          break
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [filteredServices, sortField, sortDirection])
+
+  const categories: (ServiceCategory | 'all')[] = ['all', 'corte', 'barba', 'combo', 'facial']
+
+  // Calculate quick stats
+  const activeServices = getActiveServices()
+  const totalServices = activeServices.length
+  const topService = activeServices.reduce((top, s) =>
+    s.bookings_this_month > top.bookings_this_month ? s : top
+  )
+
+  // Top 5 for mini chart
+  const top5Services = [...activeServices]
+    .sort((a, b) => b.bookings_this_month - a.bookings_this_month)
+    .slice(0, 5)
+  const maxBookings = top5Services[0]?.bookings_this_month || 100
+
+  // Handle sort
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('desc')
+    }
+  }
+
+  // Get sort icon
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-400" />
+    }
+    return sortDirection === 'asc' ? (
+      <ChevronUp className="h-3.5 w-3.5 text-violet-600" />
+    ) : (
+      <ChevronDown className="h-3.5 w-3.5 text-violet-600" />
+    )
+  }
+
+  // Form handlers
   function resetForm() {
     setFormData({
       name: '',
@@ -121,18 +455,6 @@ function ServiciosContent() {
     setEditingService(null)
     setShowForm(false)
     setError('')
-  }
-
-  function handleEdit(service: UIService) {
-    setFormData({
-      name: service.name,
-      description: service.description || '',
-      duration: service.duration,
-      price: Number(service.price),
-      business_id: businessId,
-    })
-    setEditingService(service)
-    setShowForm(true)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -155,11 +477,12 @@ function ServiciosContent() {
     }
   }
 
-  async function handleDelete() {
+  async function handleDeleteConfirm() {
     if (!deleteService) return
 
     try {
-      await deleteServiceMutation.mutateAsync(deleteService.id)
+      // In real app, would delete using deleteServiceMutation
+      // For demo, just close modal
       setDeleteService(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar servicio')
@@ -176,32 +499,450 @@ function ServiciosContent() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <FadeInUp>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
-              Servicios
-            </h1>
-            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
-              Gestiona el catálogo de servicios de tu barbería
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-6 relative overflow-hidden">
+      {/* Subtle Mesh Gradients (15% opacity) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="mx-auto max-w-[1400px] relative z-10">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="mb-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Servicios
+              </h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                Gestiona tus servicios con insights en tiempo real
+              </p>
+            </div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={() => {
+                  resetForm()
+                  setShowForm(true)
+                }}
+                className="h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar Servicio
+              </Button>
+            </motion.div>
           </div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              onClick={() => {
-                resetForm()
-                setShowForm(true)
-              }}
-              className="w-full sm:w-auto h-12 px-6 text-[15px] font-semibold"
+        </motion.div>
+
+        {/* Main Layout: Content + Sidebar */}
+        <div className="flex gap-6">
+          {/* Main Content Area (Left) */}
+          <div className="flex-1 min-w-0">
+            {/* Toolbar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.1 }}
+              className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
-              <Plus className="mr-2 h-5 w-5" />
-              Agregar Servicio
-            </Button>
+              {/* Search */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar servicios..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-4 text-sm text-zinc-900 placeholder-zinc-400 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder-zinc-500"
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+                {categories.map((cat) => (
+                  <motion.button
+                    key={cat}
+                    layout
+                    onClick={() => setSelectedCategory(cat)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium ${
+                      selectedCategory === cat
+                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25'
+                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                    }`}
+                  >
+                    {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
+              whileHover={{ scale: 1.001 }}
+              className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  {/* Header */}
+                  <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
+                    <tr>
+                      {/* Service Name */}
+                      <th className="px-4 py-3 text-left">
+                        <button
+                          onClick={() => handleSort('name')}
+                          className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        >
+                          Servicio
+                          {getSortIcon('name')}
+                        </button>
+                      </th>
+
+                      {/* Category */}
+                      <th className="px-4 py-3 text-left">
+                        <button
+                          onClick={() => handleSort('category')}
+                          className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        >
+                          Categoría
+                          {getSortIcon('category')}
+                        </button>
+                      </th>
+
+                      {/* Bookings */}
+                      <th className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => handleSort('bookings')}
+                          className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        >
+                          Reservas
+                          {getSortIcon('bookings')}
+                        </button>
+                      </th>
+
+                      {/* Duration */}
+                      <th className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => handleSort('duration')}
+                          className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        >
+                          Duración
+                          {getSortIcon('duration')}
+                        </button>
+                      </th>
+
+                      {/* Price */}
+                      <th className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => handleSort('price')}
+                          className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                        >
+                          Precio
+                          {getSortIcon('price')}
+                        </button>
+                      </th>
+
+                      {/* Rating */}
+                      <th className="px-4 py-3 text-right">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+                          Rating
+                        </span>
+                      </th>
+
+                      {/* Actions */}
+                      <th className="w-24 px-4 py-3 text-right">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+                          Acciones
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+
+                  {/* Body */}
+                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    {sortedServices.map((service) => {
+                      const categoryColor = getCategoryColor(service.category)
+                      const growth = calculateGrowth(
+                        service.bookings_this_month,
+                        service.bookings_last_month
+                      )
+
+                      return (
+                        <tr
+                          key={service.id}
+                          className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
+                        >
+                          {/* Service Name */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{service.icon}</span>
+                              <div>
+                                <p className="font-medium text-zinc-900 dark:text-white">
+                                  {service.name}
+                                </p>
+                                <p className="text-xs text-zinc-500 line-clamp-1">
+                                  {service.barber_names.length} barberos
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Category */}
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
+                            >
+                              {getCategoryLabel(service.category)}
+                            </span>
+                          </td>
+
+                          {/* Bookings */}
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <span className="font-semibold text-zinc-900 dark:text-white">
+                                {service.bookings_this_month}
+                              </span>
+                              {growth !== 0 && (
+                                <span
+                                  className={`text-xs ${growth > 0 ? 'text-green-600' : 'text-red-600'}`}
+                                >
+                                  ({growth > 0 ? '+' : ''}
+                                  {growth}%)
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Duration */}
+                          <td className="px-4 py-3 text-right">
+                            <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                              {service.duration_minutes} min
+                            </span>
+                          </td>
+
+                          {/* Price */}
+                          <td className="px-4 py-3 text-right">
+                            <span className="font-semibold text-zinc-900 dark:text-white">
+                              {formatCurrency(service.price)}
+                            </span>
+                          </td>
+
+                          {/* Rating */}
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                              <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                                {service.avg_rating}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+                                title="Editar"
+                                onClick={() => setShowForm(true)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                                title="Eliminar"
+                                onClick={() => setDeleteService(service)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Empty State */}
+              {sortedServices.length === 0 && (
+                <div className="py-12 text-center">
+                  <Search className="mx-auto h-10 w-10 text-zinc-400" />
+                  <p className="mt-3 text-sm font-medium text-zinc-900 dark:text-white">
+                    No se encontraron servicios
+                  </p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Results count */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.3 }}
+              className="mt-3 text-xs text-zinc-500 text-center"
+            >
+              Mostrando {sortedServices.length} de {mockServices.length} servicios
+            </motion.p>
+          </div>
+
+          {/* Sidebar (Right) - Insights */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
+            className="hidden lg:block w-[320px] shrink-0 space-y-4"
+          >
+            {/* Quick Stats */}
+            <div className="space-y-3">
+              {/* Total Services */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      Servicios Activos
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
+                      {totalServices}
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
+                    <Package className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Top Service */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      Más Popular
+                    </p>
+                    <p className="mt-1 text-base font-bold text-zinc-900 dark:text-white truncate">
+                      {topService.icon} {topService.name}
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {topService.bookings_this_month} reservas
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
+                    <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Average Rating */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                      Rating Promedio
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
+                      {(
+                        activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /
+                        activeServices.length
+                      ).toFixed(1)}
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {activeServices.reduce((sum, s) => sum + s.total_reviews, 0)} reviews
+                    </p>
+                  </div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30">
+                    <Star className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Mini Chart */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
+                Top 5 Servicios
+              </h3>
+              <div className="space-y-3">
+                {top5Services.map((service, idx) => {
+                  const percentage = (service.bookings_this_month / maxBookings) * 100
+                  const categoryColor = getCategoryColor(service.category)
+
+                  return (
+                    <div key={service.id}>
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          <span className="text-base">{service.icon}</span>
+                          <span className="font-medium text-zinc-900 dark:text-white truncate">
+                            {service.name}
+                          </span>
+                        </div>
+                        <span className="ml-2 shrink-0 text-xs text-zinc-500">
+                          {service.bookings_this_month}
+                        </span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${percentage}%` }}
+                          transition={{ duration: 0.8, delay: 0.4 + idx * 0.1 }}
+                          className={`h-full rounded-full ${categoryColor.bg}`}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </motion.div>
           </motion.div>
         </div>
-      </FadeInUp>
+      </div>
 
       {/* Form Modal */}
       <Modal
@@ -317,7 +1058,7 @@ function ServiciosContent() {
             <Button
               variant="outline"
               className="h-11 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
-              onClick={handleDelete}
+              onClick={handleDeleteConfirm}
               isLoading={deleteServiceMutation.isPending}
             >
               Eliminar
@@ -325,199 +1066,6 @@ function ServiciosContent() {
           </div>
         </div>
       </Modal>
-
-      {/* Service List */}
-      <FadeInUp delay={0.1}>
-        <div className="space-y-4">
-          <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
-            Catálogo de Servicios
-          </h3>
-
-          <div>
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="h-8 w-8 rounded-full border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
-                />
-              </div>
-            ) : services.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="py-16 text-center"
-              >
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[22px] bg-zinc-100 dark:bg-zinc-800">
-                  <Scissors className="h-10 w-10 text-zinc-400" />
-                </div>
-                <p className="mt-5 text-[17px] font-medium text-zinc-900 dark:text-white">
-                  No tienes servicios registrados
-                </p>
-                <p className="mt-1 text-[15px] text-zinc-500">
-                  Agrega tu primer servicio para que los clientes puedan reservar.
-                </p>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="mt-6"
-                >
-                  <Button onClick={() => setShowForm(true)} className="h-11">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Agregar Servicio
-                  </Button>
-                </motion.div>
-              </motion.div>
-            ) : isMobile ? (
-              <PullToRefresh onRefresh={handleRefresh}>
-                <StaggeredList className="space-y-2">
-                  <AnimatePresence mode="popLayout">
-                    {services.map((service) => {
-                      return (
-                        <StaggeredItem key={service.id}>
-                          {/* Compact mobile view - with swipe gestures */}
-                          <div className="relative rounded-xl overflow-hidden">
-                            {/* Swipeable content */}
-                            <motion.div
-                              drag="x"
-                              dragConstraints={{ left: -200, right: 0 }}
-                              dragElastic={0.1}
-                              dragMomentum={false}
-                              layout
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="group relative z-10 w-full flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 touch-pan-y border-l-4 border-l-blue-500"
-                            >
-                              {/* Action buttons - iOS style ovals */}
-                              <div className="absolute right-0 top-0 bottom-0 flex items-center gap-3 px-3 translate-x-full">
-                                {/* Edit button */}
-                                <motion.button
-                                  onClick={() => handleEdit(service)}
-                                  whileTap={{ scale: 0.95 }}
-                                  className="flex h-12 w-20 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg"
-                                >
-                                  <Pencil className="h-5 w-5" />
-                                </motion.button>
-                                {/* Delete button */}
-                                <motion.button
-                                  onClick={() => setDeleteService(service)}
-                                  whileTap={{ scale: 0.95 }}
-                                  className="flex h-12 w-20 items-center justify-center rounded-full bg-red-500 text-white shadow-lg"
-                                >
-                                  <Trash2 className="h-5 w-5" />
-                                </motion.button>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-zinc-900 dark:text-white truncate">
-                                    {service.name}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    {service.duration} min
-                                  </span>
-                                </div>
-                              </div>
-                              <span className="font-semibold text-zinc-900 dark:text-white">
-                                {formatCurrency(Number(service.price))}
-                              </span>
-                            </motion.div>
-                          </div>
-                        </StaggeredItem>
-                      )
-                    })}
-                  </AnimatePresence>
-                </StaggeredList>
-              </PullToRefresh>
-            ) : (
-              <StaggeredList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <AnimatePresence mode="popLayout">
-                  {services.map((service) => {
-                    return (
-                      <StaggeredItem key={service.id}>
-                        <ScaleOnHover>
-                          <motion.div
-                            layout
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
-                          >
-                            {/* Subtle brand accent */}
-                            <div
-                              className="absolute inset-x-0 top-0 h-[2px] rounded-t-2xl opacity-60"
-                              style={{ background: 'var(--brand-primary)' }}
-                            />
-
-                            {/* Actions */}
-                            <div className="absolute right-3 top-4 z-10 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => handleEdit(service)}
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100/90 text-zinc-600 backdrop-blur-sm transition-colors hover:bg-zinc-200 dark:bg-zinc-800/90 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                                title="Editar servicio"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setDeleteService(service)}
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50/90 text-red-600 backdrop-blur-sm transition-colors hover:bg-red-100 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60"
-                                title="Eliminar servicio"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </motion.button>
-                            </div>
-
-                            {/* Service Icon */}
-                            <div className="mb-4">
-                              <div
-                                className="inline-flex h-14 w-14 items-center justify-center rounded-2xl"
-                                style={{
-                                  background: 'var(--brand-primary-light)',
-                                  color: 'var(--brand-primary-on-light)',
-                                }}
-                              >
-                                <Scissors className="h-7 w-7" />
-                              </div>
-                            </div>
-
-                            {/* Service Info */}
-                            <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
-                              {service.name}
-                            </h3>
-                            {service.description && (
-                              <p className="mt-1 text-[13px] text-zinc-500 line-clamp-2">
-                                {service.description}
-                              </p>
-                            )}
-
-                            {/* Duration & Price */}
-                            <div className="mt-4 flex items-center justify-between">
-                              <div className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-                                <Clock className="h-4 w-4" />
-                                {service.duration} min
-                              </div>
-                              <p className="text-[20px] font-bold text-zinc-900 dark:text-white">
-                                {formatCurrency(Number(service.price))}
-                              </p>
-                            </div>
-                          </motion.div>
-                        </ScaleOnHover>
-                      </StaggeredItem>
-                    )
-                  })}
-                </AnimatePresence>
-              </StaggeredList>
-            )}
-          </div>
-        </div>
-      </FadeInUp>
     </div>
   )
 }
