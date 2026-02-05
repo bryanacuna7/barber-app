@@ -107,9 +107,30 @@ export default function CitasCalendarFusionDemo() {
   const timeBlocks = useMemo(() => {
     if (viewMode !== 'day') return []
     const blocks = [
-      { id: 'morning', label: 'MAÑANA', start: 7, end: 12, emoji: '🌅', gradient: 'from-blue-500/10 to-cyan-500/10' },
-      { id: 'midday', label: 'MEDIODÍA', start: 12, end: 15, emoji: '☀️', gradient: 'from-orange-500/10 to-amber-500/10' },
-      { id: 'afternoon', label: 'TARDE', start: 15, end: 21, emoji: '🌆', gradient: 'from-purple-500/10 to-pink-500/10' },
+      {
+        id: 'morning',
+        label: 'MAÑANA',
+        start: 7,
+        end: 12,
+        emoji: '🌅',
+        gradient: 'from-violet-500/10 to-blue-500/10',
+      },
+      {
+        id: 'midday',
+        label: 'MEDIODÍA',
+        start: 12,
+        end: 15,
+        emoji: '☀️',
+        gradient: 'from-purple-500/10 to-violet-500/10',
+      },
+      {
+        id: 'afternoon',
+        label: 'TARDE',
+        start: 15,
+        end: 21,
+        emoji: '🌆',
+        gradient: 'from-blue-500/10 to-purple-500/10',
+      },
     ]
     return blocks.map((block) => {
       const appointments = sortedAppointments.filter((apt) => {
@@ -194,7 +215,7 @@ export default function CitasCalendarFusionDemo() {
     <div className="min-h-screen bg-[#1C1C1E]">
       {/* Subtle mesh gradients (15% opacity) */}
       <div className="fixed inset-0 opacity-15 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl animate-blob animation-delay-2000" />
       </div>
 
@@ -247,7 +268,10 @@ export default function CitasCalendarFusionDemo() {
 
                 {/* Right: Navigation */}
                 <div className="flex items-center gap-3">
-                  <button onClick={handlePrevious} className="p-1 hover:bg-[#2C2C2E] rounded transition-colors">
+                  <button
+                    onClick={handlePrevious}
+                    className="p-1 hover:bg-[#2C2C2E] rounded transition-colors"
+                  >
                     <ChevronLeft className="w-5 h-5 text-[#8E8E93]" />
                   </button>
                   <button
@@ -256,7 +280,10 @@ export default function CitasCalendarFusionDemo() {
                   >
                     Today
                   </button>
-                  <button onClick={handleNext} className="p-1 hover:bg-[#2C2C2E] rounded transition-colors">
+                  <button
+                    onClick={handleNext}
+                    className="p-1 hover:bg-[#2C2C2E] rounded transition-colors"
+                  >
                     <ChevronRight className="w-5 h-5 text-[#8E8E93]" />
                   </button>
                   <button className="p-1.5 hover:bg-[#2C2C2E] rounded transition-colors ml-2">
@@ -268,9 +295,7 @@ export default function CitasCalendarFusionDemo() {
               {/* Large date header (Day view only) */}
               {viewMode === 'day' && (
                 <div className="flex items-baseline gap-4 mb-3">
-                  <div className="text-6xl font-bold text-white">
-                    {format(selectedDate, 'd')}
-                  </div>
+                  <div className="text-6xl font-bold text-white">{format(selectedDate, 'd')}</div>
                   <div className="text-2xl text-[#8E8E93]">
                     {format(selectedDate, 'EEEE', { locale: es })}
                   </div>
@@ -338,7 +363,9 @@ export default function CitasCalendarFusionDemo() {
                         </div>
 
                         {/* Occupancy bar (Cinema feature) */}
-                        <div className={`bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-[#2C2C2E] p-3`}>
+                        <div
+                          className={`bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-[#2C2C2E] p-3`}
+                        >
                           <div className="flex items-center justify-between mb-2 text-sm">
                             <span className="text-white">{block.count} citas</span>
                             <span
@@ -346,8 +373,8 @@ export default function CitasCalendarFusionDemo() {
                                 block.occupancyPercent >= 90
                                   ? 'text-[#FF3B30]'
                                   : block.occupancyPercent >= 60
-                                  ? 'text-[#FF9500]'
-                                  : 'text-[#34C759]'
+                                    ? 'text-[#FF9500]'
+                                    : 'text-[#34C759]'
                               }`}
                             >
                               {block.occupancyPercent}%
@@ -361,8 +388,8 @@ export default function CitasCalendarFusionDemo() {
                                 block.occupancyPercent >= 90
                                   ? 'bg-[#FF3B30]'
                                   : block.occupancyPercent >= 60
-                                  ? 'bg-[#FF9500]'
-                                  : 'bg-[#34C759]'
+                                    ? 'bg-[#FF9500]'
+                                    : 'bg-[#34C759]'
                               }`}
                             />
                           </div>
@@ -397,8 +424,8 @@ export default function CitasCalendarFusionDemo() {
                                       apt.status === 'completed'
                                         ? 'bg-[#34C759]'
                                         : apt.status === 'confirmed'
-                                        ? 'bg-[#0A84FF]'
-                                        : 'bg-[#FF9500]'
+                                          ? 'bg-[#0A84FF]'
+                                          : 'bg-[#FF9500]'
                                     }`}
                                   />
                                   <span className="font-medium text-white text-sm">
@@ -463,7 +490,9 @@ export default function CitasCalendarFusionDemo() {
                       </div>
                       {mockCitasStats.pending > 0 && (
                         <button
-                          onClick={() => toast.success(`${mockCitasStats.pending} confirmadas (demo)`)}
+                          onClick={() =>
+                            toast.success(`${mockCitasStats.pending} confirmadas (demo)`)
+                          }
                           className="px-4 py-2 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-lg font-medium text-sm transition-colors"
                         >
                           Confirmar ({mockCitasStats.pending})
@@ -493,7 +522,10 @@ export default function CitasCalendarFusionDemo() {
                       <span className="text-xs text-[#8E8E93]">All Day</span>
                     </div>
                     {weekDays.map((day) => (
-                      <div key={day.date.toISOString()} className="border-l border-[#2C2C2E] p-2 min-h-[40px]" />
+                      <div
+                        key={day.date.toISOString()}
+                        className="border-l border-[#2C2C2E] p-2 min-h-[40px]"
+                      />
                     ))}
                   </div>
 
@@ -505,11 +537,13 @@ export default function CitasCalendarFusionDemo() {
                         key={day.date.toISOString()}
                         className="text-center border-l border-[#2C2C2E] py-2"
                       >
-                        <div className={`inline-flex items-center justify-center ${
-                          isSameDay(day.date, today)
-                            ? 'bg-[#FF3B30] text-white w-8 h-8 rounded-full font-bold'
-                            : 'text-[#8E8E93]'
-                        }`}>
+                        <div
+                          className={`inline-flex items-center justify-center ${
+                            isSameDay(day.date, today)
+                              ? 'bg-[#FF3B30] text-white w-8 h-8 rounded-full font-bold'
+                              : 'text-[#8E8E93]'
+                          }`}
+                        >
                           <span className="text-sm">{format(day.date, 'd')}</span>
                         </div>
                         <div className="text-xs text-[#8E8E93] mt-1">
@@ -589,7 +623,10 @@ export default function CitasCalendarFusionDemo() {
                 {/* Weekday headers */}
                 <div className="grid grid-cols-7 gap-px bg-[#2C2C2E] mb-px">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div key={day} className="bg-[#1C1C1E] text-center text-xs text-[#8E8E93] py-2 font-medium">
+                    <div
+                      key={day}
+                      className="bg-[#1C1C1E] text-center text-xs text-[#8E8E93] py-2 font-medium"
+                    >
                       {day}
                     </div>
                   ))}
@@ -629,13 +666,15 @@ export default function CitasCalendarFusionDemo() {
                                 apt.status === 'completed'
                                   ? 'bg-[#34C759]'
                                   : apt.status === 'confirmed'
-                                  ? 'bg-[#0A84FF]'
-                                  : 'bg-[#FF9500]'
+                                    ? 'bg-[#0A84FF]'
+                                    : 'bg-[#FF9500]'
                               }`}
                             />
                           ))}
                           {day.appointments.length > 3 && (
-                            <div className="text-[10px] text-[#8E8E93]">+{day.appointments.length - 3}</div>
+                            <div className="text-[10px] text-[#8E8E93]">
+                              +{day.appointments.length - 3}
+                            </div>
                           )}
                         </div>
                       )}
@@ -684,10 +723,10 @@ export default function CitasCalendarFusionDemo() {
                         isSameDay(day, today)
                           ? 'bg-[#FF3B30] text-white font-bold'
                           : isSameDay(day, selectedDate)
-                          ? 'bg-[#3A3A3C] text-white'
-                          : isSameMonth(day, today)
-                          ? 'text-white hover:bg-[#2C2C2E]'
-                          : 'text-[#8E8E93]/50'
+                            ? 'bg-[#3A3A3C] text-white'
+                            : isSameMonth(day, today)
+                              ? 'text-white hover:bg-[#2C2C2E]'
+                              : 'text-[#8E8E93]/50'
                       } ${hasAppointments && !isSameDay(day, today) ? 'font-bold' : ''}`}
                     >
                       {format(day, 'd')}
@@ -729,109 +768,124 @@ export default function CitasCalendarFusionDemo() {
 
       {/* Appointment detail modal */}
       <AnimatePresence>
-        {selectedId && (() => {
-          const apt = mockCitasData.find((a) => a.id === selectedId)
-          if (!apt) return null
-          return (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() => setSelectedId(null)}
-            >
+        {selectedId &&
+          (() => {
+            const apt = mockCitasData.find((a) => a.id === selectedId)
+            if (!apt) return null
+            return (
               <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                className="bg-[#2C2C2E] rounded-2xl p-8 max-w-lg w-full shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                onClick={() => setSelectedId(null)}
               >
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-white mb-2">{apt.client.name}</h2>
-                  <div className="flex items-center gap-2 text-[#8E8E93]">
-                    <Phone className="w-4 h-4" />
-                    <span>{apt.client.phone}</span>
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  className="bg-[#2C2C2E] rounded-2xl p-8 max-w-lg w-full shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white mb-2">{apt.client.name}</h2>
+                    <div className="flex items-center gap-2 text-[#8E8E93]">
+                      <Phone className="w-4 h-4" />
+                      <span>{apt.client.phone}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-4 p-4 bg-[#1C1C1E] rounded-xl">
-                    <Clock className="w-5 h-5 text-[#0A84FF]" />
-                    <div>
-                      <div className="text-xs text-[#8E8E93]">Horario</div>
-                      <div className="font-medium text-white">
-                        {format(parseISO(apt.scheduled_at), 'h:mm a')} ({apt.duration_minutes} min)
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-4 p-4 bg-[#1C1C1E] rounded-xl">
+                      <Clock className="w-5 h-5 text-[#0A84FF]" />
+                      <div>
+                        <div className="text-xs text-[#8E8E93]">Horario</div>
+                        <div className="font-medium text-white">
+                          {format(parseISO(apt.scheduled_at), 'h:mm a')} ({apt.duration_minutes}{' '}
+                          min)
+                        </div>
                       </div>
                     </div>
+
+                    <div className="flex items-center gap-4 p-4 bg-[#1C1C1E] rounded-xl">
+                      <Zap className="w-5 h-5 text-[#AF52DE]" />
+                      <div>
+                        <div className="text-xs text-[#8E8E93]">Servicio</div>
+                        <div className="font-medium text-white">{apt.service.name}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 p-4 bg-[#FF9500]/10 rounded-xl border border-[#FF9500]/30">
+                      <DollarSign className="w-5 h-5 text-[#FF9500]" />
+                      <div>
+                        <div className="text-xs text-[#8E8E93]">Precio</div>
+                        <div className="text-2xl font-bold text-[#FF9500]">₡{apt.price}</div>
+                      </div>
+                    </div>
+
+                    {apt.client_notes && (
+                      <div className="p-4 bg-[#0A84FF]/10 rounded-xl border border-[#0A84FF]/30">
+                        <div className="text-xs text-[#0A84FF] mb-1">💬 Notas del cliente</div>
+                        <div className="text-sm text-white">{apt.client_notes}</div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-[#1C1C1E] rounded-xl">
-                    <Zap className="w-5 h-5 text-[#AF52DE]" />
-                    <div>
-                      <div className="text-xs text-[#8E8E93]">Servicio</div>
-                      <div className="font-medium text-white">{apt.service.name}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 p-4 bg-[#FF9500]/10 rounded-xl border border-[#FF9500]/30">
-                    <DollarSign className="w-5 h-5 text-[#FF9500]" />
-                    <div>
-                      <div className="text-xs text-[#8E8E93]">Precio</div>
-                      <div className="text-2xl font-bold text-[#FF9500]">₡{apt.price}</div>
-                    </div>
-                  </div>
-
-                  {apt.client_notes && (
-                    <div className="p-4 bg-[#0A84FF]/10 rounded-xl border border-[#0A84FF]/30">
-                      <div className="text-xs text-[#0A84FF] mb-1">💬 Notas del cliente</div>
-                      <div className="text-sm text-white">{apt.client_notes}</div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-3">
-                  {apt.status === 'pending' && (
-                    <button
-                      onClick={() => {
-                        toast.success('Confirmada (demo)')
-                        setSelectedId(null)
-                      }}
-                      className="flex-1 py-3 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-xl font-medium transition-colors"
-                    >
-                      Confirmar
+                  <div className="flex gap-3">
+                    {apt.status === 'pending' && (
+                      <button
+                        onClick={() => {
+                          toast.success('Confirmada (demo)')
+                          setSelectedId(null)
+                        }}
+                        className="flex-1 py-3 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-xl font-medium transition-colors"
+                      >
+                        Confirmar
+                      </button>
+                    )}
+                    {apt.status === 'confirmed' && (
+                      <button
+                        onClick={() => {
+                          toast.success('Check-in (demo)')
+                          setSelectedId(null)
+                        }}
+                        className="flex-1 py-3 bg-[#34C759] hover:bg-[#34C759]/80 rounded-xl font-medium transition-colors"
+                      >
+                        Check-in
+                      </button>
+                    )}
+                    <button className="px-6 py-3 bg-[#3A3A3C] hover:bg-[#48484A] rounded-xl font-medium transition-colors">
+                      Editar
                     </button>
-                  )}
-                  {apt.status === 'confirmed' && (
-                    <button
-                      onClick={() => {
-                        toast.success('Check-in (demo)')
-                        setSelectedId(null)
-                      }}
-                      className="flex-1 py-3 bg-[#34C759] hover:bg-[#34C759]/80 rounded-xl font-medium transition-colors"
-                    >
-                      Check-in
-                    </button>
-                  )}
-                  <button className="px-6 py-3 bg-[#3A3A3C] hover:bg-[#48484A] rounded-xl font-medium transition-colors">
-                    Editar
-                  </button>
-                </div>
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )
-        })()}
+            )
+          })()}
       </AnimatePresence>
 
       <style jsx global>{`
         @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -50px) scale(1.1); }
-          50% { transform: translate(-20px, 20px) scale(0.9); }
-          75% { transform: translate(40px, 30px) scale(1.05); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          25% {
+            transform: translate(20px, -50px) scale(1.1);
+          }
+          50% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          75% {
+            transform: translate(40px, 30px) scale(1.05);
+          }
         }
-        .animate-blob { animation: blob 20s infinite; }
-        .animation-delay-2000 { animation-delay: 2s; }
+        .animate-blob {
+          animation: blob 20s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
       `}</style>
     </div>
   )

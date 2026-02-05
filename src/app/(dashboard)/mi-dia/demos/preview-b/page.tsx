@@ -114,24 +114,55 @@ export default function PreviewBPage() {
   })
 
   return (
-    <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 flex flex-col overflow-hidden relative">
+      {/* Subtle Mesh Gradients (15% opacity) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
+        />
+      </div>
       {/* Top Bar */}
-      <div className="flex-shrink-0 bg-zinc-900 border-b border-zinc-800 px-6 py-4">
+      <div className="flex-shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 shadow-sm relative z-20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => router.push('/mi-dia/demos')}
-              className="text-zinc-500 hover:text-white"
+              className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver
             </Button>
 
-            <h1 className="text-xl font-bold text-white">Mi Día - Split Dashboard</h1>
-            <div className="px-3 py-1 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs text-blue-300 font-medium">
-              DEMO B (Preview)
+            <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Mi Día
+            </h1>
+            <div className="px-3 py-1 bg-gradient-to-r from-violet-500/20 to-blue-500/20 border border-violet-500/30 rounded-full text-xs text-violet-700 dark:text-violet-300 font-medium">
+              Split Dashboard
             </div>
           </div>
 
@@ -385,7 +416,9 @@ function TimelineItem({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      transition={{ delay: index * 0.03 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       onClick={onClick}
       className={cn(
         'w-full text-left p-3 rounded-lg border transition-all cursor-pointer',
@@ -633,7 +666,11 @@ function InfoCard({
   isEditing?: boolean
 }) {
   return (
-    <div className="p-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className="p-4 bg-zinc-900/50 rounded-xl border border-zinc-800"
+    >
       <div className="flex items-center gap-3 mb-3">
         <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-zinc-800">
           {icon}
@@ -655,7 +692,7 @@ function InfoCard({
           {sublabel && <p className="text-sm text-zinc-400">{sublabel}</p>}
         </>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -672,12 +709,16 @@ function StatCard({
   icon: React.ReactNode
 }) {
   return (
-    <div className={cn('p-4 rounded-xl border border-zinc-800', color)}>
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className={cn('p-4 rounded-xl border border-zinc-800', color)}
+    >
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-semibold uppercase tracking-wider opacity-80">{label}</span>
         <div className="opacity-60">{icon}</div>
       </div>
       <p className="text-3xl font-bold">{value}</p>
-    </div>
+    </motion.div>
   )
 }

@@ -141,34 +141,67 @@ export default function PreviewDSimplifiedHybrid() {
       return <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-400" />
     }
     return sortDirection === 'asc' ? (
-      <ChevronUp className="h-3.5 w-3.5 text-blue-600" />
+      <ChevronUp className="h-3.5 w-3.5 text-violet-600" />
     ) : (
-      <ChevronDown className="h-3.5 w-3.5 text-blue-600" />
+      <ChevronDown className="h-3.5 w-3.5 text-violet-600" />
     )
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6">
-      <div className="mx-auto max-w-[1400px]">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-6 relative overflow-hidden">
+      {/* Subtle Mesh Gradients (15% opacity) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
+        />
+      </div>
+
+      <div className="mx-auto max-w-[1400px] relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className="mb-6"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
-                Demo D: Simplified Hybrid
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Servicios
               </h1>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                CRUD-first con insights sidebar: Simple, balanced, practical
+                Gestiona tus servicios con insights en tiempo real
               </p>
             </div>
-            <Button className="h-10 bg-blue-600 hover:bg-blue-700">
-              <Plus className="mr-2 h-4 w-4" />
-              Agregar Servicio
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button className="h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25">
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar Servicio
+              </Button>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -180,7 +213,7 @@ export default function PreviewDSimplifiedHybrid() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.1 }}
               className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
               {/* Search */}
@@ -198,17 +231,19 @@ export default function PreviewDSimplifiedHybrid() {
               {/* Category Filter */}
               <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
                 {categories.map((cat) => (
-                  <button
+                  <motion.button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                       selectedCategory === cat
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25'
                         : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
                     }`}
                   >
                     {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </motion.div>
@@ -217,8 +252,9 @@ export default function PreviewDSimplifiedHybrid() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
+              whileHover={{ scale: 1.001 }}
+              className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
             >
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -414,7 +450,7 @@ export default function PreviewDSimplifiedHybrid() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.3 }}
               className="mt-3 text-xs text-zinc-500 text-center"
             >
               Mostrando {sortedServices.length} de {mockServices.length} servicios
@@ -425,13 +461,17 @@ export default function PreviewDSimplifiedHybrid() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
             className="hidden lg:block w-[320px] shrink-0 space-y-4"
           >
             {/* Quick Stats */}
             <div className="space-y-3">
               {/* Total Services */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
@@ -441,14 +481,18 @@ export default function PreviewDSimplifiedHybrid() {
                       {totalServices}
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                    <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
+                    <Package className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Top Service */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
@@ -461,14 +505,18 @@ export default function PreviewDSimplifiedHybrid() {
                       {topService.bookings_this_month} reservas
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
                     <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Average Rating */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
@@ -484,15 +532,19 @@ export default function PreviewDSimplifiedHybrid() {
                       {activeServices.reduce((sum, s) => sum + s.total_reviews, 0)} reviews
                     </p>
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
-                    <Star className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30">
+                    <Star className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Mini Chart */}
-            <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow"
+            >
               <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
                 Top 5 Servicios
               </h3>
@@ -526,7 +578,7 @@ export default function PreviewDSimplifiedHybrid() {
                   )
                 })}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

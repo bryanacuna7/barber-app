@@ -35,7 +35,7 @@ export default function ConfiguracionDemoA() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       {/* Animated gradient orbs background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-30">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -47,7 +47,7 @@ export default function ConfiguracionDemoA() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full blur-3xl"
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -93,12 +93,12 @@ export default function ConfiguracionDemoA() {
                 </span>
               </motion.div>
 
-              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-4">
+              <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
                 Configuración
               </h1>
               <p className="text-lg lg:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl">
                 Administra tu negocio con un diseño{' '}
-                <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">
                   excepcional
                 </span>
               </p>
@@ -124,11 +124,7 @@ export default function ConfiguracionDemoA() {
           </div>
 
           {/* Back to current button */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <Button
               variant="outline"
               size="sm"
@@ -210,20 +206,23 @@ export default function ConfiguracionDemoA() {
 
                     {/* Features list */}
                     <div className="space-y-2">
-                      {['Nombre del negocio', 'Teléfono y WhatsApp', 'Dirección', 'Enlace de reservas'].map(
-                        (item, i) => (
-                          <motion.div
-                            key={item}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.3 + i * 0.1 }}
-                            className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300"
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                            {item}
-                          </motion.div>
-                        )
-                      )}
+                      {[
+                        'Nombre del negocio',
+                        'Teléfono y WhatsApp',
+                        'Dirección',
+                        'Enlace de reservas',
+                      ].map((item, i) => (
+                        <motion.div
+                          key={item}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3 + i * 0.1 }}
+                          className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300"
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                          {item}
+                        </motion.div>
+                      ))}
                     </div>
 
                     {/* CTA */}
@@ -319,9 +318,7 @@ export default function ConfiguracionDemoA() {
                 <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
                   Marca y Estilo
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-                  Colores y logo
-                </p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">Colores y logo</p>
 
                 <motion.div
                   whileHover={{ x: 5 }}
@@ -364,12 +361,8 @@ export default function ConfiguracionDemoA() {
                     <Settings className="h-6 w-6 text-white" strokeWidth={2} />
                   </motion.div>
 
-                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">
-                    Avanzado
-                  </h3>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                    Más opciones
-                  </p>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">Avanzado</h3>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400">Más opciones</p>
                 </div>
 
                 <motion.div

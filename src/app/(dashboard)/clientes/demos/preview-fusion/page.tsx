@@ -414,14 +414,45 @@ export default function PreviewFusionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-blue-50/20 to-purple-50/20 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-900">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 relative overflow-hidden">
+      {/* Subtle Mesh Gradients (15% opacity) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
+        />
+      </div>
       {/* Fixed Header */}
       <div className="sticky top-0 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-4">
           <div className="flex items-center gap-4">
             {/* Logo/Title */}
             <div className="shrink-0">
-              <h1 className="text-xl font-bold text-zinc-900 dark:text-white">Clientes</h1>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Clientes
+              </h1>
               <p className="text-xs text-zinc-500">Demo Fusion (A+B+C)</p>
             </div>
 
@@ -589,7 +620,11 @@ export default function PreviewFusionPage() {
             >
               {/* KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
@@ -609,9 +644,13 @@ export default function PreviewFusionPage() {
                       <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
@@ -629,9 +668,13 @@ export default function PreviewFusionPage() {
                       <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
@@ -651,9 +694,13 @@ export default function PreviewFusionPage() {
                       <AlertTriangle className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                  className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 cursor-pointer"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
@@ -671,7 +718,7 @@ export default function PreviewFusionPage() {
                       <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* Charts Row */}

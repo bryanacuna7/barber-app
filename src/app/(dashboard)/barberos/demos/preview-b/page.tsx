@@ -123,8 +123,37 @@ export default function PreviewB() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4 md:p-6 lg:p-8">
-      <div className="max-w-[1600px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4 md:p-6 lg:p-8 relative overflow-hidden">
+      {/* Subtle Mesh Gradients (15% opacity) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
+        />
+      </div>
+      <div className="max-w-[1600px] mx-auto space-y-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -133,11 +162,11 @@ export default function PreviewB() {
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center">
                 <LayoutGrid className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white">
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Demo B: Visual CRM Canvas
                 </h1>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -149,7 +178,8 @@ export default function PreviewB() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="hidden md:flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 transition-colors"
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="hidden md:flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/25 transition-colors"
             >
               <Plus className="h-5 w-5" />
               Agregar Barbero
@@ -252,7 +282,8 @@ export default function PreviewB() {
           animate={{ scale: 1 }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="md:hidden fixed bottom-24 right-4 z-40 h-14 w-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-2xl shadow-blue-500/50 flex items-center justify-center"
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="md:hidden fixed bottom-24 right-4 z-40 h-14 w-14 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-full shadow-2xl shadow-violet-500/50 flex items-center justify-center"
         >
           <Plus className="h-6 w-6" />
         </motion.button>
@@ -275,8 +306,9 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
           key={barber.id}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: index * 0.05 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
         >
           {/* Avatar with gradient background */}
           <div className="relative h-24 w-24 mx-auto mb-5">
@@ -575,8 +607,9 @@ function LeaderboardView({ barbers }: { barbers: MockBarber[] }) {
           key={barber.id}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.05 }}
-          className={`bg-white dark:bg-zinc-900 rounded-2xl p-5 border shadow-sm ${
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className={`bg-white dark:bg-zinc-900 rounded-2xl p-5 border shadow-sm cursor-pointer ${
             index < 3
               ? 'border-amber-300 dark:border-amber-700 shadow-amber-100 dark:shadow-amber-900/20'
               : 'border-zinc-200 dark:border-zinc-800'
@@ -639,8 +672,9 @@ function CalendarView({ barbers }: { barbers: MockBarber[] }) {
           key={barber.id}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: index * 0.05 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm"
+          whileHover={{ scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm cursor-pointer"
         >
           {/* Header */}
           <div className="flex items-center gap-3 mb-5 pb-5 border-b border-zinc-200 dark:border-zinc-800">
