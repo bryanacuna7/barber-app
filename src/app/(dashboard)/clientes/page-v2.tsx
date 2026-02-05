@@ -55,6 +55,7 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronsUpDown,
+  PieChart as PieChartIcon,
 } from 'lucide-react'
 import {
   LineChart,
@@ -1245,41 +1246,91 @@ export default function ClientesPageV2() {
                   </div>
 
                   {/* Segment Distribution Donut Chart */}
-                  <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
-                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
+                  <div className="relative rounded-xl bg-white dark:bg-zinc-900/80 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 backdrop-blur-sm overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                      <PieChartIcon className="w-24 h-24" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-6 relative z-10">
                       Distribución
                     </h3>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={segmentPieData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {segmentPieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="mt-4 space-y-2">
+                    <div className="relative h-[220px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={segmentPieData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={85}
+                            paddingAngle={4}
+                            cornerRadius={6}
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            {segmentPieData.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={entry.color}
+                                className="stroke-transparent outline-none focus:outline-none"
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            content={({ active, payload }) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0].payload
+                                return (
+                                  <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <div
+                                        className="h-2 w-2 rounded-full"
+                                        style={{ backgroundColor: data.color }}
+                                      />
+                                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                                        {data.name}
+                                      </p>
+                                    </div>
+                                    <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                                      {data.value}
+                                      <span className="ml-1 text-xs font-normal text-zinc-500">
+                                        ({((data.value / metrics.total) * 100).toFixed(1)}%)
+                                      </span>
+                                    </p>
+                                  </div>
+                                )
+                              }
+                              return null
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      {/* Center Text */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span className="text-3xl font-bold text-zinc-900 dark:text-white">
+                          {metrics.total}
+                        </span>
+                        <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Total
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-3">
                       {segmentPieData.map((item) => (
-                        <div key={item.name} className="flex items-center justify-between">
+                        <div
+                          key={item.name}
+                          className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/50"
+                        >
                           <div className="flex items-center gap-2">
                             <div
-                              className="h-3 w-3 rounded-full"
+                              className="h-2 w-2 rounded-full ring-2 ring-white dark:ring-zinc-900"
                               style={{ backgroundColor: item.color }}
                             />
-                            <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
                               {item.name}
                             </span>
                           </div>
-                          <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                          <span className="text-xs font-bold text-zinc-900 dark:text-white">
                             {item.value}
                           </span>
                         </div>

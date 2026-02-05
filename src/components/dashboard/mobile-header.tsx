@@ -11,7 +11,7 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-zinc-200 bg-white/80 px-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80 lg:hidden">
+    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-zinc-200/50 bg-white/60 px-4 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/60 lg:hidden">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
         {logoUrl ? (
