@@ -146,7 +146,7 @@ export default function PreviewFusionPage() {
 
             {/* Comparison Toggle */}
             <Button
-              variant={comparisonMode ? 'default' : 'outline'}
+              variant={comparisonMode ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setComparisonMode(!comparisonMode)}
               className={
@@ -162,7 +162,7 @@ export default function PreviewFusionPage() {
               {(['week', 'month', 'year'] as Period[]).map((p) => (
                 <Button
                   key={p}
-                  variant={period === p ? 'default' : 'ghost'}
+                  variant={period === p ? 'primary' : 'ghost'}
                   size="sm"
                   onClick={() => setPeriod(p)}
                   className={

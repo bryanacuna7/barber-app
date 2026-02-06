@@ -201,7 +201,7 @@ function ServiceRow({
   service,
   rank,
 }: {
-  service: { id: number; name: string; count: number; revenue: number; completionRate: number }
+  service: { id: string; name: string; count: number; revenue: number; completionRate: number }
   rank: number
 }) {
   const medals = ['🥇', '🥈', '🥉']
@@ -231,9 +231,9 @@ function BarberRow({
   rank,
 }: {
   barber: {
-    id: number
+    id: string
     name: string
-    avatar: string
+    avatar?: string
     appointments: number
     revenue: number
     avgRating: number
@@ -247,8 +247,10 @@ function BarberRow({
       <div className="w-8 text-center text-lg font-bold text-zinc-400">
         {rank <= 3 ? medals[rank - 1] : rank}
       </div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={barber.avatar} alt={barber.name} className="w-10 h-10 rounded-full" />
+      {barber.avatar && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={barber.avatar} alt={barber.name} className="w-10 h-10 rounded-full" />
+      )}
       <div className="flex-1 min-w-0">
         <p className="font-medium text-zinc-900 dark:text-white truncate">{barber.name}</p>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">{barber.appointments} citas</p>
@@ -289,7 +291,7 @@ export default function PreviewAPage() {
             {(['week', 'month', 'year'] as Period[]).map((p) => (
               <Button
                 key={p}
-                variant={period === p ? 'default' : 'ghost'}
+                variant={period === p ? 'primary' : 'ghost'}
                 size="sm"
                 onClick={() => setPeriod(p)}
                 className={

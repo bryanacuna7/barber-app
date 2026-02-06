@@ -5,6 +5,28 @@ import type { Appointment } from '@/types/custom'
  * Appointments spread throughout a full day for realistic visualization
  */
 
+// Extended type for mock data with populated relations
+type AppointmentWithRelations = Omit<
+  Appointment,
+  'client_id' | 'service_id' | 'barber_id' | 'confirmation_sent_at' | 'reminder_sent_at'
+> & {
+  client: {
+    id: string
+    name: string
+    phone: string
+  }
+  service: {
+    id: string
+    name: string
+  }
+  barber: {
+    id: string
+    name: string
+  }
+  confirmation_sent_at?: string
+  reminder_sent_at?: string
+}
+
 const today = new Date()
 const formatTime = (hours: number, minutes: number = 0) => {
   const date = new Date(today)
@@ -12,7 +34,7 @@ const formatTime = (hours: number, minutes: number = 0) => {
   return date.toISOString()
 }
 
-export const mockCitasData: Appointment[] = [
+export const mockCitasData: AppointmentWithRelations[] = [
   // Completadas (morning)
   {
     id: 'apt-c1',

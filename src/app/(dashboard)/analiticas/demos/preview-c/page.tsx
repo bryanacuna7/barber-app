@@ -115,7 +115,7 @@ export default function PreviewCPage() {
                 Imprimir
               </Button>
               <Button
-                variant={comparisonMode ? 'default' : 'outline'}
+                variant={comparisonMode ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setComparisonMode(!comparisonMode)}
                 className="gap-2"

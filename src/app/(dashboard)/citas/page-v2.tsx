@@ -84,7 +84,7 @@ type ViewMode = 'day' | 'week' | 'month'
 interface StatsContentProps {
   today: Date
   miniCalendarDays: Date[]
-  appointments: Appointment[]
+  appointments: any[] // TODO: Fix type after data transformation
   selectedDate: Date
   stats: {
     pending: number

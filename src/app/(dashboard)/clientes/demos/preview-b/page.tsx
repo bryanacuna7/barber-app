@@ -11,6 +11,7 @@ import {
   Star,
   UserPlus,
   User,
+  Users,
   Phone,
   Mail,
   MessageCircle,
@@ -18,6 +19,7 @@ import {
   Award,
   Target,
   Zap,
+  DollarSign,
 } from 'lucide-react'
 import { mockClients, mockStats, type MockClient } from '../mock-data'
 import { formatCurrency } from '@/lib/utils'
