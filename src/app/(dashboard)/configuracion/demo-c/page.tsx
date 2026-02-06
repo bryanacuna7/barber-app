@@ -77,11 +77,7 @@ export default function ConfiguracionDemoC() {
               </p>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/configuracion')}
-            >
+            <Button variant="outline" size="sm" onClick={() => router.push('/configuracion')}>
               ← Volver
             </Button>
           </div>
@@ -172,7 +168,6 @@ export default function ConfiguracionDemoC() {
                         setFormData((prev) => ({ ...prev, name: e.target.value }))
                         setHasChanges(true)
                       }}
-                      icon={Building2}
                     />
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -295,11 +290,7 @@ export default function ConfiguracionDemoC() {
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => setExpandedSection(null)}
-                        className="gap-2"
-                      >
+                      <Button size="sm" onClick={() => setExpandedSection(null)} className="gap-2">
                         <Check className="h-4 w-4" />
                         Listo
                       </Button>
@@ -380,11 +371,7 @@ export default function ConfiguracionDemoC() {
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => setExpandedSection(null)}
-                        className="gap-2"
-                      >
+                      <Button size="sm" onClick={() => setExpandedSection(null)} className="gap-2">
                         <Check className="h-4 w-4" />
                         Listo
                       </Button>
@@ -465,11 +452,7 @@ export default function ConfiguracionDemoC() {
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
-                      <Button
-                        size="sm"
-                        onClick={() => setExpandedSection(null)}
-                        className="gap-2"
-                      >
+                      <Button size="sm" onClick={() => setExpandedSection(null)} className="gap-2">
                         <Check className="h-4 w-4" />
                         Listo
                       </Button>
@@ -505,7 +488,10 @@ export default function ConfiguracionDemoC() {
               'Sin pérdida de contexto',
               'Balance visual/funcional',
             ].map((feature) => (
-              <div key={feature} className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
+              <div
+                key={feature}
+                className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+              >
                 <Check className="h-4 w-4 text-purple-600 flex-shrink-0" />
                 <span>{feature}</span>
               </div>

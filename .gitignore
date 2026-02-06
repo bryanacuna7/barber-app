@@ -53,3 +53,4 @@ next-env.d.ts
 .claude/skills/custom/
 .claude/skills-backup-*/
 .claude-backup-*/
+.vercel
