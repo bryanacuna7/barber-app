@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-05 (Session 129 - Servicios Demo D Implemented 🎯)
+- **Last Updated:** 2026-02-05 (Session 130 - Barberos Demo B Implemented 🎨)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Demo Implementation - Servicios Demo D Complete
+- **Current Phase:** Demo Implementation - 4/5 Pages Complete (80%)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 
 ---
@@ -30,6 +30,171 @@
 ---
 
 ## Recent Sessions
+
+### Session 130: Barberos Demo B Implementation (2026-02-05)
+
+**Status:** ✅ 100% Complete (~3h)
+
+**Objective:** Implement Demo B (Visual CRM Canvas) for Barberos page - 100% fidelity to demo
+
+**User Requirement:**
+
+- "debe ser 100% fiel al demo" - Notion-style multi-view CRM
+- Demo chosen: Preview B - Visual CRM Canvas (8.5/10 score)
+
+**Actions Taken:**
+
+**1. Demo B Implementation** ✅ (734 lines)
+
+- **File:** `src/app/(dashboard)/barberos/page-v2.tsx`
+- **Pattern:** React Query + Real-time + Error Boundaries (ready for integration)
+- **Design:** Notion-style multi-view layout with 4 perspectives
+
+**Features Implemented:**
+
+**4 View Modes:**
+
+- **Cards View:**
+  - Rich visual cards (grid: 1 col mobile, 2 md, 3 lg)
+  - Performance rings around avatar (SVG capacity utilization)
+  - Rank badge top-right (#1, #2, #3 for top performers)
+  - Tags: "Top Performer" (crown), "Fire Streak" (flame + days)
+  - Mini stats grid (4 metrics: Citas, Ingresos, Rating, Nivel)
+  - Progress bar to next level (XP visualization)
+  - Hover scale animation (1.02)
+
+- **Table View:**
+  - Sortable 6-column table (Name, Citas/Mes, Ingresos, Rating, Nivel, Tendencia)
+  - Sort icons: ArrowUpDown (default), ArrowUp/Down (active)
+  - Trend indicators: TrendingUp (green) / TrendingDown (red)
+  - Revenue change percentage (+/-)
+  - Avatar + role badges inline
+
+- **Leaderboard View:**
+  - Rankings sorted by revenue
+  - Medal system for top 3:
+    - #1: Gold (amber-400 to yellow-500)
+    - #2: Silver (zinc-300 to zinc-400)
+    - #3: Bronze (amber-600 to orange-700)
+  - Trophy icon for top 3, rank number for rest
+  - Amber border for top 3 cards
+  - Full stats display (revenue, appointments, rating)
+
+- **Calendar View:**
+  - Grid layout (1 col mobile, 2 lg)
+  - Today's appointments per barber
+  - Appointment cards with time, client, service, status
+  - Status badges: Completada (green), Confirmada (blue), Pendiente (amber)
+  - Empty state: "Sin citas programadas"
+
+**UI Components:**
+
+- **Header:**
+  - Gradient icon (violet-500 to blue-600)
+  - Gradient title (violet → purple → blue)
+  - Subtitle: "Visual CRM • Vistas flexibles con visualizaciones ricas"
+  - "Agregar Barbero" button (desktop only)
+
+- **Search Bar:**
+  - Real-time filtering (name, email)
+  - Search icon left-aligned
+  - Rounded-xl styling
+
+- **View Switcher:**
+  - Desktop: Horizontal buttons with icons + labels
+  - Mobile: Fixed bottom nav with 4 icon buttons
+  - Active state: blue-100 bg, blue-700 text
+  - Smooth transitions
+
+- **Floating FAB (Mobile):**
+  - Bottom-right position (bottom-24 right-4)
+  - Plus icon
+  - Gradient bg (violet-600 to blue-600)
+  - Scale animations (initial: 0, animate: 1, hover: 1.05)
+  - Shadow-2xl with violet-500/50
+
+**Design System:**
+
+- **Mesh Gradients:** Animated background (15% opacity)
+  - Blob 1: Violet-400 to blue-400 (top-left, 20s loop)
+  - Blob 2: Purple-400 to pink-400 (bottom-right, 25s loop)
+- **Color Palette:**
+  - Primary: Violet-600, Purple-600, Blue-600
+  - Badges: Amber (Top Performer), Orange (Streak)
+  - Trends: Emerald-600 (up), Red-600 (down)
+- **Typography:**
+  - Headers: 2xl md:3xl bold with gradient clip
+  - Stats: 2xl font-bold
+  - Labels: xs text-zinc-500
+- **Spacing:**
+  - Container: max-w-[1600px]
+  - Padding: p-4 md:p-6 lg:p-8
+  - Gap: gap-4 (cards), gap-3 (stats)
+
+**Mock Data Integration:**
+
+- 6 barbers from `./demos/mock-data.ts`
+- Complete stats (appointments, revenue, rating)
+- Gamification data (level, XP, badges, streak, rank)
+- Schedule data (appointments_today)
+- Trends (revenue_change, direction)
+- Role badges (owner, senior, junior, trainee)
+
+**Animations:**
+
+- Framer Motion spring physics (stiffness: 300, damping: 25)
+- Initial animations (opacity: 0, y: -20/20, scale: 0.9)
+- Hover effects (scale: 1.02)
+- AnimatePresence mode="wait" for view transitions
+- Smooth mesh gradient loops (20s, 25s)
+
+**Mobile Optimizations:**
+
+- Responsive grid (1→2→3 columns)
+- Fixed bottom nav (z-50)
+- Mobile padding (h-20 spacer)
+- Floating FAB (z-40)
+- Hidden desktop button on mobile
+- Overflow-x-auto for table
+
+**Deliverables:**
+
+- ✅ 1 file implemented (barberos/page-v2.tsx - 734 lines)
+- ✅ 100% fidelity to Demo B original
+- ✅ 4 view modes fully functional
+- ✅ Search + sorting working
+- ✅ Mobile bottom nav + FAB
+- ✅ Mock data integrated
+- ✅ TypeScript 0 errors
+- ✅ ESLint passed
+
+**Key Learnings:**
+
+1. **Multi-view architecture** - AnimatePresence with mode="wait" for smooth view transitions
+2. **Component extraction** - 4 separate view components (Cards, Table, Leaderboard, Calendar) for clean separation
+3. **SortIcon pattern** - Conditional rendering based on sortField and sortDirection state
+4. **Mobile bottom nav** - Fixed position with z-50, requires h-20 spacer to prevent content overlap
+5. **Performance rings** - SVG circle with strokeDasharray for progress visualization
+6. **Medal system** - Conditional gradient colors based on rank position
+7. **Floating FAB** - md:hidden + fixed position + z-40 for mobile-only action button
+8. **Mock data patterns** - Using utility functions (formatCurrency, getRoleBadgeColor, getRoleLabel)
+9. **Framer Motion spring** - stiffness: 300, damping: 25 provides natural feel
+10. **Notion-style layout** - Flexible container (max-w-[1600px]) with responsive padding
+
+**Progress:**
+
+- **Demo Implementation:**
+  - ✅ Clientes (Session 125) - Demo Fusion
+  - ✅ Citas (Session 127-128) - Demo B Fusion
+  - ✅ Servicios (Session 129) - Demo D Simplified Hybrid
+  - ✅ Barberos (Session 130) - Demo B Visual CRM ⬅️ **NEW**
+  - ⏳ Configuración - Bento Grid demo
+
+**Next:** Continue with Configuración Bento Grid demo (last page) OR commit + push all changes
+
+**Time:** ~3h total (1h reading demo + 1.5h implementation + 0.5h testing)
+
+---
 
 ### Session 129: Servicios Demo D Implementation (2026-02-05)
 
@@ -622,7 +787,7 @@ Apply remaining 3 demos to other pages:
 
 ---
 
-**Last Update:** Session 128 (2026-02-05)
-**Recent:** ✅ Citas Mobile Responsive Fixes (~1.5h)
-**Status:** 📱 **CITAS MOBILE OPTIMIZED!** (Apple Calendar 3-day pattern + Header fixes)
-**Next:** Fix navigation buttons mobile OR commit changes + continue with remaining demos 🚀
+**Last Update:** Session 130 (2026-02-05)
+**Recent:** ✅ Barberos Demo B Visual CRM (~3h)
+**Status:** 🎨 **4/5 DEMOS COMPLETE!** (Clientes, Citas, Servicios, Barberos)
+**Next:** Configuración Bento Grid demo (last page) OR push commits + create PR 🚀
