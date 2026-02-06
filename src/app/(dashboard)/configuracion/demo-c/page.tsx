@@ -178,7 +178,6 @@ export default function ConfiguracionDemoC() {
                           setFormData((prev) => ({ ...prev, phone: e.target.value }))
                           setHasChanges(true)
                         }}
-                        icon={Phone}
                       />
                       <Input
                         label="WhatsApp"
@@ -187,7 +186,6 @@ export default function ConfiguracionDemoC() {
                           setFormData((prev) => ({ ...prev, whatsapp: e.target.value }))
                           setHasChanges(true)
                         }}
-                        icon={MessageCircle}
                       />
                     </div>
 
@@ -198,7 +196,6 @@ export default function ConfiguracionDemoC() {
                         setFormData((prev) => ({ ...prev, address: e.target.value }))
                         setHasChanges(true)
                       }}
-                      icon={MapPin}
                     />
 
                     <div className="flex items-center gap-3 pt-2">
