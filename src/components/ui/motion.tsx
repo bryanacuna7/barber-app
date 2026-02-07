@@ -3,19 +3,11 @@
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { forwardRef, type ReactNode, type ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
+import { animations } from '@/lib/design-system'
 
-// Animation presets
-export const springTransition = {
-  type: 'spring',
-  stiffness: 400,
-  damping: 30,
-}
-
-export const gentleSpring = {
-  type: 'spring',
-  stiffness: 120,
-  damping: 14,
-}
+// Re-export design system springs as convenience aliases
+export const springTransition = animations.spring.snappy
+export const gentleSpring = animations.spring.gentle
 
 // Fade In Up animation (for page content)
 export function FadeInUp({
@@ -86,11 +78,7 @@ export function StaggeredItem({
           opacity: 1,
           y: 0,
           scale: 1,
-          transition: {
-            type: 'spring',
-            stiffness: 300,
-            damping: 24,
-          },
+          transition: animations.spring.default,
         },
       }}
       className={className}
@@ -141,14 +129,7 @@ export function HoverLift({ children, className }: { children: ReactNode; classN
 // Scale on hover (for cards)
 export function ScaleOnHover({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.div
-      whileHover={{
-        scale: 1.02,
-        transition: { type: 'spring', stiffness: 400, damping: 25 },
-      }}
-      whileTap={{ scale: 0.98 }}
-      className={className}
-    >
+    <motion.div whileTap={{ scale: 0.98 }} className={className}>
       {children}
     </motion.div>
   )
@@ -182,7 +163,7 @@ export function SlideInRight({ children, className }: { children: ReactNode; cla
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      transition={animations.spring.sheet}
       className={className}
     >
       {children}
@@ -197,7 +178,7 @@ export function AnimatedNumber({ value, className }: { value: number; className?
       key={value}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      transition={animations.spring.snappy}
       className={className}
     >
       {value}
@@ -224,11 +205,7 @@ export function SuccessCheckmark({ className }: { className?: string }) {
     visible: {
       scale: 1,
       opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 20,
-      },
+      transition: animations.spring.default,
     },
   }
 

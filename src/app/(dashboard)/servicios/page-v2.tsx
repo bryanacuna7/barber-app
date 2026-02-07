@@ -8,7 +8,8 @@
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Plus,
@@ -39,6 +40,7 @@ import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { formatCurrency } from '@/lib/utils'
+import { animations } from '@/lib/design-system'
 import type { UIService } from '@/lib/adapters/services'
 import {
   useServices,
@@ -342,6 +344,18 @@ function ServiciosContent() {
     business_id: businessId,
   })
 
+  const searchParamsHook = useSearchParams()
+  const intentHandled = useRef(false)
+
+  // Auto-open create form when navigated with ?intent=create
+  useEffect(() => {
+    if (searchParamsHook.get('intent') === 'create' && !intentHandled.current) {
+      intentHandled.current = true
+      window.history.replaceState(null, '', '/servicios')
+      requestAnimationFrame(() => setShowForm(true))
+    }
+  }, [searchParamsHook])
+
   // React Query hooks
   const { isLoading: _loading, isError, error: queryError, refetch } = useServices(businessId)
   const createService = useCreateService()
@@ -521,7 +535,7 @@ function ServiciosContent() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          transition={animations.spring.default}
           className="mb-6"
         >
           <div className="flex items-center justify-between flex-wrap gap-3">
@@ -533,7 +547,7 @@ function ServiciosContent() {
                 Gestiona tus servicios con insights en tiempo real
               </p>
             </div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileTap={{ scale: 0.98 }}>
               <Button
                 onClick={() => {
                   resetForm()
@@ -556,7 +570,7 @@ function ServiciosContent() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.1 }}
+              transition={{ ...animations.spring.default, delay: 0.1 }}
               className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             >
               {/* Search */}
@@ -580,9 +594,8 @@ function ServiciosContent() {
                       key={cat}
                       layout
                       onClick={() => setSelectedCategory(cat)}
-                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                      transition={animations.spring.snappy}
                       className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium ${
                         selectedCategory === cat
                           ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25'
@@ -628,18 +641,22 @@ function ServiciosContent() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setShowForm(true)}
-                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-zinc-500 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 transition-colors"
+                          className="min-h-[44px] min-w-[44px] hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                         >
                           <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setDeleteService(service)}
-                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
+                          className="min-h-[44px] min-w-[44px] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
@@ -667,8 +684,7 @@ function ServiciosContent() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
-              whileHover={{ scale: 1.001 }}
+              transition={{ ...animations.spring.default, delay: 0.2 }}
               className="hidden lg:block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
             >
               <div className="relative">
@@ -870,7 +886,7 @@ function ServiciosContent() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.3 }}
+              transition={{ ...animations.spring.default, delay: 0.3 }}
               className="mt-3 text-xs text-zinc-500 text-center"
             >
               Mostrando {sortedServices.length} de {mockServices.length} servicios
@@ -881,15 +897,15 @@ function ServiciosContent() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
+            transition={{ ...animations.spring.default, delay: 0.2 }}
             className="hidden lg:block w-[320px] shrink-0 space-y-4"
           >
             {/* Quick Stats */}
             <div className="space-y-3">
               {/* Total Services */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                whileTap={{ scale: 0.98 }}
+                transition={animations.spring.snappy}
                 className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex items-center justify-between">
@@ -909,8 +925,8 @@ function ServiciosContent() {
 
               {/* Top Service */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                whileTap={{ scale: 0.98 }}
+                transition={animations.spring.snappy}
                 className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex items-center justify-between">
@@ -933,8 +949,8 @@ function ServiciosContent() {
 
               {/* Average Rating */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                whileTap={{ scale: 0.98 }}
+                transition={animations.spring.snappy}
                 className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex items-center justify-between">
@@ -961,8 +977,8 @@ function ServiciosContent() {
 
             {/* Mini Chart */}
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              whileTap={{ scale: 0.98 }}
+              transition={animations.spring.snappy}
               className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow"
             >
               <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
@@ -1095,7 +1111,7 @@ function ServiciosContent() {
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              transition={animations.spring.snappy}
               className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30"
             >
               <AlertTriangle className="h-7 w-7 text-red-600 dark:text-red-400" />
@@ -1115,10 +1131,10 @@ function ServiciosContent() {
               Cancelar
             </Button>
             <Button
-              variant="outline"
-              className="h-11 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+              variant="danger"
               onClick={handleDeleteConfirm}
               isLoading={deleteServiceMutation.isPending}
+              className="h-11"
             >
               Eliminar
             </Button>

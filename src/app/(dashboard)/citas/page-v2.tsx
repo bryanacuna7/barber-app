@@ -21,7 +21,8 @@
  * Created: Session 127 (Demo B Fusion Implementation)
  */
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Clock,
@@ -39,6 +40,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
 import {
   format,
   parseISO,
@@ -62,6 +64,7 @@ import {
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { animations } from '@/lib/design-system'
 
 // React Query hooks
 import { useCalendarAppointments, useCreateAppointment } from '@/hooks/queries/useAppointments'
@@ -225,6 +228,17 @@ function CitasCalendarFusionContent() {
   })
 
   const today = useMemo(() => new Date(), [])
+  const searchParams = useSearchParams()
+  const intentHandled = useRef(false)
+
+  // Auto-open create sheet when navigated with ?intent=create
+  useEffect(() => {
+    if (searchParams.get('intent') === 'create' && !intentHandled.current) {
+      intentHandled.current = true
+      window.history.replaceState(null, '', '/citas')
+      requestAnimationFrame(() => setIsCreateOpen(true))
+    }
+  }, [searchParams])
 
   // Update current time every minute
   useEffect(() => {
@@ -747,7 +761,7 @@ function CitasCalendarFusionContent() {
                       key={block.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: blockIndex * 0.1 }}
+                      transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
                     >
                       {/* Block header */}
                       <div className="mb-4">
@@ -813,7 +827,7 @@ function CitasCalendarFusionContent() {
                               setDraggedId(null)
                               toast.info('Rescheduling (demo)')
                             }}
-                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             whileDrag={{ scale: 1.05, zIndex: 50 }}
                             onClick={() => setSelectedId(apt.id)}
                             className={`bg-white/80 dark:bg-[#2C2C2E]/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-2 lg:p-3 cursor-grab active:cursor-grabbing transition-all ${
@@ -865,7 +879,7 @@ function CitasCalendarFusionContent() {
                               key={`gap-${blockIndex}-${gapIndex}`}
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               className="bg-green-500/5 rounded-lg border-2 border-dashed border-green-500/30 p-2 lg:p-3 cursor-pointer hover:bg-green-500/10 transition-all"
                               onClick={() => toast.info('Sugerir clientes para gap')}
                             >
@@ -899,20 +913,24 @@ function CitasCalendarFusionContent() {
                         </span>
                       </div>
                       {stats.pending > 0 && (
-                        <button
+                        <Button
+                          variant="primary"
+                          size="sm"
                           onClick={() => toast.success(`${stats.pending} confirmadas`)}
-                          className="px-4 py-2 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-lg font-medium text-sm transition-colors text-white min-h-[44px] whitespace-nowrap"
+                          className="whitespace-nowrap bg-[#0A84FF] hover:bg-[#0A84FF]/80"
                         >
                           Confirmar ({stats.pending})
-                        </button>
+                        </Button>
                       )}
                       {gaps.length > 0 && (
-                        <button
+                        <Button
+                          variant="success"
+                          size="sm"
                           onClick={() => toast.info('Llenar gaps')}
-                          className="px-4 py-2 bg-[#34C759] hover:bg-[#34C759]/80 rounded-lg font-medium text-sm transition-colors text-white min-h-[44px] whitespace-nowrap"
+                          className="whitespace-nowrap bg-[#34C759] hover:bg-[#34C759]/80"
                         >
                           Llenar {gaps.length} gaps
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -1134,7 +1152,7 @@ function CitasCalendarFusionContent() {
                         setSelectedDate(day.date)
                         setViewMode('day')
                       }}
-                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
                       className={`bg-white dark:bg-[#1C1C1E] aspect-square p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#2C2C2E] transition-colors ${
                         !day.isCurrentMonth ? 'opacity-30' : ''
                       }`}
@@ -1358,13 +1376,14 @@ function CitasCalendarFusionContent() {
             </div>
 
             {/* Submit button */}
-            <button
+            <Button
+              variant="gradient"
               onClick={handleCreateAppointment}
-              disabled={createAppointment.isPending}
-              className="w-full min-h-[44px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-zinc-400 disabled:to-zinc-500 text-white rounded-xl font-semibold text-base transition-colors"
+              isLoading={createAppointment.isPending}
+              className="w-full"
             >
-              {createAppointment.isPending ? 'Creando...' : 'Crear Cita'}
-            </button>
+              Crear Cita
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
@@ -1468,6 +1487,7 @@ function CitasCalendarFusionContent() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                transition={animations.spring.default}
                 className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                 onClick={() => setSelectedId(null)}
               >
@@ -1475,6 +1495,7 @@ function CitasCalendarFusionContent() {
                   initial={{ scale: 0.9, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.9, y: 20 }}
+                  transition={animations.spring.sheet}
                   className="bg-white dark:bg-[#2C2C2E] rounded-2xl p-8 max-w-lg w-full shadow-2xl"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -1538,33 +1559,36 @@ function CitasCalendarFusionContent() {
 
                   <div className="flex gap-3">
                     {apt.status === 'pending' && (
-                      <button
+                      <Button
+                        variant="primary"
                         onClick={() => {
                           toast.success('Confirmada')
                           setSelectedId(null)
                         }}
-                        className="flex-1 py-3 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-xl font-medium transition-colors text-white min-h-[44px]"
+                        className="flex-1 bg-[#0A84FF] hover:bg-[#0A84FF]/80"
                       >
                         Confirmar
-                      </button>
+                      </Button>
                     )}
                     {apt.status === 'confirmed' && (
-                      <button
+                      <Button
+                        variant="success"
                         onClick={() => {
                           toast.success('Check-in completo')
                           setSelectedId(null)
                         }}
-                        className="flex-1 py-3 bg-[#34C759] hover:bg-[#34C759]/80 rounded-xl font-medium transition-colors text-white min-h-[44px]"
+                        className="flex-1 bg-[#34C759] hover:bg-[#34C759]/80"
                       >
                         Check-in
-                      </button>
+                      </Button>
                     )}
-                    <button
+                    <Button
+                      variant="secondary"
                       onClick={() => setSelectedId(null)}
-                      className="px-6 py-3 bg-zinc-200 dark:bg-[#3A3A3C] hover:bg-zinc-300 dark:hover:bg-[#48484A] rounded-xl font-medium transition-colors text-zinc-900 dark:text-white min-h-[44px]"
+                      className="px-6"
                     >
                       Cerrar
-                    </button>
+                    </Button>
                   </div>
                 </motion.div>
               </motion.div>

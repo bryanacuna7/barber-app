@@ -18,7 +18,8 @@
  * Updated: Session 121 - Added multi-level error boundaries
  */
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus,
@@ -78,6 +79,7 @@ import { format, startOfMonth, isAfter, subDays, isSameDay, getDaysInMonth } fro
 import { es } from 'date-fns/locale'
 import type { Client } from '@/types'
 import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
+import { animations } from '@/lib/design-system'
 
 // NEW: Master-detail components (currently unused - reserved for future views)
 // import { LoyaltyRing } from '@/components/clients/loyalty-ring'
@@ -279,6 +281,18 @@ export default function ClientesPageV2() {
     email: '',
     notes: '',
   })
+
+  const searchParams = useSearchParams()
+  const intentHandled = useRef(false)
+
+  // Auto-open create modal when navigated with ?intent=create
+  useEffect(() => {
+    if (searchParams.get('intent') === 'create' && !intentHandled.current) {
+      intentHandled.current = true
+      window.history.replaceState(null, '', '/clientes')
+      requestAnimationFrame(() => setShowModal(true))
+    }
+  }, [searchParams])
 
   // Detect mobile viewport
   useEffect(() => {
@@ -588,8 +602,8 @@ export default function ClientesPageV2() {
                 {/* Clientes Nuevos */}
                 <motion.div
                   className="shrink-0 min-w-[160px] sm:min-w-0"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={animations.spring.gentle}
                 >
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700/40 px-4 py-4 shadow-sm cursor-pointer">
                     <div className="flex items-start justify-between mb-2">
@@ -609,8 +623,8 @@ export default function ClientesPageV2() {
                 {/* Clientes Activos */}
                 <motion.div
                   className="shrink-0 min-w-[160px] sm:min-w-0"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={animations.spring.gentle}
                 >
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700/40 px-4 py-4 shadow-sm cursor-pointer">
                     <div className="flex items-start justify-between mb-2">
@@ -630,8 +644,8 @@ export default function ClientesPageV2() {
                 {/* Ingresos Totales */}
                 <motion.div
                   className="shrink-0 min-w-[180px] sm:min-w-0"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={animations.spring.gentle}
                 >
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-700/40 px-4 py-4 shadow-sm cursor-pointer">
                     <div className="flex items-start justify-between mb-2">
@@ -651,8 +665,8 @@ export default function ClientesPageV2() {
                 {/* Valor Promedio */}
                 <motion.div
                   className="shrink-0 min-w-[180px] sm:min-w-0"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={animations.spring.gentle}
                 >
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border border-purple-200 dark:border-purple-700/40 px-4 py-4 shadow-sm cursor-pointer">
                     <div className="flex items-start justify-between mb-2">
@@ -724,12 +738,14 @@ export default function ClientesPageV2() {
                               <p className="text-xs text-zinc-500">{daysSinceVisit}d sin visita</p>
                             </div>
                           </div>
-                          <button
+                          <Button
+                            variant="success"
+                            size="sm"
                             onClick={() => handleWhatsApp(client.phone)}
-                            className="rounded-lg bg-green-500 p-2 text-white hover:bg-green-600 transition-colors shrink-0"
+                            className="shrink-0 p-2 h-auto"
                           >
                             <MessageCircle className="h-4 w-4" />
-                          </button>
+                          </Button>
                         </div>
                       )
                     })}
@@ -858,7 +874,8 @@ export default function ClientesPageV2() {
                             setSelectedCardClient(client)
                             setIsMobileDetailOpen(true)
                           }}
-                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={animations.spring.snappy}
                           className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-all border-2 ${
                             isSelected
                               ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-900/20 dark:border-blue-500 dark:shadow-lg'
@@ -1039,13 +1056,14 @@ export default function ClientesPageV2() {
                             </span>
                           </div>
                         </div>
-                        <button
+                        <Button
+                          variant="success"
                           onClick={() => handleWhatsApp(selectedCardClient.phone)}
-                          className="rounded-xl bg-green-500 px-4 py-2 text-white hover:bg-green-600 transition-colors flex items-center gap-2"
+                          className="flex items-center gap-2"
                         >
                           <MessageCircle className="h-4 w-4" />
                           WhatsApp
-                        </button>
+                        </Button>
                       </div>
 
                       {/* Metrics Row - 4 colorful cards (demo-accurate) */}
@@ -1381,12 +1399,13 @@ export default function ClientesPageV2() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      <button
+                      <Button
+                        variant={selectedInsight === 'churn' ? 'secondary' : 'ghost'}
                         onClick={() => setSelectedInsight('churn')}
-                        className={`rounded-xl p-4 text-left transition-all ${
+                        className={`h-auto p-4 text-left flex-col items-start justify-start ${
                           selectedInsight === 'churn'
                             ? 'bg-orange-50 dark:bg-orange-900/20 ring-2 ring-orange-500'
-                            : 'bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                            : ''
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
@@ -1399,14 +1418,15 @@ export default function ClientesPageV2() {
                           {churnRiskClients.length}
                         </p>
                         <p className="text-xs text-zinc-500">clientes en riesgo</p>
-                      </button>
+                      </Button>
 
-                      <button
+                      <Button
+                        variant={selectedInsight === 'winback' ? 'secondary' : 'ghost'}
                         onClick={() => setSelectedInsight('winback')}
-                        className={`rounded-xl p-4 text-left transition-all ${
+                        className={`h-auto p-4 text-left flex-col items-start justify-start ${
                           selectedInsight === 'winback'
                             ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500'
-                            : 'bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                            : ''
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
@@ -1419,14 +1439,15 @@ export default function ClientesPageV2() {
                           {winbackClients.length}
                         </p>
                         <p className="text-xs text-zinc-500">recuperables</p>
-                      </button>
+                      </Button>
 
-                      <button
+                      <Button
+                        variant={selectedInsight === 'upsell' ? 'secondary' : 'ghost'}
                         onClick={() => setSelectedInsight('upsell')}
-                        className={`rounded-xl p-4 text-left transition-all ${
+                        className={`h-auto p-4 text-left flex-col items-start justify-start ${
                           selectedInsight === 'upsell'
                             ? 'bg-green-50 dark:bg-green-900/20 ring-2 ring-green-500'
-                            : 'bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                            : ''
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
@@ -1439,7 +1460,7 @@ export default function ClientesPageV2() {
                           {upsellCandidates.length}
                         </p>
                         <p className="text-xs text-zinc-500">candidatos</p>
-                      </button>
+                      </Button>
                     </div>
 
                     {selectedInsight && (
@@ -1472,12 +1493,14 @@ export default function ClientesPageV2() {
                                     <p className="text-xs text-zinc-500">{daysSince}d sin visita</p>
                                   </div>
                                 </div>
-                                <button
+                                <Button
+                                  variant="success"
+                                  size="sm"
                                   onClick={() => handleWhatsApp(client.phone)}
-                                  className="rounded-lg bg-green-500 p-2 text-white hover:bg-green-600 transition-colors"
+                                  className="p-2 h-auto"
                                 >
                                   <MessageCircle className="h-4 w-4" />
-                                </button>
+                                </Button>
                               </div>
                             )
                           })}
@@ -1500,12 +1523,14 @@ export default function ClientesPageV2() {
                                   </p>
                                 </div>
                               </div>
-                              <button
+                              <Button
+                                variant="success"
+                                size="sm"
                                 onClick={() => handleWhatsApp(client.phone)}
-                                className="rounded-lg bg-green-500 p-2 text-white hover:bg-green-600 transition-colors"
+                                className="p-2 h-auto"
                               >
                                 <MessageCircle className="h-4 w-4" />
-                              </button>
+                              </Button>
                             </div>
                           ))}
                         {selectedInsight === 'upsell' &&
@@ -1527,12 +1552,14 @@ export default function ClientesPageV2() {
                                   </p>
                                 </div>
                               </div>
-                              <button
+                              <Button
+                                variant="success"
+                                size="sm"
                                 onClick={() => setSelectedClient(client)}
-                                className="rounded-lg bg-green-500 p-2 text-white hover:bg-green-600 transition-colors"
+                                className="p-2 h-auto"
                               >
                                 <Crown className="h-4 w-4" />
-                              </button>
+                              </Button>
                             </div>
                           ))}
                       </div>
@@ -1846,7 +1873,8 @@ export default function ClientesPageV2() {
                           <motion.button
                             key={client.id}
                             onClick={() => setSelectedClient(client)}
-                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            transition={animations.spring.snappy}
                             className="flex items-center gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-700"
                           >
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300 shrink-0">
@@ -1929,12 +1957,13 @@ export default function ClientesPageV2() {
                           Llamar
                         </a>
                       )}
-                      <button
+                      <Button
+                        variant="secondary"
                         onClick={() => setIsMobileDetailOpen(false)}
-                        className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 h-12"
                       >
                         Cerrar
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </>
@@ -2074,13 +2103,15 @@ export default function ClientesPageV2() {
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
                       <Phone className="h-5 w-5 text-zinc-400" />
                       <span className="text-zinc-900 dark:text-white">{selectedClient.phone}</span>
-                      <button
+                      <Button
+                        variant="success"
+                        size="sm"
                         onClick={() => handleWhatsApp(selectedClient.phone)}
-                        className="ml-auto px-3 py-1.5 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600 transition-colors flex items-center gap-1.5"
+                        className="ml-auto flex items-center gap-1.5"
                       >
                         <MessageCircle className="h-4 w-4" />
                         WhatsApp
-                      </button>
+                      </Button>
                     </div>
                     {selectedClient.email && (
                       <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">

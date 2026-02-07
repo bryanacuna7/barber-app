@@ -16,6 +16,7 @@ import {
   LayoutGrid,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { animations } from '@/lib/design-system'
 import { MoreMenuDrawer } from './more-menu-drawer'
 
 const navigation = [
@@ -52,8 +53,8 @@ export function BottomNav() {
 
   const handleQuickAction = (action: (typeof quickActions)[number]) => {
     setIsQuickActionOpen(false)
-    // Navigate to the page — the page itself handles opening the create form
-    router.push(action.href)
+    // Navigate with intent=create so destination page auto-opens create form
+    router.push(`${action.href}?intent=create`)
   }
 
   return (
@@ -82,12 +83,7 @@ export function BottomNav() {
                     <motion.div
                       layoutId="bottomNavIndicator"
                       className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-400/25 dark:to-blue-500/35 ring-1 ring-blue-200 dark:ring-blue-300/30 shadow-[0_0_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_0_20px_rgba(96,165,250,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 350,
-                        damping: 30,
-                        mass: 1,
-                      }}
+                      transition={animations.spring.snappy}
                     />
                   )}
 
@@ -96,12 +92,7 @@ export function BottomNav() {
                       scale: isActive ? 1.15 : 1,
                       y: isActive ? -2 : 0,
                     }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 20,
-                      mass: 0.8,
-                    }}
+                    transition={animations.spring.default}
                     className="relative z-10 flex h-[26px] w-[26px] items-center justify-center"
                   >
                     <item.icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
@@ -157,12 +148,7 @@ export function BottomNav() {
                     <motion.div
                       layoutId="bottomNavIndicator"
                       className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-400/25 dark:to-blue-500/35 ring-1 ring-blue-200 dark:ring-blue-300/30 shadow-[0_0_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_0_20px_rgba(96,165,250,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 350,
-                        damping: 30,
-                        mass: 1,
-                      }}
+                      transition={animations.spring.snappy}
                     />
                   )}
 
@@ -171,12 +157,7 @@ export function BottomNav() {
                       scale: isActive ? 1.15 : 1,
                       y: isActive ? -2 : 0,
                     }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 20,
-                      mass: 0.8,
-                    }}
+                    transition={animations.spring.default}
                     className="relative z-10 flex h-[26px] w-[26px] items-center justify-center"
                   >
                     <item.icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
@@ -266,7 +247,7 @@ export function BottomNav() {
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={animations.spring.sheet}
               className="fixed bottom-0 left-0 right-0 z-[61] lg:hidden"
             >
               <div className="mx-4 mb-safe-offset-4 rounded-2xl bg-white dark:bg-[#2C2C2E] shadow-2xl overflow-hidden">

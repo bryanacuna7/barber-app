@@ -49,6 +49,8 @@ import {
   type MockBarber,
 } from './demos/mock-data'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
+import { animations } from '@/lib/design-system'
 
 type ViewMode = 'cards' | 'table' | 'leaderboard' | 'calendar'
 type SortField = 'name' | 'revenue' | 'appointments' | 'rating' | 'level'
@@ -176,17 +178,16 @@ export default function BarberosPage() {
               </div>
             </div>
             {/* Add Barber Button - visible on all sizes */}
-            <motion.button
+            <Button
               onClick={() => setIsAddBarberOpen(true)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="flex items-center gap-2 px-3 py-2.5 md:px-5 md:py-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/25 transition-colors min-h-[44px]"
+              variant="gradient"
+              size="md"
+              className="gap-2 px-3 md:px-5"
               data-testid="add-barber-btn"
             >
               <Plus className="h-5 w-5" />
               <span className="hidden md:inline">Agregar Barbero</span>
-            </motion.button>
+            </Button>
           </div>
         </motion.div>
 
@@ -314,12 +315,14 @@ export default function BarberosPage() {
                 className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
-            <button
+            <Button
               onClick={() => setIsAddBarberOpen(false)}
-              className="w-full h-12 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-semibold text-base transition-colors mt-4"
+              variant="gradient"
+              size="md"
+              className="w-full mt-4"
             >
               Agregar Barbero
-            </button>
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
@@ -396,8 +399,8 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
             key={barber.id}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            whileTap={{ scale: 0.98 }}
+            transition={animations.spring.default}
             className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
           >
             {/* Avatar with gradient background */}
@@ -588,12 +591,14 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
               </div>
 
               {/* Close button */}
-              <button
+              <Button
                 onClick={() => setIsMobileBarberDetailOpen(false)}
-                className="w-full h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                variant="secondary"
+                size="md"
+                className="w-full"
               >
                 Cerrar
-              </button>
+              </Button>
             </div>
           )}
         </SheetContent>
@@ -771,8 +776,8 @@ function LeaderboardView({ barbers }: { barbers: MockBarber[] }) {
           key={barber.id}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          whileTap={{ scale: 0.98 }}
+          transition={animations.spring.default}
           className={`bg-white dark:bg-zinc-900 rounded-2xl p-3 lg:p-5 border shadow-sm cursor-pointer ${
             index < 3
               ? 'border-amber-300 dark:border-amber-700 shadow-amber-100 dark:shadow-amber-900/20'
@@ -856,8 +861,8 @@ function CalendarView({ barbers }: { barbers: MockBarber[] }) {
           key={barber.id}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          whileTap={{ scale: 0.98 }}
+          transition={animations.spring.default}
           className="bg-white dark:bg-zinc-900 rounded-2xl p-3 lg:p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm cursor-pointer"
         >
           {/* Header */}

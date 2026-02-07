@@ -37,6 +37,7 @@ import { AdvancedSettingsSection } from '@/components/settings/advanced-settings
 import { cn } from '@/lib/utils'
 import { generateThemeStyle, DEFAULT_BRAND_COLOR } from '@/lib/theme'
 import { getContrastingTextColor, getReadableBrandColor } from '@/lib/utils/color'
+import { animations } from '@/lib/design-system'
 import type { OperatingHours, DayHours } from '@/types'
 // React Query & Context
 import { useBusiness } from '@/contexts/business-context'
@@ -335,24 +336,22 @@ export default function ConfiguracionPage() {
               </p>
             </div>
             {/* Search Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setSearchModalOpen(true)}
-              className="flex items-center gap-2 h-10 px-4 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+              className="h-10 px-4"
               aria-label="Buscar configuraciones"
             >
-              <Search className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
-              <span className="hidden sm:inline text-[13px] text-zinc-600 dark:text-zinc-400 font-medium">
-                Buscar
-              </span>
+              <Search className="h-4 w-4" />
+              <span className="hidden sm:inline text-[13px]">Buscar</span>
               <kbd className="hidden lg:inline px-1.5 py-0.5 rounded bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-[11px] font-mono text-zinc-500">
                 {typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Mac') !== -1
                   ? '⌘'
                   : 'Ctrl'}
                 K
               </kbd>
-            </motion.button>
+            </Button>
           </div>
         </FadeInUp>
 
@@ -364,8 +363,7 @@ export default function ConfiguracionPage() {
             onClick={() => setOpenSheet('general')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            whileHover={{ scale: 1.02 }}
+            transition={{ delay: 0.1, ...animations.spring.gentle }}
             whileTap={{ scale: 0.98 }}
             className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all shadow-sm hover:shadow-md text-left group"
           >
@@ -391,8 +389,7 @@ export default function ConfiguracionPage() {
             onClick={() => setOpenSheet('horario')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            whileHover={{ scale: 1.02 }}
+            transition={{ delay: 0.2, ...animations.spring.gentle }}
             whileTap={{ scale: 0.98 }}
             className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all shadow-sm hover:shadow-md text-left group"
           >
@@ -418,8 +415,7 @@ export default function ConfiguracionPage() {
             onClick={() => setOpenSheet('branding')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            whileHover={{ scale: 1.02 }}
+            transition={{ delay: 0.3, ...animations.spring.gentle }}
             whileTap={{ scale: 0.98 }}
             className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-pink-300 dark:hover:border-pink-600 transition-all shadow-sm hover:shadow-md text-left group"
           >
@@ -445,8 +441,7 @@ export default function ConfiguracionPage() {
             onClick={() => setOpenSheet('avanzado')}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            whileHover={{ scale: 1.02 }}
+            transition={{ delay: 0.4, ...animations.spring.gentle }}
             whileTap={{ scale: 0.98 }}
             className="w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-amber-300 dark:hover:border-amber-600 transition-all shadow-sm hover:shadow-md text-left group"
           >
@@ -484,7 +479,7 @@ export default function ConfiguracionPage() {
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
-                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                  transition={animations.spring.sheet}
                   onClick={(e) => e.stopPropagation()}
                   className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
                 >
@@ -534,22 +529,21 @@ export default function ConfiguracionPage() {
                                 {bookingUrl || 'Cargando...'}
                               </div>
                               <div className="flex gap-2">
-                                <motion.button
+                                <Button
                                   type="button"
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
+                                  variant="outline"
+                                  size="md"
                                   onClick={copyBookingLink}
-                                  className="flex h-12 min-w-[48px] flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border-2 border-violet-200 bg-white px-4 text-violet-700 transition-colors hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
+                                  className="flex-1 sm:flex-initial border-violet-200 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300 dark:hover:bg-violet-950/70"
                                 >
                                   {copied ? (
                                     <Check className="h-5 w-5" />
                                   ) : (
                                     <Copy className="h-5 w-5" />
                                   )}
-                                  <span className="text-[15px] font-medium sm:hidden">Copiar</span>
-                                </motion.button>
+                                  <span className="sm:hidden">Copiar</span>
+                                </Button>
                                 <motion.a
-                                  whileHover={{ scale: 1.02 }}
                                   whileTap={{ scale: 0.98 }}
                                   href={bookingUrl}
                                   target="_blank"
@@ -655,7 +649,7 @@ export default function ConfiguracionPage() {
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
-                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                  transition={animations.spring.sheet}
                   onClick={(e) => e.stopPropagation()}
                   className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
                 >
@@ -847,7 +841,7 @@ export default function ConfiguracionPage() {
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
-                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                  transition={animations.spring.sheet}
                   onClick={(e) => e.stopPropagation()}
                   className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
                 >
@@ -1032,14 +1026,16 @@ export default function ConfiguracionPage() {
                                         className="hidden"
                                       />
                                     </label>
-                                    <button
+                                    <Button
                                       type="button"
+                                      variant="danger"
+                                      size="sm"
                                       onClick={handleLogoDelete}
-                                      className="rounded-xl bg-red-50 px-4 py-2.5 text-[13px] font-semibold text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                                      className="text-[13px]"
                                     >
-                                      <X className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+                                      <X className="h-4 w-4" />
                                       Eliminar
-                                    </button>
+                                    </Button>
                                   </div>
                                 </div>
                               ) : (
@@ -1114,7 +1110,7 @@ export default function ConfiguracionPage() {
                   initial={{ y: '100%' }}
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
-                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                  transition={animations.spring.sheet}
                   onClick={(e) => e.stopPropagation()}
                   className="absolute inset-x-0 lg:inset-x-auto lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-2xl bottom-0 top-16 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl overflow-hidden"
                 >
@@ -1159,16 +1155,16 @@ export default function ConfiguracionPage() {
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <motion.button
+                            <Button
                               type="button"
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
+                              variant="outline"
+                              size="md"
                               onClick={() => router.push('/lealtad/configuracion')}
-                              className="flex w-full items-center justify-between rounded-xl border-2 border-amber-200 bg-white/80 px-4 py-3.5 text-[15px] font-medium text-amber-900 transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 dark:hover:bg-amber-950/70"
+                              className="w-full justify-between border-amber-200 bg-white/80 text-amber-900 hover:bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 dark:hover:bg-amber-950/70"
                             >
                               <span>Configurar programa de lealtad</span>
                               <ArrowRight className="h-5 w-5" />
-                            </motion.button>
+                            </Button>
                           </CardContent>
                         </Card>
                       </FadeInUp>

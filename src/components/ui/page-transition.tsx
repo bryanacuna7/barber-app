@@ -3,6 +3,7 @@
 import { type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
+import { animations } from '@/lib/design-system'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -43,12 +44,7 @@ export function PageTransition({ children, variant = 'fade' }: PageTransitionPro
         initial={selectedVariant.initial}
         animate={selectedVariant.animate}
         exit={selectedVariant.exit}
-        transition={{
-          type: 'spring',
-          stiffness: 380,
-          damping: 30,
-          mass: 0.8,
-        }}
+        transition={animations.spring.snappy}
       >
         {children}
       </motion.div>
@@ -91,11 +87,7 @@ export function StaggerItem({ children, className }: { children: ReactNode; clas
         visible: {
           opacity: 1,
           y: 0,
-          transition: {
-            type: 'spring',
-            stiffness: 380,
-            damping: 30,
-          },
+          transition: animations.spring.snappy,
         },
       }}
     >
@@ -118,12 +110,7 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
-      transition={{
-        type: 'spring',
-        stiffness: 380,
-        damping: 30,
-        delay,
-      }}
+      transition={{ ...animations.spring.snappy, delay }}
     >
       {children}
     </motion.div>
