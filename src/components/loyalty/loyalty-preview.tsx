@@ -7,7 +7,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Gift, Star, Users, Zap, AlertCircle } from 'lucide-react'
+import { Gift, Star, Users, Zap, AlertCircle, Sparkles } from 'lucide-react'
 import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 
 interface Props {
@@ -209,8 +209,9 @@ export function LoyaltyPreview({ program }: Props) {
 
       {/* Footer */}
       <div className="border-t border-border/50 p-3 sm:p-4">
-        <p className="text-center text-[11px] text-muted-foreground sm:text-xs">
-          ✨ Los clientes verán esto en la página de reservas
+        <p className="text-center text-[11px] text-muted-foreground sm:text-xs inline-flex w-full items-center justify-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5" />
+          Los clientes verán esto en la página de reservas
         </p>
       </div>
     </Card>

@@ -72,36 +72,48 @@ export function NotificationBell() {
   const [stats, setStats] = useState<NotificationStats>({ total: 0, unread: 0 })
   const [isLoading, setIsLoading] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
-  // Hydration-safe: Only render portal on client
-  const [mounted, setMounted] = useState(typeof window !== 'undefined')
+  const mounted = typeof window !== 'undefined'
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Ensure mounted state is set after hydration - valid pattern for SSR + portals
-  useEffect(() => {
-    setMounted(true)
-  }, []) // Only run once on mount
-
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch('/api/notifications?limit=10')
-      if (res.ok) {
-        const data = await res.json()
-        setNotifications(data.notifications || [])
-        setStats(data.stats || { total: 0, unread: 0 })
+      const res = await fetch('/api/notifications?limit=10', {
+        cache: 'no-store',
+      })
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setNotifications([])
+          setStats({ total: 0, unread: 0 })
+        }
+        return
       }
+
+      const data = await res.json()
+      setNotifications(data.notifications || [])
+      setStats(data.stats || { total: 0, unread: 0 })
     } catch (error) {
-      console.error('Failed to fetch notifications:', error)
+      setNotifications([])
+      setStats({ total: 0, unread: 0 })
+      console.warn('Notifications fetch failed:', error)
     }
   }, [])
 
   useEffect(() => {
-     
-    fetchNotifications()
+    const initialFetch = setTimeout(() => {
+      void fetchNotifications()
+    }, 0)
 
     // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
+    const interval = setInterval(() => {
+      void fetchNotifications()
+    }, 30000)
+
+    return () => {
+      clearTimeout(initialFetch)
+      clearInterval(interval)
+    }
   }, [fetchNotifications])
 
   // Close dropdown when clicking outside

@@ -76,7 +76,6 @@ interface MockService {
   avg_rating: number
   total_reviews: number
   barber_names: string[]
-  icon: string // Emoji for demo
   iconName: string // Lucide icon name
   color: string
 }
@@ -95,7 +94,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.8,
     total_reviews: 234,
     barber_names: ['Juan', 'Carlos', 'Roberto'],
-    icon: '✂️',
     iconName: 'Scissors',
     color: 'blue',
   },
@@ -112,7 +110,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.9,
     total_reviews: 156,
     barber_names: ['Juan', 'Roberto'],
-    icon: '✨',
     iconName: 'Sparkles',
     color: 'purple',
   },
@@ -129,7 +126,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.7,
     total_reviews: 189,
     barber_names: ['Roberto', 'Carlos'],
-    icon: '⚡',
     iconName: 'Zap',
     color: 'amber',
   },
@@ -146,7 +142,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.6,
     total_reviews: 145,
     barber_names: ['Carlos', 'Miguel'],
-    icon: '🔥',
     iconName: 'Flame',
     color: 'red',
   },
@@ -163,7 +158,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.9,
     total_reviews: 98,
     barber_names: ['Carlos'],
-    icon: '🌊',
     iconName: 'Waves',
     color: 'cyan',
   },
@@ -180,7 +174,6 @@ const mockServices: MockService[] = [
     avg_rating: 5.0,
     total_reviews: 67,
     barber_names: ['Juan', 'Roberto'],
-    icon: '👑',
     iconName: 'Crown',
     color: 'gold',
   },
@@ -197,7 +190,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.7,
     total_reviews: 112,
     barber_names: ['Todos'],
-    icon: '🎁',
     iconName: 'Gift',
     color: 'emerald',
   },
@@ -214,7 +206,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.8,
     total_reviews: 54,
     barber_names: ['Miguel'],
-    icon: '💆',
     iconName: 'Sparkle',
     color: 'green',
   },
@@ -231,7 +222,6 @@ const mockServices: MockService[] = [
     avg_rating: 4.5,
     total_reviews: 178,
     barber_names: ['Juan', 'Miguel'],
-    icon: '👦',
     iconName: 'Users',
     color: 'blue',
   },
@@ -248,14 +238,12 @@ const mockServices: MockService[] = [
     avg_rating: 4.4,
     total_reviews: 89,
     barber_names: ['Miguel', 'Carlos'],
-    icon: '👁️',
     iconName: 'CircleDot',
     color: 'zinc',
   },
 ]
 
-// Icon mapping (reserved for dynamic icon resolution)
-const _iconMap: Record<string, LucideIcon> = {
+const serviceIconMap: Record<MockService['iconName'], LucideIcon> = {
   Scissors,
   Sparkles,
   Zap,
@@ -268,6 +256,17 @@ const _iconMap: Record<string, LucideIcon> = {
   CircleDot,
   Sparkle,
   Star,
+}
+
+function ServiceIcon({
+  iconName,
+  className,
+}: {
+  iconName: MockService['iconName']
+  className: string
+}) {
+  const Icon = serviceIconMap[iconName] || Scissors
+  return <Icon className={className} aria-hidden="true" />
 }
 
 // Helper functions
@@ -599,7 +598,7 @@ function ServiciosContent() {
           await refetch()
         }}
       >
-        <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 lg:mx-auto lg:max-w-[1400px] relative z-10">
+        <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 relative z-10">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -715,10 +714,15 @@ function ServiciosContent() {
                   return (
                     <SwipeableRow key={service.id} rightActions={rightActions}>
                       <div className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
-                        {/* Row 1: Emoji + Name */}
+                        {/* Row 1: Icon + Name */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <span className="text-2xl flex-shrink-0">{service.icon}</span>
+                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800/60 flex-shrink-0">
+                              <ServiceIcon
+                                iconName={service.iconName}
+                                className="h-4.5 w-4.5 text-zinc-700 dark:text-zinc-200"
+                              />
+                            </span>
                             <div className="min-w-0">
                               <p className="font-semibold text-zinc-900 dark:text-white truncate">
                                 {service.name}
@@ -864,7 +868,12 @@ function ServiciosContent() {
                               {/* Service Name */}
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xl">{service.icon}</span>
+                                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
+                                    <ServiceIcon
+                                      iconName={service.iconName}
+                                      className="h-4 w-4 text-zinc-700 dark:text-zinc-200"
+                                    />
+                                  </span>
                                   <div>
                                     <p className="font-medium text-zinc-900 dark:text-white">
                                       {service.name}
@@ -1016,9 +1025,17 @@ function ServiciosContent() {
                       <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                         Más Popular
                       </p>
-                      <p className="mt-1 text-base font-bold text-zinc-900 dark:text-white truncate">
-                        {topService.icon} {topService.name}
-                      </p>
+                      <div className="mt-1 flex items-center gap-2 min-w-0">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
+                          <ServiceIcon
+                            iconName={topService.iconName}
+                            className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
+                          />
+                        </span>
+                        <p className="text-base font-bold text-zinc-900 dark:text-white truncate">
+                          {topService.name}
+                        </p>
+                      </div>
                       <p className="text-xs text-zinc-500">
                         {topService.bookings_this_month} reservas
                       </p>
@@ -1075,7 +1092,12 @@ function ServiciosContent() {
                       <div key={service.id}>
                         <div className="mb-1 flex items-center justify-between text-xs">
                           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                            <span className="text-base">{service.icon}</span>
+                            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
+                              <ServiceIcon
+                                iconName={service.iconName}
+                                className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
+                              />
+                            </span>
                             <span className="font-medium text-zinc-900 dark:text-white truncate">
                               {service.name}
                             </span>

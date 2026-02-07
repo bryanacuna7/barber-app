@@ -86,16 +86,16 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                   }}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
                     isActive
-                      ? 'text-blue-500 dark:text-blue-300'
+                      ? 'text-zinc-900 dark:text-white'
                       : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
                   )}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="bottomNavIndicator"
-                      className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-400/25 dark:to-blue-500/35 ring-1 ring-blue-200 dark:ring-blue-300/30 shadow-[0_0_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_0_20px_rgba(96,165,250,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
+                      className="absolute inset-0 rounded-full nav-indicator"
                       transition={animations.spring.snappy}
                     />
                   )}
@@ -130,16 +130,22 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
               aria-label="Crear nuevo"
               aria-haspopup="true"
               aria-expanded={isQuickActionOpen}
-              className={cn(
-                'relative flex flex-col items-center justify-center gap-0.5 rounded-full px-3 py-1.5',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
-              )}
+              className="relative flex flex-col items-center justify-center gap-0.5 rounded-full px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2"
+              style={{ '--tw-ring-color': 'var(--brand-primary)' } as React.CSSProperties}
             >
               <motion.div
                 whileTap={{ scale: 0.9 }}
-                className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 shadow-lg shadow-blue-500/30"
+                className="flex h-[36px] w-[36px] items-center justify-center rounded-full"
+                style={{
+                  background: `linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark, var(--brand-primary)))`,
+                  boxShadow: `0 4px 14px rgba(var(--brand-primary-rgb), 0.4)`,
+                }}
               >
-                <Plus className="h-5 w-5 text-white" strokeWidth={2.5} />
+                <Plus
+                  className="h-5 w-5"
+                  style={{ color: 'var(--brand-primary-contrast, #fff)' }}
+                  strokeWidth={2.5}
+                />
               </motion.div>
             </button>
 
@@ -157,16 +163,16 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                   }}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
                     isActive
-                      ? 'text-blue-500 dark:text-blue-300'
+                      ? 'text-zinc-900 dark:text-white'
                       : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
                   )}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="bottomNavIndicator"
-                      className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-400/25 dark:to-blue-500/35 ring-1 ring-blue-200 dark:ring-blue-300/30 shadow-[0_0_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_0_20px_rgba(96,165,250,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
+                      className="absolute inset-0 rounded-full nav-indicator"
                       transition={animations.spring.snappy}
                     />
                   )}
@@ -200,9 +206,9 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
               }}
               className={cn(
                 'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
                 isMoreActive
-                  ? 'text-blue-500 dark:text-blue-300'
+                  ? 'text-zinc-900 dark:text-white'
                   : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
               )}
               aria-label="Más opciones"
@@ -212,13 +218,8 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
               {isMoreActive && (
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-400/25 dark:to-blue-500/35 ring-1 ring-blue-200 dark:ring-blue-300/30 shadow-[0_0_12px_rgba(59,130,246,0.15),inset_0_1px_0_rgba(255,255,255,0.5)] dark:shadow-[0_0_20px_rgba(96,165,250,0.3),inset_0_1px_0_rgba(255,255,255,0.15)]"
-                  transition={{
-                    type: 'spring',
-                    stiffness: 350,
-                    damping: 30,
-                    mass: 1,
-                  }}
+                  className="absolute inset-0 rounded-full nav-indicator"
+                  transition={animations.spring.snappy}
                 />
               )}
 
@@ -227,12 +228,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                   scale: isMoreActive ? 1.15 : 1,
                   y: isMoreActive ? -2 : 0,
                 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 20,
-                  mass: 0.8,
-                }}
+                transition={animations.spring.default}
                 className="relative z-10 flex h-[26px] w-[26px] items-center justify-center"
               >
                 <MoreHorizontal
@@ -294,8 +290,14 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                       onClick={() => handleQuickAction(action)}
                       className="w-full flex items-center gap-4 px-4 py-3.5 min-h-[44px] rounded-xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors"
                     >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/20">
-                        <action.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-xl"
+                        style={{ background: 'rgba(var(--brand-primary-rgb), 0.1)' }}
+                      >
+                        <action.icon
+                          className="h-5 w-5"
+                          style={{ color: 'var(--brand-primary)' }}
+                        />
                       </div>
                       <span className="text-base font-medium text-zinc-900 dark:text-white">
                         {action.name}

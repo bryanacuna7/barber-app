@@ -2,7 +2,18 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, Sparkles } from 'lucide-react'
+import {
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  Calendar,
+  Users,
+  Scissors,
+  UserRound,
+  BarChart3,
+  Palette,
+  Gift,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface SuccessProps {
@@ -93,7 +104,7 @@ export function Success({ onComplete, businessName }: SuccessProps) {
         transition={{ delay: 0.3 }}
         className="text-4xl font-bold text-zinc-900 dark:text-white mb-4"
       >
-        ¡Todo Listo! 🎉
+        ¡Todo Listo!
       </motion.h1>
 
       {/* Description */}
@@ -132,12 +143,12 @@ export function Success({ onComplete, businessName }: SuccessProps) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
             {[
-              { emoji: '📅', text: 'Crear y gestionar citas' },
-              { emoji: '👥', text: 'Agregar más clientes' },
-              { emoji: '✂️', text: 'Configurar más servicios' },
-              { emoji: '👤', text: 'Invitar más barberos' },
-              { emoji: '📊', text: 'Ver estadísticas y analíticas' },
-              { emoji: '🎨', text: 'Personalizar tu marca' },
+              { icon: Calendar, text: 'Crear y gestionar citas' },
+              { icon: Users, text: 'Agregar más clientes' },
+              { icon: Scissors, text: 'Configurar más servicios' },
+              { icon: UserRound, text: 'Invitar más barberos' },
+              { icon: BarChart3, text: 'Ver estadísticas y analíticas' },
+              { icon: Palette, text: 'Personalizar tu marca' },
             ].map((feature, i) => (
               <motion.div
                 key={i}
@@ -146,7 +157,9 @@ export function Success({ onComplete, businessName }: SuccessProps) {
                 transition={{ delay: 0.7 + i * 0.05 }}
                 className="flex items-start gap-3"
               >
-                <span className="text-2xl">{feature.emoji}</span>
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/80 dark:bg-zinc-800/80">
+                  <feature.icon className="h-4 w-4 text-zinc-700 dark:text-zinc-200" />
+                </span>
                 <span className="text-zinc-700 dark:text-zinc-300 pt-1">{feature.text}</span>
               </motion.div>
             ))}
@@ -162,8 +175,11 @@ export function Success({ onComplete, businessName }: SuccessProps) {
         className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-4 border border-blue-200 dark:border-blue-800 mb-8"
       >
         <p className="text-sm text-blue-800 dark:text-blue-300">
-          🎁 <strong>Tienes 7 días de prueba gratis</strong> con todas las funciones Pro
-          desbloqueadas.
+          <span className="inline-flex items-center gap-1.5">
+            <Gift className="h-4 w-4" />
+            <strong>Tienes 7 días de prueba gratis</strong>
+          </span>{' '}
+          con todas las funciones Pro desbloqueadas.
         </p>
       </motion.div>
 

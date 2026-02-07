@@ -21,7 +21,10 @@ function formatReleaseDate(date: string | null): string {
 }
 
 export default async function ChangelogPage() {
-  const [releases, appVersion] = await Promise.all([getChangelogReleases(12), getAppVersion()])
+  const [allReleases, appVersion] = await Promise.all([getChangelogReleases(12), getAppVersion()])
+  const releases = allReleases.filter(
+    (release) => release.version.toLowerCase() !== 'unreleased' && release.date !== null
+  )
 
   return (
     <div className="space-y-6">
@@ -34,7 +37,7 @@ export default async function ChangelogPage() {
             </p>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Novedades</h1>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Cambios importantes del producto organizados por versión.
+              Cambios ya aplicados y disponibles en la app, organizados por versión.
             </p>
           </div>
 
@@ -47,7 +50,7 @@ export default async function ChangelogPage() {
 
       {releases.length === 0 ? (
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-          No se encontró información de changelog en este entorno.
+          Aún no hay notas de versión publicadas para mostrar.
         </section>
       ) : (
         <div className="space-y-4">
@@ -58,7 +61,7 @@ export default async function ChangelogPage() {
             >
               <header className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 pb-4 dark:border-zinc-800">
                 <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
-                  {release.version === 'Unreleased' ? 'Unreleased' : `v${release.version}`}
+                  {`v${release.version}`}
                 </h2>
                 <p className="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                   <CalendarDays className="h-4 w-4" />

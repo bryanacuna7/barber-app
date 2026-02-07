@@ -11,7 +11,10 @@
 import { Database } from '@/types/supabase'
 
 // Supabase types
-type SupabaseBusiness = Database['public']['Tables']['businesses']['Row']
+type SupabaseBusiness = Database['public']['Tables']['businesses']['Row'] & {
+  brand_logo_url?: string | null
+  brand_favicon_url?: string | null
+}
 type SupabaseBarber = Database['public']['Tables']['barbers']['Row']
 
 // UI types for settings
@@ -84,7 +87,7 @@ export function adaptBusinessSettings(row: SupabaseBusiness): UIBusinessSettings
     },
     branding: {
       primaryColor: row.brand_primary_color || '#27272A',
-      logoUrl: row.brand_logo_url || undefined,
+      logoUrl: row.brand_logo_url || row.logo_url || undefined,
       faviconUrl: row.brand_favicon_url || undefined,
     },
     isActive: row.is_active,
@@ -169,7 +172,7 @@ export function adaptTeamMembers(rows: SupabaseBarber[]): UITeamMember[] {
  * Supabase query for business settings (only columns used by adapter)
  */
 export function getBusinessSettingsQuery() {
-  return 'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_logo_url, brand_favicon_url, is_active'
+  return 'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, logo_url, is_active'
 }
 
 /**

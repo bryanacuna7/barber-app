@@ -122,7 +122,7 @@ export function ClientAccountModal({
         console.error('Failed to create loyalty status:', loyaltyError)
       }
 
-      toast.success('¡Cuenta creada! 🎉 Tu próxima visita empezará a sumar puntos')
+      toast.success('¡Cuenta creada! Tu próxima visita empezará a sumar puntos')
 
       // Track analytics
       if (typeof window !== 'undefined' && 'plausible' in window) {
@@ -199,7 +199,7 @@ export function ClientAccountModal({
         console.error('Failed to create loyalty status:', loyaltyError)
       }
 
-      toast.success('¡Sesión iniciada! Ahora puedes acumular puntos 🎉')
+      toast.success('¡Sesión iniciada! Ahora puedes acumular puntos')
 
       onClose()
     } catch (error: any) {

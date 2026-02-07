@@ -18,7 +18,19 @@
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Star, Gift, Users, Share2, QrCode, TrendingUp, Sparkles } from 'lucide-react'
+import {
+  Gift,
+  Users,
+  Share2,
+  QrCode,
+  TrendingUp,
+  Sparkles,
+  Medal,
+  Trophy,
+  Gem,
+  Award,
+  type LucideIcon,
+} from 'lucide-react'
 import { useToast } from '@/components/ui/toast'
 import type { ClientLoyaltyStatus, LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 import { getPointsToNextTier } from '@/lib/gamification/loyalty-calculator'
@@ -33,29 +45,32 @@ const TIER_CONFIG = {
   bronze: {
     name: 'Bronze',
     color: 'bg-orange-600/20 text-orange-700 dark:text-orange-400',
-    icon: '🥉',
+    icon: Award,
   },
   silver: {
     name: 'Silver',
     color: 'bg-slate-400/20 text-slate-700 dark:text-slate-300',
-    icon: '🥈',
+    icon: Medal,
   },
   gold: {
     name: 'Gold',
     color: 'bg-amber-500/20 text-amber-700 dark:text-amber-400',
-    icon: '🥇',
+    icon: Trophy,
   },
   platinum: {
     name: 'Platinum',
     color: 'bg-purple-500/20 text-purple-700 dark:text-purple-400',
-    icon: '💎',
+    icon: Gem,
   },
-}
+} satisfies Record<string, { name: string; color: string; icon: LucideIcon }>
 
 export function ClientStatusCard({ status, program, businessName }: Props) {
   const toast = useToast()
   const tierConfig = TIER_CONFIG[status.currentTier]
+  const TierIcon = tierConfig.icon
   const { nextTier, pointsNeeded } = getPointsToNextTier(status.lifetimePoints)
+  const nextTierConfig = nextTier ? TIER_CONFIG[nextTier] : null
+  const NextTierIcon = nextTierConfig?.icon
 
   const handleShareReferral = async () => {
     const referralUrl = `${window.location.origin}/reservar/${program.businessId}?ref=${status.referralCode}`
@@ -127,7 +142,7 @@ export function ClientStatusCard({ status, program, businessName }: Props) {
           </p>
         </div>
         <Badge className={`${tierConfig.color} flex-shrink-0`} variant="outline">
-          <span className="mr-1">{tierConfig.icon}</span>
+          <TierIcon className="mr-1 h-3.5 w-3.5" />
           <span className="hidden sm:inline">{tierConfig.name}</span>
         </Badge>
       </div>
@@ -215,9 +230,12 @@ export function ClientStatusCard({ status, program, businessName }: Props) {
             </p>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold sm:text-sm">
-              {TIER_CONFIG[nextTier].icon} {TIER_CONFIG[nextTier].name}
-            </span>
+            {nextTierConfig && (
+              <span className="flex items-center gap-1.5 text-xs font-semibold sm:text-sm">
+                {NextTierIcon && <NextTierIcon className="h-3.5 w-3.5" />}
+                {nextTierConfig.name}
+              </span>
+            )}
             <span className="text-[11px] text-muted-foreground sm:text-xs">
               {pointsNeeded.toLocaleString()} pts más
             </span>
@@ -271,7 +289,10 @@ export function ClientStatusCard({ status, program, businessName }: Props) {
             {program.referralRewardAmount && (
               <div className="rounded-lg bg-primary/5 p-2.5 sm:p-3">
                 <p className="text-[11px] text-muted-foreground sm:text-xs">
-                  ✨ Tú y tu amigo recibirán{' '}
+                  <span className="inline-flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Tú y tu amigo recibirán
+                  </span>{' '}
                   <span className="font-semibold text-foreground">
                     {program.referralRewardType === 'discount'
                       ? `${program.referralRewardAmount}% de descuento`

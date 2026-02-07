@@ -196,7 +196,7 @@ function AnalyticsContent() {
           </div>
 
           {/* Period Selector */}
-          <div className="self-start inline-flex items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+          <div className="flex w-full sm:w-auto items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
             {[
               { value: 'week' as AnalyticsPeriod, label: 'Semana' },
               { value: 'month' as AnalyticsPeriod, label: 'Mes' },
@@ -212,7 +212,7 @@ function AnalyticsContent() {
                     setPeriod(option.value)
                     if (isMobileDevice()) haptics.selection()
                   }}
-                  className={`min-h-[44px] rounded-xl px-3 text-sm whitespace-nowrap border transition-all ${
+                  className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-all ${
                     isActive
                       ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
                       : 'text-zinc-600 dark:text-zinc-400 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'

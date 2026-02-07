@@ -89,13 +89,11 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
   - `Clientes` corrige contraste en light mode en cards de lista (nombre, metricas, fondo y bordes).
   - Consistencia de acciones mejoro de forma medible (mas uso de `Button` y menos `button` manual en modulos core).
 - Brechas criticas aun abiertas:
-  - `Fecha` en `Nueva Cita` sigue en `input[type=date]` nativo.
   - En `Servicios`, al editar un servicio se abre el modal de "Agregar nuevo servicio" (estado de modo incorrecto: edit/create).
   - Persisten botones manuales en puntos core (especialmente en `citas`/`barberos`).
   - Charts mobile siguen con patron desktop (altura fija, poca tactilidad y narrativa de insight limitada).
   - CTA `+` no es consistente entre modulos (tamano/posicion/jerarquia distinta en `servicios`, `clientes`, `barberos`).
   - Persisten contenedores "card padre" en modulos operativos (especialmente `servicios`, `barberos` y ahora tambien `citas`) que enmarcan de mas el contenido.
-  - En `citas`, `Fecha` y `Hora` siguen apilados verticalmente en lugar de composicion compacta horizontal.
   - El modal de `Nueva Cita` no se percibe consistente con `Nuevo Cliente`/`Nuevo Servicio` (estructura y lenguaje de overlay diferente).
   - En `inicio`, el CTA "Ver todas" rompe en multilinea ("Ver / todas") en viewport pequeno.
   - Admins SaaS sin negocio propio no pueden entrar al dashboard de negocio desde mobile (loop funcional hacia `/admin`).
@@ -110,9 +108,46 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
 - `Nueva Cita` mejoro en claridad de campos y elimino el picker de hora anterior de baja calidad.
 - `Barberos` mejoro en lectura de lista/leaderboard y detalle en sheet.
 - La navegacion inferior ya comunica mejor prioridades y reduce carga cognitiva.
-- Persisten riesgos de sistema: date picker nativo, shell con doble inset en modulos puntuales y visualizacion de datos aun poco tactil.
+- Los cards contenedores se perciben premium y ya funcionan como lenguaje visual fuerte del producto.
+- Persisten riesgos de sistema: shell con doble inset en modulos puntuales y visualizacion de datos aun poco tactil.
 
-### Inconsistencias visuales agregadas (capturas adjuntas)
+### Correccion de precision del audit (Sesion 145)
+
+Pendientes que se marcan como **resueltos en código**:
+
+- Date picker nativo en `Nueva Cita`:
+  - Estado real: **resuelto**.
+  - Evidencia: `DatePickerTrigger` custom en `src/app/(dashboard)/citas/page-v2.tsx`.
+- Layout `Fecha | Hora`:
+  - Estado real: **resuelto**.
+  - Evidencia: `grid grid-cols-2 gap-3` en `src/app/(dashboard)/citas/page-v2.tsx`.
+- Emojis en `Servicios`:
+  - Estado real: **resuelto** en UI operativa.
+  - Evidencia: `iconName + ServiceIcon` en `src/app/(dashboard)/servicios/page-v2.tsx`.
+- Pull-to-refresh en módulos core:
+  - Estado real: **resuelto** para `citas`, `clientes`, `servicios`.
+  - Evidencia: wrappers `PullToRefresh` en cada `page-v2`.
+- `whileHover` en mobile v2:
+  - Estado real: **resuelto** en rutas v2 principales.
+  - Evidencia: aparece en archivos `page-old.tsx`, no en flujos v2 core.
+
+Pendientes que sí siguen abiertos (confirmados):
+
+- Button migration:
+  - `citas`: ~22 `<button>` manuales vs ~7 `<Button>`.
+  - `barberos`: ~7 `<button>` manuales vs ~3 `<Button>`.
+- Card padre / doble encapsulado:
+  - Persisten wrappers en algunos módulos/subvistas; requiere normalización final.
+- Charts touch-first:
+  - Gate E sigue pendiente.
+- Header CTA Contract:
+  - Inconsistencia cross-módulo aún visible.
+- `Servicios` edit bug:
+  - Estado no concluyente en esta pasada; mantener como pendiente de validación funcional.
+- Create Modal Contract:
+  - Mejoró, pero requiere validación visual final cross-módulo en dispositivo real.
+
+### Inconsistencias visuales agregadas (capturas adjuntas, históricas)
 
 - `Servicios`:
   - Header sigue percibiendose enmarcado en card/panel y el `+` queda debajo del bloque textual.
@@ -126,8 +161,9 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
   - Recomendacion: unificar variante del `+` con `clientes/servicios` y reducir encapsulado del shell en mobile.
 - `Citas`:
   - La vista principal sigue dentro de un contenedor cuadrado/padre, reduciendo sensacion edge-to-edge.
-  - `Hora` aun va debajo de `Fecha`; el flujo se siente mas largo de lo necesario.
-  - Recomendacion: eliminar el contenedor padre en mobile y usar layout 2-column (`Fecha | Hora`) en ancho suficiente (fallback vertical en anchos muy pequenos).
+  - `Hora` iba debajo de `Fecha` y alargaba el flujo.
+  - Estado actual: `Fecha | Hora` ya esta en layout 2-column en `Nueva Cita`.
+  - Recomendacion vigente: extender ese mismo contrato a cualquier otro formulario corto equivalente.
 - `Inicio`:
   - CTA "Ver todas" rompe en dos lineas.
   - Recomendacion: asegurar `white-space: nowrap`, ancho minimo de CTA o copy alterno corto ("Ver todo") para 320-360dp.
@@ -238,7 +274,6 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
   - **Pendiente de verificación visual final**: confirmar en dispositivo real que no aparezcan dobles insets en sub-vistas y modales internos.
   - **Sigue pendiente**:
     - contrato visual único de `Create Modal` entre `Nueva Cita`, `Nuevo Cliente`, `Nuevo Servicio`;
-    - date picker unificado en `Nueva Cita` (evitar fallback nativo inconsistente);
     - consistencia total de filtros/tabs/search focus states entre módulos.
 
 ### Score update rapido (post Sesion 143)
@@ -249,21 +284,57 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
 
 Nota: el score global aún está limitado por deuda en contratos de interacción (gestos/haptics/modales/feedback), no por colorimetría.
 
+### Update de implementación (Sesion 144 - Iconografía y consolidación visual)
+
+- Fortalezas confirmadas (mantener):
+  - El patrón de **cards contenedoras** en mobile está en nivel alto de percepción premium cuando:
+    - hay radio consistente,
+    - borde sutil,
+    - sombra controlada,
+    - jerarquía limpia por bloques.
+  - Este lenguaje ya se percibe como identidad propia del producto y debe quedar como baseline.
+
+- Aplicado:
+  - Se removieron emojis en superficies operativas de `Servicios` y se migró a iconografía Lucide consistente:
+    - dataset de servicios ahora usa `iconName` + render de `ServiceIcon`.
+    - tarjetas mobile, tabla desktop, “Más popular” y “Top 5” ya no usan emoji.
+    - archivo: `src/app/(dashboard)/servicios/page-v2.tsx`.
+  - Se removieron emojis de UI en Onboarding y Loyalty visibles:
+    - `src/components/onboarding/steps/welcome.tsx`
+    - `src/components/onboarding/steps/success.tsx`
+    - `src/components/loyalty/client-status-card.tsx`
+    - `src/components/loyalty/loyalty-preview.tsx`
+    - `src/components/loyalty/client-account-modal.tsx`
+
+- Impacto UX:
+  - Mejora de coherencia de lenguaje visual (menos “ruido decorativo”).
+  - Mejor compatibilidad dark/light al usar iconos vectoriales con color semántico controlado.
+  - Mayor sensación de sistema profesional consistente entre módulos.
+
+- Pendiente sugerido:
+  - Completar barrido de copy no-operativo (ej. mensajes de referidos o textos marketing con emojis) si se quiere política **zero-emoji** total en todo el producto, no solo en UI operativa.
+
+### Score update rapido (post Sesion 144)
+
+- Consistencia cross-modulo: **7.6 -> 8.0**
+- Consistencia de componentes de acción: **7.0 -> 7.4**
+- Sensación “nativo premium”: **7.7 -> 8.0**
+
 ### Re-Audit Full Pass (codigo + capturas)
 
-- Resultado general: no se detectaron nuevos **P0** fuera de los ya documentados (date picker nativo y data-viz no touch-first), pero si se confirmaron inconsistencias **P1** transversales.
+- Resultado general: no se detectaron nuevos **P0** fuera de los ya documentados de interacción y data-viz touch-first; sí se confirmaron inconsistencias **P1** transversales.
 - Hallazgos confirmados en codigo:
   - `Servicios`: header usa `flex-wrap` y permite que el `+` caiga debajo del bloque de titulo en mobile (`src/app/(dashboard)/servicios/page-v2.tsx`).
   - `Clientes`: CTA `+` del header usa escala mas pequena y distinta jerarquia vs otros modulos (`src/app/(dashboard)/clientes/page-v2.tsx`).
   - `Barberos`: CTA `+` usa variante/tamano distinto y mantiene panel contenedor de controles muy marcado (`src/app/(dashboard)/barberos/page-v2.tsx`).
   - `Citas`: la escena principal se mantiene dentro de un contenedor rectangular/padre en mobile, en lugar de composicion respirable edge-to-edge (`src/app/(dashboard)/citas/page-v2.tsx`).
-  - `Citas`: `Fecha` y `Hora` siguen en stack vertical (`src/app/(dashboard)/citas/page-v2.tsx`).
+  - `Citas`: `Fecha` y `Hora` ya migraron a layout compacto 2-column (`src/app/(dashboard)/citas/page-v2.tsx`).
   - `Inicio`: CTA "Ver todas" en `Proximas Citas Hoy` puede quebrar en pantallas chicas (`src/components/dashboard/dashboard-content.tsx`).
   - `DashboardLayout`: cuando no existe `business` y el usuario es admin, se fuerza `redirect('/admin')`, impidiendo acceso al dashboard de negocio para admins sin negocio propio (`src/app/(dashboard)/layout.tsx`).
   - `MoreMenuDrawer`: no expone acceso admin en mobile para usuarios admin, lo que reduce descubribilidad de cambio de contexto entre dashboard de negocio y super admin (`src/components/dashboard/more-menu-drawer.tsx`).
 - Recomendacion de cierre:
   - Definir `Header CTA Contract` unico (tamano, posicion, icono, wrapper y breakpoints).
-  - Definir `Compact Field Grid` para formularios cortos en mobile (`Fecha | Hora`).
+  - Escalar `Compact Field Grid` a todos los formularios cortos en mobile (patron ya aplicado en `Nueva Cita`).
   - Definir `No-wrap CTA Contract` para botones cortos en cards (`Ver todas`, `Ver todo`).
 
 ---
@@ -473,37 +544,37 @@ Nota: el score global aún está limitado por deuda en contratos de interacción
 
 ---
 
-## [P2] Pull-to-refresh esta construido pero fuera del flujo principal
+## [P2] Pull-to-refresh
 
 ### Evidencia
 
-- `src/components/ui/pull-to-refresh.tsx` existe.
-- Modulos v2 principales no lo usan consistentemente.
+- `src/components/ui/pull-to-refresh.tsx` existe y ya está integrado en módulos core.
+- Presente en `citas`, `clientes`, `servicios`.
 
 ### Impacto
 
-- Patron nativo esperado pero ausente.
+- Patrón nativo ya incorporado; falta estandarizar thresholds/haptics cross-módulo.
 
 ### Recomendacion
 
-- Incorporarlo en listados core donde tenga valor real (citas/clientes/servicios).
+- Mantenerlo como contrato base y alinear feedback/haptics en todos los listados táctiles.
 
 ---
 
-## [P2] Se usa demasiado paradigma hover para mobile
+## [P2] Se usa paradigma hover en archivos legacy
 
 ### Evidencia
 
-- Amplio uso de `whileHover` en componentes de flujo mobile.
+- El uso de `whileHover` relevante está concentrado en `page-old.tsx` (legacy).
 
 ### Impacto
 
-- Efectos pensados para mouse no agregan valor en touch.
+- Riesgo bajo en rutas v2 actuales; riesgo moderado si legacy vuelve a activarse.
 
 ### Recomendacion
 
-- Priorizar `whileTap`, press-state, drag-state y scroll-state.
-- Reservar hover para desktop.
+- Mantener `whileTap`, press-state, drag-state y scroll-state en v2.
+- Si se mantiene legacy, encapsular `hover` detrás de `pointer:fine`.
 
 ---
 
@@ -749,24 +820,23 @@ Nota: el score global aún está limitado por deuda en contratos de interacción
 
 ---
 
-## [P0] Date/Time picker nativo rompe calidad en dark mode y usabilidad
+## [P1] Date/Time picker en Nueva Cita (estado actual)
 
 ### Evidencia
 
-- En `src/app/(dashboard)/citas/page-v2.tsx`, `Hora` ya migro a `IOSTimePicker` + `TimePickerTrigger`.
-- `Fecha` sigue en `input type="date"` (aunque con `dark:[color-scheme:dark]`).
-- El riesgo visual/UX nativo ahora se concentra solo en fecha.
+- En `src/app/(dashboard)/citas/page-v2.tsx`, `Hora` usa `IOSTimePicker` + `TimePickerTrigger`.
+- En `src/app/(dashboard)/citas/page-v2.tsx`, `Fecha` usa `DatePickerTrigger` (picker dedicado), no `input[type=date]` en el flujo principal.
 
 ### Impacto
 
-- Mejora clara de calidad en seleccion de hora.
-- Persiste inconsistencia de experiencia en fecha segun navegador/dispositivo.
+- Mejora clara de calidad y consistencia en fecha/hora dentro del modal de creación.
+- El riesgo principal pasa de “nativo inconsistente” a “paridad visual fina” entre modales de creación.
 
 ### Recomendacion
 
-- Completar unificacion migrando tambien `Fecha` a picker dedicado de sistema.
-- Si se mantiene nativo temporalmente: mantener estrategia dark + matrix de QA real en iOS/Android/PWA.
-- Estado QA: **Parcialmente resuelto**.
+- Mantener `DatePickerTrigger`/`TimePickerTrigger` como contrato oficial en altas de citas.
+- Validar QA cross-device (Safari iOS, PWA iOS standalone, Chrome Android) para confirmar microdetalles de foco/scroll/teclado.
+- Estado QA: **Resuelto en implementación, pendiente validación visual final en hardware**.
 
 ---
 
@@ -1335,8 +1405,8 @@ Esta iteracion movio la app de forma clara hacia el objetivo. El siguiente salto
 
 1. Completar `Interaction OS` unificado:
    - mismo sistema de motion, gestos y feedback en todos los modulos core.
-2. Unificar Date + Time picker en `Nueva Cita`:
-   - remover dependencia de `input[type=date]` nativo en flujo core.
+2. Terminar `Create Modal Contract` en `Nueva Cita`/`Nuevo Cliente`/`Nuevo Servicio`:
+   - validar paridad visual y de comportamiento con teclado/safe-area.
 3. Cerrar inconsistencia de shell mobile:
    - eliminar por completo la sensacion de "card padre" y doble inset en vistas operativas.
 4. Resolver acceso admin en mobile sin loops silenciosos:
@@ -1354,7 +1424,6 @@ Esta iteracion movio la app de forma clara hacia el objetivo. El siguiente salto
 4. Elevar Data Viz mobile a touch-first:
    - charts con lectura rapida, interaccion tactil util y narrativa accionable.
 5. Corregir microfricciones de layout:
-   - `Fecha | Hora` en composicion compacta cuando el ancho lo permita.
    - CTA "Ver todas" sin saltos de linea en viewports chicos.
 6. Rediseñar `MobileHeader` en pantallas internas:
    - evitar barra persistente de branding (`nombre negocio + campana`) en todos los modulos operativos.

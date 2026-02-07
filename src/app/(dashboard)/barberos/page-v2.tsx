@@ -175,7 +175,7 @@ export default function BarberosPage() {
           className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
         />
       </div>
-      <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 lg:max-w-[1600px] lg:mx-auto space-y-6 relative z-10">
+      <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 space-y-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -271,7 +271,7 @@ export default function BarberosPage() {
                 data-view-tab={value}
                 className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                   viewMode === value
-                    ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.3)]'
+                    ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white ring-1 ring-violet-300/35'
                     : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                 }`}
               >
@@ -646,11 +646,11 @@ function TableView({
   sortDirection: SortDirection
 }) {
   const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 text-zinc-400" />
+    if (sortField !== field) return <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
     return sortDirection === 'asc' ? (
-      <ArrowUp className="h-4 w-4 text-blue-600" />
+      <ArrowUp className="h-3.5 w-3.5 text-violet-600" />
     ) : (
-      <ArrowDown className="h-4 w-4 text-blue-600" />
+      <ArrowDown className="h-3.5 w-3.5 text-violet-600" />
     )
   }
 
@@ -659,75 +659,75 @@ function TableView({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden"
+      className="rounded-xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden"
     >
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-zinc-50 dark:bg-zinc-800/50">
+          <thead className="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
             <tr>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-3 text-left">
                 <button
                   onClick={() => onSort('name')}
-                  className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                  className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                 >
                   Barbero
                   <SortIcon field="name" />
                 </button>
               </th>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => onSort('appointments')}
-                  className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                  className="flex items-center justify-end gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors ml-auto"
                 >
                   Citas/Mes
                   <SortIcon field="appointments" />
                 </button>
               </th>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => onSort('revenue')}
-                  className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                  className="flex items-center justify-end gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors ml-auto"
                 >
                   Ingresos
                   <SortIcon field="revenue" />
                 </button>
               </th>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-3 text-right">
                 <button
                   onClick={() => onSort('rating')}
-                  className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                  className="flex items-center justify-end gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors ml-auto"
                 >
                   Rating
                   <SortIcon field="rating" />
                 </button>
               </th>
-              <th className="px-6 py-4 text-left">
+              <th className="px-4 py-3 text-center">
                 <button
                   onClick={() => onSort('level')}
-                  className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+                  className="flex items-center justify-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors mx-auto"
                 >
                   Nivel
                   <SortIcon field="level" />
                 </button>
               </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+              <th className="px-4 py-3 text-center text-xs font-semibold text-zinc-600 dark:text-zinc-400">
                 Tendencia
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
             {barbers.map((barber) => (
               <tr
                 key={barber.id}
-                className="border-t border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
               >
-                <td className="px-6 py-4">
+                <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
-                      <UserRound className="h-5 w-5 text-white" />
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                      <UserRound className="h-4 w-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-[15px] font-semibold text-zinc-900 dark:text-white">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-white">
                         {barber.name}
                       </p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -736,34 +736,38 @@ function TableView({
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-[15px] text-zinc-900 dark:text-white font-semibold">
-                  {barber.stats.appointments_this_month}
+                <td className="px-4 py-3 text-right">
+                  <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    {barber.stats.appointments_this_month}
+                  </span>
                 </td>
-                <td className="px-6 py-4 text-[15px] text-zinc-900 dark:text-white font-semibold">
-                  {formatCurrency(barber.stats.revenue_this_month)}
+                <td className="px-4 py-3 text-right">
+                  <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    {formatCurrency(barber.stats.revenue_this_month)}
+                  </span>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    <span className="font-semibold text-zinc-900 dark:text-white">
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    <span className="text-sm font-semibold text-zinc-900 dark:text-white">
                       {barber.stats.client_rating}
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 font-bold">
+                <td className="px-4 py-3 text-center">
+                  <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold">
                     {barber.gamification.level}
                   </span>
                 </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-center gap-1.5">
                     {barber.trends.trend_direction === 'up' ? (
-                      <TrendingUp className="h-5 w-5 text-emerald-600" />
+                      <TrendingUp className="h-4 w-4 text-emerald-600" />
                     ) : (
-                      <TrendingDown className="h-5 w-5 text-red-600" />
+                      <TrendingDown className="h-4 w-4 text-red-600" />
                     )}
                     <span
-                      className={`font-semibold ${
+                      className={`text-sm font-semibold ${
                         barber.trends.trend_direction === 'up' ? 'text-emerald-600' : 'text-red-600'
                       }`}
                     >

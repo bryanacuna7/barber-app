@@ -77,8 +77,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-transparent hover:bg-zinc-100/80 focus-visible:ring-zinc-500 dark:hover:bg-zinc-800/80',
       danger:
         'bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600 focus-visible:ring-red-500',
-      gradient:
-        'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:from-blue-700 hover:to-purple-700 focus-visible:ring-blue-500',
+      gradient: 'text-white shadow-lg focus-visible:ring-2',
       success:
         'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 focus-visible:ring-emerald-500',
     }
@@ -89,11 +88,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       lg: 'px-6 py-3.5 text-lg gap-2.5 min-h-[48px]',
     }
 
+    const gradientStyle =
+      variant === 'gradient'
+        ? {
+            background: 'var(--brand-primary)',
+            boxShadow: `0 4px 14px rgba(var(--brand-primary-rgb), 0.3)`,
+            color: 'var(--brand-primary-contrast, #fff)',
+          }
+        : undefined
+
     return (
       // @ts-ignore - framer-motion type compatibility issue
       <motion.button
         ref={ref}
         className={cn(baseStyles, variants[variant], sizes[size], className)}
+        style={gradientStyle}
         disabled={disabled || isLoading}
         onClick={handleClick}
         whileTap={{ scale: 0.97 }}
