@@ -14,7 +14,10 @@ import { Input } from '@/components/ui/input'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { useToast } from '@/components/ui/toast'
 import { FadeInUp } from '@/components/ui/motion'
+import { getStaleCache, setCache, CACHE_TTL } from '@/lib/cache'
 import type { NotificationPreferences, NotificationChannel } from '@/types/database'
+
+const CACHE_KEY = 'notif_prefs'
 
 export function NotificationPreferencesSection() {
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
@@ -22,8 +25,14 @@ export function NotificationPreferencesSection() {
   const [saving, setSaving] = useState(false)
   const toast = useToast()
 
-  // Load preferences
+  // Load preferences with stale-while-revalidate
   useEffect(() => {
+    const cached = getStaleCache<NotificationPreferences>(CACHE_KEY)
+    if (cached) {
+      setPreferences(cached.data)
+      setLoading(false)
+      if (!cached.isStale) return
+    }
     loadPreferences()
   }, [])
 
@@ -33,6 +42,7 @@ export function NotificationPreferencesSection() {
       if (!response.ok) throw new Error('Failed to load preferences')
       const data = await response.json()
       setPreferences(data)
+      setCache(CACHE_KEY, data, CACHE_TTL.LONG)
     } catch (error) {
       console.error('Error loading notification preferences:', error)
       toast.error('Error al cargar preferencias de notificaciones')
@@ -54,6 +64,7 @@ export function NotificationPreferencesSection() {
 
       const updated = await response.json()
       setPreferences(updated)
+      setCache(CACHE_KEY, updated, CACHE_TTL.LONG)
       toast.success('Preferencias guardadas')
     } catch (error) {
       console.error('Error saving notification preferences:', error)

@@ -15,7 +15,9 @@ export function useBusinessSettings(businessId: string) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('businesses')
-        .select('*')
+        .select(
+          'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_logo_url, brand_favicon_url, is_active'
+        )
         .eq('id', businessId)
         .single()
       if (error) throw error
@@ -32,7 +34,7 @@ export function useTeamMembers(businessId: string) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('barbers')
-        .select('*')
+        .select('id, name, email, phone, role, is_active, avatar_url, user_id')
         .eq('business_id', businessId)
       if (error) throw error
       return adaptTeamMembers(data || [])
@@ -51,7 +53,9 @@ export function useUpdateBusinessSettings() {
         .from('businesses')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select(
+          'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_logo_url, brand_favicon_url, is_active'
+        )
         .single()
       if (error) throw error
       return data

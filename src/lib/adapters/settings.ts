@@ -166,17 +166,17 @@ export function adaptTeamMembers(rows: SupabaseBarber[]): UITeamMember[] {
 }
 
 /**
- * Supabase query for business settings
+ * Supabase query for business settings (only columns used by adapter)
  */
 export function getBusinessSettingsQuery() {
-  return '*'
+  return 'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_logo_url, brand_favicon_url, is_active'
 }
 
 /**
- * Supabase query for team members
+ * Supabase query for team members (only columns used by adapter)
  */
 export function getTeamMembersQuery() {
-  return '*'
+  return 'id, name, email, phone, role, is_active, avatar_url, user_id'
 }
 
 /**

@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { X, Clock, Sparkles, AlertTriangle, CreditCard, ChevronRight } from 'lucide-react'
+import { getStaleCache, setCache, CACHE_TTL } from '@/lib/cache'
 import type { SubscriptionStatusResponse } from '@/types/database'
+
+const CACHE_KEY = 'sub_status'
 
 interface TrialBannerProps {
   variant?: 'full' | 'compact'
@@ -15,6 +18,13 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Stale-while-revalidate: show cached data instantly, refresh in background
+    const cached = getStaleCache<SubscriptionStatusResponse>(CACHE_KEY)
+    if (cached) {
+      setSubscription(cached.data)
+      setLoading(false)
+      if (!cached.isStale) return // fresh cache — skip network
+    }
     fetchSubscription()
   }, [])
 
@@ -24,6 +34,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
       if (res.ok) {
         const data = await res.json()
         setSubscription(data)
+        setCache(CACHE_KEY, data, CACHE_TTL.SHORT)
       }
     } catch (error) {
       console.error('Error fetching subscription:', error)
