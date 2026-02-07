@@ -2,61 +2,83 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Clock, MousePointer2 } from 'lucide-react'
+import { ArrowRight, Calendar, Clock, MousePointer2, Zap } from 'lucide-react'
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen bg-white dark:bg-black">
-      {/* Brutalist Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:64px_64px]" />
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-zinc-50 via-white to-blue-50/30 dark:from-zinc-950 dark:via-black dark:to-blue-950/20">
+      {/* Soft gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -left-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-blue-400/10 blur-3xl dark:bg-blue-500/5" />
+        <div className="absolute -right-1/4 top-1/4 h-[600px] w-[600px] rounded-full bg-purple-400/10 blur-3xl dark:bg-purple-500/5" />
+        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-500/5" />
+      </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-16 lg:py-24">
-        {/* Top Badge - Brutalist Style */}
+      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-28 lg:py-32">
+        {/* Top Badge - Modern Premium */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 border-4 border-black bg-yellow-400 px-4 py-2 font-mono text-sm font-bold uppercase tracking-wider dark:border-white dark:bg-yellow-500"
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600/90 to-purple-600/90 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm"
         >
-          <span className="h-2 w-2 animate-pulse bg-red-600" />7 días gratis · Sin tarjeta
+          <Zap className="h-4 w-4" />7 días gratis · Sin tarjeta
         </motion.div>
 
-        <div className="mt-12 grid gap-16 lg:grid-cols-2 lg:gap-8">
+        <div className="mt-12 grid items-center gap-12 lg:grid-cols-2">
           {/* Left: Copy */}
           <div className="flex flex-col justify-center">
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-mono text-5xl font-black uppercase leading-[1.1] tracking-tight text-black dark:text-white sm:text-6xl lg:text-7xl"
+              className="text-5xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-6xl lg:text-7xl"
             >
               El calendario más{' '}
-              <span className="relative inline-block">
-                <span className="relative z-10">rápido</span>
-                <span className="absolute bottom-2 left-0 h-4 w-full bg-yellow-400 dark:bg-yellow-500" />
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+                rápido e intuitivo
               </span>{' '}
               para barberías
             </motion.h1>
 
-            <motion.div
+            <motion.p
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-8 space-y-4 font-mono text-lg font-bold text-black dark:text-white"
+              className="mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-400 sm:text-xl"
             >
-              <div className="flex items-start gap-3">
-                <MousePointer2 className="mt-1 h-6 w-6 flex-shrink-0" />
-                <p>Arrastra y suelta citas en 0.2 segundos</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <Clock className="mt-1 h-6 w-6 flex-shrink-0" />
-                <p>Visualiza tu semana completa de un vistazo</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <Calendar className="mt-1 h-6 w-6 flex-shrink-0" />
-                <p>Real-time sync · Nunca más citas duplicadas</p>
-              </div>
+              Gestiona tu agenda en{' '}
+              <span className="font-semibold text-zinc-900 dark:text-white">0.2 segundos</span> con
+              drag & drop. Sincronización en tiempo real. Cero errores.
+            </motion.p>
+
+            {/* Key Features - Clean badges */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25 }}
+              className="mt-8 flex flex-wrap gap-3"
+            >
+              {[
+                { icon: MousePointer2, text: '0.2s drag & drop' },
+                { icon: Clock, text: 'Vista semanal clara' },
+                { icon: Calendar, text: 'Real-time sync' },
+              ].map((feature, i) => {
+                const Icon = feature.icon
+                return (
+                  <div
+                    key={feature.text}
+                    className="flex items-center gap-2 rounded-xl bg-white/60 px-4 py-2 shadow-sm backdrop-blur-sm dark:bg-zinc-900/60"
+                  >
+                    <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                      {feature.text}
+                    </span>
+                  </div>
+                )
+              })}
             </motion.div>
 
+            {/* CTAs */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -65,176 +87,167 @@ export function HeroSection() {
             >
               <Link
                 href="/register"
-                className="group inline-flex cursor-pointer items-center justify-center gap-3 border-4 border-black bg-black px-8 py-5 font-mono text-lg font-bold uppercase tracking-wider text-white transition-all hover:bg-white hover:text-black dark:border-white dark:bg-white dark:text-black dark:hover:bg-black dark:hover:text-white"
+                className="group inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all hover:shadow-2xl hover:shadow-blue-500/40"
               >
                 Empezar gratis
-                <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
-                href="#demo"
-                className="inline-flex cursor-pointer items-center justify-center gap-3 border-4 border-black bg-white px-8 py-5 font-mono text-lg font-bold uppercase tracking-wider text-black transition-all hover:bg-black hover:text-white dark:border-white dark:bg-black dark:text-white dark:hover:bg-white dark:hover:text-black"
+                href="#features"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-zinc-200 bg-white/80 px-8 py-4 text-base font-semibold text-zinc-900 backdrop-blur-sm transition-all hover:border-zinc-300 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-white dark:hover:border-zinc-600 dark:hover:bg-zinc-900"
               >
-                Ver demo
+                Ver cómo funciona
               </Link>
             </motion.div>
 
-            {/* Social Proof - Brutalist */}
+            {/* Social Proof - Modern Premium */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="mt-12 flex flex-wrap items-center gap-8 border-t-4 border-black pt-8 dark:border-white"
+              className="mt-12 flex flex-wrap items-center gap-8"
             >
-              <div>
-                <p className="font-mono text-4xl font-black text-black dark:text-white">150+</p>
-                <p className="mt-1 font-mono text-sm font-bold uppercase text-black/70 dark:text-white/70">
-                  Barberías
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-4xl font-black text-black dark:text-white">500+</p>
-                <p className="mt-1 font-mono text-sm font-bold uppercase text-black/70 dark:text-white/70">
-                  Citas/día
-                </p>
-              </div>
-              <div>
-                <p className="font-mono text-4xl font-black text-black dark:text-white">2.3s</p>
-                <p className="mt-1 font-mono text-sm font-bold uppercase text-black/70 dark:text-white/70">
-                  Agendar cita
-                </p>
-              </div>
+              {[
+                { value: '150+', label: 'Barberías activas' },
+                { value: '500+', label: 'Citas diarias' },
+                { value: '0.2s', label: 'Tiempo de respuesta', highlight: true },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <p
+                    className={`text-3xl font-bold ${
+                      stat.highlight
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'
+                        : 'text-zinc-900 dark:text-white'
+                    }`}
+                  >
+                    {stat.value}
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{stat.label}</p>
+                </div>
+              ))}
             </motion.div>
           </div>
 
-          {/* Right: Product Demo Visual */}
+          {/* Right: Product Demo Visual - Glassmorphism */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
             className="relative"
           >
-            {/* Brutalist Frame */}
-            <div className="relative border-8 border-black bg-zinc-50 p-4 dark:border-white dark:bg-zinc-900">
-              {/* Calendar Demo - Simplified Visual */}
-              <div className="space-y-3">
-                {/* Header */}
-                <div className="flex items-center justify-between border-4 border-black bg-white p-3 dark:border-white dark:bg-zinc-950">
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider">
-                    Lunes 3 Feb
-                  </span>
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-emerald-600">
-                    ● En vivo
+            {/* Glow Effect */}
+            <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-blue-200/40 via-purple-200/30 to-pink-200/40 blur-3xl dark:from-blue-800/20 dark:via-purple-800/15 dark:to-pink-800/20" />
+
+            {/* Glass Calendar Frame */}
+            <div className="relative overflow-hidden rounded-3xl border border-zinc-200/50 bg-white/90 p-6 shadow-2xl backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+              {/* Header */}
+              <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-zinc-50 to-zinc-100 p-4 dark:from-zinc-800 dark:to-zinc-900">
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">Lunes 3 Feb</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Vista del día</p>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+                  <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                    En vivo
                   </span>
                 </div>
-
-                {/* Time Slots with Appointments */}
-                <div className="space-y-2">
-                  {/* 9:00 - Occupied */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="flex gap-2"
-                  >
-                    <div className="w-16 border-2 border-black bg-white p-2 font-mono text-xs font-bold dark:border-white dark:bg-zinc-950">
-                      09:00
-                    </div>
-                    <div className="flex-1 border-4 border-black bg-blue-400 p-3 dark:border-white">
-                      <p className="font-mono text-sm font-bold text-black">Carlos M.</p>
-                      <p className="font-mono text-xs text-black/70">Corte + Barba</p>
-                    </div>
-                  </motion.div>
-
-                  {/* 10:00 - Empty */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex gap-2"
-                  >
-                    <div className="w-16 border-2 border-black bg-white p-2 font-mono text-xs font-bold dark:border-white dark:bg-zinc-950">
-                      10:00
-                    </div>
-                    <div className="flex-1 cursor-pointer border-4 border-dashed border-black/30 bg-white p-3 transition-all hover:border-black hover:bg-yellow-50 dark:border-white/30 dark:bg-zinc-950 dark:hover:border-white dark:hover:bg-zinc-900">
-                      <p className="font-mono text-xs font-bold uppercase tracking-wider text-black/50 dark:text-white/50">
-                        Disponible
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  {/* 11:00 - Occupied */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex gap-2"
-                  >
-                    <div className="w-16 border-2 border-black bg-white p-2 font-mono text-xs font-bold dark:border-white dark:bg-zinc-950">
-                      11:00
-                    </div>
-                    <div className="flex-1 border-4 border-black bg-yellow-400 p-3 dark:border-white">
-                      <p className="font-mono text-sm font-bold text-black">Andrea R.</p>
-                      <p className="font-mono text-xs text-black/70">Fade Premium</p>
-                    </div>
-                  </motion.div>
-
-                  {/* 12:00 - Empty */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.7 }}
-                    className="flex gap-2"
-                  >
-                    <div className="w-16 border-2 border-black bg-white p-2 font-mono text-xs font-bold dark:border-white dark:bg-zinc-950">
-                      12:00
-                    </div>
-                    <div className="flex-1 cursor-pointer border-4 border-dashed border-black/30 bg-white p-3 transition-all hover:border-black hover:bg-yellow-50 dark:border-white/30 dark:bg-zinc-950 dark:hover:border-white dark:hover:bg-zinc-900">
-                      <p className="font-mono text-xs font-bold uppercase tracking-wider text-black/50 dark:text-white/50">
-                        Disponible
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  {/* 14:00 - Occupied */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="flex gap-2"
-                  >
-                    <div className="w-16 border-2 border-black bg-white p-2 font-mono text-xs font-bold dark:border-white dark:bg-zinc-950">
-                      14:00
-                    </div>
-                    <div className="flex-1 border-4 border-black bg-red-500 p-3 dark:border-white">
-                      <p className="font-mono text-sm font-bold text-white">Luis P.</p>
-                      <p className="font-mono text-xs text-white/80">Color + Diseño</p>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Action Hint - Brutalist */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1 }}
-                  className="mt-4 border-4 border-black bg-yellow-400 p-3 text-center dark:border-white dark:bg-yellow-500"
-                >
-                  <p className="font-mono text-xs font-bold uppercase tracking-wider text-black">
-                    ↑ Arrastra para reorganizar · Click para editar
-                  </p>
-                </motion.div>
               </div>
+
+              {/* Calendar Slots */}
+              <div className="mt-4 space-y-2">
+                {[
+                  {
+                    time: '09:00',
+                    client: 'Carlos M.',
+                    service: 'Corte + Barba',
+                    color: 'from-blue-500 to-blue-600',
+                    delay: 0.4,
+                  },
+                  {
+                    time: '10:00',
+                    client: null,
+                    service: 'Disponible',
+                    color: 'dashed',
+                    delay: 0.5,
+                  },
+                  {
+                    time: '11:00',
+                    client: 'Andrea R.',
+                    service: 'Fade Premium',
+                    color: 'from-purple-500 to-purple-600',
+                    delay: 0.6,
+                  },
+                  {
+                    time: '12:00',
+                    client: null,
+                    service: 'Disponible',
+                    color: 'dashed',
+                    delay: 0.7,
+                  },
+                  {
+                    time: '14:00',
+                    client: 'Luis P.',
+                    service: 'Color + Diseño',
+                    color: 'from-orange-500 to-red-500',
+                    delay: 0.8,
+                  },
+                ].map((slot) => (
+                  <motion.div
+                    key={slot.time}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: slot.delay }}
+                    className="flex gap-3"
+                  >
+                    {/* Time */}
+                    <div className="flex w-16 items-center justify-center rounded-xl bg-zinc-100 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                      <span className="text-sm">{slot.time}</span>
+                    </div>
+
+                    {/* Appointment Card */}
+                    {slot.client ? (
+                      <div
+                        className={`group flex-1 cursor-move rounded-xl bg-gradient-to-r ${slot.color} p-4 shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl`}
+                      >
+                        <p className="font-semibold text-white">{slot.client}</p>
+                        <p className="mt-1 text-sm text-white/80">{slot.service}</p>
+                      </div>
+                    ) : (
+                      <div className="flex-1 cursor-pointer rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50/50 p-4 transition-all hover:border-zinc-400 hover:bg-zinc-100/50 dark:border-zinc-700 dark:bg-zinc-800/30 dark:hover:border-zinc-600 dark:hover:bg-zinc-800/50">
+                        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                          {slot.service}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Action Hint */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1 }}
+                className="mt-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 p-3 text-center dark:from-blue-950/30 dark:to-purple-950/30"
+              >
+                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  ↑ Arrastra para reorganizar · Click para editar
+                </p>
+              </motion.div>
             </div>
 
-            {/* Floating Speed Badge - Brutalist */}
+            {/* Floating Speed Badge - Modern Premium */}
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 1.2 }}
-              className="absolute -right-4 -top-4 border-4 border-black bg-red-600 px-4 py-3 dark:border-white"
+              className="absolute -right-4 -top-4 rounded-2xl border border-red-200 bg-gradient-to-br from-red-500 to-red-600 px-5 py-3 shadow-2xl dark:border-red-800"
             >
-              <p className="font-mono text-2xl font-black text-white">0.2s</p>
-              <p className="font-mono text-xs font-bold uppercase text-white">Drag & Drop</p>
+              <p className="text-3xl font-bold text-white">0.2s</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/90">
+                Drag & Drop
+              </p>
             </motion.div>
           </motion.div>
         </div>

@@ -1,79 +1,139 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { MousePointer2, Zap, Clock, Users, Bell, BarChart3 } from 'lucide-react'
+import {
+  MousePointer2,
+  Zap,
+  Clock,
+  Users,
+  Bell,
+  BarChart3,
+  Calendar,
+  TrendingUp,
+  Smartphone,
+  Shield,
+  CreditCard,
+  MessageSquare,
+} from 'lucide-react'
 
-// Focus on speed and UX - the differentiator
+// Core features - focus on speed and UX
 const coreFeatures = [
   {
     icon: MousePointer2,
     title: 'Drag & Drop Ultra-Rápido',
     metric: '0.2s',
     description: 'Reorganiza citas arrastrando. Respuesta instantánea, sin lag.',
-    impact: '10x más rápido que otros sistemas',
+    color: 'blue',
   },
   {
     icon: Zap,
     title: 'Real-Time Sync',
     metric: '<1s',
     description: 'Cambios sincronizados en todos los dispositivos al instante.',
-    impact: 'Nunca más citas duplicadas',
+    color: 'purple',
   },
   {
     icon: Clock,
     title: 'Vista Semanal Inteligente',
     metric: '1 vistazo',
     description: 'Toda tu semana visible. No clicks innecesarios.',
-    impact: 'Ahorra 30min/día vs calendarios tradicionales',
+    color: 'emerald',
   },
   {
     icon: Users,
     title: 'Búsqueda Instantánea',
     metric: '<0.1s',
     description: 'Encuentra cualquier cliente o cita escribiendo. Fuzzy search incluido.',
-    impact: 'Sin scroll infinito',
+    color: 'orange',
   },
   {
     icon: Bell,
     title: 'Recordatorios Automáticos',
-    metric: '80% menos',
+    metric: '80%↓',
     description: 'Notificaciones inteligentes que reducen no-shows.',
-    impact: 'No-shows',
+    color: 'red',
   },
   {
     icon: BarChart3,
     title: 'Analytics Real-Time',
     metric: 'Live',
     description: 'KPIs actualizados en tiempo real. Decisiones basadas en datos.',
-    impact: 'Sin esperar reportes',
+    color: 'cyan',
   },
 ]
 
+// Additional features
+const additionalFeatures = [
+  {
+    icon: Calendar,
+    title: 'Gestión de Citas',
+    description: 'Vista diaria, semanal y mensual. Drag & drop para reorganizar.',
+  },
+  {
+    icon: Smartphone,
+    title: '100% Responsive',
+    description: 'Funciona perfecto en móvil, tablet y desktop.',
+  },
+  {
+    icon: Shield,
+    title: 'Datos Seguros',
+    description: 'Respaldos automáticos y encriptación. Tu información protegida.',
+  },
+  {
+    icon: CreditCard,
+    title: 'Pagos Simples',
+    description: 'SINPE Móvil integrado. Reporta pagos fácilmente.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Reportes Detallados',
+    description: 'Exporta reportes de ventas, citas y clientes.',
+  },
+  {
+    icon: MessageSquare,
+    title: 'Soporte en Español',
+    description: 'Equipo local disponible por WhatsApp y chat.',
+  },
+]
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+}
+
 export function FeaturesSection() {
   return (
-    <section className="border-t-8 border-black bg-white py-20 dark:border-white dark:bg-zinc-950">
+    <section className="border-t border-zinc-200 bg-white py-20 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="mx-auto max-w-7xl px-6">
-        {/* Header - Brutalist */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center"
         >
-          <h2 className="font-mono text-4xl font-black uppercase tracking-tight text-black dark:text-white sm:text-5xl">
-            ¿Por qué somos los{' '}
-            <span className="relative inline-block">
-              <span className="relative z-10">más rápidos</span>
-              <span className="absolute bottom-2 left-0 h-4 w-full bg-blue-400" />
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-4xl">
+            Por qué somos{' '}
+            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-violet-600 bg-clip-text text-transparent">
+              los más rápidos
             </span>
-            ?
           </h2>
-          <p className="mt-4 font-mono text-lg font-bold text-black/70 dark:text-white/70">
-            Optimizado para velocidad. Cada milisegundo cuenta.
+          <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
+            Optimizado para velocidad. Cada milisegundo cuenta para tu negocio.
           </p>
         </motion.div>
 
-        {/* Core Features Grid - Brutalist Cards */}
+        {/* Core Features Grid - Glassmorphism Cards */}
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {coreFeatures.map((feature, index) => {
             const Icon = feature.icon
@@ -84,34 +144,41 @@ export function FeaturesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="group cursor-pointer border-4 border-black bg-white p-6 transition-all hover:bg-yellow-50 dark:border-white dark:bg-zinc-950 dark:hover:bg-zinc-900"
+                whileHover={{ scale: 1.02 }}
+                className={`group relative overflow-hidden rounded-3xl border border-${feature.color}-200/50 bg-white/90 p-6 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl dark:border-${feature.color}-800/50 dark:bg-zinc-900/80`}
               >
-                {/* Icon + Metric */}
-                <div className="flex items-start justify-between">
-                  <div className="border-4 border-black bg-blue-400 p-3 dark:border-white">
-                    <Icon className="h-8 w-8 text-black dark:text-white" />
+                {/* Gradient overlay on hover */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br from-${feature.color}-50/0 to-${feature.color}-100/0 opacity-0 transition-opacity group-hover:from-${feature.color}-50/50 group-hover:to-${feature.color}-100/50 group-hover:opacity-100 dark:group-hover:from-${feature.color}-950/20 dark:group-hover:to-${feature.color}-950/10`}
+                />
+
+                <div className="relative">
+                  {/* Icon + Metric */}
+                  <div className="flex items-start justify-between">
+                    <div
+                      className={`rounded-2xl bg-gradient-to-br from-${feature.color}-500 to-${feature.color}-600 p-3 shadow-lg`}
+                    >
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                    <div
+                      className={`rounded-xl bg-${feature.color}-100 px-3 py-1 dark:bg-${feature.color}-900/30`}
+                    >
+                      <p
+                        className={`text-sm font-bold text-${feature.color}-700 dark:text-${feature.color}-300`}
+                      >
+                        {feature.metric}
+                      </p>
+                    </div>
                   </div>
-                  <div className="border-2 border-black bg-yellow-400 px-3 py-1 dark:border-white dark:bg-yellow-500">
-                    <p className="font-mono text-sm font-black uppercase text-black">
-                      {feature.metric}
-                    </p>
-                  </div>
-                </div>
 
-                {/* Title */}
-                <h3 className="mt-6 font-mono text-xl font-black uppercase text-black dark:text-white">
-                  {feature.title}
-                </h3>
+                  {/* Title */}
+                  <h3 className="mt-6 text-xl font-semibold text-zinc-900 dark:text-white">
+                    {feature.title}
+                  </h3>
 
-                {/* Description */}
-                <p className="mt-3 font-mono text-sm font-bold leading-relaxed text-black/80 dark:text-white/80">
-                  {feature.description}
-                </p>
-
-                {/* Impact Badge */}
-                <div className="mt-4 border-t-4 border-black pt-4 dark:border-white">
-                  <p className="font-mono text-xs font-black uppercase tracking-wider text-black/60 dark:text-white/60">
-                    → {feature.impact}
+                  {/* Description */}
+                  <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                    {feature.description}
                   </p>
                 </div>
               </motion.div>
@@ -119,87 +186,102 @@ export function FeaturesSection() {
           })}
         </div>
 
-        {/* Before/After Comparison - Brutalist */}
+        {/* Additional Features - Compact Grid */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {additionalFeatures.map((feature) => {
+            const Icon = feature.icon
+            return (
+              <motion.div
+                key={feature.title}
+                variants={item}
+                className="flex gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:border-zinc-700"
+              >
+                <div className="flex-shrink-0">
+                  <div className="rounded-xl bg-zinc-200 p-2 dark:bg-zinc-800">
+                    <Icon className="h-5 w-5 text-zinc-700 dark:text-zinc-300" />
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-zinc-900 dark:text-white">{feature.title}</h4>
+                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                    {feature.description}
+                  </p>
+                </div>
+              </motion.div>
+            )
+          })}
+        </motion.div>
+
+        {/* Before/After Comparison - Modern Premium */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="mt-20 border-8 border-black bg-zinc-50 p-8 dark:border-white dark:bg-zinc-900 sm:p-12"
+          className="mt-20 overflow-hidden rounded-3xl border border-zinc-200 bg-gradient-to-br from-blue-50 to-purple-50 p-8 dark:border-zinc-800 dark:from-blue-950/20 dark:to-purple-950/20 sm:p-12"
         >
-          <h3 className="mb-8 text-center font-mono text-2xl font-black uppercase text-black dark:text-white">
-            Antes vs Después
+          <h3 className="mb-8 text-center text-2xl font-bold text-zinc-900 dark:text-white">
+            ¿Por qué BarberShop Pro?
           </h3>
 
           <div className="grid gap-8 lg:grid-cols-2">
             {/* Before */}
-            <div className="border-4 border-black bg-white p-6 dark:border-white dark:bg-zinc-950">
-              <div className="mb-4 flex items-center justify-between border-b-4 border-black pb-4 dark:border-white">
-                <p className="font-mono text-sm font-black uppercase tracking-wider">
-                  Otros sistemas
-                </p>
-                <span className="text-3xl">😰</span>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
+                <p className="font-semibold text-zinc-600 dark:text-zinc-400">Otros sistemas</p>
+                <span className="text-2xl">😰</span>
               </div>
-              <div className="space-y-3 font-mono text-sm font-bold">
-                <p className="flex items-start gap-2">
-                  <span className="text-red-600">✕</span>
-                  <span>3+ horas/día gestionando WhatsApp</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-red-600">✕</span>
-                  <span>30% de no-shows</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-red-600">✕</span>
-                  <span>Doble-reservas frecuentes</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-red-600">✕</span>
-                  <span>UI lenta y confusa</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-red-600">✕</span>
-                  <span>Sin datos para decidir</span>
-                </p>
+              <div className="space-y-3 text-sm">
+                {[
+                  '3+ horas/día gestionando WhatsApp',
+                  '30% de no-shows',
+                  'Doble-reservas frecuentes',
+                  'UI lenta y confusa',
+                  'Sin datos para decidir',
+                ].map((item, i) => (
+                  <p key={i} className="flex items-start gap-2 text-zinc-600 dark:text-zinc-400">
+                    <span className="font-bold text-red-500">✕</span>
+                    <span>{item}</span>
+                  </p>
+                ))}
               </div>
             </div>
 
             {/* After */}
-            <div className="border-4 border-black bg-white p-6 dark:border-white dark:bg-zinc-950">
-              <div className="mb-4 flex items-center justify-between border-b-4 border-black pb-4 dark:border-white">
-                <p className="font-mono text-sm font-black uppercase tracking-wider">
-                  BarberShop Pro
-                </p>
-                <span className="text-3xl">🚀</span>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
+                <p className="font-semibold text-zinc-600 dark:text-zinc-400">BarberShop Pro</p>
+                <span className="text-2xl">🚀</span>
               </div>
-              <div className="space-y-3 font-mono text-sm font-bold">
-                <p className="flex items-start gap-2">
-                  <span className="text-emerald-600">✓</span>
-                  <span>Todo automatizado · Cero WhatsApp</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-emerald-600">✓</span>
-                  <span>5% de no-shows (recordatorios auto)</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-emerald-600">✓</span>
-                  <span>Real-time sync · Nunca duplicados</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-emerald-600">✓</span>
-                  <span>UI ultra-rápida (0.2s response)</span>
-                </p>
-                <p className="flex items-start gap-2">
-                  <span className="text-emerald-600">✓</span>
-                  <span>Analytics live · Decisiones basadas en data</span>
-                </p>
+              <div className="space-y-3 text-sm">
+                {[
+                  'Todo automatizado · Cero WhatsApp',
+                  '5% de no-shows (recordatorios auto)',
+                  'Real-time sync · Nunca duplicados',
+                  'UI ultra-rápida (0.2s response)',
+                  'Analytics live · Decisiones basadas en data',
+                ].map((item, i) => (
+                  <p
+                    key={i}
+                    className="flex items-start gap-2 text-emerald-600 dark:text-emerald-400"
+                  >
+                    <span className="font-bold">✓</span>
+                    <span>{item}</span>
+                  </p>
+                ))}
               </div>
 
-              {/* CTA inside After box */}
-              <div className="mt-6 border-t-4 border-black pt-6 text-center dark:border-white">
+              {/* CTA */}
+              <div className="mt-6 border-t border-zinc-200 pt-6 text-center dark:border-zinc-800">
                 <a
                   href="/register"
-                  className="inline-block cursor-pointer border-4 border-black bg-black px-6 py-3 font-mono text-sm font-black uppercase tracking-wider text-white transition-all hover:bg-yellow-400 hover:text-black dark:border-white dark:bg-white dark:text-black dark:hover:bg-yellow-400"
+                  className="inline-block cursor-pointer rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
                 >
                   Prueba gratis 7 días
                 </a>
