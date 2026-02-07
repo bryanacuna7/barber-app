@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-07 (Session 149 - Chart Tooltips + Stats Cards)
-- **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Post-Color Audit polish (tooltips, compact currency, responsive stats)
+- **Last Updated:** 2026-02-07 (Session 151 - PWA auto-update fix for iOS)
+- **Current Branch:** `main` (feature/ui-ux-redesign squash-merged)
+- **Current Phase:** Post-merge — PWA update fix, icon refinements
 - **Color Audit:** `color-audit.md` (root)
 - **Supabase Project:** `zanywefnobtzhoeuoyuc`
 
@@ -93,6 +93,52 @@
 ---
 
 ## Recent Sessions
+
+### Session 151: PWA Auto-Update Fix for iOS + Icon Refinements (2026-02-07)
+
+**Status:** ✅ Complete
+
+**Objective:** Fix iOS PWA not updating after Vercel deploys (required uninstall/reinstall), refine barber pole icon
+
+**What was done:**
+
+1. **SW: Removed `/` from precache** — Root HTML was cached at install time and never refreshed between deploys. Now only offline page + icons are precached. HTML served network-first (always fresh when online).
+
+2. **SW: Added `SKIP_WAITING` message listener** — Registration component can tell a waiting SW to activate immediately.
+
+3. **SW: Bumped cache names to v2** — Forces old v1 caches to be deleted on activate (one-time cleanup).
+
+4. **Registration: Full rewrite** — Added `updateViaCache: 'none'` (bypass HTTP cache for SW checks), `controllerchange` → auto-reload, `visibilitychange` → `registration.update()` (crucial for iOS — checks for updates when user returns to app), proper `waiting`/`installing` state handling with SKIP_WAITING flow.
+
+5. **next.config.ts: Cache-Control headers** — `no-cache, no-store, must-revalidate` for `/sw.js` and `/manifest.webmanifest` so Vercel never caches them.
+
+6. **PWA Icon refinements** — Bigger barber pole (32% width, 80% height), rounded pill shape, white stripes on pure black, removed pole caps, 5 stripes with proper spacing. Updated static PNGs.
+
+**Files:** `public/sw.js`, `src/components/pwa/service-worker-register.tsx`, `next.config.ts`, `src/app/api/pwa/icon/route.tsx`, `public/icon-192.png`, `public/icon-512.png`
+
+---
+
+### Session 150: Squash Merge to Main + Discord Deploy Notifications + PWA Icon (2026-02-07)
+
+**Status:** ✅ Complete
+
+**Objective:** Merge feature branch to main, set up Discord release notifications, redesign PWA default icon
+
+**What was done:**
+
+1. **Squash Merge to Main** — 138 commits from `feature/ui-ux-redesign` squash-merged into `main` as single clean commit. Branches deleted: `feature/comprehensive-audit`, `feature/gamification-system`, `feature/subscription-payments-rebranding`.
+
+2. **Discord Deploy Notifications** — New GitHub Action (`.github/workflows/discord-deploy-notify.yml`) that triggers on push to main. Reads user-facing release notes from `RELEASE_NOTES.md`, builds JSON payload via Python3, sends embed to Discord webhook. Fixed initial JSON escaping bug (multi-step → single-step approach).
+
+3. **RELEASE_NOTES.md** (NEW) — User-facing release notes file, written in non-technical language (App Store style). Discord workflow reads latest version from this file.
+
+4. **PWA Icon Redesign** — Redesigned default barber pole icon in `src/app/api/pwa/icon/route.tsx`. New design: monochromatic negative-space barber pole — white diagonal stripes on pure black, pole shape defined by `borderRadius` clipping. No background fill on the pole itself; black space IS the design. User fine-tuned proportions directly.
+
+**Git state:** On `main`, pushed. Discord webhook secret configured. Vercel auto-deploying from main.
+
+**Files:** `.github/workflows/discord-deploy-notify.yml` (new), `RELEASE_NOTES.md` (new), `src/app/api/pwa/icon/route.tsx` (modified)
+
+---
 
 ### Session 149: Chart Tooltips + Compact Currency + Responsive Stats (2026-02-07)
 
@@ -245,6 +291,6 @@
 
 ---
 
-**Last Update:** Session 149 (2026-02-07)
-**Status:** Post-color-audit polish — custom tooltips, compact currency, responsive stats
+**Last Update:** Session 151 (2026-02-07)
+**Status:** PWA auto-update fixed for iOS, icon refined
 **Next:** Remaining audit items (button migration, charts mobile redesign, copy UX, dark mode QA)

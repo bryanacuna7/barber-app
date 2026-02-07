@@ -1,10 +1,10 @@
 // Service Worker with offline support and caching strategies
-const CACHE_NAME = 'barbershop-pro-v1'
-const RUNTIME_CACHE = 'barbershop-runtime-v1'
+const CACHE_NAME = 'barbershop-pro-v2'
+const RUNTIME_CACHE = 'barbershop-runtime-v2'
 
-// Assets to precache
+// Only precache offline fallback and icons — NEVER cache HTML shells
+// HTML is served network-first so it's always fresh when online
 const PRECACHE_ASSETS = [
-  '/',
   '/offline',
   '/icon-192.png',
   '/icon-512.png',
@@ -34,6 +34,13 @@ self.addEventListener('activate', (event) => {
       })
       .then(() => self.clients.claim())
   )
+})
+
+// Listen for SKIP_WAITING message from the registration component
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 // Fetch event - network first, fallback to cache

@@ -61,9 +61,13 @@ export async function GET(request: Request) {
   const hasLogo = Boolean(logoUrl)
   const ringSize = Math.round(size * 0.8)
   const logoSize = Math.round(size * 0.58)
-  const poleWidth = Math.round(size * 0.24)
-  const poleHeight = Math.round(size * 0.44)
-  const stripeHeight = Math.max(8, Math.round(size * 0.08))
+  const poleWidth = Math.round(size * 0.32)
+  const poleHeight = Math.round(size * 0.8)
+  const stripeThickness = Math.max(6, Math.round(size * 0.082))
+  const stripeGap = Math.max(10, Math.round(size * 0.16))
+  const stripePeriod = stripeThickness + stripeGap
+  const stripeCount = 5
+  const stripeStartOffset = Math.round(poleHeight * 0.24)
 
   return new ImageResponse(
     <div
@@ -74,7 +78,6 @@ export async function GET(request: Request) {
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        borderRadius: Math.round(size * 0.22),
         overflow: 'hidden',
         background: hasLogo
           ? 'radial-gradient(circle at 20% 20%, #3B82F6 0%, #2563EB 40%, #1D4ED8 65%, #0F172A 100%)'
@@ -121,66 +124,40 @@ export async function GET(request: Request) {
       ) : (
         <div
           style={{
-            width: ringSize,
-            height: ringSize,
-            borderRadius: Math.round(size * 0.2),
+            width: '100%',
+            height: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'transparent',
-            border: 'none',
-            boxShadow: 'none',
           }}
         >
+          {/* Negative-space barber pole: white stripes, black gaps = the pole */}
           <div
             style={{
               position: 'relative',
               width: poleWidth,
               height: poleHeight,
-              borderRadius: Math.round(size * 0.12),
-              background: '#FFFFFF',
-              overflow: 'hidden',
-              border: `${Math.max(2, Math.round(size * 0.008))}px solid #FFFFFF`,
-              boxShadow: 'none',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              overflow: 'hidden',
+              borderRadius: Math.round(poleWidth / 2),
+              background: 'transparent',
             }}
           >
-            {[0, 1, 2, 3, 4].map((i) => (
+            {Array.from({ length: stripeCount }).map((_, i) => (
               <div
                 key={i}
                 style={{
                   position: 'absolute',
-                  left: '-40%',
-                  top: Math.round(i * stripeHeight - stripeHeight * 0.3),
-                  width: '180%',
-                  height: stripeHeight,
-                  background: i % 2 === 0 ? 'rgba(0,0,0,0.14)' : 'rgba(0,0,0,0.24)',
-                  transform: 'rotate(-33deg)',
+                  left: '-95%',
+                  top: Math.round(i * stripePeriod - stripeStartOffset),
+                  width: '320%',
+                  height: stripeThickness,
+                  borderRadius: Math.round(stripeThickness / 2),
+                  background: '#FFFFFF',
+                  transform: 'rotate(-30deg)',
                 }}
               />
             ))}
-            <div
-              style={{
-                position: 'absolute',
-                top: -Math.round(size * 0.015),
-                width: Math.round(poleWidth * 0.72),
-                height: Math.max(5, Math.round(size * 0.025)),
-                borderRadius: 999,
-                background: '#FFFFFF',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                bottom: -Math.round(size * 0.015),
-                width: Math.round(poleWidth * 0.72),
-                height: Math.max(5, Math.round(size * 0.025)),
-                borderRadius: 999,
-                background: '#FFFFFF',
-              }}
-            />
           </div>
         </div>
       )}
