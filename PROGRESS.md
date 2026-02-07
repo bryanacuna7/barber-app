@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-06 (Session 131 - Landing Page Brutalist Redesign 🎨)
+- **Last Updated:** 2026-02-06 (Session 131 - Landing Page Modern Premium Redesign 🎨)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Landing Page Redesign - Brutalist + Product-Led
+- **Current Phase:** Landing Page Redesign - Modern Premium + Glassmorphism
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 
 ---
@@ -31,15 +31,21 @@
 
 ## Recent Sessions
 
-### Session 131: Landing Page Brutalist Redesign (2026-02-06)
+### Session 131: Landing Page Modern Premium Redesign (2026-02-06)
 
-**Status:** ✅ 100% Complete (~2h)
+**Status:** ✅ 100% Complete (~3h) - Corrected from Brutalist misunderstanding
 
-**Objective:** Rediseñar landing page con estilo brutalist, enfocado en velocidad/UX como diferenciador
+**Objective:** Landing "brutal" (espectacular) + Modern Premium que haga match con dashboard
+
+**⚠️ Important Clarification:**
+
+- Initial misunderstanding: "brutal" interpreted as Brutalism style (monospace, no border-radius, thick borders)
+- Actual meaning: "brutal" = espectacular/impresionante (Spanish expression)
+- Corrected to: Modern Premium + Glassmorphism (matches dashboard)
 
 **User Requirement:**
 
-- "algo brutal en diseño pero que también comunique de manera muy estratégica"
+- "algo brutal en diseño" = ESPECTACULAR (NOT Brutalism style)
 - "lo que nos destaca, lo que estamos logrando" - sin vender humo, real
 - Diferenciador: Sistema de citas ultra-rápido y visual (mejor UX del mercado)
 - Tono: Brutalist & Bold
