@@ -218,6 +218,37 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
   - extender haptics a acciones de primer nivel en todos los flows de alta/edicion (no solo tabs/swipes).
   - terminar estandarizacion de contenedores en vistas secundarias (`Lealtad`, `Configuracion avanzada`, sub-vistas dentro de `Mas`).
 
+### Update de implementación (Sesion 143 - Paridad de gutters con Analíticas)
+
+- Aplicado:
+  - Se eliminó padding lateral duplicado en mobile en:
+    - `src/app/(dashboard)/citas/page-v2.tsx`
+    - `src/app/(dashboard)/barberos/page-v2.tsx`
+    - `src/app/(dashboard)/servicios/page-v2.tsx`
+  - Objetivo: que estas pantallas usen el mismo gutter visual base que `Analíticas` (margen lateral definido por el layout global, no por wrappers internos).
+  - En `Citas`, adicionalmente se simplificó el day-view hacia cards sobrias tipo `Analíticas` (menos ruido visual y mayor coherencia de superficies).
+
+- Resultado esperado:
+  - Menor sensación de contenido “encajonado”.
+  - Paridad de spacing horizontal entre módulos core.
+  - Lectura más directa en mobile (sin doble inset).
+
+- Estado de hallazgos tras este ajuste:
+  - **Parcialmente resuelto**: “espacio excesivo entre borde y cards” en `Citas/Barberos/Servicios`.
+  - **Pendiente de verificación visual final**: confirmar en dispositivo real que no aparezcan dobles insets en sub-vistas y modales internos.
+  - **Sigue pendiente**:
+    - contrato visual único de `Create Modal` entre `Nueva Cita`, `Nuevo Cliente`, `Nuevo Servicio`;
+    - date picker unificado en `Nueva Cita` (evitar fallback nativo inconsistente);
+    - consistencia total de filtros/tabs/search focus states entre módulos.
+
+### Score update rapido (post Sesion 143)
+
+- Composición de superficie mobile (respira en pantalla): **6.2 -> 7.1**
+- Consistencia cross-modulo: **7.3 -> 7.6**
+- Sensación “nativo premium”: **7.4 -> 7.7**
+
+Nota: el score global aún está limitado por deuda en contratos de interacción (gestos/haptics/modales/feedback), no por colorimetría.
+
 ### Re-Audit Full Pass (codigo + capturas)
 
 - Resultado general: no se detectaron nuevos **P0** fuera de los ya documentados (date picker nativo y data-viz no touch-first), pero si se confirmaron inconsistencias **P1** transversales.

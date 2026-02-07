@@ -390,16 +390,16 @@ function ServiciosContent() {
   })
 
   // Filter and sort services (using mock data for demo)
-  let filteredServices =
-    selectedCategory === 'all'
-      ? mockServices
-      : mockServices.filter((s) => s.category === selectedCategory)
+  const filteredServices = useMemo(() => {
+    const byCategory =
+      selectedCategory === 'all'
+        ? mockServices
+        : mockServices.filter((s) => s.category === selectedCategory)
 
-  if (searchQuery) {
-    filteredServices = filteredServices.filter((s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }
+    if (!searchQuery) return byCategory
+
+    return byCategory.filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  }, [selectedCategory, searchQuery])
 
   const sortedServices = useMemo(() => {
     return [...filteredServices].sort((a, b) => {
@@ -582,7 +582,7 @@ function ServiciosContent() {
           await refetch()
         }}
       >
-        <div className="px-4 pt-4 sm:px-6 lg:px-0 lg:pt-0 lg:mx-auto lg:max-w-[1400px] relative z-10">
+        <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 lg:mx-auto lg:max-w-[1400px] relative z-10">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -592,10 +592,10 @@ function ServiciosContent() {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <h1 className="app-page-title bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Servicios
                 </h1>
-                <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                <p className="app-page-subtitle mt-1">
                   Gestiona tus servicios con insights en tiempo real
                 </p>
               </div>
@@ -621,22 +621,22 @@ function ServiciosContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...animations.spring.default, delay: 0.1 }}
-                className="ios-group-card mb-4 p-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-white/10 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_8px_24px_rgba(0,0,0,0.1)] sm:dark:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
               >
                 {/* Search */}
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                  <input
+                <div className="w-full sm:flex-1 sm:max-w-md">
+                  <Input
                     type="text"
                     placeholder="Buscar servicios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-11 w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] pl-9 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 transition-all focus:border-violet-400/45 focus:outline-none focus-visible:outline-none focus:ring-1 focus:ring-violet-400/45"
+                    leftIcon={<Search className="h-4 w-4" />}
+                    className="h-11 border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] focus:ring-violet-400/45 focus:border-violet-400/45"
                   />
                 </div>
 
                 {/* Category Filter */}
-                <div className="relative rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-1.5">
+                <div className="relative w-full sm:w-auto rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-1.5">
                   <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/90 dark:from-zinc-950 z-10 sm:hidden rounded-r-xl" />
                   <div
                     ref={categoryTabsRef}
@@ -693,11 +693,7 @@ function ServiciosContent() {
 
                   return (
                     <SwipeableRow key={service.id} rightActions={rightActions}>
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]"
-                      >
+                      <div className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
                         {/* Row 1: Emoji + Name */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -735,7 +731,7 @@ function ServiciosContent() {
                             </span>
                           </span>
                         </div>
-                      </motion.div>
+                      </div>
                     </SwipeableRow>
                   )
                 })}
@@ -1091,7 +1087,7 @@ function ServiciosContent() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl bg-red-50 p-4 text-[15px] text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                className="rounded-2xl bg-red-50 p-4 text-base text-red-600 dark:bg-red-900/20 dark:text-red-400"
               >
                 {error}
               </motion.div>
@@ -1178,10 +1174,10 @@ function ServiciosContent() {
                 <AlertTriangle className="h-7 w-7 text-red-600 dark:text-red-400" />
               </motion.div>
               <div>
-                <p className="text-[17px] text-zinc-900 dark:text-white">
+                <p className="text-lg text-zinc-900 dark:text-white">
                   ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
                 </p>
-                <p className="mt-2 text-[15px] text-zinc-500">
+                <p className="mt-2 text-base text-zinc-500">
                   Esta acción no se puede deshacer. Las citas existentes con este servicio no se
                   verán afectadas.
                 </p>

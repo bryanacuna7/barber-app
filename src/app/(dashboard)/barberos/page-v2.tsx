@@ -50,6 +50,7 @@ import {
 } from './mock-data'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 
@@ -174,7 +175,7 @@ export default function BarberosPage() {
           className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
         />
       </div>
-      <div className="px-4 pt-4 sm:px-6 lg:px-0 lg:pt-0 lg:max-w-[1600px] lg:mx-auto space-y-6 relative z-10">
+      <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 lg:max-w-[1600px] lg:mx-auto space-y-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -183,12 +184,10 @@ export default function BarberosPage() {
         >
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="app-page-title bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Barberos
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                {processedBarbers.length} activos
-              </p>
+              <p className="app-page-subtitle mt-1">{processedBarbers.length} activos</p>
             </div>
             <Button
               onClick={() => {
@@ -209,19 +208,17 @@ export default function BarberosPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="ios-group-card p-3 space-y-3"
+          className="space-y-3 sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-white/10 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_8px_24px_rgba(0,0,0,0.1)] sm:dark:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
         >
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
-            <input
-              type="text"
-              placeholder="Buscar barbero..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-white/65 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus-visible:outline-none focus:ring-1 focus:ring-violet-400/45 focus:border-violet-400/45"
-            />
-          </div>
+          <Input
+            type="text"
+            placeholder="Buscar barbero..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            leftIcon={<Search className="h-5 w-5" />}
+            className="h-11 bg-white/65 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 focus:ring-violet-400/45 focus:border-violet-400/45"
+          />
 
           {/* View Switcher - Desktop */}
           <div className="hidden md:flex items-center gap-2">
@@ -308,7 +305,7 @@ export default function BarberosPage() {
       <Sheet open={isAddBarberOpen} onOpenChange={setIsAddBarberOpen}>
         <SheetContent
           side="bottom"
-          className="rounded-t-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-[#1C1C1E] pb-safe"
+          className="rounded-t-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-zinc-900 pb-safe"
         >
           <SheetClose onClose={() => setIsAddBarberOpen(false)} />
           <SheetHeader>
@@ -317,32 +314,27 @@ export default function BarberosPage() {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6 space-y-4 pb-6" data-testid="add-barber-sheet">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Nombre</label>
-              <input
-                type="text"
-                placeholder="Nombre del barbero"
-                className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Email</label>
-              <input
-                type="email"
-                placeholder="email@ejemplo.com"
-                className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Teléfono
-              </label>
-              <input
-                type="tel"
-                placeholder="+506 8888-8888"
-                className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
-              />
-            </div>
+            <Input
+              label="Nombre"
+              type="text"
+              placeholder="Nombre del barbero"
+              variant="outline"
+              className="h-12 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:ring-violet-500/30"
+            />
+            <Input
+              label="Email"
+              type="email"
+              placeholder="email@ejemplo.com"
+              variant="outline"
+              className="h-12 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:ring-violet-500/30"
+            />
+            <Input
+              label="Teléfono"
+              type="tel"
+              placeholder="+506 8888-8888"
+              variant="outline"
+              className="h-12 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:ring-violet-500/30"
+            />
             <Button
               onClick={() => setIsAddBarberOpen(false)}
               variant="gradient"
@@ -370,9 +362,9 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="lg:hidden space-y-1"
+        className="lg:hidden ios-group-card p-1.5 overflow-hidden"
       >
-        {barbers.map((barber) => (
+        {barbers.map((barber, index) => (
           <motion.div
             key={barber.id}
             initial={{ opacity: 0 }}
@@ -381,7 +373,11 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
               setSelectedBarberMobile(barber)
               setIsMobileBarberDetailOpen(true)
             }}
-            className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer active:scale-[0.98]"
+            className={`flex items-center gap-3 p-3 transition-colors cursor-pointer active:scale-[0.98] ${
+              index < barbers.length - 1
+                ? 'border-b border-zinc-200/70 dark:border-white/10 hover:bg-zinc-50/85 dark:hover:bg-white/[0.04]'
+                : 'hover:bg-zinc-50/85 dark:hover:bg-white/[0.04]'
+            }`}
           >
             {/* Avatar 40px */}
             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
