@@ -36,10 +36,7 @@ export function formatCurrencyCompactMillions(amount: number): string {
   }
 
   const millions = amount / 1000000
-  const decimals = Math.abs(millions) >= 10 ? 0 : 1
-  const compact = millions.toFixed(decimals).replace(/\.0$/, '')
-
-  return `₡${compact}M`
+  return `₡${millions.toFixed(1)}M`
 }
 
 export function formatCurrencyCompact(amount: number): string {

@@ -144,10 +144,16 @@ describe('formatCurrencyCompactMillions', () => {
     expect(formatted).toBe('₡1.3M')
   })
 
-  it('should compact tens of millions without decimals', () => {
+  it('should keep one decimal for tens of millions', () => {
     const formatted = formatCurrencyCompactMillions(12500000)
 
-    expect(formatted).toBe('₡13M')
+    expect(formatted).toBe('₡12.5M')
+  })
+
+  it('should keep trailing .0 when rounded millions are whole', () => {
+    const formatted = formatCurrencyCompactMillions(13000000)
+
+    expect(formatted).toBe('₡13.0M')
   })
 })
 

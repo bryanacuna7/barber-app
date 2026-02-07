@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-07 (Session 148 - Color Audit Fase 3)
+- **Last Updated:** 2026-02-07 (Session 149 - Chart Tooltips + Stats Cards)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Color Audit complete (Fase 1+2+3)
+- **Current Phase:** Post-Color Audit polish (tooltips, compact currency, responsive stats)
 - **Color Audit:** `color-audit.md` (root)
 - **Supabase Project:** `zanywefnobtzhoeuoyuc`
 
@@ -93,6 +93,32 @@
 ---
 
 ## Recent Sessions
+
+### Session 149: Chart Tooltips + Compact Currency + Responsive Stats (2026-02-07)
+
+**Status:** ✅ Complete
+
+**Objective:** Custom chart tooltips, compact currency formatting for dashboard stats, responsive stats card sizing
+
+**What was done:**
+
+1. **chart-tooltip.tsx** (NEW) — Shared `ChartTooltip` component with theme-aware `tone` props (bg/border/text via JS, not CSS vars — fixes SVG prop limitation).
+
+2. **revenue-chart.tsx** — Replaced Recharts `contentStyle`/`labelStyle`/`itemStyle` with custom `RevenueTooltip` using `ChartTooltip`. Added tooltip color props to `useChartColors()`.
+
+3. **services-chart.tsx** — Same tooltip migration. Bar fills now use brand-primary RGB with opacity scale (`0.72, 0.56, 0.42, 0.32`) instead of hardcoded grays. Winner badge gets dynamic `winnerRgb` + border. Added `toRgbChannels()` helper for hex→RGB conversion.
+
+4. **format.ts** — Added `formatCurrencyCompactMillions()`: values < 1M use standard format, ≥1M show `₡1.3M` / `₡13M`. Exported via `index.ts`.
+
+5. **dashboard-content.tsx** — Dashboard stats now use `formatCurrencyCompactMillions` instead of `formatCurrency` (prevents overflow on mobile).
+
+6. **stats-card.tsx** — Responsive font scaling: `text-[26px]` default, `text-[22px]` for 10+ chars, `text-[20px]` for 13+ chars. Tighter mobile padding (`p-3.5`), smaller icon containers on mobile.
+
+7. **format.test.ts** — 3 new tests for `formatCurrencyCompactMillions` (below 1M, millions with decimal, tens of millions without).
+
+**Files:** chart-tooltip.tsx (new), revenue-chart.tsx, services-chart.tsx, dashboard-content.tsx, stats-card.tsx, format.ts, index.ts, format.test.ts
+
+---
 
 ### Session 148: Color Audit Fase 3 — Data Viz & Contrast (2026-02-07)
 
@@ -219,6 +245,6 @@
 
 ---
 
-**Last Update:** Session 148 (2026-02-07)
-**Status:** Color Audit COMPLETE (Fase 1+2+3) — full brand discipline
+**Last Update:** Session 149 (2026-02-07)
+**Status:** Post-color-audit polish — custom tooltips, compact currency, responsive stats
 **Next:** Remaining audit items (button migration, charts mobile redesign, copy UX, dark mode QA)
