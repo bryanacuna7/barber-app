@@ -81,6 +81,7 @@ import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 // Error boundaries
 import { ComponentErrorBoundary, CalendarErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 
 // Business context
 import { useBusiness } from '@/contexts/business-context'
@@ -550,7 +551,7 @@ function CitasCalendarFusionContent() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* Subtle mesh gradients (15% opacity) - Only in dark mode */}
-      <div className="hidden dark:block fixed inset-0 opacity-15 pointer-events-none">
+      <div className="hidden lg:block fixed inset-0 opacity-0 dark:opacity-15 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl animate-blob animation-delay-2000" />
       </div>
@@ -635,6 +636,13 @@ function CitasCalendarFusionContent() {
               </div>
 
               {/* MOBILE HEADER - Compact toolbar + full-width segmented control */}
+              <div className="lg:hidden mb-3 flex items-center justify-between px-1">
+                <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                  Citas
+                </h1>
+                <NotificationBell />
+              </div>
+
               <div className="lg:hidden mb-4 rounded-2xl border border-zinc-200/70 dark:border-zinc-700/70 bg-white/75 dark:bg-zinc-900/85 p-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl">
                 {/* Row 1: Date nav group + Today + Create */}
                 <div className="flex items-center gap-2 mb-3">

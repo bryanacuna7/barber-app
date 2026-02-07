@@ -103,6 +103,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const brandSecondary = business.brand_secondary_color || null
   const logoUrl = business.logo_url || null
   const isActive = business.is_active ?? true
+  const isCitasRoute = pathname.startsWith('/citas')
 
   // Check onboarding status (skip for admin and if already on onboarding page)
   if (!isAdmin && !pathname.includes('/onboarding')) {
@@ -153,11 +154,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Sidebar businessName={businessName} logoUrl={logoUrl} isAdmin={isAdmin} />
 
           {/* Mobile header with notification bell */}
-          <MobileHeader businessName={businessName} logoUrl={logoUrl} />
+          {!isCitasRoute && <MobileHeader businessName={businessName} logoUrl={logoUrl} />}
 
           {/* Main content */}
           <main id="main-content" className="lg:pl-64">
-            <div className="px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10">
+            <div
+              className={
+                isCitasRoute
+                  ? 'px-0 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+                  : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+              }
+            >
               <TrialBanner />
               {children}
             </div>

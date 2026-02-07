@@ -10,7 +10,7 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-05 (Session [current] - Realtime Configuration)
+> **Last Updated:** 2026-02-05 (Session 140 - Realtime Configuration)
 > **Last Verified Against:** All migrations 001-024
 
 ---
@@ -986,7 +986,7 @@ The following gamification endpoints were refactored to use the centralized `get
 
 ---
 
-## Realtime Configuration (Session [current])
+## Realtime Configuration (Session 140)
 
 **Supabase Realtime** enables WebSocket subscriptions for instant UI updates.
 

@@ -6,7 +6,7 @@
 ## Project Info
 
 - **Name:** BarberShop Pro
-- **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
+- **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
 - **Last Updated:** 2026-02-07 (Session 151 - PWA auto-update fix for iOS)
 - **Current Branch:** `main` (feature/ui-ux-redesign squash-merged)
@@ -255,11 +255,11 @@
 
 **Status:** ✅ Complete — 5 AUDIT.md items found already resolved in code, progress synced
 
-### Session 143-144: Mobile De-Generic Pass (2026-02-08)
+### Session 143-144: Mobile De-Generic Pass (2026-02-06)
 
 **Status:** ✅ Complete — barberos/servicios/clientes/lealtad UX polish
 
-### Session 142: Citas + Barberos UX Polish (2026-02-08)
+### Session 142: Citas + Barberos UX Polish (2026-02-06)
 
 **Status:** ✅ Applied
 
