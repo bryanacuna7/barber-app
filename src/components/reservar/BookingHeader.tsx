@@ -26,7 +26,11 @@ function ShareButton({ business }: { business: Business }) {
   return (
     <button
       onClick={handleShare}
-      className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-gradient-to-r from-violet-600/90 to-blue-600/90 px-3 py-1.5 text-[13px] font-semibold text-white ios-press shadow-[0_8px_20px_rgba(59,130,246,0.25)]"
+      className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-1.5 text-[13px] font-semibold text-white ios-press"
+      style={{
+        background: 'var(--brand-primary)',
+        boxShadow: '0 8px 20px rgba(var(--brand-primary-rgb), 0.25)',
+      }}
       aria-label="Compartir link de reservas"
     >
       <Share2 className="h-3.5 w-3.5" />

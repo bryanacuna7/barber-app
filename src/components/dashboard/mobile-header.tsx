@@ -29,28 +29,32 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
   const isDashboardHome = pathname === '/dashboard'
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-zinc-200/50 bg-white/60 px-4 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/60 lg:hidden">
-      {isDashboardHome ? (
-        <Link href="/dashboard" className="flex items-center gap-2">
-          {logoUrl ? (
-            <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
+    <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-zinc-950 lg:hidden">
+      <div className="pt-safe">
+        <div className="flex h-14 items-center justify-between px-4">
+          {isDashboardHome ? (
+            <Link href="/dashboard" className="flex items-center gap-2">
+              {logoUrl ? (
+                <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
+              ) : (
+                <Scissors className="h-5 w-5" />
+              )}
+              <span className="max-w-[160px] truncate font-semibold text-zinc-900 dark:text-white">
+                {currentTitle}
+              </span>
+            </Link>
           ) : (
-            <Scissors className="h-5 w-5" />
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
+                {currentTitle}
+              </span>
+            </div>
           )}
-          <span className="max-w-[160px] truncate font-semibold text-zinc-900 dark:text-white">
-            {currentTitle}
-          </span>
-        </Link>
-      ) : (
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
-            {currentTitle}
-          </span>
-        </div>
-      )}
 
-      {/* Notification bell */}
-      <NotificationBell />
+          {/* Notification bell */}
+          <NotificationBell />
+        </div>
+      </div>
     </header>
   )
 }

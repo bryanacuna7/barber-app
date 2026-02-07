@@ -79,11 +79,11 @@ const sizeClasses = {
 } as const
 
 /**
- * Base gradient classes used in all demos
- * Colors: Violet (#7c3aed) → Purple (#a855f7) → Blue (#3b82f6)
+ * Brand-aware gradient using CSS custom properties.
+ * Derives from --brand-primary (set in globals.css / theme-provider).
+ * Replaces hardcoded violet→purple→blue with single-accent discipline.
  */
-const gradientClasses =
-  'bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent'
+const gradientClasses = 'brand-gradient-text'
 
 export function GradientHeader({
   children,

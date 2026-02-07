@@ -189,9 +189,7 @@ function AnalyticsContent() {
       <FadeInUp>
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="app-page-title bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 dark:from-violet-400 dark:via-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
-              Analíticas
-            </h1>
+            <h1 className="app-page-title brand-gradient-text">Analíticas</h1>
             <p className="app-page-subtitle mt-1">Visualiza el rendimiento de tu barbería</p>
           </div>
 
@@ -214,7 +212,7 @@ function AnalyticsContent() {
                   }}
                   className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                      ? 'brand-tab-active'
                       : 'text-zinc-600 dark:text-zinc-400 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                   }`}
                 >

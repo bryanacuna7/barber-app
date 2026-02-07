@@ -132,6 +132,61 @@ body {
   }
 }
 
+/* ============================================
+   BRAND-AWARE COLOR TOKENS (Audit Phase 2)
+   Single-accent discipline: all UI chrome derives
+   from --brand-primary instead of hardcoded gradients
+   ============================================ */
+
+/* Brand gradient text — page headers */
+.brand-gradient-text {
+  background: linear-gradient(
+    to right,
+    var(--brand-primary),
+    color-mix(in srgb, var(--brand-primary), white 30%)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@media (prefers-color-scheme: dark) {
+  .brand-gradient-text {
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--brand-primary), white 20%),
+      var(--brand-primary)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+/* Brand active state — tabs, segments, pills */
+.brand-tab-active {
+  background: var(--brand-primary);
+  color: white;
+  border-color: rgba(var(--brand-primary-rgb), 0.4);
+  box-shadow: 0 8px 20px rgba(var(--brand-primary-rgb), 0.28);
+}
+
+/* Brand decorative mesh blobs */
+.brand-mesh-1 {
+  background: linear-gradient(
+    to bottom right,
+    rgba(var(--brand-primary-rgb), 0.4),
+    rgba(var(--brand-primary-rgb), 0.15)
+  );
+}
+
+.brand-mesh-2 {
+  background: linear-gradient(
+    to bottom right,
+    rgba(var(--brand-primary-rgb), 0.25),
+    rgba(var(--brand-primary-rgb), 0.08)
+  );
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;

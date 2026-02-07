@@ -16,7 +16,14 @@
  * </SwipeableRow>
  */
 
-import { motion, useMotionValue, useTransform, animate, type MotionValue } from 'framer-motion'
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  animate,
+  useDragControls,
+  type MotionValue,
+} from 'framer-motion'
 import { cn } from '@/lib/utils/cn'
 import { animations } from '@/lib/design-system'
 import { haptics } from '@/lib/utils/mobile'
@@ -108,6 +115,9 @@ export function SwipeableRow({
   threshold = 72,
 }: SwipeableRowProps) {
   const hasRevealed = useRef(false)
+  const dragControls = useDragControls()
+  const pointerStartRef = useRef<{ id: number; x: number; y: number } | null>(null)
+  const dragStartedRef = useRef(false)
   const x = useMotionValue(0)
   const ACTION_SIZE = 46
   const ACTION_GAP = 8
@@ -170,6 +180,46 @@ export function SwipeableRow({
     [leftActions.length, rightActions.length, threshold, leftConstraint, rightConstraint, x]
   )
 
+  const resetPointerTracking = useCallback(() => {
+    pointerStartRef.current = null
+    dragStartedRef.current = false
+  }, [])
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!hasActions) return
+
+      pointerStartRef.current = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+      }
+      dragStartedRef.current = false
+    },
+    [hasActions]
+  )
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const start = pointerStartRef.current
+      if (!hasActions || !start || dragStartedRef.current || event.pointerId !== start.id) return
+
+      const deltaX = event.clientX - start.x
+      const deltaY = event.clientY - start.y
+      const absX = Math.abs(deltaX)
+      const absY = Math.abs(deltaY)
+
+      // Start swipe only on clear horizontal intent; let vertical pan scroll naturally.
+      if (absX > 10 && absX > absY + 4) {
+        dragStartedRef.current = true
+        dragControls.start(event)
+      } else if (absY > 10 && absY > absX) {
+        pointerStartRef.current = null
+      }
+    },
+    [dragControls, hasActions]
+  )
+
   return (
     <div className={cn('relative overflow-hidden rounded-xl', containerClassName)}>
       {/* Swipe affordance indicator (3 dots on right edge) */}
@@ -228,6 +278,8 @@ export function SwipeableRow({
       {/* Swipeable content */}
       <motion.div
         drag={hasActions ? 'x' : false}
+        dragControls={dragControls}
+        dragListener={false}
         dragDirectionLock
         dragPropagation
         dragConstraints={{ left: leftConstraint, right: rightConstraint }}
@@ -235,6 +287,11 @@ export function SwipeableRow({
         dragMomentum={false}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={resetPointerTracking}
+        onPointerCancel={resetPointerTracking}
+        onPointerLeave={resetPointerTracking}
         transition={animations.spring.snappy}
         className={cn('relative z-10 w-full touch-pan-y', className)}
         style={{ x }}

@@ -232,13 +232,18 @@ export function KPICard({
         onClick={onClick}
         className={cn(
           'relative overflow-hidden rounded-xl h-full',
-          gradient
-            ? `bg-gradient-to-br ${gradient}`
-            : 'bg-gradient-to-br from-violet-600 via-purple-600 to-blue-600',
-          'border-0 shadow-2xl shadow-violet-500/20',
+          gradient ? `bg-gradient-to-br ${gradient}` : 'border-0 shadow-2xl',
           onClick && 'cursor-pointer',
           className
         )}
+        style={
+          !gradient
+            ? {
+                background: 'var(--brand-primary)',
+                boxShadow: '0 25px 50px -12px rgba(var(--brand-primary-rgb), 0.2)',
+              }
+            : undefined
+        }
       >
         {/* Mesh Gradient Overlay */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">

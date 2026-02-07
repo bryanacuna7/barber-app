@@ -620,12 +620,12 @@ export default function ClientesPageV2() {
               <motion.div
                 animate={{ scale: [1, 1.2, 1], x: [0, 100, 0], y: [0, -50, 0] }}
                 transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -top-1/4 -left-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-br from-violet-400 to-blue-400 blur-3xl"
+                className="absolute -top-1/4 -left-1/4 h-1/2 w-1/2 rounded-full brand-mesh-1 blur-3xl"
               />
               <motion.div
                 animate={{ scale: [1, 1.3, 1], x: [0, -100, 0], y: [0, 100, 0] }}
                 transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -right-1/4 -bottom-1/4 h-1/2 w-1/2 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 blur-3xl"
+                className="absolute -right-1/4 -bottom-1/4 h-1/2 w-1/2 rounded-full brand-mesh-2 blur-3xl"
               />
             </div>
 
@@ -633,18 +633,17 @@ export default function ClientesPageV2() {
               {/* Header - Mobile optimized with gradient */}
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <h1 className="app-page-title bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 dark:from-violet-400 dark:via-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
-                    Clientes
-                  </h1>
+                  <h1 className="app-page-title brand-gradient-text">Clientes</h1>
                   <p className="app-page-subtitle mt-1">{totalClients} registrados</p>
                 </div>
                 <Button
+                  variant="gradient"
                   data-tour="clients-add-button"
                   onClick={() => {
                     setShowModal(true)
                     if (isMobileDevice()) haptics.tap()
                   }}
-                  className="min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 border-0"
+                  className="min-w-[44px] min-h-[44px] h-10 border-0"
                 >
                   <Plus className="h-5 w-5 sm:mr-2" />
                   <span className="hidden sm:inline">Nuevo Cliente</span>
@@ -871,7 +870,7 @@ export default function ClientesPageV2() {
                           !mobile ? 'hidden lg:flex' : ''
                         } ${
                           viewMode === mode
-                            ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                            ? 'brand-tab-active border'
                             : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                         }`}
                       >
@@ -894,7 +893,7 @@ export default function ClientesPageV2() {
                       data-segment-chip="all"
                       className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 ${
                         selectedSegment === 'all'
-                          ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                          ? 'brand-tab-active border'
                           : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                       }`}
                     >
@@ -915,7 +914,7 @@ export default function ClientesPageV2() {
                             data-segment-chip={segment}
                             className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 sm:gap-1.5 border shrink-0 ${
                               selectedSegment === segment
-                                ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                                ? 'brand-tab-active border'
                                 : 'text-zinc-600 dark:text-zinc-400 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                             }`}
                           >

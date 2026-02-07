@@ -576,7 +576,7 @@ function ServiciosContent() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 bg-gradient-to-br from-violet-400 to-blue-400 rounded-full blur-3xl"
+          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 brand-mesh-1 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -589,7 +589,7 @@ function ServiciosContent() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
+          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 brand-mesh-2 rounded-full blur-3xl"
         />
       </div>
 
@@ -608,19 +608,18 @@ function ServiciosContent() {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="app-page-title bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  Servicios
-                </h1>
+                <h1 className="app-page-title brand-gradient-text">Servicios</h1>
                 <p className="app-page-subtitle mt-1">
                   Gestiona tus servicios con insights en tiempo real
                 </p>
               </div>
               <Button
+                variant="gradient"
                 onClick={() => {
                   openCreateServiceForm()
                   if (isMobileDevice()) haptics.tap()
                 }}
-                className="shrink-0 min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 border-0"
+                className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
                 <span className="hidden sm:inline">Nuevo Servicio</span>
@@ -676,7 +675,7 @@ function ServiciosContent() {
                         transition={animations.spring.snappy}
                         className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                           selectedCategory === cat
-                            ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                            ? 'brand-tab-active'
                             : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                         }`}
                       >

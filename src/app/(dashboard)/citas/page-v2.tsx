@@ -677,9 +677,10 @@ function CitasCalendarFusionContent() {
                   )}
 
                   <Button
+                    variant="gradient"
                     onClick={() => setIsCreateOpen(true)}
                     data-testid="create-appointment-btn"
-                    className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl p-0 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 flex-shrink-0"
+                    className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl p-0 flex-shrink-0"
                     aria-label="Crear cita"
                   >
                     <Plus className="h-5 w-5" />
@@ -692,7 +693,7 @@ function CitasCalendarFusionContent() {
                     onClick={() => setViewMode('day')}
                     className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
                       viewMode === 'day'
-                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
+                        ? 'brand-tab-active border'
                         : 'text-zinc-500 dark:text-zinc-300 border border-zinc-200/70 dark:border-zinc-700 bg-white/55 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-700/70'
                     }`}
                   >
@@ -702,7 +703,7 @@ function CitasCalendarFusionContent() {
                     onClick={() => setViewMode('week')}
                     className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
                       viewMode === 'week'
-                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
+                        ? 'brand-tab-active border'
                         : 'text-zinc-500 dark:text-zinc-300 border border-zinc-200/70 dark:border-zinc-700 bg-white/55 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-700/70'
                     }`}
                   >
@@ -712,7 +713,7 @@ function CitasCalendarFusionContent() {
                     onClick={() => setViewMode('month')}
                     className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
                       viewMode === 'month'
-                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
+                        ? 'brand-tab-active border'
                         : 'text-zinc-500 dark:text-zinc-300 border border-zinc-200/70 dark:border-zinc-700 bg-white/55 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-700/70'
                     }`}
                   >
@@ -804,14 +805,14 @@ function CitasCalendarFusionContent() {
                       >
                         {/* Block header */}
                         <div className="mb-4">
-                          <div className="flex items-center justify-between gap-3">
+                          <div className="flex flex-col gap-1.5 xl:flex-row xl:items-center xl:justify-between xl:gap-3">
                             <div className="flex items-center gap-2.5 min-w-0">
                               <block.icon className={`w-5 h-5 ${block.iconColor}`} />
-                              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white leading-none">
+                              <h3 className="truncate text-lg font-semibold text-zinc-900 dark:text-white leading-tight">
                                 {block.label}
                               </h3>
                             </div>
-                            <span className="shrink-0 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                            <span className="pl-7 text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 xl:pl-0 xl:shrink-0">
                               {block.start > 12 ? block.start - 12 : block.start}
                               {block.start >= 12 ? 'pm' : 'am'} -{' '}
                               {block.end > 12 ? block.end - 12 : block.end}
