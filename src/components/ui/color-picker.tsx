@@ -40,7 +40,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
   return (
     <div>
       {label && (
-        <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <label className="mb-3 block text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
           {label}
         </label>
       )}
@@ -89,7 +89,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
               setCustomHex(value)
               setShowCustom(true)
             }}
-            className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
             {!isPreset ? (
               <span className="flex items-center gap-2">
@@ -123,19 +123,19 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
               onChange={(e) => setCustomHex(e.target.value)}
               placeholder="#FF5733"
               maxLength={7}
-              className="flex-1 rounded-xl border-0 bg-zinc-100/80 px-4 py-2.5 text-[15px] font-mono text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:bg-zinc-800/80 dark:text-white dark:focus:ring-white/20"
+              className="flex-1 rounded-xl border-0 bg-zinc-100/80 px-4 py-2.5 text-base font-mono text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:bg-zinc-800/80 dark:text-white dark:focus:ring-white/20"
             />
             <button
               type="button"
               onClick={handleCustomSubmit}
-              className="rounded-xl bg-zinc-900 px-4 py-2.5 text-[13px] font-semibold text-white dark:bg-white dark:text-zinc-900"
+              className="rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white dark:bg-white dark:text-zinc-900"
             >
               Aplicar
             </button>
             <button
               type="button"
               onClick={() => setShowCustom(false)}
-              className="text-[13px] text-zinc-400 hover:text-zinc-600"
+              className="text-sm text-zinc-400 hover:text-zinc-600"
             >
               Cancelar
             </button>

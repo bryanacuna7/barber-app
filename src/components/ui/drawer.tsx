@@ -149,20 +149,18 @@ export function Drawer({
 
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-start justify-between px-6 pb-4 pt-2">
+              <div className="flex items-start justify-between px-4 sm:px-6 pb-4 pt-2">
                 <div className="flex-1 pr-4">
                   {title && (
                     <h2
                       id="drawer-title"
-                      className="text-[20px] font-bold text-zinc-900 dark:text-zinc-100"
+                      className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
                     >
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
-                      {description}
-                    </p>
+                    <p className="mt-1 text-base text-zinc-500 dark:text-zinc-400">{description}</p>
                   )}
                 </div>
                 {showCloseButton && (
@@ -185,7 +183,7 @@ export function Drawer({
             )}
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-6 pb-6">{children}</div>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6">{children}</div>
           </motion.div>
         </div>
       )}

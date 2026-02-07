@@ -116,11 +116,11 @@ export default async function LoyaltyConfigPage() {
   return (
     <>
       {/* Mobile Section Header */}
-      <header className="mb-4 lg:hidden ios-group-card px-3 py-2">
+      <header className="mb-4 lg:hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl">
         <div className="flex min-h-[44px] items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-200/70 transition-colors active:bg-zinc-300/80 dark:bg-white/10 dark:active:bg-white/15"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-700 transition-colors active:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/90 dark:text-zinc-200 dark:active:bg-zinc-700"
           >
             <ChevronLeft className="h-5 w-5" />
           </Link>

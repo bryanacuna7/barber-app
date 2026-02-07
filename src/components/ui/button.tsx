@@ -1,7 +1,7 @@
 'use client'
 
-import { forwardRef, type ButtonHTMLAttributes, useState, MouseEvent } from 'react'
-import { motion, type HTMLMotionProps } from 'framer-motion'
+import { forwardRef, useState, MouseEvent } from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
@@ -84,9 +84,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }
 
     const sizes = {
-      sm: 'px-4 py-2.5 text-[14px] gap-1.5 min-h-[44px]',
-      md: 'px-5 py-3 text-[15px] gap-2 min-h-[44px]',
-      lg: 'px-6 py-4 text-[17px] gap-2.5',
+      sm: 'px-4 py-2.5 text-sm gap-1.5 min-h-[44px]',
+      md: 'px-5 py-3 text-base gap-2 min-h-[44px]',
+      lg: 'px-6 py-3.5 text-lg gap-2.5 min-h-[48px]',
     }
 
     return (

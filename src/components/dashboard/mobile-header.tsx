@@ -43,7 +43,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
         </Link>
       ) : (
         <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate">
+          <span className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
             {currentTitle}
           </span>
         </div>

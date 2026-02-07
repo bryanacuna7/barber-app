@@ -125,7 +125,7 @@ export default function AnaliticasPage() {
     <div className="space-y-6 pb-24 lg:pb-6">
       {/* Header */}
       <FadeInUp>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 dark:from-violet-400 dark:via-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
               Analíticas
@@ -136,11 +136,11 @@ export default function AnaliticasPage() {
           </div>
 
           {/* Period Selector */}
-          <div className="relative overflow-hidden flex items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-violet-200/60 dark:border-violet-400/20 bg-gradient-to-br from-violet-50/80 via-white/75 to-blue-50/80 dark:from-violet-950/30 dark:via-zinc-950/70 dark:to-blue-950/30 p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+          <div className="self-start inline-flex items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
             {[
-              { value: 'week' as Period, label: 'Semana', meta: '7d' },
-              { value: 'month' as Period, label: 'Mes', meta: '30d' },
-              { value: 'year' as Period, label: 'Año', meta: '12m' },
+              { value: 'week' as Period, label: 'Semana' },
+              { value: 'month' as Period, label: 'Mes' },
+              { value: 'year' as Period, label: 'Año' },
             ].map((option) => {
               const isActive = period === option.value
 
@@ -152,22 +152,13 @@ export default function AnaliticasPage() {
                     setPeriod(option.value)
                     if (isMobileDevice()) haptics.selection()
                   }}
-                  className={`min-h-[48px] min-w-[88px] rounded-xl px-3 py-1.5 text-left border transition-all ${
+                  className={`min-h-[44px] rounded-xl px-3 text-[13px] sm:text-sm whitespace-nowrap border transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 text-white border-violet-400/50 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
-                      : 'text-zinc-700 dark:text-zinc-300 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-white/80 dark:hover:bg-white/[0.08]'
+                      ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                      : 'text-zinc-600 dark:text-zinc-400 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                   }`}
                 >
-                  <div className="flex flex-col leading-none">
-                    <span className="text-[13px] sm:text-sm font-semibold">{option.label}</span>
-                    <span
-                      className={`mt-1 text-[10px] ${
-                        isActive ? 'text-white/80' : 'text-zinc-500 dark:text-zinc-400'
-                      }`}
-                    >
-                      {option.meta}
-                    </span>
-                  </div>
+                  {option.label}
                 </button>
               )
             })}

@@ -275,7 +275,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
               <div className="mx-4 mb-safe-offset-4 rounded-2xl bg-white dark:bg-[#2C2C2E] shadow-2xl overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 pt-4 pb-2">
-                  <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                     Crear nuevo
                   </h3>
                   <button
@@ -297,7 +297,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/20">
                         <action.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <span className="text-[15px] font-medium text-zinc-900 dark:text-white">
+                      <span className="text-base font-medium text-zinc-900 dark:text-white">
                         {action.name}
                       </span>
                     </button>

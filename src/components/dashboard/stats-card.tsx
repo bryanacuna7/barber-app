@@ -103,7 +103,7 @@ export function StatsCard({
         <div className="min-w-0 flex-1">
           <p
             className={cn(
-              'text-[13px] font-medium uppercase tracking-wide truncate',
+              'text-sm font-medium uppercase tracking-wide truncate',
               isGradient ? 'text-white/80' : 'text-zinc-500 dark:text-zinc-400'
             )}
           >
@@ -126,7 +126,7 @@ export function StatsCard({
           {description && (
             <p
               className={cn(
-                'mt-0.5 text-[13px] truncate',
+                'mt-0.5 text-sm truncate',
                 isGradient ? 'text-white/70' : 'text-zinc-400 dark:text-zinc-500'
               )}
             >

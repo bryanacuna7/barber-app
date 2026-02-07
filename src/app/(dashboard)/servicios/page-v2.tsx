@@ -10,7 +10,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
 import {
   Plus,
   Search,
@@ -349,6 +349,9 @@ function ServiciosContent() {
   const searchParamsHook = useSearchParams()
   const intentHandled = useRef(false)
   const categoryTabsRef = useRef<HTMLDivElement>(null)
+  const hasMountedFilterTransition = useRef(false)
+  const listTransitionControls = useAnimationControls()
+  const prefersReducedMotion = useReducedMotion()
 
   // Auto-open create form when navigated with ?intent=create
   useEffect(() => {
@@ -376,6 +379,20 @@ function ServiciosContent() {
       })
     })
   }, [selectedCategory])
+
+  useEffect(() => {
+    if (prefersReducedMotion) return
+    if (!hasMountedFilterTransition.current) {
+      hasMountedFilterTransition.current = true
+      return
+    }
+
+    listTransitionControls.start({
+      opacity: [0.93, 1],
+      y: [2, 0],
+      transition: { duration: 0.18, ease: 'easeOut' },
+    })
+  }, [selectedCategory, searchQuery, prefersReducedMotion, listTransitionControls])
 
   // React Query hooks
   const { isLoading: _loading, isError, error: queryError, refetch } = useServices(businessId)
@@ -672,7 +689,11 @@ function ServiciosContent() {
               </motion.div>
 
               {/* Mobile Card View */}
-              <div className="lg:hidden space-y-3">
+              <motion.div
+                initial={false}
+                animate={listTransitionControls}
+                className="lg:hidden space-y-3"
+              >
                 {sortedServices.map((service) => {
                   const categoryColor = getCategoryColor(service.category)
 
@@ -735,7 +756,7 @@ function ServiciosContent() {
                     </SwipeableRow>
                   )
                 })}
-              </div>
+              </motion.div>
 
               {/* Desktop Table View */}
               <motion.div
@@ -823,7 +844,11 @@ function ServiciosContent() {
                       </thead>
 
                       {/* Body */}
-                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                      <motion.tbody
+                        initial={false}
+                        animate={listTransitionControls}
+                        className="divide-y divide-zinc-200 dark:divide-zinc-800"
+                      >
                         {sortedServices.map((service) => {
                           const categoryColor = getCategoryColor(service.category)
                           const growth = calculateGrowth(
@@ -923,7 +948,7 @@ function ServiciosContent() {
                             </tr>
                           )
                         })}
-                      </tbody>
+                      </motion.tbody>
                     </table>
                   </div>
                 </div>

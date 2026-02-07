@@ -18,7 +18,7 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const baseStyles = 'rounded-2xl p-6 backdrop-blur-sm transition-colors duration-200'
+  const baseStyles = 'rounded-2xl p-4 sm:p-5 backdrop-blur-sm transition-colors duration-200'
 
   const variants = {
     default:

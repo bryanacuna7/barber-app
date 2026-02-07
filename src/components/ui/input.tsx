@@ -39,7 +39,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputType = isPassword && showPassword ? 'text' : type
 
     const baseStyles =
-      'w-full px-4 py-3.5 text-[15px] text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:placeholder:text-zinc-500 transition-all duration-200 focus:outline-none shadow-sm'
+      'w-full px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:placeholder:text-zinc-500 transition-all duration-200 focus:outline-none shadow-sm'
 
     const variantStyles = {
       default:
@@ -62,7 +62,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {label && (
             <motion.label
               htmlFor={inputId}
-              className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
+              className="mb-2 block text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
@@ -156,7 +156,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               <p
                 id={error ? `${inputId}-error` : undefined}
                 className={cn(
-                  'mt-2 text-[13px] font-medium',
+                  'mt-2 text-sm font-medium',
                   error && 'text-red-500',
                   success && 'text-emerald-500',
                   !error && !success && 'text-zinc-500 dark:text-zinc-400'

@@ -155,12 +155,10 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+                    <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                       {item.name}
                     </p>
-                    <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
-                      {item.description}
-                    </p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{item.description}</p>
                   </div>
 
                   {/* Arrow */}
@@ -208,12 +206,8 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
 
                 {/* Text */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
-                    Panel Admin
-                  </p>
-                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
-                    Gestión del sistema
-                  </p>
+                  <p className="text-lg font-semibold text-zinc-900 dark:text-white">Panel Admin</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Gestión del sistema</p>
                 </div>
 
                 {/* Arrow */}
@@ -255,9 +249,7 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
 
             {/* Text */}
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
-                Cerrar Sesión
-              </p>
+              <p className="text-lg font-semibold text-zinc-900 dark:text-white">Cerrar Sesión</p>
             </div>
           </button>
         </motion.div>
@@ -294,7 +286,7 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+                    <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                       {item.name}
                     </p>
                   </div>
@@ -314,7 +306,7 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
           transition={{ delay: 0.3 }}
           className="pt-4 text-center"
         >
-          <p className="text-[13px] text-zinc-400 dark:text-zinc-600">BarberShop Pro v1.0</p>
+          <p className="text-sm text-zinc-400 dark:text-zinc-600">BarberShop Pro v1.0</p>
         </motion.div>
       </div>
     </Drawer>

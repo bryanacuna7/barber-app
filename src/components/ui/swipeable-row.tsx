@@ -16,7 +16,7 @@
  * </SwipeableRow>
  */
 
-import { motion, useMotionValue, animate } from 'framer-motion'
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { cn } from '@/lib/utils/cn'
 import { animations } from '@/lib/design-system'
 import { haptics } from '@/lib/utils/mobile'
@@ -34,6 +34,7 @@ export interface SwipeableRowProps {
   rightActions?: SwipeAction[] // revealed on swipe left
   leftActions?: SwipeAction[] // revealed on swipe right (optional)
   className?: string
+  containerClassName?: string
   threshold?: number // default 72
 }
 
@@ -42,13 +43,14 @@ export function SwipeableRow({
   rightActions = [],
   leftActions = [],
   className,
+  containerClassName,
   threshold = 72,
 }: SwipeableRowProps) {
   const hasRevealed = useRef(false)
   const x = useMotionValue(0)
-  const ACTION_SIZE = 58
-  const ACTION_GAP = 12
-  const ACTION_EDGE_PADDING = 12
+  const ACTION_SIZE = 46
+  const ACTION_GAP = 8
+  const ACTION_EDGE_PADDING = 8
 
   const calculateActionWidth = (count: number) => {
     if (count === 0) return 0
@@ -61,6 +63,8 @@ export function SwipeableRow({
   const leftConstraint = rightActions.length > 0 ? -rightActionsWidth : 0
   const rightConstraint = leftActions.length > 0 ? leftActionsWidth : 0
   const hasActions = rightActions.length > 0 || leftActions.length > 0
+  const rightActionsOpacity = useTransform(x, [0, -8, -24], [0, 0.35, 1])
+  const leftActionsOpacity = useTransform(x, [0, 8, 24], [0, 0.35, 1])
 
   // Haptic feedback when actions are revealed
   const handleDrag = useCallback(
@@ -103,7 +107,7 @@ export function SwipeableRow({
   )
 
   return (
-    <div className="relative rounded-xl overflow-hidden">
+    <div className={cn('relative overflow-hidden rounded-xl', containerClassName)}>
       {/* Swipe affordance indicator (3 dots on right edge) */}
       {rightActions.length > 0 && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-0.5 opacity-20 pointer-events-none z-0">
@@ -115,7 +119,10 @@ export function SwipeableRow({
 
       {/* Left actions (revealed on swipe right) */}
       {leftActions.length > 0 && (
-        <div className="absolute left-3 top-1/2 z-0 -translate-y-1/2 flex items-center gap-3">
+        <motion.div
+          style={{ opacity: leftActionsOpacity }}
+          className="absolute left-2 top-1/2 z-0 -translate-y-1/2 flex items-center gap-2"
+        >
           {leftActions.map((action, index) => (
             <button
               key={index}
@@ -127,21 +134,24 @@ export function SwipeableRow({
               aria-label={action.label}
               title={action.label}
               className={cn(
-                'flex items-center justify-center text-white rounded-full shadow-[0_10px_24px_rgba(0,0,0,0.25)]',
+                'flex items-center justify-center text-white rounded-2xl shadow-[0_8px_18px_rgba(0,0,0,0.24)]',
                 action.color,
-                'w-[58px] h-[58px]'
+                'w-[46px] h-[46px]'
               )}
             >
               <div className="flex items-center justify-center">{action.icon}</div>
               <span className="sr-only">{action.label}</span>
             </button>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Right actions (revealed on swipe left) */}
       {rightActions.length > 0 && (
-        <div className="absolute right-3 top-1/2 z-0 -translate-y-1/2 flex items-center gap-3">
+        <motion.div
+          style={{ opacity: rightActionsOpacity }}
+          className="absolute right-2 top-1/2 z-0 -translate-y-1/2 flex items-center gap-2"
+        >
           {rightActions.map((action, index) => (
             <button
               key={index}
@@ -153,16 +163,16 @@ export function SwipeableRow({
               aria-label={action.label}
               title={action.label}
               className={cn(
-                'flex items-center justify-center text-white rounded-full shadow-[0_10px_24px_rgba(0,0,0,0.25)]',
+                'flex items-center justify-center text-white rounded-2xl shadow-[0_8px_18px_rgba(0,0,0,0.24)]',
                 action.color,
-                'w-[58px] h-[58px]'
+                'w-[46px] h-[46px]'
               )}
             >
               <div className="flex items-center justify-center">{action.icon}</div>
               <span className="sr-only">{action.label}</span>
             </button>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Swipeable content */}

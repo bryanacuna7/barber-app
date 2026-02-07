@@ -8,7 +8,7 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-08 (Session 143 - Barberos/Lealtad de-generic + active-tab autoscroll)
+- **Last Updated:** 2026-02-08 (Session 144 - de-generic pass + audit refresh)
 - **Current Branch:** `feature/ui-ux-redesign`
 - **Current Phase:** Audit remediation in progress (checkpoint commit + targeted UX fixes applied)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
@@ -94,6 +94,48 @@
 **Validation:**
 
 - `npx eslint` on touched files: **0 errors**, warnings only (mostly pre-existing/legacy).
+
+### Session 144: Final Mobile De-Generic Pass + Audit Sync (2026-02-08)
+
+**Status:** ✅ Applied and committed
+
+**Commits:**
+
+- `40d52da` — `chore(mobile): checkpoint before final de-generic pass`
+- `214617d` — `feat(mobile): de-generic pass for citas/barberos/servicios`
+
+**Implemented in this pass:**
+
+- `Citas`:
+  - removed mobile full-bleed wrapper (`-mx`) that caused boxed canvas feel.
+  - reduced top separator harshness (header border softened).
+  - `Hoy` no longer competes with `+` when already on today; now only `Ir a hoy` appears off-today.
+  - segmented control (`Día/Semana/Mes`) upgraded to same premium active/inactive contract used across app.
+  - improved spacing in `MAÑANA/MEDIODÍA/TARDE` blocks (title/time/progress no longer cramped).
+- `Barberos`:
+  - removed full-page boxed wrapper feel and limited ambient mesh to desktop.
+  - mobile tabs now auto-center instantly on tap (`scrollIntoView`) so `Calendario` is never half-hidden.
+  - mobile list no longer wrapped in parent card (less “encajonado”).
+- `Servicios`:
+  - removed full-page boxed wrapper feel.
+  - category chips now auto-center on selection.
+  - mobile list no longer wrapped by parent card.
+- `Lealtad`:
+  - mobile section header and form surface softened to match dashboard visual language.
+- `Trial banner`:
+  - compact variant spacing stabilized for cleaner separation from surrounding modules.
+- `AUDIT.md`:
+  - added “Sesion 142 - De-generic pass” with completed changes and remaining recommendations.
+
+**Validation:**
+
+- `npx eslint` on touched files: **0 errors**, warnings only (legacy/pre-existing).
+
+**Pending visual QA:**
+
+1. Validate `TrialBanner` continuity in real iPhone PWA across `Citas`, `Servicios`, `Barberos`.
+2. Verify no residual boxed/square canvas in secondary screens (`Lealtad`, subviews in `Más`).
+3. Confirm gestures + haptics behavior on hardware (not just emulator).
 
 ### Session 142: Citas + Barberos UX Polish (2026-02-08)
 

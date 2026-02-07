@@ -53,12 +53,12 @@ export function DashboardContent() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-[28px] font-bold tracking-tight">
+            <h1 className="app-page-title">
               <span className="bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-700 dark:from-white dark:via-zinc-100 dark:to-zinc-300 bg-clip-text text-transparent">
                 {greeting}
               </span>
             </h1>
-            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className="app-page-subtitle mt-0.5">
               Bienvenido a{' '}
               <span className="font-medium text-zinc-700 dark:text-zinc-300">
                 {stats.business.name}
@@ -68,7 +68,7 @@ export function DashboardContent() {
           <Link
             href={`/reservar/${stats.business.slug}`}
             target="_blank"
-            className="group inline-flex items-center gap-2 text-[15px] text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all duration-200 hover:gap-3 focus-ring rounded-md"
+            className="app-page-subtitle group inline-flex items-center gap-2 hover:text-zinc-900 dark:hover:text-white transition-all duration-200 hover:gap-3 focus-ring rounded-md"
           >
             Ver página pública
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -93,13 +93,13 @@ export function DashboardContent() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
                 <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-[17px]">Próximas Citas Hoy</CardTitle>
+              <CardTitle className="text-lg">Próximas Citas Hoy</CardTitle>
             </div>
             <Link href="/citas">
               <Button
                 variant="gradient"
                 size="sm"
-                className="gap-1.5 text-[13px] min-h-[44px] whitespace-nowrap"
+                className="gap-1.5 text-sm min-h-[44px] whitespace-nowrap"
               >
                 Ver todo
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -141,10 +141,10 @@ export function DashboardContent() {
                   <div className="absolute inset-0 rounded-2xl border-2 border-zinc-300/50 dark:border-zinc-700/50 animate-[pulse-ring_2s_ease-in-out_infinite]" />
                 </div>
 
-                <p className="mt-4 text-[17px] font-medium text-zinc-900 dark:text-white relative">
+                <p className="mt-4 text-lg font-medium text-zinc-900 dark:text-white relative">
                   Sin citas pendientes
                 </p>
-                <p className="mt-1 text-[15px] text-zinc-500 text-center relative">
+                <p className="mt-1 text-base text-zinc-500 text-center relative">
                   No hay más citas programadas para hoy
                 </p>
               </div>
@@ -168,19 +168,19 @@ export function DashboardContent() {
                       {/* Contenido con z-index relative */}
                       <div className="relative flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 ring-2 ring-white/50 dark:ring-zinc-900/50 shadow-sm group-hover:shadow-md transition-shadow">
-                          <span className="text-[15px] font-bold text-zinc-600 dark:text-zinc-300">
+                          <span className="text-base font-bold text-zinc-600 dark:text-zinc-300">
                             {client?.name?.charAt(0).toUpperCase() || '?'}
                           </span>
                         </div>
                         <div>
-                          <p className="text-[15px] font-semibold text-zinc-900 dark:text-white">
+                          <p className="text-base font-semibold text-zinc-900 dark:text-white">
                             {client?.name || 'Cliente'}
                           </p>
-                          <p className="text-[13px] text-zinc-500">{service?.name || 'Servicio'}</p>
+                          <p className="text-sm text-zinc-500">{service?.name || 'Servicio'}</p>
                         </div>
                       </div>
                       <div className="relative text-right">
-                        <p className="text-[17px] font-bold text-zinc-900 dark:text-white">
+                        <p className="text-lg font-bold text-zinc-900 dark:text-white">
                           {formatTime(apt.scheduled_at)}
                         </p>
                         <p
@@ -204,7 +204,7 @@ export function DashboardContent() {
         {/* Quick Actions */}
         <Card variant="glass" data-tour="dashboard-quick-actions">
           <CardHeader>
-            <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
+            <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent>
             <div
@@ -216,7 +216,7 @@ export function DashboardContent() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 dark:bg-amber-600">
                       <CreditCard className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-[13px] font-medium text-amber-900 dark:text-amber-100 text-center">
+                    <span className="text-sm font-medium text-amber-900 dark:text-amber-100 text-center">
                       Reportar Pago
                     </span>
                   </div>
@@ -227,7 +227,7 @@ export function DashboardContent() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400 transition-transform group-hover:scale-110" />
                   </div>
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white text-center">
                     Nueva Cita
                   </span>
                 </div>
@@ -237,7 +237,7 @@ export function DashboardContent() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30 group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400 transition-transform group-hover:scale-110" />
                   </div>
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white text-center">
                     Servicios
                   </span>
                 </div>
@@ -247,7 +247,7 @@ export function DashboardContent() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400 transition-transform group-hover:scale-110" />
                   </div>
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white text-center">
                     Clientes
                   </span>
                 </div>
