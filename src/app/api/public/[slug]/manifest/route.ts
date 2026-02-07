@@ -29,14 +29,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     theme_color: themeColor,
     icons: [
       {
-        src: '/icon-192.png',
+        src: `/api/pwa/icon?size=192&slug=${encodeURIComponent(business.slug)}`,
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any',
       },
       {
-        src: '/icon-512.png',
+        src: `/api/pwa/icon?size=512&slug=${encodeURIComponent(business.slug)}`,
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'any',
       },
     ],
   }

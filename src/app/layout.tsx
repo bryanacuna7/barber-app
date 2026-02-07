@@ -37,6 +37,14 @@ export const metadata: Metadata = {
     locale: 'es_CR',
     siteName: 'BarberShop Pro',
   },
+  icons: {
+    icon: [
+      { url: '/api/pwa/icon?size=64', sizes: '64x64', type: 'image/png' },
+      { url: '/api/pwa/icon?size=192', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/api/pwa/icon?size=180', sizes: '180x180', type: 'image/png' }],
+    shortcut: ['/api/pwa/icon?size=64'],
+  },
 }
 
 export const viewport: Viewport = {
@@ -57,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning className="pt-safe">
       <head>
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/api/pwa/icon?size=180" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>
