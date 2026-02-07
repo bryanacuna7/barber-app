@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-06 (Session 131 - Landing Page Modern Premium Redesign 🎨)
+- **Last Updated:** 2026-02-07 (Session 134 - Mobile UX Round 2 Deep Polish)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Landing Page Redesign - Modern Premium + Glassmorphism
+- **Current Phase:** Mobile UX Deep Polish Complete
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 
 ---
@@ -30,6 +30,168 @@
 ---
 
 ## Recent Sessions
+
+### Session 134: Mobile UX Round 2 - Deep Polish (2026-02-07)
+
+**Status:** ✅ Complete - 8 bugs fixed in 5 PRs, visually verified at 390px
+
+**Objective:** Fix 8 new mobile UX bugs reported after Session 133 + leaderboard mobile fix
+
+**8 Issues Fixed (5 PRs):**
+
+- **PR1:** Bottom nav reordered (Citas|Clientes|Inicio|Servicios|Mas) + Nueva Cita form with 6 real fields (client/service/barber selects, date, time, notes)
+- **PR2:** Servicios mobile cards replacing 7-column table, icon-only "+" button on mobile
+- **PR3:** Barberos compact Apple Contacts list on mobile + bottom sheet detail view
+- **PR4:** Leaderboard mobile responsive layout + button touch targets 44px + whitespace-nowrap
+- **PR5:** Bottom padding audit for bottom nav, servicios header, calendar view, view switcher
+
+**Additional Fixes:**
+
+- Fixed 3 pre-existing TS errors in configuracion (wrong UIBusinessSettings property paths, missing createClient import, wrong prop name retry→onRetry)
+- Removed stale page.backup.tsx causing compilation errors
+
+**Key Files Modified:**
+
+- `src/components/dashboard/bottom-nav.tsx` - nav order: Inicio centered
+- `src/app/(dashboard)/citas/page-v2.tsx` - real Nueva Cita form with DB data
+- `src/app/(dashboard)/servicios/page-v2.tsx` - mobile cards + icon-only button
+- `src/app/(dashboard)/barberos/page-v2.tsx` - compact list + detail sheet + leaderboard responsive
+- `src/app/(dashboard)/configuracion/page-v2.tsx` - TS fixes
+- `src/app/(dashboard)/analiticas/page-v2.tsx` - bottom padding
+
+**Patterns Used:**
+
+- Dual render: `lg:hidden` (mobile) + `hidden lg:block` (desktop)
+- Native `<select>` for iOS picker support
+- Apple Contacts compact list + progressive disclosure via Sheet
+- `text-base` (16px) on inputs to prevent iOS zoom
+
+**Visual Verification:** Playwright screenshots at 390px - Citas, Servicios, Barberos (cards + leaderboard + detail sheet)
+
+---
+
+### Session 133: Mobile UX Overhaul - Apple HIG Standards (2026-02-06)
+
+**Status:** ✅ Complete - All 15 issues fixed, build passing, visually verified
+
+**Objective:** Comprehensive mobile UX audit + fix following Apple Human Interface Guidelines
+
+**15 Issues Fixed (7 PRs):**
+
+- **PR0:** Test infrastructure - 12 mobile viewports (Tier 1-3), shared test utils
+- **PR1:** Citas header 2-row Apple HIG layout, "+" opens create sheet, FAB removed
+- **PR2:** Barberos "+" always visible, double bottom nav killed, FAB removed
+- **PR3:** Dark mode PWA fix (black-translucent, viewport-fit cover, bg-[#0a0a0a])
+- **PR4:** PWA routing - authenticated users redirect / → /dashboard
+- **PR5:** Clientes mobile detail as bottom Sheet, compact cards, filter scroll indicator
+- **PR6:** Touch targets 44px min (dashboard, analiticas), config sheets max-h-[85vh], FAB bottom-20, servicios scroll indicator
+
+**Key Files Modified:**
+
+- `playwright.config.ts` - 12 viewport projects
+- `tests/e2e/helpers/mobile-utils.ts` - shared mobile test utilities
+- `src/app/(dashboard)/citas/page-v2.tsx` - 2-row header, create sheet
+- `src/app/(dashboard)/barberos/page-v2.tsx` - add sheet, no FAB, no double nav
+- `src/app/(dashboard)/clientes/page-v2.tsx` - mobile detail sheet, compact cards
+- `src/app/(dashboard)/servicios/page-v2.tsx` - scroll indicators
+- `src/app/(dashboard)/configuracion/page-v2.tsx` - max-h-[85vh] sheets
+- `src/app/(dashboard)/analiticas/page-v2.tsx` - 44px touch targets
+- `src/components/dashboard/dashboard-content.tsx` - 44px touch targets
+- `src/components/ui/fab.tsx` - bottom-20 positioning
+- `src/app/layout.tsx` - dark mode PWA fixes
+- `src/app/manifest.ts` - start_url /dashboard, dark bg
+- `src/lib/supabase/middleware.ts` - auth redirect from landing
+
+**Apple HIG Principles Applied:**
+
+- No FABs (primary actions in nav bar)
+- Single tab bar (no duplicate bottom navs)
+- 2-row mobile headers
+- Bottom sheets for forms/details
+- 44px minimum touch targets
+- Progressive disclosure
+
+**Visual Verification:** Playwright screenshots at 360px and 390px on Citas, Barberos, Clientes, Servicios, Dashboard, Configuracion - all passing
+
+**Plan:** `/Users/bryanacuna/.claude/plans/frolicking-floating-spring.md`
+
+---
+
+### Session 132: Awwwards-Style Animations Implementation (2026-02-06)
+
+**Status:** ✅ 100% Complete (~2h)
+
+**Objective:** Add sophisticated Awwwards-style animations to landing page
+
+**User Request:** "y esa landing puede tener animaciones modernas tipo awwwards?"
+
+**Implementation:**
+
+Implemented advanced animations across all 6 landing page components:
+
+1. **Hero Section:**
+   - Parallax scroll effects on gradient orbs (useMotionValue, scrollY tracking)
+   - Magnetic button interactions (useSpring with stiffness: 200, damping: 20)
+   - 3D tilt effects on calendar demo (rotateY, rotateX, preserve-3d)
+   - Advanced micro-interactions on appointment cards
+   - Custom easing curves: `[0.21, 0.47, 0.32, 0.98]`
+
+2. **Features Section:**
+   - 3D tilt on feature cards with `transformStyle: 'preserve-3d'`
+   - Glassmorphism with backdrop-blur-sm
+   - Stagger animations on Before/After comparison items
+   - Enhanced hover effects (scale: 1.05, y: -8)
+   - Animated gradient overlays on hover
+
+3. **Stats Section:**
+   - Improved card animations with scale transitions
+   - Glassmorphism on stat cards (`bg-white/60 backdrop-blur-sm`)
+   - Spring animations on trust badges (type: 'spring', stiffness: 200)
+   - Enhanced shadow transitions (shadow-lg → shadow-xl)
+
+4. **Testimonials Section:**
+   - 3D tilt on testimonial cards (rotateY: 3, rotateX: 3)
+   - Animated Quote icons with spring effect and rotation
+   - Stagger animations on rating stars
+   - Glassmorphism with `bg-white/80 backdrop-blur-sm`
+
+5. **Pricing Section:**
+   - 3D tilt on pricing cards with preserve-3d
+   - Animated "Recomendado" badge with spring effect
+   - Stagger animations on feature checkmarks
+   - Enhanced CTA button interactions (whileHover, whileTap)
+
+6. **Footer:**
+   - Entrance animations for all sections (opacity + y)
+   - Stagger animations on navigation links
+   - Hover effects on social icons (scale: 1.1, y: -2)
+   - Animated brand logo rotation (rotate: 15)
+
+**Animation Principles Applied:**
+
+- ✅ Smooth transitions (150-400ms duration)
+- ✅ Custom easing for professional feel
+- ✅ Viewport-triggered animations (`whileInView`, `viewport: { once: true }`)
+- ✅ Performance-optimized (transforms only, no layout properties)
+- ✅ Consistent delays and stagger patterns
+- ✅ 3D effects with proper perspective
+
+**Files Modified:**
+
+- `src/components/landing/hero-section.tsx` - parallax, magnetic buttons, 3D tilt
+- `src/components/landing/features-section.tsx` - 3D tilt cards, stagger
+- `src/components/landing/stats-section.tsx` - glassmorphism, spring animations
+- `src/components/landing/testimonials-section.tsx` - 3D tilt, animated stars
+- `src/components/landing/pricing-section.tsx` - 3D tilt, stagger checkmarks
+- `src/components/landing/footer.tsx` - entrance animations, hover effects
+
+**Commit:** `2ab560b` - ✨ feat: Add Awwwards-style animations to landing page
+
+**Result:**
+
+Landing page now has premium, modern animations matching Awwwards standards. All interactions are smooth, professional, and performance-optimized. Animations enhance the user experience without being overwhelming.
+
+---
 
 ### Session 131: Landing Page Modern Premium Redesign (2026-02-06)
 

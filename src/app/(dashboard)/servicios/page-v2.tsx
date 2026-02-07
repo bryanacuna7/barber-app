@@ -15,9 +15,7 @@ import {
   Search,
   Pencil,
   Trash2,
-  Clock,
   Star,
-  TrendingUp,
   Award,
   Package,
   ChevronDown,
@@ -252,8 +250,8 @@ const mockServices: MockService[] = [
   },
 ]
 
-// Icon mapping
-const iconMap: Record<string, LucideIcon> = {
+// Icon mapping (reserved for dynamic icon resolution)
+const _iconMap: Record<string, LucideIcon> = {
   Scissors,
   Sparkles,
   Zap,
@@ -266,12 +264,6 @@ const iconMap: Record<string, LucideIcon> = {
   CircleDot,
   Sparkle,
   Star,
-}
-
-// Service Icon Component
-function ServiceIcon({ iconName, className }: { iconName: string; className?: string }) {
-  const Icon = iconMap[iconName] || Scissors
-  return <Icon className={className} />
 }
 
 // Helper functions
@@ -351,13 +343,7 @@ function ServiciosContent() {
   })
 
   // React Query hooks
-  const {
-    data: realServices = [],
-    isLoading: loading,
-    isError,
-    error: queryError,
-    refetch,
-  } = useServices(businessId)
+  const { isLoading: _loading, isError, error: queryError, refetch } = useServices(businessId)
   const createService = useCreateService()
   const updateService = useUpdateService()
   const deleteServiceMutation = useDeleteService()
@@ -499,7 +485,7 @@ function ServiciosContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-6 pb-24 lg:pb-6 relative overflow-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
@@ -538,7 +524,7 @@ function ServiciosContent() {
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           className="mb-6"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Servicios
@@ -555,8 +541,8 @@ function ServiciosContent() {
                 }}
                 className="h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25"
               >
-                <Plus className="mr-2 h-4 w-4" />
-                Agregar Servicio
+                <Plus className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Agregar Servicio</span>
               </Button>
             </motion.div>
           </div>
@@ -586,214 +572,287 @@ function ServiciosContent() {
               </div>
 
               {/* Category Filter */}
-              <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
-                {categories.map((cat) => (
-                  <motion.button
-                    key={cat}
-                    layout
-                    onClick={() => setSelectedCategory(cat)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium ${
-                      selectedCategory === cat
-                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25'
-                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
-                    }`}
-                  >
-                    {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
-                  </motion.button>
-                ))}
+              <div className="relative">
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white dark:from-zinc-900 z-10 sm:hidden" />
+                <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                  {categories.map((cat) => (
+                    <motion.button
+                      key={cat}
+                      layout
+                      onClick={() => setSelectedCategory(cat)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                      className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium ${
+                        selectedCategory === cat
+                          ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25'
+                          : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                      }`}
+                    >
+                      {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
+                    </motion.button>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
-            {/* Table */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
-              whileHover={{ scale: 1.001 }}
-              className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
-            >
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  {/* Header */}
-                  <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
-                    <tr>
-                      {/* Service Name */}
-                      <th className="px-4 py-3 text-left">
-                        <button
-                          onClick={() => handleSort('name')}
-                          className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                        >
-                          Servicio
-                          {getSortIcon('name')}
-                        </button>
-                      </th>
-
-                      {/* Category */}
-                      <th className="px-4 py-3 text-left">
-                        <button
-                          onClick={() => handleSort('category')}
-                          className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                        >
-                          Categoría
-                          {getSortIcon('category')}
-                        </button>
-                      </th>
-
-                      {/* Bookings */}
-                      <th className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => handleSort('bookings')}
-                          className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                        >
-                          Reservas
-                          {getSortIcon('bookings')}
-                        </button>
-                      </th>
-
-                      {/* Duration */}
-                      <th className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => handleSort('duration')}
-                          className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                        >
-                          Duración
-                          {getSortIcon('duration')}
-                        </button>
-                      </th>
-
-                      {/* Price */}
-                      <th className="px-4 py-3 text-right">
-                        <button
-                          onClick={() => handleSort('price')}
-                          className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                        >
-                          Precio
-                          {getSortIcon('price')}
-                        </button>
-                      </th>
-
-                      {/* Rating */}
-                      <th className="px-4 py-3 text-right">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
-                          Rating
-                        </span>
-                      </th>
-
-                      {/* Actions */}
-                      <th className="w-24 px-4 py-3 text-right">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
-                          Acciones
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-
-                  {/* Body */}
-                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                    {sortedServices.map((service) => {
-                      const categoryColor = getCategoryColor(service.category)
-                      const growth = calculateGrowth(
-                        service.bookings_this_month,
-                        service.bookings_last_month
-                      )
-
-                      return (
-                        <tr
-                          key={service.id}
-                          className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
-                        >
-                          {/* Service Name */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xl">{service.icon}</span>
-                              <div>
-                                <p className="font-medium text-zinc-900 dark:text-white">
-                                  {service.name}
-                                </p>
-                                <p className="text-xs text-zinc-500 line-clamp-1">
-                                  {service.barber_names.length} barberos
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Category */}
-                          <td className="px-4 py-3">
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3">
+              {sortedServices.map((service) => {
+                const categoryColor = getCategoryColor(service.category)
+                return (
+                  <motion.div
+                    key={service.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+                  >
+                    {/* Row 1: Emoji + Name + Actions */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="text-2xl flex-shrink-0">{service.icon}</span>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-zinc-900 dark:text-white truncate">
+                            {service.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
                             <span
                               className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
                             >
                               {getCategoryLabel(service.category)}
                             </span>
-                          </td>
-
-                          {/* Bookings */}
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <span className="font-semibold text-zinc-900 dark:text-white">
-                                {service.bookings_this_month}
-                              </span>
-                              {growth !== 0 && (
-                                <span
-                                  className={`text-xs ${growth > 0 ? 'text-green-600' : 'text-red-600'}`}
-                                >
-                                  ({growth > 0 ? '+' : ''}
-                                  {growth}%)
-                                </span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Duration */}
-                          <td className="px-4 py-3 text-right">
-                            <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                            <span className="text-xs text-zinc-500">
                               {service.duration_minutes} min
                             </span>
-                          </td>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                        <button
+                          onClick={() => setShowForm(true)}
+                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-zinc-500 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400 transition-colors"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteService(service)}
+                          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
 
-                          {/* Price */}
-                          <td className="px-4 py-3 text-right">
-                            <span className="font-semibold text-zinc-900 dark:text-white">
-                              {formatCurrency(service.price)}
-                            </span>
-                          </td>
+                    {/* Row 2: Price + Bookings + Rating */}
+                    <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                      <span className="font-bold text-zinc-900 dark:text-white">
+                        {formatCurrency(service.price)}
+                      </span>
+                      <span className="text-sm text-zinc-500">
+                        {service.bookings_this_month} reservas
+                      </span>
+                      <span className="flex items-center gap-1 text-sm">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-zinc-700 dark:text-zinc-300">
+                          {service.avg_rating?.toFixed(1) || 'N/A'}
+                        </span>
+                      </span>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
 
-                          {/* Rating */}
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                              <span className="text-sm font-medium text-zinc-900 dark:text-white">
-                                {service.avg_rating}
+            {/* Desktop Table View */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.2 }}
+              whileHover={{ scale: 1.001 }}
+              className="hidden lg:block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
+            >
+              <div className="relative">
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white dark:from-zinc-900 z-10 sm:hidden" />
+                <div className="overflow-x-auto scrollbar-hide">
+                  <table className="w-full">
+                    {/* Header */}
+                    <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
+                      <tr>
+                        {/* Service Name */}
+                        <th className="px-4 py-3 text-left">
+                          <button
+                            onClick={() => handleSort('name')}
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                          >
+                            Servicio
+                            {getSortIcon('name')}
+                          </button>
+                        </th>
+
+                        {/* Category */}
+                        <th className="px-4 py-3 text-left">
+                          <button
+                            onClick={() => handleSort('category')}
+                            className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                          >
+                            Categoría
+                            {getSortIcon('category')}
+                          </button>
+                        </th>
+
+                        {/* Bookings */}
+                        <th className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleSort('bookings')}
+                            className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                          >
+                            Reservas
+                            {getSortIcon('bookings')}
+                          </button>
+                        </th>
+
+                        {/* Duration */}
+                        <th className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleSort('duration')}
+                            className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                          >
+                            Duración
+                            {getSortIcon('duration')}
+                          </button>
+                        </th>
+
+                        {/* Price */}
+                        <th className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleSort('price')}
+                            className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                          >
+                            Precio
+                            {getSortIcon('price')}
+                          </button>
+                        </th>
+
+                        {/* Rating */}
+                        <th className="px-4 py-3 text-right">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+                            Rating
+                          </span>
+                        </th>
+
+                        {/* Actions */}
+                        <th className="w-24 px-4 py-3 text-right">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+                            Acciones
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+
+                    {/* Body */}
+                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                      {sortedServices.map((service) => {
+                        const categoryColor = getCategoryColor(service.category)
+                        const growth = calculateGrowth(
+                          service.bookings_this_month,
+                          service.bookings_last_month
+                        )
+
+                        return (
+                          <tr
+                            key={service.id}
+                            className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
+                          >
+                            {/* Service Name */}
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">{service.icon}</span>
+                                <div>
+                                  <p className="font-medium text-zinc-900 dark:text-white">
+                                    {service.name}
+                                  </p>
+                                  <p className="text-xs text-zinc-500 line-clamp-1">
+                                    {service.barber_names.length} barberos
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Category */}
+                            <td className="px-4 py-3">
+                              <span
+                                className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
+                              >
+                                {getCategoryLabel(service.category)}
                               </span>
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* Actions */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
-                                title="Editar"
-                                onClick={() => setShowForm(true)}
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-                                title="Eliminar"
-                                onClick={() => setDeleteService(service)}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                            {/* Bookings */}
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <span className="font-semibold text-zinc-900 dark:text-white">
+                                  {service.bookings_this_month}
+                                </span>
+                                {growth !== 0 && (
+                                  <span
+                                    className={`text-xs ${growth > 0 ? 'text-green-600' : 'text-red-600'}`}
+                                  >
+                                    ({growth > 0 ? '+' : ''}
+                                    {growth}%)
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Duration */}
+                            <td className="px-4 py-3 text-right">
+                              <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                                {service.duration_minutes} min
+                              </span>
+                            </td>
+
+                            {/* Price */}
+                            <td className="px-4 py-3 text-right">
+                              <span className="font-semibold text-zinc-900 dark:text-white">
+                                {formatCurrency(service.price)}
+                              </span>
+                            </td>
+
+                            {/* Rating */}
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                                <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                                  {service.avg_rating}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+                                  title="Editar"
+                                  onClick={() => setShowForm(true)}
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                                  title="Eliminar"
+                                  onClick={() => setDeleteService(service)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Empty State */}

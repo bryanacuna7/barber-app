@@ -39,6 +39,7 @@ import {
   ArrowUp,
   ArrowDown,
   Plus,
+  ChevronRight,
 } from 'lucide-react'
 import {
   mockBarbers,
@@ -47,6 +48,7 @@ import {
   getRoleLabel,
   type MockBarber,
 } from './demos/mock-data'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 
 type ViewMode = 'cards' | 'table' | 'leaderboard' | 'calendar'
 type SortField = 'name' | 'revenue' | 'appointments' | 'rating' | 'level'
@@ -57,6 +59,7 @@ export default function BarberosPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortField, setSortField] = useState<SortField>('revenue')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [isAddBarberOpen, setIsAddBarberOpen] = useState(false)
 
   // Filter and sort barbers
   const processedBarbers = useMemo(() => {
@@ -121,7 +124,7 @@ export default function BarberosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4 md:p-6 lg:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4 pb-24 md:p-6 md:pb-24 lg:p-8 lg:pb-6 relative overflow-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
@@ -172,15 +175,17 @@ export default function BarberosPage() {
                 </p>
               </div>
             </div>
-            {/* Add Barber Button */}
+            {/* Add Barber Button - visible on all sizes */}
             <motion.button
+              onClick={() => setIsAddBarberOpen(true)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="hidden md:flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/25 transition-colors"
+              className="flex items-center gap-2 px-3 py-2.5 md:px-5 md:py-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/25 transition-colors min-h-[44px]"
+              data-testid="add-barber-btn"
             >
               <Plus className="h-5 w-5" />
-              Agregar Barbero
+              <span className="hidden md:inline">Agregar Barbero</span>
             </motion.button>
           </div>
         </motion.div>
@@ -215,7 +220,7 @@ export default function BarberosPage() {
               <button
                 key={value}
                 onClick={() => setViewMode(value as ViewMode)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
                   viewMode === value
                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                     : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
@@ -227,29 +232,27 @@ export default function BarberosPage() {
             ))}
           </div>
 
-          {/* View Switcher - Mobile Bottom Nav */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 p-3 z-50">
-            <div className="flex items-center justify-around">
-              {[
-                { value: 'cards', icon: LayoutGrid },
-                { value: 'table', icon: Table2 },
-                { value: 'leaderboard', icon: Trophy },
-                { value: 'calendar', icon: CalendarIcon },
-              ].map(({ value, icon: Icon }) => (
-                <button
-                  key={value}
-                  onClick={() => setViewMode(value as ViewMode)}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                    viewMode === value
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-zinc-400 dark:text-zinc-600'
-                  }`}
-                >
-                  <Icon className="h-6 w-6" />
-                  <span className="text-xs font-medium capitalize">{value}</span>
-                </button>
-              ))}
-            </div>
+          {/* View Switcher - Mobile (inline, horizontal scroll) */}
+          <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {[
+              { value: 'cards', label: 'Cards', icon: LayoutGrid },
+              { value: 'table', label: 'Table', icon: Table2 },
+              { value: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+              { value: 'calendar', label: 'Calendar', icon: CalendarIcon },
+            ].map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                onClick={() => setViewMode(value as ViewMode)}
+                className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                  viewMode === value
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
           </div>
         </motion.div>
 
@@ -270,169 +273,332 @@ export default function BarberosPage() {
           )}
           {viewMode === 'calendar' && <CalendarView key="calendar" barbers={processedBarbers} />}
         </AnimatePresence>
-
-        {/* Mobile padding for bottom nav */}
-        <div className="md:hidden h-20" />
-
-        {/* Floating Add Button - Mobile Only */}
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="md:hidden fixed bottom-24 right-4 z-40 h-14 w-14 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-full shadow-2xl shadow-violet-500/50 flex items-center justify-center"
-        >
-          <Plus className="h-6 w-6" />
-        </motion.button>
       </div>
+
+      {/* Add Barber Sheet */}
+      <Sheet open={isAddBarberOpen} onOpenChange={setIsAddBarberOpen}>
+        <SheetContent
+          side="bottom"
+          className="rounded-t-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-[#1C1C1E] pb-safe"
+        >
+          <SheetClose onClose={() => setIsAddBarberOpen(false)} />
+          <SheetHeader>
+            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+              Agregar Barbero
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-4 pb-6" data-testid="add-barber-sheet">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Nombre</label>
+              <input
+                type="text"
+                placeholder="Nombre del barbero"
+                className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Email</label>
+              <input
+                type="email"
+                placeholder="email@ejemplo.com"
+                className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Teléfono
+              </label>
+              <input
+                type="tel"
+                placeholder="+506 8888-8888"
+                className="w-full h-12 px-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <button
+              onClick={() => setIsAddBarberOpen(false)}
+              className="w-full h-12 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-semibold text-base transition-colors mt-4"
+            >
+              Agregar Barbero
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
 
 // Cards View Component
 function CardsView({ barbers }: { barbers: MockBarber[] }) {
+  const [selectedBarberMobile, setSelectedBarberMobile] = useState<MockBarber | null>(null)
+  const [isMobileBarberDetailOpen, setIsMobileBarberDetailOpen] = useState(false)
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-    >
-      {barbers.map((barber) => (
-        <motion.div
-          key={barber.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-        >
-          {/* Avatar with gradient background */}
-          <div className="relative h-24 w-24 mx-auto mb-5">
-            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 via-violet-400 to-purple-400 p-1">
-              <div className="h-full w-full rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center">
-                <UserRound className="h-12 w-12 text-violet-600 dark:text-violet-400" />
-              </div>
+    <>
+      {/* Mobile: Compact List (Apple Contacts style) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="lg:hidden space-y-1"
+      >
+        {barbers.map((barber) => (
+          <motion.div
+            key={barber.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            onClick={() => {
+              setSelectedBarberMobile(barber)
+              setIsMobileBarberDetailOpen(true)
+            }}
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer active:scale-[0.98]"
+          >
+            {/* Avatar 40px */}
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+              {barber.photo_url ? (
+                <img src={barber.photo_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <UserRound className="h-5 w-5 text-white" />
+              )}
             </div>
-            {/* Performance ring overlay - más sutil */}
-            <svg className="absolute inset-0 pointer-events-none" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="48"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="text-zinc-200 dark:text-zinc-800"
-              />
-              <circle
-                cx="50"
-                cy="50"
-                r="48"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeDasharray={`${barber.stats.capacity_utilization * 3.01} 301`}
-                strokeLinecap="round"
-                transform="rotate(-90 50 50)"
-                className="text-blue-500 transition-all duration-500"
-              />
-            </svg>
-            {/* Rank badge - más discreto */}
-            {barber.gamification.rank_this_month <= 3 && (
-              <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
-                #{barber.gamification.rank_this_month}
-              </div>
-            )}
-          </div>
 
-          {/* Name + Role */}
-          <div className="text-center mb-3">
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">
-              {barber.name}
-            </h3>
-            <span
-              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(barber.role)}`}
-            >
-              {getRoleLabel(barber.role)}
-            </span>
-          </div>
-
-          {/* Tags */}
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
-            {barber.gamification.rank_this_month === 1 && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium">
-                <Crown className="h-3 w-3" />
-                Top Performer
-              </span>
-            )}
-            {barber.gamification.current_streak > 50 && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs font-medium">
-                <Flame className="h-3 w-3" />
-                {barber.gamification.current_streak} días
-              </span>
-            )}
-          </div>
-
-          {/* Mini Stats Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-            <div className="text-center">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Citas</p>
-              <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                {barber.stats.appointments_this_week}
+            {/* Name + Role + Stats */}
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-zinc-900 dark:text-white truncate">
+                {barber.name}
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                {getRoleLabel(barber.role)} • {barber.stats.appointments_this_week} citas
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ingresos</p>
-              <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                {formatCurrency(barber.stats.revenue_this_month / 1000)}K
-              </p>
+
+            {/* Rating */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                {barber.stats.client_rating}
+              </span>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Rating</p>
-              <div className="flex items-center justify-center gap-1">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+
+            <ChevronRight className="h-4 w-4 text-zinc-400 flex-shrink-0" />
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Desktop: Full Cards Grid */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="hidden lg:grid lg:grid-cols-3 gap-4"
+      >
+        {barbers.map((barber) => (
+          <motion.div
+            key={barber.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+          >
+            {/* Avatar with gradient background */}
+            <div className="relative h-24 w-24 mx-auto mb-5">
+              <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 via-violet-400 to-purple-400 p-1">
+                <div className="h-full w-full rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center">
+                  <UserRound className="h-12 w-12 text-violet-600 dark:text-violet-400" />
+                </div>
+              </div>
+              {/* Performance ring overlay - más sutil */}
+              <svg className="absolute inset-0 pointer-events-none" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="48"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="text-zinc-200 dark:text-zinc-800"
+                />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="48"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeDasharray={`${barber.stats.capacity_utilization * 3.01} 301`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 50 50)"
+                  className="text-blue-500 transition-all duration-500"
+                />
+              </svg>
+              {/* Rank badge - más discreto */}
+              {barber.gamification.rank_this_month <= 3 && (
+                <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
+                  #{barber.gamification.rank_this_month}
+                </div>
+              )}
+            </div>
+
+            {/* Name + Role */}
+            <div className="text-center mb-3">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">
+                {barber.name}
+              </h3>
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(barber.role)}`}
+              >
+                {getRoleLabel(barber.role)}
+              </span>
+            </div>
+
+            {/* Tags */}
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              {barber.gamification.rank_this_month === 1 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium">
+                  <Crown className="h-3 w-3" />
+                  Top Performer
+                </span>
+              )}
+              {barber.gamification.current_streak > 50 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-xs font-medium">
+                  <Flame className="h-3 w-3" />
+                  {barber.gamification.current_streak} días
+                </span>
+              )}
+            </div>
+
+            {/* Mini Stats Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Citas</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                  {barber.stats.appointments_this_week}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ingresos</p>
                 <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                  {barber.stats.client_rating}
+                  {formatCurrency(barber.stats.revenue_this_month / 1000)}K
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Rating</p>
+                <div className="flex items-center justify-center gap-1">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                    {barber.stats.client_rating}
+                  </p>
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Nivel</p>
+                <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                  {barber.gamification.level}
                 </p>
               </div>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Nivel</p>
-              <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">
-                {barber.gamification.level}
-              </p>
-            </div>
-          </div>
 
-          {/* Progress to next level */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-500 dark:text-zinc-400">
-                Progreso a Nivel {barber.gamification.level + 1}
-              </span>
-              <span className="font-semibold text-zinc-900 dark:text-white">
-                {Math.round(
-                  (barber.gamification.xp /
-                    (barber.gamification.xp + barber.gamification.xp_to_next_level)) *
-                    100
+            {/* Progress to next level */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-zinc-500 dark:text-zinc-400">
+                  Progreso a Nivel {barber.gamification.level + 1}
+                </span>
+                <span className="font-semibold text-zinc-900 dark:text-white">
+                  {Math.round(
+                    (barber.gamification.xp /
+                      (barber.gamification.xp + barber.gamification.xp_to_next_level)) *
+                      100
+                  )}
+                  %
+                </span>
+              </div>
+              <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-cyan-600 h-2 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${(barber.gamification.xp / (barber.gamification.xp + barber.gamification.xp_to_next_level)) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      {/* Mobile Barber Detail Sheet */}
+      <Sheet open={isMobileBarberDetailOpen} onOpenChange={setIsMobileBarberDetailOpen}>
+        <SheetContent
+          side="bottom"
+          className="lg:hidden rounded-t-3xl max-h-[85vh] overflow-y-auto"
+        >
+          <SheetHeader className="pb-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+                {selectedBarberMobile?.photo_url ? (
+                  <img
+                    src={selectedBarberMobile.photo_url}
+                    alt=""
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <UserRound className="h-8 w-8 text-white" />
                 )}
-                %
-              </span>
+              </div>
+              <div>
+                <SheetTitle className="text-lg">{selectedBarberMobile?.name}</SheetTitle>
+                <p className="text-sm text-zinc-500">
+                  {selectedBarberMobile ? getRoleLabel(selectedBarberMobile.role) : ''}
+                </p>
+              </div>
             </div>
-            <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-cyan-600 h-2 rounded-full transition-all duration-500"
-                style={{
-                  width: `${(barber.gamification.xp / (barber.gamification.xp + barber.gamification.xp_to_next_level)) * 100}%`,
-                }}
-              />
+          </SheetHeader>
+
+          {selectedBarberMobile && (
+            <div className="space-y-4 px-1">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+                  <p className="text-xs text-zinc-500">Citas</p>
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                    {selectedBarberMobile.stats.appointments_this_week}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+                  <p className="text-xs text-zinc-500">Ingresos</p>
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                    ₡{Math.round(selectedBarberMobile.stats.revenue_this_month / 1000)}K
+                  </p>
+                </div>
+                <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+                  <p className="text-xs text-zinc-500">Rating</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                      {selectedBarberMobile.stats.client_rating}
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+                  <p className="text-xs text-zinc-500">Nivel</p>
+                  <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                    {selectedBarberMobile.gamification.level}
+                  </p>
+                </div>
+              </div>
+
+              {/* Close button */}
+              <button
+                onClick={() => setIsMobileBarberDetailOpen(false)}
+                className="w-full h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              >
+                Cerrar
+              </button>
             </div>
-          </div>
-        </motion.div>
-      ))}
-    </motion.div>
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
   )
 }
 
@@ -607,43 +773,63 @@ function LeaderboardView({ barbers }: { barbers: MockBarber[] }) {
           animate={{ opacity: 1, x: 0 }}
           whileHover={{ scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className={`bg-white dark:bg-zinc-900 rounded-2xl p-5 border shadow-sm cursor-pointer ${
+          className={`bg-white dark:bg-zinc-900 rounded-2xl p-3 lg:p-5 border shadow-sm cursor-pointer ${
             index < 3
               ? 'border-amber-300 dark:border-amber-700 shadow-amber-100 dark:shadow-amber-900/20'
               : 'border-zinc-200 dark:border-zinc-800'
           }`}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 lg:gap-4">
             {/* Rank Badge */}
             <div
-              className={`h-14 w-14 rounded-full bg-gradient-to-br ${getMedalColor(index + 1)} flex items-center justify-center text-white font-bold text-xl shadow-lg`}
+              className={`h-10 w-10 lg:h-14 lg:w-14 rounded-full bg-gradient-to-br ${getMedalColor(index + 1)} flex items-center justify-center text-white font-bold text-lg lg:text-xl shadow-lg flex-shrink-0`}
             >
-              {index < 3 ? <Trophy className="h-7 w-7" /> : `#${index + 1}`}
+              {index < 3 ? <Trophy className="h-5 w-5 lg:h-7 lg:w-7" /> : `#${index + 1}`}
             </div>
 
             {/* Avatar */}
-            <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
-              <UserRound className="h-7 w-7 text-white" />
+            <div className="h-10 w-10 lg:h-14 lg:w-14 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center flex-shrink-0">
+              <UserRound className="h-5 w-5 lg:h-7 lg:w-7 text-white" />
             </div>
 
-            {/* Info */}
+            {/* Info + Stats */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg text-zinc-900 dark:text-white truncate">
-                {barber.name}
-              </h3>
-              <p className="text-sm text-zinc-500">{getRoleLabel(barber.role)}</p>
-            </div>
-
-            {/* Stats */}
-            <div className="text-right space-y-1">
-              <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                {formatCurrency(barber.stats.revenue_this_month)}
-              </p>
-              <div className="flex items-center gap-3 justify-end text-sm">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-sm lg:text-lg text-zinc-900 dark:text-white truncate">
+                    {barber.name}
+                  </h3>
+                  <p className="text-xs lg:text-sm text-zinc-500">{getRoleLabel(barber.role)}</p>
+                </div>
+                {/* Desktop stats - hidden on mobile */}
+                <div className="hidden lg:block text-right space-y-1">
+                  <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                    {formatCurrency(barber.stats.revenue_this_month)}
+                  </p>
+                  <div className="flex items-center gap-3 justify-end text-sm">
+                    <span className="text-zinc-500">
+                      {barber.stats.appointments_this_month} citas
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="font-semibold text-zinc-900 dark:text-white">
+                        {barber.stats.client_rating}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Mobile stats - visible only on mobile */}
+              <div className="flex items-center gap-2 mt-1 lg:hidden text-xs">
+                <span className="font-bold text-zinc-900 dark:text-white">
+                  {formatCurrency(barber.stats.revenue_this_month)}
+                </span>
+                <span className="text-zinc-400">•</span>
                 <span className="text-zinc-500">{barber.stats.appointments_this_month} citas</span>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="font-semibold text-zinc-900 dark:text-white">
+                <span className="text-zinc-400">•</span>
+                <div className="flex items-center gap-0.5">
+                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  <span className="font-semibold text-zinc-700 dark:text-zinc-300">
                     {barber.stats.client_rating}
                   </span>
                 </div>
@@ -672,12 +858,12 @@ function CalendarView({ barbers }: { barbers: MockBarber[] }) {
           animate={{ opacity: 1, scale: 1 }}
           whileHover={{ scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm cursor-pointer"
+          className="bg-white dark:bg-zinc-900 rounded-2xl p-3 lg:p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm cursor-pointer"
         >
           {/* Header */}
-          <div className="flex items-center gap-3 mb-5 pb-5 border-b border-zinc-200 dark:border-zinc-800">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
-              <UserRound className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-3 mb-3 lg:mb-5 pb-3 lg:pb-5 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
+              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-zinc-900 dark:text-white">{barber.name}</h3>

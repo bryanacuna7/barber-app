@@ -15,7 +15,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { TrendingUp, Calendar, DollarSign, Users } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
@@ -184,7 +184,7 @@ function AnalyticsContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-24 lg:pb-6">
       {/* Header */}
       <FadeInUp>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -203,7 +203,7 @@ function AnalyticsContent() {
               variant={period === 'week' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setPeriod('week')}
-              className="text-[13px] sm:text-sm"
+              className="text-[13px] sm:text-sm min-h-[44px]"
             >
               Semana
             </Button>
@@ -211,7 +211,7 @@ function AnalyticsContent() {
               variant={period === 'month' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setPeriod('month')}
-              className="text-[13px] sm:text-sm"
+              className="text-[13px] sm:text-sm min-h-[44px]"
             >
               Mes
             </Button>
@@ -219,7 +219,7 @@ function AnalyticsContent() {
               variant={period === 'year' ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setPeriod('year')}
-              className="text-[13px] sm:text-sm"
+              className="text-[13px] sm:text-sm min-h-[44px]"
             >
               Año
             </Button>

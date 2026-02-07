@@ -5,10 +5,11 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'BarberShop Pro',
     short_name: 'BarberShop',
     description: 'Sistema de gestión de citas para barberías. Agenda fácil, clientes felices.',
-    start_url: '/',
+    start_url: '/dashboard',
+    scope: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#007AFF',
+    background_color: '#0a0a0a',
+    theme_color: '#0a0a0a',
     orientation: 'portrait',
     icons: [
       {

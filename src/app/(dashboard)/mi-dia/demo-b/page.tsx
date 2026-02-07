@@ -6,7 +6,6 @@ import {
   Calendar,
   Clock,
   User,
-  Phone,
   DollarSign,
   Check,
   UserX,
@@ -14,9 +13,9 @@ import {
   AlertCircle,
   ChevronRight,
   Edit2,
-  Save,
   X as XIcon,
   Search,
+  Activity,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -520,9 +519,7 @@ function TimelineItem({
       )}
 
       {/* Past indicator */}
-      {isPast && !isFinalized && (
-        <div className="mt-2 text-xs text-amber-500">Pasada</div>
-      )}
+      {isPast && !isFinalized && <div className="mt-2 text-xs text-amber-500">Pasada</div>}
     </motion.button>
   )
 }

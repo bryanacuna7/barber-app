@@ -35,7 +35,6 @@ import {
   Sun,
   Moon,
   Zap,
-  BarChart3,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import {
@@ -62,11 +61,11 @@ import {
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
 
-// Types
-import type { Appointment } from '@/types'
-
 // React Query hooks
-import { useCalendarAppointments } from '@/hooks/queries/useAppointments'
+import { useCalendarAppointments, useCreateAppointment } from '@/hooks/queries/useAppointments'
+import { useClients } from '@/hooks/queries/useClients'
+import { useServices } from '@/hooks/queries/useServices'
+import { useBarbers } from '@/hooks/queries/useBarbers'
 
 // Real-time WebSocket integration
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
@@ -207,6 +206,14 @@ function CitasCalendarFusionContent() {
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isStatsOpen, setIsStatsOpen] = useState(false)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [createForm, setCreateForm] = useState({
+    client_id: '',
+    service_id: '',
+    barber_id: '',
+    time: '09:00',
+    notes: '',
+  })
 
   const today = useMemo(() => new Date(), [])
 
@@ -243,6 +250,16 @@ function CitasCalendarFusionContent() {
 
   // Real-time updates
   useRealtimeAppointments({ businessId })
+
+  // Fetch clients, services, and barbers for the form
+  const { data: clientsData } = useClients(businessId)
+  const { data: servicesData } = useServices(businessId || '')
+  const { data: barbersData } = useBarbers(businessId || '')
+  const createAppointment = useCreateAppointment()
+
+  const clients = clientsData?.clients || []
+  const services = servicesData || []
+  const barbers = barbersData || []
 
   // Navigation handlers
   const handlePrevious = useCallback(() => {
@@ -428,6 +445,55 @@ function CitasCalendarFusionContent() {
   const DAILY_GOAL = 200000
   const goalProgress = Math.min(Math.round((stats.projectedRevenue / DAILY_GOAL) * 100), 100)
 
+  // Handle form submission
+  const handleCreateAppointment = async () => {
+    if (!createForm.client_id || !createForm.service_id || !createForm.barber_id || !businessId) {
+      toast.error('Por favor completa todos los campos requeridos')
+      return
+    }
+
+    // Find service to get duration and price
+    const service = services.find((s) => s.id === createForm.service_id)
+    if (!service) {
+      toast.error('Servicio no encontrado')
+      return
+    }
+
+    // Combine date and time
+    const scheduledAt = `${formDate}T${createForm.time}:00`
+
+    try {
+      await createAppointment.mutateAsync({
+        business_id: businessId,
+        client_id: createForm.client_id,
+        service_id: createForm.service_id,
+        barber_id: createForm.barber_id,
+        scheduled_at: scheduledAt,
+        duration_minutes: service.duration,
+        price: service.price,
+        status: 'pending',
+      })
+
+      toast.success('Cita creada exitosamente')
+      setIsCreateOpen(false)
+
+      // Reset form
+      setCreateForm({
+        client_id: '',
+        service_id: '',
+        barber_id: '',
+        time: '09:00',
+        notes: '',
+      })
+    } catch (error) {
+      toast.error('Error al crear la cita')
+      console.error(error)
+    }
+  }
+
+  // Derive form date from selectedDate
+  const formDate = format(selectedDate, 'yyyy-MM-dd')
+
   // Error state
   if (queryError) {
     return (
@@ -451,10 +517,10 @@ function CitasCalendarFusionContent() {
           {/* Header */}
           <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl border-b border-zinc-200 dark:border-[#2C2C2E]">
             <div className="px-4 lg:px-6 py-4">
-              {/* Top row: Date + View Switcher + Navigation */}
-              <div className="flex items-center justify-between mb-4 gap-2">
+              {/* DESKTOP HEADER - Single row layout (unchanged) */}
+              <div className="hidden lg:flex items-center justify-between mb-4 gap-2">
                 {/* Left: Month/Year context */}
-                <div className="text-xs lg:text-sm font-medium text-zinc-600 dark:text-[#8E8E93] min-w-0 flex-shrink-0">
+                <div className="text-sm font-medium text-zinc-600 dark:text-[#8E8E93] min-w-0 flex-shrink-0">
                   {format(selectedDate, 'MMMM yyyy', { locale: es })}
                 </div>
 
@@ -462,7 +528,7 @@ function CitasCalendarFusionContent() {
                 <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#2C2C2E] rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('day')}
-                    className={`px-2 lg:px-4 py-1.5 rounded-md font-medium text-xs lg:text-sm transition-colors ${
+                    className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                       viewMode === 'day'
                         ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
                         : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
@@ -472,7 +538,7 @@ function CitasCalendarFusionContent() {
                   </button>
                   <button
                     onClick={() => setViewMode('week')}
-                    className={`px-2 lg:px-4 py-1.5 rounded-md font-medium text-xs lg:text-sm transition-colors ${
+                    className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                       viewMode === 'week'
                         ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
                         : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
@@ -482,7 +548,7 @@ function CitasCalendarFusionContent() {
                   </button>
                   <button
                     onClick={() => setViewMode('month')}
-                    className={`px-2 lg:px-4 py-1.5 rounded-md font-medium text-xs lg:text-sm transition-colors ${
+                    className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                       viewMode === 'month'
                         ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
                         : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
@@ -512,9 +578,99 @@ function CitasCalendarFusionContent() {
                   >
                     <ChevronRight className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
                   </button>
-                  <button className="p-1.5 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors ml-2">
+                  <button
+                    onClick={() => setIsCreateOpen(true)}
+                    data-testid="create-appointment-btn"
+                    className="p-1.5 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors ml-2"
+                  >
                     <Plus className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
                   </button>
+                </div>
+              </div>
+
+              {/* MOBILE HEADER - Two row layout */}
+              <div className="lg:hidden mb-4">
+                {/* Row 1: Navigation + Month/Year + Today + Create */}
+                <div className="flex items-center justify-between mb-3 gap-2">
+                  {/* Left: Previous button + Month/Year */}
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <button
+                      onClick={handlePrevious}
+                      className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center flex-shrink-0"
+                      aria-label="Previous"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
+                    </button>
+                    <div className="text-sm font-medium text-zinc-600 dark:text-[#8E8E93]">
+                      <span className="hidden min-[375px]:inline">
+                        {format(selectedDate, 'MMMM yyyy', { locale: es })}
+                      </span>
+                      <span className="min-[375px]:hidden">
+                        {format(selectedDate, 'MMM yyyy', { locale: es })}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Today + Next + Stats + Create buttons */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={handleToday}
+                      className="min-w-[44px] min-h-[44px] px-3 py-2 text-xs font-medium text-red-500 dark:text-[#FF3B30] hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center"
+                      aria-label="Next"
+                    >
+                      <ChevronRight className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
+                    </button>
+                    <button
+                      onClick={() => setIsCreateOpen(true)}
+                      data-testid="create-appointment-btn"
+                      className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center"
+                      aria-label="Create appointment"
+                    >
+                      <Plus className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Row 2: View Switcher (centered) */}
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#2C2C2E] rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('day')}
+                      className={`px-4 py-2 rounded-md font-medium text-xs transition-colors min-h-[44px] ${
+                        viewMode === 'day'
+                          ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
+                          : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Day
+                    </button>
+                    <button
+                      onClick={() => setViewMode('week')}
+                      className={`px-4 py-2 rounded-md font-medium text-xs transition-colors min-h-[44px] ${
+                        viewMode === 'week'
+                          ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
+                          : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Week
+                    </button>
+                    <button
+                      onClick={() => setViewMode('month')}
+                      className={`px-4 py-2 rounded-md font-medium text-xs transition-colors min-h-[44px] ${
+                        viewMode === 'month'
+                          ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
+                          : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Month
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -736,7 +892,7 @@ function CitasCalendarFusionContent() {
                       {stats.pending > 0 && (
                         <button
                           onClick={() => toast.success(`${stats.pending} confirmadas`)}
-                          className="px-4 py-2 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-lg font-medium text-sm transition-colors text-white"
+                          className="px-4 py-2 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-lg font-medium text-sm transition-colors text-white min-h-[44px] whitespace-nowrap"
                         >
                           Confirmar ({stats.pending})
                         </button>
@@ -744,7 +900,7 @@ function CitasCalendarFusionContent() {
                       {gaps.length > 0 && (
                         <button
                           onClick={() => toast.info('Llenar gaps')}
-                          className="px-4 py-2 bg-[#34C759] hover:bg-[#34C759]/80 rounded-lg font-medium text-sm transition-colors text-white"
+                          className="px-4 py-2 bg-[#34C759] hover:bg-[#34C759]/80 rounded-lg font-medium text-sm transition-colors text-white min-h-[44px] whitespace-nowrap"
                         >
                           Llenar {gaps.length} gaps
                         </button>
@@ -1031,16 +1187,6 @@ function CitasCalendarFusionContent() {
         </div>
       </div>
 
-      {/* MOBILE FAB: Stats Drawer Trigger - Only visible on mobile */}
-      <motion.button
-        onClick={() => setIsStatsOpen(true)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="lg:hidden fixed bottom-20 right-4 z-40 w-14 h-14 bg-gradient-to-br from-[#0A84FF] to-[#AF52DE] rounded-full shadow-lg flex items-center justify-center"
-      >
-        <BarChart3 className="w-6 h-6 text-white" />
-      </motion.button>
-
       {/* MOBILE DRAWER: Calendar & Stats */}
       <Sheet open={isStatsOpen} onOpenChange={setIsStatsOpen}>
         <SheetContent
@@ -1064,6 +1210,128 @@ function CitasCalendarFusionContent() {
               setViewMode={setViewMode}
               setIsStatsOpen={setIsStatsOpen}
             />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* CREATE APPOINTMENT DRAWER */}
+      <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <SheetContent
+          side="bottom"
+          data-testid="create-appointment-sheet"
+          className="max-h-[85vh] overflow-y-auto bg-white dark:bg-[#1C1C1E] border-t border-zinc-200 dark:border-[#2C2C2E] rounded-t-2xl pb-safe"
+        >
+          <SheetHeader>
+            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+              Nueva Cita
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-4 px-4 pb-6">
+            {/* Cliente */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Cliente
+              </label>
+              <select
+                value={createForm.client_id}
+                onChange={(e) => setCreateForm({ ...createForm, client_id: e.target.value })}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecciona un cliente</option>
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Servicio */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Servicio
+              </label>
+              <select
+                value={createForm.service_id}
+                onChange={(e) => setCreateForm({ ...createForm, service_id: e.target.value })}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecciona un servicio</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name} - ₡{service.price.toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Barbero */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Barbero
+              </label>
+              <select
+                value={createForm.barber_id}
+                onChange={(e) => setCreateForm({ ...createForm, barber_id: e.target.value })}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecciona un barbero</option>
+                {barbers.map((barber) => (
+                  <option key={barber.id} value={barber.id}>
+                    {barber.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Fecha */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Fecha
+              </label>
+              <input
+                type="date"
+                value={formDate}
+                onChange={(e) => setSelectedDate(new Date(e.target.value + 'T12:00:00'))}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Hora */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Hora
+              </label>
+              <input
+                type="time"
+                value={createForm.time}
+                onChange={(e) => setCreateForm({ ...createForm, time: e.target.value })}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Notas (opcional) */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                Notas (opcional)
+              </label>
+              <textarea
+                value={createForm.notes}
+                onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                placeholder="Notas adicionales sobre la cita..."
+                rows={3}
+                className="w-full px-4 py-3 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              />
+            </div>
+
+            {/* Submit button */}
+            <button
+              onClick={handleCreateAppointment}
+              disabled={createAppointment.isPending}
+              className="w-full min-h-[44px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-zinc-400 disabled:to-zinc-500 text-white rounded-xl font-semibold text-base transition-colors"
+            >
+              {createAppointment.isPending ? 'Creando...' : 'Crear Cita'}
+            </button>
           </div>
         </SheetContent>
       </Sheet>
@@ -1154,7 +1422,7 @@ function CitasCalendarFusionContent() {
                           toast.success('Confirmada')
                           setSelectedId(null)
                         }}
-                        className="flex-1 py-3 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-xl font-medium transition-colors text-white"
+                        className="flex-1 py-3 bg-[#0A84FF] hover:bg-[#0A84FF]/80 rounded-xl font-medium transition-colors text-white min-h-[44px]"
                       >
                         Confirmar
                       </button>
@@ -1165,14 +1433,14 @@ function CitasCalendarFusionContent() {
                           toast.success('Check-in completo')
                           setSelectedId(null)
                         }}
-                        className="flex-1 py-3 bg-[#34C759] hover:bg-[#34C759]/80 rounded-xl font-medium transition-colors text-white"
+                        className="flex-1 py-3 bg-[#34C759] hover:bg-[#34C759]/80 rounded-xl font-medium transition-colors text-white min-h-[44px]"
                       >
                         Check-in
                       </button>
                     )}
                     <button
                       onClick={() => setSelectedId(null)}
-                      className="px-6 py-3 bg-zinc-200 dark:bg-[#3A3A3C] hover:bg-zinc-300 dark:hover:bg-[#48484A] rounded-xl font-medium transition-colors text-zinc-900 dark:text-white"
+                      className="px-6 py-3 bg-zinc-200 dark:bg-[#3A3A3C] hover:bg-zinc-300 dark:hover:bg-[#48484A] rounded-xl font-medium transition-colors text-zinc-900 dark:text-white min-h-[44px]"
                     >
                       Cerrar
                     </button>

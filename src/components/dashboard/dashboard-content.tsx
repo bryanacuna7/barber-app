@@ -96,7 +96,7 @@ export function DashboardContent() {
               <CardTitle className="text-[17px]">Próximas Citas Hoy</CardTitle>
             </div>
             <Link href="/citas">
-              <Button variant="gradient" size="sm" className="gap-1.5 text-[13px]">
+              <Button variant="gradient" size="sm" className="gap-1.5 text-[13px] min-h-[44px]">
                 Ver todas
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>

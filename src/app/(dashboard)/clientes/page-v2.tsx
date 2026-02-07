@@ -84,6 +84,7 @@ import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
 // import { RelationshipStrength } from '@/components/clients/relationship-strength'
 // import { SpendingTier } from '@/components/clients/spending-tier'
 import { ActivityItem } from '@/components/clients/activity-item'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 
 // NEW: Standardized React Query hooks
 import { useClients, useCreateClient } from '@/hooks/queries/useClients'
@@ -143,8 +144,8 @@ function calculateLoyalty(client: Client): number {
   return Math.min(visitScore + recencyScore, 100)
 }
 
-// Calculate relationship strength
-function getRelationshipStrength(client: Client): 'weak' | 'moderate' | 'strong' | 'excellent' {
+// Calculate relationship strength (used by insights)
+function _getRelationshipStrength(client: Client): 'weak' | 'moderate' | 'strong' | 'excellent' {
   const loyalty = calculateLoyalty(client)
 
   if (loyalty >= 80) return 'excellent'
@@ -259,13 +260,14 @@ export default function ClientesPageV2() {
   const [search, setSearch] = useState('')
   const [selectedSegment, setSelectedSegment] = useState<ClientSegment>('all')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [isMobile, setIsMobile] = useState(false)
+  const [, setIsMobile] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
   const [showNotifications, setShowNotifications] = useState(true)
   const [selectedInsight, setSelectedInsight] = useState<InsightType>('churn')
   const [sortColumn, setSortColumn] = useState<'name' | 'segment' | 'spent' | 'visits' | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [selectedCardClient, setSelectedCardClient] = useState<Client | null>(null) // For master-detail cards view
+  const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date()) // For calendar view
 
   // NEW: Business ID from context (server-side auth passed down)
@@ -289,7 +291,7 @@ export default function ClientesPageV2() {
   // NEW: React Query hooks (standardized pattern)
   const {
     data: clientsData,
-    isLoading: loading,
+    isLoading: _isLoading,
     error: queryError,
     refetch,
   } = useClients(businessId)
@@ -299,8 +301,8 @@ export default function ClientesPageV2() {
   // NEW: Real-time WebSocket updates
   useRealtimeClients({ businessId, enabled: !!businessId })
 
-  // Pull to refresh handler
-  const handleRefresh = async () => {
+  // Pull to refresh handler (used by mobile gesture)
+  const _handleRefresh = async () => {
     await refetch()
   }
 
@@ -827,7 +829,7 @@ export default function ClientesPageV2() {
                   <div className="space-y-3 max-h-[calc(100vh-24rem)] overflow-y-auto pr-2 scrollbar-thin">
                     {filteredClients.map((client) => {
                       const segment = getClientSegment(client)
-                      const segmentInfo = segmentConfig[segment]
+                      const _segmentInfo = segmentConfig[segment]
                       const tier = getSpendingTier(client)
                       const loyalty = calculateLoyalty(client)
                       const isSelected = selectedCardClient?.id === client.id
@@ -852,16 +854,35 @@ export default function ClientesPageV2() {
                       return (
                         <motion.button
                           key={client.id}
-                          onClick={() => setSelectedCardClient(client)}
+                          onClick={() => {
+                            setSelectedCardClient(client)
+                            setIsMobileDetailOpen(true)
+                          }}
                           whileHover={{ scale: 1.01 }}
-                          className={`relative w-full text-left rounded-2xl p-4 transition-all border-2 ${
+                          className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-all border-2 ${
                             isSelected
                               ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 shadow-lg'
                               : 'bg-zinc-900/40 dark:bg-zinc-800/40 border-zinc-700 dark:border-zinc-700 hover:border-zinc-600 dark:hover:border-zinc-600 hover:shadow-md'
                           }`}
                         >
-                          {/* Loyalty ring badge - top right corner */}
-                          <div className="absolute top-3 right-3">
+                          {/* Loyalty badge - mobile (compact) */}
+                          <div className="absolute top-2 right-2 lg:hidden">
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                loyalty >= 80
+                                  ? 'bg-green-500/20 text-green-400'
+                                  : loyalty >= 50
+                                    ? 'bg-blue-500/20 text-blue-400'
+                                    : loyalty >= 30
+                                      ? 'bg-amber-500/20 text-amber-400'
+                                      : 'bg-zinc-500/20 text-zinc-400'
+                              }`}
+                            >
+                              {Math.round(loyalty)}%
+                            </span>
+                          </div>
+                          {/* Loyalty ring - desktop (full SVG) */}
+                          <div className="absolute top-3 right-3 hidden lg:block">
                             <div className="relative w-12 h-12">
                               <svg className="w-12 h-12 transform -rotate-90">
                                 <circle
@@ -987,8 +1008,8 @@ export default function ClientesPageV2() {
                   </div>
                 </div>
 
-                {/* Right: Detail panel */}
-                <div className="lg:col-span-2">
+                {/* Right: Detail panel - Desktop only */}
+                <div className="hidden lg:block lg:col-span-2">
                   {selectedCardClient ? (
                     <motion.div
                       key={selectedCardClient.id}
@@ -1847,6 +1868,76 @@ export default function ClientesPageV2() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Mobile Client Detail Sheet */}
+          <Sheet open={isMobileDetailOpen} onOpenChange={setIsMobileDetailOpen}>
+            <SheetContent
+              side="bottom"
+              className="lg:hidden rounded-t-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-[#1C1C1E] pb-safe"
+            >
+              <SheetClose onClose={() => setIsMobileDetailOpen(false)} />
+              {selectedCardClient && (
+                <>
+                  <SheetHeader>
+                    <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+                      {selectedCardClient.name}
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-4 space-y-4">
+                    {/* Contact info */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 text-xl font-bold text-white">
+                        {selectedCardClient.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-bold text-base text-zinc-900 dark:text-white">
+                          {selectedCardClient.name}
+                        </p>
+                        {selectedCardClient.phone && (
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                            {selectedCardClient.phone}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Gastado</p>
+                        <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                          {formatCurrencyCompact(Number(selectedCardClient.total_spent || 0))}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Visitas</p>
+                        <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                          {selectedCardClient.total_visits || 0}
+                        </p>
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex gap-3">
+                      {selectedCardClient.phone && (
+                        <a
+                          href={`tel:${selectedCardClient.phone}`}
+                          className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 font-medium"
+                        >
+                          <Phone className="h-4 w-4" />
+                          Llamar
+                        </a>
+                      )}
+                      <button
+                        onClick={() => setIsMobileDetailOpen(false)}
+                        className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </SheetContent>
+          </Sheet>
 
           {/* Modal Nuevo Cliente - Wrapped in error boundary */}
           {showModal && (

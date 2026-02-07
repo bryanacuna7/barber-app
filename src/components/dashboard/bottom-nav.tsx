@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils'
 import { MoreMenuDrawer } from './more-menu-drawer'
 
 const navigation = [
-  { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Citas', href: '/citas', icon: Calendar },
   { name: 'Clientes', href: '/clientes', icon: Users },
+  { name: 'Inicio', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Servicios', href: '/servicios', icon: Scissors },
 ]
 

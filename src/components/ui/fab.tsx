@@ -17,7 +17,7 @@ export function FAB({ icon, label, isLoading, className, ...props }: FABProps) {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={cn(
-        'fixed bottom-24 right-4 z-50',
+        'fixed bottom-20 right-4 z-50',
         'flex items-center gap-2 h-14 px-6 rounded-full',
         'bg-zinc-900 dark:bg-white',
         'text-white dark:text-zinc-900',
