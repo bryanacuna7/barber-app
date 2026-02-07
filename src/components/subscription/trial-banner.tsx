@@ -81,24 +81,24 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
     return (
       <Link
         href="/suscripcion"
-        className="mb-4 flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+        className="mb-4 mt-1 flex items-center justify-between gap-3 rounded-2xl border border-zinc-200/60 bg-white/70 px-3.5 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-colors hover:bg-zinc-50/90 dark:border-white/10 dark:bg-black/25 dark:hover:bg-black/35"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-            <Sparkles className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100/80 dark:bg-white/10">
+            <Sparkles className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
           </div>
-          <div>
-            <span className="text-sm font-medium text-zinc-900 dark:text-white">
+          <div className="min-w-0">
+            <span className="text-sm font-semibold text-zinc-900 dark:text-white">
               {subscription.status === 'trial'
                 ? `Trial Pro: ${subscription.days_remaining} días restantes`
                 : `Plan ${subscription.plan.display_name}`}
             </span>
-            <span className="ml-2 text-xs text-zinc-500">
+            <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
               {subscription.plan.name === 'basic' ? 'Actualiza a Pro' : 'Ver detalles'}
             </span>
           </div>
         </div>
-        <ChevronRight className="h-4 w-4 text-zinc-400" />
+        <ChevronRight className="h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
       </Link>
     )
   }
@@ -109,7 +109,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
 
     return (
       <div
-        className={`relative mb-4 rounded-lg p-3 ${
+        className={`relative mb-3 mt-1 rounded-2xl p-3 ${
           urgencyColor === 'red'
             ? 'bg-red-50 dark:bg-red-950/50'
             : 'bg-amber-50 dark:bg-amber-950/50'
@@ -189,7 +189,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
     const daysLeft = subscription.days_remaining || 0
 
     return (
-      <div className="relative mb-4 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/50">
+      <div className="relative mb-3 mt-1 rounded-2xl border border-blue-200/80 bg-blue-50/95 p-4 shadow-sm dark:border-blue-800/70 dark:bg-blue-950/50">
         <button
           onClick={() => setDismissed(true)}
           className="absolute right-3 top-3 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
@@ -228,7 +228,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
   // Basic plan banner (non-urgent)
   if (subscription.plan.name === 'basic') {
     return (
-      <div className="relative mb-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="relative mb-3 mt-1 rounded-2xl border border-zinc-200/70 bg-zinc-50/95 p-4 shadow-sm dark:border-zinc-700/70 dark:bg-zinc-900/75">
         <button
           onClick={() => setDismissed(true)}
           className="absolute right-3 top-3 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"

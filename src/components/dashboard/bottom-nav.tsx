@@ -54,7 +54,10 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false)
 
   // Check if current page is in "More" menu
-  const isMoreActive = morePages.some((page) => pathname === page)
+  const currentPath = pathname || ''
+  const isMoreActive =
+    currentPath.length > 0 &&
+    morePages.some((page) => currentPath === page || currentPath.startsWith(`${page}/`))
 
   const handleQuickAction = (action: (typeof quickActions)[number]) => {
     setIsQuickActionOpen(false)
@@ -69,7 +72,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
           <div className="mx-auto flex max-w-[95%] items-center justify-around gap-0 rounded-full bg-white/80 dark:bg-black/60 px-1.5 py-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08),0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),0_-2px_12px_rgba(0,0,0,0.15)] backdrop-blur-xl border border-black/10 dark:border-white/10">
             {/* Left tabs: Citas, Clientes */}
             {navigation.slice(0, 2).map((item) => {
-              const isActive = pathname === item.href
+              const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
               return (
                 <Link
                   key={item.name}
@@ -134,7 +137,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
 
             {/* Right tabs: Servicios */}
             {navigation.slice(2).map((item) => {
-              const isActive = pathname === item.href
+              const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
               return (
                 <Link
                   key={item.name}

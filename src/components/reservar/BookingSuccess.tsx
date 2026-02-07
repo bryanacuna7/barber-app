@@ -47,17 +47,6 @@ export function BookingSuccess({
 
         if (!error && data) {
           setHasLoyaltyProgram(true)
-
-          // Check if modal was dismissed recently (within 30 days)
-          const dismissedUntil = localStorage.getItem(`loyalty_modal_dismissed_${business.id}`)
-          const isDismissed = dismissedUntil && parseInt(dismissedUntil) > Date.now()
-
-          if (!isDismissed) {
-            // Show modal after 2 seconds (let user see success message first)
-            setTimeout(() => {
-              setShowLoyaltyModal(true)
-            }, 2000)
-          }
         }
       } catch (error) {
         console.error('Error checking loyalty program:', error)
@@ -149,6 +138,16 @@ export function BookingSuccess({
             <Share2 className="h-5 w-5" />
             Recomendar a un amigo
           </button>
+
+          {/* Manual loyalty CTA (prevents success screen interruption) */}
+          {hasLoyaltyProgram && (
+            <button
+              onClick={() => setShowLoyaltyModal(true)}
+              className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-5 py-4 text-[16px] font-semibold text-violet-600 ios-press dark:text-violet-300"
+            >
+              Activar beneficios de lealtad
+            </button>
+          )}
 
           <p className="text-center text-[13px] text-zinc-500 dark:text-zinc-400">
             Te enviaremos un recordatorio antes de tu cita.

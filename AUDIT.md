@@ -148,6 +148,52 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
   - El bloque se percibe como capa "pegada", sin respiracion vertical consistente.
   - Recomendacion: definir `Promo Banner Contract` (spacing estable, borde/sombra sin artefactos de 1px y CTA secundaria con contraste/touch target uniforme).
 
+### Re-Audit Visual (Sesion 140 - paridad Citas/Servicios/Clientes)
+
+- Hallazgo principal:
+  - `Clientes` se percibe mejor porque el contenido vive directo sobre el background global.
+  - `Citas` y `Servicios` aun renderizan un canvas propio con fondo/caja, generando el efecto de "cuadrado oscuro" o pantalla encajonada.
+- `Citas` (P1 alto):
+  - Persisten señales de canvas interno: wrapper full-screen con fondo propio + header opaco con borde marcado.
+  - Evidencia en codigo:
+    - `src/app/(dashboard)/citas/page-v2.tsx`: wrapper con `bg-white dark:bg[#1C1C1E]` y estructura de lienzo interno.
+    - `src/app/(dashboard)/citas/page-v2.tsx`: header sticky con `border-b` visible y bloque opaco.
+  - Impacto:
+    - la pantalla se siente separada del sistema visual del app;
+    - corta continuidad entre `TrialBanner` y toolbar de calendario.
+  - Recomendacion:
+    - remover canvas opaco de pagina y usar solo superficies internas (cards/segmented controls);
+    - bajar contraste del divider del header (o usar sombra suave en lugar de linea).
+- `Servicios` (P1 medio):
+  - Mantiene wrapper con `-mt-6` + fondo gradiente de pagina, distinto a `Clientes`.
+  - Evidencia en codigo:
+    - `src/app/(dashboard)/servicios/page-v2.tsx`: wrapper con `-mx/-mt` + `bg-gradient-to-br`.
+  - Impacto:
+    - inconsistencia de shell entre modulos;
+    - sensacion de layout "special case" vs sistema unificado.
+  - Recomendacion:
+    - converger `Servicios` al mismo shell de `Clientes` (sin canvas full-page extra);
+    - conservar gradientes solo como acento local (hero/stats), no como base de toda la pantalla.
+- `Trial Banner` (P1 medio):
+  - Aunque mejoró, su percepción sigue variando por el contexto de cada modulo (especialmente cuando cae encima de headers opacos).
+  - Recomendacion:
+    - aplicar `Promo Banner Contract` junto con `Page Shell Contract` unificado;
+    - validar spacing vertical fijo: header -> banner -> contenido (sin doble borde ni saltos de contraste).
+- Decision de diseño recomendada (experta):
+  - Adoptar un unico `Mobile Canvas Contract`: mismo comportamiento de fondo, mismos insets y misma separación superior en `Citas`, `Clientes`, `Servicios`, `Barberos`.
+  - Regla: si `Clientes` se siente correcto en composición, usarlo como baseline del shell para los demás módulos.
+
+### Update de implementación (Sesion 141)
+
+- Aplicado:
+  - `Citas`: se removió el fondo opaco de página y se suavizó el header sticky para reducir efecto de "cuadrado oscuro".
+  - `Servicios`: se removió `-mt` y el canvas de fondo propio; ahora hereda mejor el shell global (más cercano a `Clientes`).
+  - `Nueva Cita`: migró de sheet inferior a modal centrado, alineado al contrato visual de `Nuevo Cliente`.
+  - CTA de formularios de alta en mobile simplificada a `Guardar` (evita salto de línea tipo `Guardar/Cliente`).
+- Pendiente de validar visualmente en hardware:
+  - continuidad final del `Trial Banner` sobre `Citas` y `Servicios` después del ajuste de shell;
+  - paridad exacta de contraste/espaciado entre `Nuevo Cliente` y `Nueva Cita` en dark mode.
+
 ### Re-Audit Full Pass (codigo + capturas)
 
 - Resultado general: no se detectaron nuevos **P0** fuera de los ya documentados (date picker nativo y data-viz no touch-first), pero si se confirmaron inconsistencias **P1** transversales.

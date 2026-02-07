@@ -54,6 +54,26 @@ export interface CreateClientInput {
 
 export type UpdateClientInput = Partial<CreateClientInput>
 
+type ApiErrorPayload = {
+  message?: string
+  error?: string
+}
+
+async function throwApiError(response: Response, fallbackMessage: string): Promise<never> {
+  let message = fallbackMessage
+
+  try {
+    const payload = (await response.json()) as ApiErrorPayload
+    message = payload.message || payload.error || fallbackMessage
+  } catch {
+    // Keep fallback when response body is empty or not JSON
+  }
+
+  const error = new Error(message) as Error & { statusCode: number }
+  error.statusCode = response.status
+  throw error
+}
+
 /* ==================== QUERIES ==================== */
 
 /**
@@ -76,8 +96,7 @@ export function useClients(businessId: string | null) {
       const response = await fetch(`/api/clients?businessId=${businessId}`)
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to fetch clients')
+        await throwApiError(response, 'Failed to fetch clients')
       }
 
       // API returns { data: Client[], pagination: { total, offset, limit, hasMore } }
@@ -120,8 +139,7 @@ export function useClient(clientId: string | null) {
       const response = await fetch(`/api/clients/${clientId}`)
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to fetch client')
+        await throwApiError(response, 'Failed to fetch client')
       }
 
       return response.json() as Promise<Client>
@@ -152,8 +170,7 @@ export function useClientStats(clientId: string | null) {
       const response = await fetch(`/api/clients/${clientId}/stats`)
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to fetch client stats')
+        await throwApiError(response, 'Failed to fetch client stats')
       }
 
       return response.json()
@@ -192,8 +209,7 @@ export function useCreateClient() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to create client')
+        await throwApiError(response, 'Failed to create client')
       }
 
       return response.json() as Promise<Client>
@@ -236,8 +252,7 @@ export function useUpdateClient() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to update client')
+        await throwApiError(response, 'Failed to update client')
       }
 
       return response.json() as Promise<Client>
@@ -278,8 +293,7 @@ export function useDeleteClient() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to delete client')
+        await throwApiError(response, 'Failed to delete client')
       }
 
       return response.json()

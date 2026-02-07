@@ -45,7 +45,6 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
 import { formatCurrency } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
-import type { UIService } from '@/lib/adapters/services'
 import {
   useServices,
   useCreateService,
@@ -337,7 +336,7 @@ function ServiciosContent() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState('')
-  const [editingService, setEditingService] = useState<UIService | null>(null)
+  const [editingService, setEditingService] = useState<{ id: string } | null>(null)
   const [deleteService, setDeleteService] = useState<MockService | null>(null)
 
   const [formData, setFormData] = useState({
@@ -448,6 +447,32 @@ function ServiciosContent() {
   }
 
   // Form handlers
+  function openCreateServiceForm() {
+    setEditingService(null)
+    setFormData({
+      name: '',
+      description: '',
+      duration: 30,
+      price: 0,
+      business_id: businessId,
+    })
+    setError('')
+    setShowForm(true)
+  }
+
+  function openEditServiceForm(service: MockService) {
+    setEditingService({ id: service.id })
+    setFormData({
+      name: service.name,
+      description: service.description,
+      duration: service.duration_minutes,
+      price: service.price,
+      business_id: businessId,
+    })
+    setError('')
+    setShowForm(true)
+  }
+
   function resetForm() {
     setFormData({
       name: '',
@@ -503,9 +528,9 @@ function ServiciosContent() {
   }
 
   return (
-    <div className="-mx-4 -mt-6 sm:-mx-6 lg:mx-0 lg:mt-0 min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 lg:pb-6 relative overflow-hidden">
+    <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen lg:pb-6 relative overflow-x-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+      <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -539,7 +564,7 @@ function ServiciosContent() {
           await refetch()
         }}
       >
-        <div className="px-4 pt-6 sm:px-6 lg:px-0 lg:pt-0 lg:mx-auto lg:max-w-[1400px] relative z-10">
+        <div className="px-4 pt-4 sm:px-6 lg:px-0 lg:pt-0 lg:mx-auto lg:max-w-[1400px] relative z-10">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -557,10 +582,7 @@ function ServiciosContent() {
                 </p>
               </div>
               <Button
-                onClick={() => {
-                  resetForm()
-                  setShowForm(true)
-                }}
+                onClick={openCreateServiceForm}
                 className="shrink-0 min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 border-0"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
@@ -578,7 +600,7 @@ function ServiciosContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...animations.spring.default, delay: 0.1 }}
-                className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                className="mb-4 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-black/20 backdrop-blur-xl p-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 {/* Search */}
                 <div className="relative flex-1 max-w-md">
@@ -588,14 +610,14 @@ function ServiciosContent() {
                     placeholder="Buscar servicios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-4 text-sm text-zinc-900 placeholder-zinc-400 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:placeholder-zinc-500"
+                    className="h-11 w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] pl-9 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 transition-all focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
                 </div>
 
                 {/* Category Filter */}
-                <div className="relative">
-                  <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white dark:from-zinc-900 z-10 sm:hidden" />
-                  <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+                <div className="relative rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-1.5">
+                  <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/90 dark:from-zinc-950 z-10 sm:hidden rounded-r-xl" />
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
                     {categories.map((cat) => (
                       <motion.button
                         key={cat}
@@ -603,10 +625,10 @@ function ServiciosContent() {
                         onClick={() => setSelectedCategory(cat)}
                         whileTap={{ scale: 0.98 }}
                         transition={animations.spring.snappy}
-                        className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium ${
+                        className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                           selectedCategory === cat
-                            ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25'
-                            : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                            ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-white/10'
                         }`}
                       >
                         {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
@@ -628,7 +650,7 @@ function ServiciosContent() {
                       icon: <Pencil className="h-5 w-5" />,
                       label: 'Editar',
                       color: 'bg-blue-500',
-                      onClick: () => setShowForm(true),
+                      onClick: () => openEditServiceForm(service),
                     },
                     {
                       icon: isActive ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />,
@@ -646,7 +668,7 @@ function ServiciosContent() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm"
+                        className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white/70 dark:bg-zinc-900/80 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl"
                       >
                         {/* Row 1: Emoji + Name */}
                         <div className="flex items-start justify-between">
@@ -861,7 +883,7 @@ function ServiciosContent() {
                                   <button
                                     className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                                     title="Editar"
-                                    onClick={() => setShowForm(true)}
+                                    onClick={() => openEditServiceForm(service)}
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
                                   </button>

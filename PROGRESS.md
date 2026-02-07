@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-08 (Session 139 - Progress Save + Demo Cleanup)
+- **Last Updated:** 2026-02-08 (Session 142 - Citas/Barberos polish + trial banner fix)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Major cleanup done, pending commit (84 files, -27K lines)
+- **Current Phase:** Audit remediation in progress (checkpoint commit + targeted UX fixes applied)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 - **Supabase Project:** `zanywefnobtzhoeuoyuc` (new, migrated from `bwelkcqqzkiiaxrkoslb`)
 
@@ -40,12 +40,12 @@
 
 ### IN PROGRESS: Remaining Audit Items
 
-- [ ] Date picker migration (native `input[type=date]` → custom picker for fecha)
+- [x] Date/time picker migration in `Nueva Cita` (custom `DatePickerTrigger` + `TimePickerTrigger`)
 - [ ] Pull-to-refresh integration in list views
 - [ ] Gesture grammar (swipe actions on list items)
 - [ ] Charts mobile-first redesign
 - [ ] Copy UX Spanish consistency audit
-- [ ] Double inset / card padre removal
+- [ ] Double inset / card padre removal (remaining in some views)
 - [ ] Visual verification at 360px (smallest tier)
 - [ ] Dark mode full QA pass
 
@@ -60,6 +60,85 @@
 ---
 
 ## Recent Sessions
+
+### Session 142: Citas + Barberos UX Polish (2026-02-08)
+
+**Status:** ✅ Applied
+
+**Implemented now:**
+
+- `Citas`: when selected date is NOT today, header now shows **`Ir a hoy`**; when it is today, shows passive `Hoy`.
+- `Citas`: kept reduced redundancy strategy (no duplicated mobile big date block).
+- `Barberos`: removed “card padre” feel in controls area by separating search/tabs into lighter independent surfaces.
+- `Trial banner` compact style improved to avoid broken/boxed appearance in dark mobile.
+
+**Files updated in this pass:**
+
+- `src/app/(dashboard)/citas/page-v2.tsx`
+- `src/app/(dashboard)/barberos/page-v2.tsx`
+- `src/components/subscription/trial-banner.tsx`
+
+**Validation:**
+
+- `npx eslint` on touched files: 0 errors, warnings only.
+
+### Session 141: Mobile UX Polish + De-Generic Pass (2026-02-08)
+
+**Status:** ✅ In progress (UX polish applied, ready for visual QA)
+
+**What was implemented:**
+
+- `Citas` mobile header refined:
+  - Removed redundant mode label above date (`DÍA`).
+  - Reduced visual competition between `Hoy` and `+` (now `Hoy` only appears as passive indicator when selected date is today).
+  - Removed duplicated date presentation on mobile (big date block hidden on mobile, kept on desktop).
+- **De-generic pass** across key mobile pages:
+  - `src/app/(dashboard)/servicios/page-v2.tsx` — premium toolbar/search/chips/card surfaces.
+  - `src/app/(dashboard)/clientes/page-v2.tsx` — premium view switcher and segment filters.
+  - `src/app/(dashboard)/barberos/page-v2.tsx` — premium controls/search/mobile view switcher.
+- Public booking alignment pass:
+  - `src/app/(public)/reservar/[slug]/page.tsx`
+  - `src/components/reservar/BookingHeader.tsx`
+  - `src/components/reservar/ProgressSteps.tsx`
+  - `src/app/globals.css` (ios-glass/ios-card dark-scope support)
+- Booking confirmation stability fix:
+  - `src/components/reservar/BookingSuccess.tsx` now keeps success screen stable and avoids interruption by removing auto-open loyalty modal; loyalty prompt is manual CTA.
+
+**Validation run:**
+
+- `npx eslint` on touched dashboard/public booking files: **0 errors**, warnings only (legacy/pre-existing items).
+
+**Next focus:**
+
+1. Visual QA at 390/375/360 for `citas`, `servicios`, `clientes`, `barberos` and public booking.
+2. Fine-tune any remaining spacing/contrast edge cases from screenshots.
+
+### Session 140: Audit QA + Mobile Fixes (2026-02-08)
+
+**Status:** ✅ In progress (checkpoint + fixes aplicados)
+
+**Commit de checkpoint antes de tocar código:**
+
+- `bf55b70` — `chore: checkpoint before mobile audit fixes`
+
+**Fixes aplicados en esta sesión:**
+
+- `Servicios`: corregido bug de edición (ahora `Editar` abre modal en modo edición real con datos precargados, no modo crear).
+- `Citas`: mejorados gutters/respiración en mobile (contenido ya no pegado al borde).
+- `Dashboard Layout`: admin sin negocio ahora recibe selector explícito de contexto (Panel Admin / Crear negocio) en vez de redirect silencioso.
+- `Mobile Header`: ahora contextual por pantalla (se reduce ruido de branding persistente en vistas operativas).
+- `Bottom Nav`: robustecida detección de tab activa con rutas anidadas para evitar estados activos erróneos.
+- `Trial Banner`: ajustes de spacing/shape/border para reducir artefactos visuales en dark mode.
+- `PWA theme-color`: actualizado para reducir franja blanca superior en iOS al abrir superficies oscuras.
+
+**Validación:**
+
+- `npx eslint` ejecutado sobre archivos tocados (0 errores, warnings preexistentes en módulos legacy).
+
+**Siguiente foco:**
+
+1. Revisión visual Playwright (390/375/360) en `citas`, `servicios`, `clientes`, `barberos`.
+2. Cerrar inconsistencias restantes del `AUDIT.md` (charts mobile-first y contratos de motion/gesture).
 
 ### Session 139: Progress Save + Uncommitted State Snapshot (2026-02-08)
 

@@ -189,7 +189,7 @@ export default function BookingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F2F2F7] dark:bg-[#1C1C1E]">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#0B0D14]">
         <div className="text-center ios-spring-in">
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-[22px] bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-2xl dark:from-zinc-100 dark:to-zinc-200">
             <Scissors className="h-10 w-10 text-white dark:text-zinc-900 animate-pulse" />
@@ -204,7 +204,7 @@ export default function BookingPage() {
 
   if (error && !business) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900">
+      <div className="flex min-h-screen items-center justify-center p-4 bg-zinc-50 dark:bg-[#0B0D14]">
         <Card className="w-full max-w-md text-center">
           <CardContent className="pt-8 pb-8">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
@@ -234,7 +234,13 @@ export default function BookingPage() {
   const noBarbers = barbers.length === 0
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] dark:bg-[#1C1C1E]">
+    <div className="public-booking-theme min-h-screen bg-zinc-50 dark:bg-[#0B0D14] text-zinc-900 dark:text-white relative overflow-hidden">
+      {/* Subtle mesh gradients to match dashboard language */}
+      <div className="pointer-events-none absolute inset-0 opacity-20 hidden dark:block">
+        <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-violet-500/30 blur-3xl" />
+        <div className="absolute -bottom-20 right-1/4 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
+      </div>
+
       {/* Header */}
       {business && <BookingHeader business={business} />}
 
@@ -242,7 +248,7 @@ export default function BookingPage() {
       <ProgressSteps currentStep={step} barberCount={barbers.length} />
 
       {/* Content */}
-      <div className="mx-auto max-w-2xl px-4 py-6">
+      <div className="relative z-10 mx-auto max-w-2xl px-4 py-6">
         {/* Loyalty Status Card - Shows if user is authenticated and has loyalty status */}
         {!loadingLoyalty && loyaltyStatus && loyaltyProgram && business && (
           <div className="mb-5">

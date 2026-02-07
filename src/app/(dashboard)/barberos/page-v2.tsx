@@ -126,7 +126,7 @@ export default function BarberosPage() {
   }
 
   return (
-    <div className="-mx-4 -mt-6 sm:-mx-6 lg:mx-0 lg:mt-0 min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 lg:p-8 lg:pb-6 relative overflow-hidden">
+    <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 lg:p-8 lg:pb-6 relative overflow-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
@@ -188,17 +188,17 @@ export default function BarberosPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="lg:bg-white lg:dark:bg-zinc-900 lg:rounded-2xl lg:p-4 lg:border lg:border-zinc-200 lg:dark:border-zinc-800 lg:shadow-sm space-y-3"
+          className="space-y-3"
         >
           {/* Search */}
-          <div className="relative mb-4">
+          <div className="relative mb-4 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-black/20 backdrop-blur-xl p-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
             <input
               type="text"
               placeholder="Buscar barbero..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-11 pl-10 pr-4 bg-white/70 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
 
@@ -226,7 +226,7 @@ export default function BarberosPage() {
           </div>
 
           {/* View Switcher - Mobile (inline, horizontal scroll) */}
-          <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-1 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-black/20 backdrop-blur-xl p-1.5">
             {[
               { value: 'cards', label: 'Tarjetas', icon: LayoutGrid },
               { value: 'table', label: 'Tabla', icon: Table2 },
@@ -236,10 +236,10 @@ export default function BarberosPage() {
               <button
                 key={value}
                 onClick={() => setViewMode(value as ViewMode)}
-                className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                   viewMode === value
-                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.3)]'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-white/10'
                 }`}
               >
                 <Icon className="h-4 w-4" />

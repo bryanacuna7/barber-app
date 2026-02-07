@@ -473,6 +473,26 @@ function CitasCalendarFusionContent() {
 
   const DAILY_GOAL = 200000
   const goalProgress = Math.min(Math.round((stats.projectedRevenue / DAILY_GOAL) * 100), 100)
+  const isSelectedDateToday = useMemo(() => isSameDay(selectedDate, today), [selectedDate, today])
+  const mobileDateLabel = useMemo(() => {
+    if (viewMode === 'day') {
+      return format(selectedDate, 'EEE d MMM yyyy', { locale: es })
+    }
+    if (viewMode === 'week') {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+      const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
+      return `${format(weekStart, 'd MMM', { locale: es })} - ${format(weekEnd, 'd MMM yyyy', { locale: es })}`
+    }
+    return format(selectedDate, 'MMMM yyyy', { locale: es })
+  }, [selectedDate, viewMode])
+  const mobileDateLabelCompact = useMemo(() => {
+    if (viewMode === 'day') return format(selectedDate, 'd MMM', { locale: es })
+    if (viewMode === 'week') {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+      return `Semana ${format(weekStart, 'd MMM', { locale: es })}`
+    }
+    return format(selectedDate, 'MMM yyyy', { locale: es })
+  }, [selectedDate, viewMode])
 
   // Handle form submission
   const handleCreateAppointment = async () => {
@@ -533,7 +553,7 @@ function CitasCalendarFusionContent() {
   }
 
   return (
-    <div className="-mx-4 -mt-6 sm:-mx-6 lg:mx-0 lg:mt-0 min-h-screen bg-white dark:bg-[#1C1C1E] overflow-x-hidden">
+    <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen overflow-x-hidden">
       {/* Subtle mesh gradients (15% opacity) - Only in dark mode */}
       <div className="hidden dark:block fixed inset-0 opacity-15 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
@@ -544,7 +564,7 @@ function CitasCalendarFusionContent() {
         {/* Main content area */}
         <div className="flex-1 lg:pr-80 w-full min-w-0">
           {/* Header */}
-          <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl border-b border-zinc-200 dark:border-[#2C2C2E]">
+          <header className="sticky top-0 z-40 bg-transparent backdrop-blur-sm border-b border-zinc-200/30 dark:border-zinc-800/40">
             <div className="px-4 lg:px-6 py-4">
               {/* DESKTOP HEADER - Single row layout (unchanged) */}
               <div className="hidden lg:flex items-center justify-between mb-4 gap-2">
@@ -619,95 +639,95 @@ function CitasCalendarFusionContent() {
                 </div>
               </div>
 
-              {/* MOBILE HEADER - Two row layout */}
+              {/* MOBILE HEADER - Compact toolbar + full-width segmented control */}
               <div className="lg:hidden mb-4">
-                {/* Row 1: Navigation + Month/Year + Today + Create */}
-                <div className="flex items-center justify-between mb-3 gap-2">
-                  {/* Left: Previous button + Month/Year */}
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                {/* Row 1: Date nav group + Today + Create */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center flex-1 min-w-0 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-xl px-1 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_28px_rgba(0,0,0,0.35)]">
                     <button
                       onClick={handlePrevious}
-                      className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center flex-shrink-0"
+                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-zinc-500 dark:text-[#8E8E93] hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
                       aria-label="Anterior"
                     >
-                      <ChevronLeft className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
+                      <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <div className="text-sm font-medium text-zinc-600 dark:text-[#8E8E93]">
-                      <span className="hidden min-[375px]:inline">
-                        {format(selectedDate, 'MMMM yyyy', { locale: es })}
-                      </span>
-                      <span className="min-[375px]:hidden">
-                        {format(selectedDate, 'MMM yyyy', { locale: es })}
-                      </span>
+                    <div className="flex-1 text-center px-2 min-w-0">
+                      <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 truncate">
+                        <span className="hidden min-[390px]:inline">{mobileDateLabel}</span>
+                        <span className="min-[390px]:hidden">{mobileDateLabelCompact}</span>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Right: Today + Next + Stats + Create buttons */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={handleToday}
-                      className="min-w-[44px] min-h-[44px] px-3 py-2 text-xs font-medium text-red-500 dark:text-[#FF3B30] hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors"
-                    >
-                      Hoy
-                    </button>
                     <button
                       onClick={handleNext}
-                      className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center"
+                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-zinc-500 dark:text-[#8E8E93] hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
                       aria-label="Siguiente"
                     >
-                      <ChevronRight className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
+                      <ChevronRight className="w-5 h-5" />
                     </button>
-                    <Button
-                      onClick={() => setIsCreateOpen(true)}
-                      data-testid="create-appointment-btn"
-                      className="min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25"
-                      aria-label="Crear cita"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </Button>
                   </div>
+
+                  {isSelectedDateToday ? (
+                    <span className="min-h-[44px] h-11 px-1.5 text-xs font-semibold text-blue-600 dark:text-blue-300 flex items-center justify-center flex-shrink-0">
+                      Hoy
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleToday}
+                      className="min-h-[44px] h-11 px-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors flex items-center justify-center flex-shrink-0"
+                      aria-label="Ir a hoy"
+                    >
+                      Ir a hoy
+                    </button>
+                  )}
+
+                  <Button
+                    onClick={() => setIsCreateOpen(true)}
+                    data-testid="create-appointment-btn"
+                    className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl p-0 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 flex-shrink-0"
+                    aria-label="Crear cita"
+                  >
+                    <Plus className="h-5 w-5" />
+                  </Button>
                 </div>
 
-                {/* Row 2: View Switcher (centered) */}
-                <div className="flex justify-center">
-                  <div className="flex items-center gap-1 bg-zinc-100 dark:bg-[#2C2C2E] rounded-lg p-1">
-                    <button
-                      onClick={() => setViewMode('day')}
-                      className={`px-4 py-2 rounded-md font-medium text-xs transition-colors min-h-[44px] ${
-                        viewMode === 'day'
-                          ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
-                          : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Día
-                    </button>
-                    <button
-                      onClick={() => setViewMode('week')}
-                      className={`px-4 py-2 rounded-md font-medium text-xs transition-colors min-h-[44px] ${
-                        viewMode === 'week'
-                          ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
-                          : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Semana
-                    </button>
-                    <button
-                      onClick={() => setViewMode('month')}
-                      className={`px-4 py-2 rounded-md font-medium text-xs transition-colors min-h-[44px] ${
-                        viewMode === 'month'
-                          ? 'bg-white dark:bg-[#3A3A3C] text-zinc-900 dark:text-white shadow-sm'
-                          : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
-                      }`}
-                    >
-                      Mes
-                    </button>
-                  </div>
+                {/* Row 2: View switcher */}
+                <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-black/25 backdrop-blur-xl p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                  <button
+                    onClick={() => setViewMode('day')}
+                    className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
+                      viewMode === 'day'
+                        ? 'bg-white dark:bg-zinc-800/90 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 shadow-[0_6px_18px_rgba(0,0,0,0.18)]'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    Día
+                  </button>
+                  <button
+                    onClick={() => setViewMode('week')}
+                    className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
+                      viewMode === 'week'
+                        ? 'bg-white dark:bg-zinc-800/90 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 shadow-[0_6px_18px_rgba(0,0,0,0.18)]'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    Semana
+                  </button>
+                  <button
+                    onClick={() => setViewMode('month')}
+                    className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
+                      viewMode === 'month'
+                        ? 'bg-white dark:bg-zinc-800/90 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 shadow-[0_6px_18px_rgba(0,0,0,0.18)]'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                    }`}
+                  >
+                    Mes
+                  </button>
                 </div>
               </div>
 
               {/* Large date header (Day view only) */}
               {viewMode === 'day' && (
-                <div className="flex items-baseline gap-4 mb-3">
+                <div className="hidden lg:flex items-baseline gap-4 mb-3">
                   <div className="text-6xl font-bold text-zinc-900 dark:text-white">
                     {format(selectedDate, 'd')}
                   </div>
@@ -758,7 +778,7 @@ function CitasCalendarFusionContent() {
               await refetch()
             }}
           >
-            <div className="lg:p-6">
+            <div className="px-4 pb-4 lg:p-6">
               {/* Loading state */}
               {isLoading && (
                 <div className="flex items-center justify-center h-64">
@@ -785,22 +805,24 @@ function CitasCalendarFusionContent() {
                       >
                         {/* Block header */}
                         <div className="mb-4">
-                          <div className="flex items-center gap-2">
-                            <block.icon className={`w-5 h-5 ${block.iconColor}`} />
-                            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white leading-none">
-                              {block.label}
-                            </h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                              <block.icon className={`w-5 h-5 ${block.iconColor}`} />
+                              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white leading-none">
+                                {block.label}
+                              </h3>
+                            </div>
+                            <span className="text-sm text-zinc-500 dark:text-[#8E8E93]">
+                              {block.start > 12 ? block.start - 12 : block.start}
+                              {block.start >= 12 ? 'pm' : 'am'} -{' '}
+                              {block.end > 12 ? block.end - 12 : block.end}
+                              {block.end >= 12 ? 'pm' : 'am'}
+                            </span>
                           </div>
-                          <p className="text-xs text-zinc-500 dark:text-[#8E8E93] ml-7 mb-3">
-                            {block.start > 12 ? block.start - 12 : block.start}
-                            {block.start >= 12 ? 'pm' : 'am'} -{' '}
-                            {block.end > 12 ? block.end - 12 : block.end}
-                            {block.end >= 12 ? 'pm' : 'am'}
-                          </p>
 
                           {/* Occupancy bar (Cinema feature) */}
                           <div
-                            className={`bg-white/50 dark:bg-transparent dark:bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-zinc-200 dark:border-[#2C2C2E] p-2 lg:p-3`}
+                            className={`mt-2.5 bg-white/50 dark:bg-transparent dark:bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-zinc-200 dark:border-[#2C2C2E] p-2 lg:p-3`}
                           >
                             <div className="flex items-center justify-between mb-2 text-sm">
                               <span className="text-zinc-900 dark:text-white">
@@ -1341,152 +1363,162 @@ function CitasCalendarFusionContent() {
         </SheetContent>
       </Sheet>
 
-      {/* CREATE APPOINTMENT DRAWER */}
-      <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent
-          side="bottom"
-          data-testid="create-appointment-sheet"
-          className="max-h-[85vh] overflow-y-auto bg-white dark:bg-[#1C1C1E] border-t border-zinc-200 dark:border-[#2C2C2E] rounded-t-2xl pb-safe"
-        >
-          <SheetHeader>
-            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
-              Nueva Cita
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-4 px-4 pb-6">
-            {/* Cliente */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Cliente
-              </label>
+      {/* CREATE APPOINTMENT MODAL (aligned with Nuevo Cliente contract) */}
+      {isCreateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setIsCreateOpen(false)}
+          />
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Nueva Cita</h2>
               <button
-                type="button"
-                onClick={() => setActivePickerField('client')}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onClick={() => setIsCreateOpen(false)}
+                className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                aria-label="Cerrar"
               >
-                <span
-                  className={
-                    createForm.client_id
-                      ? 'text-zinc-900 dark:text-white'
-                      : 'text-zinc-400 dark:text-zinc-500'
-                  }
-                >
-                  {createForm.client_id
-                    ? clients.find((c) => c.id === createForm.client_id)?.name ||
-                      'Selecciona un cliente'
-                    : 'Selecciona un cliente'}
-                </span>
-                <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Servicio */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Servicio
-              </label>
-              <button
-                type="button"
-                onClick={() => setActivePickerField('service')}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <span
-                  className={
-                    createForm.service_id
-                      ? 'text-zinc-900 dark:text-white'
-                      : 'text-zinc-400 dark:text-zinc-500'
-                  }
-                >
-                  {createForm.service_id
-                    ? (() => {
-                        const s = services.find((s) => s.id === createForm.service_id)
-                        return s
-                          ? `${s.name} - ₡${s.price.toLocaleString()}`
-                          : 'Selecciona un servicio'
-                      })()
-                    : 'Selecciona un servicio'}
-                </span>
-                <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />
-              </button>
-            </div>
-
-            {/* Barbero */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Barbero
-              </label>
-              <button
-                type="button"
-                onClick={() => setActivePickerField('barber')}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <span
-                  className={
-                    createForm.barber_id
-                      ? 'text-zinc-900 dark:text-white'
-                      : 'text-zinc-400 dark:text-zinc-500'
-                  }
-                >
-                  {createForm.barber_id
-                    ? barbers.find((b) => b.id === createForm.barber_id)?.name ||
-                      'Selecciona un barbero'
-                    : 'Selecciona un barbero'}
-                </span>
-                <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />
-              </button>
-            </div>
-
-            {/* Fecha y Hora - Compact horizontal grid */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Fecha
+            <div className="space-y-4">
+              {/* Cliente */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Cliente
                 </label>
-                <DatePickerTrigger
-                  value={selectedDate}
-                  onChange={setSelectedDate}
-                  label="Fecha"
-                  className="w-full h-12 justify-start px-3 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
+                <button
+                  type="button"
+                  onClick={() => setActivePickerField('client')}
+                  className="flex w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-4 py-3 text-left text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                >
+                  <span
+                    className={
+                      createForm.client_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
+                    }
+                  >
+                    {createForm.client_id
+                      ? clients.find((c) => c.id === createForm.client_id)?.name ||
+                        'Selecciona un cliente'
+                      : 'Selecciona un cliente'}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+                </button>
+              </div>
+
+              {/* Servicio */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Servicio
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setActivePickerField('service')}
+                  className="flex w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-4 py-3 text-left text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                >
+                  <span
+                    className={
+                      createForm.service_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
+                    }
+                  >
+                    {createForm.service_id
+                      ? (() => {
+                          const s = services.find((service) => service.id === createForm.service_id)
+                          return s
+                            ? `${s.name} - ₡${s.price.toLocaleString()}`
+                            : 'Selecciona un servicio'
+                        })()
+                      : 'Selecciona un servicio'}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+                </button>
+              </div>
+
+              {/* Barbero */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Barbero
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setActivePickerField('barber')}
+                  className="flex w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-4 py-3 text-left text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                >
+                  <span
+                    className={
+                      createForm.barber_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
+                    }
+                  >
+                    {createForm.barber_id
+                      ? barbers.find((b) => b.id === createForm.barber_id)?.name ||
+                        'Selecciona un barbero'
+                      : 'Selecciona un barbero'}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+                </button>
+              </div>
+
+              {/* Fecha y Hora */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Fecha
+                  </label>
+                  <DatePickerTrigger
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                    label="Fecha"
+                    className="h-[46px] w-full justify-start rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Hora
+                  </label>
+                  <TimePickerTrigger
+                    value={createForm.time || '09:00'}
+                    onClick={() => setIsTimePickerOpen(true)}
+                    className="h-[46px] w-full justify-start rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* Notas */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Notas (opcional)
+                </label>
+                <textarea
+                  value={createForm.notes}
+                  onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
+                  placeholder="Notas adicionales sobre la cita..."
+                  rows={3}
+                  className="w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Hora
-                </label>
-                <TimePickerTrigger
-                  value={createForm.time || '09:00'}
-                  onClick={() => setIsTimePickerOpen(true)}
-                  className="w-full h-12 justify-start px-3 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
-                />
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  onClick={handleCreateAppointment}
+                  isLoading={createAppointment.isPending}
+                  className="flex-1"
+                >
+                  Guardar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsCreateOpen(false)}
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
               </div>
             </div>
-
-            {/* Notas (opcional) */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Notas (opcional)
-              </label>
-              <textarea
-                value={createForm.notes}
-                onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })}
-                placeholder="Notas adicionales sobre la cita..."
-                rows={3}
-                className="w-full px-4 py-3 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              />
-            </div>
-
-            {/* Submit button */}
-            <Button
-              variant="gradient"
-              onClick={handleCreateAppointment}
-              isLoading={createAppointment.isPending}
-              className="w-full"
-            >
-              Crear Cita
-            </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      )}
 
       {/* iOS Time Picker for Nueva Cita */}
       <IOSTimePicker

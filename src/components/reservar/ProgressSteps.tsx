@@ -23,7 +23,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
   return (
     <div className="sticky top-[108px] sm:top-[116px] z-40 px-4 py-3" data-testid="progress-steps">
       <div className="mx-auto max-w-2xl">
-        <div className="flex items-center justify-center gap-2 rounded-2xl bg-white/80 backdrop-blur-xl p-2 shadow-sm dark:bg-zinc-900/80">
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-zinc-950/60 backdrop-blur-xl p-2 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
           {stepLabels.map((label, i) => {
             const isCompleted = i < stepIndex
             const isCurrent = i === stepIndex
@@ -36,20 +36,18 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
                   data-completed={isCompleted ? 'true' : undefined}
                   className={cn(
                     'flex items-center gap-2 rounded-full px-3 py-2 transition-all duration-300',
-                    isCurrent && 'bg-zinc-900 dark:bg-white',
-                    isCompleted && 'bg-emerald-100 dark:bg-emerald-900/30',
-                    !isCompleted && !isCurrent && 'bg-transparent'
+                    isCurrent && 'bg-white/10 ring-1 ring-white/15',
+                    isCompleted && 'bg-emerald-500/20',
+                    !isCompleted && !isCurrent && 'bg-transparent opacity-80'
                   )}
                 >
                   <div
                     data-testid={`step-indicator-${stepKeys[i]}`}
                     className={cn(
                       'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
-                      isCurrent && 'bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white',
+                      isCurrent && 'bg-white text-zinc-900',
                       isCompleted && 'bg-emerald-500 text-white',
-                      !isCompleted &&
-                        !isCurrent &&
-                        'bg-zinc-200 text-zinc-400 dark:bg-zinc-700 dark:text-zinc-500'
+                      !isCompleted && !isCurrent && 'bg-zinc-700 text-zinc-300'
                     )}
                   >
                     {isCompleted ? <CheckCircle className="h-4 w-4" /> : i + 1}
@@ -57,9 +55,9 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
                   <span
                     className={cn(
                       'text-[13px] font-semibold hidden sm:block',
-                      isCurrent && 'text-white dark:text-zinc-900',
-                      isCompleted && 'text-emerald-700 dark:text-emerald-400',
-                      !isCompleted && !isCurrent && 'text-zinc-400 dark:text-zinc-500'
+                      isCurrent && 'text-white',
+                      isCompleted && 'text-emerald-300',
+                      !isCompleted && !isCurrent && 'text-zinc-400'
                     )}
                   >
                     {label}
@@ -69,7 +67,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
                   <div
                     className={cn(
                       'w-4 sm:w-6 h-0.5 mx-1 rounded-full transition-colors',
-                      i < stepIndex ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
+                      i < stepIndex ? 'bg-emerald-500' : 'bg-zinc-700'
                     )}
                   />
                 )}

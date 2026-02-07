@@ -18,7 +18,7 @@
  * Updated: Session 121 - Added multi-level error boundaries
  */
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { Fragment, useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -782,14 +782,14 @@ export default function ClientesPageV2() {
                 placeholder="Buscar por nombre, teléfono o email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 sm:py-3 pl-10 sm:pl-12 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-zinc-600"
+                className="w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] py-2.5 sm:py-3 pl-10 sm:pl-12 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-zinc-400/60 focus:outline-none focus:ring-2 focus:ring-zinc-400/20 backdrop-blur-xl"
               />
             </div>
 
             {/* View Mode Tabs + Segment Filters (SAME LINE like demo) */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               {/* View Mode Switcher - LEFT */}
-              <div className="flex items-center gap-2 rounded-xl bg-white dark:bg-zinc-900 p-1 shadow-sm border border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center gap-1.5 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
                 {[
                   {
                     mode: 'dashboard' as ViewMode,
@@ -809,12 +809,12 @@ export default function ClientesPageV2() {
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
-                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                    className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       !mobile ? 'hidden lg:flex' : ''
                     } ${
                       viewMode === mode
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border border-zinc-900/30 dark:border-white/15 shadow-[0_6px_18px_rgba(0,0,0,0.2)]'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-white/10'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -830,7 +830,7 @@ export default function ClientesPageV2() {
                   className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 ${
                     selectedSegment === 'all'
                       ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
-                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+                      : 'bg-white/70 text-zinc-600 hover:bg-zinc-100 dark:bg-white/[0.06] dark:text-zinc-400 dark:hover:bg-white/10'
                   }`}
                 >
                   Todos ({metrics.total})
@@ -847,7 +847,7 @@ export default function ClientesPageV2() {
                         className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 sm:gap-1.5 border shrink-0 ${
                           selectedSegment === segment
                             ? config.color
-                            : 'bg-zinc-100 text-zinc-600 border-transparent hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+                            : 'bg-white/70 text-zinc-600 border-transparent hover:bg-zinc-100 dark:bg-white/[0.06] dark:text-zinc-400 dark:hover:bg-white/10'
                         }`}
                       >
                         <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
@@ -916,12 +916,8 @@ export default function ClientesPageV2() {
                         ]
 
                         return (
-                          <>
-                            <SwipeableRow
-                              key={client.id}
-                              rightActions={rightActions}
-                              className="lg:hidden"
-                            >
+                          <Fragment key={client.id}>
+                            <SwipeableRow rightActions={rightActions} className="lg:hidden">
                               <motion.button
                                 onClick={() => {
                                   setSelectedCardClient(client)
@@ -1082,7 +1078,6 @@ export default function ClientesPageV2() {
                             </SwipeableRow>
                             {/* Desktop: regular card without swipe */}
                             <motion.button
-                              key={`desktop-${client.id}`}
                               onClick={() => {
                                 setSelectedCardClient(client)
                                 setIsMobileDetailOpen(true)
@@ -1223,7 +1218,7 @@ export default function ClientesPageV2() {
                                 </div>
                               </div>
                             </motion.button>
-                          </>
+                          </Fragment>
                         )
                       })}
                     </div>
@@ -2255,7 +2250,7 @@ export default function ClientesPageV2() {
 
                       <div className="flex gap-3 pt-2">
                         <Button type="submit" isLoading={createClient.isPending} className="flex-1">
-                          Guardar Cliente
+                          Guardar
                         </Button>
                         <Button
                           type="button"

@@ -24,7 +24,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     let query = supabase
       .from('clients')
       .select(
-        'id, name, phone, email, notes, created_at, last_visit_at, total_visits, total_spent, vip_status, business_id',
+        'id, name, phone, email, notes, created_at, last_visit_at, total_visits, total_spent, business_id',
         { count: 'exact' }
       )
       .eq('business_id', business.id)
