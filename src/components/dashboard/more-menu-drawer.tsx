@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Gift,
   LogOut,
+  LayoutDashboard,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
@@ -25,6 +26,14 @@ interface MoreMenuDrawerProps {
 }
 
 const menuItems = [
+  {
+    name: 'Inicio',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+    description: 'Resumen del negocio',
+    color: 'text-indigo-600 dark:text-indigo-400',
+    bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+  },
   {
     name: 'Analíticas',
     href: '/analiticas',

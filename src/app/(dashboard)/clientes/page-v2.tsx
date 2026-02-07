@@ -861,14 +861,14 @@ export default function ClientesPageV2() {
                           whileHover={{ scale: 1.01 }}
                           className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-all border-2 ${
                             isSelected
-                              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 shadow-lg'
-                              : 'bg-zinc-900/40 dark:bg-zinc-800/40 border-zinc-700 dark:border-zinc-700 hover:border-zinc-600 dark:hover:border-zinc-600 hover:shadow-md'
+                              ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-900/20 dark:border-blue-500 dark:shadow-lg'
+                              : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-800/40 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
                           }`}
                         >
                           {/* Loyalty badge - mobile (compact) */}
                           <div className="absolute top-2 right-2 lg:hidden">
                             <span
-                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                              className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
                                 loyalty >= 80
                                   ? 'bg-green-500/20 text-green-400'
                                   : loyalty >= 50
@@ -918,7 +918,7 @@ export default function ClientesPageV2() {
                                 />
                               </svg>
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-[10px] font-bold text-zinc-100 dark:text-white">
+                                <span className="text-[11px] font-bold text-zinc-700 dark:text-white">
                                   {Math.round(loyalty)}%
                                 </span>
                               </div>
@@ -941,11 +941,11 @@ export default function ClientesPageV2() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-bold text-base text-white dark:text-white truncate">
+                                  <p className="font-bold text-base text-zinc-900 dark:text-white truncate">
                                     {client.name}
                                   </p>
                                   {segment === 'vip' && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
                                       <Crown className="h-2.5 w-2.5" />
                                       VIP
                                     </span>
@@ -962,10 +962,13 @@ export default function ClientesPageV2() {
                                     {Array.from({
                                       length: Math.max(0, 4 - Math.ceil(loyalty / 25)),
                                     }).map((_, i) => (
-                                      <div key={i} className="w-1 h-3 rounded-full bg-zinc-700" />
+                                      <div
+                                        key={i}
+                                        className="w-1 h-3 rounded-full bg-zinc-300 dark:bg-zinc-700"
+                                      />
                                     ))}
                                   </div>
-                                  <span className="text-xs text-zinc-400">
+                                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
                                     {loyalty}% engagement
                                   </span>
                                 </div>
@@ -978,7 +981,7 @@ export default function ClientesPageV2() {
                                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">
                                   Gastado
                                 </p>
-                                <p className="text-lg font-bold text-white dark:text-white">
+                                <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                   {formatCurrencyCompact(Number(client.total_spent || 0))}
                                 </p>
                               </div>
@@ -986,7 +989,7 @@ export default function ClientesPageV2() {
                                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">
                                   Visitas
                                 </p>
-                                <p className="text-lg font-bold text-white dark:text-white">
+                                <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                   {client.total_visits || 0}
                                 </p>
                               </div>
@@ -994,7 +997,7 @@ export default function ClientesPageV2() {
 
                             {/* Spending tier badge */}
                             <div className="flex items-center gap-1.5">
-                              <Award className="h-3.5 w-3.5 text-zinc-400" />
+                              <Award className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
                               <span
                                 className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tierColors[tier]}`}
                               >

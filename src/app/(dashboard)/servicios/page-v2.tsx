@@ -516,7 +516,7 @@ function ServiciosContent() {
         />
       </div>
 
-      <div className="mx-auto max-w-[1400px] relative z-10">
+      <div className="lg:mx-auto lg:max-w-[1400px] relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

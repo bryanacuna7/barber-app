@@ -29,6 +29,8 @@ import {
   Phone,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Check,
   Plus,
   Mail,
   Sunrise,
@@ -76,6 +78,9 @@ import { QueryError } from '@/components/ui/query-error'
 
 // Business context
 import { useBusiness } from '@/contexts/business-context'
+
+// iOS Time Picker
+import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -207,6 +212,10 @@ function CitasCalendarFusionContent() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isStatsOpen, setIsStatsOpen] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isTimePickerOpen, setIsTimePickerOpen] = useState(false)
+  const [activePickerField, setActivePickerField] = useState<
+    'client' | 'service' | 'barber' | null
+  >(null)
   const [createForm, setCreateForm] = useState({
     client_id: '',
     service_id: '',
@@ -1024,7 +1033,7 @@ function CitasCalendarFusionContent() {
                                     <div className="font-medium text-white truncate">
                                       {apt.client?.name || 'Cliente'}
                                     </div>
-                                    <div className="text-[10px] text-white/80 truncate">
+                                    <div className="text-[11px] text-white/80 truncate">
                                       {apt.service?.name || 'Servicio'}
                                     </div>
                                   </div>
@@ -1072,7 +1081,7 @@ function CitasCalendarFusionContent() {
                                     <div className="font-medium text-white truncate">
                                       {apt.client?.name || 'Cliente'}
                                     </div>
-                                    <div className="text-[10px] text-white/80 truncate">
+                                    <div className="text-[11px] text-white/80 truncate">
                                       {apt.service?.name || 'Servicio'}
                                     </div>
                                   </div>
@@ -1156,7 +1165,7 @@ function CitasCalendarFusionContent() {
                             />
                           ))}
                           {day.appointments.length > 3 && (
-                            <div className="text-[10px] text-zinc-500 dark:text-[#8E8E93]">
+                            <div className="text-[11px] text-zinc-500 dark:text-[#8E8E93]">
                               +{day.appointments.length - 3}
                             </div>
                           )}
@@ -1232,18 +1241,25 @@ function CitasCalendarFusionContent() {
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Cliente
               </label>
-              <select
-                value={createForm.client_id}
-                onChange={(e) => setCreateForm({ ...createForm, client_id: e.target.value })}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <button
+                type="button"
+                onClick={() => setActivePickerField('client')}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Selecciona un cliente</option>
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
+                <span
+                  className={
+                    createForm.client_id
+                      ? 'text-zinc-900 dark:text-white'
+                      : 'text-zinc-400 dark:text-zinc-500'
+                  }
+                >
+                  {createForm.client_id
+                    ? clients.find((c) => c.id === createForm.client_id)?.name ||
+                      'Selecciona un cliente'
+                    : 'Selecciona un cliente'}
+                </span>
+                <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />
+              </button>
             </div>
 
             {/* Servicio */}
@@ -1251,18 +1267,29 @@ function CitasCalendarFusionContent() {
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Servicio
               </label>
-              <select
-                value={createForm.service_id}
-                onChange={(e) => setCreateForm({ ...createForm, service_id: e.target.value })}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <button
+                type="button"
+                onClick={() => setActivePickerField('service')}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Selecciona un servicio</option>
-                {services.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.name} - ₡{service.price.toLocaleString()}
-                  </option>
-                ))}
-              </select>
+                <span
+                  className={
+                    createForm.service_id
+                      ? 'text-zinc-900 dark:text-white'
+                      : 'text-zinc-400 dark:text-zinc-500'
+                  }
+                >
+                  {createForm.service_id
+                    ? (() => {
+                        const s = services.find((s) => s.id === createForm.service_id)
+                        return s
+                          ? `${s.name} - ₡${s.price.toLocaleString()}`
+                          : 'Selecciona un servicio'
+                      })()
+                    : 'Selecciona un servicio'}
+                </span>
+                <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />
+              </button>
             </div>
 
             {/* Barbero */}
@@ -1270,18 +1297,25 @@ function CitasCalendarFusionContent() {
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Barbero
               </label>
-              <select
-                value={createForm.barber_id}
-                onChange={(e) => setCreateForm({ ...createForm, barber_id: e.target.value })}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <button
+                type="button"
+                onClick={() => setActivePickerField('barber')}
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Selecciona un barbero</option>
-                {barbers.map((barber) => (
-                  <option key={barber.id} value={barber.id}>
-                    {barber.name}
-                  </option>
-                ))}
-              </select>
+                <span
+                  className={
+                    createForm.barber_id
+                      ? 'text-zinc-900 dark:text-white'
+                      : 'text-zinc-400 dark:text-zinc-500'
+                  }
+                >
+                  {createForm.barber_id
+                    ? barbers.find((b) => b.id === createForm.barber_id)?.name ||
+                      'Selecciona un barbero'
+                    : 'Selecciona un barbero'}
+                </span>
+                <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />
+              </button>
             </div>
 
             {/* Fecha */}
@@ -1293,7 +1327,7 @@ function CitasCalendarFusionContent() {
                 type="date"
                 value={formDate}
                 onChange={(e) => setSelectedDate(new Date(e.target.value + 'T12:00:00'))}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:[color-scheme:dark]"
               />
             </div>
 
@@ -1302,11 +1336,10 @@ function CitasCalendarFusionContent() {
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                 Hora
               </label>
-              <input
-                type="time"
-                value={createForm.time}
-                onChange={(e) => setCreateForm({ ...createForm, time: e.target.value })}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <TimePickerTrigger
+                value={createForm.time || '09:00'}
+                onClick={() => setIsTimePickerOpen(true)}
+                className="w-full h-12 justify-start px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
               />
             </div>
 
@@ -1332,6 +1365,94 @@ function CitasCalendarFusionContent() {
             >
               {createAppointment.isPending ? 'Creando...' : 'Crear Cita'}
             </button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* iOS Time Picker for Nueva Cita */}
+      <IOSTimePicker
+        isOpen={isTimePickerOpen}
+        onClose={() => setIsTimePickerOpen(false)}
+        value={createForm.time || '09:00'}
+        onChange={(value) => setCreateForm({ ...createForm, time: value })}
+        title="Hora de la cita"
+      />
+
+      {/* Picker Sheet for Client/Service/Barber selection */}
+      <Sheet
+        open={activePickerField !== null}
+        onOpenChange={(open) => {
+          if (!open) setActivePickerField(null)
+        }}
+      >
+        <SheetContent
+          side="bottom"
+          className="max-h-[60vh] bg-white dark:bg-[#1C1C1E] border-t border-zinc-200 dark:border-[#2C2C2E] rounded-t-2xl pb-safe"
+        >
+          <SheetHeader>
+            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+              {activePickerField === 'client' && 'Seleccionar Cliente'}
+              {activePickerField === 'service' && 'Seleccionar Servicio'}
+              {activePickerField === 'barber' && 'Seleccionar Barbero'}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 overflow-y-auto max-h-[calc(60vh-80px)] px-2">
+            {activePickerField === 'client' &&
+              clients.map((client) => (
+                <button
+                  key={client.id}
+                  type="button"
+                  onClick={() => {
+                    setCreateForm({ ...createForm, client_id: client.id })
+                    setActivePickerField(null)
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <span className="text-base text-zinc-900 dark:text-white">{client.name}</span>
+                  {createForm.client_id === client.id && (
+                    <Check className="h-5 w-5 text-blue-500 shrink-0" />
+                  )}
+                </button>
+              ))}
+            {activePickerField === 'service' &&
+              services.map((service) => (
+                <button
+                  key={service.id}
+                  type="button"
+                  onClick={() => {
+                    setCreateForm({ ...createForm, service_id: service.id })
+                    setActivePickerField(null)
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <div>
+                    <span className="text-base text-zinc-900 dark:text-white">{service.name}</span>
+                    <span className="text-[13px] text-zinc-500 dark:text-zinc-400 ml-2">
+                      ₡{service.price.toLocaleString()}
+                    </span>
+                  </div>
+                  {createForm.service_id === service.id && (
+                    <Check className="h-5 w-5 text-blue-500 shrink-0" />
+                  )}
+                </button>
+              ))}
+            {activePickerField === 'barber' &&
+              barbers.map((barber) => (
+                <button
+                  key={barber.id}
+                  type="button"
+                  onClick={() => {
+                    setCreateForm({ ...createForm, barber_id: barber.id })
+                    setActivePickerField(null)
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <span className="text-base text-zinc-900 dark:text-white">{barber.name}</span>
+                  {createForm.barber_id === barber.id && (
+                    <Check className="h-5 w-5 text-blue-500 shrink-0" />
+                  )}
+                </button>
+              ))}
           </div>
         </SheetContent>
       </Sheet>

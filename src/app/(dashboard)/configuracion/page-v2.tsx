@@ -289,7 +289,7 @@ export default function ConfiguracionPage() {
   // Error state
   if (error) {
     return (
-      <div className="container mx-auto max-w-6xl p-6">
+      <div className="max-w-6xl mx-auto">
         <QueryError error={error} onRetry={() => refetch()} title="Error al cargar configuración" />
       </div>
     )
@@ -377,7 +377,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Información General
                 </h3>
-                <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
                   Nombre, teléfono, dirección y enlace de reservas
                 </p>
               </div>
@@ -404,7 +404,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Horario de Atención
                 </h3>
-                <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
                   Días y horas de operación, tiempos de buffer
                 </p>
               </div>
@@ -431,7 +431,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Marca y Estilo
                 </h3>
-                <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
                   Colores, logo y personalización visual
                 </p>
               </div>
@@ -458,7 +458,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Configuración Avanzada
                 </h3>
-                <p className="text-[14px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
                   Notificaciones, lealtad y opciones avanzadas
                 </p>
               </div>

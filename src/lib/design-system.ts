@@ -106,10 +106,20 @@ export const colors = {
 
 // Animation presets
 export const animations = {
-  // Spring configs for framer-motion
+  /**
+   * Spring configs for framer-motion (Interaction OS v1)
+   *
+   * gentle  → Subtle UI feedback, disclosure animations
+   * default → General-purpose transitions (cards, lists, panels)
+   * snappy  → Quick interactions (tap feedback, chips, segmented controls)
+   * sheet   → Bottom sheets and overlays (open/close)
+   * bouncy  → Playful animations (use sparingly)
+   */
   spring: {
     gentle: { type: 'spring', stiffness: 120, damping: 14 },
+    default: { type: 'spring', stiffness: 300, damping: 25 },
     snappy: { type: 'spring', stiffness: 400, damping: 30 },
+    sheet: { type: 'spring', stiffness: 300, damping: 30 },
     bouncy: { type: 'spring', stiffness: 300, damping: 10 },
   },
 

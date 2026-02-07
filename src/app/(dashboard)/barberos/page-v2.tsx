@@ -154,7 +154,7 @@ export default function BarberosPage() {
           className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
         />
       </div>
-      <div className="max-w-[1600px] mx-auto space-y-6 relative z-10">
+      <div className="lg:max-w-[1600px] lg:mx-auto space-y-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

@@ -8,10 +8,11 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-07 (Session 134 - Mobile UX Round 2 Deep Polish)
+- **Last Updated:** 2026-02-07 (Session 136 - Supabase Migration + Visual QA)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Mobile UX Deep Polish Complete
+- **Current Phase:** Super Admin Panel + Egress Management (Next)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
+- **Supabase Project:** `zanywefnobtzhoeuoyuc` (new, migrated from `bwelkcqqzkiiaxrkoslb`)
 
 ---
 
@@ -26,10 +27,126 @@
 - [x] **Performance Optimization** ✅ (7 índices DB, N+1 queries fixed, 7-10x faster)
 - [x] **Observability Infrastructure** ✅ (Pino logging, Sentry, Redis rate limiting)
 - [x] **Phase 1 & 2:** All 5 Dashboard Pages Modernized (Clientes, Citas, Servicios, Barberos, Configuración)
+- [x] **Mobile UX Audit:** 11 critical fixes (typography, nav restructure, picker sheets, motion tokens)
+- [x] **Supabase Migration:** Schema cloned to new free-tier project (egress management)
+
+---
+
+## Roadmap (Prioritized)
+
+### HIGH PRIORITY: Super Admin Panel
+
+- [ ] `/admin/dashboard` — SaaS metrics: total businesses, active users, MRR, churn
+- [ ] `/admin/businesses` — List/manage all businesses (activate, deactivate, view details)
+- [ ] `/admin/users` — Manage platform admins (currently only via SQL INSERT)
+- [ ] Admin middleware — protect `/admin/*` routes with `verifyAdmin()`
+- [ ] Multi-tenant view — switch between businesses as super admin
+
+### HIGH PRIORITY: Egress Management
+
+- [ ] Disable Supabase Realtime WebSocket in dev mode (biggest egress drain)
+- [ ] Cache subscription/notification checks with TTL (localStorage, 5min)
+- [ ] Use specific `select('col1,col2')` instead of `select('*')` everywhere
+- [ ] Add egress monitoring/alerts (track usage proactively)
+- [ ] Consider edge caching for read-heavy queries
+
+### MEDIUM: Remaining Audit Items
+
+- [ ] Migrate hardcoded spring configs to design-system.ts motion tokens (35+ files)
+- [ ] Visual verification at 360px (smallest tier)
+- [ ] Dark mode full QA pass
 
 ---
 
 ## Recent Sessions
+
+### Session 136: Supabase Migration + Visual QA + Super Admin Discovery (2026-02-07)
+
+**Status:** ✅ Complete
+
+**Objective:** Migrate to new Supabase project (egress exhausted on old one), visually verify all Session 135 changes, discover Super Admin gap
+
+**Supabase Migration:**
+
+- Old project `bwelkcqqzkiiaxrkoslb` hit 112% egress (5.61/5 GB)
+- Created new project `zanywefnobtzhoeuoyuc`
+- Concatenated 26 migration files into 3 parts: `schema_part1_core.sql` (1041 lines), `schema_part2_features.sql` (1884 lines), `schema_part3_fixes_rbac.sql` (693 lines)
+- Executed all 3 in SQL Editor successfully
+- Updated `.env.local` with new URL + anon key + service_role key
+- Fixed RLS infinite recursion: dropped "Barbers can view business staff" policy (self-referencing SELECT on barbers table)
+- Created test account + Bryan's admin account + seed data (services, barbers, clients, appointments)
+- Bryan added to `admin_users` table as Platform Super Admin
+
+**Visual QA (Playwright 390px) — ALL PASS:**
+
+- `/citas` — bottom nav correct (Citas|Clientes|+|Servicios|Más), data loads, header with segmented control
+- `/clientes` — 3 clients visible, VIP badges legible, stats cards
+- `/servicios` — full-width cards on mobile (no max-w), 10 demo services
+- `/configuracion` — no double padding, text-[15px] descriptions
+- Action sheet (+) — 3 options (Nueva Cita, Nuevo Cliente, Nuevo Servicio), backdrop blur
+- "Más" menu — Inicio as first item, 6 options + Cerrar Sesión
+
+**Super Admin Discovery:**
+
+- `admin_users` table exists (migration 004)
+- `verifyAdmin()` + `isUserAdmin()` helpers in `src/lib/admin.ts`
+- Only 1 admin page exists: `/admin/referencias`
+- **GAP:** No full admin panel, no multi-tenant management, no SaaS metrics dashboard
+- Added to roadmap as high priority
+
+**Credentials:**
+
+- Bryan: `bryn.acuna7@gmail.com` / `TempPass123!` (admin_users + business owner)
+- Test: `test@barbershop.dev` / `TestPass123!` (business owner only)
+
+---
+
+### Session 135: Mobile UX Audit Remediation Phase 1+2 (2026-02-07)
+
+**Status:** ✅ Code complete, pending visual QA (Supabase Egress exhausted)
+
+**Objective:** Fix critical issues from comprehensive AUDIT.md mobile experience review
+
+**Phase 1 (7 fixes):**
+
+- Deleted dead code: `button-refactored.tsx`, `confirm-dialog-refactored.tsx`, `modal-refactored.tsx`
+- Fixed Configuracion error state double padding (`container p-6` → `max-w-6xl mx-auto`)
+- Replaced `text-[10px]` → `text-[11px]` in Citas (3) and Clientes (3)
+- Normalized `text-[14px]` → `text-[15px]` in Configuracion (4 description paragraphs)
+- Replaced native `<input type="time">` with `IOSTimePicker` in Nueva Cita form
+- Added `dark:[color-scheme:dark]` to date input for dark mode fix
+- Added canonical motion token presets (`default`, `sheet`) to design-system.ts
+
+**Phase 2 (4 fixes):**
+
+- Bottom nav labels `text-[10px]` → `text-[11px]`
+- Removed desktop `max-w` on mobile: servicios (`lg:max-w-[1400px]`), barberos (`lg:max-w-[1600px]`)
+- Replaced 3 native `<select>` in Nueva Cita with picker sheets (portal-stable, no transform issues)
+- Restructured bottom nav: Citas | Clientes | **+** (center) | Servicios | Más — Inicio moved to "Más" menu
+  - `+` button opens action sheet with: Nueva Cita, Nuevo Cliente, Nuevo Servicio
+
+**Key Files Modified:**
+
+- `src/components/dashboard/bottom-nav.tsx` — restructured: 3 nav tabs + center `+` + Más
+- `src/components/dashboard/more-menu-drawer.tsx` — added Inicio as first item
+- `src/app/(dashboard)/citas/page-v2.tsx` — picker sheets, IOSTimePicker, dark mode date, text fixes
+- `src/app/(dashboard)/clientes/page-v2.tsx` — text-[10px] → text-[11px]
+- `src/app/(dashboard)/configuracion/page-v2.tsx` — padding fix, text normalization
+- `src/app/(dashboard)/servicios/page-v2.tsx` — lg:max-w only
+- `src/app/(dashboard)/barberos/page-v2.tsx` — lg:max-w only
+- `src/lib/design-system.ts` — motion tokens (default, sheet presets)
+
+**Audit Impact:**
+
+- Gate A (estructura): max-w fixed, nav restructured
+- Gate B (tipografía): text-[10px] eliminated from all core surfaces + bottom nav
+- Gate I (formularios en overlays): native selects replaced with picker sheets
+
+**Blocked:** Visual verification pending Supabase Egress renewal
+
+**Plan file:** `/Users/bryanacuna/.claude/plans/ticklish-mapping-meteor.md`
+
+---
 
 ### Session 134: Mobile UX Round 2 - Deep Polish (2026-02-07)
 
