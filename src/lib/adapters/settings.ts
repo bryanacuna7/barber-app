@@ -83,7 +83,7 @@ export function adaptBusinessSettings(row: SupabaseBusiness): UIBusinessSettings
       advanceBookingDays: row.advance_booking_days || 30,
     },
     branding: {
-      primaryColor: row.brand_primary_color || '#000000',
+      primaryColor: row.brand_primary_color || '#27272A',
       logoUrl: row.brand_logo_url || undefined,
       faviconUrl: row.brand_favicon_url || undefined,
     },

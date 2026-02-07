@@ -78,7 +78,7 @@ export async function GET(request: Request) {
         overflow: 'hidden',
         background: hasLogo
           ? 'radial-gradient(circle at 20% 20%, #3B82F6 0%, #2563EB 40%, #1D4ED8 65%, #0F172A 100%)'
-          : 'radial-gradient(circle at 20% 20%, #27272A 0%, #18181B 60%, #09090B 100%)',
+          : '#000000',
       }}
     >
       <div
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
           borderRadius: Math.round(size * 0.24),
           border: hasLogo
             ? `${Math.max(2, Math.round(size * 0.01))}px solid rgba(255,255,255,0.22)`
-            : `${Math.max(2, Math.round(size * 0.01))}px solid rgba(255,255,255,0.18)`,
+            : 'none',
         }}
       />
 
@@ -127,9 +127,9 @@ export async function GET(request: Request) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(255,255,255,0.06)',
-            border: `${Math.max(2, Math.round(size * 0.01))}px solid rgba(255,255,255,0.25)`,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.28)',
+            background: 'transparent',
+            border: 'none',
+            boxShadow: 'none',
           }}
         >
           <div
@@ -138,10 +138,10 @@ export async function GET(request: Request) {
               width: poleWidth,
               height: poleHeight,
               borderRadius: Math.round(size * 0.12),
-              background: '#F5F5F5',
+              background: '#FFFFFF',
               overflow: 'hidden',
-              border: `${Math.max(2, Math.round(size * 0.008))}px solid rgba(255,255,255,0.95)`,
-              boxShadow: 'inset 0 0 0 1px rgba(15, 23, 42, 0.12)',
+              border: `${Math.max(2, Math.round(size * 0.008))}px solid #FFFFFF`,
+              boxShadow: 'none',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -156,7 +156,7 @@ export async function GET(request: Request) {
                   top: Math.round(i * stripeHeight - stripeHeight * 0.3),
                   width: '180%',
                   height: stripeHeight,
-                  background: i % 2 === 0 ? '#D4D4D8' : '#A1A1AA',
+                  background: i % 2 === 0 ? 'rgba(0,0,0,0.14)' : 'rgba(0,0,0,0.24)',
                   transform: 'rotate(-33deg)',
                 }}
               />
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
                 width: Math.round(poleWidth * 0.72),
                 height: Math.max(5, Math.round(size * 0.025)),
                 borderRadius: 999,
-                background: '#E4E4E7',
+                background: '#FFFFFF',
               }}
             />
             <div
@@ -178,7 +178,7 @@ export async function GET(request: Request) {
                 width: Math.round(poleWidth * 0.72),
                 height: Math.max(5, Math.round(size * 0.025)),
                 borderRadius: 999,
-                background: '#E4E4E7',
+                background: '#FFFFFF',
               }}
             />
           </div>

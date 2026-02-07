@@ -13,6 +13,7 @@ import {
   Shield,
   TrendingUp,
   Share2,
+  History,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Analíticas', href: '/analiticas', icon: TrendingUp },
   { name: 'Referencias', href: '/referencias', icon: Share2 },
+  { name: 'Novedades', href: '/changelog', icon: History },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
 

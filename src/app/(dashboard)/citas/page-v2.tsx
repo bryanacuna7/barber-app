@@ -38,9 +38,13 @@ import {
   Sun,
   Moon,
   Zap,
+  CheckCircle,
+  X,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
+import { SwipeableRow } from '@/components/ui/swipeable-row'
 import {
   format,
   parseISO,
@@ -84,6 +88,8 @@ import { useBusiness } from '@/contexts/business-context'
 
 // iOS Time Picker
 import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
+// iOS Date Picker
+import { DatePickerTrigger } from '@/components/ui/ios-date-picker'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -126,7 +132,7 @@ function StatsContent({
 
         {/* Weekday headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+          {['D', 'L', 'M', 'X', 'J', 'V', 'S'].map((day, i) => (
             <div
               key={i}
               className="text-center text-xs text-zinc-500 dark:text-[#8E8E93] font-medium"
@@ -171,25 +177,25 @@ function StatsContent({
       {/* Stats (Cinema feature) */}
       <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-[#2C2C2E]">
         <div className="text-xs font-medium text-zinc-500 dark:text-[#8E8E93] mb-3">
-          TODAY&apos;S STATS
+          ESTADÍSTICAS HOY
         </div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-[#2C2C2E]/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Pending</span>
+          <span className="text-sm text-zinc-900 dark:text-white">Pendiente</span>
           <span className="text-sm font-bold text-amber-500 dark:text-[#FF9500]">
             {stats.pending}
           </span>
         </div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-[#2C2C2E]/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Confirmed</span>
+          <span className="text-sm text-zinc-900 dark:text-white">Confirmada</span>
           <span className="text-sm font-bold text-blue-500 dark:text-[#0A84FF]">
             {stats.confirmed}
           </span>
         </div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-[#2C2C2E]/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Completed</span>
+          <span className="text-sm text-zinc-900 dark:text-white">Completada</span>
           <span className="text-sm font-bold text-green-500 dark:text-[#34C759]">
             {stats.completed}
           </span>
@@ -527,7 +533,7 @@ function CitasCalendarFusionContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#1C1C1E] overflow-x-hidden">
+    <div className="-mx-4 -mt-6 sm:-mx-6 lg:mx-0 lg:mt-0 min-h-screen bg-white dark:bg-[#1C1C1E] overflow-x-hidden">
       {/* Subtle mesh gradients (15% opacity) - Only in dark mode */}
       <div className="hidden dark:block fixed inset-0 opacity-15 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
@@ -557,7 +563,7 @@ function CitasCalendarFusionContent() {
                         : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
-                    Day
+                    Día
                   </button>
                   <button
                     onClick={() => setViewMode('week')}
@@ -567,7 +573,7 @@ function CitasCalendarFusionContent() {
                         : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
-                    Week
+                    Semana
                   </button>
                   <button
                     onClick={() => setViewMode('month')}
@@ -577,7 +583,7 @@ function CitasCalendarFusionContent() {
                         : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
-                    Month
+                    Mes
                   </button>
                 </div>
 
@@ -593,7 +599,7 @@ function CitasCalendarFusionContent() {
                     onClick={handleToday}
                     className="px-3 py-1 text-sm font-medium text-red-500 dark:text-[#FF3B30] hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors"
                   >
-                    Today
+                    Hoy
                   </button>
                   <button
                     onClick={handleNext}
@@ -601,13 +607,15 @@ function CitasCalendarFusionContent() {
                   >
                     <ChevronRight className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
                   </button>
-                  <button
+                  <Button
                     onClick={() => setIsCreateOpen(true)}
                     data-testid="create-appointment-btn"
-                    className="p-1.5 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors ml-2"
+                    variant="ghost"
+                    className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors"
+                    aria-label="Crear cita"
                   >
                     <Plus className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -620,7 +628,7 @@ function CitasCalendarFusionContent() {
                     <button
                       onClick={handlePrevious}
                       className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center flex-shrink-0"
-                      aria-label="Previous"
+                      aria-label="Anterior"
                     >
                       <ChevronLeft className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
                     </button>
@@ -640,23 +648,23 @@ function CitasCalendarFusionContent() {
                       onClick={handleToday}
                       className="min-w-[44px] min-h-[44px] px-3 py-2 text-xs font-medium text-red-500 dark:text-[#FF3B30] hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors"
                     >
-                      Today
+                      Hoy
                     </button>
                     <button
                       onClick={handleNext}
                       className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center"
-                      aria-label="Next"
+                      aria-label="Siguiente"
                     >
                       <ChevronRight className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
                     </button>
-                    <button
+                    <Button
                       onClick={() => setIsCreateOpen(true)}
                       data-testid="create-appointment-btn"
-                      className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-[#2C2C2E] rounded transition-colors flex items-center justify-center"
-                      aria-label="Create appointment"
+                      className="min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25"
+                      aria-label="Crear cita"
                     >
-                      <Plus className="w-5 h-5 text-zinc-500 dark:text-[#8E8E93]" />
-                    </button>
+                      <Plus className="h-5 w-5" />
+                    </Button>
                   </div>
                 </div>
 
@@ -671,7 +679,7 @@ function CitasCalendarFusionContent() {
                           : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
                       }`}
                     >
-                      Day
+                      Día
                     </button>
                     <button
                       onClick={() => setViewMode('week')}
@@ -681,7 +689,7 @@ function CitasCalendarFusionContent() {
                           : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
                       }`}
                     >
-                      Week
+                      Semana
                     </button>
                     <button
                       onClick={() => setViewMode('month')}
@@ -691,7 +699,7 @@ function CitasCalendarFusionContent() {
                           : 'text-zinc-500 dark:text-[#8E8E93] hover:text-zinc-900 dark:hover:text-white'
                       }`}
                     >
-                      Month
+                      Mes
                     </button>
                   </div>
                 </div>
@@ -709,8 +717,15 @@ function CitasCalendarFusionContent() {
                 </div>
               )}
 
-              {/* Revenue stats (Cinema feature - compact) */}
-              <div className="flex items-center gap-6 text-sm">
+              {/* Revenue stats - Mobile compact, Desktop expanded */}
+              {/* Mobile: Single compact line */}
+              <div className="lg:hidden text-sm text-zinc-500 dark:text-[#8E8E93]">
+                ₡{(stats.projectedRevenue / 1000).toFixed(0)}k proyectado ·{' '}
+                {filteredAppointments.length} citas
+              </div>
+
+              {/* Desktop: Full stats with progress bar */}
+              <div className="hidden lg:flex items-center gap-6 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-zinc-500 dark:text-[#8E8E93]">Proyectado:</span>
                   <span className="font-bold text-amber-500 dark:text-[#FF9500]">
@@ -738,463 +753,548 @@ function CitasCalendarFusionContent() {
           </header>
 
           {/* View Content */}
-          <div className="p-4 lg:p-6">
-            {/* Loading state */}
-            {isLoading && (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-zinc-500 dark:text-[#8E8E93]">Cargando citas...</div>
-              </div>
-            )}
-
-            {/* DAY VIEW */}
-            {!isLoading && viewMode === 'day' && (
-              <div>
-                {/* All Day section */}
-                <div className="border-b border-zinc-200 dark:border-[#2C2C2E] p-4 mb-4 min-h-[50px]">
-                  <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">All Day</span>
+          <PullToRefresh
+            onRefresh={async () => {
+              await refetch()
+            }}
+          >
+            <div className="lg:p-6">
+              {/* Loading state */}
+              {isLoading && (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-zinc-500 dark:text-[#8E8E93]">Cargando citas...</div>
                 </div>
+              )}
 
-                {/* Time blocks (Cinema feature) */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {timeBlocks.map((block, blockIndex) => (
-                    <motion.div
-                      key={block.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
-                    >
-                      {/* Block header */}
-                      <div className="mb-4">
-                        <div className="flex items-center gap-2">
-                          <block.icon className={`w-5 h-5 ${block.iconColor}`} />
-                          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white leading-none">
-                            {block.label}
-                          </h3>
-                        </div>
-                        <p className="text-xs text-zinc-500 dark:text-[#8E8E93] ml-7 mb-3">
-                          {block.start > 12 ? block.start - 12 : block.start}
-                          {block.start >= 12 ? 'pm' : 'am'} -{' '}
-                          {block.end > 12 ? block.end - 12 : block.end}
-                          {block.end >= 12 ? 'pm' : 'am'}
-                        </p>
+              {/* DAY VIEW */}
+              {!isLoading && viewMode === 'day' && (
+                <div>
+                  {/* All Day section */}
+                  <div className="border-b border-zinc-200 dark:border-[#2C2C2E] p-4 mb-4 min-h-[50px]">
+                    <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">Todo el día</span>
+                  </div>
 
-                        {/* Occupancy bar (Cinema feature) */}
-                        <div
-                          className={`bg-white/50 dark:bg-transparent dark:bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-zinc-200 dark:border-[#2C2C2E] p-2 lg:p-3`}
-                        >
-                          <div className="flex items-center justify-between mb-2 text-sm">
-                            <span className="text-zinc-900 dark:text-white">
-                              {block.count} citas
-                            </span>
-                            <span
-                              className={`font-bold ${
-                                block.occupancyPercent >= 90
-                                  ? 'text-red-500 dark:text-[#FF3B30]'
-                                  : block.occupancyPercent >= 60
-                                    ? 'text-amber-500 dark:text-[#FF9500]'
-                                    : 'text-green-500 dark:text-[#34C759]'
-                              }`}
-                            >
-                              {block.occupancyPercent}%
-                            </span>
+                  {/* Time blocks (Cinema feature) */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {timeBlocks.map((block, blockIndex) => (
+                      <motion.div
+                        key={block.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
+                      >
+                        {/* Block header */}
+                        <div className="mb-4">
+                          <div className="flex items-center gap-2">
+                            <block.icon className={`w-5 h-5 ${block.iconColor}`} />
+                            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white leading-none">
+                              {block.label}
+                            </h3>
                           </div>
-                          <div className="h-1.5 bg-zinc-100 dark:bg-black/20 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${block.occupancyPercent}%` }}
-                              className={`h-full ${
-                                block.occupancyPercent >= 90
-                                  ? 'bg-red-500 dark:bg-[#FF3B30]'
-                                  : block.occupancyPercent >= 60
-                                    ? 'bg-amber-500 dark:bg-[#FF9500]'
-                                    : 'bg-green-500 dark:bg-[#34C759]'
-                              }`}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                          <p className="text-xs text-zinc-500 dark:text-[#8E8E93] ml-7 mb-3">
+                            {block.start > 12 ? block.start - 12 : block.start}
+                            {block.start >= 12 ? 'pm' : 'am'} -{' '}
+                            {block.end > 12 ? block.end - 12 : block.end}
+                            {block.end >= 12 ? 'pm' : 'am'}
+                          </p>
 
-                      {/* Appointments */}
-                      <div className="space-y-1.5 lg:space-y-2">
-                        {block.appointments.map((apt) => (
-                          <motion.div
-                            key={apt.id}
-                            drag
-                            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                            dragElastic={0.05}
-                            onDragStart={() => setDraggedId(apt.id)}
-                            onDragEnd={() => {
-                              setDraggedId(null)
-                              toast.info('Rescheduling (demo)')
-                            }}
-                            whileTap={{ scale: 0.98 }}
-                            whileDrag={{ scale: 1.05, zIndex: 50 }}
-                            onClick={() => setSelectedId(apt.id)}
-                            className={`bg-white/80 dark:bg-[#2C2C2E]/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-2 lg:p-3 cursor-grab active:cursor-grabbing transition-all ${
-                              draggedId === apt.id
-                                ? 'opacity-50'
-                                : 'hover:bg-zinc-50 dark:hover:bg-[#3A3A3C]/60'
-                            }`}
+                          {/* Occupancy bar (Cinema feature) */}
+                          <div
+                            className={`bg-white/50 dark:bg-transparent dark:bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-zinc-200 dark:border-[#2C2C2E] p-2 lg:p-3`}
                           >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <div
-                                    className={`w-1.5 h-1.5 rounded-full ${
-                                      apt.status === 'completed'
-                                        ? 'bg-[#34C759]'
-                                        : apt.status === 'confirmed'
-                                          ? 'bg-[#0A84FF]'
-                                          : 'bg-[#FF9500]'
-                                    }`}
-                                  />
-                                  <span className="font-medium text-zinc-900 dark:text-white text-sm">
-                                    {apt.client?.name || 'Cliente'}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-zinc-500 dark:text-[#8E8E93]">
-                                  {apt.service?.name || 'Servicio'}
-                                </div>
-                              </div>
-                              <div className="text-right text-xs">
-                                <div className="text-zinc-500 dark:text-[#8E8E93] font-mono">
-                                  {format(parseISO(apt.scheduled_at), 'h:mm a')}
-                                </div>
-                                <div className="text-amber-500 dark:text-[#FF9500] font-bold mt-0.5">
-                                  ₡{((apt.service?.price || 0) / 1000).toFixed(0)}k
-                                </div>
-                              </div>
+                            <div className="flex items-center justify-between mb-2 text-sm">
+                              <span className="text-zinc-900 dark:text-white">
+                                {block.count} citas
+                              </span>
+                              <span
+                                className={`font-bold ${
+                                  block.occupancyPercent >= 90
+                                    ? 'text-red-500 dark:text-[#FF3B30]'
+                                    : block.occupancyPercent >= 60
+                                      ? 'text-amber-500 dark:text-[#FF9500]'
+                                      : 'text-green-500 dark:text-[#34C759]'
+                                }`}
+                              >
+                                {block.occupancyPercent}%
+                              </span>
                             </div>
-                          </motion.div>
-                        ))}
+                            <div className="h-1.5 bg-zinc-100 dark:bg-black/20 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${block.occupancyPercent}%` }}
+                                className={`h-full ${
+                                  block.occupancyPercent >= 90
+                                    ? 'bg-red-500 dark:bg-[#FF3B30]'
+                                    : block.occupancyPercent >= 60
+                                      ? 'bg-amber-500 dark:bg-[#FF9500]'
+                                      : 'bg-green-500 dark:bg-[#34C759]'
+                                }`}
+                              />
+                            </div>
+                          </div>
+                        </div>
 
-                        {/* Gap indicators (Cinema feature) */}
-                        {gaps
-                          .filter((gap) => {
-                            const gapHour = parseISO(gap.start).getHours()
-                            return gapHour >= block.start && gapHour < block.end
-                          })
-                          .map((gap, gapIndex) => (
-                            <motion.div
-                              key={`gap-${blockIndex}-${gapIndex}`}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              whileTap={{ scale: 0.98 }}
-                              className="bg-green-500/5 rounded-lg border-2 border-dashed border-green-500/30 p-2 lg:p-3 cursor-pointer hover:bg-green-500/10 transition-all"
-                              onClick={() => toast.info('Sugerir clientes para gap')}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-green-600 dark:text-[#34C759]" />
-                                <div className="flex-1">
-                                  <div className="text-xs font-bold text-green-600 dark:text-[#34C759]">
-                                    {gap.minutes} MIN GAP
+                        {/* Appointments */}
+                        <div className="space-y-1.5 lg:space-y-2">
+                          {block.appointments.map((apt) => {
+                            const canConfirm = apt.status === 'pending'
+                            const canCancel =
+                              apt.status !== 'cancelled' && apt.status !== 'completed'
+
+                            const rightActions = []
+                            if (canConfirm) {
+                              rightActions.push({
+                                icon: <CheckCircle className="h-5 w-5" />,
+                                label: 'Confirmar',
+                                color: 'bg-emerald-500',
+                                onClick: () => {
+                                  // TODO: Call onStatusChange when integrated
+                                  toast.success('Cita confirmada')
+                                },
+                              })
+                            }
+                            if (canCancel) {
+                              rightActions.push({
+                                icon: <X className="h-5 w-5" />,
+                                label: 'Cancelar',
+                                color: 'bg-red-500',
+                                onClick: () => {
+                                  // TODO: Call onStatusChange when integrated
+                                  toast.info('Cita cancelada')
+                                },
+                              })
+                            }
+
+                            return (
+                              <>
+                                <div key={apt.id} className="lg:hidden">
+                                  <SwipeableRow rightActions={rightActions}>
+                                    <div
+                                      onClick={() => setSelectedId(apt.id)}
+                                      className="bg-white/80 dark:bg-[#2C2C2E]/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-2 cursor-pointer active:bg-zinc-50 dark:active:bg-[#3A3A3C]/60"
+                                    >
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <div
+                                              className={`w-1.5 h-1.5 rounded-full ${
+                                                apt.status === 'completed'
+                                                  ? 'bg-[#34C759]'
+                                                  : apt.status === 'confirmed'
+                                                    ? 'bg-[#0A84FF]'
+                                                    : 'bg-[#FF9500]'
+                                              }`}
+                                            />
+                                            <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                              {apt.client?.name || 'Cliente'}
+                                            </span>
+                                          </div>
+                                          <div className="text-xs text-zinc-500 dark:text-[#8E8E93]">
+                                            {apt.service?.name || 'Servicio'}
+                                          </div>
+                                        </div>
+                                        <div className="text-right text-xs">
+                                          <div className="text-zinc-500 dark:text-[#8E8E93] font-mono">
+                                            {format(parseISO(apt.scheduled_at), 'h:mm a')}
+                                          </div>
+                                          <div className="text-amber-500 dark:text-[#FF9500] font-bold mt-0.5">
+                                            ₡{((apt.service?.price || 0) / 1000).toFixed(0)}k
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </SwipeableRow>
+                                </div>
+                                {/* Desktop: draggable version */}
+                                <motion.div
+                                  key={`desktop-${apt.id}`}
+                                  className="hidden lg:block"
+                                  drag
+                                  dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                                  dragElastic={0.05}
+                                  onDragStart={() => setDraggedId(apt.id)}
+                                  onDragEnd={() => {
+                                    setDraggedId(null)
+                                    toast.info('Rescheduling (demo)')
+                                  }}
+                                  whileTap={{ scale: 0.98 }}
+                                  whileDrag={{ scale: 1.05, zIndex: 50 }}
+                                  onClick={() => setSelectedId(apt.id)}
+                                >
+                                  <div
+                                    className={`bg-white/80 dark:bg-[#2C2C2E]/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-3 cursor-grab active:cursor-grabbing transition-all ${
+                                      draggedId === apt.id
+                                        ? 'opacity-50'
+                                        : 'hover:bg-zinc-50 dark:hover:bg-[#3A3A3C]/60'
+                                    }`}
+                                  >
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <div
+                                            className={`w-1.5 h-1.5 rounded-full ${
+                                              apt.status === 'completed'
+                                                ? 'bg-[#34C759]'
+                                                : apt.status === 'confirmed'
+                                                  ? 'bg-[#0A84FF]'
+                                                  : 'bg-[#FF9500]'
+                                            }`}
+                                          />
+                                          <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                            {apt.client?.name || 'Cliente'}
+                                          </span>
+                                        </div>
+                                        <div className="text-xs text-zinc-500 dark:text-[#8E8E93]">
+                                          {apt.service?.name || 'Servicio'}
+                                        </div>
+                                      </div>
+                                      <div className="text-right text-xs">
+                                        <div className="text-zinc-500 dark:text-[#8E8E93] font-mono">
+                                          {format(parseISO(apt.scheduled_at), 'h:mm a')}
+                                        </div>
+                                        <div className="text-amber-500 dark:text-[#FF9500] font-bold mt-0.5">
+                                          ₡{((apt.service?.price || 0) / 1000).toFixed(0)}k
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div className="text-xs text-zinc-500 dark:text-[#8E8E93]">
-                                    {format(parseISO(gap.start), 'h:mm a')} -{' '}
-                                    {format(parseISO(gap.end), 'h:mm a')}
+                                </motion.div>
+                              </>
+                            )
+                          })}
+
+                          {/* Gap indicators (Cinema feature) */}
+                          {gaps
+                            .filter((gap) => {
+                              const gapHour = parseISO(gap.start).getHours()
+                              return gapHour >= block.start && gapHour < block.end
+                            })
+                            .map((gap, gapIndex) => (
+                              <motion.div
+                                key={`gap-${blockIndex}-${gapIndex}`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="bg-green-500/5 rounded-lg border-2 border-dashed border-green-500/30 p-2 lg:p-3 cursor-pointer hover:bg-green-500/10 transition-all"
+                                onClick={() => toast.info('Sugerir clientes para gap')}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Zap className="w-4 h-4 text-green-600 dark:text-[#34C759]" />
+                                  <div className="flex-1">
+                                    <div className="text-xs font-bold text-green-600 dark:text-[#34C759]">
+                                      {gap.minutes} MIN GAP
+                                    </div>
+                                    <div className="text-xs text-zinc-500 dark:text-[#8E8E93]">
+                                      {format(parseISO(gap.start), 'h:mm a')} -{' '}
+                                      {format(parseISO(gap.end), 'h:mm a')}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </motion.div>
-                          ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                              </motion.div>
+                            ))}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
 
-                {/* Quick Actions (Cinema feature) */}
-                {(stats.pending > 0 || gaps.length > 0) && (
-                  <div className="mt-6 bg-amber-500/10 rounded-xl border border-amber-500/20 p-4">
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Zap className="w-4 h-4 text-amber-500 dark:text-[#FF9500]" />
-                        <span className="font-bold text-zinc-900 dark:text-white">
-                          QUICK ACTIONS:
+                  {/* Quick Actions (Cinema feature) */}
+                  {(stats.pending > 0 || gaps.length > 0) && (
+                    <div className="mt-6 bg-amber-500/10 rounded-xl border border-amber-500/20 p-4">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Zap className="w-4 h-4 text-amber-500 dark:text-[#FF9500]" />
+                          <span className="font-bold text-zinc-900 dark:text-white">
+                            QUICK ACTIONS:
+                          </span>
+                        </div>
+                        {stats.pending > 0 && (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => toast.success(`${stats.pending} confirmadas`)}
+                            className="whitespace-nowrap bg-[#0A84FF] hover:bg-[#0A84FF]/80"
+                          >
+                            Confirmar ({stats.pending})
+                          </Button>
+                        )}
+                        {gaps.length > 0 && (
+                          <Button
+                            variant="success"
+                            size="sm"
+                            onClick={() => toast.info('Llenar gaps')}
+                            className="whitespace-nowrap bg-[#34C759] hover:bg-[#34C759]/80"
+                          >
+                            Llenar {gaps.length} gaps
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* WEEK VIEW */}
+              {!isLoading && viewMode === 'week' && (
+                <div className="overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    {/* All Day section */}
+                    {/* Mobile: 3-day view */}
+                    <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] border-b border-zinc-200 dark:border-[#2C2C2E] mb-4">
+                      <div className="p-2">
+                        <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">
+                          Todo el día
                         </span>
                       </div>
-                      {stats.pending > 0 && (
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => toast.success(`${stats.pending} confirmadas`)}
-                          className="whitespace-nowrap bg-[#0A84FF] hover:bg-[#0A84FF]/80"
-                        >
-                          Confirmar ({stats.pending})
-                        </Button>
-                      )}
-                      {gaps.length > 0 && (
-                        <Button
-                          variant="success"
-                          size="sm"
-                          onClick={() => toast.info('Llenar gaps')}
-                          className="whitespace-nowrap bg-[#34C759] hover:bg-[#34C759]/80"
-                        >
-                          Llenar {gaps.length} gaps
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* WEEK VIEW */}
-            {!isLoading && viewMode === 'week' && (
-              <div className="overflow-x-auto">
-                <div className="min-w-[800px]">
-                  {/* All Day section */}
-                  {/* Mobile: 3-day view */}
-                  <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] border-b border-zinc-200 dark:border-[#2C2C2E] mb-4">
-                    <div className="p-2">
-                      <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">All Day</span>
-                    </div>
-                    {mobileWeekDays.map((day) => (
-                      <div
-                        key={day.date.toISOString()}
-                        className="border-l border-zinc-200 dark:border-[#2C2C2E] p-2 min-h-[40px]"
-                      />
-                    ))}
-                  </div>
-                  {/* Desktop: 7-day view */}
-                  <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] border-b border-zinc-200 dark:border-[#2C2C2E] mb-4">
-                    <div className="p-2">
-                      <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">All Day</span>
-                    </div>
-                    {weekDays.map((day) => (
-                      <div
-                        key={day.date.toISOString()}
-                        className="border-l border-zinc-200 dark:border-[#2C2C2E] p-2 min-h-[40px]"
-                      />
-                    ))}
-                  </div>
-
-                  {/* Day headers - Mobile: 3 days */}
-                  <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] mb-4">
-                    <div />
-                    {mobileWeekDays.map((day) => (
-                      <div
-                        key={day.date.toISOString()}
-                        className="text-center border-l border-zinc-200 dark:border-[#2C2C2E] py-2"
-                      >
+                      {mobileWeekDays.map((day) => (
                         <div
-                          className={`inline-flex items-center justify-center ${
-                            isSameDay(day.date, today)
-                              ? 'bg-red-500 dark:bg-[#FF3B30] text-white w-8 h-8 rounded-full font-bold'
-                              : 'text-zinc-500 dark:text-[#8E8E93]'
-                          }`}
-                        >
-                          <span className="text-sm">{format(day.date, 'd')}</span>
-                        </div>
-                        <div className="text-xs text-zinc-500 dark:text-[#8E8E93] mt-1">
-                          {format(day.date, 'EEE', { locale: es })}
-                        </div>
+                          key={day.date.toISOString()}
+                          className="border-l border-zinc-200 dark:border-[#2C2C2E] p-2 min-h-[40px]"
+                        />
+                      ))}
+                    </div>
+                    {/* Desktop: 7-day view */}
+                    <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] border-b border-zinc-200 dark:border-[#2C2C2E] mb-4">
+                      <div className="p-2">
+                        <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">
+                          Todo el día
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                  {/* Day headers - Desktop: 7 days */}
-                  <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] mb-4">
-                    <div />
-                    {weekDays.map((day) => (
-                      <div
-                        key={day.date.toISOString()}
-                        className="text-center border-l border-zinc-200 dark:border-[#2C2C2E] py-2"
-                      >
+                      {weekDays.map((day) => (
                         <div
-                          className={`inline-flex items-center justify-center ${
-                            isSameDay(day.date, today)
-                              ? 'bg-red-500 dark:bg-[#FF3B30] text-white w-8 h-8 rounded-full font-bold'
-                              : 'text-zinc-500 dark:text-[#8E8E93]'
-                          }`}
-                        >
-                          <span className="text-sm">{format(day.date, 'd')}</span>
-                        </div>
-                        <div className="text-xs text-zinc-500 dark:text-[#8E8E93] mt-1">
-                          {format(day.date, 'EEE', { locale: es })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                          key={day.date.toISOString()}
+                          className="border-l border-zinc-200 dark:border-[#2C2C2E] p-2 min-h-[40px]"
+                        />
+                      ))}
+                    </div>
 
-                  {/* Timeline grid - Mobile: 3 days */}
-                  <div className="relative lg:hidden">
-                    {/* Hour rows */}
-                    {Array.from({ length: 14 }).map((_, i) => {
-                      const hour = 7 + i
-                      return (
+                    {/* Day headers - Mobile: 3 days */}
+                    <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] mb-4">
+                      <div />
+                      {mobileWeekDays.map((day) => (
                         <div
-                          key={hour}
-                          className="grid grid-cols-[60px_repeat(3,1fr)] border-t border-zinc-200 dark:border-[#2C2C2E]"
-                          style={{ minHeight: '60px' }}
+                          key={day.date.toISOString()}
+                          className="text-center border-l border-zinc-200 dark:border-[#2C2C2E] py-2"
                         >
-                          {/* Hour label */}
-                          <div className="text-xs text-zinc-500 dark:text-[#8E8E93] text-right pr-2 pt-1">
-                            {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                          <div
+                            className={`inline-flex items-center justify-center ${
+                              isSameDay(day.date, today)
+                                ? 'bg-red-500 dark:bg-[#FF3B30] text-white w-8 h-8 rounded-full font-bold'
+                                : 'text-zinc-500 dark:text-[#8E8E93]'
+                            }`}
+                          >
+                            <span className="text-sm">{format(day.date, 'd')}</span>
                           </div>
-
-                          {/* Day columns */}
-                          {mobileWeekDays.map((day) => {
-                            const hourAppointments = day.appointments.filter((apt) => {
-                              const aptDate = parseISO(apt.scheduled_at)
-                              return isValid(aptDate) && aptDate.getHours() === hour
-                            })
-                            return (
-                              <div
-                                key={`${day.date.toISOString()}-${hour}`}
-                                className="border-l border-zinc-200 dark:border-[#2C2C2E] p-1 relative"
-                              >
-                                {hourAppointments.map((apt) => (
-                                  <div
-                                    key={apt.id}
-                                    onClick={() => setSelectedId(apt.id)}
-                                    className="bg-[#0A84FF]/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-[#0A84FF] transition-colors text-xs"
-                                  >
-                                    <div className="font-medium text-white truncate">
-                                      {apt.client?.name || 'Cliente'}
-                                    </div>
-                                    <div className="text-[11px] text-white/80 truncate">
-                                      {apt.service?.name || 'Servicio'}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )
-                    })}
-                  </div>
-                  {/* Timeline grid - Desktop: 7 days */}
-                  <div className="relative hidden lg:block">
-                    {/* Hour rows */}
-                    {Array.from({ length: 14 }).map((_, i) => {
-                      const hour = 7 + i
-                      return (
-                        <div
-                          key={hour}
-                          className="grid grid-cols-[60px_repeat(7,1fr)] border-t border-zinc-200 dark:border-[#2C2C2E]"
-                          style={{ minHeight: '60px' }}
-                        >
-                          {/* Hour label */}
-                          <div className="text-xs text-zinc-500 dark:text-[#8E8E93] text-right pr-2 pt-1">
-                            {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                          <div className="text-xs text-zinc-500 dark:text-[#8E8E93] mt-1">
+                            {format(day.date, 'EEE', { locale: es })}
                           </div>
-
-                          {/* Day columns */}
-                          {weekDays.map((day) => {
-                            const hourAppointments = day.appointments.filter((apt) => {
-                              const aptDate = parseISO(apt.scheduled_at)
-                              return isValid(aptDate) && aptDate.getHours() === hour
-                            })
-                            return (
-                              <div
-                                key={`${day.date.toISOString()}-${hour}`}
-                                className="border-l border-zinc-200 dark:border-[#2C2C2E] p-1 relative"
-                              >
-                                {hourAppointments.map((apt) => (
-                                  <div
-                                    key={apt.id}
-                                    onClick={() => setSelectedId(apt.id)}
-                                    className="bg-[#0A84FF]/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-[#0A84FF] transition-colors text-xs"
-                                  >
-                                    <div className="font-medium text-white truncate">
-                                      {apt.client?.name || 'Cliente'}
-                                    </div>
-                                    <div className="text-[11px] text-white/80 truncate">
-                                      {apt.service?.name || 'Servicio'}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )
-                          })}
                         </div>
-                      )
-                    })}
-
-                    {/* Current time indicator (Week view) */}
-                    {currentTime.getHours() >= 7 && currentTime.getHours() < 21 && (
-                      <div
-                        className="absolute inset-x-0 h-0.5 bg-red-500 dark:bg-[#FF3B30] z-20 pointer-events-none"
-                        style={{ top: `${currentTimePercent}%` }}
-                      >
-                        <div className="absolute left-0 w-2 h-2 bg-red-500 dark:bg-[#FF3B30] rounded-full -translate-y-1/2 animate-pulse" />
-                        <div className="absolute left-3 -translate-y-1/2 text-xs font-bold text-white bg-red-500 dark:bg-[#FF3B30] px-2 py-0.5 rounded shadow-sm">
-                          {format(currentTime, 'h:mm a')}
+                      ))}
+                    </div>
+                    {/* Day headers - Desktop: 7 days */}
+                    <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] mb-4">
+                      <div />
+                      {weekDays.map((day) => (
+                        <div
+                          key={day.date.toISOString()}
+                          className="text-center border-l border-zinc-200 dark:border-[#2C2C2E] py-2"
+                        >
+                          <div
+                            className={`inline-flex items-center justify-center ${
+                              isSameDay(day.date, today)
+                                ? 'bg-red-500 dark:bg-[#FF3B30] text-white w-8 h-8 rounded-full font-bold'
+                                : 'text-zinc-500 dark:text-[#8E8E93]'
+                            }`}
+                          >
+                            <span className="text-sm">{format(day.date, 'd')}</span>
+                          </div>
+                          <div className="text-xs text-zinc-500 dark:text-[#8E8E93] mt-1">
+                            {format(day.date, 'EEE', { locale: es })}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      ))}
+                    </div>
+
+                    {/* Timeline grid - Mobile: 3 days */}
+                    <div className="relative lg:hidden">
+                      {/* Hour rows */}
+                      {Array.from({ length: 14 }).map((_, i) => {
+                        const hour = 7 + i
+                        return (
+                          <div
+                            key={hour}
+                            className="grid grid-cols-[60px_repeat(3,1fr)] border-t border-zinc-200 dark:border-[#2C2C2E]"
+                            style={{ minHeight: '60px' }}
+                          >
+                            {/* Hour label */}
+                            <div className="text-xs text-zinc-500 dark:text-[#8E8E93] text-right pr-2 pt-1">
+                              {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                            </div>
+
+                            {/* Day columns */}
+                            {mobileWeekDays.map((day) => {
+                              const hourAppointments = day.appointments.filter((apt) => {
+                                const aptDate = parseISO(apt.scheduled_at)
+                                return isValid(aptDate) && aptDate.getHours() === hour
+                              })
+                              return (
+                                <div
+                                  key={`${day.date.toISOString()}-${hour}`}
+                                  className="border-l border-zinc-200 dark:border-[#2C2C2E] p-1 relative"
+                                >
+                                  {hourAppointments.map((apt) => (
+                                    <div
+                                      key={apt.id}
+                                      onClick={() => setSelectedId(apt.id)}
+                                      className="bg-[#0A84FF]/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-[#0A84FF] transition-colors text-xs"
+                                    >
+                                      <div className="font-medium text-white truncate">
+                                        {apt.client?.name || 'Cliente'}
+                                      </div>
+                                      <div className="text-[11px] text-white/80 truncate">
+                                        {apt.service?.name || 'Servicio'}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {/* Timeline grid - Desktop: 7 days */}
+                    <div className="relative hidden lg:block">
+                      {/* Hour rows */}
+                      {Array.from({ length: 14 }).map((_, i) => {
+                        const hour = 7 + i
+                        return (
+                          <div
+                            key={hour}
+                            className="grid grid-cols-[60px_repeat(7,1fr)] border-t border-zinc-200 dark:border-[#2C2C2E]"
+                            style={{ minHeight: '60px' }}
+                          >
+                            {/* Hour label */}
+                            <div className="text-xs text-zinc-500 dark:text-[#8E8E93] text-right pr-2 pt-1">
+                              {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                            </div>
+
+                            {/* Day columns */}
+                            {weekDays.map((day) => {
+                              const hourAppointments = day.appointments.filter((apt) => {
+                                const aptDate = parseISO(apt.scheduled_at)
+                                return isValid(aptDate) && aptDate.getHours() === hour
+                              })
+                              return (
+                                <div
+                                  key={`${day.date.toISOString()}-${hour}`}
+                                  className="border-l border-zinc-200 dark:border-[#2C2C2E] p-1 relative"
+                                >
+                                  {hourAppointments.map((apt) => (
+                                    <div
+                                      key={apt.id}
+                                      onClick={() => setSelectedId(apt.id)}
+                                      className="bg-[#0A84FF]/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-[#0A84FF] transition-colors text-xs"
+                                    >
+                                      <div className="font-medium text-white truncate">
+                                        {apt.client?.name || 'Cliente'}
+                                      </div>
+                                      <div className="text-[11px] text-white/80 truncate">
+                                        {apt.service?.name || 'Servicio'}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )
+                      })}
+
+                      {/* Current time indicator (Week view) */}
+                      {currentTime.getHours() >= 7 && currentTime.getHours() < 21 && (
+                        <div
+                          className="absolute inset-x-0 h-0.5 bg-red-500 dark:bg-[#FF3B30] z-20 pointer-events-none"
+                          style={{ top: `${currentTimePercent}%` }}
+                        >
+                          <div className="absolute left-0 w-2 h-2 bg-red-500 dark:bg-[#FF3B30] rounded-full -translate-y-1/2 animate-pulse" />
+                          <div className="absolute left-3 -translate-y-1/2 text-xs font-bold text-white bg-red-500 dark:bg-[#FF3B30] px-2 py-0.5 rounded shadow-sm">
+                            {format(currentTime, 'h:mm a')}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* MONTH VIEW */}
-            {!isLoading && viewMode === 'month' && (
-              <div>
-                {/* Weekday headers */}
-                <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-[#2C2C2E] mb-px">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div
-                      key={day}
-                      className="bg-white dark:bg-[#1C1C1E] text-center text-xs text-zinc-500 dark:text-[#8E8E93] py-2 font-medium"
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Calendar grid */}
-                <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-[#2C2C2E]">
-                  {monthDays.map((day) => (
-                    <motion.div
-                      key={day.date.toISOString()}
-                      onClick={() => {
-                        setSelectedDate(day.date)
-                        setViewMode('day')
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`bg-white dark:bg-[#1C1C1E] aspect-square p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#2C2C2E] transition-colors ${
-                        !day.isCurrentMonth ? 'opacity-30' : ''
-                      }`}
-                    >
+              {/* MONTH VIEW */}
+              {!isLoading && viewMode === 'month' && (
+                <div>
+                  {/* Weekday headers */}
+                  <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-[#2C2C2E] mb-px">
+                    {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
                       <div
-                        className={`inline-flex items-center justify-center ${
-                          isSameDay(day.date, today)
-                            ? 'bg-red-500 dark:bg-[#FF3B30] text-white w-6 h-6 rounded-full font-bold text-sm'
-                            : 'text-zinc-900 dark:text-white text-sm'
+                        key={day}
+                        className="bg-white dark:bg-[#1C1C1E] text-center text-xs text-zinc-500 dark:text-[#8E8E93] py-2 font-medium"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calendar grid */}
+                  <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-[#2C2C2E]">
+                    {monthDays.map((day) => (
+                      <motion.div
+                        key={day.date.toISOString()}
+                        onClick={() => {
+                          setSelectedDate(day.date)
+                          setViewMode('day')
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`bg-white dark:bg-[#1C1C1E] aspect-square p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-[#2C2C2E] transition-colors ${
+                          !day.isCurrentMonth ? 'opacity-30' : ''
                         }`}
                       >
-                        {format(day.date, 'd')}
-                      </div>
-
-                      {/* Event indicators (max 3 dots) */}
-                      {day.appointments.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {day.appointments.slice(0, 3).map((apt, i) => (
-                            <div
-                              key={i}
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                apt.status === 'completed'
-                                  ? 'bg-[#34C759]'
-                                  : apt.status === 'confirmed'
-                                    ? 'bg-[#0A84FF]'
-                                    : 'bg-[#FF9500]'
-                              }`}
-                            />
-                          ))}
-                          {day.appointments.length > 3 && (
-                            <div className="text-[11px] text-zinc-500 dark:text-[#8E8E93]">
-                              +{day.appointments.length - 3}
-                            </div>
-                          )}
+                        <div
+                          className={`inline-flex items-center justify-center ${
+                            isSameDay(day.date, today)
+                              ? 'bg-red-500 dark:bg-[#FF3B30] text-white w-6 h-6 rounded-full font-bold text-sm'
+                              : 'text-zinc-900 dark:text-white text-sm'
+                          }`}
+                        >
+                          {format(day.date, 'd')}
                         </div>
-                      )}
-                    </motion.div>
-                  ))}
+
+                        {/* Event indicators (max 3 dots) */}
+                        {day.appointments.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {day.appointments.slice(0, 3).map((apt, i) => (
+                              <div
+                                key={i}
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  apt.status === 'completed'
+                                    ? 'bg-[#34C759]'
+                                    : apt.status === 'confirmed'
+                                      ? 'bg-[#0A84FF]'
+                                      : 'bg-[#FF9500]'
+                                }`}
+                              />
+                            ))}
+                            {day.appointments.length > 3 && (
+                              <div className="text-[11px] text-zinc-500 dark:text-[#8E8E93]">
+                                +{day.appointments.length - 3}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </PullToRefresh>
         </div>
 
         {/* RIGHT SIDEBAR: Mini Calendar (macOS feature) - Hidden on mobile */}
@@ -1336,29 +1436,29 @@ function CitasCalendarFusionContent() {
               </button>
             </div>
 
-            {/* Fecha */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Fecha
-              </label>
-              <input
-                type="date"
-                value={formDate}
-                onChange={(e) => setSelectedDate(new Date(e.target.value + 'T12:00:00'))}
-                className="w-full h-12 px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 dark:[color-scheme:dark]"
-              />
-            </div>
-
-            {/* Hora */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Hora
-              </label>
-              <TimePickerTrigger
-                value={createForm.time || '09:00'}
-                onClick={() => setIsTimePickerOpen(true)}
-                className="w-full h-12 justify-start px-4 text-base bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
-              />
+            {/* Fecha y Hora - Compact horizontal grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Fecha
+                </label>
+                <DatePickerTrigger
+                  value={selectedDate}
+                  onChange={setSelectedDate}
+                  label="Fecha"
+                  className="w-full h-12 justify-start px-3 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Hora
+                </label>
+                <TimePickerTrigger
+                  value={createForm.time || '09:00'}
+                  onClick={() => setIsTimePickerOpen(true)}
+                  className="w-full h-12 justify-start px-3 text-sm bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
+                />
+              </div>
             </div>
 
             {/* Notas (opcional) */}

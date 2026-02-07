@@ -47,7 +47,7 @@ import {
   getRoleBadgeColor,
   getRoleLabel,
   type MockBarber,
-} from './demos/mock-data'
+} from './mock-data'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { animations } from '@/lib/design-system'
@@ -126,7 +126,7 @@ export default function BarberosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4 pb-24 md:p-6 md:pb-24 lg:p-8 lg:pb-6 relative overflow-hidden">
+    <div className="-mx-4 -mt-6 sm:-mx-6 lg:mx-0 lg:mt-0 min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 lg:p-8 lg:pb-6 relative overflow-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
@@ -156,37 +156,29 @@ export default function BarberosPage() {
           className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl"
         />
       </div>
-      <div className="lg:max-w-[1600px] lg:mx-auto space-y-6 relative z-10">
+      <div className="px-4 pt-4 sm:px-6 lg:px-0 lg:pt-0 lg:max-w-[1600px] lg:mx-auto space-y-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-2"
         >
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center">
-                <LayoutGrid className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  Barberos
-                </h1>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  Visual CRM • Vistas flexibles con visualizaciones ricas
-                </p>
-              </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Barberos
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                {processedBarbers.length} activos
+              </p>
             </div>
-            {/* Add Barber Button - visible on all sizes */}
             <Button
               onClick={() => setIsAddBarberOpen(true)}
-              variant="gradient"
-              size="md"
-              className="gap-2 px-3 md:px-5"
               data-testid="add-barber-btn"
+              className="shrink-0 min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 border-0"
             >
-              <Plus className="h-5 w-5" />
-              <span className="hidden md:inline">Agregar Barbero</span>
+              <Plus className="h-5 w-5 sm:mr-2" />
+              <span className="hidden sm:inline">Nuevo Barbero</span>
             </Button>
           </div>
         </motion.div>
@@ -196,7 +188,7 @@ export default function BarberosPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800 shadow-sm"
+          className="lg:bg-white lg:dark:bg-zinc-900 lg:rounded-2xl lg:p-4 lg:border lg:border-zinc-200 lg:dark:border-zinc-800 lg:shadow-sm space-y-3"
         >
           {/* Search */}
           <div className="relative mb-4">
@@ -213,10 +205,10 @@ export default function BarberosPage() {
           {/* View Switcher - Desktop */}
           <div className="hidden md:flex items-center gap-2">
             {[
-              { value: 'cards', label: 'Cards', icon: LayoutGrid },
-              { value: 'table', label: 'Table', icon: Table2 },
-              { value: 'leaderboard', label: 'Leaderboard', icon: Trophy },
-              { value: 'calendar', label: 'Calendar', icon: CalendarIcon },
+              { value: 'cards', label: 'Tarjetas', icon: LayoutGrid },
+              { value: 'table', label: 'Tabla', icon: Table2 },
+              { value: 'leaderboard', label: 'Ranking', icon: Trophy },
+              { value: 'calendar', label: 'Calendario', icon: CalendarIcon },
             ].map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
@@ -236,10 +228,10 @@ export default function BarberosPage() {
           {/* View Switcher - Mobile (inline, horizontal scroll) */}
           <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
             {[
-              { value: 'cards', label: 'Cards', icon: LayoutGrid },
-              { value: 'table', label: 'Table', icon: Table2 },
-              { value: 'leaderboard', label: 'Leaderboard', icon: Trophy },
-              { value: 'calendar', label: 'Calendar', icon: CalendarIcon },
+              { value: 'cards', label: 'Tarjetas', icon: LayoutGrid },
+              { value: 'table', label: 'Tabla', icon: Table2 },
+              { value: 'leaderboard', label: 'Ranking', icon: Trophy },
+              { value: 'calendar', label: 'Calendario', icon: CalendarIcon },
             ].map(({ value, label, icon: Icon }) => (
               <button
                 key={value}

@@ -135,7 +135,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </main>
 
           {/* Mobile bottom navigation */}
-          <BottomNav />
+          <BottomNav isAdmin={isAdmin} />
 
           {/* Tour tooltip overlay */}
           <TourTooltip />

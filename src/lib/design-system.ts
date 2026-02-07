@@ -155,3 +155,15 @@ export const glass = {
   subtle: 'bg-white/50 backdrop-blur-md dark:bg-zinc-900/50',
   prominent: 'bg-white/80 backdrop-blur-2xl dark:bg-zinc-900/80',
 } as const
+
+// Reduced motion support
+export const reducedMotion = {
+  // Replacement springs for reduced motion - instant transitions
+  spring: {
+    gentle: { duration: 0.01 },
+    default: { duration: 0.01 },
+    snappy: { duration: 0.01 },
+    sheet: { duration: 0.15 }, // keep minimal for sheets
+    bouncy: { duration: 0.01 },
+  },
+} as const

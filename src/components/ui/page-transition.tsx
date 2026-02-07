@@ -1,9 +1,9 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { animations } from '@/lib/design-system'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -35,16 +35,27 @@ const variants = {
 
 export function PageTransition({ children, variant = 'fade' }: PageTransitionProps) {
   const pathname = usePathname()
+  const prefersReducedMotion = useReducedMotion()
   const selectedVariant = variants[variant]
+
+  // For reduced motion: only use opacity, no translate or scale
+  const reducedVariant = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  }
+
+  const finalVariant = prefersReducedMotion ? reducedVariant : selectedVariant
+  const transition = prefersReducedMotion ? { duration: 0.1 } : animations.spring.snappy
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
-        initial={selectedVariant.initial}
-        animate={selectedVariant.animate}
-        exit={selectedVariant.exit}
-        transition={animations.spring.snappy}
+        initial={finalVariant.initial}
+        animate={finalVariant.animate}
+        exit={finalVariant.exit}
+        transition={transition}
       >
         {children}
       </motion.div>
@@ -60,6 +71,12 @@ interface StaggerContainerProps {
 }
 
 export function StaggerContainer({ children, className, delay = 0.05 }: StaggerContainerProps) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       className={className}
@@ -79,6 +96,12 @@ export function StaggerContainer({ children, className, delay = 0.05 }: StaggerC
 }
 
 export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       className={className}
@@ -104,6 +127,12 @@ interface RevealOnScrollProps {
 }
 
 export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrollProps) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       className={className}

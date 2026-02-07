@@ -111,3 +111,19 @@ export function vibrate(pattern: number | number[] = 50) {
 
   return navigator.vibrate(pattern)
 }
+
+/**
+ * Semantic haptic feedback patterns for common UI interactions
+ */
+export const haptics = {
+  /** Light tap feedback for button presses */
+  tap: () => vibrate(10),
+  /** Success confirmation (form submit, action complete) */
+  success: () => vibrate([10, 30, 10]),
+  /** Warning/attention (destructive action confirmation) */
+  warning: () => vibrate([20, 50, 20]),
+  /** Error feedback */
+  error: () => vibrate(40),
+  /** Selection change (picker wheel, toggle) */
+  selection: () => vibrate(5),
+}

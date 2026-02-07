@@ -33,6 +33,7 @@ const morePages = [
   '/lealtad/configuracion',
   '/barberos',
   '/suscripcion',
+  '/changelog',
   '/configuracion',
 ]
 
@@ -42,7 +43,11 @@ const quickActions = [
   { name: 'Nuevo Servicio', href: '/servicios', icon: LayoutGrid, action: 'create-service' },
 ]
 
-export function BottomNav() {
+interface BottomNavProps {
+  isAdmin?: boolean
+}
+
+export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
@@ -258,7 +263,7 @@ export function BottomNav() {
                   </h3>
                   <button
                     onClick={() => setIsQuickActionOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-700"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-700 min-w-[44px] min-h-[44px]"
                     aria-label="Cerrar"
                   >
                     <X className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
@@ -288,7 +293,7 @@ export function BottomNav() {
       </AnimatePresence>
 
       {/* More Menu Drawer */}
-      <MoreMenuDrawer isOpen={isMoreOpen} onClose={() => setIsMoreOpen(false)} />
+      <MoreMenuDrawer isOpen={isMoreOpen} onClose={() => setIsMoreOpen(false)} isAdmin={isAdmin} />
     </>
   )
 }

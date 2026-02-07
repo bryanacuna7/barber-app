@@ -1,9 +1,9 @@
 'use client'
 
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, AnimatePresence, type Variants, useReducedMotion } from 'framer-motion'
 import { forwardRef, type ReactNode, type ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
-import { animations } from '@/lib/design-system'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 // Re-export design system springs as convenience aliases
 export const springTransition = animations.spring.snappy
@@ -19,6 +19,12 @@ export function FadeInUp({
   delay?: number
   className?: string
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -41,6 +47,12 @@ export function StaggeredList({
   className?: string
   staggerDelay?: number
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial="hidden"
@@ -70,6 +82,12 @@ export function StaggeredItem({
   className?: string
   index?: number
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       variants={{
@@ -96,11 +114,13 @@ interface PressableProps extends ComponentProps<typeof motion.button> {
 
 export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(
   ({ children, scale = 0.97, className, ...props }, ref) => {
+    const prefersReducedMotion = useReducedMotion()
+
     return (
       <motion.button
         ref={ref}
-        whileTap={{ scale }}
-        transition={{ duration: 0.1 }}
+        whileTap={prefersReducedMotion ? {} : { scale }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.1 }}
         className={cn('cursor-pointer', className)}
         {...props}
       >
@@ -143,6 +163,22 @@ export function PageTransition({
   children: ReactNode
   className?: string
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.1 }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}

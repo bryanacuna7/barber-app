@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  const themeColor = business.brand_primary_color || '#007AFF'
+  const themeColor = business.brand_primary_color || '#27272A'
 
   const manifest = {
     name: business.name,

@@ -497,7 +497,8 @@ export default function ConfiguracionPage() {
                       <button
                         type="button"
                         onClick={() => setOpenSheet(null)}
-                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                        aria-label="Cerrar"
+                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-w-[44px] min-h-[44px]"
                       >
                         <X className="h-5 w-5 text-zinc-500" />
                       </button>
@@ -667,7 +668,8 @@ export default function ConfiguracionPage() {
                       <button
                         type="button"
                         onClick={() => setOpenSheet(null)}
-                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                        aria-label="Cerrar"
+                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-w-[44px] min-h-[44px]"
                       >
                         <X className="h-5 w-5 text-zinc-500" />
                       </button>
@@ -859,7 +861,8 @@ export default function ConfiguracionPage() {
                       <button
                         type="button"
                         onClick={() => setOpenSheet(null)}
-                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                        aria-label="Cerrar"
+                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-w-[44px] min-h-[44px]"
                       >
                         <X className="h-5 w-5 text-zinc-500" />
                       </button>
@@ -1128,7 +1131,8 @@ export default function ConfiguracionPage() {
                       <button
                         type="button"
                         onClick={() => setOpenSheet(null)}
-                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                        aria-label="Cerrar"
+                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-w-[44px] min-h-[44px]"
                       >
                         <X className="h-5 w-5 text-zinc-500" />
                       </button>

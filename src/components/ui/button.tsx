@@ -4,6 +4,7 @@ import { forwardRef, type ButtonHTMLAttributes, useState, MouseEvent } from 'rea
 import { motion, type HTMLMotionProps } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
+import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { Loader2 } from 'lucide-react'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -38,6 +39,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Ripple effect on click
     const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+      // Haptic feedback for primary actions on mobile
+      if (
+        isMobileDevice() &&
+        (variant === 'primary' || variant === 'gradient' || variant === 'danger')
+      ) {
+        haptics.tap()
+      }
+
       if (withRipple && !disabled && !isLoading) {
         const rect = e.currentTarget.getBoundingClientRect()
         const x = e.clientX - rect.left

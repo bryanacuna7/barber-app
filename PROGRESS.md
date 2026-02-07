@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-08 (Session 138 - AUDIT.md Gap Analysis + Implementation)
+- **Last Updated:** 2026-02-08 (Session 139 - Progress Save + Demo Cleanup)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Audit Remediation Complete, QA Pass Pending
+- **Current Phase:** Major cleanup done, pending commit (84 files, -27K lines)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 - **Supabase Project:** `zanywefnobtzhoeuoyuc` (new, migrated from `bwelkcqqzkiiaxrkoslb`)
 
@@ -60,6 +60,48 @@
 ---
 
 ## Recent Sessions
+
+### Session 139: Progress Save + Uncommitted State Snapshot (2026-02-08)
+
+**Status:** Snapshot — large uncommitted diff pending commit
+
+**Uncommitted Changes (84 files, -27,330 lines / +962 lines):**
+
+**Major cleanup — deleted ~35 demo/preview/test pages:**
+
+- All `demos/` folders under citas, clientes, barberos, servicios, analiticas, configuracion, mi-dia
+- Test pages: `test-errors`, `test-gradient-header`, `test-kpi-card`, `test-mesh-gradient`, `test-realtime`, `test-sortable-table`
+- Preview pages: `admin-referencias-preview`, `referencias-preview`, `components-demo`
+- Demo pages: `demo/mi-dia`
+- Stale env examples: `.env.local.example`, `.env.test.example`
+- Python `__pycache__` files from ui-ux-pro-max skill
+
+**Modified core files (from Session 138 audit + this session):**
+
+- 5 dashboard pages: citas, clientes, servicios, barberos, configuracion (Button migration, design tokens, whileTap, Create Intent)
+- UI components: bottom-nav, more-menu-drawer, sidebar, sheet, button, motion, page-transition
+- Analytics charts: revenue-chart.tsx, services-chart.tsx (mobile-first redesign)
+- Design system: design-system.ts, theme.ts, globals.css
+- Utils: mobile.ts, settings adapter
+- API: pwa/icon route, public manifest route
+- DB: 003_branding.sql minor fix
+
+**New files (untracked):**
+
+- `src/components/ui/ios-date-picker.tsx` — Custom date picker replacing native input
+- `src/components/ui/swipeable-row.tsx` — Swipe gesture component for list items
+- `src/lib/cache.ts` — SWR caching utility
+- `src/lib/changelog.ts` — Changelog data
+- `src/app/(dashboard)/changelog/` — Changelog page
+- `src/app/(dashboard)/barberos/mock-data.ts` — Barberos mock data
+- `supabase/full_schema.sql` — Full concatenated schema
+- `supabase/schema_part1_core.sql`, `schema_part2_features.sql`, `schema_part3_fixes_rbac.sql` — Split schema files
+- `supabase/seed_bryan_business.sql` — Seed data for Bryan's business
+- `AUDIT.md` — Mobile UX audit document
+
+**Next:** Commit this as 1-2 commits (cleanup + feature work), then continue remaining audit items
+
+---
 
 ### Session 138: AUDIT.md Gap Analysis + Full Implementation (2026-02-08)
 
@@ -330,13 +372,14 @@ Sessions 124-132 covered: Phase 1+2 commits (38 files), Clientes/Citas/Servicios
 
 ### Next Session
 
-1. **Remaining audit items** — Date picker, pull-to-refresh, swipe gestures, charts mobile, Spanish copy, card padre
-2. **QA Pass** — 360px visual verification + dark mode full pass
-3. **Commit pending changes** — Session 138 work (10 files modified)
+1. **COMMIT PENDING CHANGES** — 84 files changed (demo cleanup + audit remediation). Split into cleanup commit + feature commit
+2. **Remaining audit items** — Date picker migration, pull-to-refresh, swipe gestures, charts mobile-first, Spanish copy audit, card padre removal
+3. **QA Pass** — 360px visual verification + dark mode full pass
+4. **New components to integrate** — ios-date-picker.tsx, swipeable-row.tsx, cache.ts
 
 ---
 
-**Last Update:** Session 138 (2026-02-08)
-**Recent:** ✅ AUDIT.md gap analysis + 10 tasks implemented (Button migration, design tokens, Create Intent, whileTap)
-**Status:** Audit critical gaps closed, remaining items are polish-level
-**Next:** Commit + remaining audit items (date picker, gestures, charts) or QA pass
+**Last Update:** Session 139 (2026-02-08)
+**Recent:** Progress save — 84 files uncommitted (demo cleanup -27K lines + audit remediation)
+**Status:** Major cleanup + audit gaps closed, ALL UNCOMMITTED
+**Next:** Commit (cleanup + features), then remaining audit items (date picker, gestures, charts) or QA pass

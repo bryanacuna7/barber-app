@@ -30,7 +30,7 @@ export interface ThemeVars {
 }
 
 export function generateThemeVars(primaryColor: string, secondaryColor?: string | null): ThemeVars {
-  const rgb = hexToRgb(primaryColor) || { r: 0, g: 122, b: 255 }
+  const rgb = hexToRgb(primaryColor) || { r: 39, g: 39, b: 42 }
 
   return {
     '--brand-primary': primaryColor,
@@ -59,4 +59,4 @@ export function applyThemeToElement(
   }
 }
 
-export const DEFAULT_BRAND_COLOR = '#007AFF'
+export const DEFAULT_BRAND_COLOR = '#27272A'

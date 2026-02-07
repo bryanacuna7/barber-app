@@ -298,11 +298,11 @@ function AnalyticsContent() {
             </TabsList>
 
             <TabsContent value="revenue">
-              <RevenueChart data={analytics.revenueSeries} period={period} />
+              <RevenueChart data={analytics.revenueSeries} period={period} height={200} />
             </TabsContent>
 
             <TabsContent value="services">
-              <ServicesChart data={analytics.services} period={period} />
+              <ServicesChart data={analytics.services} period={period} height={200} />
             </TabsContent>
 
             <TabsContent value="barbers">
@@ -314,12 +314,12 @@ function AnalyticsContent() {
         {/* Desktop: Original Layout */}
         <div className="hidden md:block space-y-6">
           <FadeInUp delay={0.2}>
-            <RevenueChart data={analytics.revenueSeries} period={period} />
+            <RevenueChart data={analytics.revenueSeries} period={period} height={300} />
           </FadeInUp>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <FadeInUp delay={0.3}>
-              <ServicesChart data={analytics.services} period={period} />
+              <ServicesChart data={analytics.services} period={period} height={300} />
             </FadeInUp>
             <FadeInUp delay={0.4}>
               <BarbersLeaderboard data={analytics.barbers} period={period} />
