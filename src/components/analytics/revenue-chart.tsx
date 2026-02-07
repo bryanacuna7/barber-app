@@ -15,9 +15,12 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  type TooltipProps,
 } from 'recharts'
+import { type NameType, type ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { ChartTooltip } from '@/components/analytics/chart-tooltip'
 
 interface RevenueChartProps {
   data: Array<{
@@ -31,7 +34,14 @@ interface RevenueChartProps {
 }
 
 function useChartColors() {
-  const [colors, setColors] = useState({ accent: '#6d7cff', grid: '#e5e7eb', axis: '#9ca3af' })
+  const [colors, setColors] = useState({
+    accent: '#6d7cff',
+    grid: '#e5e7eb',
+    axis: '#9ca3af',
+    tooltipBg: 'rgba(18, 22, 30, 0.86)',
+    tooltipBorder: 'rgba(163, 175, 196, 0.16)',
+    tooltipText: '#f5f7fb',
+  })
   useEffect(() => {
     const update = () => {
       const root = document.documentElement
@@ -48,6 +58,9 @@ function useChartColors() {
         accent: readableAccent || s.getPropertyValue('--brand-primary').trim() || '#6d7cff',
         grid: s.getPropertyValue('--chart-grid').trim() || '#e5e7eb',
         axis: s.getPropertyValue('--chart-axis').trim() || '#9ca3af',
+        tooltipBg: isDarkTheme ? 'rgba(18, 22, 30, 0.86)' : 'rgba(255, 255, 255, 0.96)',
+        tooltipBorder: isDarkTheme ? 'rgba(163, 175, 196, 0.16)' : 'rgba(15, 23, 42, 0.12)',
+        tooltipText: isDarkTheme ? '#f5f7fb' : '#0f172a',
       })
     }
 
@@ -63,6 +76,24 @@ function useChartColors() {
     }
   }, [])
   return colors
+}
+
+function RevenueTooltip({
+  active,
+  payload,
+  label,
+  tone,
+}: TooltipProps<ValueType, NameType> & {
+  tone: { bg: string; border: string; text: string }
+}) {
+  if (!active || !payload?.length) return null
+
+  const rawValue = payload[0]?.value
+  const value = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0)
+  const formatted = `₡${value.toLocaleString()}`
+  const resolvedLabel = typeof label === 'string' ? label : String(label ?? '')
+
+  return <ChartTooltip label={resolvedLabel} metricLabel="Ingresos" value={formatted} tone={tone} />
 }
 
 export function RevenueChart({ data, period, height }: RevenueChartProps) {
@@ -186,33 +217,21 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
               width={52}
             />
             <Tooltip
-              formatter={(value: number) => [formatCurrency(value, false), 'Ingresos']}
+              content={
+                <RevenueTooltip
+                  tone={{
+                    bg: chart.tooltipBg,
+                    border: chart.tooltipBorder,
+                    text: chart.tooltipText,
+                  }}
+                />
+              }
               labelFormatter={(
                 label: string,
                 payload: readonly { payload?: { desktopLabel?: string } }[]
               ) => {
                 const datum = payload?.[0]?.payload
                 return datum?.desktopLabel ?? label
-              }}
-              contentStyle={{
-                backgroundColor: 'var(--chart-tooltip-bg)',
-                border: '1px solid var(--chart-tooltip-border)',
-                borderRadius: '10px',
-                fontSize: '13px',
-                padding: '10px 12px',
-                color: 'var(--chart-tooltip-text)',
-                boxShadow: '0 10px 28px rgba(0, 0, 0, 0.35)',
-              }}
-              labelStyle={{
-                color: 'var(--chart-tooltip-text)',
-                fontSize: '13px',
-                fontWeight: 600,
-                marginBottom: '4px',
-              }}
-              itemStyle={{
-                color: 'var(--chart-tooltip-text)',
-                fontSize: '13px',
-                fontWeight: 500,
               }}
               cursor={{
                 stroke: chart.accent,

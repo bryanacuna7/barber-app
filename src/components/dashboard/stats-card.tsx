@@ -66,6 +66,9 @@ export function StatsCard({
 }: StatsCardProps) {
   const styles = variants[variant]
   const isGradient = styles.gradient
+  const valueText = typeof value === 'number' ? value.toLocaleString('es-CR') : String(value)
+  const hasLongValue = valueText.length >= 10
+  const hasVeryLongValue = valueText.length >= 13
 
   return (
     <motion.div
@@ -79,7 +82,7 @@ export function StatsCard({
       }}
       whileHover={{ y: -4, scale: 1.01, transition: { duration: 0.2 } }}
       className={cn(
-        'relative overflow-hidden rounded-2xl p-4 sm:p-5',
+        'relative overflow-hidden rounded-2xl p-3.5 sm:p-5',
         'transition-all duration-300',
         styles.bg,
         styles.shadow,
@@ -99,11 +102,11 @@ export function StatsCard({
         </>
       )}
 
-      <div className="relative flex items-start justify-between gap-3">
+      <div className="relative flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
           <p
             className={cn(
-              'text-sm font-medium uppercase tracking-wide truncate',
+              'text-[11px] sm:text-sm font-medium uppercase tracking-[0.08em] sm:tracking-wide leading-tight',
               isGradient ? 'text-white/80' : 'text-muted'
             )}
           >
@@ -116,7 +119,12 @@ export function StatsCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             className={cn(
-              'mt-1.5 text-[28px] sm:text-[32px] font-bold tracking-tight truncate',
+              'mt-1.5 font-bold tracking-tight leading-[1.05] [overflow-wrap:anywhere]',
+              hasVeryLongValue
+                ? 'text-[20px] sm:text-[28px]'
+                : hasLongValue
+                  ? 'text-[22px] sm:text-[30px]'
+                  : 'text-[26px] sm:text-[32px]',
               isGradient ? 'text-white' : 'text-zinc-900 dark:text-white'
             )}
           >
@@ -126,7 +134,7 @@ export function StatsCard({
           {description && (
             <p
               className={cn(
-                'mt-0.5 text-sm truncate',
+                'mt-0.5 text-xs sm:text-sm leading-tight',
                 isGradient ? 'text-white/70' : 'text-zinc-400 dark:text-zinc-500'
               )}
             >
@@ -155,12 +163,12 @@ export function StatsCard({
 
         <div
           className={cn(
-            'flex h-11 w-11 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl',
+            'flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl',
             styles.iconBg,
             isGradient && 'ring-4 ring-white/10'
           )}
         >
-          <Icon className={cn('h-5 w-5 sm:h-6 sm:w-6', styles.iconColor)} />
+          <Icon className={cn('h-4 w-4 sm:h-6 sm:w-6', styles.iconColor)} />
         </div>
       </div>
 

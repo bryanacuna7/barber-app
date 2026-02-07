@@ -5,6 +5,7 @@ export {
   formatDateTime,
   formatRelative,
   formatCurrency,
+  formatCurrencyCompactMillions,
   formatCurrencyCompact,
   formatPhone,
 } from './format'

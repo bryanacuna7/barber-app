@@ -16,9 +16,12 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   Cell,
+  type TooltipProps,
 } from 'recharts'
+import { type NameType, type ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Scissors } from 'lucide-react'
+import { ChartTooltip } from '@/components/analytics/chart-tooltip'
 
 interface ServicesChartProps {
   data: Array<{
@@ -32,13 +35,38 @@ interface ServicesChartProps {
   height?: number
 }
 
+function toRgbChannels(color: string, fallback: string): string {
+  const hex = color.trim().match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i)
+  if (hex) {
+    return `${parseInt(hex[1], 16)}, ${parseInt(hex[2], 16)}, ${parseInt(hex[3], 16)}`
+  }
+
+  const rgb = color
+    .trim()
+    .match(/^rgba?\(\s*(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})(?:[\s,\/]+[\d.]+)?\s*\)$/i)
+  if (rgb) {
+    return `${rgb[1]}, ${rgb[2]}, ${rgb[3]}`
+  }
+
+  return fallback
+}
+
 function useChartColors() {
   const [colors, setColors] = useState({
     accent: '#6d7cff',
     grid: '#e5e7eb',
     axis: '#9ca3af',
     winner: '#f59e0b',
-    bars: ['#808899', '#727b8d', '#656f82', '#596376'],
+    winnerRgb: '245, 158, 11',
+    bars: [
+      'rgba(109, 124, 255, 0.72)',
+      'rgba(109, 124, 255, 0.56)',
+      'rgba(109, 124, 255, 0.42)',
+      'rgba(109, 124, 255, 0.32)',
+    ],
+    tooltipBg: 'rgba(18, 22, 30, 0.76)',
+    tooltipBorder: 'rgba(163, 175, 196, 0.16)',
+    tooltipText: '#f5f7fb',
   })
   useEffect(() => {
     const update = () => {
@@ -51,15 +79,24 @@ function useChartColors() {
           ? s.getPropertyValue('--brand-primary-on-dark')
           : s.getPropertyValue('--brand-primary-on-light')
       ).trim()
+      const brandRgb = s.getPropertyValue('--brand-primary-rgb').trim() || '109, 124, 255'
+      const winner = s.getPropertyValue('--color-warning').trim() || '#f59e0b'
 
       setColors({
         accent: readableAccent || s.getPropertyValue('--brand-primary').trim() || '#6d7cff',
         grid: s.getPropertyValue('--chart-grid').trim() || '#e5e7eb',
         axis: s.getPropertyValue('--chart-axis').trim() || '#9ca3af',
-        winner: s.getPropertyValue('--color-warning').trim() || '#f59e0b',
-        bars: isDarkTheme
-          ? ['#8a93a5', '#7c8699', '#6f798d', '#626d82']
-          : ['#6f7a8f', '#7f8a9f', '#8f9aae', '#9fa9bc'],
+        winner,
+        winnerRgb: toRgbChannels(winner, '245, 158, 11'),
+        bars: [
+          `rgba(${brandRgb}, 0.72)`,
+          `rgba(${brandRgb}, 0.56)`,
+          `rgba(${brandRgb}, 0.42)`,
+          `rgba(${brandRgb}, 0.32)`,
+        ],
+        tooltipBg: isDarkTheme ? 'rgba(18, 22, 30, 0.76)' : 'rgba(255, 255, 255, 0.9)',
+        tooltipBorder: isDarkTheme ? 'rgba(163, 175, 196, 0.16)' : 'rgba(15, 23, 42, 0.12)',
+        tooltipText: isDarkTheme ? '#f5f7fb' : '#0f172a',
       })
     }
 
@@ -75,6 +112,24 @@ function useChartColors() {
     }
   }, [])
   return colors
+}
+
+function ServicesTooltip({
+  active,
+  payload,
+  label,
+  tone,
+}: TooltipProps<ValueType, NameType> & {
+  tone: { bg: string; border: string; text: string }
+}) {
+  if (!active || !payload?.length) return null
+
+  const rawValue = payload[0]?.value
+  const value = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0)
+  const formatted = `₡${value.toLocaleString()}`
+  const resolvedLabel = typeof label === 'string' ? label : String(label ?? '')
+
+  return <ChartTooltip label={resolvedLabel} metricLabel="Ingresos" value={formatted} tone={tone} />
 }
 
 export function ServicesChart({ data, period, height }: ServicesChartProps) {
@@ -137,26 +192,22 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                 axisLine={false}
               />
               <Tooltip
-                formatter={(value: number, name: string) => {
-                  if (name === 'revenue') return [formatCurrency(value, false), 'Ingresos']
-                  return [value, 'Reservas']
-                }}
-                contentStyle={{
-                  backgroundColor: 'var(--chart-tooltip-bg)',
-                  border: '1px solid var(--chart-tooltip-border)',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  padding: '10px 12px',
-                  color: 'var(--chart-tooltip-text)',
-                }}
+                content={
+                  <ServicesTooltip
+                    tone={{
+                      bg: chart.tooltipBg,
+                      border: chart.tooltipBorder,
+                      text: chart.tooltipText,
+                    }}
+                  />
+                }
                 cursor={{ fill: `${chart.accent}1f` }}
               />
               <Bar dataKey="revenue" radius={[0, 9, 9, 0]}>
                 {topServices.map((_, idx) => (
                   <Cell
                     key={`service-bar-${idx}`}
-                    fill={idx === 0 ? chart.winner : (chart.bars[idx - 1] ?? chart.axis)}
-                    fillOpacity={idx === 0 ? 0.95 : 0.82}
+                    fill={idx === 0 ? chart.winner : (chart.bars[idx - 1] ?? chart.accent)}
                   />
                 ))}
               </Bar>
@@ -178,12 +229,13 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                     style={{
                       backgroundColor:
                         idx === 0
-                          ? 'rgba(245, 158, 11, 0.18)'
+                          ? `rgba(${chart.winnerRgb}, 0.18)`
                           : `rgba(var(--brand-primary-rgb), ${(barOpacities[idx] ?? 0.2) * 0.15})`,
                       color:
                         idx === 0
-                          ? 'rgb(245, 158, 11)'
+                          ? chart.winner
                           : `rgba(var(--brand-primary-rgb), ${barOpacities[idx] ?? 0.2})`,
+                      border: idx === 0 ? `1px solid rgba(${chart.winnerRgb}, 0.36)` : 'none',
                     }}
                   >
                     {idx + 1}

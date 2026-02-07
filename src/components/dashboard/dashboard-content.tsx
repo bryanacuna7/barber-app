@@ -3,7 +3,7 @@
 import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard } from 'lucide-react'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { formatCurrency, formatTime } from '@/lib/utils'
+import { formatCurrencyCompactMillions, formatTime } from '@/lib/utils'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { DashboardTourWrapper } from '@/components/tours/dashboard-tour-wrapper'
@@ -79,8 +79,8 @@ export function DashboardContent() {
         <div data-tour="dashboard-stats">
           <DashboardStats
             todayAppointments={stats.todayAppointments}
-            todayRevenue={formatCurrency(stats.todayRevenue)}
-            monthRevenue={formatCurrency(stats.monthRevenue)}
+            todayRevenue={formatCurrencyCompactMillions(stats.todayRevenue)}
+            monthRevenue={formatCurrencyCompactMillions(stats.monthRevenue)}
             monthAppointments={stats.monthAppointments}
             totalClients={stats.totalClients}
           />
