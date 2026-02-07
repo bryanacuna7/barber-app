@@ -16,7 +16,9 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('businesses')
-    .select('*')
+    .select(
+      'id, name, slug, owner_id, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_secondary_color, is_active, created_at, updated_at'
+    )
     .eq('owner_id', user.id)
     .single()
 

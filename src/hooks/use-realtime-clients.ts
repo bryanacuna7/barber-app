@@ -55,8 +55,29 @@ export function useRealtimeClients({
   useEffect(() => {
     if (!enabled || !businessId) return
 
+    const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
 
+    // If realtime is disabled, use polling immediately
+    if (!enableRealtime) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Realtime disabled - using polling mode for clients')
+      }
+      pollingIntervalRef.current = setInterval(() => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🔄 Polling clients (dev mode)')
+        }
+        invalidateQueries.afterClientChange(queryClient)
+      }, pollingInterval)
+
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current)
+        }
+      }
+    }
+
+    // Realtime enabled - subscribe to WebSocket
     // Subscribe to client changes for this business
     const channel = supabase
       .channel(`clients-${businessId}`)

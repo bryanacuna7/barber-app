@@ -22,10 +22,7 @@ interface UseRealtimeServicesOptions {
   onError?: (error: Error) => void
 }
 
-export function useRealtimeServices({
-  businessId,
-  enabled = true,
-}: UseRealtimeServicesOptions) {
+export function useRealtimeServices({ businessId, enabled = true }: UseRealtimeServicesOptions) {
   const queryClient = useQueryClient()
   const [status, setStatus] = useState<RealtimeStatus>('CONNECTING')
   const [isPolling, setIsPolling] = useState(false)
@@ -53,6 +50,26 @@ export function useRealtimeServices({
       return
     }
 
+    const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
+
+    // If realtime is disabled, use polling immediately
+    if (!enableRealtime) {
+      console.log('[Services Real-time] Realtime disabled - using polling mode')
+
+      pollingIntervalRef.current = setInterval(() => {
+        console.log('[Services Real-time] 🔄 Polling (dev mode)')
+        invalidateQueries.afterServiceChange(queryClient)
+      }, 60000)
+
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current)
+          pollingIntervalRef.current = null
+        }
+      }
+    }
+
+    // Realtime enabled - subscribe to WebSocket
     console.log(`[Services Real-time] Initializing for business: ${businessId}`)
 
     const supabase = createClient()
@@ -100,7 +117,9 @@ export function useRealtimeServices({
           )
 
           if (reconnectCountRef.current >= MAX_RECONNECT_ATTEMPTS) {
-            console.warn('[Services Real-time] ⚠️ Max reconnect attempts reached, switching to polling')
+            console.warn(
+              '[Services Real-time] ⚠️ Max reconnect attempts reached, switching to polling'
+            )
             startPolling()
           }
         }

@@ -55,8 +55,25 @@ export function useRealtimeAppointments({
   useEffect(() => {
     if (!enabled || !businessId) return
 
+    const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
 
+    // If realtime is disabled, use polling immediately
+    if (!enableRealtime) {
+      console.log('🔄 Realtime disabled - using polling mode for appointments')
+      pollingIntervalRef.current = setInterval(() => {
+        console.log('🔄 Polling appointments (dev mode)')
+        invalidateQueries.afterAppointmentChange(queryClient)
+      }, pollingInterval)
+
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current)
+        }
+      }
+    }
+
+    // Realtime enabled - subscribe to WebSocket
     // Subscribe to appointment changes for this business
     const channel = supabase
       .channel(`appointments-${businessId}`)

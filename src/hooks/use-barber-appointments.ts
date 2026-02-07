@@ -76,8 +76,21 @@ export function useBarberAppointments({
   useEffect(() => {
     if (!autoRefresh || !enabled || !barberId) return
 
+    const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
 
+    // If realtime is disabled, use polling immediately
+    if (!enableRealtime) {
+      console.log('🔄 Realtime disabled - using polling mode for barber appointments')
+      const interval = setInterval(() => {
+        console.log('🔄 Polling barber appointments (dev mode)')
+        fetchAppointments()
+      }, refreshInterval)
+
+      return () => clearInterval(interval)
+    }
+
+    // Realtime enabled - subscribe to WebSocket
     // Subscribe to appointment changes for this barber
     const channel = supabase
       .channel(`barber-appointments-${barberId}`)

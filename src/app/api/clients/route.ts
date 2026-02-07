@@ -23,7 +23,10 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     // Build query with pagination
     let query = supabase
       .from('clients')
-      .select('*', { count: 'exact' })
+      .select(
+        'id, name, phone, email, notes, created_at, last_visit_at, total_visits, total_spent, vip_status, business_id',
+        { count: 'exact' }
+      )
       .eq('business_id', business.id)
       .order('name', { ascending: true })
       .range(offset, offset + limit - 1)
@@ -93,7 +96,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
         email: result.data.email,
         notes: result.data.notes,
       })
-      .select()
+      .select('id, name, phone, email, notes, created_at, business_id')
       .single()
 
     if (error) {

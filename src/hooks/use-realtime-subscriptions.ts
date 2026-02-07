@@ -69,8 +69,25 @@ export function useRealtimeSubscriptions({
   useEffect(() => {
     if (!enabled || !businessId) return
 
+    const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
 
+    // If realtime is disabled, use polling immediately
+    if (!enableRealtime) {
+      console.log('🔄 Realtime disabled - using polling mode for subscriptions')
+      pollingIntervalRef.current = setInterval(() => {
+        console.log('🔄 Polling subscriptions (dev mode)')
+        invalidateQueries.afterBusinessSettingsChange(queryClient)
+      }, pollingInterval)
+
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current)
+        }
+      }
+    }
+
+    // Realtime enabled - subscribe to WebSocket
     // Subscribe to business_subscriptions changes for this business
     const channel = supabase
       .channel(`business-subscriptions-${businessId}`)

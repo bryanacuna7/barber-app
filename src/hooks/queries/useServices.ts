@@ -15,7 +15,9 @@ export function useServices(businessId: string) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('services')
-        .select('*')
+        .select(
+          'id, name, description, duration_minutes, price, display_order, is_active, business_id'
+        )
         .eq('business_id', businessId)
         .order('display_order', { ascending: true })
 
@@ -46,7 +48,13 @@ export function useCreateService() {
         price: service.price,
         business_id: service.business_id,
       }
-      const { data, error } = await supabase.from('services').insert(dbService).select().single()
+      const { data, error } = await supabase
+        .from('services')
+        .insert(dbService)
+        .select(
+          'id, name, description, duration_minutes, price, display_order, is_active, business_id'
+        )
+        .single()
       if (error) throw error
       return data
     },
@@ -84,7 +92,9 @@ export function useUpdateService() {
         .from('services')
         .update(dbUpdates)
         .eq('id', id)
-        .select()
+        .select(
+          'id, name, description, duration_minutes, price, display_order, is_active, business_id'
+        )
         .single()
       if (error) throw error
       return data

@@ -13,7 +13,9 @@ const barberSchema = z.object({
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   const { data: barbers, error } = await supabase
     .from('barbers')
-    .select('*')
+    .select(
+      'id, name, email, phone, user_id, business_id, is_active, role, bio, photo_url, avatar_url, display_order, created_at'
+    )
     .eq('business_id', business.id)
     .order('display_order', { ascending: true })
 
@@ -65,7 +67,9 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       bio: parsed.data.bio || null,
       photo_url: parsed.data.photo_url || null,
     })
-    .select()
+    .select(
+      'id, name, email, phone, user_id, business_id, is_active, role, bio, photo_url, avatar_url, display_order, created_at'
+    )
     .single()
 
   if (error) {

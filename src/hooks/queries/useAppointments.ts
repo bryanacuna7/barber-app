@@ -70,7 +70,7 @@ export function useUpdateAppointmentStatus() {
         .from('appointments')
         .update({ status })
         .eq('id', appointmentId)
-        .select()
+        .select('id, status, updated_at')
         .single()
 
       if (error) throw error
@@ -103,7 +103,9 @@ export function useCreateAppointment() {
       const { data, error } = await supabase
         .from('appointments')
         .insert(appointment)
-        .select()
+        .select(
+          'id, status, client_id, service_id, barber_id, scheduled_at, duration_minutes, price, created_at, business_id'
+        )
         .single()
 
       if (error) throw error
@@ -241,11 +243,7 @@ export function useBarberDayAppointments(barberId: string | null) {
  * const { data: appointments } = useCalendarAppointments(weekStart, weekEnd, businessId)
  * ```
  */
-export function useCalendarAppointments(
-  startDate: Date,
-  endDate: Date,
-  businessId: string | null
-) {
+export function useCalendarAppointments(startDate: Date, endDate: Date, businessId: string | null) {
   const startDateStr = format(startDate, 'yyyy-MM-dd')
   const endDateStr = format(endDate, 'yyyy-MM-dd')
 

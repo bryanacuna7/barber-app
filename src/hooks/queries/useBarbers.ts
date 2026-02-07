@@ -15,7 +15,9 @@ export function useBarbers(businessId: string) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('barbers')
-        .select('*')
+        .select(
+          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
+        )
         .eq('business_id', businessId)
         .order('name', { ascending: true })
 
@@ -39,7 +41,13 @@ export function useCreateBarber() {
       is_active?: boolean
     }) => {
       const supabase = createClient()
-      const { data, error } = await supabase.from('barbers').insert(barber).select().single()
+      const { data, error } = await supabase
+        .from('barbers')
+        .insert(barber)
+        .select(
+          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
+        )
+        .single()
       if (error) throw error
       return data
     },
@@ -57,7 +65,9 @@ export function useUpdateBarber() {
         .from('barbers')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select(
+          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
+        )
         .single()
       if (error) throw error
       return data
@@ -85,7 +95,13 @@ export function useBarberById(barberId: string | undefined) {
     queryFn: async () => {
       if (!barberId) throw new Error('No barber ID provided')
       const supabase = createClient()
-      const { data, error } = await supabase.from('barbers').select('*').eq('id', barberId).single()
+      const { data, error } = await supabase
+        .from('barbers')
+        .select(
+          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
+        )
+        .eq('id', barberId)
+        .single()
 
       if (error) throw error
       return data

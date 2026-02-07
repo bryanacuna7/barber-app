@@ -23,7 +23,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Get business details
     const { data: businessData, error } = await serviceClient
       .from('businesses')
-      .select('*')
+      .select(
+        'id, name, slug, owner_id, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_secondary_color, is_active, created_at, updated_at'
+      )
       .eq('id', id)
       .single()
 
@@ -53,19 +55,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Get appointment stats
     const { count: totalAppointments } = await serviceClient
       .from('appointments')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('business_id', id)
 
     const { count: completedAppointments } = await serviceClient
       .from('appointments')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('business_id', id)
       .eq('status', 'completed')
 
     // Get clients count
     const { count: totalClients } = await serviceClient
       .from('clients')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('business_id', id)
 
     return NextResponse.json({
