@@ -30,30 +30,28 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-zinc-950 lg:hidden">
-      <div className="pt-safe">
-        <div className="flex h-14 items-center justify-between px-4">
-          {isDashboardHome ? (
-            <Link href="/dashboard" className="flex items-center gap-2">
-              {logoUrl ? (
-                <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
-              ) : (
-                <Scissors className="h-5 w-5" />
-              )}
-              <span className="max-w-[160px] truncate font-semibold text-zinc-900 dark:text-white">
-                {currentTitle}
-              </span>
-            </Link>
-          ) : (
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
-                {currentTitle}
-              </span>
-            </div>
-          )}
+      <div className="flex h-14 items-center justify-between px-4">
+        {isDashboardHome ? (
+          <Link href="/dashboard" className="flex items-center gap-2">
+            {logoUrl ? (
+              <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
+            ) : (
+              <Scissors className="h-5 w-5" />
+            )}
+            <span className="max-w-[160px] truncate font-semibold text-zinc-900 dark:text-white">
+              {currentTitle}
+            </span>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
+              {currentTitle}
+            </span>
+          </div>
+        )}
 
-          {/* Notification bell */}
-          <NotificationBell />
-        </div>
+        {/* Notification bell */}
+        <NotificationBell />
       </div>
     </header>
   )
