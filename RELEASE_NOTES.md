@@ -8,19 +8,14 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.1
-
-### Novedades
-
-- Nuevo sistema de colores con mejor legibilidad en todo el app
-- Graficas de analiticas rediseñadas con colores de la marca
+## v0.9.2
 
 ### Mejoras
 
-- Mejor visibilidad del texto en modo claro y oscuro
-- Numeros grandes en el dashboard ahora se muestran de forma compacta (ej: ₡1.3M)
-- Tarjetas de estadisticas se adaptan mejor a pantallas pequeñas
+- La app ahora se actualiza automaticamente cuando hay una nueva version (ya no hay que reinstalar)
+- Icono de la app mas grande y limpio
 
 ### Correcciones
 
-- Los colores de las graficas ahora se ven correctamente en todos los navegadores
+- Arreglado problema donde la app en iPhone mostraba version vieja despues de una actualizacion
+- Corregido espaciado doble en la barra superior del dashboard
