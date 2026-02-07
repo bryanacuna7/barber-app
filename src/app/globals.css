@@ -75,8 +75,11 @@ html {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-400/50 dark:focus-visible:ring-offset-zinc-900;
 }
 
-/* Focus visible styles (fallback) */
-*:focus-visible:not(.focus-ring) {
+/* Focus visible styles (fallback for non-form controls) */
+button:focus-visible:not(.focus-ring),
+a:focus-visible:not(.focus-ring),
+[role='button']:focus-visible:not(.focus-ring),
+[tabindex]:focus-visible:not(.focus-ring) {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }

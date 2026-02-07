@@ -16,7 +16,7 @@
  * </SwipeableRow>
  */
 
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, animate } from 'framer-motion'
 import { cn } from '@/lib/utils/cn'
 import { animations } from '@/lib/design-system'
 import { haptics } from '@/lib/utils/mobile'
@@ -45,14 +45,26 @@ export function SwipeableRow({
   threshold = 72,
 }: SwipeableRowProps) {
   const hasRevealed = useRef(false)
+  const x = useMotionValue(0)
+  const ACTION_SIZE = 58
+  const ACTION_GAP = 12
+  const ACTION_EDGE_PADDING = 12
+
+  const calculateActionWidth = (count: number) => {
+    if (count === 0) return 0
+    return ACTION_EDGE_PADDING * 2 + count * ACTION_SIZE + (count - 1) * ACTION_GAP
+  }
 
   // Calculate drag constraints based on actions
-  const leftConstraint = rightActions.length > 0 ? -(rightActions.length * threshold) : 0
-  const rightConstraint = leftActions.length > 0 ? leftActions.length * threshold : 0
+  const rightActionsWidth = calculateActionWidth(rightActions.length)
+  const leftActionsWidth = calculateActionWidth(leftActions.length)
+  const leftConstraint = rightActions.length > 0 ? -rightActionsWidth : 0
+  const rightConstraint = leftActions.length > 0 ? leftActionsWidth : 0
+  const hasActions = rightActions.length > 0 || leftActions.length > 0
 
   // Haptic feedback when actions are revealed
   const handleDrag = useCallback(
-    (_event: any, info: { offset: { x: number } }) => {
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number } }) => {
       const dragDistance = Math.abs(info.offset.x)
 
       // Trigger haptic when user drags past the first action threshold
@@ -66,9 +78,29 @@ export function SwipeableRow({
     [threshold]
   )
 
-  const handleDragEnd = useCallback(() => {
-    hasRevealed.current = false
-  }, [])
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number } }) => {
+      hasRevealed.current = false
+
+      const offsetX = info.offset.x
+      let targetX = 0
+
+      // Swipe left to reveal right actions
+      if (rightActions.length > 0 && offsetX < -threshold * 0.8) {
+        targetX = leftConstraint
+      }
+
+      // Swipe right to reveal left actions
+      if (leftActions.length > 0 && offsetX > threshold * 0.8) {
+        targetX = rightConstraint
+      }
+
+      animate(x, targetX, {
+        ...animations.spring.snappy,
+      })
+    },
+    [leftActions.length, rightActions.length, threshold, leftConstraint, rightConstraint, x]
+  )
 
   return (
     <div className="relative rounded-xl overflow-hidden">
@@ -83,22 +115,25 @@ export function SwipeableRow({
 
       {/* Left actions (revealed on swipe right) */}
       {leftActions.length > 0 && (
-        <div className="absolute left-0 top-0 bottom-0 flex -translate-x-full">
+        <div className="absolute left-3 top-1/2 z-0 -translate-y-1/2 flex items-center gap-3">
           {leftActions.map((action, index) => (
             <button
               key={index}
               onClick={(e) => {
                 e.stopPropagation()
+                haptics.tap()
                 action.onClick()
               }}
+              aria-label={action.label}
+              title={action.label}
               className={cn(
-                'flex flex-col items-center justify-center text-white',
+                'flex items-center justify-center text-white rounded-full shadow-[0_10px_24px_rgba(0,0,0,0.25)]',
                 action.color,
-                'w-[72px] h-full'
+                'w-[58px] h-[58px]'
               )}
             >
-              <div className="flex items-center justify-center mb-1">{action.icon}</div>
-              <span className="text-[11px] font-medium">{action.label}</span>
+              <div className="flex items-center justify-center">{action.icon}</div>
+              <span className="sr-only">{action.label}</span>
             </button>
           ))}
         </div>
@@ -106,22 +141,25 @@ export function SwipeableRow({
 
       {/* Right actions (revealed on swipe left) */}
       {rightActions.length > 0 && (
-        <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
+        <div className="absolute right-3 top-1/2 z-0 -translate-y-1/2 flex items-center gap-3">
           {rightActions.map((action, index) => (
             <button
               key={index}
               onClick={(e) => {
                 e.stopPropagation()
+                haptics.tap()
                 action.onClick()
               }}
+              aria-label={action.label}
+              title={action.label}
               className={cn(
-                'flex flex-col items-center justify-center text-white',
+                'flex items-center justify-center text-white rounded-full shadow-[0_10px_24px_rgba(0,0,0,0.25)]',
                 action.color,
-                'w-[72px] h-full'
+                'w-[58px] h-[58px]'
               )}
             >
-              <div className="flex items-center justify-center mb-1">{action.icon}</div>
-              <span className="text-[11px] font-medium">{action.label}</span>
+              <div className="flex items-center justify-center">{action.icon}</div>
+              <span className="sr-only">{action.label}</span>
             </button>
           ))}
         </div>
@@ -129,7 +167,9 @@ export function SwipeableRow({
 
       {/* Swipeable content */}
       <motion.div
-        drag="x"
+        drag={hasActions ? 'x' : false}
+        dragDirectionLock
+        dragPropagation
         dragConstraints={{ left: leftConstraint, right: rightConstraint }}
         dragElastic={0.1}
         dragMomentum={false}
@@ -137,6 +177,7 @@ export function SwipeableRow({
         onDragEnd={handleDragEnd}
         transition={animations.spring.snappy}
         className={cn('relative z-10 w-full touch-pan-y', className)}
+        style={{ x }}
       >
         {children}
       </motion.div>

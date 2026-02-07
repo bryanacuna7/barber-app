@@ -82,6 +82,7 @@ import { es } from 'date-fns/locale'
 import type { Client } from '@/types'
 import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
 import { animations } from '@/lib/design-system'
+import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 
 // NEW: Master-detail components (currently unused - reserved for future views)
 // import { LoyaltyRing } from '@/components/clients/loyalty-ring'
@@ -287,6 +288,7 @@ export default function ClientesPageV2() {
   const searchParams = useSearchParams()
   const intentHandled = useRef(false)
   const segmentTabsRef = useRef<HTMLDivElement>(null)
+  const viewModeTabsRef = useRef<HTMLDivElement>(null)
 
   // Auto-open create modal when navigated with ?intent=create
   useEffect(() => {
@@ -314,6 +316,22 @@ export default function ClientesPageV2() {
       })
     })
   }, [selectedSegment])
+
+  useEffect(() => {
+    const container = viewModeTabsRef.current
+    if (!container) return
+
+    const activeView = container.querySelector<HTMLButtonElement>(`[data-view-chip="${viewMode}"]`)
+    if (!activeView) return
+
+    requestAnimationFrame(() => {
+      activeView.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    })
+  }, [viewMode])
 
   // Detect mobile viewport
   useEffect(() => {
@@ -801,14 +819,17 @@ export default function ClientesPageV2() {
                 placeholder="Buscar por nombre, teléfono o email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] py-2.5 sm:py-3 pl-10 sm:pl-12 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-zinc-400/60 focus:outline-none focus:ring-2 focus:ring-zinc-400/20 backdrop-blur-xl"
+                className="w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] py-2.5 sm:py-3 pl-10 sm:pl-12 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-violet-400/45 focus:outline-none focus-visible:outline-none focus:ring-1 focus:ring-violet-400/45 backdrop-blur-xl"
               />
             </div>
 
             {/* View Mode Tabs + Segment Filters (SAME LINE like demo) */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               {/* View Mode Switcher - LEFT */}
-              <div className="flex items-center gap-1.5 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+              <div
+                ref={viewModeTabsRef}
+                className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl"
+              >
                 {[
                   {
                     mode: 'dashboard' as ViewMode,
@@ -817,27 +838,31 @@ export default function ClientesPageV2() {
                     mobile: true,
                   },
                   { mode: 'cards' as ViewMode, icon: LayoutGrid, label: 'Lista', mobile: true },
-                  { mode: 'table' as ViewMode, icon: TableIcon, label: 'Tabla', mobile: false },
+                  { mode: 'table' as ViewMode, icon: TableIcon, label: 'Tabla', mobile: true },
                   {
                     mode: 'calendar' as ViewMode,
                     icon: CalendarIcon,
                     label: 'Calendario',
-                    mobile: false,
+                    mobile: true,
                   },
                 ].map(({ mode, icon: Icon, label, mobile }) => (
                   <button
                     key={mode}
-                    onClick={() => setViewMode(mode)}
+                    onClick={() => {
+                      setViewMode(mode)
+                      if (isMobileDevice()) haptics.selection()
+                    }}
+                    data-view-chip={mode}
                     className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       !mobile ? 'hidden lg:flex' : ''
                     } ${
                       viewMode === mode
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border border-zinc-900/30 dark:border-white/15 shadow-[0_6px_18px_rgba(0,0,0,0.2)]'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                        : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{label}</span>
+                    <span className="inline">{label}</span>
                   </button>
                 ))}
               </div>
@@ -951,8 +976,8 @@ export default function ClientesPageV2() {
                                 transition={animations.spring.snappy}
                                 className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-all border-2 ${
                                   isSelected
-                                    ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-900/20 dark:border-blue-500 dark:shadow-lg'
-                                    : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-800/40 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
+                                    ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-950 dark:border-blue-500 dark:shadow-lg'
+                                    : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-900 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
                                 }`}
                               >
                                 {/* Loyalty badge - mobile (compact) */}
@@ -1110,8 +1135,8 @@ export default function ClientesPageV2() {
                               transition={animations.spring.snappy}
                               className={`relative w-full text-left rounded-2xl p-4 transition-all border-2 hidden lg:block ${
                                 isSelected
-                                  ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-900/20 dark:border-blue-500 dark:shadow-lg'
-                                  : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-800/40 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
+                                  ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-950 dark:border-blue-500 dark:shadow-lg'
+                                  : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-900 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
                               }`}
                             >
                               {/* Loyalty ring - desktop (full SVG) */}

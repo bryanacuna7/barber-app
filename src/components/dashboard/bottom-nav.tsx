@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
+import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { MoreMenuDrawer } from './more-menu-drawer'
 
 const navigation = [
@@ -61,6 +62,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
 
   const handleQuickAction = (action: (typeof quickActions)[number]) => {
     setIsQuickActionOpen(false)
+    if (isMobileDevice()) haptics.selection()
     // Navigate with intent=create so destination page auto-opens create form
     router.push(`${action.href}?intent=create`)
   }
@@ -79,6 +81,9 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={item.name}
+                  onClick={() => {
+                    if (isMobileDevice()) haptics.selection()
+                  }}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
@@ -118,7 +123,10 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
 
             {/* Center: + Button (Global Create Action) */}
             <button
-              onClick={() => setIsQuickActionOpen(true)}
+              onClick={() => {
+                setIsQuickActionOpen(true)
+                if (isMobileDevice()) haptics.tap()
+              }}
               aria-label="Crear nuevo"
               aria-haspopup="true"
               aria-expanded={isQuickActionOpen}
@@ -144,6 +152,9 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={item.name}
+                  onClick={() => {
+                    if (isMobileDevice()) haptics.selection()
+                  }}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
@@ -183,7 +194,10 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
 
             {/* More Button */}
             <button
-              onClick={() => setIsMoreOpen(true)}
+              onClick={() => {
+                setIsMoreOpen(true)
+                if (isMobileDevice()) haptics.selection()
+              }}
               className={cn(
                 'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',

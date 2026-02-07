@@ -629,7 +629,7 @@ function ServiciosContent() {
                     placeholder="Buscar servicios..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-11 w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] pl-9 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 transition-all focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="h-11 w-full rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] pl-9 pr-4 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 transition-all focus:border-violet-400/45 focus:outline-none focus-visible:outline-none focus:ring-1 focus:ring-violet-400/45"
                   />
                 </div>
 
@@ -691,7 +691,7 @@ function ServiciosContent() {
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white/70 dark:bg-zinc-900/80 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)] backdrop-blur-xl"
+                        className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]"
                       >
                         {/* Row 1: Emoji + Name */}
                         <div className="flex items-start justify-between">

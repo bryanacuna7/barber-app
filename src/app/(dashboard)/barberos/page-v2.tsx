@@ -51,6 +51,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { animations } from '@/lib/design-system'
+import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 
 type ViewMode = 'cards' | 'table' | 'leaderboard' | 'calendar'
 type SortField = 'name' | 'revenue' | 'appointments' | 'rating' | 'level'
@@ -215,7 +216,7 @@ export default function BarberosPage() {
               placeholder="Buscar barbero..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-white/65 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="w-full h-11 pl-10 pr-4 bg-white/65 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus-visible:outline-none focus:ring-1 focus:ring-violet-400/45 focus:border-violet-400/45"
             />
           </div>
 
@@ -229,7 +230,10 @@ export default function BarberosPage() {
             ].map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
-                onClick={() => setViewMode(value as ViewMode)}
+                onClick={() => {
+                  setViewMode(value as ViewMode)
+                  if (isMobileDevice()) haptics.selection()
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
                   viewMode === value
                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
@@ -255,7 +259,10 @@ export default function BarberosPage() {
             ].map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
-                onClick={() => setViewMode(value as ViewMode)}
+                onClick={() => {
+                  setViewMode(value as ViewMode)
+                  if (isMobileDevice()) haptics.selection()
+                }}
                 data-view-tab={value}
                 className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                   viewMode === value
