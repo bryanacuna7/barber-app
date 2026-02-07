@@ -206,10 +206,10 @@ export default function BarberosPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="space-y-3"
+          className="ios-group-card p-3 space-y-3"
         >
           {/* Search */}
-          <div className="relative mb-3">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
             <input
               type="text"
@@ -236,8 +236,8 @@ export default function BarberosPage() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all min-h-[44px] whitespace-nowrap ${
                   viewMode === value
-                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
+                    : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -362,7 +362,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="lg:hidden space-y-1"
+        className="lg:hidden ios-group-card p-2 space-y-1"
       >
         {barbers.map((barber) => (
           <motion.div

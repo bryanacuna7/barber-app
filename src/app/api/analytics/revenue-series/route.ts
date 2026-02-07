@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { format, startOfDay, addDays } from 'date-fns'
+import { format, startOfDay, addDays, addMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 export async function GET(request: Request) {
@@ -124,7 +124,12 @@ function groupByPeriod(
       dataMap.set(key, { revenue: 0, appointments: 0 })
     }
 
-    current = addDays(current, groupBy === 'day' ? 1 : groupBy === 'month' ? 30 : 7)
+    current =
+      groupBy === 'day'
+        ? addDays(current, 1)
+        : groupBy === 'month'
+          ? addMonths(current, 1)
+          : addDays(current, 7)
   }
 
   // Aggregate appointments
@@ -149,12 +154,12 @@ function groupByPeriod(
 
   // Convert map to array and format dates
   return Array.from(dataMap.entries())
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
     .map(([key, data]) => ({
       date: formatDateLabel(key, groupBy),
       revenue: data.revenue,
       appointments: data.appointments,
     }))
-    .sort((a, b) => a.date.localeCompare(b.date))
 }
 
 /**
@@ -169,7 +174,7 @@ function formatDateLabel(key: string, groupBy: 'day' | 'week' | 'month'): string
     return format(new Date(key + '-01'), 'MMM yyyy', { locale: es })
   } else {
     // Format: "Semana 3"
-    const [year, week] = key.split('-')
+    const [, week] = key.split('-')
     return `Sem ${week}`
   }
 }

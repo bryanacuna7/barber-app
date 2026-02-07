@@ -640,7 +640,7 @@ function CitasCalendarFusionContent() {
               </div>
 
               {/* MOBILE HEADER - Compact toolbar + full-width segmented control */}
-              <div className="lg:hidden mb-4">
+              <div className="lg:hidden mb-4 ios-group-card p-3">
                 {/* Row 1: Date nav group + Today + Create */}
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center flex-1 min-w-0 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-xl px-1 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_28px_rgba(0,0,0,0.35)]">
@@ -790,7 +790,7 @@ function CitasCalendarFusionContent() {
               {!isLoading && viewMode === 'day' && (
                 <div>
                   {/* All Day section */}
-                  <div className="border-b border-zinc-200 dark:border-[#2C2C2E] p-4 mb-4 min-h-[50px]">
+                  <div className="ios-group-card p-4 mb-4 min-h-[50px]">
                     <span className="text-xs text-zinc-500 dark:text-[#8E8E93]">Todo el día</span>
                   </div>
 
@@ -802,6 +802,7 @@ function CitasCalendarFusionContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
+                        className="ios-group-card p-3 lg:p-4"
                       >
                         {/* Block header */}
                         <div className="mb-4">
@@ -893,7 +894,7 @@ function CitasCalendarFusionContent() {
                                   <SwipeableRow rightActions={rightActions}>
                                     <div
                                       onClick={() => setSelectedId(apt.id)}
-                                      className="bg-white/80 dark:bg-[#2C2C2E]/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-2 cursor-pointer active:bg-zinc-50 dark:active:bg-[#3A3A3C]/60"
+                                      className="bg-white dark:bg-[#2C2C2E] rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-2 cursor-pointer active:bg-zinc-50 dark:active:bg-[#3A3A3C]/60"
                                     >
                                       <div className="flex items-start justify-between mb-2">
                                         <div className="flex-1">
@@ -944,7 +945,7 @@ function CitasCalendarFusionContent() {
                                   onClick={() => setSelectedId(apt.id)}
                                 >
                                   <div
-                                    className={`bg-white/80 dark:bg-[#2C2C2E]/80 backdrop-blur-sm rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-3 cursor-grab active:cursor-grabbing transition-all ${
+                                    className={`bg-white dark:bg-[#2C2C2E] rounded-lg border border-zinc-200 dark:border-[#3A3A3C] p-3 cursor-grab active:cursor-grabbing transition-all ${
                                       draggedId === apt.id
                                         ? 'opacity-50'
                                         : 'hover:bg-zinc-50 dark:hover:bg-[#3A3A3C]/60'

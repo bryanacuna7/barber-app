@@ -45,6 +45,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
 import { formatCurrency } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
+import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import {
   useServices,
   useCreateService,
@@ -619,7 +620,7 @@ function ServiciosContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...animations.spring.default, delay: 0.1 }}
-                className="mb-4 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-black/20 backdrop-blur-xl p-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                className="ios-group-card mb-4 p-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 {/* Search */}
                 <div className="relative flex-1 max-w-md">
@@ -644,14 +645,17 @@ function ServiciosContent() {
                       <motion.button
                         key={cat}
                         layout
-                        onClick={() => setSelectedCategory(cat)}
+                        onClick={() => {
+                          setSelectedCategory(cat)
+                          if (isMobileDevice()) haptics.selection()
+                        }}
                         data-category-chip={cat}
                         whileTap={{ scale: 0.98 }}
                         transition={animations.spring.snappy}
                         className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                           selectedCategory === cat
                             ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.28)]'
-                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                            : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                         }`}
                       >
                         {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
@@ -662,7 +666,7 @@ function ServiciosContent() {
               </motion.div>
 
               {/* Mobile Card View */}
-              <div className="lg:hidden space-y-3">
+              <div className="lg:hidden ios-group-card p-2 space-y-3">
                 {sortedServices.map((service) => {
                   const categoryColor = getCategoryColor(service.category)
                   // Assume is_active is a property on service (TODO: integrate with real data)

@@ -62,15 +62,33 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
     return `₡${value.toLocaleString()}`
   }
 
+  // Prevent label overlap on small screens.
+  const chartData = useMemo(
+    () =>
+      data.map((item) => {
+        const [first = '', second = ''] = item.date.split(' ')
+        const chartValue = item.revenue ?? item.value ?? 0
+        return {
+          ...item,
+          chartValue,
+          mobileLabel: period === 'year' ? first : first,
+          desktopLabel: period === 'year' && second ? `${first} ${second}` : item.date,
+        }
+      }),
+    [data, period]
+  )
+
+  const xAxisInterval = period === 'week' ? 0 : period === 'month' ? 4 : 1
+
   return (
-    <Card>
+    <Card className="border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 backdrop-blur-none">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-blue-500" />
             <CardTitle className="text-base lg:text-lg">Ingresos</CardTitle>
           </div>
-          <div className="text-xs lg:text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="text-[11px] lg:text-sm text-zinc-500 dark:text-zinc-400">
             {period === 'week' && 'Últimos 7 días'}
             {period === 'month' && 'Últimos 30 días'}
             {period === 'year' && 'Último año'}
@@ -103,7 +121,7 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
       <CardContent className="p-3 lg:p-6">
         <ResponsiveContainer width="100%" height={height || 200}>
           <AreaChart
-            data={data}
+            data={chartData}
             onClick={(e) => {
               if (e && e.activeTooltipIndex !== undefined) {
                 setActiveIndex(
@@ -126,12 +144,13 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
               className="hidden lg:block"
             />
             <XAxis
-              dataKey="date"
+              dataKey="mobileLabel"
               stroke="#6b7280"
-              fontSize={11}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
-              interval={data.length > 14 ? 'preserveStartEnd' : 0}
+              interval={xAxisInterval}
+              minTickGap={16}
             />
             <YAxis
               stroke="#6b7280"
@@ -144,6 +163,13 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
             <Tooltip
               active={activeIndex !== null}
               formatter={(value: number) => [formatCurrency(value, false), 'Ingresos']}
+              labelFormatter={(
+                label: string,
+                payload: Array<{ payload?: { desktopLabel?: string } }>
+              ) => {
+                const datum = payload?.[0]?.payload
+                return datum?.desktopLabel ?? label
+              }}
               contentStyle={{
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 border: '1px solid #e5e7eb',
@@ -155,7 +181,7 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
             />
             <Area
               type="monotone"
-              dataKey={(item: any) => item.revenue ?? item.value ?? 0}
+              dataKey="chartValue"
               stroke="#3b82f6"
               strokeWidth={2}
               fillOpacity={1}

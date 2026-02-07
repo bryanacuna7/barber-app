@@ -41,7 +41,7 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
   }
 
   return (
-    <Card>
+    <Card className="border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 backdrop-blur-none">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -118,9 +118,9 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
             {topServices.map((service, idx) => (
               <div
                 key={service.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-900 min-h-[44px]"
+                className="flex items-center justify-between gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 min-h-[44px]"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <div
                     className="flex items-center justify-center w-7 h-7 rounded-full text-sm font-semibold"
                     style={{
@@ -130,8 +130,8 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                   >
                     {idx + 1}
                   </div>
-                  <div>
-                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm lg:text-base">
+                  <div className="min-w-0">
+                    <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm lg:text-base truncate">
                       {service.name}
                     </p>
                     <p className="text-xs lg:text-sm text-zinc-500 dark:text-zinc-400">
@@ -139,7 +139,7 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm lg:text-base">
                     {formatCurrency(service.revenue, false)}
                   </p>
