@@ -13,11 +13,6 @@ function parseSize(input: string | null): number {
   return Math.min(MAX_SIZE, Math.max(MIN_SIZE, Math.round(parsed)))
 }
 
-function getInitial(name: string | null | undefined): string {
-  const candidate = (name ?? '').trim()
-  return candidate.length > 0 ? candidate.charAt(0).toUpperCase() : 'B'
-}
-
 async function getBusinessBranding(
   slug: string | null
 ): Promise<{ logoUrl: string | null; name: string }> {
@@ -63,7 +58,6 @@ export async function GET(request: Request) {
   const slug = searchParams.get('slug')
 
   const { logoUrl, name } = await getBusinessBranding(slug)
-  const initial = getInitial(name)
   const hasLogo = Boolean(logoUrl)
   const ringSize = Math.round(size * 0.8)
   const logoSize = Math.round(size * 0.58)
@@ -87,28 +81,6 @@ export async function GET(request: Request) {
           : 'radial-gradient(circle at 20% 20%, #27272A 0%, #18181B 60%, #09090B 100%)',
       }}
     >
-      {!hasLogo && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            opacity: 0.16,
-            transform: 'rotate(-16deg) scale(1.2)',
-          }}
-        >
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                background: i % 2 === 0 ? '#DC2626' : '#2563EB',
-              }}
-            />
-          ))}
-        </div>
-      )}
-
       <div
         style={{
           position: 'absolute',
@@ -153,11 +125,9 @@ export async function GET(request: Request) {
             height: ringSize,
             borderRadius: Math.round(size * 0.2),
             display: 'flex',
-            flexDirection: 'column',
-            gap: Math.round(size * 0.04),
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.06)',
             border: `${Math.max(2, Math.round(size * 0.01))}px solid rgba(255,255,255,0.25)`,
             boxShadow: '0 10px 30px rgba(0,0,0,0.28)',
           }}
@@ -168,10 +138,10 @@ export async function GET(request: Request) {
               width: poleWidth,
               height: poleHeight,
               borderRadius: Math.round(size * 0.12),
-              background: '#F8FAFC',
+              background: '#F5F5F5',
               overflow: 'hidden',
               border: `${Math.max(2, Math.round(size * 0.008))}px solid rgba(255,255,255,0.95)`,
-              boxShadow: 'inset 0 0 0 1px rgba(15, 23, 42, 0.1)',
+              boxShadow: 'inset 0 0 0 1px rgba(15, 23, 42, 0.12)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -186,7 +156,7 @@ export async function GET(request: Request) {
                   top: Math.round(i * stripeHeight - stripeHeight * 0.3),
                   width: '180%',
                   height: stripeHeight,
-                  background: i % 2 === 0 ? '#DC2626' : '#2563EB',
+                  background: i % 2 === 0 ? '#D4D4D8' : '#A1A1AA',
                   transform: 'rotate(-33deg)',
                 }}
               />
@@ -198,7 +168,7 @@ export async function GET(request: Request) {
                 width: Math.round(poleWidth * 0.72),
                 height: Math.max(5, Math.round(size * 0.025)),
                 borderRadius: 999,
-                background: '#E2E8F0',
+                background: '#E4E4E7',
               }}
             />
             <div
@@ -208,30 +178,9 @@ export async function GET(request: Request) {
                 width: Math.round(poleWidth * 0.72),
                 height: Math.max(5, Math.round(size * 0.025)),
                 borderRadius: 999,
-                background: '#E2E8F0',
+                background: '#E4E4E7',
               }}
             />
-          </div>
-
-          <div
-            style={{
-              width: Math.round(size * 0.14),
-              height: Math.round(size * 0.14),
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(255,255,255,0.16)',
-              border: `${Math.max(1, Math.round(size * 0.004))}px solid rgba(255,255,255,0.22)`,
-              color: '#FFFFFF',
-              fontSize: Math.round(size * 0.07),
-              fontWeight: 700,
-              fontFamily:
-                'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
-              lineHeight: 1,
-            }}
-          >
-            {initial}
           </div>
         </div>
       )}

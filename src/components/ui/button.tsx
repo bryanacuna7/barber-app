@@ -3,6 +3,7 @@
 import { forwardRef, type ButtonHTMLAttributes, useState, MouseEvent } from 'react'
 import { motion, type HTMLMotionProps } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { animations } from '@/lib/design-system'
 import { Loader2 } from 'lucide-react'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -87,8 +88,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         onClick={handleClick}
         whileTap={{ scale: 0.97 }}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+        transition={animations.spring.snappy}
         {...props}
       >
         {/* Ripple effect */}
