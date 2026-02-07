@@ -115,17 +115,19 @@ export default async function LoyaltyConfigPage() {
 
   return (
     <>
-      {/* Mobile Header - Fixed */}
-      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-xl lg:hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 -mt-6">
-        <div className="flex h-14 items-center gap-3">
+      {/* Mobile Section Header */}
+      <header className="mb-4 lg:hidden">
+        <div className="flex min-h-[44px] items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/80 transition-colors active:bg-secondary"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-200/70 transition-colors active:bg-zinc-300/80 dark:bg-white/10 dark:active:bg-white/15"
           >
             <ChevronLeft className="h-5 w-5" />
           </Link>
           <div className="flex-1">
-            <h1 className="text-[17px] font-semibold">Programa de Lealtad</h1>
+            <h1 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              Programa de Lealtad
+            </h1>
           </div>
         </div>
       </header>
@@ -201,7 +203,7 @@ export default async function LoyaltyConfigPage() {
       )}
 
       {/* Main Content - Side by side on desktop */}
-      <div className="mt-4 grid grid-cols-1 gap-6 lg:mt-0 lg:grid-cols-[1fr_400px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
         {/* Left Column: Configuration Form + Mobile Preview Button */}
         <Suspense fallback={<ConfigFormSkeleton />}>
           <LoyaltyConfigWrapper businessId={business.id} initialProgram={program} />

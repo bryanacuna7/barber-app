@@ -21,7 +21,7 @@
  * Created: Session 130 (Demo B implementation with 100% fidelity)
  */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -62,6 +62,7 @@ export default function BarberosPage() {
   const [sortField, setSortField] = useState<SortField>('revenue')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [isAddBarberOpen, setIsAddBarberOpen] = useState(false)
+  const mobileTabsRef = useRef<HTMLDivElement>(null)
 
   // Filter and sort barbers
   const processedBarbers = useMemo(() => {
@@ -124,6 +125,22 @@ export default function BarberosPage() {
       setSortDirection('desc')
     }
   }
+
+  useEffect(() => {
+    const container = mobileTabsRef.current
+    if (!container) return
+
+    const activeTab = container.querySelector<HTMLButtonElement>(`[data-view-tab="${viewMode}"]`)
+    if (!activeTab) return
+
+    requestAnimationFrame(() => {
+      activeTab.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    })
+  }, [viewMode])
 
   return (
     <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 lg:p-8 lg:pb-6 relative overflow-hidden">
@@ -191,14 +208,14 @@ export default function BarberosPage() {
           className="space-y-3"
         >
           {/* Search */}
-          <div className="relative mb-4 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-black/20 backdrop-blur-xl p-2">
+          <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
             <input
               type="text"
               placeholder="Buscar barbero..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-white/70 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className="w-full h-11 pl-10 pr-4 bg-white/65 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-white/10 rounded-xl text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
 
@@ -226,7 +243,10 @@ export default function BarberosPage() {
           </div>
 
           {/* View Switcher - Mobile (inline, horizontal scroll) */}
-          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-1 rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-black/20 backdrop-blur-xl p-1.5">
+          <div
+            ref={mobileTabsRef}
+            className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1"
+          >
             {[
               { value: 'cards', label: 'Tarjetas', icon: LayoutGrid },
               { value: 'table', label: 'Tabla', icon: Table2 },
@@ -236,10 +256,11 @@ export default function BarberosPage() {
               <button
                 key={value}
                 onClick={() => setViewMode(value as ViewMode)}
+                data-view-tab={value}
                 className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                   viewMode === value
                     ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-[0_8px_20px_rgba(59,130,246,0.3)]'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                    : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                 }`}
               >
                 <Icon className="h-4 w-4" />

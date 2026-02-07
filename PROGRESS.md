@@ -8,7 +8,7 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-08 (Session 142 - Citas/Barberos polish + trial banner fix)
+- **Last Updated:** 2026-02-08 (Session 143 - Barberos/Lealtad de-generic + active-tab autoscroll)
 - **Current Branch:** `feature/ui-ux-redesign`
 - **Current Phase:** Audit remediation in progress (checkpoint commit + targeted UX fixes applied)
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
@@ -60,6 +60,40 @@
 ---
 
 ## Recent Sessions
+
+### Session 143: Barberos + Lealtad Mobile De-Generic Pass (2026-02-08)
+
+**Status:** ✅ Applied (pending visual QA on device)
+
+**Implemented now:**
+
+- `Barberos`:
+  - Removed heavy “control frame” feeling in mobile by simplifying search and tabs surfaces.
+  - Added **auto-scroll to active tab** in horizontal mobile switcher (`Tarjetas/Tabla/Ranking/Calendario`) so selected tab never stays clipped off-screen.
+- `Servicios`:
+  - Added **auto-scroll to active category chip** in mobile (`Todos/Corte/Barba/Combo/Facial`) to prevent hidden-active-state issue.
+- `Clientes`:
+  - Added **auto-scroll to active segment chip** (`Todos/VIP/Frecuente/Nuevo/Inactivo`) for consistency with mobile UX contract.
+- `Lealtad`:
+  - Reworked mobile section header (removed sticky framed strip look).
+  - Softened main configuration container (`glass` surface instead of heavy block).
+  - Updated selected-state visuals in custom radio group to avoid harsh black tiles in dark mode.
+- `Trial banner`:
+  - Compact banner now uses full width to avoid clipped/truncated appearance in narrow mobile layouts.
+
+**Files updated in this pass:**
+
+- `src/app/(dashboard)/barberos/page-v2.tsx`
+- `src/app/(dashboard)/servicios/page-v2.tsx`
+- `src/app/(dashboard)/clientes/page-v2.tsx`
+- `src/app/(dashboard)/lealtad/configuracion/page.tsx`
+- `src/components/loyalty/loyalty-config-form.tsx`
+- `src/components/ui/radio-group.tsx`
+- `src/components/subscription/trial-banner.tsx`
+
+**Validation:**
+
+- `npx eslint` on touched files: **0 errors**, warnings only (mostly pre-existing/legacy).
 
 ### Session 142: Citas + Barberos UX Polish (2026-02-08)
 

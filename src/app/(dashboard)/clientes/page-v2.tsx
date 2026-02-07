@@ -286,6 +286,7 @@ export default function ClientesPageV2() {
 
   const searchParams = useSearchParams()
   const intentHandled = useRef(false)
+  const segmentTabsRef = useRef<HTMLDivElement>(null)
 
   // Auto-open create modal when navigated with ?intent=create
   useEffect(() => {
@@ -295,6 +296,24 @@ export default function ClientesPageV2() {
       requestAnimationFrame(() => setShowModal(true))
     }
   }, [searchParams])
+
+  useEffect(() => {
+    const container = segmentTabsRef.current
+    if (!container) return
+
+    const activeSegment = container.querySelector<HTMLButtonElement>(
+      `[data-segment-chip="${selectedSegment}"]`
+    )
+    if (!activeSegment) return
+
+    requestAnimationFrame(() => {
+      activeSegment.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    })
+  }, [selectedSegment])
 
   // Detect mobile viewport
   useEffect(() => {
@@ -824,9 +843,13 @@ export default function ClientesPageV2() {
               </div>
 
               {/* Segment Filters - RIGHT (same line as tabs like demo) */}
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              <div
+                ref={segmentTabsRef}
+                className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
+              >
                 <button
                   onClick={() => setSelectedSegment('all')}
+                  data-segment-chip="all"
                   className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 ${
                     selectedSegment === 'all'
                       ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
@@ -844,6 +867,7 @@ export default function ClientesPageV2() {
                       <button
                         key={segment}
                         onClick={() => setSelectedSegment(segment)}
+                        data-segment-chip={segment}
                         className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 sm:gap-1.5 border shrink-0 ${
                           selectedSegment === segment
                             ? config.color

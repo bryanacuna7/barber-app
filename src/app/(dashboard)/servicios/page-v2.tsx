@@ -349,6 +349,7 @@ function ServiciosContent() {
 
   const searchParamsHook = useSearchParams()
   const intentHandled = useRef(false)
+  const categoryTabsRef = useRef<HTMLDivElement>(null)
 
   // Auto-open create form when navigated with ?intent=create
   useEffect(() => {
@@ -358,6 +359,24 @@ function ServiciosContent() {
       requestAnimationFrame(() => setShowForm(true))
     }
   }, [searchParamsHook])
+
+  useEffect(() => {
+    const container = categoryTabsRef.current
+    if (!container) return
+
+    const activeChip = container.querySelector<HTMLButtonElement>(
+      `[data-category-chip="${selectedCategory}"]`
+    )
+    if (!activeChip) return
+
+    requestAnimationFrame(() => {
+      activeChip.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    })
+  }, [selectedCategory])
 
   // React Query hooks
   const { isLoading: _loading, isError, error: queryError, refetch } = useServices(businessId)
@@ -617,12 +636,16 @@ function ServiciosContent() {
                 {/* Category Filter */}
                 <div className="relative rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-1.5">
                   <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/90 dark:from-zinc-950 z-10 sm:hidden rounded-r-xl" />
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+                  <div
+                    ref={categoryTabsRef}
+                    className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide"
+                  >
                     {categories.map((cat) => (
                       <motion.button
                         key={cat}
                         layout
                         onClick={() => setSelectedCategory(cat)}
+                        data-category-chip={cat}
                         whileTap={{ scale: 0.98 }}
                         transition={animations.spring.snappy}
                         className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all ${
