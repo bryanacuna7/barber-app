@@ -62,7 +62,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {label && (
             <motion.label
               htmlFor={inputId}
-              className="mb-2 block text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
+              className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted"
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
@@ -159,7 +159,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                   'mt-2 text-sm font-medium',
                   error && 'text-red-500',
                   success && 'text-emerald-500',
-                  !error && !success && 'text-zinc-500 dark:text-zinc-400'
+                  !error && !success && 'text-muted'
                 )}
               >
                 {error || success || helperText}

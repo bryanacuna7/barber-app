@@ -45,7 +45,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
           {/* Error Details (development) */}
           {process.env.NODE_ENV === 'development' && (
             <details className="mb-6">
-              <summary className="text-sm text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors mb-2">
+              <summary className="text-sm text-muted cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors mb-2">
                 Detalles del error
               </summary>
               <div className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg space-y-2">
@@ -102,7 +102,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
         </div>
 
         {/* Help Link */}
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-4">
+        <p className="text-center text-sm text-muted mt-4">
           ¿Necesitas ayuda?{' '}
           <Link
             href="/configuracion"

@@ -86,7 +86,6 @@ export function SheetContent({ side = 'bottom', className = '', children }: Shee
 
   // Drag state for bottom sheets
   const y = useMotionValue(0)
-  const backdropOpacity = useTransform(y, [0, 300], [1, 0])
   const sheetOpacity = useTransform(y, [0, 200], [1, 0.5])
 
   const slideVariants = {
@@ -180,7 +179,7 @@ export function SheetContent({ side = 'bottom', className = '', children }: Shee
     >
       {/* Drag handle for bottom sheets */}
       {isBottomSheet && (
-        <div className="flex justify-center -mt-2 mb-2">
+        <div className="flex justify-center -mt-2 mb-2 md:hidden">
           <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
         </div>
       )}

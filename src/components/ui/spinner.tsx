@@ -41,7 +41,7 @@ export function Spinner({ size = 'md', variant = 'default', className }: Spinner
         ease: 'linear',
       }}
     >
-      <Loader2 className={cn(sizeClasses[size], 'text-zinc-500 dark:text-zinc-400')} />
+      <Loader2 className={cn(sizeClasses[size], 'text-muted')} />
     </motion.div>
   )
 }

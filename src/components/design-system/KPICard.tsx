@@ -305,11 +305,9 @@ export function KPICard({
       >
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">{label}</p>
+            <p className="text-xs font-medium text-muted mb-1">{label}</p>
             <p className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
-            {subtitle && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-xs text-muted mt-1">{subtitle}</p>}
           </div>
           <div
             className={cn(
@@ -348,7 +346,7 @@ export function KPICard({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           {/* Label */}
-          <p className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
+          <p className="text-xs sm:text-sm font-medium text-muted">{label}</p>
 
           {/* Value */}
           <p className="mt-2 text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-white">
@@ -363,9 +361,7 @@ export function KPICard({
           )}
 
           {/* Subtitle */}
-          {subtitle && (
-            <p className="mt-2 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">{subtitle}</p>
-          )}
+          {subtitle && <p className="mt-2 text-xs sm:text-sm text-muted">{subtitle}</p>}
 
           {/* Comparison Value */}
           {comparisonValue && (

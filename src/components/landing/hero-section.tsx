@@ -1,9 +1,9 @@
 'use client'
 
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, Calendar, Clock, MousePointer2, Zap } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export function HeroSection() {
   // Parallax scroll effect
@@ -101,7 +101,7 @@ export function HeroSection() {
                 { icon: MousePointer2, text: '0.2s drag & drop' },
                 { icon: Clock, text: 'Vista semanal clara' },
                 { icon: Calendar, text: 'Real-time sync' },
-              ].map((feature, i) => {
+              ].map((feature) => {
                 const Icon = feature.icon
                 return (
                   <div
@@ -227,7 +227,7 @@ export function HeroSection() {
               <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-zinc-50 to-zinc-100 p-4 dark:from-zinc-800 dark:to-zinc-900">
                 <div>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-white">Lunes 3 Feb</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Vista del día</p>
+                  <p className="text-xs text-muted">Vista del día</p>
                 </div>
                 <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
@@ -332,9 +332,7 @@ export function HeroSection() {
                         whileTap={{ scale: 0.98 }}
                         className="flex-1 cursor-pointer rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50/50 p-4 transition-colors dark:border-zinc-700 dark:bg-zinc-800/30"
                       >
-                        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                          {slot.service}
-                        </p>
+                        <p className="text-sm font-medium text-muted">{slot.service}</p>
                       </motion.div>
                     )}
                   </motion.div>

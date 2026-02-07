@@ -578,7 +578,7 @@ export function DatePickerTrigger({ value, onChange, label, className }: DatePic
           className
         )}
       >
-        <CalendarIcon className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+        <CalendarIcon className="h-4 w-4 text-muted" />
         <span>{formattedDate}</span>
       </button>
 

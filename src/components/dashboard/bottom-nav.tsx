@@ -268,18 +268,18 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
               transition={animations.spring.sheet}
               className="fixed bottom-0 left-0 right-0 z-[61] lg:hidden"
             >
-              <div className="mx-4 mb-safe-offset-4 rounded-2xl bg-white dark:bg-[#2C2C2E] shadow-2xl overflow-hidden">
+              <div className="mx-4 mb-safe-offset-4 overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/80 dark:bg-[#232326]">
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                <div className="flex items-center justify-between px-5 pb-2 pt-4">
                   <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                     Crear nuevo
                   </h3>
                   <button
                     onClick={() => setIsQuickActionOpen(false)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-700 min-w-[44px] min-h-[44px]"
+                    className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
                     aria-label="Cerrar"
                   >
-                    <X className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
                 {/* Actions */}
@@ -288,16 +288,13 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                     <button
                       key={action.action}
                       onClick={() => handleQuickAction(action)}
-                      className="w-full flex items-center gap-4 px-4 py-3.5 min-h-[44px] rounded-xl text-left hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors"
+                      className="flex min-h-[44px] w-full items-center gap-4 rounded-xl px-4 py-3.5 text-left text-zinc-900 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]/40 dark:text-zinc-100 dark:hover:bg-zinc-800/80"
                     >
                       <div
-                        className="flex h-10 w-10 items-center justify-center rounded-xl"
-                        style={{ background: 'rgba(var(--brand-primary-rgb), 0.1)' }}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl border bg-zinc-100 dark:bg-zinc-700/60"
+                        style={{ borderColor: 'rgba(var(--brand-primary-rgb), 0.28)' }}
                       >
-                        <action.icon
-                          className="h-5 w-5"
-                          style={{ color: 'var(--brand-primary)' }}
-                        />
+                        <action.icon className="h-5 w-5 text-[var(--brand-primary-on-light)] dark:text-zinc-100" />
                       </div>
                       <span className="text-base font-medium text-zinc-900 dark:text-white">
                         {action.name}

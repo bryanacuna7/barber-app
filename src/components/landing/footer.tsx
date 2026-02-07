@@ -178,7 +178,7 @@ export function Footer() {
           className="mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800"
         >
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-muted">
               &copy; 2026 BarberShop Pro. Todos los derechos reservados.
             </p>
             <div className="flex gap-6">

@@ -305,7 +305,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                   className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 hover:scale-105 active:scale-95"
                   aria-label="Cerrar búsqueda"
                 >
-                  <X className="h-4 w-4 text-zinc-500 dark:text-zinc-400" strokeWidth={2.5} />
+                  <X className="h-4 w-4 text-muted" strokeWidth={2.5} />
                 </button>
               </div>
 
@@ -352,9 +352,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                               <Icon
                                 className={cn(
                                   'h-5 w-5 transition-colors duration-200',
-                                  isSelected
-                                    ? 'text-white'
-                                    : 'text-zinc-600 dark:text-zinc-400'
+                                  isSelected ? 'text-white' : 'text-zinc-600 dark:text-zinc-400'
                                 )}
                                 strokeWidth={2}
                               />
@@ -376,9 +374,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                             <p
                               className={cn(
                                 'text-[13px] truncate transition-colors duration-200',
-                                isSelected
-                                  ? 'text-blue-600/70 dark:text-blue-400/70'
-                                  : 'text-zinc-500 dark:text-zinc-400'
+                                isSelected ? 'text-blue-600/70 dark:text-blue-400/70' : 'text-muted'
                               )}
                             >
                               {setting.description}
@@ -427,21 +423,22 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                 ) : (
                   <div className="py-16 px-6 text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-4">
-                      <Search className="h-7 w-7 text-zinc-400 dark:text-zinc-500" strokeWidth={2} />
+                      <Search
+                        className="h-7 w-7 text-zinc-400 dark:text-zinc-500"
+                        strokeWidth={2}
+                      />
                     </div>
                     <p className="text-[15px] font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                       No se encontraron configuraciones
                     </p>
-                    <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
-                      Intenta con otras palabras clave
-                    </p>
+                    <p className="text-[13px] text-muted">Intenta con otras palabras clave</p>
                   </div>
                 )}
               </div>
 
               {/* Footer - Enhanced keyboard shortcuts */}
               <div className="px-6 py-4 bg-gradient-to-t from-zinc-50/80 to-transparent dark:from-zinc-800/40 border-t border-zinc-200/80 dark:border-zinc-700/80">
-                <div className="flex items-center gap-5 text-[12px] text-zinc-500 dark:text-zinc-400">
+                <div className="flex items-center gap-5 text-[12px] text-muted">
                   <span className="flex items-center gap-2">
                     <kbd className="min-w-[28px] px-2 py-1 rounded-lg bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 shadow-sm font-mono text-center">
                       ↑↓

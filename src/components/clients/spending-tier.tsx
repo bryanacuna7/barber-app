@@ -63,7 +63,7 @@ export function SpendingTier({ tier, amount, className = '' }: SpendingTierProps
         <p className="text-2xl font-bold text-zinc-900 dark:text-white">
           ₡{amount.toLocaleString('es-CR')}
         </p>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Gastado histórico</p>
+        <p className="text-xs text-muted mt-1">Gastado histórico</p>
       </div>
     </div>
   )

@@ -32,7 +32,7 @@ export function ConversionsTimeline({ conversions }: ConversionsTimelineProps) {
   if (conversions.length === 0) {
     return (
       <Card className="p-8">
-        <div className="text-center text-zinc-500 dark:text-zinc-400">
+        <div className="text-center text-muted">
           <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>No hay conversiones registradas todavía</p>
         </div>
@@ -75,7 +75,7 @@ export function ConversionsTimeline({ conversions }: ConversionsTimelineProps) {
           <Clock className="h-5 w-5 text-blue-600" />
           Conversiones Recientes
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-muted mt-1">
           Últimas {conversions.length} conversiones registradas
         </p>
       </div>
@@ -126,7 +126,7 @@ export function ConversionsTimeline({ conversions }: ConversionsTimelineProps) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-muted">
                     {formatDistanceToNow(new Date(conversion.createdAt), {
                       addSuffix: true,
                       locale: es,

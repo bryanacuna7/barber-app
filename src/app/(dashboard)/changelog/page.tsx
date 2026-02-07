@@ -63,7 +63,7 @@ export default async function ChangelogPage() {
                 <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
                   {`v${release.version}`}
                 </h2>
-                <p className="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="inline-flex items-center gap-2 text-sm text-muted">
                   <CalendarDays className="h-4 w-4" />
                   {formatReleaseDate(release.date)}
                 </p>

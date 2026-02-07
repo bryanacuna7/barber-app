@@ -51,9 +51,7 @@ export function AdvancedSettingsSection({
               </span>
             )}
           </div>
-          {description && (
-            <p className="text-[13px] text-zinc-500 dark:text-zinc-400">{description}</p>
-          )}
+          {description && <p className="text-[13px] text-muted">{description}</p>}
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 180 : 0 }}

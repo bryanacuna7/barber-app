@@ -80,7 +80,7 @@ export function CardTitle({ className, ...props }: CardTitleProps) {
 type CardDescriptionProps = HTMLAttributes<HTMLParagraphElement>
 
 export function CardDescription({ className, ...props }: CardDescriptionProps) {
-  return <p className={cn('mt-1 text-sm text-zinc-500 dark:text-zinc-400', className)} {...props} />
+  return <p className={cn('mt-1 text-sm text-muted', className)} {...props} />
 }
 
 type CardContentProps = HTMLAttributes<HTMLDivElement>
@@ -124,7 +124,7 @@ export function StatCard({
       )}
 
       <div className="space-y-1">
-        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
+        <p className="text-sm font-medium text-muted">{label}</p>
         <div className="flex items-end gap-2">
           <p className="text-3xl font-bold text-zinc-900 dark:text-white">{value}</p>
           {trend && (
@@ -139,7 +139,7 @@ export function StatCard({
             </span>
           )}
         </div>
-        {description && <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>}
+        {description && <p className="text-xs text-muted">{description}</p>}
       </div>
     </Card>
   )

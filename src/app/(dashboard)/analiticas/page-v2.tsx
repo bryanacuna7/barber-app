@@ -158,7 +158,7 @@ function AnalyticsContent() {
   if (authError || !businessId) {
     return (
       <div className="text-center py-12">
-        <p className="text-zinc-500 dark:text-zinc-400">
+        <p className="text-muted">
           {authError || 'Necesitas estar autenticado para ver las analíticas'}
         </p>
       </div>
@@ -178,7 +178,7 @@ function AnalyticsContent() {
   if (!analytics) {
     return (
       <div className="text-center py-12">
-        <p className="text-zinc-500 dark:text-zinc-400">No hay datos de analíticas disponibles</p>
+        <p className="text-muted">No hay datos de analíticas disponibles</p>
       </div>
     )
   }
@@ -393,17 +393,13 @@ function CompactKPISummary({ overview }: { overview: OverviewMetrics }) {
         >
           <div className="flex items-start justify-between gap-2">
             <div className={`p-2.5 rounded-xl ${kpi.color}`}>{kpi.icon}</div>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-none text-right truncate">
-              {kpi.label}
-            </p>
+            <p className="text-[11px] text-muted leading-none text-right truncate">{kpi.label}</p>
           </div>
           <div className="mt-3">
             <p className="text-2xl font-bold tracking-tight tabular-nums text-zinc-900 dark:text-white leading-none">
               {kpi.value}
             </p>
-            <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
-              {kpi.fullValue}
-            </p>
+            <p className="mt-1 text-[11px] text-muted truncate">{kpi.fullValue}</p>
           </div>
         </div>
       ))}
@@ -437,11 +433,9 @@ function KPICard({
       <CardContent className="p-6 h-full flex items-center">
         <div className="flex items-start justify-between w-full">
           <div className="flex-1 min-h-[80px] flex flex-col justify-center">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2">{label}</p>
+            <p className="text-sm text-muted mb-2">{label}</p>
             <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
-            {subtitle && (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-sm text-muted mt-1">{subtitle}</p>}
           </div>
           <div className={`p-3 rounded-lg ${colorClasses[color]}`}>{icon}</div>
         </div>

@@ -60,7 +60,7 @@ export function LoyaltyRing({
         <span className="text-2xl font-bold text-zinc-900 dark:text-white">
           {Math.round(percentage)}%
         </span>
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">Lealtad</span>
+        <span className="text-xs text-muted">Lealtad</span>
       </div>
     </div>
   )

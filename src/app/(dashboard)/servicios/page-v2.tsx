@@ -1000,9 +1000,7 @@ function ServiciosContent() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                        Servicios Activos
-                      </p>
+                      <p className="text-xs font-medium text-muted">Servicios Activos</p>
                       <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
                         {totalServices}
                       </p>
@@ -1021,9 +1019,7 @@ function ServiciosContent() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                        Más Popular
-                      </p>
+                      <p className="text-xs font-medium text-muted">Más Popular</p>
                       <div className="mt-1 flex items-center gap-2 min-w-0">
                         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
                           <ServiceIcon
@@ -1053,9 +1049,7 @@ function ServiciosContent() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                        Rating Promedio
-                      </p>
+                      <p className="text-xs font-medium text-muted">Rating Promedio</p>
                       <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
                         {(
                           activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /

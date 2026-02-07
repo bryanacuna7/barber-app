@@ -62,7 +62,7 @@ export function ClientInfoForm({
             <p className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate">
               {service.name}
             </p>
-            <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
+            <p className="text-[15px] text-muted">
               {format(date, "EEEE d 'de' MMMM", { locale: es })} · {time}
             </p>
           </div>
@@ -72,9 +72,7 @@ export function ClientInfoForm({
       <form data-testid="client-info-form" onSubmit={onSubmit} className="space-y-4">
         <div className="px-1">
           <h3 className="text-[20px] font-bold text-zinc-900 dark:text-white">Tus datos</h3>
-          <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
-            Para enviarte confirmación y recordatorios
-          </p>
+          <p className="mt-1 text-[15px] text-muted">Para enviarte confirmación y recordatorios</p>
         </div>
 
         {error && (
@@ -116,7 +114,7 @@ export function ClientInfoForm({
         />
 
         <div>
-          <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-muted">
             Notas (opcional)
           </label>
           <textarea

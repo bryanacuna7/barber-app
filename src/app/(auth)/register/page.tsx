@@ -276,7 +276,7 @@ function RegisterForm({
             data-testid="register-confirm-password"
           />
 
-          <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
+          <label className="flex items-center gap-2 text-[13px] font-medium text-muted">
             <input
               type="checkbox"
               checked={showPasswords}

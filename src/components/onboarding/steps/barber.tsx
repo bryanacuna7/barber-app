@@ -92,9 +92,7 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
             onChange={(e) => setBarber({ ...barber, phone: e.target.value })}
             placeholder="Ej: 8888-8888"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Útil para notificaciones de citas
-          </p>
+          <p className="text-xs text-muted">Útil para notificaciones de citas</p>
         </div>
 
         {/* Email (optional) */}
@@ -108,9 +106,7 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
             onChange={(e) => setBarber({ ...barber, email: e.target.value })}
             placeholder="Ej: carlos@ejemplo.com"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Para enviar confirmaciones de citas
-          </p>
+          <p className="text-xs text-muted">Para enviar confirmaciones de citas</p>
         </div>
 
         {/* Preview */}

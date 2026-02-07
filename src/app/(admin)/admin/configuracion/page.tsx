@@ -229,9 +229,7 @@ export default function AdminConfiguracion() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Configuración</h1>
-        <p className="mt-1 text-zinc-500 dark:text-zinc-400">
-          Configuración global de la plataforma
-        </p>
+        <p className="mt-1 text-muted">Configuración global de la plataforma</p>
       </div>
 
       {/* Alerts */}
@@ -258,7 +256,7 @@ export default function AdminConfiguracion() {
             </div>
             <div>
               <CardTitle className="text-lg">Tipo de Cambio USD/CRC</CardTitle>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm text-muted">
                 Para mostrar precios en colones a clientes costarricenses
               </p>
             </div>
@@ -353,9 +351,7 @@ export default function AdminConfiguracion() {
             </div>
             <div>
               <CardTitle className="text-lg">Cuenta Bancaria en Dólares</CardTitle>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Opción de pago alternativa para clientes
-              </p>
+              <p className="text-sm text-muted">Opción de pago alternativa para clientes</p>
             </div>
           </div>
         </CardHeader>
@@ -475,9 +471,7 @@ export default function AdminConfiguracion() {
             </div>
             <div>
               <CardTitle className="text-lg">WhatsApp de Soporte</CardTitle>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Número para reportar pagos y soporte
-              </p>
+              <p className="text-sm text-muted">Número para reportar pagos y soporte</p>
             </div>
           </div>
         </CardHeader>
@@ -561,9 +555,7 @@ export default function AdminConfiguracion() {
             </div>
             <div>
               <CardTitle className="text-lg">Datos SINPE Móvil</CardTitle>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Información para recibir pagos por SINPE
-              </p>
+              <p className="text-sm text-muted">Información para recibir pagos por SINPE</p>
             </div>
           </div>
         </CardHeader>

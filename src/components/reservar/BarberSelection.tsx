@@ -57,6 +57,7 @@ export function BarberSelection({
           >
             <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 overflow-hidden">
               {barber.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={barber.photo_url}
                   alt={barber.name}
@@ -74,9 +75,7 @@ export function BarberSelection({
                 {barber.name}
               </p>
               {barber.bio && (
-                <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                  {barber.bio}
-                </p>
+                <p className="mt-0.5 text-[13px] text-muted line-clamp-2">{barber.bio}</p>
               )}
             </div>
             <ChevronRight className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />

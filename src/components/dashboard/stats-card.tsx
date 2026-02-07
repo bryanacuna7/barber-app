@@ -104,7 +104,7 @@ export function StatsCard({
           <p
             className={cn(
               'text-sm font-medium uppercase tracking-wide truncate',
-              isGradient ? 'text-white/80' : 'text-zinc-500 dark:text-zinc-400'
+              isGradient ? 'text-white/80' : 'text-muted'
             )}
           >
             {title}

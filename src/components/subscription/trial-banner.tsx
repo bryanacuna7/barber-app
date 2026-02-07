@@ -93,7 +93,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
                 ? `Trial Pro: ${subscription.days_remaining} días restantes`
                 : `Plan ${subscription.plan.display_name}`}
             </span>
-            <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="ml-2 text-xs text-muted">
               {subscription.plan.name === 'basic' ? 'Actualiza a Pro' : 'Ver detalles'}
             </span>
           </div>
@@ -299,7 +299,7 @@ function UsageItem({
 
   return (
     <div className="text-center">
-      <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
+      <div className="text-xs text-muted">{label}</div>
       <div
         className={`text-sm font-semibold ${
           isAtLimit ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white'

@@ -66,6 +66,7 @@ type SortDirection = 'asc' | 'desc'
 // Main Component
 // ============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function SortableTable<T extends Record<string, any>>({
   data,
   columns,
@@ -192,9 +193,7 @@ export function SortableTable<T extends Record<string, any>>({
                         <span className="text-2xl text-zinc-400">📋</span>
                       </div>
                     )}
-                    <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                      {emptyMessage}
-                    </p>
+                    <p className="text-sm font-medium text-muted">{emptyMessage}</p>
                   </div>
                 </td>
               </tr>
@@ -264,6 +263,7 @@ function SortIndicator({ active, direction }: { active: boolean; direction: Sort
 /**
  * CompactTable - Smaller padding, good for dense data
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function CompactTable<T extends Record<string, any>>(props: SortableTableProps<T>) {
   return (
     <div className="[&_td]:py-2 [&_th]:py-2">
@@ -275,6 +275,7 @@ export function CompactTable<T extends Record<string, any>>(props: SortableTable
 /**
  * StripedTable - Alternating row colors for easier scanning
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function StripedTable<T extends Record<string, any>>(props: SortableTableProps<T>) {
   return (
     <SortableTable
@@ -289,6 +290,7 @@ export function StripedTable<T extends Record<string, any>>(props: SortableTable
 /**
  * BorderedTable - Visible borders for all cells
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function BorderedTable<T extends Record<string, any>>(props: SortableTableProps<T>) {
   return (
     <div className="[&_td]:border-r [&_td]:border-zinc-200 [&_td]:dark:border-zinc-800 [&_td]:last:border-r-0 [&_th]:border-r [&_th]:border-zinc-200 [&_th]:dark:border-zinc-800 [&_th]:last:border-r-0">

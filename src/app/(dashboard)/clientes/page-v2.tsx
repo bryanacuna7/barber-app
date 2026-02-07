@@ -149,16 +149,6 @@ function calculateLoyalty(client: Client): number {
   return Math.min(visitScore + recencyScore, 100)
 }
 
-// Calculate relationship strength (used by insights)
-function _getRelationshipStrength(client: Client): 'weak' | 'moderate' | 'strong' | 'excellent' {
-  const loyalty = calculateLoyalty(client)
-
-  if (loyalty >= 80) return 'excellent'
-  if (loyalty >= 60) return 'strong'
-  if (loyalty >= 30) return 'moderate'
-  return 'weak'
-}
-
 // Calculate spending tier
 function getSpendingTier(client: Client): 'bronze' | 'silver' | 'gold' | 'platinum' {
   const spent = Number(client.total_spent || 0)
@@ -342,25 +332,15 @@ export default function ClientesPageV2() {
   }, [])
 
   // NEW: React Query hooks (standardized pattern)
-  const {
-    data: clientsData,
-    isLoading: _isLoading,
-    error: queryError,
-    refetch,
-  } = useClients(businessId)
+  const { data: clientsData, error: queryError, refetch } = useClients(businessId)
 
   const createClient = useCreateClient()
 
   // NEW: Real-time WebSocket updates
   useRealtimeClients({ businessId, enabled: !!businessId })
 
-  // Pull to refresh handler (used by mobile gesture)
-  const _handleRefresh = async () => {
-    await refetch()
-  }
-
   // NEW: Extract clients from new response format
-  const clients = clientsData?.clients || []
+  const clients = useMemo(() => clientsData?.clients || [], [clientsData?.clients])
   const totalClients = clientsData?.total || 0
 
   // Métricas calculadas con contexto temporal
@@ -527,7 +507,9 @@ export default function ClientesPageV2() {
     // Sort by column
     if (sortColumn) {
       result = [...result].sort((a, b) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let aValue: any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let bValue: any
 
         switch (sortColumn) {
@@ -812,7 +794,7 @@ export default function ClientesPageV2() {
                                 variant="success"
                                 size="sm"
                                 onClick={() => handleWhatsApp(client.phone)}
-                                className="shrink-0 p-2 h-auto"
+                                className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
                               >
                                 <MessageCircle className="h-4 w-4" />
                               </Button>
@@ -947,7 +929,6 @@ export default function ClientesPageV2() {
                       <div className="space-y-3 max-h-[calc(100vh-24rem)] overflow-y-auto lg:pr-2 scrollbar-thin">
                         {filteredClients.map((client) => {
                           const segment = getClientSegment(client)
-                          const _segmentInfo = segmentConfig[segment]
                           const tier = getSpendingTier(client)
                           const loyalty = calculateLoyalty(client)
                           const isSelected = selectedCardClient?.id === client.id
@@ -1106,7 +1087,7 @@ export default function ClientesPageV2() {
                                               />
                                             ))}
                                           </div>
-                                          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                                          <span className="text-xs text-muted">
                                             {loyalty}% engagement
                                           </span>
                                         </div>
@@ -1116,17 +1097,13 @@ export default function ClientesPageV2() {
                                     {/* Metrics row */}
                                     <div className="grid grid-cols-2 gap-2 mb-2">
                                       <div>
-                                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">
-                                          Gastado
-                                        </p>
+                                        <p className="text-xs text-muted mb-0.5">Gastado</p>
                                         <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                           {formatCurrencyCompact(Number(client.total_spent || 0))}
                                         </p>
                                       </div>
                                       <div>
-                                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">
-                                          Visitas
-                                        </p>
+                                        <p className="text-xs text-muted mb-0.5">Visitas</p>
                                         <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                           {client.total_visits || 0}
                                         </p>
@@ -1135,7 +1112,7 @@ export default function ClientesPageV2() {
 
                                     {/* Spending tier badge */}
                                     <div className="flex items-center gap-1.5">
-                                      <Award className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+                                      <Award className="h-3.5 w-3.5 text-muted" />
                                       <span
                                         className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tierColors[tier]}`}
                                       >
@@ -1249,7 +1226,7 @@ export default function ClientesPageV2() {
                                             />
                                           ))}
                                         </div>
-                                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        <span className="text-xs text-muted">
                                           {loyalty}% engagement
                                         </span>
                                       </div>
@@ -1259,17 +1236,13 @@ export default function ClientesPageV2() {
                                   {/* Metrics row */}
                                   <div className="grid grid-cols-2 gap-2 mb-2">
                                     <div>
-                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">
-                                        Gastado
-                                      </p>
+                                      <p className="text-xs text-muted mb-0.5">Gastado</p>
                                       <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                         {formatCurrencyCompact(Number(client.total_spent || 0))}
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-0.5">
-                                        Visitas
-                                      </p>
+                                      <p className="text-xs text-muted mb-0.5">Visitas</p>
                                       <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                         {client.total_visits || 0}
                                       </p>
@@ -1278,7 +1251,7 @@ export default function ClientesPageV2() {
 
                                   {/* Spending tier badge */}
                                   <div className="flex items-center gap-1.5">
-                                    <Award className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+                                    <Award className="h-3.5 w-3.5 text-muted" />
                                     <span
                                       className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tierColors[tier]}`}
                                     >
@@ -1449,9 +1422,7 @@ export default function ClientesPageV2() {
                                     )} días`
                                   : 'No estimado'}
                               </p>
-                              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                                Basado en historial promedio
-                              </p>
+                              <p className="text-xs text-muted">Basado en historial promedio</p>
                             </div>
 
                             {/* Riesgo de Pérdida */}
@@ -1477,7 +1448,7 @@ export default function ClientesPageV2() {
                                   return '5%'
                                 })()}
                               </p>
-                              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                              <p className="text-xs text-muted">
                                 {selectedCardClient.last_visit_at
                                   ? `${Math.floor(
                                       (new Date().getTime() -
@@ -1505,9 +1476,7 @@ export default function ClientesPageV2() {
                         <div className="flex items-center justify-center h-full min-h-[400px] rounded-2xl bg-zinc-50 dark:bg-zinc-900 border-2 border-dashed border-zinc-300 dark:border-zinc-700">
                           <div className="text-center">
                             <User className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-600 mb-3" />
-                            <p className="text-zinc-500 dark:text-zinc-400">
-                              Selecciona un cliente para ver detalles
-                            </p>
+                            <p className="text-muted">Selecciona un cliente para ver detalles</p>
                           </div>
                         </div>
                       )}
@@ -1597,7 +1566,7 @@ export default function ClientesPageV2() {
                                             className="h-2 w-2 rounded-full"
                                             style={{ backgroundColor: data.color }}
                                           />
-                                          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                                          <p className="text-xs font-medium text-muted">
                                             {data.name}
                                           </p>
                                         </div>
@@ -1768,7 +1737,7 @@ export default function ClientesPageV2() {
                                       variant="success"
                                       size="sm"
                                       onClick={() => handleWhatsApp(client.phone)}
-                                      className="p-2 h-auto"
+                                      className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
                                     >
                                       <MessageCircle className="h-4 w-4" />
                                     </Button>
@@ -1798,7 +1767,7 @@ export default function ClientesPageV2() {
                                     variant="success"
                                     size="sm"
                                     onClick={() => handleWhatsApp(client.phone)}
-                                    className="p-2 h-auto"
+                                    className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
                                   >
                                     <MessageCircle className="h-4 w-4" />
                                   </Button>
@@ -1827,7 +1796,7 @@ export default function ClientesPageV2() {
                                     variant="success"
                                     size="sm"
                                     onClick={() => setSelectedClient(client)}
-                                    className="p-2 h-auto"
+                                    className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
                                   >
                                     <Crown className="h-4 w-4" />
                                   </Button>
@@ -2201,22 +2170,20 @@ export default function ClientesPageV2() {
                               {selectedCardClient.name}
                             </p>
                             {selectedCardClient.phone && (
-                              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                                {selectedCardClient.phone}
-                              </p>
+                              <p className="text-sm text-muted">{selectedCardClient.phone}</p>
                             )}
                           </div>
                         </div>
                         {/* Stats */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3">
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Gastado</p>
+                            <p className="text-xs text-muted mb-1">Gastado</p>
                             <p className="text-lg font-bold text-zinc-900 dark:text-white">
                               {formatCurrencyCompact(Number(selectedCardClient.total_spent || 0))}
                             </p>
                           </div>
                           <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3">
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Visitas</p>
+                            <p className="text-xs text-muted mb-1">Visitas</p>
                             <p className="text-lg font-bold text-zinc-900 dark:text-white">
                               {selectedCardClient.total_visits || 0}
                             </p>

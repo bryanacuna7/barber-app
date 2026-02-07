@@ -154,7 +154,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
       // Upsert loyalty program
       // Note: loyalty_programs table created in migration 014_loyalty_system.sql
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      const { error } = await (supabase as any)
         .from('loyalty_programs')
         .upsert(payload, { onConflict: 'business_id' })
         .select()
@@ -183,7 +183,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
             <h2 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
               Configuración
             </h2>
-            <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-[15px] text-muted">
               {enabled ? (
                 <span className="font-medium text-emerald-600 dark:text-emerald-400">
                   ✓ Programa activo

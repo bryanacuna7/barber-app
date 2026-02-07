@@ -121,7 +121,7 @@ function LoginForm() {
             autoComplete="current-password"
             data-testid="login-password"
           />
-          <div className="flex flex-wrap items-center gap-2 text-[13px] text-zinc-500 dark:text-zinc-400">
+          <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted">
             <label className="flex items-center gap-2 font-medium">
               <input
                 type="checkbox"

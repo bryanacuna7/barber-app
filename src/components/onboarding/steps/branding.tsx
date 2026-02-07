@@ -106,7 +106,7 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
             value={branding.primaryColor}
             onChange={(color) => setBranding({ ...branding, primaryColor: color })}
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-muted">
             Este color aparecerá en detalles de tu dashboard y página de reservas
           </p>
         </div>
@@ -137,6 +137,7 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
                 <X className="h-4 w-4" />
               </button>
               <div className="flex items-center gap-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={branding.logoPreview}
                   alt="Logo preview"
@@ -144,7 +145,7 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
                 />
                 <div>
                   <p className="font-medium text-zinc-900 dark:text-white">Logo subido</p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{branding.logo?.name}</p>
+                  <p className="text-sm text-muted">{branding.logo?.name}</p>
                 </div>
               </div>
             </div>
@@ -156,6 +157,7 @@ export function Branding({ onNext, onBack, onSkip, initialBranding }: BrandingPr
           <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-4">Vista previa:</p>
           <div className="rounded-xl bg-white dark:bg-zinc-800 p-6">
             {branding.logoPreview && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={branding.logoPreview} alt="Logo" className="h-12 mb-4 object-contain" />
             )}
             <div className="flex items-center gap-4">

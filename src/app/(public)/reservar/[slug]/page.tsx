@@ -194,9 +194,7 @@ export default function BookingPage() {
           <div className="inline-flex h-20 w-20 items-center justify-center rounded-[22px] bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-2xl dark:from-zinc-100 dark:to-zinc-200">
             <Scissors className="h-10 w-10 text-white dark:text-zinc-900 animate-pulse" />
           </div>
-          <p className="mt-5 text-[15px] font-medium text-zinc-500 dark:text-zinc-400">
-            Cargando...
-          </p>
+          <p className="mt-5 text-[15px] font-medium text-muted">Cargando...</p>
         </div>
       </div>
     )

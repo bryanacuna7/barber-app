@@ -40,7 +40,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
   return (
     <div>
       {label && (
-        <label className="mb-3 block text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <label className="mb-3 block text-sm font-semibold uppercase tracking-wide text-muted">
           {label}
         </label>
       )}
@@ -89,7 +89,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
               setCustomHex(value)
               setShowCustom(true)
             }}
-            className="text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            className="text-sm font-medium text-muted hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
             {!isPreset ? (
               <span className="flex items-center gap-2">

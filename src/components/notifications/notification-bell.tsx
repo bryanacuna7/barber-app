@@ -243,9 +243,7 @@ export function NotificationBell() {
           {notifications.length === 0 ? (
             <div className="px-4 py-8 text-center">
               <Bell className="mx-auto h-8 w-8 text-zinc-300 dark:text-zinc-600" />
-              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                No tienes notificaciones
-              </p>
+              <p className="mt-2 text-sm text-muted">No tienes notificaciones</p>
             </div>
           ) : (
             <div className="divide-y divide-zinc-100 dark:divide-zinc-700">
@@ -296,7 +294,7 @@ export function NotificationBell() {
                           <span className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
                         )}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="mt-0.5 line-clamp-2 text-xs text-muted">
                         {notification.message}
                       </p>
                       <p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
@@ -313,7 +311,7 @@ export function NotificationBell() {
         {/* Footer */}
         {stats.total > 10 && (
           <div className="border-t border-zinc-200 px-4 py-2 dark:border-zinc-700">
-            <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-center text-xs text-muted">
               Mostrando 10 de {stats.total} notificaciones
             </p>
           </div>

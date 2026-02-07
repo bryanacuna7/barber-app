@@ -158,7 +158,7 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
                     <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                       {item.name}
                     </p>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">{item.description}</p>
+                    <p className="text-sm text-muted">{item.description}</p>
                   </div>
 
                   {/* Arrow */}
@@ -207,7 +207,7 @@ export function MoreMenuDrawer({ isOpen, onClose, isAdmin = false }: MoreMenuDra
                 {/* Text */}
                 <div className="flex-1 min-w-0">
                   <p className="text-lg font-semibold text-zinc-900 dark:text-white">Panel Admin</p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Gestión del sistema</p>
+                  <p className="text-sm text-muted">Gestión del sistema</p>
                 </div>
 
                 {/* Arrow */}

@@ -119,7 +119,7 @@ export function AppointmentCard({
               </span>
               <StatusBadge status={appointment.status as AppointmentStatus} size="sm" />
             </div>
-            <div className="flex items-center gap-3 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center gap-3 mt-1 text-sm text-muted">
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
                 {formatTime(scheduledTime)}

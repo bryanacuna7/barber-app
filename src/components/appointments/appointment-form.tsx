@@ -234,7 +234,7 @@ export function AppointmentForm({
 
         {/* Preview */}
         <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Vista previa:</p>
+          <p className="text-sm text-muted mb-1">Vista previa:</p>
           <p className="font-medium text-zinc-900 dark:text-zinc-100 capitalize">
             {format(new Date(`${date}T${time}:00`), "EEEE, d 'de' MMMM 'a las' HH:mm", {
               locale: es,

@@ -48,9 +48,10 @@ import {
   getRoleLabel,
   type MockBarber,
 } from './mock-data'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Modal } from '@/components/ui/modal'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 
@@ -300,51 +301,39 @@ export default function BarberosPage() {
         </AnimatePresence>
       </div>
 
-      {/* Add Barber Sheet */}
-      <Sheet open={isAddBarberOpen} onOpenChange={setIsAddBarberOpen}>
-        <SheetContent
-          side="bottom"
-          className="rounded-t-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-zinc-900 pb-safe"
+      {/* Form Modal */}
+      <Modal
+        isOpen={isAddBarberOpen}
+        onClose={() => setIsAddBarberOpen(false)}
+        title="Nuevo Barbero"
+      >
+        <form
+          className="space-y-5"
+          data-testid="add-barber-sheet"
+          onSubmit={(event) => {
+            event.preventDefault()
+            setIsAddBarberOpen(false)
+          }}
         >
-          <SheetClose onClose={() => setIsAddBarberOpen(false)} />
-          <SheetHeader>
-            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
-              Agregar Barbero
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-4 pb-6" data-testid="add-barber-sheet">
-            <Input
-              label="Nombre"
-              type="text"
-              placeholder="Nombre del barbero"
-              variant="outline"
-              className="h-12 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:ring-violet-500/30"
-            />
-            <Input
-              label="Email"
-              type="email"
-              placeholder="email@ejemplo.com"
-              variant="outline"
-              className="h-12 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:ring-violet-500/30"
-            />
-            <Input
-              label="Teléfono"
-              type="tel"
-              placeholder="+506 8888-8888"
-              variant="outline"
-              className="h-12 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 focus:ring-violet-500/30"
-            />
+          <Input label="Nombre del barbero" type="text" placeholder="Ej: Juan Pérez" required />
+          <Input label="Email" type="email" placeholder="juan@ejemplo.com" required />
+          <Input label="Teléfono" type="tel" placeholder="+506 8888-8888" />
+
+          <div className="flex justify-end gap-3 pt-4">
             <Button
+              type="button"
+              variant="outline"
               onClick={() => setIsAddBarberOpen(false)}
-              variant="gradient"
-              size="md"
-              className="w-full mt-4"
+              className="h-11"
             >
+              Cancelar
+            </Button>
+            <Button type="submit" className="h-11">
               Agregar Barbero
             </Button>
           </div>
-        </SheetContent>
-      </Sheet>
+        </form>
+      </Modal>
     </div>
   )
 }
@@ -381,6 +370,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
             {/* Avatar 40px */}
             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
               {barber.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={barber.photo_url} alt="" className="h-full w-full object-cover" />
               ) : (
                 <UserRound className="h-5 w-5 text-white" />
@@ -392,7 +382,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
               <p className="font-semibold text-[15px] text-zinc-900 dark:text-white truncate">
                 {barber.name}
               </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-muted">
                 {getRoleLabel(barber.role)} • {barber.stats.appointments_this_week} citas
               </p>
             </div>
@@ -496,19 +486,19 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
             {/* Mini Stats Grid */}
             <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
               <div className="text-center">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Citas</p>
+                <p className="text-xs text-muted mb-1">Citas</p>
                 <p className="text-2xl font-bold text-zinc-900 dark:text-white">
                   {barber.stats.appointments_this_week}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Ingresos</p>
+                <p className="text-xs text-muted mb-1">Ingresos</p>
                 <p className="text-lg font-bold text-zinc-900 dark:text-white">
                   {formatCurrency(barber.stats.revenue_this_month / 1000)}K
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Rating</p>
+                <p className="text-xs text-muted mb-1">Rating</p>
                 <div className="flex items-center justify-center gap-1">
                   <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                   <p className="text-lg font-bold text-zinc-900 dark:text-white">
@@ -517,7 +507,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Nivel</p>
+                <p className="text-xs text-muted mb-1">Nivel</p>
                 <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">
                   {barber.gamification.level}
                 </p>
@@ -527,9 +517,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
             {/* Progress to next level */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500 dark:text-zinc-400">
-                  Progreso a Nivel {barber.gamification.level + 1}
-                </span>
+                <span className="text-muted">Progreso a Nivel {barber.gamification.level + 1}</span>
                 <span className="font-semibold text-zinc-900 dark:text-white">
                   {Math.round(
                     (barber.gamification.xp /
@@ -562,6 +550,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center">
                 {selectedBarberMobile?.photo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={selectedBarberMobile.photo_url}
                     alt=""
@@ -575,7 +564,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
                 <SheetTitle className="text-[17px] font-semibold text-zinc-900 dark:text-white">
                   {selectedBarberMobile?.name}
                 </SheetTitle>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-muted">
                   {selectedBarberMobile ? getRoleLabel(selectedBarberMobile.role) : ''}
                 </p>
               </div>
@@ -729,9 +718,7 @@ function TableView({
                       <p className="text-sm font-medium text-zinc-900 dark:text-white">
                         {barber.name}
                       </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {getRoleLabel(barber.role)}
-                      </p>
+                      <p className="text-xs text-muted">{getRoleLabel(barber.role)}</p>
                     </div>
                   </div>
                 </td>
@@ -837,9 +824,7 @@ function LeaderboardView({ barbers }: { barbers: MockBarber[] }) {
                   <h3 className="font-semibold text-[15px] lg:text-base text-zinc-900 dark:text-white truncate">
                     {barber.name}
                   </h3>
-                  <p className="text-xs lg:text-sm text-zinc-500 dark:text-zinc-400">
-                    {getRoleLabel(barber.role)}
-                  </p>
+                  <p className="text-xs lg:text-sm text-muted">{getRoleLabel(barber.role)}</p>
                 </div>
                 {/* Desktop stats - hidden on mobile */}
                 <div className="hidden lg:block text-right space-y-1">
@@ -847,9 +832,7 @@ function LeaderboardView({ barbers }: { barbers: MockBarber[] }) {
                     {formatCurrency(barber.stats.revenue_this_month)}
                   </p>
                   <div className="flex items-center gap-3 justify-end text-sm">
-                    <span className="text-zinc-500 dark:text-zinc-400">
-                      {barber.stats.appointments_this_month} citas
-                    </span>
+                    <span className="text-muted">{barber.stats.appointments_this_month} citas</span>
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                       <span className="font-semibold text-zinc-900 dark:text-white">
@@ -865,9 +848,7 @@ function LeaderboardView({ barbers }: { barbers: MockBarber[] }) {
                   {formatCurrency(barber.stats.revenue_this_month)}
                 </span>
                 <span className="text-zinc-400">•</span>
-                <span className="text-zinc-500 dark:text-zinc-400">
-                  {barber.stats.appointments_this_month} citas
-                </span>
+                <span className="text-muted">{barber.stats.appointments_this_month} citas</span>
                 <span className="text-zinc-400">•</span>
                 <div className="flex items-center gap-0.5">
                   <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -911,7 +892,7 @@ function CalendarView({ barbers }: { barbers: MockBarber[] }) {
               <h3 className="text-[15px] lg:text-base font-semibold text-zinc-900 dark:text-white">
                 {barber.name}
               </h3>
-              <p className="text-xs lg:text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs lg:text-sm text-muted">
                 {barber.schedule.appointments_today.length} citas hoy
               </p>
             </div>
@@ -926,7 +907,7 @@ function CalendarView({ barbers }: { barbers: MockBarber[] }) {
                   className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl"
                 >
                   <div className="text-center">
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">Hora</p>
+                    <p className="text-xs text-muted">Hora</p>
                     <p className="font-semibold text-zinc-900 dark:text-white">{apt.time}</p>
                   </div>
                   <div className="flex-1 min-w-0">

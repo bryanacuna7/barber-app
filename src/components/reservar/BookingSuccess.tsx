@@ -149,7 +149,7 @@ export function BookingSuccess({
             </button>
           )}
 
-          <p className="text-center text-[13px] text-zinc-500 dark:text-zinc-400">
+          <p className="text-center text-[13px] text-muted">
             Te enviaremos un recordatorio antes de tu cita.
           </p>
         </div>

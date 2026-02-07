@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-07 (Session 147 - Color Audit Fase 2)
+- **Last Updated:** 2026-02-07 (Session 148 - Color Audit Fase 3)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Color Audit remediation — Fase 2 complete (dashboard unification)
+- **Current Phase:** Color Audit complete (Fase 1+2+3)
 - **Color Audit:** `color-audit.md` (root)
 - **Supabase Project:** `zanywefnobtzhoeuoyuc`
 
@@ -38,7 +38,7 @@
 
 ## Roadmap (Prioritized)
 
-### IN PROGRESS: Color Audit (Sessions 146-147)
+### COMPLETE: Color Audit (Sessions 146-148)
 
 **Reference:** `color-audit.md` — Awwwards-level color discipline
 
@@ -64,11 +64,15 @@
 - [x] `BookingHeader.tsx` — share button gradient → brand-primary inline style
 - [x] Verified: light mode + dark mode on mobile (375px), all 5 pages
 
-**Fase 3 — Data viz y contraste (NOT STARTED):**
+**Fase 3 — Data viz y contraste (COMPLETE — Session 148):**
 
-- [ ] Chart tooltips dark/light adaptive (revenue-chart.tsx, services-chart.tsx)
-- [ ] `text-zinc-500/400` contrast adjustment (203+ instances)
-- [ ] `themeColor` meta in layout.tsx — light mode `#0a0a0a` → `#ffffff`
+- [x] Chart tooltips dark/light adaptive — `contentStyle` uses CSS vars (`--chart-tooltip-bg/border/text`)
+- [x] Chart palette — SVG props use `useChartColors()` hook (reads CSS vars at runtime, listens for theme changes)
+- [x] Chart colors brand-aware — revenue line + services bars use `--brand-primary` via JS hook
+- [x] `text-zinc-500 dark:text-zinc-400` → `text-muted` (218 instances across 66 active files)
+- [x] Added Tailwind `--color-muted` and `--color-subtle` tokens in `@theme` (maps to `--text-2` / `--text-3`)
+- [x] `themeColor` meta in layout.tsx — light mode `#0a0a0a` → `#ffffff`
+- [x] Verified: light mode on mobile (375px), `text-muted` renders `#5A6270` (6.2:1 contrast on white)
 
 ### Remaining Audit Items (pre-color)
 
@@ -89,6 +93,32 @@
 ---
 
 ## Recent Sessions
+
+### Session 148: Color Audit Fase 3 — Data Viz & Contrast (2026-02-07)
+
+**Status:** ✅ Complete
+
+**Objective:** Chart theming (tooltips + palette), secondary text contrast, themeColor meta
+
+**What was done:**
+
+1. **globals.css** — Added chart tokens (`--chart-grid`, `--chart-axis`, `--chart-tooltip-bg/border/text`) for light and dark. Added `--color-muted` and `--color-subtle` to `@theme inline` (maps to `--text-2` / `--text-3`). Updated `app-page-subtitle` component class to use `text-muted`.
+
+2. **revenue-chart.tsx** — Tooltip `contentStyle` uses CSS vars for theme-aware bg/border/text. SVG props (stroke, fill, gradient stops) use `useChartColors()` hook that reads computed CSS vars and listens for `prefers-color-scheme` changes. Line/area now uses brand-primary instead of hardcoded `#3b82f6`. Icon color brand-aware.
+
+3. **services-chart.tsx** — Same tooltip + SVG theming. Bar fill uses brand-primary. Rank list uses brand-derived monochromatic opacity scale (`barOpacities`). Icon color brand-aware.
+
+4. **66 active .tsx files** — Replaced 218 instances of `text-zinc-500 dark:text-zinc-400` → `text-muted` (single Tailwind class). Remaining 20 instances only in deprecated `page-old.tsx` files.
+
+5. **layout.tsx** — `themeColor` light mode changed from `#0a0a0a` to `#ffffff`.
+
+6. **TS fix** — `revenue-chart.tsx` `labelFormatter` payload type changed from `Array<>` to `readonly []` (pre-existing Recharts type mismatch).
+
+**Contrast improvement:** `text-muted` renders `#5A6270` in light mode (6.2:1 on white, was borderline 4.88:1 with zinc-500). Dark mode `#A6B0BE` (8.76:1 on `#0a0a0a`).
+
+**Files modified:** globals.css, layout.tsx, revenue-chart.tsx, services-chart.tsx, barbers-leaderboard.tsx, + 57 component/page files (text-muted migration)
+
+---
 
 ### Session 147: Color Audit Fase 2 — Dashboard Unification (2026-02-07)
 
@@ -173,20 +203,22 @@
 
 - App running at http://localhost:3000
 - All 5 dashboard pages modernized
-- Premium color tokens defined in CSS (light + dark)
-- Brand system (`--brand-primary`) now used in bottom-nav, button gradient, premium-background
-- Background mesh reduced to subtle brand tint
+- **Color Audit COMPLETE** (Fases 1+2+3) — brand tokens, gradient unification, data viz, contrast
+- Charts fully theme-aware (tooltip + palette + axis via CSS vars + JS hook)
+- Secondary text uses `text-muted` (6.2:1 contrast on white vs old 4.88:1)
+- `themeColor` meta correct for light mode
 
 ### Issues ⚠️
 
 1. ~~Bottom nav dark mode indicator~~ — FIXED by user
-2. ~~60+ hardcoded gradient instances~~ — MIGRATED to brand tokens (Fase 2)
-3. **203+ text-zinc-500/400 instances** need contrast audit (Fase 3)
-4. **Chart tooltips** hardcoded white — unreadable in dark mode (Fase 3)
-5. **Focus ring colors** (6 inputs) still use `focus:ring-violet-400` — low priority, transient
+2. ~~60+ hardcoded gradient instances~~ — MIGRATED (Fase 2)
+3. ~~203+ text-zinc-500/400~~ — MIGRATED to `text-muted` (Fase 3)
+4. ~~Chart tooltips hardcoded white~~ — THEMED (Fase 3)
+5. **Focus ring colors** (6 inputs) still use `focus:ring-violet-400` — low priority
+6. **Pre-existing TS error** in `features-section.tsx` (framer-motion Variants type) — unrelated to audit
 
 ---
 
-**Last Update:** Session 147 (2026-02-07)
-**Status:** Color Audit Fase 1+2 complete — foundations + dashboard unification
-**Next:** Fase 3 (data viz, contrast fine-tuning, themeColor meta)
+**Last Update:** Session 148 (2026-02-07)
+**Status:** Color Audit COMPLETE (Fase 1+2+3) — full brand discipline
+**Next:** Remaining audit items (button migration, charts mobile redesign, copy UX, dark mode QA)

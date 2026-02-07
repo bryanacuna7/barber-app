@@ -6,7 +6,7 @@
  * Optimized for mobile-first touch interaction
  */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   AreaChart,
   Area,
@@ -30,8 +30,43 @@ interface RevenueChartProps {
   height?: number
 }
 
+function useChartColors() {
+  const [colors, setColors] = useState({ accent: '#6d7cff', grid: '#e5e7eb', axis: '#9ca3af' })
+  useEffect(() => {
+    const update = () => {
+      const root = document.documentElement
+      const s = getComputedStyle(document.documentElement)
+      const isDarkTheme =
+        root.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches
+      const readableAccent = (
+        isDarkTheme
+          ? s.getPropertyValue('--brand-primary-on-dark')
+          : s.getPropertyValue('--brand-primary-on-light')
+      ).trim()
+
+      setColors({
+        accent: readableAccent || s.getPropertyValue('--brand-primary').trim() || '#6d7cff',
+        grid: s.getPropertyValue('--chart-grid').trim() || '#e5e7eb',
+        axis: s.getPropertyValue('--chart-axis').trim() || '#9ca3af',
+      })
+    }
+
+    update()
+    const root = document.documentElement
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const observer = new MutationObserver(update)
+    observer.observe(root, { attributes: true, attributeFilter: ['class', 'style'] })
+    mq.addEventListener('change', update)
+    return () => {
+      observer.disconnect()
+      mq.removeEventListener('change', update)
+    }
+  }, [])
+  return colors
+}
+
 export function RevenueChart({ data, period, height }: RevenueChartProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const chart = useChartColors()
 
   // Calculate trend vs previous period
   const trend = useMemo(() => {
@@ -85,10 +120,10 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-500" />
+            <TrendingUp className="w-5 h-5" style={{ color: chart.accent }} />
             <CardTitle className="text-base lg:text-lg">Ingresos</CardTitle>
           </div>
-          <div className="text-[11px] lg:text-sm text-zinc-500 dark:text-zinc-400">
+          <div className="text-[11px] lg:text-sm text-muted">
             {period === 'week' && 'Últimos 7 días'}
             {period === 'month' && 'Últimos 30 días'}
             {period === 'year' && 'Último año'}
@@ -120,73 +155,85 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
       </CardHeader>
       <CardContent className="p-3 lg:p-6">
         <ResponsiveContainer width="100%" height={height || 200}>
-          <AreaChart
-            data={chartData}
-            onClick={(e) => {
-              if (e && e.activeTooltipIndex !== undefined) {
-                setActiveIndex(
-                  e.activeTooltipIndex === activeIndex ? null : Number(e.activeTooltipIndex)
-                )
-              }
-            }}
-          >
+          <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="8%" stopColor={chart.accent} stopOpacity={0.46} />
+                <stop offset="92%" stopColor={chart.accent} stopOpacity={0.03} />
               </linearGradient>
             </defs>
-            {/* Hide grid on mobile, show on desktop */}
             <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#e5e7eb"
-              opacity={0.5}
+              strokeDasharray="2 5"
+              stroke={chart.grid}
+              opacity={0.42}
               className="hidden lg:block"
             />
             <XAxis
               dataKey="mobileLabel"
-              stroke="#6b7280"
-              fontSize={10}
+              stroke={chart.axis}
+              fontSize={11}
               tickLine={false}
               axisLine={false}
               interval={xAxisInterval}
               minTickGap={16}
             />
             <YAxis
-              stroke="#6b7280"
+              stroke={chart.axis}
               fontSize={11}
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => formatCurrency(value, true)}
-              width={45}
+              width={52}
             />
             <Tooltip
-              active={activeIndex !== null}
               formatter={(value: number) => [formatCurrency(value, false), 'Ingresos']}
               labelFormatter={(
                 label: string,
-                payload: Array<{ payload?: { desktopLabel?: string } }>
+                payload: readonly { payload?: { desktopLabel?: string } }[]
               ) => {
                 const datum = payload?.[0]?.payload
                 return datum?.desktopLabel ?? label
               }}
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '16px',
-                padding: '12px',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                border: '1px solid var(--chart-tooltip-border)',
+                borderRadius: '10px',
+                fontSize: '13px',
+                padding: '10px 12px',
+                color: 'var(--chart-tooltip-text)',
+                boxShadow: '0 10px 28px rgba(0, 0, 0, 0.35)',
               }}
-              cursor={{ stroke: '#3b82f6', strokeWidth: 2 }}
+              labelStyle={{
+                color: 'var(--chart-tooltip-text)',
+                fontSize: '13px',
+                fontWeight: 600,
+                marginBottom: '4px',
+              }}
+              itemStyle={{
+                color: 'var(--chart-tooltip-text)',
+                fontSize: '13px',
+                fontWeight: 500,
+              }}
+              cursor={{
+                stroke: chart.accent,
+                strokeWidth: 1.5,
+                strokeDasharray: '4 4',
+                strokeOpacity: 0.75,
+              }}
             />
             <Area
               type="monotone"
               dataKey="chartValue"
-              stroke="#3b82f6"
-              strokeWidth={2}
+              stroke={chart.accent}
+              strokeWidth={2.75}
               fillOpacity={1}
               fill="url(#colorRevenue)"
-              activeDot={{ r: 6, onClick: () => {} }}
+              activeDot={{
+                r: 5,
+                fill: chart.accent,
+                stroke: 'var(--chart-tooltip-bg)',
+                strokeWidth: 2,
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>

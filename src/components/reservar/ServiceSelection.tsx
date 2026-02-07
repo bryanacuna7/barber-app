@@ -24,9 +24,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
         <h2 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
           Elige servicio
         </h2>
-        <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
-          Selecciona el servicio que deseas reservar
-        </p>
+        <p className="mt-1 text-[15px] text-muted">Selecciona el servicio que deseas reservar</p>
       </div>
       {noBarbers && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
@@ -72,7 +70,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                     {service.name}
                   </p>
                   {service.description && (
-                    <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-1">
+                    <p className="mt-0.5 text-[13px] text-muted line-clamp-1">
                       {service.description}
                     </p>
                   )}

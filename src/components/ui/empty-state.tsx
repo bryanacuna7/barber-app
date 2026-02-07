@@ -4,16 +4,7 @@ import { cn } from '@/lib/utils/cn'
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
-import {
-  FileX,
-  Users,
-  Calendar,
-  Search,
-  ShoppingBag,
-  Mail,
-  FolderOpen,
-  Database,
-} from 'lucide-react'
+import { Users, Calendar, Search, Database } from 'lucide-react'
 
 export interface EmptyStateProps {
   icon?: LucideIcon
@@ -41,7 +32,7 @@ export function EmptyState({
         className={cn('flex flex-col items-center justify-center py-8 px-4 text-center', className)}
       >
         {Icon && <Icon className="w-8 h-8 text-zinc-400 dark:text-zinc-600 mb-3" />}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{title}</p>
+        <p className="text-sm text-muted">{title}</p>
         {description && (
           <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{description}</p>
         )}
@@ -92,9 +83,7 @@ export function EmptyState({
         )}
 
         <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-2">{title}</h3>
-        {description && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted max-w-sm mb-6">{description}</p>}
         {action}
       </motion.div>
     )
@@ -118,9 +107,7 @@ export function EmptyState({
         </motion.div>
       )}
       <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{title}</h3>
-      {description && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mb-6">{description}</p>
-      )}
+      {description && <p className="text-sm text-muted max-w-sm mb-6">{description}</p>}
       {action}
     </motion.div>
   )

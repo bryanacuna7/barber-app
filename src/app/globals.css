@@ -21,11 +21,20 @@
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
+
+  /* Chart tokens (theme-aware) */
+  --chart-grid: #e5e7eb;
+  --chart-axis: #9ca3af;
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
+  --chart-tooltip-border: #e5e7eb;
+  --chart-tooltip-text: #111318;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--text-2);
+  --color-subtle: var(--text-3);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
@@ -82,6 +91,13 @@
     --text-2: #a6b0be;
     --text-3: #828d9d;
     --accent-soft: #1c2440;
+
+    /* Chart tokens (dark) */
+    --chart-grid: #27272a;
+    --chart-axis: #71717a;
+    --chart-tooltip-bg: rgba(24, 24, 27, 0.95);
+    --chart-tooltip-border: #3f3f46;
+    --chart-tooltip-text: #f3f6fb;
   }
 }
 
@@ -124,7 +140,7 @@ body {
   }
 
   .app-page-subtitle {
-    @apply text-sm sm:text-base text-zinc-500 dark:text-zinc-400;
+    @apply text-sm sm:text-base text-muted;
   }
 
   .app-surface-padding {
@@ -159,6 +175,37 @@ body {
     );
     -webkit-background-clip: text;
     background-clip: text;
+  }
+}
+
+/* Improve contrast for page titles on desktop dark backgrounds */
+@media (min-width: 1024px) and (prefers-color-scheme: dark) {
+  .app-page-title.brand-gradient-text {
+    background-image: linear-gradient(
+      to right,
+      color-mix(in srgb, white 88%, var(--brand-primary) 12%),
+      color-mix(in srgb, white 72%, var(--brand-primary) 28%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: 0 1px 10px rgba(255, 255, 255, 0.08);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dark .app-page-title.brand-gradient-text {
+    background-image: linear-gradient(
+      to right,
+      color-mix(in srgb, white 88%, var(--brand-primary) 12%),
+      color-mix(in srgb, white 72%, var(--brand-primary) 28%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow: 0 1px 10px rgba(255, 255, 255, 0.08);
   }
 }
 

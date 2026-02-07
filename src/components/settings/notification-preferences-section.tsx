@@ -34,6 +34,7 @@ export function NotificationPreferencesSection() {
       if (!cached.isStale) return
     }
     loadPreferences()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function loadPreferences() {
@@ -101,7 +102,7 @@ export function NotificationPreferencesSection() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Cargando...</p>
+          <p className="text-sm text-muted">Cargando...</p>
         </CardContent>
       </Card>
     )
@@ -178,9 +179,7 @@ export function NotificationPreferencesSection() {
                   Guardar
                 </Button>
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Dejar vacío para usar el email de tu cuenta
-              </p>
+              <p className="text-xs text-muted mt-1">Dejar vacío para usar el email de tu cuenta</p>
             </motion.div>
           )}
 
@@ -261,7 +260,7 @@ function ChannelCard({
         {icon}
         <span className="font-medium">{label}</span>
       </div>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
+      <p className="text-xs text-muted">{description}</p>
     </button>
   )
 }
@@ -289,7 +288,7 @@ function NotificationToggle({
     >
       <div className="flex-1">
         <p className="font-medium text-zinc-900 dark:text-zinc-100">{label}</p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{description}</p>
+        <p className="text-sm text-muted mt-1">{description}</p>
       </div>
       <IOSToggle checked={checked} onChange={onChange} disabled={disabled} />
     </div>

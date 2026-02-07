@@ -62,7 +62,7 @@ function DayDetailsPopover({ date, appointments, onClose, onAppointmentClick }: 
             <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
               {format(date, "d 'de' MMMM", { locale: es })}
             </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-sm text-muted">
               {appointments.length} {appointments.length === 1 ? 'cita' : 'citas'}
             </p>
           </div>
@@ -92,7 +92,7 @@ function DayDetailsPopover({ date, appointments, onClose, onAppointmentClick }: 
                   {apt.client?.name || 'Sin cliente'}
                 </div>
                 {apt.service && (
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                  <div className="text-xs text-muted mt-1">
                     {apt.service.name} • {apt.service.duration_minutes} min
                   </div>
                 )}
@@ -210,7 +210,7 @@ export const MonthView = memo(function MonthView({
           {weekDaysFull.map((day, index) => (
             <div
               key={day}
-              className="p-1 md:p-2 text-center text-[10px] md:text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase border-b border-zinc-200 dark:border-zinc-700"
+              className="p-1 md:p-2 text-center text-[10px] md:text-xs font-medium text-muted uppercase border-b border-zinc-200 dark:border-zinc-700"
             >
               <span className="hidden md:inline">{day}</span>
               <span className="md:hidden">{weekDaysShort[index]}</span>
@@ -292,7 +292,7 @@ export const MonthView = memo(function MonthView({
 
                     {/* +X more indicator */}
                     {hiddenCount > 0 && (
-                      <div className="text-[9px] md:text-[10px] font-medium text-zinc-500 dark:text-zinc-400 px-1 md:px-1.5">
+                      <div className="text-[9px] md:text-[10px] font-medium text-muted px-1 md:px-1.5">
                         +{hiddenCount}
                       </div>
                     )}

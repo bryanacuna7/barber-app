@@ -85,7 +85,7 @@ export function MiniCalendar({
         {weekDays.map((day) => (
           <div
             key={day}
-            className="h-8 flex items-center justify-center text-xs font-medium text-zinc-500 dark:text-zinc-400"
+            className="h-8 flex items-center justify-center text-xs font-medium text-muted"
           >
             {day}
           </div>

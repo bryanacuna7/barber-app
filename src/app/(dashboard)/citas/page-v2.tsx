@@ -97,6 +97,7 @@ type ViewMode = 'day' | 'week' | 'month'
 interface StatsContentProps {
   today: Date
   miniCalendarDays: Date[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   appointments: any[] // TODO: Fix type after data transformation
   selectedDate: Date
   stats: {
@@ -133,10 +134,7 @@ function StatsContent({
         {/* Weekday headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['D', 'L', 'M', 'X', 'J', 'V', 'S'].map((day, i) => (
-            <div
-              key={i}
-              className="text-center text-xs text-zinc-500 dark:text-zinc-400 font-medium"
-            >
+            <div key={i} className="text-center text-xs text-muted font-medium">
               {day}
             </div>
           ))}
@@ -176,9 +174,7 @@ function StatsContent({
 
       {/* Stats (Cinema feature) */}
       <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-3">
-          ESTADÍSTICAS HOY
-        </div>
+        <div className="text-xs font-medium text-muted mb-3">ESTADÍSTICAS HOY</div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
           <span className="text-sm text-zinc-900 dark:text-white">Pendiente</span>
@@ -580,7 +576,7 @@ function CitasCalendarFusionContent() {
                     className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                       viewMode === 'day'
                         ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                        : 'text-muted hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
                     Día
@@ -590,7 +586,7 @@ function CitasCalendarFusionContent() {
                     className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                       viewMode === 'week'
                         ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                        : 'text-muted hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
                     Semana
@@ -600,7 +596,7 @@ function CitasCalendarFusionContent() {
                     className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                       viewMode === 'month'
                         ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                        : 'text-muted hover:text-zinc-900 dark:hover:text-white'
                     }`}
                   >
                     Mes
@@ -613,7 +609,7 @@ function CitasCalendarFusionContent() {
                     onClick={handlePrevious}
                     className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
                   >
-                    <ChevronLeft className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                    <ChevronLeft className="w-5 h-5 text-muted" />
                   </button>
                   <button
                     onClick={handleToday}
@@ -625,7 +621,7 @@ function CitasCalendarFusionContent() {
                     onClick={handleNext}
                     className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
                   >
-                    <ChevronRight className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                    <ChevronRight className="w-5 h-5 text-muted" />
                   </button>
                   <Button
                     onClick={() => setIsCreateOpen(true)}
@@ -634,7 +630,7 @@ function CitasCalendarFusionContent() {
                     className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
                     aria-label="Crear cita"
                   >
-                    <Plus className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                    <Plus className="w-5 h-5 text-muted" />
                   </Button>
                 </div>
               </div>
@@ -646,7 +642,7 @@ function CitasCalendarFusionContent() {
                   <div className="flex items-center flex-1 min-w-0 rounded-2xl border border-zinc-200/70 dark:border-zinc-700/70 bg-white/70 dark:bg-zinc-800/80 backdrop-blur-xl px-1 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_28px_rgba(0,0,0,0.35)]">
                     <button
                       onClick={handlePrevious}
-                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
+                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-muted hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
                       aria-label="Anterior"
                     >
                       <ChevronLeft className="w-5 h-5" />
@@ -659,7 +655,7 @@ function CitasCalendarFusionContent() {
                     </div>
                     <button
                       onClick={handleNext}
-                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
+                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-muted hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
                       aria-label="Siguiente"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -728,7 +724,7 @@ function CitasCalendarFusionContent() {
                   <div className="text-6xl font-bold text-zinc-900 dark:text-white">
                     {format(selectedDate, 'd')}
                   </div>
-                  <div className="text-2xl text-zinc-500 dark:text-zinc-400">
+                  <div className="text-2xl text-muted">
                     {format(selectedDate, 'EEEE', { locale: es })}
                   </div>
                 </div>
@@ -736,7 +732,7 @@ function CitasCalendarFusionContent() {
 
               {/* Revenue stats - Mobile compact, Desktop expanded */}
               {/* Mobile: Single compact line */}
-              <div className="lg:hidden text-sm text-zinc-500 dark:text-zinc-400">
+              <div className="lg:hidden text-sm text-muted">
                 ₡{(stats.projectedRevenue / 1000).toFixed(0)}k proyectado ·{' '}
                 {filteredAppointments.length} citas
               </div>
@@ -744,7 +740,7 @@ function CitasCalendarFusionContent() {
               {/* Desktop: Full stats with progress bar */}
               <div className="hidden lg:flex items-center gap-6 text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-zinc-500 dark:text-zinc-400">Proyectado:</span>
+                  <span className="text-muted">Proyectado:</span>
                   <span className="font-bold text-amber-500 dark:text-amber-500">
                     ₡{(stats.projectedRevenue / 1000).toFixed(0)}k
                   </span>
@@ -761,9 +757,7 @@ function CitasCalendarFusionContent() {
                   </div>
                 )}
                 <div className="flex items-center gap-2">
-                  <span className="text-zinc-500 dark:text-zinc-400">
-                    {filteredAppointments.length} citas
-                  </span>
+                  <span className="text-muted">{filteredAppointments.length} citas</span>
                 </div>
               </div>
             </div>
@@ -779,7 +773,7 @@ function CitasCalendarFusionContent() {
               {/* Loading state */}
               {isLoading && (
                 <div className="flex items-center justify-center h-64">
-                  <div className="text-zinc-500 dark:text-zinc-400">Cargando citas...</div>
+                  <div className="text-muted">Cargando citas...</div>
                 </div>
               )}
 
@@ -788,7 +782,7 @@ function CitasCalendarFusionContent() {
                 <div className="space-y-4">
                   {/* All Day section */}
                   <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-                    <span className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    <span className="text-xs font-medium uppercase tracking-wide text-muted">
                       Todo el día
                     </span>
                   </div>
@@ -812,7 +806,7 @@ function CitasCalendarFusionContent() {
                                 {block.label}
                               </h3>
                             </div>
-                            <span className="pl-7 text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400 xl:pl-0 xl:shrink-0">
+                            <span className="pl-7 text-xs sm:text-sm font-medium text-muted xl:pl-0 xl:shrink-0">
                               {block.start > 12 ? block.start - 12 : block.start}
                               {block.start >= 12 ? 'pm' : 'am'} -{' '}
                               {block.end > 12 ? block.end - 12 : block.end}
@@ -857,7 +851,7 @@ function CitasCalendarFusionContent() {
                         {/* Appointments (grouped rows inside block card) */}
                         <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950/60">
                           {block.appointments.length === 0 && (
-                            <div className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
+                            <div className="px-4 py-3 text-sm text-muted">
                               Sin citas programadas
                             </div>
                           )}
@@ -924,12 +918,12 @@ function CitasCalendarFusionContent() {
                                               {apt.client?.name || 'Cliente'}
                                             </span>
                                           </div>
-                                          <div className="text-xs text-zinc-500 dark:text-zinc-400 leading-tight">
+                                          <div className="text-xs text-muted leading-tight">
                                             {apt.service?.name || 'Servicio'}
                                           </div>
                                         </div>
                                         <div className="text-right text-xs">
-                                          <div className="text-zinc-500 dark:text-zinc-400 font-mono">
+                                          <div className="text-muted font-mono">
                                             {format(parseISO(apt.scheduled_at), 'h:mm a')}
                                           </div>
                                           <div className="text-amber-500 dark:text-amber-500 font-semibold mt-0.5">
@@ -978,12 +972,12 @@ function CitasCalendarFusionContent() {
                                             {apt.client?.name || 'Cliente'}
                                           </span>
                                         </div>
-                                        <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        <div className="text-xs text-muted">
                                           {apt.service?.name || 'Servicio'}
                                         </div>
                                       </div>
                                       <div className="text-right text-xs">
-                                        <div className="text-zinc-500 dark:text-zinc-400 font-mono">
+                                        <div className="text-muted font-mono">
                                           {format(parseISO(apt.scheduled_at), 'h:mm a')}
                                         </div>
                                         <div className="text-amber-500 dark:text-amber-500 font-semibold mt-0.5">
@@ -1020,7 +1014,7 @@ function CitasCalendarFusionContent() {
                                     <div className="text-xs font-bold text-green-600 dark:text-emerald-500">
                                       {gap.minutes} MIN GAP
                                     </div>
-                                    <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                                    <div className="text-xs text-muted">
                                       {format(parseISO(gap.start), 'h:mm a')} -{' '}
                                       {format(parseISO(gap.end), 'h:mm a')}
                                     </div>
@@ -1076,9 +1070,7 @@ function CitasCalendarFusionContent() {
                     {/* Mobile: 3-day view */}
                     <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] border-b border-zinc-200 dark:border-zinc-800 mb-4">
                       <div className="p-2">
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                          Todo el día
-                        </span>
+                        <span className="text-xs text-muted">Todo el día</span>
                       </div>
                       {mobileWeekDays.map((day) => (
                         <div
@@ -1090,9 +1082,7 @@ function CitasCalendarFusionContent() {
                     {/* Desktop: 7-day view */}
                     <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] border-b border-zinc-200 dark:border-zinc-800 mb-4">
                       <div className="p-2">
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                          Todo el día
-                        </span>
+                        <span className="text-xs text-muted">Todo el día</span>
                       </div>
                       {weekDays.map((day) => (
                         <div
@@ -1114,12 +1104,12 @@ function CitasCalendarFusionContent() {
                             className={`inline-flex items-center justify-center ${
                               isSameDay(day.date, today)
                                 ? 'bg-red-500 dark:bg-red-500 text-white w-8 h-8 rounded-full font-bold'
-                                : 'text-zinc-500 dark:text-zinc-400'
+                                : 'text-muted'
                             }`}
                           >
                             <span className="text-sm">{format(day.date, 'd')}</span>
                           </div>
-                          <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                          <div className="text-xs text-muted mt-1">
                             {format(day.date, 'EEE', { locale: es })}
                           </div>
                         </div>
@@ -1137,12 +1127,12 @@ function CitasCalendarFusionContent() {
                             className={`inline-flex items-center justify-center ${
                               isSameDay(day.date, today)
                                 ? 'bg-red-500 dark:bg-red-500 text-white w-8 h-8 rounded-full font-bold'
-                                : 'text-zinc-500 dark:text-zinc-400'
+                                : 'text-muted'
                             }`}
                           >
                             <span className="text-sm">{format(day.date, 'd')}</span>
                           </div>
-                          <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                          <div className="text-xs text-muted mt-1">
                             {format(day.date, 'EEE', { locale: es })}
                           </div>
                         </div>
@@ -1161,7 +1151,7 @@ function CitasCalendarFusionContent() {
                             style={{ minHeight: '60px' }}
                           >
                             {/* Hour label */}
-                            <div className="text-xs text-zinc-500 dark:text-zinc-400 text-right pr-2 pt-1">
+                            <div className="text-xs text-muted text-right pr-2 pt-1">
                               {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
                             </div>
 
@@ -1209,7 +1199,7 @@ function CitasCalendarFusionContent() {
                             style={{ minHeight: '60px' }}
                           >
                             {/* Hour label */}
-                            <div className="text-xs text-zinc-500 dark:text-zinc-400 text-right pr-2 pt-1">
+                            <div className="text-xs text-muted text-right pr-2 pt-1">
                               {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
                             </div>
 
@@ -1270,7 +1260,7 @@ function CitasCalendarFusionContent() {
                     {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
                       <div
                         key={day}
-                        className="bg-white dark:bg-zinc-900 text-center text-xs text-zinc-500 dark:text-zinc-400 py-2 font-medium"
+                        className="bg-white dark:bg-zinc-900 text-center text-xs text-muted py-2 font-medium"
                       >
                         {day}
                       </div>
@@ -1317,7 +1307,7 @@ function CitasCalendarFusionContent() {
                               />
                             ))}
                             {day.appointments.length > 3 && (
-                              <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                              <div className="text-[11px] text-muted">
                                 +{day.appointments.length - 3}
                               </div>
                             )}
@@ -1551,7 +1541,7 @@ function CitasCalendarFusionContent() {
       >
         <SheetContent
           side="bottom"
-          className="max-h-[60vh] bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-2xl pb-safe"
+          className="max-h-[60vh] bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-2xl pb-safe md:inset-x-auto md:bottom-6 md:left-1/2 md:w-[min(42rem,calc(100%-2rem))] md:-translate-x-1/2 md:rounded-2xl md:max-h-[70vh] md:border md:border-zinc-200 md:shadow-2xl md:dark:border-zinc-800"
         >
           <SheetHeader>
             <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
@@ -1591,7 +1581,7 @@ function CitasCalendarFusionContent() {
                 >
                   <div>
                     <span className="text-base text-zinc-900 dark:text-white">{service.name}</span>
-                    <span className="text-sm text-zinc-500 dark:text-zinc-400 ml-2">
+                    <span className="text-sm text-muted ml-2">
                       ₡{service.price.toLocaleString()}
                     </span>
                   </div>
@@ -1648,12 +1638,12 @@ function CitasCalendarFusionContent() {
                     <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
                       {apt.client?.name || 'Cliente'}
                     </h2>
-                    <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+                    <div className="flex items-center gap-2 text-muted">
                       <Phone className="w-4 h-4" />
                       <span>{apt.client?.phone || 'Sin teléfono'}</span>
                     </div>
                     {apt.client?.email && (
-                      <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mt-1">
+                      <div className="flex items-center gap-2 text-muted mt-1">
                         <Mail className="w-4 h-4" />
                         <span>{apt.client.email}</span>
                       </div>
@@ -1664,7 +1654,7 @@ function CitasCalendarFusionContent() {
                     <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
                       <Clock className="w-5 h-5 text-blue-500" />
                       <div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400">Horario</div>
+                        <div className="text-xs text-muted">Horario</div>
                         <div className="font-medium text-zinc-900 dark:text-white">
                           {format(parseISO(apt.scheduled_at), 'h:mm a')} (
                           {apt.service?.duration_minutes || 30} min)
@@ -1675,7 +1665,7 @@ function CitasCalendarFusionContent() {
                     <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
                       <Zap className="w-5 h-5 text-violet-500" />
                       <div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400">Servicio</div>
+                        <div className="text-xs text-muted">Servicio</div>
                         <div className="font-medium text-zinc-900 dark:text-white">
                           {apt.service?.name || 'Sin servicio'}
                         </div>
@@ -1685,7 +1675,7 @@ function CitasCalendarFusionContent() {
                     <div className="flex items-center gap-4 p-4 bg-amber-500/10 rounded-xl border border-amber-500/30">
                       <DollarSign className="w-5 h-5 text-amber-500 dark:text-amber-500" />
                       <div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400">Precio</div>
+                        <div className="text-xs text-muted">Precio</div>
                         <div className="text-2xl font-bold text-amber-500 dark:text-amber-500">
                           ₡{apt.service?.price || 0}
                         </div>

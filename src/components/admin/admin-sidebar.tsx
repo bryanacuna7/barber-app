@@ -106,7 +106,7 @@ export function AdminBottomNav() {
               href={item.href}
               className={cn(
                 'flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors',
-                isActive ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'
+                isActive ? 'text-zinc-900 dark:text-zinc-100' : 'text-muted'
               )}
             >
               <item.icon

@@ -116,9 +116,7 @@ export function Modal({
                   {title}
                 </h2>
               )}
-              {description && (
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
-              )}
+              {description && <p className="mt-1 text-sm text-muted">{description}</p>}
             </div>
             {showCloseButton && (
               <button

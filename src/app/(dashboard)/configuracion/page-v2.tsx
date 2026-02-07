@@ -140,6 +140,7 @@ export default function ConfiguracionPage() {
       setBrandSecondary('')
       setLogoUrl(business.branding?.logoUrl || null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [business])
 
   // Cmd+K / Ctrl+K keyboard shortcut
@@ -331,7 +332,7 @@ export default function ConfiguracionPage() {
               <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
                 Configuración
               </h1>
-              <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
+              <p className="text-[15px] text-muted mt-1">
                 Administra los datos y preferencias de tu negocio
               </p>
             </div>
@@ -375,7 +376,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Información General
                 </h3>
-                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-muted">
                   Nombre, teléfono, dirección y enlace de reservas
                 </p>
               </div>
@@ -401,7 +402,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Horario de Atención
                 </h3>
-                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-muted">
                   Días y horas de operación, tiempos de buffer
                 </p>
               </div>
@@ -427,9 +428,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Marca y Estilo
                 </h3>
-                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
-                  Colores, logo y personalización visual
-                </p>
+                <p className="text-[15px] text-muted">Colores, logo y personalización visual</p>
               </div>
               <ArrowRight className="h-5 w-5 text-zinc-400 dark:text-zinc-500 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors flex-shrink-0 mt-1" />
             </div>
@@ -453,7 +452,7 @@ export default function ConfiguracionPage() {
                 <h3 className="text-[17px] font-semibold text-zinc-900 dark:text-white mb-1">
                   Configuración Avanzada
                 </h3>
-                <p className="text-[15px] text-zinc-500 dark:text-zinc-400">
+                <p className="text-[15px] text-muted">
                   Notificaciones, lealtad y opciones avanzadas
                 </p>
               </div>
@@ -757,7 +756,7 @@ export default function ConfiguracionPage() {
                           <div className="space-y-4">
                             <div className="grid gap-4 sm:grid-cols-2">
                               <div id="buffer-time">
-                                <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                                <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-muted">
                                   Tiempo entre citas
                                 </label>
                                 <select
@@ -776,12 +775,12 @@ export default function ConfiguracionPage() {
                                   <option value={15}>15 minutos</option>
                                   <option value={30}>30 minutos</option>
                                 </select>
-                                <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+                                <p className="mt-2 text-[12px] text-muted">
                                   Tiempo adicional entre citas para preparación o limpieza
                                 </p>
                               </div>
                               <div id="advance-booking">
-                                <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                                <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-muted">
                                   Días de anticipación
                                 </label>
                                 <select
@@ -800,7 +799,7 @@ export default function ConfiguracionPage() {
                                   <option value={30}>1 mes</option>
                                   <option value={60}>2 meses</option>
                                 </select>
-                                <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+                                <p className="mt-2 text-[12px] text-muted">
                                   Con cuánta anticipación los clientes pueden reservar
                                 </p>
                               </div>
@@ -898,7 +897,7 @@ export default function ConfiguracionPage() {
 
                             {/* Live Preview - Dual Mode */}
                             <div>
-                              <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                              <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-muted">
                                 Vista previa
                               </label>
                               <div className="space-y-3">
@@ -913,6 +912,7 @@ export default function ConfiguracionPage() {
                                   >
                                     <div className="flex items-center gap-3 mb-3">
                                       {logoUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
                                         <img
                                           src={logoUrl}
                                           alt="Logo"
@@ -964,6 +964,7 @@ export default function ConfiguracionPage() {
                                   >
                                     <div className="flex items-center gap-3 mb-3">
                                       {logoUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
                                         <img
                                           src={logoUrl}
                                           alt="Logo"
@@ -1008,11 +1009,12 @@ export default function ConfiguracionPage() {
 
                             {/* Logo Upload */}
                             <div>
-                              <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                              <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-muted">
                                 Logo del negocio
                               </label>
                               {logoUrl ? (
                                 <div className="flex items-center gap-4">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={logoUrl}
                                     alt="Logo"

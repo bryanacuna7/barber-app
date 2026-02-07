@@ -150,9 +150,7 @@ export function BarbersManagement() {
             <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
               Staff
             </h1>
-            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
-              Gestiona tu equipo de profesionales
-            </p>
+            <p className="text-[15px] text-muted mt-1">Gestiona tu equipo de profesionales</p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button

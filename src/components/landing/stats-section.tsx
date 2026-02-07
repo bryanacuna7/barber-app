@@ -127,7 +127,7 @@ export function StatsSection() {
         </motion.div>
 
         {/* Trust Badges */}
-        <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-muted">
           {['Datos 100% seguros', 'Soporte en español', 'Actualización constante'].map(
             (badge, i) => (
               <motion.div
