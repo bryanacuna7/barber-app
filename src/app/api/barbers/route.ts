@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { canAddBarber } from '@/lib/subscription'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
 const barberSchema = z.object({
   name: z.string().min(1),
@@ -11,67 +10,23 @@ const barberSchema = z.object({
   photo_url: z.string().optional(),
 })
 
-export async function GET() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // Get user's business
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!business) {
-    return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-  }
-
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   const { data: barbers, error } = await supabase
     .from('barbers')
-    .select('*')
+    .select(
+      'id, name, email, phone, user_id, business_id, is_active, role, bio, photo_url, avatar_url, display_order, created_at'
+    )
     .eq('business_id', business.id)
     .order('display_order', { ascending: true })
 
   if (error) {
-    return NextResponse.json({ error: 'Failed to fetch barbers' }, { status: 500 })
+    return errorResponse('Failed to fetch barbers')
   }
 
   return NextResponse.json(barbers)
-}
+})
 
-export async function POST(request: Request) {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // Get user's business
-  const { data: business, error: bizError } = await supabase
-    .from('businesses')
-    .select('id')
-    .eq('owner_id', user.id)
-    .single()
-
-  if (!business) {
-    return NextResponse.json(
-      {
-        error: 'Business not found',
-        debug: { userId: user.id, bizError: bizError?.message },
-      },
-      { status: 404 }
-    )
-  }
-
+export const POST = withAuth(async (request, context, { business, supabase }) => {
   let body
   try {
     body = await request.json()
@@ -112,7 +67,9 @@ export async function POST(request: Request) {
       bio: parsed.data.bio || null,
       photo_url: parsed.data.photo_url || null,
     })
-    .select()
+    .select(
+      'id, name, email, phone, user_id, business_id, is_active, role, bio, photo_url, avatar_url, display_order, created_at'
+    )
     .single()
 
   if (error) {
@@ -135,4 +92,4 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(barber)
-}
+})

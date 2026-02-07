@@ -8,8 +8,11 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-02 03:00 PM
-- **Last Session:** Session 58 - Navigation & Layout Fixes + Client Referral Planning ✅ (COMPLETE)
+- **Last Updated:** 2026-02-07 (Session 149 - Chart Tooltips + Stats Cards)
+- **Current Branch:** `feature/ui-ux-redesign`
+- **Current Phase:** Post-Color Audit polish (tooltips, compact currency, responsive stats)
+- **Color Audit:** `color-audit.md` (root)
+- **Supabase Project:** `zanywefnobtzhoeuoyuc`
 
 ---
 
@@ -17,526 +20,231 @@
 
 ### Completed Features
 
-- [x] Sistema de reservas online público (/reservar/[slug])
-- [x] Dashboard administrativo para barberías
-- [x] **Sistema de Gamificación Completo** 🎮
-  - **Phase 1: Client Loyalty** ✅ (puntos, tiers, referidos, recompensas)
-  - **Phase 2: Barber Gamification** ✅ (achievements, leaderboards, challenges)
-  - **Phase 3: SaaS Referral System** ✅ (Backend + Frontend Dashboard completo + Working)
-- [x] Integración de loyalty en booking flow
-- [x] PWA y branding personalizable
-- [x] Notificaciones automáticas
-
-### In Progress
-
-- [ ] **Phase 3 - Sistema de Referencias:** Testing & QA
-  - **Estado:** ✅ FASE 1-6 completas y funcionando | ⏳ FASE 7 pendiente
-  - **Documento:** `REFERRAL_SYSTEM_PLAN.md` (plan completo de 7 fases)
-  - **Progreso de implementación:**
-    1. ✅ Database Schema - Migration 019 creada
-    2. ✅ Backend API Routes - 5 APIs funcionando
-    3. ✅ Frontend Dashboard Cliente - Funcional sin errores
-    4. ✅ Integración Signup Flow - Banner, tracking y cookies implementados
-    5. ✅ Notificaciones - In-app notifications funcionando automáticamente
-    6. ✅ Super Admin Dashboard - Completo con 4 APIs + 4 componentes
-    7. ⏳ Testing & QA (próximo)
-
-### Recently Completed
-
-#### Session 58 (2026-02-02 03:00 PM)
-
-**Tema:** 🔧 Navigation & Layout Fixes + Client Referral Dashboard Planning
-
-**Completado:**
-
-- ✅ **npm security vulnerabilities resolved** - 0 vulnerabilities (tar package updated)
-
-- ✅ **Navigation Fixed (2 sidebars)**
-  - Business Dashboard Sidebar: Agregado link "Referencias" con Share2 icon
-  - Super Admin Sidebar: Agregado link "Referencias" con Share2 icon
-  - Ahora ambos dashboards tienen acceso a sus respectivas páginas de referencias
-
-- ✅ **Layout Group Fix - Critical**
-  - **Problema:** `/admin/referencias` estaba en `(dashboard)` layout group → usaba sidebar de business
-  - **Solución:** Movido a `(admin)` layout group → ahora usa sidebar de super admin correctamente
-  - **Resultado:** Super Admin sidebar (negro con Shield icon) se mantiene al navegar a Referencias
-
-- ✅ **Client Referral Dashboard - Planning Complete**
-  - Documento: `CLIENT_REFERRAL_DASHBOARD_PLAN.md` (plan completo de implementación)
-  - 3 API endpoints planeados (my-code, stats, list)
-  - 4 componentes frontend diseñados
-  - Página `/referidos` especificada para clientes
-  - ~770 líneas de código estimadas
-
-**Archivos modificados (5):**
-
-- `src/components/dashboard/sidebar.tsx` - Agregado link Referencias
-- `src/components/admin/admin-sidebar.tsx` - Agregado link Referencias
-- `src/app/(admin)/admin/referencias/page.tsx` - Movido de (dashboard) a (admin)
-- `package.json` + `package-lock.json` - Dependencies actualizadas (npm audit fix)
-
-**Archivos creados (1):**
-
-- `CLIENT_REFERRAL_DASHBOARD_PLAN.md` - Plan completo del dashboard de referidos para clientes
-
-**Issues resueltos:**
-
-1. ❌ → ✅ Links de referencias no eran accesibles desde navegación
-2. ❌ → ✅ Admin sidebar no persistía al navegar a /admin/referencias
-3. ❌ → ✅ npm vulnerabilities (tar package)
-4. ❌ → 📋 Sistema de referidos clientes sin UI (ahora planeado)
-
-**Commit:** `0a578a2` - 20 archivos, 2173 insertions
-
-**Estado:** ✅ Navegación completa, layout correcto, sistema listo para testing
-
-**Siguiente paso:**
-
-- **Opción A:** Implementar Client Referral Dashboard (~3-4 horas, 8 archivos)
-- **Opción B:** FASE 7 - Testing & QA del Business Referral System
+- [x] Sistema de reservas online + Dashboard administrativo
+- [x] Sistema de Gamificación Completo (Client Loyalty + Barber + SaaS Referral)
+- [x] PWA y branding personalizable + Notificaciones automáticas
+- [x] **Security Hardening** ✅ (RBAC, IDOR fixed, rate limiting)
+- [x] **Performance Optimization** ✅ (7 índices DB, N+1 queries fixed, 7-10x faster)
+- [x] **Observability Infrastructure** ✅ (Pino logging, Sentry, Redis rate limiting)
+- [x] **Phase 1 & 2:** All 5 Dashboard Pages Modernized
+- [x] **Mobile UX Audit:** 11 critical fixes
+- [x] **Supabase Migration:** New free-tier project
+- [x] **Super Admin Panel** ✅ — 6 pages + 11 API routes
+- [x] **Egress Optimization** ✅
+- [x] **Motion Token Migration** ✅
+- [x] **AUDIT.md Gap Remediation** ✅
 
 ---
 
-#### Session 57 (2026-02-02 01:30 PM)
+## Roadmap (Prioritized)
 
-**Tema:** 🎯 FASE 6 - Super Admin Dashboard para Sistema de Referencias
+### COMPLETE: Color Audit (Sessions 146-148)
 
-**Completado:**
+**Reference:** `color-audit.md` — Awwwards-level color discipline
 
-- ✅ **Backend APIs (4 nuevos endpoints)**
-  - `/api/admin/referrals/overview` - Stats globales del programa
-  - `/api/admin/referrals/top-referrers` - Ranking de top 10 referrers
-  - `/api/admin/referrals/recent-conversions` - Timeline de conversiones recientes
-  - `/api/admin/referrals/analytics` - Data para gráficas (Line, Pie, Bar charts)
+**Fase 1 — Foundations (COMPLETE):**
 
-- ✅ **Frontend Components (4 componentes)**
-  - `GlobalStatsCards` - 6 métricas clave con animaciones (Framer Motion)
-  - `TopReferrersTable` - Tabla con ranking, badges de milestone y conversión rate
-  - `ConversionsTimeline` - Timeline con status badges (pending/active/expired)
-  - `ReferralAnalyticsCharts` - 3 gráficas interactivas (Recharts)
+- [x] Premium color tokens added to globals.css (surface-0/1/2, text-1/2/3, accent-soft, semantic)
+- [x] Default `--brand-primary` upgraded from `#27272a` to `#4F46E5` (light) / `#6D7CFF` (dark)
+- [x] `premium-background.tsx` — mesh reduced from saturated violet/purple to subtle brand-tinted, opacity 15% → 7%
+- [x] `button.tsx` — gradient variant uses `var(--brand-primary)` instead of hardcoded blue→purple
+- [x] `bottom-nav.tsx` — active state, + button, action sheet icons use brand tokens
+- [x] **FIXED by user:** bottom-nav indicator pill — opacities doubled, active text neutral
 
-- ✅ **Admin Dashboard Page** - `/admin/referencias`
-  - Auth check usando tabla `admin_users` existente
-  - Queries directas a Supabase (sin fetch a APIs intermedias)
-  - Server Component con createServiceClient para admin access
-  - Manejo de errores y estados vacíos
-  - Responsive design + dark mode completo
+**Fase 2 — Dashboard Unification (COMPLETE — Session 147):**
 
-**Archivos creados (9):**
+- [x] CSS utility classes added: `brand-gradient-text`, `brand-tab-active`, `brand-mesh-1`, `brand-mesh-2`
+- [x] `GradientHeader.tsx` — hardcoded `from-violet-600 via-purple-600 to-blue-600` → `brand-gradient-text` CSS class
+- [x] Page headers (4 pages) — inline gradient → `brand-gradient-text`
+- [x] CTA buttons (4 pages) — inline gradient → `Button variant="gradient"` (uses `--brand-primary`)
+- [x] Segment tabs (all 5 pages, ~10 instances) — gradient → `brand-tab-active` solid brand color
+- [x] Category pills (servicios) — gradient → `brand-tab-active`
+- [x] Decorative mesh (3 pages, 6 blobs) — hardcoded violet/purple → `brand-mesh-1`/`brand-mesh-2`
+- [x] `KPICard.tsx` hero variant — default gradient → `var(--brand-primary)` inline style
+- [x] `BookingHeader.tsx` — share button gradient → brand-primary inline style
+- [x] Verified: light mode + dark mode on mobile (375px), all 5 pages
 
-- `src/app/api/admin/referrals/overview/route.ts` (~90 líneas)
-- `src/app/api/admin/referrals/top-referrers/route.ts` (~100 líneas)
-- `src/app/api/admin/referrals/recent-conversions/route.ts` (~110 líneas)
-- `src/app/api/admin/referrals/analytics/route.ts` (~140 líneas)
-- `src/components/admin/referrals/global-stats-cards.tsx` (~110 líneas)
-- `src/components/admin/referrals/top-referrers-table.tsx` (~190 líneas)
-- `src/components/admin/referrals/conversions-timeline.tsx` (~160 líneas)
-- `src/components/admin/referrals/referral-analytics-charts.tsx` (~180 líneas)
-- `src/app/(dashboard)/admin/referencias/page.tsx` (~280 líneas)
+**Fase 3 — Data viz y contraste (COMPLETE — Session 148):**
 
-**Total:** ~1,360 líneas de código
+- [x] Chart tooltips dark/light adaptive — `contentStyle` uses CSS vars (`--chart-tooltip-bg/border/text`)
+- [x] Chart palette — SVG props use `useChartColors()` hook (reads CSS vars at runtime, listens for theme changes)
+- [x] Chart colors brand-aware — revenue line + services bars use `--brand-primary` via JS hook
+- [x] `text-zinc-500 dark:text-zinc-400` → `text-muted` (218 instances across 66 active files)
+- [x] Added Tailwind `--color-muted` and `--color-subtle` tokens in `@theme` (maps to `--text-2` / `--text-3`)
+- [x] `themeColor` meta in layout.tsx — light mode `#0a0a0a` → `#ffffff`
+- [x] Verified: light mode on mobile (375px), `text-muted` renders `#5A6270` (6.2:1 contrast on white)
 
-**Características implementadas:**
+### Remaining Audit Items (pre-color)
 
-- Verificación de permisos admin usando `admin_users` table
-- Queries optimizadas con service client
-- Animaciones con Framer Motion
-- Gráficas interactivas con Recharts (Line, Pie, Bar)
-- Responsive design con Tailwind CSS
-- Dark mode support completo
-- TypeScript types completos
+- [ ] Button migration — citas (22 manual/7 Button), barberos (7/3)
+- [ ] Charts mobile-first redesign (Gate E: FAIL)
+- [ ] Copy UX Spanish consistency audit (Gate F: PENDING)
+- [ ] Card padre / double inset removal
+- [ ] Header CTA Contract consistency
+- [ ] Visual verification at 360px + Dark mode full QA
 
-**Estado:** ✅ FASE 6 completa - Super Admin Dashboard funcional
+### MEDIUM: Platform Features
 
-**Siguiente paso:** FASE 7 - Testing & QA del sistema completo
-
----
-
-#### Session 56 (2026-02-02 11:30 AM)
-
-**Tema:** 🎯 FASE 4 - Integración Signup Flow con Sistema de Referencias
-
-**Completado:**
-
-- ✅ **ReferrerBanner Component** - Banner visual que se muestra cuando un usuario llega con código de referido
-  - Diseño con gradiente purple/pink
-  - Muestra el nombre del negocio que refiere
-  - Lista de beneficios para el nuevo usuario
-  - Animación de entrada con Framer Motion
-
-- ✅ **Cookie Management** - Persistencia del código de referido durante signup
-  - Helper functions: `saveReferralCode()`, `getReferralCode()`, `clearReferralCode()`
-  - Cookie con 30 días de duración
-  - Se guarda cuando usuario llega con `?ref=CODIGO`
-  - Se lee al completar signup para trackear conversión
-
-- ✅ **Signup Flow Integration** - Modificado `/register` page
-  - Detecta query param `?ref=CODIGO` en useEffect
-  - Fetch automático a `/api/referrals/info` para obtener datos del referrer
-  - Muestra banner si el código es válido
-  - Tracking automático de conversión después de crear cuenta exitosamente
-  - Estado inicial: "pending"
-
-- ✅ **Conversion Tracking** - Helper function `trackReferralConversion()`
-  - Llama a `/api/referrals/track-conversion` POST endpoint
-  - Incrementa `total_referrals` del referrer
-  - Crea registro en `referral_conversions` table
-  - Limpia cookie después de tracking exitoso
-
-**Archivos creados (3):**
-
-- `src/components/referrals/referrer-banner.tsx` - Componente del banner (~70 líneas)
-- `src/lib/referrals.ts` - Utilidades para cookies y tracking (~90 líneas)
-
-**Archivos modificados (1):**
-
-- `src/app/(auth)/register/page.tsx` - Integrado flujo de referidos (~50 líneas agregadas)
-
-**Total:** ~210 líneas de código
-
-**Cómo funciona el flujo:**
-
-```
-1. Usuario llega a /register?ref=BARBERSHOP_2026_A3F5
-   ↓
-2. useEffect detecta query param, guarda en cookie
-   ↓
-3. Fetch a /api/referrals/info?code=...
-   ↓
-4. Si válido → Muestra ReferrerBanner con nombre del negocio
-   ↓
-5. Usuario completa registro (crea cuenta + negocio)
-   ↓
-6. Lee código de cookie, llama trackReferralConversion()
-   ↓
-7. POST /api/referrals/track-conversion
-   ↓
-8. Incrementa total_referrals, crea conversión con status "pending"
-   ↓
-9. Limpia cookie, redirect a /dashboard
-```
-
-**Estado:** ✅ FASE 4 completa - Signup flow integrado con sistema de referencias
-
-**FASE 5 - Notificaciones:** ✅ Marcada como completa
-
-- Las notificaciones in-app ya funcionan automáticamente en el API `/api/referrals/track-conversion`
-- Se crean notificaciones cuando status='active' y cuando se desbloquean milestones
-- Email/push notifications quedan como opcional para futuro
-
-**Siguiente paso:** FASE 6 - Super Admin Dashboard
+- [ ] Admin user management UI
+- [ ] Multi-tenant view
+- [ ] Cache subscription/notification checks with TTL
+- [ ] Egress monitoring/alerts
 
 ---
 
-#### Session 55 (2026-02-02 10:15 AM)
+## Recent Sessions
 
-**Tema:** 🐛 Fix crítico de autenticación en sistema de referencias
+### Session 149: Chart Tooltips + Compact Currency + Responsive Stats (2026-02-07)
 
-**Problema encontrado:**
+**Status:** ✅ Complete
 
-- ❌ App dejó de cargar después de completar FASE 3
-- ❌ Error "Unauthorized" al intentar acceder a `/referencias`
-- ❌ Múltiples procesos de Next.js causando conflictos
+**Objective:** Custom chart tooltips, compact currency formatting for dashboard stats, responsive stats card sizing
 
-**Debugging realizado:**
+**What was done:**
 
-1. **Múltiples procesos del servidor** - Detectados 2 pares de procesos Next.js corriendo simultáneamente
-2. **Error de autenticación** - Server Component haciendo fetch interno a `/api/referrals/stats` sin pasar cookies
-3. **Root cause:** Fetch desde Server Components no pasa automáticamente cookies de autenticación
+1. **chart-tooltip.tsx** (NEW) — Shared `ChartTooltip` component with theme-aware `tone` props (bg/border/text via JS, not CSS vars — fixes SVG prop limitation).
 
-**Solución aplicada:**
+2. **revenue-chart.tsx** — Replaced Recharts `contentStyle`/`labelStyle`/`itemStyle` with custom `RevenueTooltip` using `ChartTooltip`. Added tooltip color props to `useChartColors()`.
 
-- ✅ Terminados todos los procesos duplicados del servidor
-- ✅ Reiniciado dev server limpiamente
-- ✅ **Fix principal:** Movidas todas las queries de `/api/referrals/stats` directamente al Server Component
-- ✅ Eliminado fetch interno innecesario (más rápido, menos overhead)
-- ✅ Verificado: Compilación exitosa sin errores
+3. **services-chart.tsx** — Same tooltip migration. Bar fills now use brand-primary RGB with opacity scale (`0.72, 0.56, 0.42, 0.32`) instead of hardcoded grays. Winner badge gets dynamic `winnerRgb` + border. Added `toRgbChannels()` helper for hex→RGB conversion.
 
-**Archivos modificados:**
+4. **format.ts** — Added `formatCurrencyCompactMillions()`: values < 1M use standard format, ≥1M show `₡1.3M` / `₡13M`. Exported via `index.ts`.
 
-- `src/app/(dashboard)/referencias/page.tsx` - Reemplazado fetch API con queries directas a Supabase
+5. **dashboard-content.tsx** — Dashboard stats now use `formatCurrencyCompactMillions` instead of `formatCurrency` (prevents overflow on mobile).
 
-**Beneficios del fix:**
+6. **stats-card.tsx** — Responsive font scaling: `text-[26px]` default, `text-[22px]` for 10+ chars, `text-[20px]` for 13+ chars. Tighter mobile padding (`p-3.5`), smaller icon containers on mobile.
 
-1. ✅ Autenticación funciona correctamente (Supabase client tiene acceso a cookies)
-2. ✅ Más rápido (sin HTTP round-trip extra)
-3. ✅ Código más simple (menos failure points)
-4. ✅ Mejor type safety (queries directas)
+7. **format.test.ts** — 3 new tests for `formatCurrencyCompactMillions` (below 1M, millions with decimal, tens of millions without).
 
-**Estado:** ✅ `/referencias` ahora carga correctamente sin errores de autenticación
-
-**Siguiente paso:** FASE 4 - Integración Signup Flow
+**Files:** chart-tooltip.tsx (new), revenue-chart.tsx, services-chart.tsx, dashboard-content.tsx, stats-card.tsx, format.ts, index.ts, format.test.ts
 
 ---
 
-#### Session 54 (2026-02-02)
+### Session 148: Color Audit Fase 3 — Data Viz & Contrast (2026-02-07)
 
-**Tema:** 🎨 Phase 3 - Frontend Dashboard Cliente (FASE 3)
+**Status:** ✅ Complete
 
-**Completado:**
+**Objective:** Chart theming (tooltips + palette), secondary text contrast, themeColor meta
 
-- ✅ **Frontend Dashboard Completo**
-  - Página principal `/referencias` con 3 estados (error, empty, full dashboard)
-  - Integración con APIs de FASE 2
-  - Server component para fetch de datos
-  - Manejo de estados de carga y error
+**What was done:**
 
-- ✅ **6 Componentes Client Creados:**
-  1. `ReferralCodeCard` - Código único + QR + botones de compartir (WhatsApp, Copy)
-  2. `StatsCards` - 4 métricas animadas (Total, Activos, Milestone, Conversión)
-  3. `MilestoneProgress` - Barra progreso + grid de 5 milestone cards con tier colors
-  4. `BadgesShowcase` - Grid de badges desbloqueados con animaciones spring
-  5. `ConversionsTable` - Tabla de referidos con status badges y empty state
-  6. `GenerateReferralCode` - Modal para generar primer código con beneficios
+1. **globals.css** — Added chart tokens (`--chart-grid`, `--chart-axis`, `--chart-tooltip-bg/border/text`) for light and dark. Added `--color-muted` and `--color-subtle` to `@theme inline` (maps to `--text-2` / `--text-3`). Updated `app-page-subtitle` component class to use `text-muted`.
 
-- ✅ **Características Implementadas:**
-  - Dark mode completo en todos los componentes
-  - Responsive design (mobile-first, grid adaptativo)
-  - Animaciones con Framer Motion (cards, milestones, badges)
-  - Toast notifications con Sonner
-  - TypeScript types completos
+2. **revenue-chart.tsx** — Tooltip `contentStyle` uses CSS vars for theme-aware bg/border/text. SVG props (stroke, fill, gradient stops) use `useChartColors()` hook that reads computed CSS vars and listens for `prefers-color-scheme` changes. Line/area now uses brand-primary instead of hardcoded `#3b82f6`. Icon color brand-aware.
 
-**Archivos creados (7):**
+3. **services-chart.tsx** — Same tooltip + SVG theming. Bar fill uses brand-primary. Rank list uses brand-derived monochromatic opacity scale (`barOpacities`). Icon color brand-aware.
 
-- `src/app/(dashboard)/referencias/page.tsx`
-- `src/components/referrals/referral-code-card.tsx`
-- `src/components/referrals/stats-cards.tsx`
-- `src/components/referrals/milestone-progress.tsx`
-- `src/components/referrals/badges-showcase.tsx`
-- `src/components/referrals/conversions-table.tsx`
-- `src/components/referrals/generate-referral-code.tsx`
+4. **66 active .tsx files** — Replaced 218 instances of `text-zinc-500 dark:text-zinc-400` → `text-muted` (single Tailwind class). Remaining 20 instances only in deprecated `page-old.tsx` files.
 
-**Total:** ~1,200 líneas de código
+5. **layout.tsx** — `themeColor` light mode changed from `#0a0a0a` to `#ffffff`.
+
+6. **TS fix** — `revenue-chart.tsx` `labelFormatter` payload type changed from `Array<>` to `readonly []` (pre-existing Recharts type mismatch).
+
+**Contrast improvement:** `text-muted` renders `#5A6270` in light mode (6.2:1 on white, was borderline 4.88:1 with zinc-500). Dark mode `#A6B0BE` (8.76:1 on `#0a0a0a`).
+
+**Files modified:** globals.css, layout.tsx, revenue-chart.tsx, services-chart.tsx, barbers-leaderboard.tsx, + 57 component/page files (text-muted migration)
 
 ---
 
-### Key Files
+### Session 147: Color Audit Fase 2 — Dashboard Unification (2026-02-07)
 
-| File                                                     | Purpose                                       |
-| -------------------------------------------------------- | --------------------------------------------- |
-| `src/app/(dashboard)/referencias/page.tsx`               | Dashboard de referencias para business owners |
-| `src/app/(admin)/admin/referencias/page.tsx`             | Admin dashboard con vista global del programa |
-| `src/app/(auth)/register/page.tsx`                       | Signup page con integración de referidos      |
-| `src/components/referrals/referral-code-card.tsx`        | Card con código único + QR + compartir        |
-| `src/components/referrals/referrer-banner.tsx`           | Banner que muestra quién refirió (signup)     |
-| `src/components/admin/referrals/global-stats-cards.tsx`  | 6 métricas globales para admin                |
-| `src/components/admin/referrals/top-referrers-table.tsx` | Ranking de top referrers                      |
-| `src/lib/referrals.ts`                                   | Utilidades para cookies y tracking            |
-| `src/app/api/referrals/info/route.ts`                    | API para obtener info del referrer            |
-| `src/app/api/admin/referrals/overview/route.ts`          | Admin API - Stats globales                    |
-| `supabase/migrations/019_business_referral_system.sql`   | Schema completo del sistema de referencias    |
+**Status:** ✅ Complete
+
+**Objective:** Migrate all hardcoded violet/purple/blue gradients in dashboards to brand token system
+
+**What was done:**
+
+1. **globals.css** — Added 4 brand utility classes: `brand-gradient-text` (headers), `brand-tab-active` (tabs/pills), `brand-mesh-1`/`brand-mesh-2` (decorative blobs). All derive from `--brand-primary` / `--brand-primary-rgb`.
+
+2. **GradientHeader.tsx** — Replaced hardcoded `from-violet-600 via-purple-600 to-blue-600` with `brand-gradient-text` CSS class that creates a subtle monochromatic gradient from brand-primary to 30% lighter (light mode) or 20% lighter (dark mode).
+
+3. **All 5 page-v2 files** — Migrated ~30+ gradient instances:
+   - 4 page headers: inline gradient → `brand-gradient-text`
+   - 4 CTA buttons: inline gradient → `Button variant="gradient"`
+   - ~10 tab/segment active states: gradient → solid `brand-tab-active`
+   - 6 decorative mesh blobs: hardcoded colors → `brand-mesh-1`/`brand-mesh-2`
+
+4. **Design system components** — KPICard hero default and BookingHeader share button migrated to brand tokens.
+
+**Audit impact:** Reduced hardcoded gradient instances from 60+ to ~0 in dashboard chrome. Semantic colors (avatars, medals, stat card decoratives) intentionally preserved.
+
+**Files modified:** globals.css, GradientHeader.tsx, citas/page-v2.tsx, servicios/page-v2.tsx, barberos/page-v2.tsx, clientes/page-v2.tsx, analiticas/page-v2.tsx, KPICard.tsx, BookingHeader.tsx
+
+---
+
+### Session 146: Color Audit Fase 1 — Foundations (2026-02-07)
+
+**Status:** ✅ Complete
+
+**Objective:** Apply `color-audit.md` Phase 1 recommendations
+
+**What was done:**
+
+1. **globals.css** — Added premium tokens (surface-0/1/2, text-1/2/3, accent-soft, semantic colors) for light and dark. Changed default `--brand-primary` from zinc-800 (`#27272a`) to indigo (`#4F46E5` light / `#6D7CFF` dark).
+
+2. **premium-background.tsx** — Replaced saturated violet-400→blue-400 + purple-400→pink-400 mesh with brand-tinted subtle blobs at 7% opacity (was 15%). Uses `rgba(var(--brand-primary-rgb))`.
+
+3. **bottom-nav.tsx** — All active states (text, indicator pill, + button, action sheet icons) migrated from hardcoded `blue-*` to `var(--brand-primary)` / `var(--brand-primary-rgb)`. Created `.nav-indicator` CSS class for the active pill.
+
+4. **button.tsx** — `gradient` variant changed from `from-blue-600 to-purple-600` to solid `var(--brand-primary)` with brand shadow.
+
+**Problem found:**
+
+- The bottom-nav indicator pill in dark mode lost its premium glow effect. The original used specific Tailwind blue shades (blue-400/25 → blue-500/35) with 20px glow at 30% opacity. The brand-token version with CSS variables is less vibrant.
+- User explicitly said: "el ovalo en el nav bar de elemento activo me encantaba" and "se perdio el diseno premium"
+- **NEXT SESSION MUST FIX:** Increase `.nav-indicator` dark mode intensities or consider a hybrid approach that preserves the original glow quality.
+
+**Files modified:**
+
+- `src/app/globals.css` — tokens + `.nav-indicator` class
+- `src/components/ui/premium-background.tsx` — brand-tinted subtle mesh
+- `src/components/dashboard/bottom-nav.tsx` — brand tokens throughout
+- `src/components/ui/button.tsx` — gradient variant brand-aware
+
+**Git state:** Uncommitted changes (color audit + prior session changes)
+
+---
+
+### Session 145: Code Audit Verification (2026-02-07)
+
+**Status:** ✅ Complete — 5 AUDIT.md items found already resolved in code, progress synced
+
+### Session 143-144: Mobile De-Generic Pass (2026-02-08)
+
+**Status:** ✅ Complete — barberos/servicios/clientes/lealtad UX polish
+
+### Session 142: Citas + Barberos UX Polish (2026-02-08)
+
+**Status:** ✅ Applied
+
+### Sessions 133-141: Mobile UX Audit + Remediation
+
+**Status:** ✅ Complete — Apple HIG, 15 issues fixed, motion tokens, egress optimization
 
 ---
 
 ## Current State
 
-### Working
+### Working ✅
 
-- ✅ App funcionando correctamente en http://localhost:3000
-- ✅ Sistema de reservas operativo
-- ✅ Dashboard administrativo funcional
-- ✅ Sistema de loyalty integrado
-- ✅ Sistema de referencias funcionando sin errores (/referencias accessible)
+- App running at http://localhost:3000
+- All 5 dashboard pages modernized
+- **Color Audit COMPLETE** (Fases 1+2+3) — brand tokens, gradient unification, data viz, contrast
+- Charts fully theme-aware (tooltip + palette + axis via CSS vars + JS hook)
+- Secondary text uses `text-muted` (6.2:1 contrast on white vs old 4.88:1)
+- `themeColor` meta correct for light mode
 
-### Known Issues
+### Issues ⚠️
 
-- ⚠️ TypeScript errors pendientes en varios archivos (database types no registrados en Database['public']['Tables'])
-- ⚠️ No actualizar a Next.js 16 hasta que Turbopack esté más estable (esperar 16.2+)
-- ⚠️ Migraciones pendientes de aplicar en producción:
-  - 015_fix_notification_trigger.sql
-  - 016_fix_loyalty_programs_rls.sql
-  - 017_allow_public_read_loyalty_programs.sql
-  - 018_barber_gamification.sql
-  - 019_business_referral_system.sql
-
----
-
-## Next Session
-
-### Continue With
-
-**Opción A: 🎯 FASE 7 - Testing & QA del Business Referral System** (Recomendado)
-
-Sistema de referencias business-to-business completo (FASE 1-6 ✅ + navegación fixed). Ahora verificar que todo funciona correctamente end-to-end.
-
-**Objetivo:** Validar funcionamiento completo del sistema de referencias desde signup hasta admin dashboard.
-
-**Testing Plan:**
-
-1. **Backend API Testing**
-   - Verificar que los 9 endpoints respondan correctamente
-   - Validar permisos admin (tabla `admin_users`)
-   - Verificar cálculos de stats y analytics
-   - Test de error handling
-
-2. **Frontend Testing**
-   - Dashboard cliente `/referencias` - Verificar visualización de datos
-   - Dashboard admin `/admin/referencias` - Verificar métricas globales
-   - Signup flow con código de referido
-   - Tracking de conversiones
-
-3. **Integration Testing**
-   - Flujo completo: signup con código → conversión pending → conversión active
-   - Verificar notificaciones in-app
-   - Verificar incremento de milestones
-   - Verificar rewards claimed
-
-4. **Edge Cases**
-   - Código de referido inválido
-   - Usuario sin permisos admin
-   - Dashboard sin datos (empty state)
-   - Analytics con período sin conversiones
-
-**Comandos útiles:**
-
-```bash
-npm run dev  # Servidor en http://localhost:3000
-npx tsc --noEmit  # Verificar compilación TypeScript
-lsof -i :3000  # Verificar servidor
-```
-
-**Opción B: 👥 Implementar Client Referral Dashboard** (3-4 horas)
-
-Sistema de referidos cliente-a-cliente (backend ya existe, falta UI).
-
-**Plan completo en:** `CLIENT_REFERRAL_DASHBOARD_PLAN.md`
-
-**Sprint 1 (2-3 horas):**
-
-1. Crear 3 API routes (my-code, stats, list)
-2. Testing de APIs
-
-**Sprint 2 (2-3 horas):** 3. Crear 4 componentes frontend 4. Crear página `/referidos`
-
-**Sprint 3 (1 hora):** 5. Integrar link en sidebar 6. Testing end-to-end 7. Visual verification
-
-**Total:** ~770 líneas de código (8 archivos nuevos)
+1. ~~Bottom nav dark mode indicator~~ — FIXED by user
+2. ~~60+ hardcoded gradient instances~~ — MIGRATED (Fase 2)
+3. ~~203+ text-zinc-500/400~~ — MIGRATED to `text-muted` (Fase 3)
+4. ~~Chart tooltips hardcoded white~~ — THEMED (Fase 3)
+5. **Focus ring colors** (6 inputs) still use `focus:ring-violet-400` — low priority
+6. **Pre-existing TS error** in `features-section.tsx` (framer-motion Variants type) — unrelated to audit
 
 ---
 
-### Commands to Run
-
-```bash
-npm run dev  # Servidor en http://localhost:3000
-```
-
-### Context Notes
-
-- **Next.js Version:** Mantenerse en 15.x (no actualizar a 16 por ahora)
-- **Referral System:** FASE 1-5 completas | FASE 6 (Super Admin) pendiente
-- **Database:** Migration 019 creada pero no aplicada en producción
-- **Dev Server:** Corriendo en http://localhost:3000
-- **Notificaciones:** In-app notifications funcionando automáticamente
-
----
-
-## Session History
-
-### 2026-02-02 - Session 57 (FASE 6: Super Admin Dashboard) ✅
-
-**Duration:** ~45 min | **Status:** ✅ Complete
-
-**Features Implemented:**
-
-- Super Admin Dashboard con 4 API endpoints (overview, top-referrers, recent-conversions, analytics)
-- 4 componentes frontend (GlobalStatsCards, TopReferrersTable, ConversionsTimeline, ReferralAnalyticsCharts)
-- Admin page `/admin/referencias` con auth check usando `admin_users` table
-- Queries optimizadas con service client para admin access
-- Gráficas interactivas con Recharts (Line, Pie, Bar charts)
-- Responsive design + dark mode completo
-
-**Impact:**
-
-- ✅ Admins pueden monitorear el programa de referencias globalmente
-- ✅ Vista de métricas clave: conversión rate, revenue impact, avg referrals
-- ✅ Ranking de top referrers con stats detalladas
-- ✅ Timeline de conversiones recientes con filtros
-- ✅ Analytics con tendencias por mes y distribución de milestones
-
----
-
-### 2026-02-02 - Session 56 (FASE 4: Signup Flow Integration) ✅
-
-**Duration:** ~45 min | **Status:** ✅ Complete
-
-**Features Implemented:**
-
-- ReferrerBanner component con diseño purple/pink gradient
-- Cookie management para persistir código de referido (30 días)
-- Signup page integration (detect ?ref=, fetch referrer info, show banner)
-- Automatic conversion tracking después de signup exitoso
-- Helper functions: saveReferralCode, getReferralCode, clearReferralCode, trackReferralConversion
-
-**Flow:**
-
-```
-/register?ref=CODE → Save cookie → Fetch referrer info → Show banner
-→ User registers → Track conversion → Clear cookie → Redirect /dashboard
-```
-
-**Impact:**
-
-- ✅ Usuarios pueden registrarse usando códigos de referido
-- ✅ Referrers ven sus conversiones en /referencias dashboard
-- ✅ Total referrals se incrementa automáticamente
-- ✅ Sistema listo para tracking de conversiones a "active" status
-
----
-
-### 2026-02-02 - Session 55 (Fix Autenticación Referencias) ✅
-
-**Duration:** ~30 min | **Agents:** @debugger | **Status:** ✅ Complete
-
-**Problem:** Error "Unauthorized" al acceder a /referencias
-
-**Root Cause:**
-
-- Server Component haciendo fetch interno a `/api/referrals/stats`
-- Fetch no pasa cookies de autenticación automáticamente
-- API route no puede identificar usuario → 401 Unauthorized
-
-**Solution:**
-
-- Eliminado fetch interno innecesario
-- Movidas queries directamente al Server Component
-- Server Component tiene acceso directo a cookies via Supabase client
-
-**Result:**
-
-- ✅ /referencias carga correctamente
-- ✅ Autenticación funciona
-- ✅ Código más limpio y rápido
-
----
-
-### 2026-02-02 - Session 54 (Phase 3: Frontend Dashboard) ✅
-
-**Duration:** ~2 hours | **Status:** ✅ Complete
-
-Frontend completo del sistema de referencias con 6 componentes, integración con APIs, y manejo de estados. ~1,200 líneas de código.
-
----
-
-### 2026-02-02 - Session 53 (Phase 3: Backend) ✅
-
-**Duration:** ~2 hours | **Status:** ✅ Complete
-
-Backend completo: Migration 019, 5 API routes, TypeScript types. Sistema de milestones con recompensas escalonadas funcionando.
-
----
-
-### 2026-02-01 - Session 52 (UI Previews) ✅
-
-**Duration:** ~1.5 hours | **Status:** ✅ Complete
-
-Mockups visuales completos del dashboard de referencias (cliente + admin) con datos de ejemplo y funcionalidad de compartir.
-
----
-
-### 2026-02-01 - Session 51 (Planning) ✅
-
-**Duration:** ~1 hour | **Status:** ✅ Complete
-
-Brainstorming y planning completo del sistema de referencias. Plan de 7 fases documentado en REFERRAL_SYSTEM_PLAN.md.
-
----
+**Last Update:** Session 149 (2026-02-07)
+**Status:** Post-color-audit polish — custom tooltips, compact currency, responsive stats
+**Next:** Remaining audit items (button migration, charts mobile redesign, copy UX, dark mode QA)

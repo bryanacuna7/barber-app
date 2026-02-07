@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
@@ -18,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  const themeColor = business.brand_primary_color || '#007AFF'
+  const themeColor = business.brand_primary_color || '#27272A'
 
   const manifest = {
     name: business.name,
@@ -30,14 +29,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     theme_color: themeColor,
     icons: [
       {
-        src: '/icon-192.png',
+        src: `/api/pwa/icon?size=192&slug=${encodeURIComponent(business.slug)}`,
         sizes: '192x192',
         type: 'image/png',
+        purpose: 'any',
       },
       {
-        src: '/icon-512.png',
+        src: `/api/pwa/icon?size=512&slug=${encodeURIComponent(business.slug)}`,
         sizes: '512x512',
         type: 'image/png',
+        purpose: 'any',
       },
     ],
   }

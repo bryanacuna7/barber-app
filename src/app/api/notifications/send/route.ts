@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * API Route: Send notification
  * Handles intelligent notification sending based on user preferences

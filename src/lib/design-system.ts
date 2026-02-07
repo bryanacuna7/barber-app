@@ -106,10 +106,20 @@ export const colors = {
 
 // Animation presets
 export const animations = {
-  // Spring configs for framer-motion
+  /**
+   * Spring configs for framer-motion (Interaction OS v1)
+   *
+   * gentle  → Subtle UI feedback, disclosure animations
+   * default → General-purpose transitions (cards, lists, panels)
+   * snappy  → Quick interactions (tap feedback, chips, segmented controls)
+   * sheet   → Bottom sheets and overlays (open/close)
+   * bouncy  → Playful animations (use sparingly)
+   */
   spring: {
     gentle: { type: 'spring', stiffness: 120, damping: 14 },
+    default: { type: 'spring', stiffness: 300, damping: 25 },
     snappy: { type: 'spring', stiffness: 400, damping: 30 },
+    sheet: { type: 'spring', stiffness: 300, damping: 30 },
     bouncy: { type: 'spring', stiffness: 300, damping: 10 },
   },
 
@@ -144,4 +154,16 @@ export const glass = {
   dark: 'bg-black/70 backdrop-blur-xl',
   subtle: 'bg-white/50 backdrop-blur-md dark:bg-zinc-900/50',
   prominent: 'bg-white/80 backdrop-blur-2xl dark:bg-zinc-900/80',
+} as const
+
+// Reduced motion support
+export const reducedMotion = {
+  // Replacement springs for reduced motion - instant transitions
+  spring: {
+    gentle: { duration: 0.01 },
+    default: { duration: 0.01 },
+    snappy: { duration: 0.01 },
+    sheet: { duration: 0.15 }, // keep minimal for sheets
+    bouncy: { duration: 0.01 },
+  },
 } as const

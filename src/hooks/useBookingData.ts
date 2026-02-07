@@ -161,12 +161,6 @@ export function useBookingData(slug: string) {
         notes: booking.notes || undefined,
       }
 
-      console.log('[Booking] Sending payload:', bookingPayload)
-      console.log(
-        '[Booking] Available barbers:',
-        barbers.map((b) => ({ id: b.id, name: b.name }))
-      )
-
       const res = await fetch(`/api/public/${slug}/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

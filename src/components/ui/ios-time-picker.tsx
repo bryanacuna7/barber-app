@@ -170,11 +170,11 @@ function DesktopTimePicker({
   useEffect(() => {
     if (isOpen) {
       const [h, m] = value.split(':')
-       
+
       setTempHour(h || '09')
       const mins = parseInt(m || '0')
       const rounded = Math.round(mins / 5) * 5
-       
+
       setTempMinute(rounded.toString().padStart(2, '0'))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only sync when modal opens
@@ -295,7 +295,7 @@ function DesktopTimePicker({
                 </div>
               </div>
 
-              <div className="mt-5 flex items-center justify-center gap-2 text-zinc-500 dark:text-zinc-400">
+              <div className="mt-5 flex items-center justify-center gap-2 text-muted">
                 <Clock className="h-4 w-4" />
                 <span className="text-[14px]">
                   {tempHour}:{tempMinute}
@@ -358,11 +358,11 @@ function MobileTimePicker({
   useEffect(() => {
     if (isOpen) {
       const [h, m] = value.split(':')
-       
+
       setTempHour(h || '09')
       const mins = parseInt(m || '0')
       const rounded = Math.round(mins / 5) * 5
-       
+
       setTempMinute(rounded.toString().padStart(2, '0'))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only sync when modal opens

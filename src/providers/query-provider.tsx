@@ -1,33 +1,13 @@
 'use client'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState } from 'react'
+import { createQueryClient } from '@/lib/react-query/config'
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // Cache data for 5 minutes by default
-            staleTime: 5 * 60 * 1000,
-            // Keep unused data in cache for 10 minutes
-            gcTime: 10 * 60 * 1000,
-            // Retry failed requests once
-            retry: 1,
-            // Refetch on window focus for fresh data
-            refetchOnWindowFocus: true,
-            // Disable refetch on mount for better perceived performance
-            refetchOnMount: false,
-          },
-          mutations: {
-            // Retry mutations once
-            retry: 1,
-          },
-        },
-      })
-  )
+  // Use centralized config with smart retry logic and optimized refetch strategy
+  const [queryClient] = useState(() => createQueryClient())
 
   return (
     <QueryClientProvider client={queryClient}>

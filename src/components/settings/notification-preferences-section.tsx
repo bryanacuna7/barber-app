@@ -14,7 +14,10 @@ import { Input } from '@/components/ui/input'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { useToast } from '@/components/ui/toast'
 import { FadeInUp } from '@/components/ui/motion'
+import { getStaleCache, setCache, CACHE_TTL } from '@/lib/cache'
 import type { NotificationPreferences, NotificationChannel } from '@/types/database'
+
+const CACHE_KEY = 'notif_prefs'
 
 export function NotificationPreferencesSection() {
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
@@ -22,9 +25,16 @@ export function NotificationPreferencesSection() {
   const [saving, setSaving] = useState(false)
   const toast = useToast()
 
-  // Load preferences
+  // Load preferences with stale-while-revalidate
   useEffect(() => {
+    const cached = getStaleCache<NotificationPreferences>(CACHE_KEY)
+    if (cached) {
+      setPreferences(cached.data)
+      setLoading(false)
+      if (!cached.isStale) return
+    }
     loadPreferences()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function loadPreferences() {
@@ -33,6 +43,7 @@ export function NotificationPreferencesSection() {
       if (!response.ok) throw new Error('Failed to load preferences')
       const data = await response.json()
       setPreferences(data)
+      setCache(CACHE_KEY, data, CACHE_TTL.LONG)
     } catch (error) {
       console.error('Error loading notification preferences:', error)
       toast.error('Error al cargar preferencias de notificaciones')
@@ -54,6 +65,7 @@ export function NotificationPreferencesSection() {
 
       const updated = await response.json()
       setPreferences(updated)
+      setCache(CACHE_KEY, updated, CACHE_TTL.LONG)
       toast.success('Preferencias guardadas')
     } catch (error) {
       console.error('Error saving notification preferences:', error)
@@ -64,7 +76,10 @@ export function NotificationPreferencesSection() {
   }
 
   function handleChannelChange(channel: NotificationChannel) {
-    savePreferences({ channel })
+    // Only allow valid preference channels
+    const validChannel =
+      channel === 'app' || channel === 'email' || channel === 'both' ? channel : 'app'
+    savePreferences({ channel: validChannel })
   }
 
   function handleEmailAddressChange() {
@@ -87,7 +102,7 @@ export function NotificationPreferencesSection() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Cargando...</p>
+          <p className="text-sm text-muted">Cargando...</p>
         </CardContent>
       </Card>
     )
@@ -164,9 +179,7 @@ export function NotificationPreferencesSection() {
                   Guardar
                 </Button>
               </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Dejar vacío para usar el email de tu cuenta
-              </p>
+              <p className="text-xs text-muted mt-1">Dejar vacío para usar el email de tu cuenta</p>
             </motion.div>
           )}
 
@@ -247,7 +260,7 @@ function ChannelCard({
         {icon}
         <span className="font-medium">{label}</span>
       </div>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
+      <p className="text-xs text-muted">{description}</p>
     </button>
   )
 }
@@ -275,7 +288,7 @@ function NotificationToggle({
     >
       <div className="flex-1">
         <p className="font-medium text-zinc-900 dark:text-zinc-100">{label}</p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{description}</p>
+        <p className="text-sm text-muted mt-1">{description}</p>
       </div>
       <IOSToggle checked={checked} onChange={onChange} disabled={disabled} />
     </div>

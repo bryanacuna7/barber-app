@@ -1,0 +1,146 @@
+{
+  "$schema": ".claude/schemas/config.schema.json",
+  "version": "1.0.0",
+  "project": {
+    "name": "claude-starter-kit",
+    "description": "AI-powered development starter kit with intelligent agents",
+    "devServer": {
+      "port": 3000,
+      "autoStart": true,
+      "checkBeforePreview": true
+    }
+  },
+  "agents": {
+    "routing": {
+      "enabled": true,
+      "verboseAnnouncements": true,
+      "silentAnalysis": true
+    },
+    "defaultModel": "claude-sonnet-4.5",
+    "specializedModels": {
+      "context-manager": "claude-opus-4.5",
+      "performance-profiler": "claude-sonnet-4.5",
+      "security-auditor": "claude-sonnet-4.5"
+    },
+    "socraticGate": {
+      "enabled": true,
+      "triggers": ["new-feature", "vague-request", "critical-change"]
+    }
+  },
+  "skills": {
+    "directories": {
+      "bundled": ".claude/skills/bundled",
+      "managed": ".claude/skills/managed",
+      "custom": ".claude/skills/custom"
+    },
+    "autoLoad": true,
+    "sources": {
+      "vercel": {
+        "path": ".agents/skills/vercel-*",
+        "autoUpdate": false
+      },
+      "antigravity": {
+        "path": ".agents/skills/antigravity-awesome-skills/skills",
+        "autoUpdate": false
+      }
+    }
+  },
+  "mcp": {
+    "servers": {
+      "memory": {
+        "enabled": true,
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory",
+          "--file",
+          ".claude/memory.json"
+        ]
+      },
+      "playwright": {
+        "enabled": true,
+        "command": "npx",
+        "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+      },
+      "github": {
+        "enabled": false,
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "note": "Requires GITHUB_TOKEN env var"
+      }
+    }
+  },
+  "automation": {
+    "visualVerification": {
+      "mandatory": true,
+      "skipPatterns": ["*.test.tsx", "*.test.ts", "*.spec.ts"],
+      "playwrightScreenshots": true
+    },
+    "sessionContinuity": {
+      "enabled": true,
+      "file": "PROGRESS.md",
+      "autoSave": {
+        "afterCommands": ["/create", "/commit", "/deploy", "/enhance"],
+        "onUserPhrases": ["listo", "funciona", "done", "terminé"]
+      }
+    },
+    "errorRecovery": {
+      "enabled": true,
+      "autoFix": ["eslint", "prettier", "npm-install", "server-restart"],
+      "strategies": {
+        "EADDRINUSE": "kill-and-restart",
+        "node_modules-missing": "npm-install",
+        "env-missing": "create-from-example"
+      }
+    },
+    "devServer": {
+      "autoRestart": true,
+      "checkTriggers": [
+        "session-start",
+        "after-ui-change",
+        "user-preview-request",
+        "fetch-failed-error"
+      ]
+    }
+  },
+  "validation": {
+    "quickChecks": {
+      "enabled": true,
+      "duration": "30s",
+      "commands": [
+        "npm audit",
+        "npm run lint",
+        "npm test",
+        "npx tsc --noEmit"
+      ]
+    },
+    "fullVerification": {
+      "enabled": true,
+      "duration": "5min",
+      "beforeDeploy": true,
+      "commands": [
+        "npm run build",
+        "npm run test:e2e",
+        "npx lighthouse http://localhost:3000 --only-categories=performance",
+        "npx pa11y http://localhost:3000"
+      ]
+    }
+  },
+  "profiles": {
+    "production": {
+      "agents.routing.verboseAnnouncements": false,
+      "automation.visualVerification.mandatory": false,
+      "validation.quickChecks.enabled": false
+    },
+    "ci": {
+      "automation.devServer.autoStart": false,
+      "automation.visualVerification.mandatory": false,
+      "validation.fullVerification.enabled": true
+    }
+  },
+  "meta": {
+    "configVersion": "1.0.0",
+    "lastUpdated": "2026-02-02",
+    "compatibleWith": "claude-code >= 1.0.0"
+  }
+}

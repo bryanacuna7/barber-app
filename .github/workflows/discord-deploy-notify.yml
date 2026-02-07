@@ -1,0 +1,63 @@
+name: Discord Deploy Notification
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Parse release notes
+        id: notes
+        run: |
+          # Extract version from RELEASE_NOTES.md (first ## line)
+          VERSION=$(grep -m1 '^## ' RELEASE_NOTES.md | sed 's/^## //')
+
+          # Extract sections and format for Discord
+          # Read everything after the first ## line
+          BODY=$(awk '/^## /{if(found) exit; found=1; next} found' RELEASE_NOTES.md)
+
+          # Format sections with Discord markdown
+          # Convert ### headers to bold, keep bullet points
+          FORMATTED=$(echo "$BODY" | sed '/^<!--/,/-->/d' | sed '/^$/N;/^\n$/d' | sed 's/^### \(.*\)/**\1**/' | head -30)
+
+          # Escape for JSON
+          FORMATTED_JSON=$(echo "$FORMATTED" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))')
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "body=$FORMATTED_JSON" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> $GITHUB_OUTPUT
+
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          VERSION="${{ steps.notes.outputs.version }}"
+          BODY=${{ steps.notes.outputs.body }}
+          TIMESTAMP="${{ steps.notes.outputs.timestamp }}"
+
+          # Build the JSON payload
+          cat > /tmp/payload.json << PAYLOAD
+          {
+            "embeds": [{
+              "title": "📲 BarberApp — $VERSION",
+              "description": $BODY,
+              "color": 5025616,
+              "footer": {
+                "text": "BarberApp Updates"
+              },
+              "timestamp": "$TIMESTAMP"
+            }]
+          }
+          PAYLOAD
+
+          curl -s -H "Content-Type: application/json" \
+            -d @/tmp/payload.json \
+            "$DISCORD_WEBHOOK"

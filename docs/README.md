@@ -1,52 +1,202 @@
-# Documentation Structure
+# Documentation
 
-This directory contains all project documentation organized by category.
+All project documentation organized by purpose.
 
-## Directory Structure
+---
+
+## 📂 Directory Structure
 
 ```
 docs/
-├── reference/       # Technical reference documentation
-├── archive/         # Completed implementation docs (historical)
-└── specs/          # Feature specifications and proposals
+├── planning/         # Implementation plans and roadmaps
+├── reference/        # Technical guides and knowledge base
+├── specs/            # Feature specifications
+└── archive/          # Historical documentation
 ```
 
-## Reference Documentation
+---
 
-Technical documentation for developers:
+## 🚀 Quick Start
 
-- **ACCESSIBILITY.md** - WCAG AA compliance guidelines and patterns
-- **ACCESSIBILITY_AUDIT.md** - Accessibility audit results and fixes
-- **DESIGN_TOKENS.md** - Design system tokens and usage
-- **PERFORMANCE_BASELINE.md** - Performance metrics and optimization
-- **SECURITY_HEADERS.md** - Security headers configuration
-- **TESTING.md** - Testing strategy and guidelines
+### For New Developers
 
-## Archive
+1. **Start here:** [../README.md](../README.md) - Project overview
+2. **Read governance:** [../GUARDRAILS.md](../GUARDRAILS.md) - Non-negotiable rules
+3. **Database work?** [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md) - **MUST READ** before DB changes
+4. **Bug prevention:** [reference/lessons-learned.md](reference/lessons-learned.md) - Critical patterns
+5. **Current state:** [../PROGRESS.md](../PROGRESS.md) - Session status
 
-Historical implementation documentation:
+### For AI Agents
 
-- **PHASE1_IMPLEMENTATION.md** - Phase 1 implementation notes
-- **REFACTORING_COMPLETE.md** - Refactoring completion report
-- **DROPDOWN_REFACTOR_ANALYSIS.md** - Dropdown component analysis
-- **REFACTOR_CANDIDATES.md** - Files identified for refactoring
-- **COMPONENTS_MIGRATION_GUIDE.md** - Component migration guide
-- **UI_PREMIUM_IMPROVEMENTS.md** - UI improvement implementation
+1. **Start here:** [../CLAUDE.md](../CLAUDE.md) - Agent instructions
+2. **Database protocol:** [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md) - Mandatory verification
+3. **Lessons learned:** [reference/lessons-learned.md](reference/lessons-learned.md) - Prevent repeated bugs
+4. **Current context:** [../PROGRESS.md](../PROGRESS.md) - Session continuity
 
-## Root Documentation
+---
 
-Project governance docs remain in root:
+## 📋 Planning
 
-- **CLAUDE.md** - Claude Code instructions and workflows
-- **GUARDRAILS.md** - Non-negotiable development rules
-- **DECISIONS.md** - Architectural decision records (ADR)
-- **PROGRESS.md** - Current project progress and session history
-- **README.md** - Project overview and setup
-- **SKILLS_INSTALLED.md** - Installed Claude skills registry
+Active implementation plans and roadmaps.
 
-## Usage
+**→ [planning/README.md](planning/README.md)** - Full index
 
-- **New features?** → Create spec in `docs/specs/`
-- **Technical docs?** → Add to `docs/reference/`
-- **Completed work?** → Archive in `docs/archive/`
-- **Governance?** → Keep in project root (UPPERCASE.md)
+### Active Plans
+
+- **[Implementation Plan v2.5](planning/implementation-v2.5.md)** - Major app transformation (154-200h)
+  - Status: Área 0 Task 4 (80% complete)
+  - Next: Área 1 - Client Subscription
+
+---
+
+## 📚 Reference
+
+Technical guides, best practices, and knowledge base.
+
+**→ [reference/README.md](reference/README.md)** - Full index
+
+### Critical Reading
+
+- **[Lessons Learned](reference/lessons-learned.md)** 🔥 - 11 critical patterns from real bugs
+  - RLS + Triggers need `SECURITY DEFINER`
+  - DATABASE_SCHEMA.md is source of truth
+  - Server Components: Use Supabase, not fetch
+  - Regenerate types after migrations
+  - Check for duplicate Next.js processes
+
+### Technical Guides
+
+- [Testing](reference/TESTING.md) - Test strategies, coverage, E2E
+- [Accessibility](reference/ACCESSIBILITY.md) - WCAG AA compliance
+- [Performance Baseline](reference/PERFORMANCE_BASELINE.md) - Metrics and targets
+- [Security Headers](reference/SECURITY_HEADERS.md) - CSP, CORS configuration
+- [Design Tokens](reference/DESIGN_TOKENS.md) - Design system reference
+
+---
+
+## 📐 Specifications
+
+Feature specifications for implemented and planned features.
+
+**→ [specs/README.md](specs/README.md)** - Full index
+
+### Implemented
+
+- **[Business Referral System](specs/referral-system.md)** - B2B referral program (6 phases complete)
+
+### Planned
+
+See [planning/implementation-v2.5.md](planning/implementation-v2.5.md) for upcoming features.
+
+---
+
+## 📦 Archive
+
+Historical documentation and completed implementations.
+
+**→ [archive/README.md](archive/README.md)** - Full index
+
+### Progress Archives
+
+- **[Sessions 54-65: Referral System](archive/progress/sessions-54-65.md)** - 12 sessions, ~3,500 lines code
+
+### 2026-01 Archives
+
+- Component refactoring guides
+- UI improvement implementations
+- Phase 1 completion notes
+
+---
+
+## 🗂️ File Organization
+
+### Where to Put Documentation
+
+| Type                    | Location            | Example                         |
+| ----------------------- | ------------------- | ------------------------------- |
+| **Governance**          | Root (UPPERCASE.md) | CLAUDE.md, GUARDRAILS.md        |
+| **Critical Reference**  | Root                | DATABASE_SCHEMA.md, PROGRESS.md |
+| **Implementation Plan** | docs/planning/      | implementation-v2.5.md          |
+| **Feature Spec**        | docs/specs/         | referral-system.md              |
+| **Technical Guide**     | docs/reference/     | lessons-learned.md, TESTING.md  |
+| **Historical**          | docs/archive/       | sessions-54-65.md               |
+
+### Naming Conventions
+
+- **Root governance:** UPPERCASE.md (e.g., CLAUDE.md)
+- **Technical docs:** UPPERCASE.md or lowercase-with-hyphens.md (match existing folder conventions)
+- **Index files:** README.md in each directory
+
+---
+
+## 📖 Root Documentation
+
+Project governance and critical references (stay in root):
+
+| File                                        | Purpose                           |
+| ------------------------------------------- | --------------------------------- |
+| [README.md](../README.md)                   | Project overview and setup        |
+| [CLAUDE.md](../CLAUDE.md)                   | AI agent instructions             |
+| [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md) | Database schema (source of truth) |
+| [DECISIONS.md](../DECISIONS.md)             | Architectural decision records    |
+| [GUARDRAILS.md](../GUARDRAILS.md)           | Non-negotiable rules              |
+| [PROGRESS.md](../PROGRESS.md)               | Session history and current state |
+| [CONTRIBUTING.md](../CONTRIBUTING.md)       | Contribution guidelines           |
+| [CHANGELOG.md](../CHANGELOG.md)             | Release history                   |
+
+---
+
+## ✍️ Creating New Documentation
+
+### Implementation Plan
+
+1. Save as `docs/planning/[feature-name]-plan.md`
+2. Update [planning/README.md](planning/README.md) index
+3. Reference in [../PROGRESS.md](../PROGRESS.md)
+
+### Feature Specification
+
+1. Save as `docs/specs/[feature-name].md`
+2. Update [specs/README.md](specs/README.md) index
+3. Link from implementation plan
+
+### Technical Guide
+
+1. Save as `docs/reference/[topic-name].md`
+2. Update [reference/README.md](reference/README.md) index
+3. Use template from reference/README.md
+
+### Archive Document
+
+1. Move to `docs/archive/YYYY-MM/[filename].md`
+2. Update [archive/README.md](archive/README.md) index
+3. Add archive metadata header
+
+---
+
+## 🔍 Finding Documentation
+
+### By Purpose
+
+- **Starting project?** → README.md
+- **Making DB changes?** → DATABASE_SCHEMA.md
+- **Planning feature?** → docs/planning/
+- **Writing code?** → docs/reference/lessons-learned.md
+- **Understanding decisions?** → DECISIONS.md
+- **Current progress?** → PROGRESS.md
+
+### By Topic
+
+| Topic           | File                                                                   |
+| --------------- | ---------------------------------------------------------------------- |
+| Bug Prevention  | [reference/lessons-learned.md](reference/lessons-learned.md)           |
+| Database Schema | [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)                         |
+| Testing         | [reference/TESTING.md](reference/TESTING.md)                           |
+| Accessibility   | [reference/ACCESSIBILITY.md](reference/ACCESSIBILITY.md)               |
+| Performance     | [reference/PERFORMANCE_BASELINE.md](reference/PERFORMANCE_BASELINE.md) |
+| Security        | [reference/SECURITY_HEADERS.md](reference/SECURITY_HEADERS.md)         |
+| Roadmap         | [planning/implementation-v2.5.md](planning/implementation-v2.5.md)     |
+
+---
+
+**Last Updated:** 2026-02-07 (Global docs consistency pass)

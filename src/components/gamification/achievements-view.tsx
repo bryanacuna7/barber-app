@@ -10,15 +10,7 @@ import { AchievementCard } from './achievement-card'
 import { groupAchievementsByCategory } from '@/lib/gamification/barber-gamification'
 import { Loader2, TrendingUp, Calendar, Users, Award, Sparkles } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import type { AchievementCategory, BarberAchievement } from '@/types/database'
-
-interface AchievementWithProgress extends BarberAchievement {
-  is_earned: boolean
-  earned_at: string | null
-  progress: number
-  current: number
-  threshold: number
-}
+import type { AchievementCategory, AchievementWithProgress } from '@/types'
 
 interface AchievementsViewProps {
   businessId: string

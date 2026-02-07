@@ -19,7 +19,7 @@ export function UsageCard({
   if (enabled !== undefined) {
     return (
       <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-        <Icon className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
+        <Icon className="h-5 w-5 text-muted" />
         <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{label}</div>
         <div
           className={`mt-1 font-semibold ${enabled ? 'text-green-600 dark:text-green-400' : 'text-zinc-400 dark:text-zinc-500'}`}
@@ -32,7 +32,7 @@ export function UsageCard({
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800">
-      <Icon className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
+      <Icon className="h-5 w-5 text-muted" />
       <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{label}</div>
       <div
         className={`mt-1 font-semibold ${

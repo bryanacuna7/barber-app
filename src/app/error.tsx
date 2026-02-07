@@ -40,7 +40,7 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
             {/* Error Details (only in development) */}
             {process.env.NODE_ENV === 'development' && (
               <details className="mt-4">
-                <summary className="text-sm text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
+                <summary className="text-sm text-muted cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
                   Ver detalles técnicos
                 </summary>
                 <div className="mt-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
@@ -48,9 +48,7 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
                     {error.message}
                   </p>
                   {error.digest && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-                      Error ID: {error.digest}
-                    </p>
+                    <p className="text-xs text-muted mt-2">Error ID: {error.digest}</p>
                   )}
                 </div>
               </details>
@@ -76,7 +74,7 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
             </div>
 
             {/* Help Text */}
-            <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 pt-2">
+            <p className="text-xs text-center text-muted pt-2">
               Si el problema persiste, contacta a soporte
             </p>
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Modal, ModalFooter } from './modal'
+import { Modal } from './modal'
 import { Button } from './button'
 import { AlertTriangle, Trash2, Info } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -78,9 +78,7 @@ export function ConfirmDialog({
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">{title}</h3>
 
         {/* Description */}
-        {description && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted mb-6">{description}</p>}
 
         {/* Actions */}
         <div className="flex items-center gap-3 w-full">

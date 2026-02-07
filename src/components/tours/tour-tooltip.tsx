@@ -128,7 +128,8 @@ export function TourTooltip() {
     if (!targetElement || !currentStep?.spotlight) return
 
     // Direct DOM manipulation for spotlight effect - valid for tour highlights
-    targetElement.style.position = 'relative'  
+    /* eslint-disable react-hooks/immutability */
+    targetElement.style.position = 'relative'
     targetElement.style.zIndex = '9999'
     targetElement.classList.add('tour-spotlight')
 
@@ -136,6 +137,7 @@ export function TourTooltip() {
       targetElement.style.position = ''
       targetElement.style.zIndex = ''
       targetElement.classList.remove('tour-spotlight')
+      /* eslint-enable react-hooks/immutability */
     }
   }, [targetElement, currentStep])
 
@@ -212,7 +214,7 @@ export function TourTooltip() {
               <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
                 {currentStep.title}
               </h3>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs sm:text-sm text-muted">
                 Paso {currentStepIndex + 1} de {totalSteps}
               </p>
             </div>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
@@ -20,12 +19,12 @@ export async function GET() {
     // Get total businesses count
     const { count: totalBusinesses } = await serviceClient
       .from('businesses')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
 
     // Get active businesses count
     const { count: activeBusinesses } = await serviceClient
       .from('businesses')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('is_active', true)
 
     // Get inactive businesses count
@@ -38,7 +37,7 @@ export async function GET() {
 
     const { count: newThisMonth } = await serviceClient
       .from('businesses')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .gte('created_at', startOfMonth.toISOString())
 
     // Get businesses registered this week
@@ -48,7 +47,7 @@ export async function GET() {
 
     const { count: newThisWeek } = await serviceClient
       .from('businesses')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .gte('created_at', startOfWeek.toISOString())
 
     // Get recent businesses (last 5)
@@ -64,7 +63,7 @@ export async function GET() {
 
     const { count: lastMonthCount } = await serviceClient
       .from('businesses')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .gte('created_at', startOfLastMonth.toISOString())
       .lt('created_at', startOfMonth.toISOString())
 
@@ -81,7 +80,7 @@ export async function GET() {
     // Get pending payments count
     const { count: pendingPayments } = await serviceClient
       .from('payment_reports')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('status', 'pending')
 
     return NextResponse.json({

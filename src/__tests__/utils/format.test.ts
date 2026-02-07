@@ -4,6 +4,7 @@ import {
   formatTime,
   formatDateTime,
   formatCurrency,
+  formatCurrencyCompactMillions,
   formatCurrencyCompact,
   formatPhone,
 } from '@/lib/utils/format'
@@ -124,6 +125,35 @@ describe('formatCurrencyCompact', () => {
 
     expect(formatted).toContain('₡')
     expect(formatted).toContain('0')
+  })
+})
+
+describe('formatCurrencyCompactMillions', () => {
+  it('should keep standard format below one million', () => {
+    const formatted = formatCurrencyCompactMillions(5000)
+
+    expect(formatted).toContain('₡')
+    expect(formatted).toContain('5')
+    expect(formatted).not.toContain('k')
+    expect(formatted).not.toContain('M')
+  })
+
+  it('should compact millions with one decimal by default', () => {
+    const formatted = formatCurrencyCompactMillions(1250000)
+
+    expect(formatted).toBe('₡1.3M')
+  })
+
+  it('should keep one decimal for tens of millions', () => {
+    const formatted = formatCurrencyCompactMillions(12500000)
+
+    expect(formatted).toBe('₡12.5M')
+  })
+
+  it('should keep trailing .0 when rounded millions are whole', () => {
+    const formatted = formatCurrencyCompactMillions(13000000)
+
+    expect(formatted).toBe('₡13.0M')
   })
 })
 

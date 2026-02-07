@@ -17,12 +17,12 @@ export function FAB({ icon, label, isLoading, className, ...props }: FABProps) {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={cn(
-        'fixed bottom-24 right-4 z-50',
+        'fixed bottom-20 right-4 z-50',
         'flex items-center gap-2 h-14 px-6 rounded-full',
         'bg-zinc-900 dark:bg-white',
         'text-white dark:text-zinc-900',
         'shadow-lg shadow-zinc-900/20 dark:shadow-white/20',
-        'font-semibold text-[15px]',
+        'font-semibold text-base',
         'transition-all duration-200',
         'hover:shadow-xl hover:shadow-zinc-900/30 dark:hover:shadow-white/30',
         isLoading && 'opacity-70 pointer-events-none',

@@ -11,10 +11,9 @@ dist/
 
 # Environment & Secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+!.env.*.example
 .mcp.json
 
 # Debug
@@ -34,11 +33,23 @@ Thumbs.db
 
 # Testing
 coverage/
+test-results/
+test-reports/
+playwright-report/
+explorations/
+*.zip
 
 # Misc
 *.tsbuildinfo
 next-env.d.ts
 
 # Claude/Playwright temp folders
-.agent/
+.agents/
+.claude/plans/
 .playwright-mcp/
+
+# Claude Code - Skills
+.claude/skills/custom/
+.claude/skills-backup-*/
+.claude-backup-*/
+.vercel

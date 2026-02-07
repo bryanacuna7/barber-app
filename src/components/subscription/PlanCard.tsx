@@ -83,9 +83,7 @@ export function PlanCard({
           <span className="text-zinc-500">/mes</span>
         </div>
         {priceCRC && (
-          <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            ≈ ₡{priceCRC.toLocaleString('es-CR')} CRC
-          </div>
+          <div className="mt-1 text-sm text-muted">≈ ₡{priceCRC.toLocaleString('es-CR')} CRC</div>
         )}
       </div>
 

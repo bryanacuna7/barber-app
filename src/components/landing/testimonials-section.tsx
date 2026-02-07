@@ -77,8 +77,16 @@ const container = {
 }
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.21, 0.47, 0.32, 0.98],
+    },
+  },
 }
 
 export function TestimonialsSection() {
@@ -114,18 +122,39 @@ export function TestimonialsSection() {
             <motion.div
               key={index}
               variants={item}
-              whileHover={{ y: -5 }}
-              className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+              whileHover={{
+                y: -8,
+                scale: 1.02,
+                rotateY: 3,
+                rotateX: 3,
+                transition: { duration: 0.3 },
+              }}
+              style={{ transformStyle: 'preserve-3d' }}
+              className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-lg backdrop-blur-sm transition-all hover:shadow-2xl dark:border-zinc-800 dark:bg-zinc-900/80"
             >
               {/* Quote Icon */}
-              <div className="absolute right-6 top-6 opacity-10 transition-opacity group-hover:opacity-20">
+              <motion.div
+                initial={{ scale: 0, rotate: -45 }}
+                whileInView={{ scale: 1, rotate: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 + index * 0.1, type: 'spring', stiffness: 100 }}
+                className="absolute right-6 top-6 opacity-10 transition-opacity group-hover:opacity-20"
+              >
                 <Quote className="h-16 w-16 text-zinc-900 dark:text-white" />
-              </div>
+              </motion.div>
 
               {/* Rating */}
               <div className="relative flex gap-1">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + index * 0.1 + i * 0.05 }}
+                  >
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  </motion.div>
                 ))}
               </div>
 
@@ -153,19 +182,21 @@ export function TestimonialsSection() {
 
         {/* CTA */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
           className="mt-12 text-center"
         >
           <p className="text-lg text-zinc-600 dark:text-zinc-400">¿Listo para unirte a ellos?</p>
-          <a
+          <motion.a
             href="/register"
-            className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all hover:shadow-2xl hover:shadow-blue-500/40"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all hover:shadow-2xl hover:shadow-blue-500/40"
           >
             Comenzar gratis
-          </a>
+          </motion.a>
         </motion.div>
       </div>
     </section>

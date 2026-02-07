@@ -44,7 +44,7 @@ export default function PublicError({ error, reset }: PublicErrorProps) {
             {/* Error Details (only in development) */}
             {process.env.NODE_ENV === 'development' && (
               <details className="mt-4">
-                <summary className="text-[13px] text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
+                <summary className="text-[13px] text-muted cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors">
                   Ver detalles técnicos
                 </summary>
                 <div className="mt-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
@@ -52,9 +52,7 @@ export default function PublicError({ error, reset }: PublicErrorProps) {
                     {error.message}
                   </p>
                   {error.digest && (
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-2">
-                      Error ID: {error.digest}
-                    </p>
+                    <p className="text-[11px] text-muted mt-2">Error ID: {error.digest}</p>
                   )}
                 </div>
               </details>
@@ -80,7 +78,7 @@ export default function PublicError({ error, reset }: PublicErrorProps) {
             </div>
 
             {/* Help Text */}
-            <p className="text-[12px] text-center text-zinc-500 dark:text-zinc-400 pt-2">
+            <p className="text-[12px] text-center text-muted pt-2">
               Si el problema persiste, contacta al negocio directamente
             </p>
           </div>

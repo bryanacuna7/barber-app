@@ -133,7 +133,7 @@ export default async function AdminReferralsPage() {
       conversions?.map((c) => ({
         id: c.id,
         referralCode: c.referral_code,
-        status: c.status,
+        status: c.status as 'pending' | 'active' | 'expired',
         createdAt: c.created_at,
         convertedAt: c.converted_at,
         referrerBusiness: {

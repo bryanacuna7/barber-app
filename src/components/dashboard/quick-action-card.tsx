@@ -47,7 +47,7 @@ export function QuickActionCard({
         </motion.div>
         <span
           className={cn(
-            'text-[13px] font-medium text-center',
+            'text-sm font-medium text-center',
             isWarning ? 'text-amber-900 dark:text-amber-100' : 'text-zinc-900 dark:text-white'
           )}
         >

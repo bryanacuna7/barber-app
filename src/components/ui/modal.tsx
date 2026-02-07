@@ -106,19 +106,17 @@ export function Modal({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-start justify-between p-5 sm:p-6 border-b border-zinc-200 dark:border-zinc-800">
             <div className="flex-1 pr-4">
               {title && (
                 <h2
                   id="modal-title"
-                  className="text-xl font-semibold text-zinc-900 dark:text-zinc-100"
+                  className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100"
                 >
                   {title}
                 </h2>
               )}
-              {description && (
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
-              )}
+              {description && <p className="mt-1 text-sm text-muted">{description}</p>}
             </div>
             {showCloseButton && (
               <button
@@ -139,7 +137,7 @@ export function Modal({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6">{children}</div>
       </div>
     </div>
   )

@@ -68,7 +68,7 @@ export function AppointmentForm({
   })
 
   const [date, setDate] = useState(format(selectedDate || new Date(), 'yyyy-MM-dd'))
-  const [time, setTime] = useState('09:00')
+  const [time, setTime] = useState(selectedDate ? format(selectedDate, 'HH:mm') : '09:00')
 
   // Initialize form when editing
   useEffect(() => {
@@ -85,6 +85,7 @@ export function AppointmentForm({
       setTime(format(apptDate, 'HH:mm'))
     } else {
       // Reset form for new appointment
+      const defaultDate = selectedDate || new Date()
       setFormData({
         client_id: '',
         service_id: services[0]?.id || '',
@@ -92,8 +93,9 @@ export function AppointmentForm({
         client_notes: '',
         internal_notes: '',
       })
-      setDate(format(selectedDate || new Date(), 'yyyy-MM-dd'))
-      setTime('09:00')
+      setDate(format(defaultDate, 'yyyy-MM-dd'))
+      // Use the hour from selectedDate if provided, otherwise default to 09:00
+      setTime(selectedDate ? format(selectedDate, 'HH:mm') : '09:00')
     }
   }, [appointment, selectedDate, services])
 
@@ -232,7 +234,7 @@ export function AppointmentForm({
 
         {/* Preview */}
         <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Vista previa:</p>
+          <p className="text-sm text-muted mb-1">Vista previa:</p>
           <p className="font-medium text-zinc-900 dark:text-zinc-100 capitalize">
             {format(new Date(`${date}T${time}:00`), "EEEE, d 'de' MMMM 'a las' HH:mm", {
               locale: es,

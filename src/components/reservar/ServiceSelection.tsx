@@ -24,9 +24,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
         <h2 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
           Elige servicio
         </h2>
-        <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
-          Selecciona el servicio que deseas reservar
-        </p>
+        <p className="mt-1 text-[15px] text-muted">Selecciona el servicio que deseas reservar</p>
       </div>
       {noBarbers && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
@@ -48,6 +46,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
             return (
               <button
                 key={service.id}
+                data-testid="service-card"
                 onClick={() => onSelectService(service)}
                 disabled={noBarbers}
                 className={cn(
@@ -64,21 +63,30 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                   <Scissors className="h-6 w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate">
+                  <p
+                    data-testid="service-name"
+                    className="text-[17px] font-semibold text-zinc-900 dark:text-white truncate"
+                  >
                     {service.name}
                   </p>
                   {service.description && (
-                    <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-1">
+                    <p className="mt-0.5 text-[13px] text-muted line-clamp-1">
                       {service.description}
                     </p>
                   )}
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[13px] text-zinc-400">
+                  <div
+                    data-testid="service-duration"
+                    className="mt-1.5 flex items-center gap-1.5 text-[13px] text-zinc-400"
+                  >
                     <Clock className="h-3.5 w-3.5" />
                     <span>{service.duration_minutes} min</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <p className="text-[20px] font-bold text-zinc-900 dark:text-white">
+                  <p
+                    data-testid="service-price"
+                    className="text-[20px] font-bold text-zinc-900 dark:text-white"
+                  >
                     {formatCurrency(Number(service.price))}
                   </p>
                   <ChevronRight className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />

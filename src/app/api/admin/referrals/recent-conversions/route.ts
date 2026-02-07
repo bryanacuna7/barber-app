@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { verifyAdmin } from '@/lib/admin'
 
 /**
  * GET /api/admin/referrals/recent-conversions?limit=50&status=all
@@ -22,22 +23,8 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '50', 10)
     const statusFilter = searchParams.get('status') || 'all' // 'all', 'pending', 'active', 'expired'
 
-    // Auth check - verify user is admin
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check if user is admin (exists in admin_users table)
-    const { data: adminUser } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
+    // Verify admin access
+    const adminUser = await verifyAdmin(supabase)
     if (!adminUser) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }

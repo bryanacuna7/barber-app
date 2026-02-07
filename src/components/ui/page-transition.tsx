@@ -1,8 +1,9 @@
 'use client'
 
 import { type ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -34,21 +35,27 @@ const variants = {
 
 export function PageTransition({ children, variant = 'fade' }: PageTransitionProps) {
   const pathname = usePathname()
+  const prefersReducedMotion = useReducedMotion()
   const selectedVariant = variants[variant]
+
+  // For reduced motion: only use opacity, no translate or scale
+  const reducedVariant = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  }
+
+  const finalVariant = prefersReducedMotion ? reducedVariant : selectedVariant
+  const transition = prefersReducedMotion ? { duration: 0.1 } : animations.spring.snappy
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={pathname}
-        initial={selectedVariant.initial}
-        animate={selectedVariant.animate}
-        exit={selectedVariant.exit}
-        transition={{
-          type: 'spring',
-          stiffness: 380,
-          damping: 30,
-          mass: 0.8,
-        }}
+        initial={finalVariant.initial}
+        animate={finalVariant.animate}
+        exit={finalVariant.exit}
+        transition={transition}
       >
         {children}
       </motion.div>
@@ -64,6 +71,12 @@ interface StaggerContainerProps {
 }
 
 export function StaggerContainer({ children, className, delay = 0.05 }: StaggerContainerProps) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       className={className}
@@ -83,6 +96,12 @@ export function StaggerContainer({ children, className, delay = 0.05 }: StaggerC
 }
 
 export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       className={className}
@@ -91,11 +110,7 @@ export function StaggerItem({ children, className }: { children: ReactNode; clas
         visible: {
           opacity: 1,
           y: 0,
-          transition: {
-            type: 'spring',
-            stiffness: 380,
-            damping: 30,
-          },
+          transition: animations.spring.snappy,
         },
       }}
     >
@@ -112,18 +127,19 @@ interface RevealOnScrollProps {
 }
 
 export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrollProps) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       className={className}
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
-      transition={{
-        type: 'spring',
-        stiffness: 380,
-        damping: 30,
-        delay,
-      }}
+      transition={{ ...animations.spring.snappy, delay }}
     >
       {children}
     </motion.div>

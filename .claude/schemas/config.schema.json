@@ -1,0 +1,351 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claude Starter Kit Configuration",
+  "description": "Centralized configuration for Claude Code starter kit",
+  "type": "object",
+  "required": ["version", "project", "agents", "skills", "mcp"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Configuration version (semver)"
+    },
+    "project": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description"
+        },
+        "devServer": {
+          "type": "object",
+          "properties": {
+            "port": {
+              "type": "integer",
+              "minimum": 1024,
+              "maximum": 65535,
+              "default": 3000
+            },
+            "autoStart": {
+              "type": "boolean",
+              "default": true
+            },
+            "checkBeforePreview": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "routing": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "verboseAnnouncements": {
+              "type": "boolean",
+              "default": true
+            },
+            "silentAnalysis": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "defaultModel": {
+          "type": "string",
+          "enum": [
+            "claude-sonnet-4.5",
+            "claude-opus-4.5",
+            "claude-haiku-4"
+          ],
+          "default": "claude-sonnet-4.5"
+        },
+        "specializedModels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "claude-sonnet-4.5",
+              "claude-opus-4.5",
+              "claude-haiku-4"
+            ]
+          }
+        },
+        "socraticGate": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "triggers": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "new-feature",
+                  "vague-request",
+                  "critical-change",
+                  "bug-fix"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "properties": {
+        "directories": {
+          "type": "object",
+          "properties": {
+            "bundled": {
+              "type": "string",
+              "default": ".claude/skills/bundled"
+            },
+            "managed": {
+              "type": "string",
+              "default": ".claude/skills/managed"
+            },
+            "custom": {
+              "type": "string",
+              "default": ".claude/skills/custom"
+            }
+          }
+        },
+        "autoLoad": {
+          "type": "boolean",
+          "default": true
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "autoUpdate": {
+                "type": "boolean",
+                "default": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "servers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "command": {
+                "type": "string"
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": ["command", "args"]
+          }
+        }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "properties": {
+        "visualVerification": {
+          "type": "object",
+          "properties": {
+            "mandatory": {
+              "type": "boolean",
+              "default": true
+            },
+            "skipPatterns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "playwrightScreenshots": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "sessionContinuity": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "file": {
+              "type": "string",
+              "default": "PROGRESS.md"
+            },
+            "autoSave": {
+              "type": "object",
+              "properties": {
+                "afterCommands": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "onUserPhrases": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "errorRecovery": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "autoFix": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "eslint",
+                  "prettier",
+                  "npm-install",
+                  "server-restart"
+                ]
+              }
+            },
+            "strategies": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "devServer": {
+          "type": "object",
+          "properties": {
+            "autoRestart": {
+              "type": "boolean",
+              "default": true
+            },
+            "checkTriggers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "quickChecks": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "duration": {
+              "type": "string",
+              "pattern": "^\\d+[smh]$"
+            },
+            "commands": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "fullVerification": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "duration": {
+              "type": "string",
+              "pattern": "^\\d+[smh]$"
+            },
+            "beforeDeploy": {
+              "type": "boolean",
+              "default": true
+            },
+            "commands": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "description": "Environment-specific configuration overrides",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "configVersion": {
+          "type": "string"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date"
+        },
+        "compatibleWith": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

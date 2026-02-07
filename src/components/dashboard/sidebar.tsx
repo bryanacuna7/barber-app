@@ -13,6 +13,7 @@ import {
   Shield,
   TrendingUp,
   Share2,
+  History,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Analíticas', href: '/analiticas', icon: TrendingUp },
   { name: 'Referencias', href: '/referencias', icon: Share2 },
+  { name: 'Novedades', href: '/changelog', icon: History },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
 
@@ -55,7 +57,7 @@ function SidebarContent({
   return (
     <>
       {/* Logo and notifications */}
-      <div className="flex h-16 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
+      <div className="flex h-16 items-center justify-between border-b border-zinc-200/50 px-4 dark:border-zinc-800/50">
         <Link href="/dashboard" className="flex items-center gap-2" onClick={onLinkClick}>
           {logoUrl ? (
             <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
@@ -91,7 +93,7 @@ function SidebarContent({
       </nav>
 
       {/* Admin Panel + Logout */}
-      <div className="border-t border-zinc-200 p-4 dark:border-zinc-800 space-y-1">
+      <div className="border-t border-zinc-200/50 p-4 dark:border-zinc-800/50 space-y-1">
         {isAdmin && (
           <Link
             href="/admin"
@@ -104,6 +106,7 @@ function SidebarContent({
         )}
         <button
           onClick={onLogout}
+          data-testid="logout-button"
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
           <LogOut className="h-5 w-5" />
@@ -130,7 +133,7 @@ export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
       {/* Desktop sidebar only - mobile uses bottom nav */}
       <aside
         data-tour="sidebar"
-        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200 lg:bg-white dark:lg:border-zinc-800 dark:lg:bg-zinc-900"
+        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200/50 dark:lg:border-zinc-800/50 bg-gradient-to-b from-white/30 via-white/70 to-white/90 dark:from-zinc-900/30 dark:via-zinc-900/70 dark:to-zinc-900/90 backdrop-blur-md transition-colors duration-300"
       >
         <SidebarContent
           businessName={businessName}

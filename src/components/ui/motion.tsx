@@ -1,21 +1,13 @@
 'use client'
 
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, AnimatePresence, type Variants, useReducedMotion } from 'framer-motion'
 import { forwardRef, type ReactNode, type ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
+import { animations, reducedMotion } from '@/lib/design-system'
 
-// Animation presets
-export const springTransition = {
-  type: 'spring',
-  stiffness: 400,
-  damping: 30,
-}
-
-export const gentleSpring = {
-  type: 'spring',
-  stiffness: 120,
-  damping: 14,
-}
+// Re-export design system springs as convenience aliases
+export const springTransition = animations.spring.snappy
+export const gentleSpring = animations.spring.gentle
 
 // Fade In Up animation (for page content)
 export function FadeInUp({
@@ -27,6 +19,12 @@ export function FadeInUp({
   delay?: number
   className?: string
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,6 +47,12 @@ export function StaggeredList({
   className?: string
   staggerDelay?: number
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial="hidden"
@@ -78,6 +82,12 @@ export function StaggeredItem({
   className?: string
   index?: number
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       variants={{
@@ -86,11 +96,7 @@ export function StaggeredItem({
           opacity: 1,
           y: 0,
           scale: 1,
-          transition: {
-            type: 'spring',
-            stiffness: 300,
-            damping: 24,
-          },
+          transition: animations.spring.default,
         },
       }}
       className={className}
@@ -108,11 +114,13 @@ interface PressableProps extends ComponentProps<typeof motion.button> {
 
 export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(
   ({ children, scale = 0.97, className, ...props }, ref) => {
+    const prefersReducedMotion = useReducedMotion()
+
     return (
       <motion.button
         ref={ref}
-        whileTap={{ scale }}
-        transition={{ duration: 0.1 }}
+        whileTap={prefersReducedMotion ? {} : { scale }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.1 }}
         className={cn('cursor-pointer', className)}
         {...props}
       >
@@ -141,14 +149,7 @@ export function HoverLift({ children, className }: { children: ReactNode; classN
 // Scale on hover (for cards)
 export function ScaleOnHover({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <motion.div
-      whileHover={{
-        scale: 1.02,
-        transition: { type: 'spring', stiffness: 400, damping: 25 },
-      }}
-      whileTap={{ scale: 0.98 }}
-      className={className}
-    >
+    <motion.div whileTap={{ scale: 0.98 }} className={className}>
       {children}
     </motion.div>
   )
@@ -162,6 +163,22 @@ export function PageTransition({
   children: ReactNode
   className?: string
 }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.1 }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -182,7 +199,7 @@ export function SlideInRight({ children, className }: { children: ReactNode; cla
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      transition={animations.spring.sheet}
       className={className}
     >
       {children}
@@ -197,7 +214,7 @@ export function AnimatedNumber({ value, className }: { value: number; className?
       key={value}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+      transition={animations.spring.snappy}
       className={className}
     >
       {value}
@@ -224,11 +241,7 @@ export function SuccessCheckmark({ className }: { className?: string }) {
     visible: {
       scale: 1,
       opacity: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 20,
-      },
+      transition: animations.spring.default,
     },
   }
 

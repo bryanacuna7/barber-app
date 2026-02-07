@@ -7,9 +7,7 @@ import {
   CheckCircle2,
   XCircle,
   TrendingUp,
-  Calendar,
   DollarSign,
-  Users,
   ArrowRight,
   Loader2,
   CreditCard,
@@ -89,7 +87,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Panel de Administrador</h1>
-        <p className="mt-1 text-zinc-500 dark:text-zinc-400">Vista general de tu plataforma SaaS</p>
+        <p className="mt-1 text-muted">Vista general de tu plataforma SaaS</p>
       </div>
 
       {/* Main Stats */}
@@ -267,7 +265,7 @@ function StatCard({
     <Card className="relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
+          <p className="text-sm font-medium text-muted">{label}</p>
           <p className="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">{value}</p>
           {trend && (
             <p className={`mt-1 text-sm ${trendUp ? 'text-emerald-600' : 'text-zinc-500'}`}>

@@ -1,0 +1,53 @@
+Security Test Report - Tue Feb  3 15:20:16 CST 2026
+========================================
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/bryanacuna/Desktop/barber-app[39m
+
+[31mNo test files found, exiting with code 1
+[39m
+[2mfilter: [22m[33msrc/app/api/barbers/[id/]/appointments/today/__tests__/route.security.test.ts[39m
+[2minclude: [22m[33m**/__tests__/**/*.test.{ts,tsx}[2m, [22m**/*.test.{ts,tsx}[2m, [22m**/*.spec.{ts,tsx}[39m
+[2mexclude:  [22m[33mnode_modules[2m, [22me2e[2m, [22m.next[2m, [22mout[2m, [22mdist[39m
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/bryanacuna/Desktop/barber-app[39m
+
+[31mNo test files found, exiting with code 1
+[39m
+[2mfilter: [22m[33msrc/app/api/appointments/[id/]/check-in/__tests__/route.security.test.ts[39m
+[2minclude: [22m[33m**/__tests__/**/*.test.{ts,tsx}[2m, [22m**/*.test.{ts,tsx}[2m, [22m**/*.spec.{ts,tsx}[39m
+[2mexclude:  [22m[33mnode_modules[2m, [22me2e[2m, [22m.next[2m, [22mout[2m, [22mdist[39m
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/bryanacuna/Desktop/barber-app[39m
+
+[31mNo test files found, exiting with code 1
+[39m
+[2mfilter: [22m[33msrc/app/api/appointments/[id/]/complete/__tests__/route.security.test.ts[39m
+[2minclude: [22m[33m**/__tests__/**/*.test.{ts,tsx}[2m, [22m**/*.test.{ts,tsx}[2m, [22m**/*.spec.{ts,tsx}[39m
+[2mexclude:  [22m[33mnode_modules[2m, [22me2e[2m, [22m.next[2m, [22mout[2m, [22mdist[39m
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/bryanacuna/Desktop/barber-app[39m
+
+[31mNo test files found, exiting with code 1
+[39m
+[2mfilter: [22m[33msrc/app/api/appointments/[id/]/check-in/__tests__/route.rate-limit.test.ts[39m
+[2minclude: [22m[33m**/__tests__/**/*.test.{ts,tsx}[2m, [22m**/*.test.{ts,tsx}[2m, [22m**/*.spec.{ts,tsx}[39m
+[2mexclude:  [22m[33mnode_modules[2m, [22me2e[2m, [22m.next[2m, [22mout[2m, [22mdist[39m
+
+✓ No hardcoded credentials found
+✓ No SQL injection vulnerabilities found
+✓ Atomic RPC function is used for client stats
+✓ All routes protected with authentication middleware
+
+================================================================
+SUMMARY
+================================================================
+Total Tests: 8
+Passed: 8
+Failed: 0
+Pass Rate: 100%
+
+✅ All security tests passing! Safe to deploy.

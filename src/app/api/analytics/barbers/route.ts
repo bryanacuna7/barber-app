@@ -1,11 +1,8 @@
-// @ts-nocheck
-// @ts-nocheck
 /**
  * API Route: Barber Performance Analytics
  * Returns barber leaderboard by revenue and appointments
  */
 
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 

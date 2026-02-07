@@ -67,7 +67,7 @@ Sistema de **vista previa dual** que muestra ambos modos simultáneamente:
 4. **Textos Fijos**: `text-zinc-900` (claro) y `text-white` (oscuro) con contraste garantizado
 5. **Etiquetas Claras**: "Modo claro" / "Modo oscuro" para contexto inmediato
 
-**Ubicación:** [configuracion/page.tsx:465-520](<src/app/(dashboard)/configuracion/page.tsx#L465-L520>)
+**Ubicación:** [configuracion/page.tsx:465-520](<../../src/app/(dashboard)/configuracion/page.tsx#L465-L520>)
 
 ---
 
@@ -94,13 +94,13 @@ className={`... border-2 ${
 }`}
 ```
 
-**Ubicación:** [configuracion/page.tsx:580-586](<src/app/(dashboard)/configuracion/page.tsx#L580-L586>)
+**Ubicación:** [configuracion/page.tsx:580-586](<../../src/app/(dashboard)/configuracion/page.tsx#L580-L586>)
 
 ---
 
 ## ✅ Áreas Verificadas (Sin Problemas)
 
-### 1. ThemeProvider ([theme-provider.tsx](src/components/theme-provider.tsx))
+### 1. ThemeProvider ([theme-provider.tsx](../../src/components/theme-provider.tsx))
 
 - ✅ Calcula correctamente variables CSS de contraste WCAG 2.0
 - ✅ `--brand-primary-contrast`: blanco/negro según luminancia del color
@@ -109,18 +109,18 @@ className={`... border-2 ${
 
 ### 2. Componentes UI Base
 
-- ✅ [button.tsx](src/components/ui/button.tsx): Usa colores predefinidos con contraste garantizado
-- ✅ [input.tsx](src/components/ui/input.tsx): Usa zinc palette con contraste adecuado
-- ✅ [card.tsx](src/components/ui/card.tsx): Fondos y bordes con contraste claro
+- ✅ [button.tsx](../../src/components/ui/button.tsx): Usa colores predefinidos con contraste garantizado
+- ✅ [input.tsx](../../src/components/ui/input.tsx): Usa zinc palette con contraste adecuado
+- ✅ [card.tsx](../../src/components/ui/card.tsx): Fondos y bordes con contraste claro
 
 ### 3. Páginas del Dashboard
 
-- ✅ [barberos/page.tsx](<src/app/(dashboard)/barberos/page.tsx>): Usa variables CSS del tema
-- ✅ [onboarding/page.tsx](<src/app/(dashboard)/onboarding/page.tsx>): Sin estilos inline problemáticos
+- ✅ [barberos/page.tsx](<../../src/app/(dashboard)/barberos/page.tsx>): Usa variables CSS del tema
+- ✅ [onboarding/page.tsx](<../../src/app/(dashboard)/onboarding/page.tsx>): Sin estilos inline problemáticos
 
 ### 4. Página Pública de Reservas
 
-- ✅ [reservar/[slug]/page.tsx](<src/app/(public)/reservar/[slug]/page.tsx>): Implementa funciones de contraste localmente, usa CSS variables
+- ✅ [reservar/[slug]/page.tsx](<../../src/app/(public)/reservar/[slug]/page.tsx>): Implementa funciones de contraste localmente, usa CSS variables
 
 ---
 
@@ -272,8 +272,8 @@ const textColor = getContrastingTextColor(backgroundColor)
 
 Ver implementación en:
 
-- [theme-provider.tsx](src/components/theme-provider.tsx#L47-L113)
-- [configuracion/page.tsx](<src/app/(dashboard)/configuracion/page.tsx#L43-L98>)
+- [theme-provider.tsx](../../src/components/theme-provider.tsx#L47-L113)
+- [configuracion/page.tsx](<../../src/app/(dashboard)/configuracion/page.tsx#L43-L98>)
 
 ---
 

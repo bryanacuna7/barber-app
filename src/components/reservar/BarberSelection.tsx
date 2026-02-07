@@ -19,6 +19,7 @@ export function BarberSelection({
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
+        data-testid="back-button"
         onClick={onBack}
         className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
       >
@@ -50,11 +51,13 @@ export function BarberSelection({
         {barbers.map((barber) => (
           <button
             key={barber.id}
+            data-testid="barber-card"
             onClick={() => onSelectBarber(barber)}
             className="ios-card w-full flex items-center gap-4 p-4 text-left ios-press"
           >
             <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 overflow-hidden">
               {barber.photo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={barber.photo_url}
                   alt={barber.name}
@@ -65,13 +68,14 @@ export function BarberSelection({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              <p
+                data-testid="barber-name"
+                className="text-[17px] font-semibold text-zinc-900 dark:text-white"
+              >
                 {barber.name}
               </p>
               {barber.bio && (
-                <p className="mt-0.5 text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                  {barber.bio}
-                </p>
+                <p className="mt-0.5 text-[13px] text-muted line-clamp-2">{barber.bio}</p>
               )}
             </div>
             <ChevronRight className="h-5 w-5 text-zinc-300 dark:text-zinc-600" />

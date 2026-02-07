@@ -25,7 +25,7 @@ export function TopReferrersTable({ referrers }: TopReferrersTableProps) {
   if (referrers.length === 0) {
     return (
       <Card className="p-8">
-        <div className="text-center text-zinc-500 dark:text-zinc-400">
+        <div className="text-center text-muted">
           <Trophy className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>No hay referrers registrados todavía</p>
         </div>

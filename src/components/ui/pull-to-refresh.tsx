@@ -121,6 +121,8 @@ export function PullToRefresh({
       {/* Draggable content wrapper */}
       <motion.div
         drag="y"
+        dragListener={canPull && !isRefreshing && !disabled}
+        dragPropagation
         dragDirectionLock
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={{ top: 0.5, bottom: 0 }}

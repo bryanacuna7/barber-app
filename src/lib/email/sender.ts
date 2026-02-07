@@ -34,7 +34,7 @@ export async function getNotificationPreferences(
     return null
   }
 
-  return data
+  return data as NotificationPreferences
 }
 
 /**

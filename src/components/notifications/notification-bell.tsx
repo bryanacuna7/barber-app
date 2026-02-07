@@ -72,36 +72,48 @@ export function NotificationBell() {
   const [stats, setStats] = useState<NotificationStats>({ total: 0, unread: 0 })
   const [isLoading, setIsLoading] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 })
-  // Hydration-safe: Only render portal on client
-  const [mounted, setMounted] = useState(typeof window !== 'undefined')
+  const mounted = typeof window !== 'undefined'
   const buttonRef = useRef<HTMLButtonElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Ensure mounted state is set after hydration - valid pattern for SSR + portals
-  useEffect(() => {
-    setMounted(true)
-  }, []) // Only run once on mount
-
   const fetchNotifications = useCallback(async () => {
     try {
-      const res = await fetch('/api/notifications?limit=10')
-      if (res.ok) {
-        const data = await res.json()
-        setNotifications(data.notifications || [])
-        setStats(data.stats || { total: 0, unread: 0 })
+      const res = await fetch('/api/notifications?limit=10', {
+        cache: 'no-store',
+      })
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setNotifications([])
+          setStats({ total: 0, unread: 0 })
+        }
+        return
       }
+
+      const data = await res.json()
+      setNotifications(data.notifications || [])
+      setStats(data.stats || { total: 0, unread: 0 })
     } catch (error) {
-      console.error('Failed to fetch notifications:', error)
+      setNotifications([])
+      setStats({ total: 0, unread: 0 })
+      console.warn('Notifications fetch failed:', error)
     }
   }, [])
 
   useEffect(() => {
-     
-    fetchNotifications()
+    const initialFetch = setTimeout(() => {
+      void fetchNotifications()
+    }, 0)
 
     // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
+    const interval = setInterval(() => {
+      void fetchNotifications()
+    }, 30000)
+
+    return () => {
+      clearTimeout(initialFetch)
+      clearInterval(interval)
+    }
   }, [fetchNotifications])
 
   // Close dropdown when clicking outside
@@ -231,9 +243,7 @@ export function NotificationBell() {
           {notifications.length === 0 ? (
             <div className="px-4 py-8 text-center">
               <Bell className="mx-auto h-8 w-8 text-zinc-300 dark:text-zinc-600" />
-              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-                No tienes notificaciones
-              </p>
+              <p className="mt-2 text-sm text-muted">No tienes notificaciones</p>
             </div>
           ) : (
             <div className="divide-y divide-zinc-100 dark:divide-zinc-700">
@@ -284,7 +294,7 @@ export function NotificationBell() {
                           <span className="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />
                         )}
                       </div>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="mt-0.5 line-clamp-2 text-xs text-muted">
                         {notification.message}
                       </p>
                       <p className="mt-1 text-[10px] text-zinc-400 dark:text-zinc-500">
@@ -301,7 +311,7 @@ export function NotificationBell() {
         {/* Footer */}
         {stats.total > 10 && (
           <div className="border-t border-zinc-200 px-4 py-2 dark:border-zinc-700">
-            <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-center text-xs text-muted">
               Mostrando 10 de {stats.total} notificaciones
             </p>
           </div>

@@ -1,8 +1,7 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
 import { canAddClient } from '@/lib/subscription'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
 // Validation schema for creating clients
 const clientSchema = z.object({
@@ -13,30 +12,8 @@ const clientSchema = z.object({
 })
 
 // GET - Fetch clients for the authenticated user's business
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Get user's business
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!business) {
-      return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
-    }
-
     // Parse query params
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
@@ -46,7 +23,10 @@ export async function GET(request: Request) {
     // Build query with pagination
     let query = supabase
       .from('clients')
-      .select('*', { count: 'exact' })
+      .select(
+        'id, name, phone, email, notes, created_at, last_visit_at, total_visits, total_spent, business_id',
+        { count: 'exact' }
+      )
       .eq('business_id', business.id)
       .order('name', { ascending: true })
       .range(offset, offset + limit - 1)
@@ -73,35 +53,13 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})
 
 // POST - Create a new client
-export async function POST(request: Request) {
+export const POST = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Get user's business
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!business) {
-      return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
-    }
-
     // Parse and validate request body
     const body = await request.json()
     const result = clientSchema.safeParse(body)
@@ -138,7 +96,7 @@ export async function POST(request: Request) {
         email: result.data.email,
         notes: result.data.notes,
       })
-      .select()
+      .select('id, name, phone, email, notes, created_at, business_id')
       .single()
 
     if (error) {
@@ -156,6 +114,6 @@ export async function POST(request: Request) {
     return NextResponse.json(client, { status: 201 })
   } catch (error) {
     console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})

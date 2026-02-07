@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils/cn'
 import type { ReactNode } from 'react'
+import type { BadgeVariant } from '@/types'
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'pending' | 'outline'
 type BadgeSize = 'sm' | 'md' | 'lg'
 
 interface BadgeProps {
@@ -13,22 +13,28 @@ interface BadgeProps {
   className?: string
 }
 
-const variantClasses: Record<BadgeVariant, string> = {
+const variantClasses: Partial<Record<BadgeVariant, string>> = {
   default: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
+  secondary: 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200',
+  primary: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
   success: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400',
   warning: 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
   danger: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400',
+  error: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400',
   info: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
   pending: 'bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-400',
   outline:
     'bg-transparent border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400',
 }
 
-const dotColors: Record<BadgeVariant, string> = {
+const dotColors: Partial<Record<BadgeVariant, string>> = {
   default: 'bg-zinc-500',
+  secondary: 'bg-zinc-600',
+  primary: 'bg-blue-500',
   success: 'bg-emerald-500',
   warning: 'bg-amber-500',
   danger: 'bg-red-500',
+  error: 'bg-red-500',
   info: 'bg-blue-500',
   pending: 'bg-violet-500',
   outline: 'bg-zinc-400',
@@ -53,7 +59,7 @@ export function Badge({
       className={cn(
         'inline-flex items-center gap-1.5 font-medium rounded-full',
         'transition-all duration-200',
-        variantClasses[variant],
+        variantClasses[variant] || variantClasses.default,
         sizeClasses[size],
         className
       )}
@@ -64,11 +70,16 @@ export function Badge({
             <span
               className={cn(
                 'absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping',
-                dotColors[variant]
+                dotColors[variant] || dotColors.default
               )}
             />
           )}
-          <span className={cn('relative inline-flex rounded-full h-2 w-2', dotColors[variant])} />
+          <span
+            className={cn(
+              'relative inline-flex rounded-full h-2 w-2',
+              dotColors[variant] || dotColors.default
+            )}
+          />
         </span>
       )}
       {children}

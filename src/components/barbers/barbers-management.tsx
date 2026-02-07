@@ -148,11 +148,9 @@ export function BarbersManagement() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
-              Staff de Barberos
+              Staff
             </h1>
-            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-1">
-              Gestiona tu equipo de profesionales
-            </p>
+            <p className="text-[15px] text-muted mt-1">Gestiona tu equipo de profesionales</p>
           </div>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button

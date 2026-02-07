@@ -3,7 +3,7 @@
 import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard } from 'lucide-react'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { formatCurrency, formatTime } from '@/lib/utils'
+import { formatCurrencyCompactMillions, formatTime } from '@/lib/utils'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { DashboardTourWrapper } from '@/components/tours/dashboard-tour-wrapper'
@@ -11,11 +11,11 @@ import { useDashboardStats } from '@/hooks/use-dashboard-stats'
 import { useDashboardAppointments } from '@/hooks/use-dashboard-appointments'
 
 export function DashboardContent() {
-  const { data: stats, isLoading: statsLoading } = useDashboardStats()
+  const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats()
   const { data: appointmentsData, isLoading: appointmentsLoading } = useDashboardAppointments()
 
-  // Show loading state
-  if (statsLoading || appointmentsLoading) {
+  // Show loading state only for stats (appointments load lazily)
+  if (statsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -26,11 +26,14 @@ export function DashboardContent() {
     )
   }
 
-  if (!stats) {
+  // Show error state if stats failed to load
+  if (statsError || !stats) {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold">Error</h1>
-        <p className="text-zinc-500 mt-2">No se pudieron cargar los datos</p>
+        <p className="text-zinc-500 mt-2">
+          {statsError instanceof Error ? statsError.message : 'No se pudieron cargar los datos'}
+        </p>
       </div>
     )
   }
@@ -50,12 +53,12 @@ export function DashboardContent() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-[28px] font-bold tracking-tight">
+            <h1 className="app-page-title">
               <span className="bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-700 dark:from-white dark:via-zinc-100 dark:to-zinc-300 bg-clip-text text-transparent">
                 {greeting}
               </span>
             </h1>
-            <p className="text-[15px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className="app-page-subtitle mt-0.5">
               Bienvenido a{' '}
               <span className="font-medium text-zinc-700 dark:text-zinc-300">
                 {stats.business.name}
@@ -65,7 +68,7 @@ export function DashboardContent() {
           <Link
             href={`/reservar/${stats.business.slug}`}
             target="_blank"
-            className="group inline-flex items-center gap-2 text-[15px] text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all duration-200 hover:gap-3 focus-ring rounded-md"
+            className="app-page-subtitle group inline-flex items-center gap-2 hover:text-zinc-900 dark:hover:text-white transition-all duration-200 hover:gap-3 focus-ring rounded-md"
           >
             Ver página pública
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -76,8 +79,8 @@ export function DashboardContent() {
         <div data-tour="dashboard-stats">
           <DashboardStats
             todayAppointments={stats.todayAppointments}
-            todayRevenue={formatCurrency(stats.todayRevenue)}
-            monthRevenue={formatCurrency(stats.monthRevenue)}
+            todayRevenue={formatCurrencyCompactMillions(stats.todayRevenue)}
+            monthRevenue={formatCurrencyCompactMillions(stats.monthRevenue)}
             monthAppointments={stats.monthAppointments}
             totalClients={stats.totalClients}
           />
@@ -90,17 +93,40 @@ export function DashboardContent() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
                 <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-[17px]">Próximas Citas Hoy</CardTitle>
+              <CardTitle className="text-lg">Próximas Citas Hoy</CardTitle>
             </div>
             <Link href="/citas">
-              <Button variant="gradient" size="sm" className="gap-1.5 text-[13px]">
-                Ver todas
+              <Button
+                variant="gradient"
+                size="sm"
+                className="gap-1.5 text-sm min-h-[44px] whitespace-nowrap"
+              >
+                Ver todo
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
           </CardHeader>
           <CardContent className="p-0">
-            {upcomingAppointments.length === 0 ? (
+            {appointmentsLoading ? (
+              // Loading skeleton
+              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-4 animate-pulse">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-zinc-200 dark:bg-zinc-700" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-32 bg-zinc-200 dark:bg-zinc-700 rounded" />
+                        <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-700 rounded" />
+                      </div>
+                    </div>
+                    <div className="text-right space-y-2">
+                      <div className="h-5 w-16 bg-zinc-200 dark:bg-zinc-700 rounded ml-auto" />
+                      <div className="h-3 w-20 bg-zinc-200 dark:bg-zinc-700 rounded ml-auto" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : upcomingAppointments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4 relative">
                 {/* Círculo decorativo de fondo */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -115,10 +141,10 @@ export function DashboardContent() {
                   <div className="absolute inset-0 rounded-2xl border-2 border-zinc-300/50 dark:border-zinc-700/50 animate-[pulse-ring_2s_ease-in-out_infinite]" />
                 </div>
 
-                <p className="mt-4 text-[17px] font-medium text-zinc-900 dark:text-white relative">
+                <p className="mt-4 text-lg font-medium text-zinc-900 dark:text-white relative">
                   Sin citas pendientes
                 </p>
-                <p className="mt-1 text-[15px] text-zinc-500 text-center relative">
+                <p className="mt-1 text-base text-zinc-500 text-center relative">
                   No hay más citas programadas para hoy
                 </p>
               </div>
@@ -142,19 +168,19 @@ export function DashboardContent() {
                       {/* Contenido con z-index relative */}
                       <div className="relative flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 ring-2 ring-white/50 dark:ring-zinc-900/50 shadow-sm group-hover:shadow-md transition-shadow">
-                          <span className="text-[15px] font-bold text-zinc-600 dark:text-zinc-300">
+                          <span className="text-base font-bold text-zinc-600 dark:text-zinc-300">
                             {client?.name?.charAt(0).toUpperCase() || '?'}
                           </span>
                         </div>
                         <div>
-                          <p className="text-[15px] font-semibold text-zinc-900 dark:text-white">
+                          <p className="text-base font-semibold text-zinc-900 dark:text-white">
                             {client?.name || 'Cliente'}
                           </p>
-                          <p className="text-[13px] text-zinc-500">{service?.name || 'Servicio'}</p>
+                          <p className="text-sm text-zinc-500">{service?.name || 'Servicio'}</p>
                         </div>
                       </div>
                       <div className="relative text-right">
-                        <p className="text-[17px] font-bold text-zinc-900 dark:text-white">
+                        <p className="text-lg font-bold text-zinc-900 dark:text-white">
                           {formatTime(apt.scheduled_at)}
                         </p>
                         <p
@@ -178,7 +204,7 @@ export function DashboardContent() {
         {/* Quick Actions */}
         <Card variant="glass" data-tour="dashboard-quick-actions">
           <CardHeader>
-            <CardTitle className="text-[17px]">Acciones Rápidas</CardTitle>
+            <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent>
             <div
@@ -190,7 +216,7 @@ export function DashboardContent() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 dark:bg-amber-600">
                       <CreditCard className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-[13px] font-medium text-amber-900 dark:text-amber-100 text-center">
+                    <span className="text-sm font-medium text-amber-900 dark:text-amber-100 text-center">
                       Reportar Pago
                     </span>
                   </div>
@@ -201,7 +227,7 @@ export function DashboardContent() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400 transition-transform group-hover:scale-110" />
                   </div>
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white text-center">
                     Nueva Cita
                   </span>
                 </div>
@@ -211,7 +237,7 @@ export function DashboardContent() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30 group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400 transition-transform group-hover:scale-110" />
                   </div>
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white text-center">
                     Servicios
                   </span>
                 </div>
@@ -221,7 +247,7 @@ export function DashboardContent() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400 transition-transform group-hover:scale-110" />
                   </div>
-                  <span className="text-[13px] font-medium text-zinc-900 dark:text-white text-center">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-white text-center">
                     Clientes
                   </span>
                 </div>

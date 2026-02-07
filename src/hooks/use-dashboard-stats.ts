@@ -17,15 +17,32 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/stats')
-      if (!response.ok) {
-        throw new Error('Failed to fetch dashboard stats')
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
+      try {
+        const response = await fetch('/api/dashboard/stats', {
+          signal: controller.signal,
+        })
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch dashboard stats: ${response.status}`)
+        }
+        return response.json() as Promise<DashboardStats>
+      } catch (error) {
+        clearTimeout(timeoutId)
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Dashboard stats request timed out after 10 seconds')
+        }
+        throw error
       }
-      return response.json() as Promise<DashboardStats>
     },
     // Refetch every 30 seconds for fresh stats
     refetchInterval: 30000,
     // Keep previous data while refetching
     placeholderData: (previousData) => previousData,
+    // Retry only once
+    retry: 1,
   })
 }

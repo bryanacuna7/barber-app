@@ -52,8 +52,16 @@ const container = {
 }
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.21, 0.47, 0.32, 0.98],
+    },
+  },
 }
 
 export function PricingSection() {
@@ -92,20 +100,33 @@ export function PricingSection() {
             <motion.div
               key={plan.name}
               variants={item}
-              whileHover={{ y: -5, scale: 1.02 }}
+              whileHover={{
+                y: -8,
+                scale: 1.03,
+                rotateY: 3,
+                rotateX: 3,
+                transition: { duration: 0.3 },
+              }}
+              style={{ transformStyle: 'preserve-3d' }}
               className={`relative overflow-hidden rounded-3xl border p-8 shadow-xl transition-all ${
                 plan.popular
-                  ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 dark:border-blue-500 dark:from-blue-950/20 dark:to-purple-950/20'
-                  : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+                  ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-sm dark:border-blue-500 dark:from-blue-950/20 dark:to-purple-950/20'
+                  : 'border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <motion.div
+                  initial={{ scale: 0, y: -10 }}
+                  whileInView={{ scale: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+                  className="absolute -top-3 left-1/2 -translate-x-1/2"
+                >
                   <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-1.5 text-sm font-semibold text-white shadow-lg">
                     <Crown className="h-4 w-4" />
                     Recomendado
                   </span>
-                </div>
+                </motion.div>
               )}
 
               <div className="mb-8">
@@ -121,11 +142,24 @@ export function PricingSection() {
 
               <ul className="mb-8 space-y-4">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3">
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + i * 0.05 }}
+                    className="flex items-center gap-3"
+                  >
                     {feature.included ? (
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.5 + i * 0.05, type: 'spring', stiffness: 200 }}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30"
+                      >
                         <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                      </div>
+                      </motion.div>
                     ) : (
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
                         <X className="h-4 w-4 text-zinc-400 dark:text-zinc-600" />
@@ -140,41 +174,45 @@ export function PricingSection() {
                     >
                       {feature.label}
                     </span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
 
-              <Link
-                href="/register"
-                className={`group flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all ${
-                  plan.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40'
-                    : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100'
-                }`}
-              >
-                {plan.cta}
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                <Link
+                  href="/register"
+                  className={`group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all ${
+                    plan.popular
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40'
+                      : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100'
+                  }`}
+                >
+                  {plan.cta}
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </motion.div>
             </motion.div>
           ))}
         </motion.div>
 
         {/* FAQ Link */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
           className="mt-12 text-center"
         >
           <p className="text-zinc-600 dark:text-zinc-400">
             ¿Tienes preguntas?{' '}
-            <Link
-              href="/precios"
-              className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Ver preguntas frecuentes →
-            </Link>
+            <motion.span whileHover={{ x: 3 }} className="inline-block">
+              <Link
+                href="/precios"
+                className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Ver preguntas frecuentes →
+              </Link>
+            </motion.span>
           </p>
         </motion.div>
       </div>

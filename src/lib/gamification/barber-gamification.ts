@@ -136,10 +136,10 @@ export function getAchievementProgress(
 /**
  * Group achievements by category
  */
-export function groupAchievementsByCategory(
-  achievements: Achievement[]
-): Record<AchievementCategory, Achievement[]> {
-  const grouped: Record<AchievementCategory, Achievement[]> = {
+export function groupAchievementsByCategory<
+  T extends { category: AchievementCategory | string; display_order?: number },
+>(achievements: T[]): Record<AchievementCategory, T[]> {
+  const grouped: Record<AchievementCategory, T[]> = {
     revenue: [],
     appointments: [],
     clients: [],
@@ -148,12 +148,17 @@ export function groupAchievementsByCategory(
   }
 
   achievements.forEach((achievement) => {
-    grouped[achievement.category].push(achievement)
+    const category = achievement.category as AchievementCategory
+    grouped[category].push(achievement)
   })
 
-  // Sort each category by display_order
+  // Sort each category by display_order if available
   Object.keys(grouped).forEach((category) => {
-    grouped[category as AchievementCategory].sort((a, b) => a.display_order - b.display_order)
+    grouped[category as AchievementCategory].sort((a, b) => {
+      const aOrder = 'display_order' in a ? (a.display_order ?? 0) : 0
+      const bOrder = 'display_order' in b ? (b.display_order ?? 0) : 0
+      return aOrder - bOrder
+    })
   })
 
   return grouped

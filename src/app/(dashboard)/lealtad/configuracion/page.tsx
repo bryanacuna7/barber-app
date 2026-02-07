@@ -18,6 +18,7 @@ import { LoyaltyPreview } from '@/components/loyalty/loyalty-preview'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
+import type { ProgramType, ReferralRewardType } from '@/types'
 
 export const metadata = {
   title: 'Configuración de Lealtad | BarberShop Pro',
@@ -40,13 +41,13 @@ async function getLoyaltyProgram(businessId: string): Promise<LoyaltyProgram | n
     id: data.id,
     businessId: data.business_id,
     enabled: data.enabled,
-    programType: data.program_type,
+    programType: data.program_type as ProgramType,
     pointsPerCurrencyUnit: data.points_per_currency_unit,
     pointsExpiryDays: data.points_expiry_days,
     freeServiceAfterVisits: data.free_service_after_visits,
     discountAfterVisits: data.discount_after_visits,
     discountPercentage: data.discount_percentage,
-    referralRewardType: data.referral_reward_type,
+    referralRewardType: data.referral_reward_type as ReferralRewardType,
     referralRewardAmount: data.referral_reward_amount,
     refereeRewardAmount: data.referee_reward_amount,
     createdAt: data.created_at,
@@ -114,17 +115,19 @@ export default async function LoyaltyConfigPage() {
 
   return (
     <>
-      {/* Mobile Header - Fixed */}
-      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-xl lg:hidden -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 -mt-6">
-        <div className="flex h-14 items-center gap-3">
+      {/* Mobile Section Header */}
+      <header className="mb-4 lg:hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+        <div className="flex min-h-[44px] items-center gap-3">
           <Link
             href="/dashboard"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/80 transition-colors active:bg-secondary"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white/95 text-zinc-700 transition-colors active:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/90 dark:text-zinc-200 dark:active:bg-zinc-700"
           >
             <ChevronLeft className="h-5 w-5" />
           </Link>
           <div className="flex-1">
-            <h1 className="text-[17px] font-semibold">Programa de Lealtad</h1>
+            <h1 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              Programa de Lealtad
+            </h1>
           </div>
         </div>
       </header>
@@ -200,7 +203,7 @@ export default async function LoyaltyConfigPage() {
       )}
 
       {/* Main Content - Side by side on desktop */}
-      <div className="mt-4 grid grid-cols-1 gap-6 lg:mt-0 lg:grid-cols-[1fr_400px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
         {/* Left Column: Configuration Form + Mobile Preview Button */}
         <Suspense fallback={<ConfigFormSkeleton />}>
           <LoyaltyConfigWrapper businessId={business.id} initialProgram={program} />

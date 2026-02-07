@@ -14,6 +14,7 @@ Al iniciar una nueva sesión, **EJECUTA AUTOMÁTICAMENTE** el comando `/continue
    - Qué sigue
 
 2. Muestra resumen breve:
+
    ```
    📋 Sesión anterior: [resumen 1 línea]
    ➡️  Siguiente: [próxima tarea]
@@ -31,33 +32,48 @@ Al iniciar una nueva sesión, **EJECUTA AUTOMÁTICAMENTE** el comando `/continue
 
 Estas reglas son **OBLIGATORIAS**, no sugerencias:
 
-### 1. SIEMPRE verificar cambios UI visualmente
+### 1. NUNCA asumir columnas de base de datos sin verificar
+
+```
+⚠️ ANTES de crear migrations, queries, o indexes:
+1. Leer DATABASE_SCHEMA.md (única fuente de verdad)
+2. Verificar que columnas/tablas EXISTEN
+3. NUNCA asumir features futuras están implementadas
+
+PROHIBIDO:
+❌ Crear migration sin leer DATABASE_SCHEMA.md primero
+❌ Asumir columnas como deposit_paid, last_activity_at sin verificar
+❌ Usar tablas que no están documentadas en DATABASE_SCHEMA.md
+```
+
+### 2. SIEMPRE verificar cambios UI visualmente
 
 ```
 Después de modificar CSS/componentes → Playwright screenshot OBLIGATORIO
 NUNCA decir "debería verse bien" sin verificar
 ```
 
-### 2. SIEMPRE mostrar qué agente se usa
+### 3. SIEMPRE mostrar qué agente se usa
 
 ```
 Antes de trabajar → "🤖 Using @[agente]..."
 Leer .claude/agents/[agente].md para instrucciones específicas
 ```
 
-### 3. SIEMPRE verificar el dev server antes de preview
+### 4. SIEMPRE verificar el dev server antes de preview
 
 ```
 lsof -i :3000 | grep LISTEN
 Si no corre → iniciar automáticamente
 ```
 
-### 4. NUNCA asumir que el código funciona
+### 5. NUNCA asumir que el código funciona
 
 ```
 Cambio de UI → screenshot
 Cambio de lógica → test o verificación
 Fix de bug → confirmar que está resuelto
+Cambio de DB → verificar contra DATABASE_SCHEMA.md
 ```
 
 ---
@@ -103,6 +119,96 @@ Automáticamente actualiza `PROGRESS.md` cuando:
 
 - `/continue` - Forzar lectura de PROGRESS.md
 - `/save-progress` - Forzar guardado manual
+- `/remember [info]` - Guardar información específica en Memory MCP
+
+---
+
+## 🧠 Memory Auto-Save (Memoria Persistente)
+
+Claude puede recordar información importante entre sesiones usando Memory MCP.
+
+### Qué se guarda automáticamente:
+
+**Triggers de auto-save** (sin intervención del usuario):
+
+1. **Después de /commit:**
+   - Si el mensaje menciona "fix bug", "security", "breaking change"
+   - Guardar patrón en `lessons_learned` entity
+   - Ejemplo: "Session 73: Race condition fixed with atomic DB function"
+
+2. **Después de /create o /enhance:**
+   - Decisiones arquitectónicas tomadas
+   - Nuevos patrones implementados
+   - Dependencias agregadas a `tech_stack`
+
+3. **Cuando usuario corrige mi código:**
+   - Detectar patrón: "No, usa X en lugar de Y"
+   - Guardar en `code_style_preferences` o entity relevante
+   - Ejemplo: "User prefers const over let for immutable values"
+
+4. **Después de /deploy:**
+   - Actualizar `current_implementation_status`
+   - Features deployadas
+
+5. **Cuando se modifican archivos críticos:**
+   - `DATABASE_SCHEMA.md` → actualizar `database_architecture`
+   - `DECISIONS.md` → nuevas decisiones arquitectónicas
+   - `package.json` → actualizar `tech_stack`
+
+### Detección de Información Valiosa:
+
+Claude detecta y guarda automáticamente cuando el usuario dice:
+
+| Patrón detectado        | Ejemplo                             | Entity actualizada       |
+| ----------------------- | ----------------------------------- | ------------------------ |
+| Preferencia de código   | "prefiero usar X", "siempre usa Y"  | `code_style_preferences` |
+| Decisión arquitectónica | "vamos a usar X para Y porque..."   | `architecture_pattern`   |
+| Bug pattern             | "esto causó un bug antes"           | `lessons_learned`        |
+| Seguridad               | "NUNCA hagas X porque..."           | `security_pattern`       |
+| Workflow                | "cuando hagas X, siempre Y primero" | `workflow`               |
+
+### Comando Manual /remember:
+
+Para guardar explícitamente:
+
+```
+/remember "prefiero Playwright para UI testing"
+/remember decision: usar WebSocket en lugar de polling
+/remember bug: last_activity_at debe ser last_visit_at
+/remember security: validar business_id en TODAS las queries
+```
+
+### Confirmación:
+
+Cuando se guarda algo en memoria, mostrar brevemente:
+
+```
+💾 Saved to memory: [entity_name]
+```
+
+**No mostrar confirmación** si es parte de auto-save silencioso (post-commit, post-feature).
+
+### Entidades en Memoria:
+
+El proyecto barber-app tiene **32 entidades principales** en memoria:
+
+- `barber_app_project` - Identidad del proyecto
+- `tech_stack` - Stack tecnológico
+- `database_architecture` - Arquitectura de BD
+- `auth_middleware_pattern` - Patrones de auth
+- `code_style_preferences` - Estilos de código
+- `lessons_learned` - Lecciones de bugs
+- `automation_preferences` - Preferencias de automatización
+- `immediate_priorities` - Prioridades actuales
+- ... (ver grafo completo con `mcp__memory__read_graph`)
+
+### Beneficios:
+
+- ✅ Claude recuerda preferencias entre sesiones
+- ✅ No repite errores pasados (lessons_learned)
+- ✅ Aplica convenciones del proyecto automáticamente
+- ✅ Conoce el estado actual sin preguntar
+- ✅ Sigue patrones de seguridad críticos
 
 ---
 
@@ -479,136 +585,373 @@ Claude: Para entender el problema:
 
 **PROHIBIDO:** Implementar sin clarificar cuando hay ambigüedad.
 
-### Agent Routing Checklist (OBLIGATORIO)
+### Team Activation Checklist (OBLIGATORIO)
 
 **NUNCA empezar a trabajar sin completar esta checklist:**
 
-- [ ] **1. Identificar dominio:** Analizar keywords silenciosamente
-- [ ] **2. Seleccionar agente(s):** Usar matriz de selección
-- [ ] **3. Leer configuración:** Leer `.claude/agents/[nombre].md`
-- [ ] **4. Anunciar agente:** Mostrar "🤖 Using/Applying @[agente]..."
-- [ ] **5. Cargar skills:** Si el agente requiere skills específicos, cargarlos
+- [ ] **1. Identificar tipo de request:** Analizar keywords silenciosamente
+- [ ] **2. Seleccionar TEAM apropiado:** Usar Matriz de Activación
+- [ ] **3. Leer configuración de miembros:** Leer `.claude/agents/[nombre].md` de cada miembro
+- [ ] **4. Anunciar TEAM:** Mostrar "🤖 Activating [Team Name]: @member1 + @member2..."
+- [ ] **5. Cargar skills:** Si el team requiere skills (ej: /ui-ux-pro-max)
 - [ ] **6. Aplicar Socratic Gate:** Si es feature nueva o request vago, preguntar primero
-- [ ] **7. Comenzar trabajo:** Seguir instrucciones del agente
+- [ ] **7. Ejecutar workflow del team:** Seguir secuencia específica del team
 
 ### Flujo OBLIGATORIO para cada tarea:
 
 ```
 1. Usuario hace request ─────────────────────────────────────────┐
 2. ANALIZAR SILENCIOSAMENTE: keywords y tipo de tarea            │
-3. DETECTAR DOMINIO: frontend, backend, security, etc.           │
-4. Seleccionar agente(s) apropiado(s) (ver matriz abajo)         │
-5. LEER archivo(s) del agente: .claude/agents/[nombre].md        │
+3. DETECTAR TEAM APROPIADO: Security, UI/UX, Debug, etc.         │
+4. Seleccionar team de la Matriz de Activación                   │
+5. LEER archivos .md de TODOS los miembros del team              │
 6. Mostrar ANTES de trabajar:                                    │
-   - Un agente: "🤖 Using @[agente]..."                          │
-   - Múltiples: "🤖 Applying @[agente1] + @[agente2]..."         │
-   - Con contexto: "🤖 Using @[agente] for [specific task]..."   │
+   "🤖 Activating [Team Name]: @member1 + @member2 + @member3"   │
 7. Aplicar Socratic Gate si es necesario                         │
-8. Seguir las instrucciones específicas del agente               │
-9. Aplicar el expertise del agente al trabajo                    │
+8. Ejecutar workflow del team secuencialmente                    │
+9. Cada miembro aplica su expertise en orden                     │
+10. Coordinator (@context-manager) si multi-team                 │
 └────────────────────────────────────────────────────────────────┘
 ```
 
-### Agent Selection Matrix (15 agentes)
+### Agent Teams Architecture 🎯
 
-| Keywords en request                                | Agente                    | Archivo a leer                              |
-| -------------------------------------------------- | ------------------------- | ------------------------------------------- |
-| component, react, css, UI, layout, button, form    | `fullstack-developer`     | `.claude/agents/fullstack-developer.md`     |
-| api, endpoint, server, database, backend           | `fullstack-developer`     | `.claude/agents/fullstack-developer.md`     |
-| error, bug, crash, not working, falla, no funciona | `debugger`                | `.claude/agents/debugger.md`                |
-| test, coverage, unit, e2e, jest, vitest            | `test-engineer`           | `.claude/agents/test-engineer.md`           |
-| slow, optimize, memory, performance, lento         | `performance-profiler`    | `.claude/agents/performance-profiler.md`    |
-| auth, jwt, password, security, xss, sql injection  | `security-auditor`        | `.claude/agents/security-auditor.md`        |
-| refactor, migrate, modernize, arquitectura         | `architecture-modernizer` | `.claude/agents/architecture-modernizer.md` |
-| docs, readme, comments, documentar                 | `documentation-expert`    | `.claude/agents/documentation-expert.md`    |
-| design, UI/UX, colores, estilos, diseño            | `ui-ux-designer`          | `.claude/agents/ui-ux-designer.md`          |
-| review, quality, standards, code smell             | `code-reviewer`           | `.claude/agents/code-reviewer.md`           |
-| prompt, ai, llm, gpt, optimize prompt              | `prompt-engineer`         | `.claude/agents/prompt-engineer.md`         |
-| devops, ci/cd, docker, kubernetes, deploy pipeline | `devops-engineer`         | `.claude/agents/devops-engineer.md`         |
-| roadmap, features, mvp, product, strategy          | `product-strategist`      | `.claude/agents/product-strategist.md`      |
-| context, session, multi-agent, coordination        | `context-manager`         | `.claude/agents/context-manager.md`         |
-| frontend only, react advanced, state management    | `frontend-specialist`     | `.claude/agents/frontend-specialist.md`     |
-| backend only, api design, microservices            | `backend-specialist`      | `.claude/agents/backend-specialist.md`      |
+**NUEVO PARADIGMA:** Los agentes NO trabajan solos - trabajan en EQUIPOS especializados.
+
+**10 Equipos Disponibles:**
+
+---
+
+| Keywords en request | Agente | Archivo a leer |
+| ------------------- | ------ | -------------- |
+
+#### 1. 🔒 Security Team
+
+**Auto-Trigger:** `auth`, `login`, `payment`, `password`, `JWT`, `OAuth`, `admin`, `sensitive data`
+
+**Miembros:**
+
+- `security-auditor` (LEAD) - Análisis vulnerabilidades
+- `backend-specialist` - Implementación segura
+- `code-reviewer` - Validación código
+
+**Workflow:** Security-auditor analiza → Backend implementa → Code-reviewer valida
+
+**Ejemplo:** "Agregar login para barberos"
+
+---
+
+#### 2. 🎨 UI/UX Team
+
+**Auto-Trigger:** `design`, `UI/UX`, `colores`, `landing`, `componente visual`, `estilo`
+
+**Miembros:**
+
+- `ui-ux-designer` (LEAD) - Estrategia UX
+- `/ui-ux-pro-max` - Biblioteca estilos
+- `frontend-specialist` - Implementación optimizada
+
+**Workflow:** UI-UX-designer define → UI-UX-pro-max estilos → Frontend implementa
+
+**Ejemplo:** "Diseña sección de servicios"
+
+---
+
+#### 3. ✅ Quality Assurance Team
+
+**Auto-Trigger:** Después de `/create`, `/enhance`, cuando feature lista
+
+**Miembros:**
+
+- `test-engineer` (LEAD) - Suite de tests
+- `code-reviewer` - Quality gates
+- `performance-profiler` - Optimización
+
+**Workflow:** Tests → Code review → Performance check
+
+**Ejemplo:** Auto-trigger post-feature
+
+---
+
+#### 4. 🏗️ Architecture Team
+
+**Auto-Trigger:** `refactor`, `migrate`, `modernize`, `architectural change`, `scale`
+
+**Miembros:**
+
+- `architecture-modernizer` (LEAD) - Diseño
+- `fullstack-developer` - Implementación
+- `code-reviewer` - Validación coherencia
+
+**Workflow:** Diseño arquitectónico → Implementación → Validación
+
+**Ejemplo:** "Migrar a microservicios"
+
+---
+
+#### 5. 🐛 Debug Team
+
+**Auto-Trigger:** `error`, `bug`, `crash`, `not working`, `500 error`, `exception`
+
+**Miembros:**
+
+- `debugger` (LEAD) - Root cause analysis
+- `test-engineer` - Regression tests
+- `performance-profiler` - Si es performance issue
+
+**Workflow:** Diagnóstico → Fix → Tests prevención
+
+**Ejemplo:** "Las reservas fallan"
+
+---
+
+#### 6. 🚀 DevOps Team
+
+**Auto-Trigger:** `deploy`, `CI/CD`, `docker`, `kubernetes`, `pipeline`, `production`
+
+**Miembros:**
+
+- `devops-engineer` (LEAD) - Deploy
+- `security-auditor` - Security scan
+- `test-engineer` - Integration tests
+
+**Workflow:** Preparar → Security scan → Tests → Deploy
+
+**Ejemplo:** "/deploy production"
+
+---
+
+#### 7. 📚 Documentation Team
+
+**Auto-Trigger:** Después de cambios arquitectónicos, `/docs`
+
+**Miembros:**
+
+- `documentation-expert` (LEAD) - Docs técnicas
+- `code-reviewer` - Technical accuracy
+- `architecture-modernizer` - Diagramas
+
+**Workflow:** Estructura docs → Validación → Diagramas
+
+**Ejemplo:** "Documenta sistema de reservas"
+
+---
+
+#### 8. 🎯 Product Planning Team
+
+**Auto-Trigger:** `/brainstorm`, nueva feature ambigua, `roadmap`, `MVP`
+
+**Miembros:**
+
+- `product-strategist` (LEAD) - Strategy
+- `ui-ux-designer` - UX considerations
+- `architecture-modernizer` - Feasibility
+
+**Workflow:** Opciones → UX → Feasibility → Recomendación
+
+**Ejemplo:** "/brainstorm sistema de puntos"
+
+---
+
+#### 9. 🤖 AI Integration Team
+
+**Auto-Trigger:** `AI`, `LLM`, `prompt`, `GPT`, `embeddings`, `chat`
+
+**Miembros:**
+
+- `prompt-engineer` (LEAD) - Prompt optimization
+- `backend-specialist` - API integration
+- `security-auditor` - Privacy validation
+
+**Workflow:** Optimize prompts → Integrate → Security review
+
+**Ejemplo:** "Agregar chat AI para consultas"
+
+---
+
+#### 10. 🎪 Full Feature Team
+
+**Auto-Trigger:** Feature end-to-end que toca frontend + backend + DB
+
+**Miembros:**
+
+- `frontend-specialist` - UI y estado
+- `backend-specialist` - API y lógica
+- `security-auditor` - Security review
+- `test-engineer` - E2E tests
+
+**Workflow:** Frontend → Backend → Integración → Security → Tests
+
+**Ejemplo:** "Sistema completo de reservas con calendario"
+
+---
+
+### 📊 Matriz de Activación
+
+| Request Type       | Team                  | Auto-Trigger       |
+| ------------------ | --------------------- | ------------------ |
+| Auth/Payment       | Security Team         | ✅ Siempre         |
+| UI/Design          | UI/UX Team            | ✅ Siempre         |
+| Error/Bug          | Debug Team            | ✅ Siempre         |
+| Feature Full-Stack | Full Feature Team     | ✅ Si front+back   |
+| Refactor           | Architecture Team     | ✅ Siempre         |
+| Deploy             | DevOps Team           | ✅ Siempre         |
+| Brainstorm         | Product Planning Team | ✅ Siempre         |
+| AI Feature         | AI Integration Team   | ✅ Siempre         |
+| Post-Feature       | QA Team               | ✅ Auto            |
+| Docs               | Documentation Team    | ⚠️ Cambios grandes |
+
+**Coordinador:** `context-manager` gestiona handoffs entre múltiples teams.
 
 ### Ejemplos de uso correcto:
 
-**Ejemplo 1: Bug de UI**
+**Ejemplo 1: Bug de Reservas → Debug Team**
 
 ```
-Usuario: "El botón de búsqueda se ve mal, el ícono se sobrepone"
+Usuario: "El botón de reserva no funciona, no guarda la cita"
 
 Claude debe:
-1. Analizar silenciosamente: "botón", "se ve mal" → UI issue + bug
-2. Detectar dominio: Frontend + Debugging
-3. Seleccionar: @fullstack-developer + @debugger
-4. Leer ambos archivos .md
-5. Mostrar: "🤖 Applying @fullstack-developer + @debugger to fix UI issue..."
-6. Arreglar el código siguiendo las instrucciones de ambos agentes
-7. OBLIGATORIO: Usar Playwright para verificar el fix visualmente
-8. Mostrar screenshot confirmando que se ve bien
+1. Analizar: "no funciona", "no guarda" → Bug crítico
+2. Activar: 🐛 Debug Team
+3. Mostrar: "🤖 Activating Debug Team: @debugger + @test-engineer..."
+4. Debugger: Identifica problema (evento onClick o API call)
+5. Implementa fix
+6. Test-engineer: Crea regression tests
+7. Verifica que reservas funcionan correctamente
 ```
 
-**Ejemplo 2: Feature de autenticación**
+**Ejemplo 2: Login para Barberos → Security Team**
 
 ```
-Usuario: "Agregar login con JWT"
+Usuario: "Agregar login para que barberos accedan al panel"
 
 Claude debe:
-1. Analizar: "login", "JWT" → Auth + Backend + Security
-2. Mostrar: "🤖 Applying @security-auditor + @backend-specialist for JWT authentication..."
-3. Implementar siguiendo best practices de seguridad
+1. Analizar: "login", "barberos", "panel" → Security critical
+2. Activar: 🔒 Security Team
+3. Mostrar: "🤖 Activating Security Team: @security-auditor + @backend-specialist + @code-reviewer..."
+4. Security-auditor: Analiza requisitos y vulnerabilidades
+5. Backend-specialist: Implementa con JWT/session
+6. Code-reviewer: Valida antes de commit
+7. Resultado: Login seguro validado
 ```
 
-**Ejemplo 3: Error en producción**
+**Ejemplo 3: Error en Pagos → Debug Team**
 
 ```
-Usuario: "El checkout da error 500"
+Usuario: "Los pagos fallan con error 500"
 
 Claude debe:
-1. Analizar: "error 500" → Debugging needed
-2. Mostrar: "🤖 Using @debugger for systematic error analysis..."
-3. Investigar causa raíz siguiendo metodología del debugger
+1. Analizar: "pagos", "error 500" → Critical bug
+2. Activar: 🐛 Debug Team
+3. Mostrar: "🤖 Activating Debug Team: @debugger + @test-engineer..."
+4. Debugger: Root cause analysis (API, DB, payment gateway)
+5. Implementa fix
+6. Test-engineer: Crea tests E2E de payment flow
+7. Verifica que pagos funcionan
 ```
 
-### Multi-Agent Orchestration
-
-**Para tareas complejas que requieren múltiples dominios:**
-
-El sistema procesa cada dominio **secuencialmente**, cambiando de contexto entre especialistas (NO es ejecución paralela real).
-
-**Ejemplo: Full-stack feature**
+**Ejemplo 4: UI/UX Design (Team por Default)**
 
 ```
-Usuario: "Crear sistema de notificaciones en tiempo real"
+Usuario: "Diseña la sección de servicios de la barbería"
 
-Claude: 🤖 Orchestrating @backend-specialist + @frontend-specialist + @security-auditor...
-
-1. [Backend] Diseñando WebSocket API...
-2. [Frontend] Creando componente de notificaciones...
-3. [Security] Validando autenticación de WebSocket...
-4. [Integration] Conectando frontend con backend...
-
-✅ Feature completado con coherencia entre dominios
+Claude debe:
+1. Analizar: "diseña", "sección" → UI/UX + Design
+2. Mostrar: "🤖 Activating UI/UX Team: @ui-ux-designer + /ui-ux-pro-max..."
+3. FASE 1 - Estrategia (@ui-ux-designer):
+   - Analizar contexto de barbería
+   - Definir layout apropiado (grid, cards, etc)
+   - Principios de diseño para servicios
+4. FASE 2 - Implementación (/ui-ux-pro-max):
+   - Recomendar estilo visual (ej: brutalist para barbería moderna)
+   - Seleccionar paleta de colores apropiada
+   - Elegir tipografía que comunique profesionalismo
+   - Generar componentes con el estilo
+5. INTEGRACIÓN:
+   - Implementar código siguiendo ambas guías
+   - Usar Playwright para verificar resultado visual
+6. Mostrar screenshot del resultado
 ```
 
-**Coherencia de código:** Aunque se cambia entre agentes, se mantiene consistencia en:
+**Otro ejemplo UI/UX Team:**
 
-- Convenciones de naming
-- Patrones de arquitectura
-- Estilo de código
+```
+Usuario: "Los botones de reserva se ven anticuados, modernízalos"
+
+Claude debe:
+1. Mostrar: "🤖 UI/UX Team: @ui-ux-designer + /ui-ux-pro-max..."
+2. @ui-ux-designer: Analizar contexto (¿dónde están? ¿call-to-action principal?)
+3. /ui-ux-pro-max: Recomendar 2-3 estilos modernos con ejemplos (glassmorphism, brutalist, etc)
+4. Implementar mejora combinando ambos insights
+5. Playwright screenshot para verificar
+```
+
+**REGLA:** Para CUALQUIER request de UI/UX, SIEMPRE activar ambos automáticamente.
+
+### Multi-Team Orchestration
+
+**Para tareas complejas que requieren múltiples TEAMS:**
+
+El `context-manager` coordina handoffs entre equipos secuencialmente.
+
+**Ejemplo: Sistema de Reservas Completo**
+
+```
+Usuario: "Crear sistema completo de reservas con calendario y pagos"
+
+Claude: 🤖 Orchestrating Multi-Team Pipeline...
+        Coordinador: @context-manager
+
+1. 🎯 Product Planning Team
+   - Define flujo de reservas
+   - Valida experiencia para clientes
+   - Determina funcionalidad de calendario
+
+2. 🔒 Security Team
+   - Implementa auth para clientes y barberos
+   - Valida manejo seguro de pagos
+   - Protege datos personales
+
+3. 🎨 UI/UX Team
+   - Diseña calendario interactivo
+   - Define estados de loading
+   - Maneja errores visualmente
+
+4. 🎪 Full Feature Team
+   - Integra frontend + backend
+   - Conecta con Stripe/payment API
+   - Persiste reservas en DB
+
+5. ✅ QA Team
+   - Tests E2E completos
+   - Code review final
+   - Performance check
+
+6. 🚀 DevOps Team
+   - Deploy a staging
+   - Verifica en producción
+
+✅ Sistema completo con 6 teams coordinados
+```
+
+**Coherencia entre teams:**
+
+- Context-manager mantiene decisiones entre handoffs
+- Cada team recibe contexto del anterior
+- Estilo y arquitectura consistentes
 
 ### PROHIBIDO:
 
-- ❌ Ignorar la matriz de agentes
-- ❌ No mostrar qué agente se está usando ANTES de trabajar
-- ❌ No leer el archivo del agente
-- ❌ Trabajar sin el expertise específico del agente
-- ❌ Mencionar agentes sin aplicar su expertise real
-- ❌ Cambiar de agente sin anunciar el cambio
+- ❌ Usar agentes individuales cuando debería usar TEAMS
+- ❌ No mostrar qué TEAM se está activando ANTES de trabajar
+- ❌ No leer los archivos .md de los agentes del team
+- ❌ Trabajar sin el expertise específico del team
+- ❌ Saltarse miembros del team
+- ❌ Cambiar de team sin anunciar el cambio
 
 ### Override manual:
 
-Si el usuario menciona `@agent-name` explícitamente, usar ese agente y confirmarlo:
+Si el usuario menciona `@agent-name` o team específico, usar ese y confirmarlo:
 
 ```
 Usuario: "Usa @security-auditor para revisar esto"
@@ -763,31 +1106,193 @@ Changes to these require extra review:
 
 Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
 
+## Database Change Protocol
+
+> ⚠️ **CRITICAL:** This protocol is MANDATORY for ALL database-related work
+
+### Before ANY database change (migrations, queries, indexes):
+
+```
+MANDATORY CHECKLIST:
+
+□ 1. Read DATABASE_SCHEMA.md completely
+□ 2. Verify tables exist in the schema document
+□ 3. Verify columns exist with EXACT names
+□ 4. Check "Tables That DO NOT Exist" section
+□ 5. Never assume future features are implemented
+
+IF creating a migration:
+□ 6. List all tables/columns to be used
+□ 7. Cross-reference each one with DATABASE_SCHEMA.md
+□ 8. If column doesn't exist → STOP, don't assume it
+□ 9. After creating migration → update DATABASE_SCHEMA.md
+□ 10. Guide user to execute migration in Supabase
+□ 11. Wait for confirmation of success
+□ 12. Commit both files together
+```
+
+### After Creating Migration - Guide User:
+
+**ALWAYS guide the user to execute the migration:**
+
+```
+✅ Migration created: supabase/migrations/019c_calendar_indexes.sql
+
+**Next step:** Execute this migration in Supabase Dashboard:
+1. Go to your Supabase project
+2. Navigate to SQL Editor
+3. Run the migration file
+4. Confirm success (check for ✅ message)
+
+Let me know when it's done so we can proceed!
+```
+
+**NEVER assume the migration is applied automatically.**
+
+### Common Mistakes to Avoid:
+
+```
+❌ Assuming deposit_paid exists (it doesn't - future feature)
+❌ Assuming push_subscriptions table exists (it doesn't - Área 5)
+❌ Using last_activity_at instead of last_visit_at in clients
+❌ Creating indexes for columns that don't exist
+❌ Trusting docs/planning/implementation-v2.5.md for current schema
+   (the plan describes FUTURE state, not current state)
+```
+
+### If Column Doesn't Exist:
+
+```
+1. DO NOT create the migration with that column
+2. DO NOT assume it's a mistake in documentation
+3. DO check if it's a future feature in docs/planning/implementation-v2.5.md
+4. DO create migration only with existing columns
+5. DO inform user which features aren't implemented yet
+```
+
+### Advanced: Direct Supabase Verification (When Available)
+
+If you have Supabase connection, you can verify schema directly:
+
+```sql
+-- List all tables
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public';
+
+-- List columns for a specific table
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'appointments';
+
+-- Check if column exists
+SELECT EXISTS (
+  SELECT 1 FROM information_schema.columns
+  WHERE table_name = 'appointments' AND column_name = 'deposit_paid'
+);
+```
+
+**Process:**
+
+1. Read DATABASE_SCHEMA.md (always start here)
+2. If unsure, verify with Supabase directly
+3. Update DATABASE_SCHEMA.md if discrepancy found
+4. Never trust plan documents for current schema
+
+---
+
 ## Required Reading Before Changes
 
-1. **GUARDRAILS.md** - Non-negotiable behavior
-2. **DECISIONS.md** - Design rationale
+1. **DATABASE_SCHEMA.md** - Current database structure (ALWAYS check for DB work)
+2. **docs/reference/lessons-learned.md** - Critical bug patterns (prevent repeated mistakes)
+3. **GUARDRAILS.md** - Non-negotiable behavior
+4. **DECISIONS.md** - Design rationale
 
 ## Available Commands
 
-| Command           | Description                 |
-| ----------------- | --------------------------- |
-| `/setup`          | Configure project           |
-| `/continue`       | Resume where you left off   |
-| `/save-progress`  | Save state for next session |
-| `/commit`         | Smart git commit            |
-| `/create`         | Create feature/app          |
-| `/brainstorm`     | Explore options             |
-| `/plan`           | Implementation plan         |
-| `/deploy`         | Production deploy           |
-| `/test`           | Run tests                   |
-| `/debug`          | Debug issues                |
-| `/enhance`        | Improve code                |
-| `/preview`        | Preview changes             |
-| `/status`         | Project status              |
-| `/orchestrate`    | Multi-agent tasks           |
-| `/code-review`    | Quality review              |
-| `/generate-tests` | Generate tests              |
+| Command           | Description                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| `/setup`          | Configure project                                                          |
+| `/continue`       | Resume where you left off                                                  |
+| `/save-progress`  | Save state for next session                                                |
+| `/commit`         | Smart git commit                                                           |
+| `/create`         | Create feature/app                                                         |
+| `/brainstorm`     | Explore options                                                            |
+| `/plan`           | Implementation plan                                                        |
+| `/deploy`         | Production deploy                                                          |
+| `/test`           | Run tests                                                                  |
+| `/debug`          | Debug issues                                                               |
+| `/enhance`        | Improve code                                                               |
+| `/preview`        | Preview changes                                                            |
+| `/status`         | Project status                                                             |
+| `/orchestrate`    | Multi-agent tasks                                                          |
+| `/code-review`    | Quality review                                                             |
+| `/generate-tests` | Generate tests                                                             |
+| `/ui-ux-pro-max`  | Advanced UI/UX design with 67 styles, 96 palettes, design system generator |
+
+## Advanced Skills
+
+### UI/UX Pro Max (Installed)
+
+**🤖 Automatic Team Mode:**
+This skill ALWAYS works with `@ui-ux-designer` as a team.
+When you see any UI/UX request, both activate automatically.
+
+**Capabilities:**
+
+- 67 UI styles (glassmorphism, brutalism, neumorphism, cyberpunk, bento grid, etc.)
+- 96 color palettes
+- 57 typography pairings
+- 25 chart types
+- AI-powered design system generator
+- 13 tech stacks (React, Next.js, Vue, Svelte, SwiftUI, Flutter, etc.)
+- 99 UX guidelines
+- shadcn/ui integration
+
+**When to use:**
+
+- Building landing pages, dashboards, mobile apps
+- Need specific design system or style guide
+- Creating complete UI from scratch
+- Want design recommendations based on industry (barbershop/beauty, SaaS, etc.)
+
+**Example requests:**
+
+```
+"Build a booking interface with modern glassmorphism style"
+"Create a barber profile card with brutalist design"
+"Generate color palette for a barbershop app"
+"Design services section with bento grid layout"
+```
+
+**Difference vs @ui-ux-designer agent:**
+
+| Aspect       | `/ui-ux-pro-max` Skill               | `@ui-ux-designer` Agent            |
+| ------------ | ------------------------------------ | ---------------------------------- |
+| **Use for**  | Concrete design artifacts            | Design strategy & UX decisions     |
+| **Output**   | Specific styles, colors, components  | Design principles, user flows      |
+| **When**     | "Make this look good"                | "How should this work?"            |
+| **Strength** | Large library of ready-to-use assets | Custom design thinking & reasoning |
+
+**🔄 How they work together (automatic):**
+
+1. **Strategy Phase** - `@ui-ux-designer` analyzes:
+   - User needs and barbershop context
+   - UX best practices for booking/services
+   - Design principles to apply
+
+2. **Implementation Phase** - `/ui-ux-pro-max` provides:
+   - Specific style recommendations (from 67 options)
+   - Color palette selection (from 96)
+   - Typography pairing (from 57)
+   - Component code with chosen style
+
+3. **Integration** - Claude combines both:
+   - Implements code following UX strategy
+   - Applies visual style from library
+   - Verifies with Playwright screenshot
+
+**You don't need to ask for both - they activate as a team automatically.**
 
 ## Proactive Behavior
 

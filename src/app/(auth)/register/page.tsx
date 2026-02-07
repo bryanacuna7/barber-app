@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -25,9 +25,51 @@ import {
   trackReferralConversion,
 } from '@/lib/referrals'
 
-export default function RegisterPage() {
-  const router = useRouter()
+// Component that uses useSearchParams - must be wrapped in Suspense
+function ReferralDetector({
+  onReferrerInfo,
+}: {
+  onReferrerInfo: (info: { businessName: string; businessSlug?: string } | null) => void
+}) {
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const refCode = searchParams.get('ref')
+    if (!refCode) return
+
+    // Guardar código en cookie
+    saveReferralCode(refCode)
+
+    // Fetch info del referrer
+    const fetchReferrerInfo = async () => {
+      try {
+        const response = await fetch(`/api/referrals/info?code=${refCode}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.isValid) {
+            onReferrerInfo({
+              businessName: data.businessName,
+              businessSlug: data.businessSlug,
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching referrer info:', error)
+      }
+    }
+
+    fetchReferrerInfo()
+  }, [searchParams, onReferrerInfo])
+
+  return null
+}
+
+function RegisterForm({
+  referrerInfo,
+}: {
+  referrerInfo: { businessName: string; businessSlug?: string } | null
+}) {
+  const router = useRouter()
 
   const [formData, setFormData] = useState({
     businessName: '',
@@ -38,46 +80,8 @@ export default function RegisterPage() {
   const [showPasswords, setShowPasswords] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [referrerInfo, setReferrerInfo] = useState<{
-    businessName: string
-    businessSlug?: string
-  } | null>(null)
-  const [loadingReferrer, setLoadingReferrer] = useState(false)
-
   const { getFieldError, markFieldTouched, validateForm, clearErrors } =
     useFormValidation(registerSchema)
-
-  // Detectar código de referido en query params
-  useEffect(() => {
-    const refCode = searchParams.get('ref')
-    if (!refCode) return
-
-    // Guardar código en cookie
-    saveReferralCode(refCode)
-
-    // Fetch info del referrer
-    const fetchReferrerInfo = async () => {
-      setLoadingReferrer(true)
-      try {
-        const response = await fetch(`/api/referrals/info?code=${refCode}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.isValid) {
-            setReferrerInfo({
-              businessName: data.businessName,
-              businessSlug: data.businessSlug,
-            })
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching referrer info:', error)
-      } finally {
-        setLoadingReferrer(false)
-      }
-    }
-
-    fetchReferrerInfo()
-  }, [searchParams])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -165,7 +169,8 @@ export default function RegisterPage() {
     // 3. Track referral conversion if exists
     const referralCode = getReferralCode()
     if (referralCode) {
-      const tracked = await trackReferralConversion(referralCode, businessData.id)
+      const businessId = (businessData as { id: string }).id
+      const tracked = await trackReferralConversion(referralCode, businessId)
       if (tracked) {
         clearReferralCode() // Clear cookie after successful tracking
       }
@@ -177,13 +182,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <Card>
+    <Card data-testid="register-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
         <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
       </CardHeader>
 
-      <form onSubmit={handleRegister}>
+      <form onSubmit={handleRegister} data-testid="register-form">
         <CardContent className="space-y-4">
           {/* Referrer Banner */}
           {referrerInfo && (
@@ -194,7 +199,10 @@ export default function RegisterPage() {
           )}
 
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <div
+              className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+              data-testid="register-error"
+            >
               {error}
             </div>
           )}
@@ -212,6 +220,7 @@ export default function RegisterPage() {
               formData.businessName && !getFieldError('businessName') ? 'Nombre válido' : undefined
             }
             required
+            data-testid="register-business-name"
           />
 
           <Input
@@ -226,6 +235,7 @@ export default function RegisterPage() {
             success={formData.email && !getFieldError('email') ? 'Correo válido' : undefined}
             required
             autoComplete="email"
+            data-testid="register-email"
           />
 
           <div className="space-y-2">
@@ -240,6 +250,7 @@ export default function RegisterPage() {
               error={getFieldError('password')}
               required
               autoComplete="new-password"
+              data-testid="register-password"
             />
             {formData.password && <PasswordStrength password={formData.password} />}
           </div>
@@ -262,32 +273,82 @@ export default function RegisterPage() {
             }
             required
             autoComplete="new-password"
+            data-testid="register-confirm-password"
           />
 
-          <label className="flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
+          <label className="flex items-center gap-2 text-[13px] font-medium text-muted">
             <input
               type="checkbox"
               checked={showPasswords}
               onChange={(e) => setShowPasswords(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+              data-testid="register-show-passwords"
             />
             Mostrar contraseñas
           </label>
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button
+            type="submit"
+            className="w-full"
+            isLoading={isLoading}
+            data-testid="register-submit"
+          >
             Crear Cuenta
           </Button>
 
           <p className="text-center text-sm text-zinc-500">
             ¿Ya tienes cuenta?{' '}
-            <Link href="/login" className="text-zinc-900 underline dark:text-white">
+            <Link
+              href="/login"
+              className="text-zinc-900 underline dark:text-white"
+              data-testid="login-link"
+            >
               Inicia sesión
             </Link>
           </p>
         </CardFooter>
       </form>
+    </Card>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterFormSkeleton />}>
+      <RegisterPageContent />
+    </Suspense>
+  )
+}
+
+function RegisterPageContent() {
+  const [referrerInfo, setReferrerInfo] = useState<{
+    businessName: string
+    businessSlug?: string
+  } | null>(null)
+
+  return (
+    <>
+      <ReferralDetector onReferrerInfo={setReferrerInfo} />
+      <RegisterForm referrerInfo={referrerInfo} />
+    </>
+  )
+}
+
+function RegisterFormSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
+        <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
+      </CardContent>
     </Card>
   )
 }

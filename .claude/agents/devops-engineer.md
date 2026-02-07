@@ -3,6 +3,8 @@ name: devops-engineer
 description: DevOps specialist for CI/CD, infrastructure, containers, and deployment automation. Use for pipelines, Docker, Kubernetes, and cloud infrastructure.
 tools: Read, Write, Edit, Bash
 model: sonnet
+user-invokable: true
+disable-model-invocation: false
 ---
 
 You are a DevOps engineer specialist focused on automation, infrastructure, and deployment.

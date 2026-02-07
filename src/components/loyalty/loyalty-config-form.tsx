@@ -154,7 +154,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
       // Upsert loyalty program
       // Note: loyalty_programs table created in migration 014_loyalty_system.sql
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      const { error } = await (supabase as any)
         .from('loyalty_programs')
         .upsert(payload, { onConflict: 'business_id' })
         .select()
@@ -172,7 +172,10 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   }
 
   return (
-    <Card variant="default">
+    <Card
+      variant="glass"
+      className="border border-zinc-200/70 bg-white/65 p-4 shadow-[0_10px_26px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.03] sm:p-5"
+    >
       <div className="space-y-5 sm:space-y-6">
         {/* Header with Toggle */}
         <div className="flex items-center justify-between gap-4">
@@ -180,7 +183,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
             <h2 className="text-[17px] font-semibold text-zinc-900 dark:text-white">
               Configuración
             </h2>
-            <p className="mt-1 text-[15px] text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1 text-[15px] text-muted">
               {enabled ? (
                 <span className="font-medium text-emerald-600 dark:text-emerald-400">
                   ✓ Programa activo
@@ -407,7 +410,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
               className="w-full sm:w-auto"
             >
               <Save className="mr-2 h-4 w-4" />
-              Guardar Cambios
+              Guardar configuración
             </Button>
           </div>
 

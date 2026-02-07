@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import { Sparkles, ArrowRight, Clock3, Scissors, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface WelcomeProps {
@@ -42,7 +42,7 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
         transition={{ delay: 0.2 }}
         className="text-4xl font-bold text-zinc-900 dark:text-white mb-4"
       >
-        ¡Bienvenido a BarberShop Pro! 🎉
+        ¡Bienvenido a BarberShop Pro!
       </motion.h1>
 
       {/* Description */}
@@ -75,12 +75,12 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
       >
         {[
           {
-            emoji: '⏰',
+            icon: Clock3,
             title: 'Configura tu horario',
             desc: 'Define cuándo está abierta tu barbería',
           },
-          { emoji: '✂️', title: 'Agrega tus servicios', desc: 'Cortes, afeitados y más' },
-          { emoji: '👤', title: 'Registra tus barberos', desc: 'Tu equipo en un solo lugar' },
+          { icon: Scissors, title: 'Agrega tus servicios', desc: 'Cortes, afeitados y más' },
+          { icon: UserRound, title: 'Registra tus barberos', desc: 'Tu equipo en un solo lugar' },
         ].map((feature, i) => (
           <motion.div
             key={i}
@@ -89,7 +89,9 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
             transition={{ delay: 0.6 + i * 0.1 }}
             className="rounded-2xl bg-white dark:bg-zinc-800 p-6 shadow-sm border border-zinc-200 dark:border-zinc-700"
           >
-            <div className="text-3xl mb-3">{feature.emoji}</div>
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/70 mx-auto">
+              <feature.icon className="h-5 w-5 text-zinc-700 dark:text-zinc-200" />
+            </div>
             <h3 className="font-semibold text-zinc-900 dark:text-white mb-1">{feature.title}</h3>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">{feature.desc}</p>
           </motion.div>

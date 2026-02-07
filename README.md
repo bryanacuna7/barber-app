@@ -44,7 +44,7 @@ Client
 
 ## Tech stack
 
-- Next.js App Router (React 19)
+- Next.js App Router (Next.js 16 + React 19)
 - Tailwind CSS v4
 - Supabase (Auth, Postgres, Storage)
 - Zod validation
@@ -76,10 +76,12 @@ Open http://localhost:3000
 
 ## Database and Supabase
 
-- Migrations live in `supabase/migrations`:
-  - 001_initial_schema.sql (businesses, services, clients, appointments)
-  - 002_multi_barber.sql (barbers + invitations)
-  - 003_branding.sql (brand colors + logo)
+- Canonical migrations live in `supabase/migrations` (currently `001` through `024`).
+- Consolidated schema snapshots are available for manual setup:
+  - `supabase/schema_part1_core.sql`
+  - `supabase/schema_part2_features.sql`
+  - `supabase/schema_part3_fixes_rbac.sql`
+  - `supabase/full_schema.sql`
 - Optional seed file: `supabase/seed_test_data.sql`
 - Demo data helper: `scripts/create-demo-user.ts` (requires SUPABASE_SERVICE_ROLE_KEY)
 

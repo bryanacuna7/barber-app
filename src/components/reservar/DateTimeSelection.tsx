@@ -34,6 +34,7 @@ export function DateTimeSelection({
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
         onClick={onBack}
+        data-testid="back-button"
         className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
       >
         <ChevronLeft className="h-5 w-5 -ml-1" />
@@ -56,7 +57,7 @@ export function DateTimeSelection({
       </Card>
 
       {/* Date Selection - Horizontal Scroll */}
-      <div>
+      <div data-testid="date-picker">
         <h3 className="mb-4 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
           Selecciona el día
         </h3>
@@ -73,6 +74,8 @@ export function DateTimeSelection({
                 <button
                   key={date.toISOString()}
                   onClick={() => onSelectDate(date)}
+                  data-testid="date-cell"
+                  data-date={format(date, 'yyyy-MM-dd')}
                   className={cn(
                     'relative flex min-w-[68px] flex-col items-center rounded-2xl px-3 py-3 transition-all ios-press flex-shrink-0 snap-start',
                     isSelected
@@ -119,7 +122,7 @@ export function DateTimeSelection({
             Selecciona la hora
           </h3>
           {loadingSlots ? (
-            <div className="flex justify-center py-12">
+            <div className="flex justify-center py-12" data-testid="slots-loading">
               <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white" />
             </div>
           ) : slots.length === 0 ? (
@@ -138,6 +141,7 @@ export function DateTimeSelection({
                   key={slot.datetime}
                   onClick={() => slot.available && onSelectTime(slot)}
                   disabled={!slot.available}
+                  data-testid="time-slot"
                   className={cn(
                     'rounded-2xl py-4 text-[15px] font-semibold transition-all',
                     !slot.available

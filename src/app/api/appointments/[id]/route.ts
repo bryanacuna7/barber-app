@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, notFoundResponse, errorResponse } from '@/lib/api/middleware'
 
 // Validation schemas
 const updateAppointmentSchema = z.object({
@@ -18,32 +17,10 @@ interface RouteParams {
 }
 
 // GET - Get single appointment
-export async function GET(request: Request, { params }: RouteParams) {
+export const GET = withAuth(async (request, { params }, { business, supabase }) => {
   try {
     const { id } = await params
-    const supabase = await createClient()
 
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Get user's business
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!business) {
-      return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
-    }
-
-    // Get appointment
     const { data: appointment, error } = await supabase
       .from('appointments')
       .select(
@@ -58,47 +35,27 @@ export async function GET(request: Request, { params }: RouteParams) {
       .single()
 
     if (error || !appointment) {
-      return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
+      return notFoundResponse('Cita no encontrada')
     }
 
     return NextResponse.json(appointment)
   } catch (error) {
     console.error('Error:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})
 
 // PATCH - Update appointment
-export async function PATCH(request: Request, { params }: RouteParams) {
+export const PATCH = withAuth(async (request, { params }, { business, supabase }) => {
   try {
     const { id } = await params
-    const supabase = await createClient()
-
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Get user's business
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!business) {
-      return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
-    }
 
     // Parse and validate request body
     const body = await request.json()
     const result = updateAppointmentSchema.safeParse(body)
 
     if (!result.success) {
+      console.error('❌ API: Validation failed:', result.error.flatten())
       return NextResponse.json(
         { error: 'Datos inválidos', details: result.error.flatten() },
         { status: 400 }
@@ -147,11 +104,25 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single()
 
     if (error) {
-      console.error('Error updating appointment:', error)
-      return NextResponse.json({ error: 'Error al actualizar la cita' }, { status: 500 })
+      console.error('❌ API: Error updating appointment:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        full: error,
+      })
+      return NextResponse.json(
+        {
+          error: 'Error al actualizar la cita',
+          details: error.message,
+          code: error.code,
+        },
+        { status: 500 }
+      )
     }
 
     if (!appointment) {
+      console.error('❌ API: Appointment not found after update')
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
     }
 
@@ -161,37 +132,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json(appointment)
   } catch (error) {
     console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})
 
 // DELETE - Delete appointment
-export async function DELETE(request: Request, { params }: RouteParams) {
+export const DELETE = withAuth(async (request, { params }, { business, supabase }) => {
   try {
     const { id } = await params
-    const supabase = await createClient()
 
-    // Get authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Get user's business
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!business) {
-      return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
-    }
-
-    // Delete appointment
     const { error } = await supabase
       .from('appointments')
       .delete()
@@ -200,12 +149,12 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (error) {
       console.error('Error deleting appointment:', error)
-      return NextResponse.json({ error: 'Error al eliminar la cita' }, { status: 500 })
+      return errorResponse('Error al eliminar la cita')
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})
