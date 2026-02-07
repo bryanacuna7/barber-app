@@ -144,9 +144,9 @@ export default function BarberosPage() {
   }, [viewMode])
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 lg:p-8 lg:pb-6 relative overflow-hidden">
+    <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+      <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
@@ -191,7 +191,10 @@ export default function BarberosPage() {
               </p>
             </div>
             <Button
-              onClick={() => setIsAddBarberOpen(true)}
+              onClick={() => {
+                setIsAddBarberOpen(true)
+                if (isMobileDevice()) haptics.tap()
+              }}
               data-testid="add-barber-btn"
               className="shrink-0 min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 border-0"
             >
@@ -259,9 +262,14 @@ export default function BarberosPage() {
             ].map(({ value, label, icon: Icon }) => (
               <button
                 key={value}
-                onClick={() => {
+                onClick={(e) => {
                   setViewMode(value as ViewMode)
                   if (isMobileDevice()) haptics.selection()
+                  e.currentTarget.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center',
+                  })
                 }}
                 data-view-tab={value}
                 className={`flex items-center gap-1.5 px-3 min-h-[44px] rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
@@ -362,7 +370,7 @@ function CardsView({ barbers }: { barbers: MockBarber[] }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        className="lg:hidden ios-group-card p-2 space-y-1"
+        className="lg:hidden space-y-1"
       >
         {barbers.map((barber) => (
           <motion.div

@@ -34,8 +34,6 @@ import {
   CircleDot,
   Sparkle,
   AlertTriangle,
-  Pause,
-  Play,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -548,7 +546,7 @@ function ServiciosContent() {
   }
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen lg:pb-6 relative overflow-x-hidden">
+    <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
       {/* Subtle Mesh Gradients (15% opacity) */}
       <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
         <motion.div
@@ -602,7 +600,10 @@ function ServiciosContent() {
                 </p>
               </div>
               <Button
-                onClick={openCreateServiceForm}
+                onClick={() => {
+                  openCreateServiceForm()
+                  if (isMobileDevice()) haptics.tap()
+                }}
                 className="shrink-0 min-w-[44px] min-h-[44px] h-10 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white shadow-lg shadow-violet-500/25 border-0"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
@@ -645,9 +646,14 @@ function ServiciosContent() {
                       <motion.button
                         key={cat}
                         layout
-                        onClick={() => {
+                        onClick={(e) => {
                           setSelectedCategory(cat)
                           if (isMobileDevice()) haptics.selection()
+                          e.currentTarget.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest',
+                            inline: 'center',
+                          })
                         }}
                         data-category-chip={cat}
                         whileTap={{ scale: 0.98 }}
@@ -666,11 +672,9 @@ function ServiciosContent() {
               </motion.div>
 
               {/* Mobile Card View */}
-              <div className="lg:hidden ios-group-card p-2 space-y-3">
+              <div className="lg:hidden space-y-3">
                 {sortedServices.map((service) => {
                   const categoryColor = getCategoryColor(service.category)
-                  // Assume is_active is a property on service (TODO: integrate with real data)
-                  const isActive = true // Replace with service.is_active when integrated
 
                   const rightActions = [
                     {
@@ -680,13 +684,10 @@ function ServiciosContent() {
                       onClick: () => openEditServiceForm(service),
                     },
                     {
-                      icon: isActive ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />,
-                      label: isActive ? 'Pausar' : 'Activar',
-                      color: 'bg-amber-500',
-                      onClick: () => {
-                        // TODO: Toggle is_active when integrated
-                        console.log('Toggle active state for', service.id)
-                      },
+                      icon: <Trash2 className="h-5 w-5" />,
+                      label: 'Eliminar',
+                      color: 'bg-red-500',
+                      onClick: () => setDeleteService(service),
                     },
                   ]
 

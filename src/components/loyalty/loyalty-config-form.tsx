@@ -174,7 +174,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   return (
     <Card
       variant="glass"
-      className="border border-zinc-200/70 bg-white/65 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-black/20 sm:p-5"
+      className="border border-zinc-200/70 bg-white/65 p-4 shadow-[0_10px_26px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.03] sm:p-5"
     >
       <div className="space-y-5 sm:space-y-6">
         {/* Header with Toggle */}

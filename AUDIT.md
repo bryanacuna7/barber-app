@@ -194,6 +194,30 @@ No te falta "poner mas animaciones". Te falta un **Interaction OS**:
   - continuidad final del `Trial Banner` sobre `Citas` y `Servicios` después del ajuste de shell;
   - paridad exacta de contraste/espaciado entre `Nuevo Cliente` y `Nueva Cita` en dark mode.
 
+### Update de implementación (Sesion 142 - De-generic pass)
+
+- Aplicado:
+  - `Citas`, `Barberos` y `Servicios` eliminan wrappers `-mx` en mobile para reducir efecto de lienzo encajonado.
+  - `Citas` ajusta toolbar mobile:
+    - `Hoy` deja de competir como chip fijo cuando ya estas en hoy.
+    - segmented control (`Día/Semana/Mes`) adopta estilo activo/inactivo consistente con el resto del app.
+    - separacion vertical mejorada en bloques (`MAÑANA`, `MEDIODÍA`, `TARDE`) y jerarquia mas limpia entre titulo/horario/progreso.
+  - `Barberos`:
+    - tabs mobile ahora hacen `scrollIntoView` inmediato al seleccionar (mejora visibilidad de `Calendario` y tabs al extremo).
+    - lista mobile deja de estar dentro de card padre para reducir encapsulado.
+  - `Servicios`:
+    - chips de categoria agregan `scrollIntoView` al seleccionar.
+    - lista mobile deja de estar dentro de card padre para evitar efecto "cuadro dentro de cuadro".
+  - `Lealtad`:
+    - header mobile y card principal suavizados para reducir bloque oscuro pesado.
+  - `TrialBanner`:
+    - spacing vertical estabilizado para mejorar respiracion con el contenido superior/inferior.
+
+- Pendiente recomendado (siguiente pass):
+  - validar en dispositivo real que `TrialBanner` no genere linea fantasma en todos los modulos.
+  - extender haptics a acciones de primer nivel en todos los flows de alta/edicion (no solo tabs/swipes).
+  - terminar estandarizacion de contenedores en vistas secundarias (`Lealtad`, `Configuracion avanzada`, sub-vistas dentro de `Mas`).
+
 ### Re-Audit Full Pass (codigo + capturas)
 
 - Resultado general: no se detectaron nuevos **P0** fuera de los ya documentados (date picker nativo y data-viz no touch-first), pero si se confirmaron inconsistencias **P1** transversales.

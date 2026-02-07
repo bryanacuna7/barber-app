@@ -116,7 +116,7 @@ export default async function LoyaltyConfigPage() {
   return (
     <>
       {/* Mobile Section Header */}
-      <header className="mb-4 lg:hidden">
+      <header className="mb-4 lg:hidden ios-group-card px-3 py-2">
         <div className="flex min-h-[44px] items-center gap-3">
           <Link
             href="/dashboard"

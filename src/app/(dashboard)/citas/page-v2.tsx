@@ -553,7 +553,7 @@ function CitasCalendarFusionContent() {
   }
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:mx-0 min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden">
       {/* Subtle mesh gradients (15% opacity) - Only in dark mode */}
       <div className="hidden dark:block fixed inset-0 opacity-15 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
@@ -564,7 +564,7 @@ function CitasCalendarFusionContent() {
         {/* Main content area */}
         <div className="flex-1 lg:pr-80 w-full min-w-0">
           {/* Header */}
-          <header className="sticky top-0 z-40 bg-transparent backdrop-blur-sm border-b border-zinc-200/30 dark:border-zinc-800/40">
+          <header className="sticky top-0 z-40 bg-transparent backdrop-blur-sm border-b border-transparent dark:border-white/5">
             <div className="px-4 lg:px-6 py-4">
               {/* DESKTOP HEADER - Single row layout (unchanged) */}
               <div className="hidden lg:flex items-center justify-between mb-4 gap-2">
@@ -666,14 +666,10 @@ function CitasCalendarFusionContent() {
                     </button>
                   </div>
 
-                  {isSelectedDateToday ? (
-                    <span className="min-h-[44px] h-11 px-1.5 text-xs font-semibold text-blue-600 dark:text-blue-300 flex items-center justify-center flex-shrink-0">
-                      Hoy
-                    </span>
-                  ) : (
+                  {!isSelectedDateToday && (
                     <button
                       onClick={handleToday}
-                      className="min-h-[44px] h-11 px-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors flex items-center justify-center flex-shrink-0"
+                      className="min-h-[44px] h-11 px-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors flex items-center justify-center flex-shrink-0"
                       aria-label="Ir a hoy"
                     >
                       Ir a hoy
@@ -696,8 +692,8 @@ function CitasCalendarFusionContent() {
                     onClick={() => setViewMode('day')}
                     className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
                       viewMode === 'day'
-                        ? 'bg-white dark:bg-zinc-800/90 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 shadow-[0_6px_18px_rgba(0,0,0,0.18)]'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
+                        : 'text-zinc-500 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                     }`}
                   >
                     Día
@@ -706,8 +702,8 @@ function CitasCalendarFusionContent() {
                     onClick={() => setViewMode('week')}
                     className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
                       viewMode === 'week'
-                        ? 'bg-white dark:bg-zinc-800/90 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 shadow-[0_6px_18px_rgba(0,0,0,0.18)]'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
+                        : 'text-zinc-500 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                     }`}
                   >
                     Semana
@@ -716,8 +712,8 @@ function CitasCalendarFusionContent() {
                     onClick={() => setViewMode('month')}
                     className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
                       viewMode === 'month'
-                        ? 'bg-white dark:bg-zinc-800/90 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 shadow-[0_6px_18px_rgba(0,0,0,0.18)]'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white border border-violet-400/40 shadow-[0_10px_24px_rgba(79,70,229,0.35)]'
+                        : 'text-zinc-500 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                     }`}
                   >
                     Mes
@@ -805,15 +801,15 @@ function CitasCalendarFusionContent() {
                         className="ios-group-card p-3 lg:p-4"
                       >
                         {/* Block header */}
-                        <div className="mb-4">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-2">
+                        <div className="mb-5">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
                               <block.icon className={`w-5 h-5 ${block.iconColor}`} />
                               <h3 className="text-lg font-semibold text-zinc-900 dark:text-white leading-none">
                                 {block.label}
                               </h3>
                             </div>
-                            <span className="text-sm text-zinc-500 dark:text-[#8E8E93]">
+                            <span className="shrink-0 text-sm text-zinc-500 dark:text-[#8E8E93]">
                               {block.start > 12 ? block.start - 12 : block.start}
                               {block.start >= 12 ? 'pm' : 'am'} -{' '}
                               {block.end > 12 ? block.end - 12 : block.end}
@@ -823,7 +819,7 @@ function CitasCalendarFusionContent() {
 
                           {/* Occupancy bar (Cinema feature) */}
                           <div
-                            className={`mt-2.5 bg-white/50 dark:bg-transparent dark:bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-zinc-200 dark:border-[#2C2C2E] p-2 lg:p-3`}
+                            className={`mt-3.5 bg-white/50 dark:bg-transparent dark:bg-gradient-to-br ${block.gradient} backdrop-blur-sm rounded-xl border border-zinc-200 dark:border-[#2C2C2E] p-2.5 lg:p-3`}
                           >
                             <div className="flex items-center justify-between mb-2 text-sm">
                               <span className="text-zinc-900 dark:text-white">
@@ -1022,33 +1018,32 @@ function CitasCalendarFusionContent() {
 
                   {/* Quick Actions (Cinema feature) */}
                   {(stats.pending > 0 || gaps.length > 0) && (
-                    <div className="mt-6 bg-amber-500/10 rounded-xl border border-amber-500/20 p-4">
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Zap className="w-4 h-4 text-amber-500 dark:text-[#FF9500]" />
-                          <span className="font-bold text-zinc-900 dark:text-white">
-                            QUICK ACTIONS:
-                          </span>
-                        </div>
+                    <div className="mt-6 ios-group-card p-4">
+                      <div className="mb-3 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-500 dark:text-[#FF9500]" />
+                        <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                          Acciones rápidas
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {stats.pending > 0 && (
-                          <Button
-                            variant="primary"
-                            size="sm"
+                          <button
+                            type="button"
                             onClick={() => toast.success(`${stats.pending} confirmadas`)}
-                            className="whitespace-nowrap bg-[#0A84FF] hover:bg-[#0A84FF]/80"
+                            className="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-white bg-[#0A84FF] hover:bg-[#0A84FF]/85 dark:bg-[#0A84FF] dark:hover:bg-[#0A84FF]/85 shadow-[0_8px_20px_rgba(10,132,255,0.28)] transition-colors"
                           >
                             Confirmar ({stats.pending})
-                          </Button>
+                          </button>
                         )}
                         {gaps.length > 0 && (
-                          <Button
-                            variant="success"
-                            size="sm"
+                          <button
+                            type="button"
                             onClick={() => toast.info('Llenar gaps')}
-                            className="whitespace-nowrap bg-[#34C759] hover:bg-[#34C759]/80"
+                            className="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-white bg-[#34C759] hover:bg-[#34C759]/85 dark:bg-[#34C759] dark:hover:bg-[#34C759]/85 shadow-[0_8px_20px_rgba(52,199,89,0.28)] transition-colors"
                           >
                             Llenar {gaps.length} gaps
-                          </Button>
+                          </button>
                         )}
                       </div>
                     </div>
