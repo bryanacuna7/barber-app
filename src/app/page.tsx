@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { HeroSection } from '@/components/landing/hero-section'
 import { StatsSection } from '@/components/landing/stats-section'
 import { FeaturesSection } from '@/components/landing/features-section'
-import { DemoSection } from '@/components/landing/demo-section'
+// import { DemoSection } from '@/components/landing/demo-section' // Removed - product shown in Hero
 import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { Footer } from '@/components/landing/footer'
@@ -82,7 +82,6 @@ export default function Home() {
       <HeroSection />
       <StatsSection />
       <FeaturesSection />
-      <DemoSection />
       <TestimonialsSection />
       <PricingSection />
       <Footer />

@@ -8,9 +8,9 @@
 - **Name:** BarberShop Pro
 - **Stack:** Next.js 15, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-05 (Session 130 - Barberos Demo B Implemented 🎨)
+- **Last Updated:** 2026-02-06 (Session 131 - Landing Page Brutalist Redesign 🎨)
 - **Current Branch:** `feature/ui-ux-redesign`
-- **Current Phase:** Demo Implementation - 4/5 Pages Complete (80%)
+- **Current Phase:** Landing Page Redesign - Brutalist + Product-Led
 - **Phase 0 Plan:** `/Users/bryanacuna/.claude/plans/memoized-drifting-penguin.md`
 
 ---
@@ -30,6 +30,94 @@
 ---
 
 ## Recent Sessions
+
+### Session 131: Landing Page Brutalist Redesign (2026-02-06)
+
+**Status:** ✅ 100% Complete (~2h)
+
+**Objective:** Rediseñar landing page con estilo brutalist, enfocado en velocidad/UX como diferenciador
+
+**User Requirement:**
+
+- "algo brutal en diseño pero que también comunique de manera muy estratégica"
+- "lo que nos destaca, lo que estamos logrando" - sin vender humo, real
+- Diferenciador: Sistema de citas ultra-rápido y visual (mejor UX del mercado)
+- Tono: Brutalist & Bold
+- CTA: "Empezar gratis ahora" (conversión directa)
+
+**Actions Taken:**
+
+**1. Strategic Design System** ✅
+
+- Used UI/UX Pro Max skill para generar design system
+- Estilo: Brutalism (raw, unpolished, stark, high contrast, bold typography)
+- Colores: Primarios puros (negro, blanco, amarillo #FFFF00, azul #0000FF, rojo #FF0000)
+- Tipografía: Space Mono (monospace brutalist)
+- Paleta: #1E3A8A (primary), #F97316 (CTA), #EFF6FF (bg)
+
+**2. Hero Section Redesign** ✅
+
+- **File:** `src/components/landing/hero-section.tsx`
+- **Before:** Gradientes suaves, colores pasteles, mensaje genérico
+- **After:** Brutalist bold con producto visible
+  - Headline: "EL CALENDARIO MÁS RÁPIDO PARA BARBERÍAS" (Space Mono uppercase)
+  - Visual demo calendario funcionando (drag & drop visible)
+  - Métricas concretas: "0.2s drag & drop", "2.3s agendar cita"
+  - Colores: Negro/blanco, bordes gruesos (4-8px), sin border-radius
+  - Badge flotante: "0.2s Drag & Drop" (rojo brutalist)
+  - Social proof: 150+ barberías, 500+ citas/día
+
+**3. Features Section Redesign** ✅
+
+- **File:** `src/components/landing/features-section.tsx`
+- **Before:** 12 features genéricas con iconos de colores
+- **After:** 6 core features enfocadas en velocidad/UX
+  - Cada feature con métrica visible: "0.2s", "<1s", "80% menos"
+  - Cards brutalist: bordes negros 4px, hover amarillo
+  - Icons: MousePointer2, Zap, Clock, Users, Bell, BarChart3
+  - Badges de métricas prominentes (amarillo)
+  - Impacto claro: "10x más rápido que otros sistemas"
+
+**4. Before/After Comparison** ✅
+
+- Sección "Antes vs Después" brutalist
+- Bordes gruesos, comparación directa
+- CTA integrado en "Después" box
+
+**5. Demo Section Eliminated** ✅
+
+- Removed `DemoSection` component (redundante)
+- Producto ya visible en Hero (show don't tell)
+- Simplified landing structure: Hero → Stats → Features → Testimonials → Pricing
+
+**Design Principles Applied:**
+
+- ✅ Show product in action (calendario visible en Hero)
+- ✅ Métricas concretas (no claims vagos)
+- ✅ Brutalist aesthetic (bold, raw, high contrast)
+- ✅ Diferenciador claro: velocidad y UX visual
+- ✅ CTA directo: "EMPEZAR GRATIS" prominente
+- ✅ No fluff, no gradientes, no emojis como íconos
+
+**Files Modified:**
+
+- `src/components/landing/hero-section.tsx` (complete redesign)
+- `src/components/landing/features-section.tsx` (complete redesign)
+- `src/app/page.tsx` (removed DemoSection)
+
+**Screenshots:**
+
+- `landing-hero-brutalist.png` - Hero section
+- `landing-full-brutalist.png` - Full page
+- `landing-brutalist-final-hero.png` - Final result
+
+**Next Steps:**
+
+- Consider brutalist redesign for Stats & Testimonials sections
+- Mobile responsive verification
+- Match landing design with dashboard app design
+
+---
 
 ### Session 130: Barberos Demo B Implementation (2026-02-05)
 
