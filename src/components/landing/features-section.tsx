@@ -108,7 +108,14 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.21, 0.47, 0.32, 0.98],
+    },
+  },
 }
 
 export function FeaturesSection() {
@@ -133,19 +140,30 @@ export function FeaturesSection() {
           </p>
         </motion.div>
 
-        {/* Core Features Grid - Glassmorphism Cards */}
+        {/* Core Features Grid - Glassmorphism Cards with 3D Tilt */}
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {coreFeatures.map((feature, index) => {
             const Icon = feature.icon
             return (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className={`group relative overflow-hidden rounded-3xl border border-${feature.color}-200/50 bg-white/90 p-6 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl dark:border-${feature.color}-800/50 dark:bg-zinc-900/80`}
+                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{
+                  delay: index * 0.1,
+                  duration: 0.5,
+                  ease: [0.21, 0.47, 0.32, 0.98],
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  rotateY: 5,
+                  rotateX: 5,
+                  z: 50,
+                  transition: { duration: 0.3 },
+                }}
+                style={{ transformStyle: 'preserve-3d' }}
+                className={`group relative overflow-hidden rounded-3xl border border-${feature.color}-200/50 bg-white/90 p-6 shadow-lg backdrop-blur-sm transition-shadow hover:shadow-2xl dark:border-${feature.color}-800/50 dark:bg-zinc-900/80`}
               >
                 {/* Gradient overlay on hover */}
                 <div
@@ -200,6 +218,11 @@ export function FeaturesSection() {
               <motion.div
                 key={feature.title}
                 variants={item}
+                whileHover={{
+                  scale: 1.02,
+                  y: -4,
+                  transition: { duration: 0.2 },
+                }}
                 className="flex gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 transition-all hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:border-zinc-700"
               >
                 <div className="flex-shrink-0">
@@ -232,7 +255,13 @@ export function FeaturesSection() {
 
           <div className="grid gap-8 lg:grid-cols-2">
             {/* Before */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+            >
               <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
                 <p className="font-semibold text-zinc-600 dark:text-zinc-400">Otros sistemas</p>
                 <span className="text-2xl">😰</span>
@@ -245,16 +274,29 @@ export function FeaturesSection() {
                   'UI lenta y confusa',
                   'Sin datos para decidir',
                 ].map((item, i) => (
-                  <p key={i} className="flex items-start gap-2 text-zinc-600 dark:text-zinc-400">
+                  <motion.p
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
+                    className="flex items-start gap-2 text-zinc-600 dark:text-zinc-400"
+                  >
                     <span className="font-bold text-red-500">✕</span>
                     <span>{item}</span>
-                  </p>
+                  </motion.p>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* After */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+            >
               <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
                 <p className="font-semibold text-zinc-600 dark:text-zinc-400">BarberShop Pro</p>
                 <span className="text-2xl">🚀</span>
@@ -267,26 +309,38 @@ export function FeaturesSection() {
                   'UI ultra-rápida (0.2s response)',
                   'Analytics live · Decisiones basadas en data',
                 ].map((item, i) => (
-                  <p
+                  <motion.p
                     key={i}
+                    initial={{ opacity: 0, x: 10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
                     className="flex items-start gap-2 text-emerald-600 dark:text-emerald-400"
                   >
                     <span className="font-bold">✓</span>
                     <span>{item}</span>
-                  </p>
+                  </motion.p>
                 ))}
               </div>
 
               {/* CTA */}
-              <div className="mt-6 border-t border-zinc-200 pt-6 text-center dark:border-zinc-800">
-                <a
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 1.0 }}
+                className="mt-6 border-t border-zinc-200 pt-6 text-center dark:border-zinc-800"
+              >
+                <motion.a
                   href="/register"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
                   className="inline-block cursor-pointer rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:shadow-xl"
                 >
                   Prueba gratis 7 días
-                </a>
-              </div>
-            </div>
+                </motion.a>
+              </motion.div>
+            </motion.div>
           </div>
         </motion.div>
       </div>
