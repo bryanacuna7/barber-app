@@ -260,12 +260,12 @@ HAVING COUNT(*) > 5;
 
 ### Scripts
 
-- `/scripts/generate-security-report.sh` - Automated security test runner
+- `../../scripts/generate-security-report.sh` - Automated security test runner
 
 ### Documentation
 
-- `/docs/security/mi-dia-security-test-report.md` - Detailed report
-- `/docs/security/SECURITY-TEST-SUMMARY.md` - This file
+- `mi-dia-security-test-report.md` - Detailed report
+- `SECURITY-TEST-SUMMARY.md` - This file
 
 ---
 
@@ -273,10 +273,10 @@ HAVING COUNT(*) > 5;
 
 ### Related Documentation
 
-- [Session 72 Analysis](/docs/sessions/session-72-analysis.md)
-- [Implementation Plan v2.5](/docs/planning/implementation-v2.5.md)
-- [Database Schema](/DATABASE_SCHEMA.md)
-- [Lessons Learned](/docs/reference/lessons-learned.md)
+- [Session 72 Analysis](IDOR-fixes-session-72.md)
+- [Implementation Plan v2.5](../planning/implementation-v2.5.md)
+- [Database Schema](../../DATABASE_SCHEMA.md)
+- [Lessons Learned](../reference/lessons-learned.md)
 
 ### Security Standards
 

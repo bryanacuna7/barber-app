@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-04
 **Analyst:** UI/UX Team (@ui-ux-designer + /ui-ux-pro-max)
-**Current File:** [src/app/(dashboard)/servicios/page.tsx](<src/app/(dashboard)/servicios/page.tsx>) (483 lines)
+**Current File:** [src/app/(dashboard)/servicios/page.tsx](<../../../src/app/(dashboard)/servicios/page.tsx>) (483 lines)
 
 ---
 

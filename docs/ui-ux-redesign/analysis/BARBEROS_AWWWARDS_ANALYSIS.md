@@ -1,8 +1,8 @@
 # Barberos Module - Awwwards Critical Analysis
 
 **Module:** Barberos (Team Management)
-**Current Implementation:** [src/app/(dashboard)/barberos/page.tsx](<src/app/(dashboard)/barberos/page.tsx>)
-**Component:** [src/components/barbers/barbers-management.tsx](src/components/barbers/barbers-management.tsx) (473 lines)
+**Current Implementation:** [src/app/(dashboard)/barberos/page.tsx](<../../../src/app/(dashboard)/barberos/page.tsx>)
+**Component:** [src/components/barbers/barbers-management.tsx](../../../src/components/barbers/barbers-management.tsx) (473 lines)
 **Date:** 2026-02-04
 **Analyst:** UI/UX Team (@ui-ux-designer + /ui-ux-pro-max)
 

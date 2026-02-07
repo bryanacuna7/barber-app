@@ -8,20 +8,20 @@ Complete guide to all project documentation.
 
 ```
 barber-app/
-├── *.md                          # Governance docs (UPPERCASE only)
+├── *.md                          # Root project docs
 │   ├── CLAUDE.md                 # Claude Code instructions
 │   ├── CONTRIBUTING.md           # Contribution guidelines
 │   ├── DATABASE_SCHEMA.md        # DB schema (source of truth)
 │   ├── DECISIONS.md              # Architectural decisions
 │   ├── GUARDRAILS.md             # Non-negotiable behaviors
 │   ├── PROGRESS.md               # Session continuity
-│   ├── README.md                 # Project overview
-│   └── SECURITY_AUDIT_SUMMARY.md # Security status
+│   └── README.md                 # Project overview
 │
 └── docs/
     ├── reference/                # Technical guides
     ├── planning/                 # Implementation plans
     ├── specs/                    # Feature specifications
+    ├── security/                 # Security reports and summaries
     └── archive/                  # Historical documents
 ```
 
@@ -45,17 +45,17 @@ barber-app/
 
 ### Governance (Root Level)
 
-| Document                                                  | Description                         |
-| --------------------------------------------------------- | ----------------------------------- |
-| [CHANGELOG.md](../CHANGELOG.md)                           | Version history and changes         |
-| [CLAUDE.md](../CLAUDE.md)                                 | Claude Code configuration and rules |
-| [CONTRIBUTING.md](../CONTRIBUTING.md)                     | How to contribute to the project    |
-| [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)               | Database schema (source of truth)   |
-| [DECISIONS.md](../DECISIONS.md)                           | Architectural decision records      |
-| [GUARDRAILS.md](../GUARDRAILS.md)                         | Non-negotiable behaviors            |
-| [PROGRESS.md](../PROGRESS.md)                             | Current project state               |
-| [README.md](../README.md)                                 | Project overview and setup          |
-| [SECURITY_AUDIT_SUMMARY.md](../SECURITY_AUDIT_SUMMARY.md) | Security status                     |
+| Document                                                        | Description                         |
+| --------------------------------------------------------------- | ----------------------------------- |
+| [CHANGELOG.md](../CHANGELOG.md)                                 | Version history and changes         |
+| [CLAUDE.md](../CLAUDE.md)                                       | Claude Code configuration and rules |
+| [CONTRIBUTING.md](../CONTRIBUTING.md)                           | How to contribute to the project    |
+| [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)                     | Database schema (source of truth)   |
+| [DECISIONS.md](../DECISIONS.md)                                 | Architectural decision records      |
+| [GUARDRAILS.md](../GUARDRAILS.md)                               | Non-negotiable behaviors            |
+| [PROGRESS.md](../PROGRESS.md)                                   | Current project state               |
+| [README.md](../README.md)                                       | Project overview and setup          |
+| [SECURITY_AUDIT_SUMMARY.md](security/SECURITY_AUDIT_SUMMARY.md) | Security status                     |
 
 ---
 
@@ -76,7 +76,7 @@ barber-app/
 
 | Document                                                                   | Description             |
 | -------------------------------------------------------------------------- | ----------------------- |
-| [SECURITY_AUDIT_SUMMARY.md](../SECURITY_AUDIT_SUMMARY.md)                  | Overall security status |
+| [SECURITY_AUDIT_SUMMARY.md](security/SECURITY_AUDIT_SUMMARY.md)            | Overall security status |
 | [SECURITY_HEADERS.md](reference/SECURITY_HEADERS.md)                       | CSP, CORS configuration |
 | [SECURITY_THREAT_MODEL_V2.5.md](reference/SECURITY_THREAT_MODEL_V2.5.md)   | Threat analysis         |
 | [SECURITY_FIXES_STATUS.md](reference/SECURITY_FIXES_STATUS.md)             | Applied fixes           |
@@ -145,19 +145,19 @@ barber-app/
 
 ### By Task
 
-| I want to...               | Read this                                                    |
-| -------------------------- | ------------------------------------------------------------ |
-| Set up the project         | [README.md](../README.md)                                    |
-| Understand Claude behavior | [CLAUDE.md](../CLAUDE.md)                                    |
-| Modify database            | [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)                  |
-| Avoid common bugs          | [lessons-learned.md](reference/lessons-learned.md)           |
-| Write tests                | [TESTING.md](reference/TESTING.md)                           |
-| Debug with trace viewer    | [TRACE_QUICK_START.md](reference/TRACE_QUICK_START.md)       |
-| Analyze competitor         | [UI_EXPLORATION_GUIDE.md](reference/UI_EXPLORATION_GUIDE.md) |
-| Improve performance        | [PERFORMANCE_BASELINE.md](reference/PERFORMANCE_BASELINE.md) |
-| Fix security issue         | [SECURITY_AUDIT_SUMMARY.md](../SECURITY_AUDIT_SUMMARY.md)    |
-| Make design changes        | [DESIGN_TOKENS.md](reference/DESIGN_TOKENS.md)               |
-| Understand decisions       | [DECISIONS.md](../DECISIONS.md)                              |
+| I want to...               | Read this                                                       |
+| -------------------------- | --------------------------------------------------------------- |
+| Set up the project         | [README.md](../README.md)                                       |
+| Understand Claude behavior | [CLAUDE.md](../CLAUDE.md)                                       |
+| Modify database            | [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)                     |
+| Avoid common bugs          | [lessons-learned.md](reference/lessons-learned.md)              |
+| Write tests                | [TESTING.md](reference/TESTING.md)                              |
+| Debug with trace viewer    | [TRACE_QUICK_START.md](reference/TRACE_QUICK_START.md)          |
+| Analyze competitor         | [UI_EXPLORATION_GUIDE.md](reference/UI_EXPLORATION_GUIDE.md)    |
+| Improve performance        | [PERFORMANCE_BASELINE.md](reference/PERFORMANCE_BASELINE.md)    |
+| Fix security issue         | [SECURITY_AUDIT_SUMMARY.md](security/SECURITY_AUDIT_SUMMARY.md) |
+| Make design changes        | [DESIGN_TOKENS.md](reference/DESIGN_TOKENS.md)                  |
+| Understand decisions       | [DECISIONS.md](../DECISIONS.md)                                 |
 
 ---
 
@@ -225,6 +225,6 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 
 ---
 
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-07
 
 **Maintainer:** @documentation-expert

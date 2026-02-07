@@ -66,11 +66,11 @@ Technical guides, best practices, and knowledge base.
 
 ### Technical Guides
 
-- [Testing](reference/testing.md) - Test strategies, coverage, E2E
-- [Accessibility](reference/accessibility.md) - WCAG AA compliance
-- [Performance Baseline](reference/performance-baseline.md) - Metrics and targets
-- [Security Headers](reference/security-headers.md) - CSP, CORS configuration
-- [Design Tokens](reference/design-tokens.md) - Design system reference
+- [Testing](reference/TESTING.md) - Test strategies, coverage, E2E
+- [Accessibility](reference/ACCESSIBILITY.md) - WCAG AA compliance
+- [Performance Baseline](reference/PERFORMANCE_BASELINE.md) - Metrics and targets
+- [Security Headers](reference/SECURITY_HEADERS.md) - CSP, CORS configuration
+- [Design Tokens](reference/DESIGN_TOKENS.md) - Design system reference
 
 ---
 
@@ -118,13 +118,13 @@ Historical documentation and completed implementations.
 | **Critical Reference**  | Root                | DATABASE_SCHEMA.md, PROGRESS.md |
 | **Implementation Plan** | docs/planning/      | implementation-v2.5.md          |
 | **Feature Spec**        | docs/specs/         | referral-system.md              |
-| **Technical Guide**     | docs/reference/     | lessons-learned.md, testing.md  |
+| **Technical Guide**     | docs/reference/     | lessons-learned.md, TESTING.md  |
 | **Historical**          | docs/archive/       | sessions-54-65.md               |
 
 ### Naming Conventions
 
 - **Root governance:** UPPERCASE.md (e.g., CLAUDE.md)
-- **Technical docs:** lowercase-with-hyphens.md (e.g., lessons-learned.md)
+- **Technical docs:** UPPERCASE.md or lowercase-with-hyphens.md (match existing folder conventions)
 - **Index files:** README.md in each directory
 
 ---
@@ -191,12 +191,12 @@ Project governance and critical references (stay in root):
 | --------------- | ---------------------------------------------------------------------- |
 | Bug Prevention  | [reference/lessons-learned.md](reference/lessons-learned.md)           |
 | Database Schema | [../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)                         |
-| Testing         | [reference/testing.md](reference/testing.md)                           |
-| Accessibility   | [reference/accessibility.md](reference/accessibility.md)               |
-| Performance     | [reference/performance-baseline.md](reference/performance-baseline.md) |
-| Security        | [reference/security-headers.md](reference/security-headers.md)         |
+| Testing         | [reference/TESTING.md](reference/TESTING.md)                           |
+| Accessibility   | [reference/ACCESSIBILITY.md](reference/ACCESSIBILITY.md)               |
+| Performance     | [reference/PERFORMANCE_BASELINE.md](reference/PERFORMANCE_BASELINE.md) |
+| Security        | [reference/SECURITY_HEADERS.md](reference/SECURITY_HEADERS.md)         |
 | Roadmap         | [planning/implementation-v2.5.md](planning/implementation-v2.5.md)     |
 
 ---
 
-**Last Updated:** 2026-02-03 (Session 70 - Documentation Reorganization)
+**Last Updated:** 2026-02-07 (Global docs consistency pass)

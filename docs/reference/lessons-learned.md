@@ -437,10 +437,10 @@ WHERE status != 'cancelled';
 
 ## 🔗 Related Documentation
 
-- [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Complete schema reference
-- [CLAUDE.md](CLAUDE.md) - Development rules and protocols
-- [PROGRESS.md](PROGRESS.md) - Current project state
-- [docs/archive/progress/](docs/archive/progress/) - Historical session details
+- [DATABASE_SCHEMA.md](../../DATABASE_SCHEMA.md) - Complete schema reference
+- [CLAUDE.md](../../CLAUDE.md) - Development rules and protocols
+- [PROGRESS.md](../../PROGRESS.md) - Current project state
+- [docs/archive/progress/](../archive/progress/) - Historical session details
 
 ---
 

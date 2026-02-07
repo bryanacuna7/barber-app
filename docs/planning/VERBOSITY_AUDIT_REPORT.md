@@ -31,11 +31,11 @@ Tu codebase **SÍ tiene código verboso** - pero no es excesivo para un proyecto
 
 **Problema:** 3 páginas concentran 2,318 líneas (5% del codebase)
 
-| Archivo                                                               | Líneas | Funciones      | Complejidad | Severidad  |
-| --------------------------------------------------------------------- | ------ | -------------- | ----------- | ---------- |
-| [configuracion/page.tsx](<../app/(dashboard)/configuracion/page.tsx>) | 825    | ~200 líneas/fn | 35+         | 🔴 CRÍTICO |
-| [clientes/page.tsx](<../app/(dashboard)/clientes/page.tsx>)           | 792    | ~150 líneas/fn | 28          | 🔴 CRÍTICO |
-| [citas/page.tsx](<../app/(dashboard)/citas/page.tsx>)                 | 701    | ~120 líneas/fn | 32          | 🔴 CRÍTICO |
+| Archivo                                                                      | Líneas | Funciones      | Complejidad | Severidad  |
+| ---------------------------------------------------------------------------- | ------ | -------------- | ----------- | ---------- |
+| [configuracion/page.tsx](<../../src/app/(dashboard)/configuracion/page.tsx>) | 825    | ~200 líneas/fn | 35+         | 🔴 CRÍTICO |
+| [clientes/page.tsx](<../../src/app/(dashboard)/clientes/page.tsx>)           | 792    | ~150 líneas/fn | 28          | 🔴 CRÍTICO |
+| [citas/page.tsx](<../../src/app/(dashboard)/citas/page.tsx>)                 | 701    | ~120 líneas/fn | 32          | 🔴 CRÍTICO |
 
 **Impacto:**
 
@@ -113,7 +113,7 @@ export const GET = withAuth(async (req, ctx, { user, business }) => {
 
 **Problema:** 0% de componentes usan memoización
 
-**Ejemplo Crítico:** [citas/page.tsx:145-194](<../app/(dashboard)/citas/page.tsx#L145-L194>)
+**Ejemplo Crítico:** [citas/page.tsx:145-194](<../../src/app/(dashboard)/citas/page.tsx#L145-L194>)
 
 ```typescript
 // 350 operaciones por render! 😱
@@ -174,7 +174,7 @@ const stats = useMemo(() => {
 
 **Problema:** 3 funciones casi idénticas (canAddBarber, canAddService, canAddClient)
 
-**Ubicación:** [lib/subscription.ts:133-217](../lib/subscription.ts#L133-L217)
+**Ubicación:** [lib/subscription.ts:133-217](../../src/lib/subscription.ts#L133-L217)
 
 ```typescript
 // 85 líneas × 3 funciones = 255 líneas de código duplicado
@@ -217,7 +217,7 @@ export const canAddClient = (s, b) => canAddResource(s, b, 'clients')
 
 **Problema:** Booking flow pasa 15+ props a través de 3 niveles
 
-**Ubicación:** [reservar/[slug]/page.tsx](<../app/(public)/reservar/[slug]/page.tsx>)
+**Ubicación:** [reservar/[slug]/page.tsx](<../../src/app/(public)/reservar/[slug]/page.tsx>)
 
 ```typescript
 // Parent → ClientInfoForm (15 props!)
@@ -258,7 +258,7 @@ export function ClientInfoForm() {
 
 **Problema:** 16 estados separados para data relacionada
 
-**Ubicación:** [reservar/[slug]/page.tsx:63-78](<../app/(public)/reservar/[slug]/page.tsx#L63-L78>)
+**Ubicación:** [reservar/[slug]/page.tsx:63-78](<../../src/app/(public)/reservar/[slug]/page.tsx#L63-L78>)
 
 **Solución:** useReducer con estado agrupado
 
@@ -281,11 +281,11 @@ const [state, dispatch] = useReducer(bookingReducer, {
 
 **Archivos:**
 
-- [use-barbers.ts](../hooks/use-barbers.ts)
-- [use-services.ts](../hooks/use-services.ts)
-- [use-clients.ts](../hooks/use-clients.ts)
-- [use-dashboard-stats.ts](../hooks/use-dashboard-stats.ts)
-- [use-dashboard-appointments.ts](../hooks/use-dashboard-appointments.ts)
+- [use-barbers.ts](../../src/hooks/use-barbers.ts)
+- [use-services.ts](../../src/hooks/use-services.ts)
+- [use-clients.ts](../../src/hooks/use-clients.ts)
+- [use-dashboard-stats.ts](../../src/hooks/use-dashboard-stats.ts)
+- [use-dashboard-appointments.ts](../../src/hooks/use-dashboard-appointments.ts)
 
 **Solución:** Factory genérico
 
@@ -426,15 +426,15 @@ logger.debug('Update request', { id, body }) // solo dev
 
 ### Sprint 1 (Semana 1-2): Componentes Críticos
 
-- [ ] **Día 1-2:** Refactor [configuracion/page.tsx](<../app/(dashboard)/configuracion/page.tsx>)
+- [ ] **Día 1-2:** Refactor [configuracion/page.tsx](<../../src/app/(dashboard)/configuracion/page.tsx>)
   - Dividir en 5 sub-componentes
   - Extraer `useBusinessSettings()` hook
   - Target: 825 → 120 líneas
-- [ ] **Día 3-4:** Refactor [citas/page.tsx](<../app/(dashboard)/citas/page.tsx>)
+- [ ] **Día 3-4:** Refactor [citas/page.tsx](<../../src/app/(dashboard)/citas/page.tsx>)
   - Extraer `useAppointmentsPage()` hook
   - Memoizar stats calculation
   - Target: 701 → 150 líneas
-- [ ] **Día 5-6:** Refactor [clientes/page.tsx](<../app/(dashboard)/clientes/page.tsx>)
+- [ ] **Día 5-6:** Refactor [clientes/page.tsx](<../../src/app/(dashboard)/clientes/page.tsx>)
   - Consolidar mobile/desktop rendering
   - Extraer `useClientMetrics()` hook
   - Target: 792 → 200 líneas

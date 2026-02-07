@@ -34,14 +34,14 @@ Critical patterns extracted from real bugs. **Read before coding.**
 
 ### Design & UX
 
-- [Accessibility](accessibility.md) - WCAG compliance guide
-- [Accessibility Audit](accessibility-audit.md) - Audit results
-- [Design Tokens](design-tokens.md) - Color, spacing, typography system
+- [Accessibility](ACCESSIBILITY.md) - WCAG compliance guide
+- [Accessibility Audit](ACCESSIBILITY_AUDIT.md) - Audit results
+- [Design Tokens](DESIGN_TOKENS.md) - Color, spacing, typography system
 
 ### Performance & Security
 
-- [Performance Baseline](performance-baseline.md) - Metrics and optimization targets
-- [Security Headers](security-headers.md) - CSP, CORS, security configuration
+- [Performance Baseline](PERFORMANCE_BASELINE.md) - Metrics and optimization targets
+- [Security Headers](SECURITY_HEADERS.md) - CSP, CORS, security configuration
 
 ---
 
@@ -68,7 +68,7 @@ When creating a new reference document:
 
 1. **Save as:** `docs/reference/[topic-name].md`
 2. **Update this index** with link and description
-3. **Use lowercase-with-hyphens** naming convention
+3. **Follow existing naming convention** in this folder (UPPERCASE or lowercase-with-hyphens)
 4. **Include these sections:**
    - Overview
    - Quick Start

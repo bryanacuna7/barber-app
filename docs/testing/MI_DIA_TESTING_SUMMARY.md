@@ -431,9 +431,9 @@ npm run test:e2e:ui
 
 ### Documentation
 
-- [Testing Strategy](/docs/testing/mi-dia-testing-strategy.md)
-- [Execution Guide](/docs/testing/test-execution-guide.md)
-- [Test Utils](/src/test/test-utils.tsx)
+- [Testing Strategy](mi-dia-testing-strategy.md)
+- [Execution Guide](test-execution-guide.md)
+- [Test Utils](../../src/test/test-utils.tsx)
 
 ### External Links
 

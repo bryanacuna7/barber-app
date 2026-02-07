@@ -137,7 +137,7 @@
 
 **Mock Data:** 12 services across 4 categories (Corte, Barba, Combo, Facial) with professional Lucide icons
 
-**Analysis Document:** [SERVICIOS_AWWWARDS_ANALYSIS.md](SERVICIOS_AWWWARDS_ANALYSIS.md)
+**Analysis Document:** [SERVICIOS_AWWWARDS_ANALYSIS.md](analysis/SERVICIOS_AWWWARDS_ANALYSIS.md)
 
 **Next:** Move to Module 6 (Barberos)
 
@@ -196,7 +196,7 @@
 
 **Mock Data:** 8 barberos con business data completo (appointments, revenue, rating, trends, gamification, schedule)
 
-**Analysis Document:** [BARBEROS_AWWWARDS_ANALYSIS.md](BARBEROS_AWWWARDS_ANALYSIS.md)
+**Analysis Document:** [BARBEROS_AWWWARDS_ANALYSIS.md](analysis/BARBEROS_AWWWARDS_ANALYSIS.md)
 
 **Winner Rationale:** User selected Demo B for its flexibility with 4 view modes (Cards/Table/Leaderboard/Calendar), rich visualizations (performance rings, progress bars), and comprehensive feature set. Despite Demo A having higher score (9/10), Demo B's multi-view approach better fits team management needs.
 
@@ -289,7 +289,7 @@
 
 **Current Analytics Page:** `/analiticas/page.tsx` (Score: 6.5/10)
 
-**Analysis Document:** [REPORTES_AWWWARDS_ANALYSIS.md](REPORTES_AWWWARDS_ANALYSIS.md)
+**Analysis Document:** [REPORTES_AWWWARDS_ANALYSIS.md](analysis/REPORTES_AWWWARDS_ANALYSIS.md)
 
 **Key Improvements from Current (6.5/10 → 9.0/10):**
 

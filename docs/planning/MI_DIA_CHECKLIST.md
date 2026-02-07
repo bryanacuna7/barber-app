@@ -394,9 +394,9 @@ vercel rollback
 
 ### Documentation
 
-- [Component README](/src/components/barber/README.md)
-- [Implementation Summary](/docs/planning/MI_DIA_IMPLEMENTATION.md)
-- [Type Definitions](/src/types/custom.ts)
+- [Component README](../../src/components/barber/README.md)
+- [Implementation Summary](MI_DIA_IMPLEMENTATION.md)
+- [Type Definitions](../../src/types/custom.ts)
 
 ### External Resources
 

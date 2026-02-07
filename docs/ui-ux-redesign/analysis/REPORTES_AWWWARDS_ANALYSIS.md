@@ -1,7 +1,7 @@
 # Reportes/Analíticas - Critical UX Analysis (Awwwards Benchmark)
 
 **Module:** Reportes/Analíticas (Module 7 of 7 - FINAL)
-**Current File:** [src/app/(dashboard)/analiticas/page.tsx](<src/app/(dashboard)/analiticas/page.tsx>)
+**Current File:** [src/app/(dashboard)/analiticas/page.tsx](<../../../src/app/(dashboard)/analiticas/page.tsx>)
 **Benchmark:** Awwwards 9/10 level
 **Date:** 2026-02-04
 **Status:** Critical analysis complete

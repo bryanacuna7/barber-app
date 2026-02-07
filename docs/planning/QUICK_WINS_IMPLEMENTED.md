@@ -22,7 +22,7 @@
 
 ### Archivo Modificado
 
-[src/app/(dashboard)/citas/page.tsx:163-211](<../../../src/app/(dashboard)/citas/page.tsx#L163-L211>)
+[src/app/(dashboard)/citas/page.tsx:163-211](<../../src/app/(dashboard)/citas/page.tsx#L163-L211>)
 
 ### Problema Resuelto
 
@@ -124,7 +124,7 @@ const stats = useMemo(() => {
 
 #### 1. Middleware Helper Creado
 
-**[src/lib/api/middleware.ts](../../../src/lib/api/middleware.ts)** - 128 líneas
+**[src/lib/api/middleware.ts](../../src/lib/api/middleware.ts)** - 128 líneas
 
 ```typescript
 /**
@@ -172,12 +172,12 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
 
 #### 2. Rutas Refactorizadas (3 archivos, 8 métodos)
 
-| Archivo                                                                           | Métodos            | Líneas Eliminadas |
-| --------------------------------------------------------------------------------- | ------------------ | ----------------- |
-| [api/appointments/[id]/route.ts](../../../src/app/api/appointments/[id]/route.ts) | GET, PATCH, DELETE | -90               |
-| [api/services/route.ts](../../../src/app/api/services/route.ts)                   | GET, POST          | -80               |
-| [api/clients/route.ts](../../../src/app/api/clients/route.ts)                     | GET, POST          | -70               |
-| **Total**                                                                         | **8 métodos**      | **-240 líneas**   |
+| Archivo                                                                        | Métodos            | Líneas Eliminadas |
+| ------------------------------------------------------------------------------ | ------------------ | ----------------- |
+| [api/appointments/[id]/route.ts](../../src/app/api/appointments/[id]/route.ts) | GET, PATCH, DELETE | -90               |
+| [api/services/route.ts](../../src/app/api/services/route.ts)                   | GET, POST          | -80               |
+| [api/clients/route.ts](../../src/app/api/clients/route.ts)                     | GET, POST          | -70               |
+| **Total**                                                                      | **8 métodos**      | **-240 líneas**   |
 
 ### Ejemplo de Transformación
 
@@ -301,12 +301,12 @@ Después de auditar 63 archivos que importan `framer-motion`, descubrí que:
 
 ### Archivos Auditados
 
-| Componente                                                            | Uso                                     | Apropiado? | Razón                                    |
-| --------------------------------------------------------------------- | --------------------------------------- | ---------- | ---------------------------------------- |
-| [spinner.tsx](../../../src/components/ui/spinner.tsx)                 | Animaciones con delays, repeat infinite | ✅         | CSS no puede hacer delays independientes |
-| [stats-card.tsx](../../../src/components/dashboard/stats-card.tsx)    | Spring animations, hover effects        | ✅         | Spring physics difícil en CSS            |
-| [pull-to-refresh.tsx](../../../src/components/ui/pull-to-refresh.tsx) | Drag gestures                           | ✅         | Requiere gesture handling                |
-| [clientes/page.tsx](<../../../src/app/(dashboard)/clientes/page.tsx>) | Swipeable cards                         | ✅         | Drag constraints complejos               |
+| Componente                                                         | Uso                                     | Apropiado? | Razón                                    |
+| ------------------------------------------------------------------ | --------------------------------------- | ---------- | ---------------------------------------- |
+| [spinner.tsx](../../src/components/ui/spinner.tsx)                 | Animaciones con delays, repeat infinite | ✅         | CSS no puede hacer delays independientes |
+| [stats-card.tsx](../../src/components/dashboard/stats-card.tsx)    | Spring animations, hover effects        | ✅         | Spring physics difícil en CSS            |
+| [pull-to-refresh.tsx](../../src/components/ui/pull-to-refresh.tsx) | Drag gestures                           | ✅         | Requiere gesture handling                |
+| [clientes/page.tsx](<../../src/app/(dashboard)/clientes/page.tsx>) | Swipeable cards                         | ✅         | Drag constraints complejos               |
 
 ### Decisión
 

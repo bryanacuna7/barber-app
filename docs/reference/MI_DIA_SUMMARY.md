@@ -357,15 +357,15 @@ No new dependencies added (Framer Motion already in project).
 
 ### Component Docs
 
-- [Component README](/src/components/barber/README.md)
-- [Implementation Details](/docs/planning/MI_DIA_IMPLEMENTATION.md)
-- [Task Checklist](/docs/planning/MI_DIA_CHECKLIST.md)
+- [Component README](../../src/components/barber/README.md)
+- [Implementation Details](../planning/MI_DIA_IMPLEMENTATION.md)
+- [Task Checklist](../planning/MI_DIA_CHECKLIST.md)
 
 ### Code References
 
-- [Type Definitions](/src/types/custom.ts)
-- [Backend API](/src/app/api/barbers/[id]/appointments/today/route.ts)
-- [Toast Component](/src/components/ui/toast.tsx)
+- [Type Definitions](../../src/types/custom.ts)
+- [Backend API](../../src/app/api/barbers/[id]/appointments/today/route.ts)
+- [Toast Component](../../src/components/ui/toast.tsx)
 
 ---
 
@@ -446,9 +446,9 @@ The Mi Día frontend is **production-ready** with the following caveats:
 
 For implementation questions, see:
 
-- [Component README](/src/components/barber/README.md) - Usage examples
-- [Implementation Doc](/docs/planning/MI_DIA_IMPLEMENTATION.md) - Architecture details
-- [Checklist](/docs/planning/MI_DIA_CHECKLIST.md) - Task tracking
+- [Component README](../../src/components/barber/README.md) - Usage examples
+- [Implementation Doc](../planning/MI_DIA_IMPLEMENTATION.md) - Architecture details
+- [Checklist](../planning/MI_DIA_CHECKLIST.md) - Task tracking
 
 **Contact:** Development team
 **Last Updated:** February 3, 2026

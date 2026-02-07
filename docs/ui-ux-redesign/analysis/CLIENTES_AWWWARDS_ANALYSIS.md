@@ -1,6 +1,6 @@
 # Clientes Module - Critical UX/UI Analysis
 
-**Current File:** [`src/app/(dashboard)/clientes/page.tsx`](<src/app/(dashboard)/clientes/page.tsx:1>) (792 lines)
+**Current File:** [`src/app/(dashboard)/clientes/page.tsx`](<../../../src/app/(dashboard)/clientes/page.tsx#L1>) (792 lines)
 
 **Analysis Date:** 2026-02-04 (Session 107)
 
