@@ -3,6 +3,8 @@ name: Discord Deploy Notification
 on:
   push:
     branches: [main]
+    paths:
+      - 'RELEASE_NOTES.md'
 
 jobs:
   notify:
