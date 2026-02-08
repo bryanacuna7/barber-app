@@ -10,8 +10,9 @@
 - **Database:** PostgreSQL (Supabase)
 - **Last Updated:** 2026-02-07 (Session 151 - PWA auto-update fix for iOS)
 - **Current Branch:** `main` (feature/ui-ux-redesign squash-merged)
-- **Current Phase:** Post-merge — PWA update fix, icon refinements
-- **Color Audit:** `color-audit.md` (root)
+- **Current Phase:** Post-merge — UX polish sprint
+- **Roadmap:** `ROADMAP.md` (single source of truth for what's next)
+- **Color Audit:** COMPLETE (archived to `docs/archive/2026-02/color-audit.md`)
 - **Supabase Project:** `zanywefnobtzhoeuoyuc`
 
 ---
@@ -36,59 +37,18 @@
 
 ---
 
-## Roadmap (Prioritized)
+## Roadmap
 
-### COMPLETE: Color Audit (Sessions 146-148)
+**See [`ROADMAP.md`](ROADMAP.md) for the full prioritized roadmap.**
 
-**Reference:** `color-audit.md` — Awwwards-level color discipline
+### Next Up (UX Polish Sprint)
 
-**Fase 1 — Foundations (COMPLETE):**
-
-- [x] Premium color tokens added to globals.css (surface-0/1/2, text-1/2/3, accent-soft, semantic)
-- [x] Default `--brand-primary` upgraded from `#27272a` to `#4F46E5` (light) / `#6D7CFF` (dark)
-- [x] `premium-background.tsx` — mesh reduced from saturated violet/purple to subtle brand-tinted, opacity 15% → 7%
-- [x] `button.tsx` — gradient variant uses `var(--brand-primary)` instead of hardcoded blue→purple
-- [x] `bottom-nav.tsx` — active state, + button, action sheet icons use brand tokens
-- [x] **FIXED by user:** bottom-nav indicator pill — opacities doubled, active text neutral
-
-**Fase 2 — Dashboard Unification (COMPLETE — Session 147):**
-
-- [x] CSS utility classes added: `brand-gradient-text`, `brand-tab-active`, `brand-mesh-1`, `brand-mesh-2`
-- [x] `GradientHeader.tsx` — hardcoded `from-violet-600 via-purple-600 to-blue-600` → `brand-gradient-text` CSS class
-- [x] Page headers (4 pages) — inline gradient → `brand-gradient-text`
-- [x] CTA buttons (4 pages) — inline gradient → `Button variant="gradient"` (uses `--brand-primary`)
-- [x] Segment tabs (all 5 pages, ~10 instances) — gradient → `brand-tab-active` solid brand color
-- [x] Category pills (servicios) — gradient → `brand-tab-active`
-- [x] Decorative mesh (3 pages, 6 blobs) — hardcoded violet/purple → `brand-mesh-1`/`brand-mesh-2`
-- [x] `KPICard.tsx` hero variant — default gradient → `var(--brand-primary)` inline style
-- [x] `BookingHeader.tsx` — share button gradient → brand-primary inline style
-- [x] Verified: light mode + dark mode on mobile (375px), all 5 pages
-
-**Fase 3 — Data viz y contraste (COMPLETE — Session 148):**
-
-- [x] Chart tooltips dark/light adaptive — `contentStyle` uses CSS vars (`--chart-tooltip-bg/border/text`)
-- [x] Chart palette — SVG props use `useChartColors()` hook (reads CSS vars at runtime, listens for theme changes)
-- [x] Chart colors brand-aware — revenue line + services bars use `--brand-primary` via JS hook
-- [x] `text-zinc-500 dark:text-zinc-400` → `text-muted` (218 instances across 66 active files)
-- [x] Added Tailwind `--color-muted` and `--color-subtle` tokens in `@theme` (maps to `--text-2` / `--text-3`)
-- [x] `themeColor` meta in layout.tsx — light mode `#0a0a0a` → `#ffffff`
-- [x] Verified: light mode on mobile (375px), `text-muted` renders `#5A6270` (6.2:1 contrast on white)
-
-### Remaining Audit Items (pre-color)
-
-- [ ] Button migration — citas (22 manual/7 Button), barberos (7/3)
+- [ ] Button migration — citas (22 manual), barberos (7 manual)
 - [ ] Charts mobile-first redesign (Gate E: FAIL)
-- [ ] Copy UX Spanish consistency audit (Gate F: PENDING)
+- [ ] Copy UX Spanish consistency (Gate F: PENDING)
 - [ ] Card padre / double inset removal
 - [ ] Header CTA Contract consistency
-- [ ] Visual verification at 360px + Dark mode full QA
-
-### MEDIUM: Platform Features
-
-- [ ] Admin user management UI
-- [ ] Multi-tenant view
-- [ ] Cache subscription/notification checks with TTL
-- [ ] Egress monitoring/alerts
+- [ ] 360px + dark mode full QA
 
 ---
 
