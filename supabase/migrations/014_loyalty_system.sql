@@ -1,4 +1,4 @@
--- BarberShop Pro - Phase 1: Client Loyalty System
+-- BarberApp - Phase 1: Client Loyalty System
 -- Run this in Supabase SQL Editor after manual review
 
 -- ===========================================

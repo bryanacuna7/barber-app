@@ -1,4 +1,4 @@
--- BarberShop Pro - Initial Schema
+-- BarberApp - Initial Schema
 -- Run this in Supabase SQL Editor (https://supabase.com/dashboard/project/_/sql)
 
 -- ===========================================

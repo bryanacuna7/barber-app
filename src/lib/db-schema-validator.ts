@@ -182,7 +182,7 @@ export function verifyColumn(table: TableName, column: string): void {
     throw new Error(`❌ Table '${table}' not found in VERIFIED_SCHEMA. Check DATABASE_SCHEMA.md`)
   }
 
-  if (schema.missing.includes(column)) {
+  if ((schema.missing as readonly string[]).includes(column)) {
     throw new Error(
       `❌ Column '${column}' does NOT exist in table '${table}'. ` +
         `This is a future feature not yet implemented. ` +
@@ -190,7 +190,7 @@ export function verifyColumn(table: TableName, column: string): void {
     )
   }
 
-  if (!schema.columns.includes(column)) {
+  if (!(schema.columns as readonly string[]).includes(column)) {
     throw new Error(
       `❌ Column '${column}' not found in table '${table}'. ` +
         `Available columns: ${schema.columns.join(', ')}. ` +
@@ -224,14 +224,14 @@ export function columnExists(table: TableName, column: string): boolean {
  * Get all available columns for a table
  */
 export function getAvailableColumns(table: TableName): string[] {
-  return VERIFIED_SCHEMA[table]?.columns || []
+  return [...(VERIFIED_SCHEMA[table]?.columns || [])]
 }
 
 /**
  * Get columns that DON'T exist (future features)
  */
 export function getMissingColumns(table: TableName): string[] {
-  return VERIFIED_SCHEMA[table]?.missing || []
+  return [...(VERIFIED_SCHEMA[table]?.missing || [])]
 }
 
 /**

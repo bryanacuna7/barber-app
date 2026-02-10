@@ -97,18 +97,21 @@ describe('formatCurrencyCompact', () => {
     expect(formatted).toContain('2.5M')
   })
 
-  it('should format hundreds of thousands with k suffix', () => {
+  it('should keep full format for hundreds of thousands (no k suffix)', () => {
     const formatted = formatCurrencyCompact(150000)
 
     expect(formatted).toContain('₡')
-    expect(formatted).toContain('150k')
+    expect(formatted).toContain('150')
+    expect(formatted).toContain('000')
+    expect(formatted).not.toContain('k')
   })
 
-  it('should format tens of thousands with k suffix and decimal', () => {
+  it('should keep full format for tens of thousands (no k suffix)', () => {
     const formatted = formatCurrencyCompact(15500)
 
     expect(formatted).toContain('₡')
-    expect(formatted).toContain('15.5k')
+    expect(formatted).toContain('15')
+    expect(formatted).not.toContain('k')
   })
 
   it('should format small numbers normally', () => {

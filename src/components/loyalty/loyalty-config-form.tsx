@@ -71,6 +71,8 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   const [refereeRewardAmount, setRefereeRewardAmount] = useState(
     initialProgram?.refereeRewardAmount?.toString() || '25'
   )
+  const formFieldClass =
+    'mt-2 border border-zinc-200/70 dark:border-zinc-800/80 bg-white/65 dark:bg-white/[0.04] text-sm focus:ring-violet-400/45 focus:border-violet-400/45 backdrop-blur-xl'
 
   // Build current config for preview (simplified, no debouncing for now)
   const currentConfig: LoyaltyProgram | null = useMemo(
@@ -174,7 +176,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
   return (
     <Card
       variant="glass"
-      className="border border-zinc-200/70 bg-white/65 p-4 shadow-[0_10px_26px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.03] sm:p-5"
+      className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] p-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:p-5"
     >
       <div className="space-y-5 sm:space-y-6">
         {/* Header with Toggle */}
@@ -243,7 +245,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                     value={pointsPerCurrency}
                     onChange={(e) => setPointsPerCurrency(e.target.value)}
                     placeholder="100"
-                    className="mt-2"
+                    className={formFieldClass}
                   />
                   <p className="mt-1.5 text-xs text-muted-foreground italic">
                     Ejemplo: 500 puntos = {discountPercentage}% descuento
@@ -259,7 +261,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                     value={discountPercentage}
                     onChange={(e) => setDiscountPercentage(e.target.value)}
                     placeholder="20"
-                    className="mt-2"
+                    className={formFieldClass}
                   />
                   <p className="mt-1.5 text-xs text-muted-foreground">
                     Descuento por canjear 500 pts
@@ -282,7 +284,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                   value={freeServiceAfterVisits}
                   onChange={(e) => setFreeServiceAfterVisits(e.target.value)}
                   placeholder="10"
-                  className="mt-2"
+                  className={formFieldClass}
                 />
                 <p className="mt-1.5 text-xs text-muted-foreground italic">
                   Ejemplo: 10 visitas = 1 servicio gratis
@@ -305,7 +307,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                     value={referralRewardAmount}
                     onChange={(e) => setReferralRewardAmount(e.target.value)}
                     placeholder="25"
-                    className="mt-2"
+                    className={formFieldClass}
                   />
                 </div>
                 <div>
@@ -318,7 +320,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                     value={refereeRewardAmount}
                     onChange={(e) => setRefereeRewardAmount(e.target.value)}
                     placeholder="25"
-                    className="mt-2"
+                    className={formFieldClass}
                   />
                 </div>
               </div>
@@ -344,7 +346,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                       value={pointsExpiry}
                       onChange={(e) => setPointsExpiry(e.target.value)}
                       placeholder="365"
-                      className="mt-2"
+                      className={formFieldClass}
                     />
                     <p className="mt-1.5 text-xs text-muted-foreground">
                       Dejar vacío = puntos nunca expiran
@@ -364,7 +366,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                       value={discountAfterVisits}
                       onChange={(e) => setDiscountAfterVisits(e.target.value)}
                       placeholder="5"
-                      className="mt-2"
+                      className={formFieldClass}
                     />
                     <p className="mt-1.5 text-xs text-muted-foreground">
                       Opcional: ofrecer descuento cada X visitas
@@ -384,7 +386,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
                         setReferralRewardType(value as 'discount' | 'points' | 'free_service')
                       }
                     >
-                      <SelectTrigger id="referral-type" className="mt-2">
+                      <SelectTrigger id="referral-type" className={formFieldClass}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -401,7 +403,7 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
         </div>
         {/* End Configuration Form */}
         {/* Save Button */}
-        <div className="space-y-3 border-t border-zinc-200 dark:border-zinc-700 pt-5">
+        <div className="space-y-3 border-t border-zinc-200/70 dark:border-zinc-800/80 pt-5">
           <div className="flex justify-end">
             <Button
               onClick={handleSave}

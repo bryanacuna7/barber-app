@@ -8,10 +8,9 @@
  * Demo: preview-d
  */
 
-import { Database } from '@/types/supabase'
-
 // Supabase types
-type SupabaseService = Database['public']['Tables']['services']['Row']
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseService = any
 
 // UI types for demo
 export interface UIService {

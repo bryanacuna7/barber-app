@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -25,44 +25,7 @@ import {
   trackReferralConversion,
 } from '@/lib/referrals'
 
-// Component that uses useSearchParams - must be wrapped in Suspense
-function ReferralDetector({
-  onReferrerInfo,
-}: {
-  onReferrerInfo: (info: { businessName: string; businessSlug?: string } | null) => void
-}) {
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    const refCode = searchParams.get('ref')
-    if (!refCode) return
-
-    // Guardar código en cookie
-    saveReferralCode(refCode)
-
-    // Fetch info del referrer
-    const fetchReferrerInfo = async () => {
-      try {
-        const response = await fetch(`/api/referrals/info?code=${refCode}`)
-        if (response.ok) {
-          const data = await response.json()
-          if (data.isValid) {
-            onReferrerInfo({
-              businessName: data.businessName,
-              businessSlug: data.businessSlug,
-            })
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching referrer info:', error)
-      }
-    }
-
-    fetchReferrerInfo()
-  }, [searchParams, onReferrerInfo])
-
-  return null
-}
+const REGISTER_CARD_STABLE_HEIGHT = 'min-h-[760px]'
 
 function RegisterForm({
   referrerInfo,
@@ -182,30 +145,34 @@ function RegisterForm({
   }
 
   return (
-    <Card data-testid="register-card">
+    <Card className={REGISTER_CARD_STABLE_HEIGHT} data-testid="register-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
-        <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
+        <CardDescription>Registra tu barbería en BarberApp</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleRegister} data-testid="register-form">
         <CardContent className="space-y-4">
-          {/* Referrer Banner */}
-          {referrerInfo && (
-            <ReferrerBanner
-              businessName={referrerInfo.businessName}
-              businessSlug={referrerInfo.businessSlug}
-            />
-          )}
+          <div className="min-h-[128px]">
+            {/* Referrer Banner */}
+            {referrerInfo && (
+              <ReferrerBanner
+                businessName={referrerInfo.businessName}
+                businessSlug={referrerInfo.businessSlug}
+              />
+            )}
+          </div>
 
-          {error && (
-            <div
-              className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
-              data-testid="register-error"
-            >
-              {error}
-            </div>
-          )}
+          <div className="min-h-[44px]">
+            {error && (
+              <div
+                className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
+                data-testid="register-error"
+              >
+                {error}
+              </div>
+            )}
+          </div>
 
           <Input
             label="Nombre de tu barbería"
@@ -252,7 +219,9 @@ function RegisterForm({
               autoComplete="new-password"
               data-testid="register-password"
             />
-            {formData.password && <PasswordStrength password={formData.password} />}
+            <div className="min-h-[30px]">
+              {formData.password && <PasswordStrength password={formData.password} />}
+            </div>
           </div>
 
           <Input
@@ -315,11 +284,7 @@ function RegisterForm({
 }
 
 export default function RegisterPage() {
-  return (
-    <Suspense fallback={<RegisterFormSkeleton />}>
-      <RegisterPageContent />
-    </Suspense>
-  )
+  return <RegisterPageContent />
 }
 
 function RegisterPageContent() {
@@ -328,27 +293,35 @@ function RegisterPageContent() {
     businessSlug?: string
   } | null>(null)
 
+  useEffect(() => {
+    const refCode = new URLSearchParams(window.location.search).get('ref')
+    if (!refCode) return
+
+    saveReferralCode(refCode)
+
+    const fetchReferrerInfo = async () => {
+      try {
+        const response = await fetch(`/api/referrals/info?code=${refCode}`)
+        if (!response.ok) return
+
+        const data = await response.json()
+        if (!data.isValid) return
+
+        setReferrerInfo({
+          businessName: data.businessName,
+          businessSlug: data.businessSlug,
+        })
+      } catch (error) {
+        console.error('Error fetching referrer info:', error)
+      }
+    }
+
+    fetchReferrerInfo()
+  }, [])
+
   return (
     <>
-      <ReferralDetector onReferrerInfo={setReferrerInfo} />
       <RegisterForm referrerInfo={referrerInfo} />
     </>
-  )
-}
-
-function RegisterFormSkeleton() {
-  return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
-        <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
-        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
-        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
-        <div className="h-10 animate-pulse rounded-lg bg-zinc-200 dark:bg-zinc-800" />
-      </CardContent>
-    </Card>
   )
 }

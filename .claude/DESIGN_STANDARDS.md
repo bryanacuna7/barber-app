@@ -1,4 +1,4 @@
-# Design Standards - Barber App
+# Design Standards - BarberApp
 
 > **OBLIGATORIO**: Estos patrones DEBEN usarse en TODOS los componentes nuevos o modificados.
 

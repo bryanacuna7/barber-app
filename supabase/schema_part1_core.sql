@@ -1,4 +1,4 @@
--- BarberShop Pro - Initial Schema
+-- BarberApp - Initial Schema
 -- Run this in Supabase SQL Editor (https://supabase.com/dashboard/project/_/sql)
 
 -- ===========================================
@@ -170,7 +170,7 @@ CREATE POLICY "Public can create appointments"
 CREATE POLICY "Public can view active businesses"
   ON businesses FOR SELECT
   USING (is_active = true);
--- BarberShop Pro - Multi-Barber Migration
+-- BarberApp - Multi-Barber Migration
 -- Run this in Supabase SQL Editor
 
 -- 1. Create Barbers Table
@@ -885,7 +885,7 @@ VALUES (
     "enabled": false,
     "bank_name": "Banco Nacional",
     "account_number": "IBAN CR00 0000 0000 0000 0000 00",
-    "account_holder": "BarberShop Pro S.A.",
+    "account_holder": "BarberApp S.A.",
     "notes": "Cuenta en dólares - próximamente"
   }'::jsonb
 ) ON CONFLICT (key) DO NOTHING;
@@ -927,7 +927,7 @@ VALUES (
   'sinpe_details',
   '{
     "phone_number": "8888-8888",
-    "account_name": "BarberShop Pro",
+    "account_name": "BarberApp",
     "notes": "Realiza el SINPE Móvil al número indicado y sube el comprobante"
   }'::jsonb
 ) ON CONFLICT (key) DO NOTHING;

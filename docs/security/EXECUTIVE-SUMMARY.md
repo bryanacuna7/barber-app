@@ -1,7 +1,7 @@
 # Executive Summary: Security Testing - Mi Día Feature
 
 **Date:** February 3, 2026
-**Project:** Barber App - Área 6 (Mi Día Staff View)
+**Project:** BarberApp - Área 6 (Mi Día Staff View)
 **Status:** ✅ **PRODUCTION READY**
 
 ---

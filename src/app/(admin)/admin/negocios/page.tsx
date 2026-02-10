@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -105,8 +106,10 @@ export default function AdminBusinessesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Negocios</h1>
-        <p className="mt-1 text-muted">Gestiona todas las barberías registradas en la plataforma</p>
+        <h1 className="app-page-title">Negocios</h1>
+        <p className="app-page-subtitle mt-1 lg:hidden">
+          Gestiona todas las barberías registradas en la plataforma
+        </p>
       </div>
 
       {/* Filters */}
@@ -127,20 +130,17 @@ export default function AdminBusinessesPage() {
           {/* Status Filter */}
           <div className="flex gap-2">
             {['all', 'active', 'inactive'].map((status) => (
-              <button
+              <Button
                 key={status}
+                variant={statusFilter === status ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => {
                   setStatusFilter(status)
                   updateFilters(search, status, 1)
                 }}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  statusFilter === status
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
-                }`}
               >
                 {status === 'all' ? 'Todos' : status === 'active' ? 'Activos' : 'Inactivos'}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -239,22 +239,24 @@ export default function AdminBusinessesPage() {
                 {Math.min(currentPage * pagination.limit, pagination.total)} de {pagination.total}
               </p>
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => updateFilters(search, statusFilter, currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-1 rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-400"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Anterior
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => updateFilters(search, statusFilter, currentPage + 1)}
                   disabled={currentPage >= pagination.totalPages}
-                  className="flex items-center gap-1 rounded-lg bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-400"
                 >
                   Siguiente
                   <ChevronRight className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
           )}

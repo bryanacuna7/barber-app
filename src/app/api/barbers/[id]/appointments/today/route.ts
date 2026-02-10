@@ -33,6 +33,10 @@ export interface TodayAppointment {
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
   client_notes: string | null
   internal_notes: string | null
+  started_at: string | null
+  actual_duration_minutes: number | null
+  payment_method: 'cash' | 'sinpe' | 'card' | null
+  tracking_token: string | null
   client: TodayAppointmentClient | null
   service: TodayAppointmentService | null
 }
@@ -121,7 +125,7 @@ export const GET = withAuth<RouteParams>(
       endOfDay.setUTCHours(23, 59, 59, 999)
 
       // 4. Fetch today's appointments for this barber
-      const { data: appointments, error: appointmentsError } = await supabase
+      const { data: appointments, error: appointmentsError } = (await supabase
         .from('appointments')
         .select(
           `
@@ -132,6 +136,10 @@ export const GET = withAuth<RouteParams>(
         status,
         client_notes,
         internal_notes,
+        started_at,
+        actual_duration_minutes,
+        payment_method,
+        tracking_token,
         client:clients(id, name, phone, email),
         service:services(id, name, duration_minutes, price)
       `
@@ -140,7 +148,7 @@ export const GET = withAuth<RouteParams>(
         .eq('business_id', business.id)
         .gte('scheduled_at', startOfDay.toISOString())
         .lte('scheduled_at', endOfDay.toISOString())
-        .order('scheduled_at', { ascending: true })
+        .order('scheduled_at', { ascending: true })) as any
 
       if (appointmentsError) {
         logger.error(

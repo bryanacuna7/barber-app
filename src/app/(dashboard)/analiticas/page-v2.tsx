@@ -14,8 +14,11 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { TrendingUp, Calendar, DollarSign, Users, Scissors } from 'lucide-react'
+import { TrendingUp, Calendar, DollarSign, Users, Scissors, ChevronDown } from 'lucide-react'
+import { cn, formatCurrencyCompactMillions } from '@/lib/utils'
+import { usePreference } from '@/lib/preferences'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
@@ -76,8 +79,17 @@ export default function AnaliticasPageV2() {
 
 function AnalyticsContent() {
   const router = useRouter()
-  const [period, setPeriod] = useState<AnalyticsPeriod>('month')
-  const [activeChartTab, setActiveChartTab] = useState('revenue')
+  const [period, setPeriod] = usePreference<AnalyticsPeriod>('analytics_period', 'month', [
+    'week',
+    'month',
+    'year',
+  ])
+  const [activeChartTab, setActiveChartTab] = usePreference<string>('analytics_chart', 'revenue', [
+    'revenue',
+    'services',
+    'barbers',
+  ])
+  const [statsExpanded, setStatsExpanded] = useState(false)
   const [businessId, setBusinessId] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
@@ -190,11 +202,14 @@ function AnalyticsContent() {
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="app-page-title brand-gradient-text">Analíticas</h1>
-            <p className="app-page-subtitle mt-1">Visualiza el rendimiento de tu barbería</p>
+            <p className="app-page-subtitle mt-1 lg:hidden">
+              Visualiza el rendimiento de tu barbería
+            </p>
           </div>
 
           {/* Period Selector */}
-          <div className="flex w-full sm:w-auto items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+          <div className="relative overflow-hidden flex w-full sm:w-auto items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+            <div className="pointer-events-none absolute inset-x-3 top-0 hidden h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent lg:block" />
             {[
               { value: 'week' as AnalyticsPeriod, label: 'Semana' },
               { value: 'month' as AnalyticsPeriod, label: 'Mes' },
@@ -213,7 +228,7 @@ function AnalyticsContent() {
                   className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-all ${
                     isActive
                       ? 'brand-tab-active'
-                      : 'text-zinc-600 dark:text-zinc-400 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                      : 'text-muted border-zinc-200/70 dark:border-zinc-800/80 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                   }`}
                 >
                   {option.label}
@@ -230,15 +245,35 @@ function AnalyticsContent() {
         fallbackDescription="No pudimos cargar las métricas KPI."
         showReset
       >
-        {/* Mobile: Compact 2x2 Grid */}
-        <FadeInUp className="md:hidden">
-          <CompactKPISummary overview={analytics.overview} />
-        </FadeInUp>
+        {/* Mobile: Collapsible KPI Stats */}
+        <div className="lg:hidden">
+          <button
+            type="button"
+            onClick={() => setStatsExpanded(!statsExpanded)}
+            className="flex items-center justify-between w-full px-1 py-2"
+            aria-expanded={statsExpanded}
+          >
+            <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+              Métricas Resumen
+            </span>
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted transition-transform duration-200',
+                statsExpanded && 'rotate-180'
+              )}
+            />
+          </button>
+          <div className={cn(statsExpanded ? '' : 'hidden')}>
+            <FadeInUp>
+              <CompactKPISummary overview={analytics.overview} />
+            </FadeInUp>
+          </div>
+        </div>
 
         {/* Desktop: Full KPI Cards */}
-        <StaggeredList className="hidden md:block">
+        <StaggeredList className="hidden lg:block">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StaggeredItem index={0}>
+            <StaggeredItem key={0}>
               <div className="h-full">
                 <KPICard
                   icon={<DollarSign className="w-5 h-5" />}
@@ -248,7 +283,7 @@ function AnalyticsContent() {
                 />
               </div>
             </StaggeredItem>
-            <StaggeredItem index={1}>
+            <StaggeredItem key={1}>
               <div className="h-full">
                 <KPICard
                   icon={<Calendar className="w-5 h-5" />}
@@ -259,7 +294,7 @@ function AnalyticsContent() {
                 />
               </div>
             </StaggeredItem>
-            <StaggeredItem index={2}>
+            <StaggeredItem key={2}>
               <div className="h-full">
                 <KPICard
                   icon={<TrendingUp className="w-5 h-5" />}
@@ -269,12 +304,13 @@ function AnalyticsContent() {
                 />
               </div>
             </StaggeredItem>
-            <StaggeredItem index={3}>
+            <StaggeredItem key={3}>
               <div className="h-full">
                 <KPICard
                   icon={<Users className="w-5 h-5" />}
                   label="Tasa de Completación"
                   value={`${analytics.overview.completionRate}%`}
+                  subtitle={`${analytics.overview.completedAppointments} de ${analytics.overview.totalAppointments}`}
                   color="purple"
                 />
               </div>
@@ -288,7 +324,7 @@ function AnalyticsContent() {
         {/* Mobile: Tabbed Charts */}
         <div className="md:hidden">
           <Tabs value={activeChartTab} onValueChange={setActiveChartTab}>
-            <TabsList className="mb-4 flex w-full items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+            <TabsList className="mb-4 flex w-full items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
               <TabsTrigger
                 value="revenue"
                 icon={<TrendingUp className="h-4 w-4" />}
@@ -349,8 +385,7 @@ function AnalyticsContent() {
 // Compact KPI Summary for Mobile (2x2 grid)
 function CompactKPISummary({ overview }: { overview: OverviewMetrics }) {
   const formatCompactCurrency = (amount: number) => {
-    if (amount >= 1000) return `₡${Math.round(amount / 1000)}k`
-    return `₡${amount.toLocaleString()}`
+    return formatCurrencyCompactMillions(amount)
   }
 
   const kpis = [
@@ -430,14 +465,14 @@ function KPICard({
 
   return (
     <Card className="h-full border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <CardContent className="p-6 h-full flex items-center">
+      <CardContent className="p-4 lg:p-5 h-full flex items-center">
         <div className="flex items-start justify-between w-full">
-          <div className="flex-1 min-h-[80px] flex flex-col justify-center">
-            <p className="text-sm text-muted mb-2">{label}</p>
-            <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
-            {subtitle && <p className="text-sm text-muted mt-1">{subtitle}</p>}
+          <div className="flex-1 flex flex-col justify-center">
+            <p className="text-xs text-muted mb-1.5">{label}</p>
+            <p className="text-xl font-bold text-zinc-900 dark:text-white">{value}</p>
+            {subtitle && <p className="text-xs text-muted mt-1">{subtitle}</p>}
           </div>
-          <div className={`p-3 rounded-lg ${colorClasses[color]}`}>{icon}</div>
+          <div className={`p-2.5 rounded-lg ${colorClasses[color]}`}>{icon}</div>
         </div>
       </CardContent>
     </Card>
@@ -448,9 +483,7 @@ function KPICard({
 function ChartSkeleton() {
   return (
     <Card className="p-6 border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="h-[300px] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white" />
-      </div>
+      <Skeleton className="h-[300px]" />
     </Card>
   )
 }
@@ -458,14 +491,14 @@ function ChartSkeleton() {
 // Full Page Loading Skeleton
 function AnalyticsPageSkeleton() {
   return (
-    <div className="space-y-8 animate-pulse">
+    <div className="space-y-8">
       {/* Header Skeleton */}
       <div className="flex justify-between items-center">
-        <div>
-          <div className="h-8 w-48 bg-zinc-200 dark:bg-zinc-700 rounded" />
-          <div className="h-4 w-64 bg-zinc-200 dark:bg-zinc-700 rounded mt-2" />
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
         </div>
-        <div className="h-10 w-48 bg-zinc-200 dark:bg-zinc-700 rounded-xl" />
+        <Skeleton className="h-10 w-48 rounded-xl" />
       </div>
 
       {/* KPI Cards Skeleton */}
@@ -473,7 +506,7 @@ function AnalyticsPageSkeleton() {
         {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
             <CardContent className="p-6">
-              <div className="h-20 bg-zinc-200 dark:bg-zinc-700 rounded" />
+              <Skeleton className="h-20" />
             </CardContent>
           </Card>
         ))}

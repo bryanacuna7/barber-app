@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Search,
   X,
@@ -183,10 +184,11 @@ const SEARCHABLE_SETTINGS = [
 interface SettingsSearchModalProps {
   isOpen: boolean
   onClose: () => void
-  onNavigate: (tabId: string, settingId: string) => void
+  onNavigate?: (tabId: string, settingId: string) => void
 }
 
 export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSearchModalProps) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -226,10 +228,14 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
 
   const handleSelect = useCallback(
     (setting: (typeof SEARCHABLE_SETTINGS)[0]) => {
-      onNavigate(setting.tab, setting.id)
+      if (onNavigate) {
+        onNavigate(setting.tab, setting.id)
+      } else {
+        router.push(`/configuracion/${setting.tab}`)
+      }
       onClose()
     },
-    [onNavigate, onClose]
+    [onNavigate, onClose, router]
   )
 
   // Keyboard navigation
@@ -277,7 +283,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                 duration: 0.3,
                 ease: [0.16, 1, 0.3, 1], // Custom easing for smoother feel
               }}
-              className="w-full max-w-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.4)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.7)] border border-zinc-200/50 dark:border-zinc-700/50 overflow-hidden"
+              className="w-full max-w-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-3xl shadow-[0_24px_64px_rgba(0,0,0,0.28)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.45)] border border-zinc-200/50 dark:border-zinc-700/50 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Search Input - Enhanced */}

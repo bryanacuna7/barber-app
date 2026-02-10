@@ -31,7 +31,7 @@ const variants = {
   default:
     'bg-white/90 shadow-[0_0_0_0.5px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.04)] dark:bg-zinc-800/80 dark:border dark:border-zinc-700/50 dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]',
   elevated:
-    'bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08),0_8px_40px_rgba(0,0,0,0.04)] dark:bg-zinc-800 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]',
+    'bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08),0_8px_40px_rgba(0,0,0,0.04)] dark:bg-zinc-800 dark:shadow-[0_4px_20px_rgba(0,0,0,0.32)]',
   gradient:
     'bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/30',
   bordered: 'bg-white border-2 border-zinc-200 dark:bg-zinc-900 dark:border-zinc-700',

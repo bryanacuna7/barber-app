@@ -1,9 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion'
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  useReducedMotion,
+  PanInfo,
+} from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 interface DrawerProps {
   isOpen: boolean
@@ -28,6 +36,7 @@ export function Drawer({
 }: DrawerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const prefersReducedMotion = useReducedMotion()
   const [isDragging, setIsDragging] = useState(false)
   const y = useMotionValue(0)
   const opacity = useTransform(y, [0, 200], [1, 0.5])
@@ -110,7 +119,11 @@ export function Drawer({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{
+              duration: prefersReducedMotion
+                ? reducedMotion.spring.default.duration
+                : animations.duration.normal,
+            }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             aria-hidden="true"
           />
@@ -129,14 +142,14 @@ export function Drawer({
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            transition={prefersReducedMotion ? reducedMotion.spring.sheet : animations.spring.sheet}
             style={{
               y: isDragging ? y : 0,
               opacity,
             }}
             className={cn(
               'relative w-full bg-white dark:bg-zinc-900 rounded-t-[28px] shadow-2xl',
-              'border border-zinc-200 dark:border-zinc-800 border-b-0',
+              'border border-black/10 dark:border-zinc-800/80 border-b-0',
               'max-h-[85vh] overflow-hidden flex flex-col',
               'pb-safe', // Safe area for iOS home indicator
               className
@@ -163,8 +176,8 @@ export function Drawer({
                 </div>
                 {showCloseButton && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                     onClick={onClose}
                     className={cn(
                       'p-2 rounded-xl transition-colors duration-200',

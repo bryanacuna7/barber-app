@@ -58,6 +58,10 @@ import {
   ChevronsUpDown,
   PieChart as PieChartIcon,
   Edit,
+  Check,
+  ChevronDown,
+  Filter,
+  type LucideIcon,
 } from 'lucide-react'
 import {
   LineChart,
@@ -83,6 +87,7 @@ import type { Client } from '@/types'
 import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { usePreference } from '@/lib/preferences'
 
 // NEW: Master-detail components (currently unused - reserved for future views)
 // import { LoyaltyRing } from '@/components/clients/loyalty-ring'
@@ -100,6 +105,7 @@ import { useRealtimeClients } from '@/hooks/use-realtime-clients'
 // NEW: Error boundaries (multi-level)
 import { ComponentErrorBoundary, ClientProfileErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // NEW: Business context for authentication data
 import { useBusiness } from '@/contexts/business-context'
@@ -207,7 +213,7 @@ const segmentConfig = {
     label: 'VIP',
     color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
     icon: Crown,
-    description: '5+ visitas o ₡50k+ gastados',
+    description: '5+ visitas o ₡50,000+ gastados',
   },
   frequent: {
     label: 'Frecuente',
@@ -256,8 +262,16 @@ export default function ClientesPageV2() {
   const [selectedSegment, setSelectedSegment] = useState<ClientSegment>('all')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [, setIsMobile] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('cards')
-  const [showNotifications, setShowNotifications] = useState(true)
+  const [viewMode, setViewMode] = usePreference<ViewMode>('clientes_view', 'cards', [
+    'dashboard',
+    'cards',
+    'table',
+    'calendar',
+  ])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [viewDropdownOpen, setViewDropdownOpen] = useState(false)
+  const [segmentSheetOpen, setSegmentSheetOpen] = useState(false)
+  const [statsExpanded, setStatsExpanded] = useState(false)
   const [selectedInsight, setSelectedInsight] = useState<InsightType>('churn')
   const [sortColumn, setSortColumn] = useState<'name' | 'segment' | 'spent' | 'visits' | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
@@ -277,8 +291,7 @@ export default function ClientesPageV2() {
 
   const searchParams = useSearchParams()
   const intentHandled = useRef(false)
-  const segmentTabsRef = useRef<HTMLDivElement>(null)
-  const viewModeTabsRef = useRef<HTMLDivElement>(null)
+  const viewDropdownRef = useRef<HTMLDivElement>(null)
 
   // Auto-open create modal when navigated with ?intent=create
   useEffect(() => {
@@ -289,39 +302,25 @@ export default function ClientesPageV2() {
     }
   }, [searchParams])
 
+  // Click-outside + Escape handler for view dropdown
   useEffect(() => {
-    const container = segmentTabsRef.current
-    if (!container) return
-
-    const activeSegment = container.querySelector<HTMLButtonElement>(
-      `[data-segment-chip="${selectedSegment}"]`
-    )
-    if (!activeSegment) return
-
-    requestAnimationFrame(() => {
-      activeSegment.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      })
-    })
-  }, [selectedSegment])
-
-  useEffect(() => {
-    const container = viewModeTabsRef.current
-    if (!container) return
-
-    const activeView = container.querySelector<HTMLButtonElement>(`[data-view-chip="${viewMode}"]`)
-    if (!activeView) return
-
-    requestAnimationFrame(() => {
-      activeView.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      })
-    })
-  }, [viewMode])
+    function handleClickOutside(e: MouseEvent) {
+      if (viewDropdownRef.current && !viewDropdownRef.current.contains(e.target as Node)) {
+        setViewDropdownOpen(false)
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') setViewDropdownOpen(false)
+    }
+    if (viewDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleEscape)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [viewDropdownOpen])
 
   // Detect mobile viewport
   useEffect(() => {
@@ -332,7 +331,7 @@ export default function ClientesPageV2() {
   }, [])
 
   // NEW: React Query hooks (standardized pattern)
-  const { data: clientsData, error: queryError, refetch } = useClients(businessId)
+  const { data: clientsData, isLoading, error: queryError, refetch } = useClients(businessId)
 
   const createClient = useCreateClient()
 
@@ -580,11 +579,59 @@ export default function ClientesPageV2() {
     }
   }
 
+  const viewOptions: Array<{ mode: ViewMode; icon: LucideIcon; label: string }> = [
+    { mode: 'dashboard', icon: BarChart3, label: 'Tablero' },
+    { mode: 'cards', icon: LayoutGrid, label: 'Lista' },
+    { mode: 'table', icon: TableIcon, label: 'Tabla' },
+    { mode: 'calendar', icon: CalendarIcon, label: 'Calendario' },
+  ]
+  const currentView = viewOptions.find((v) => v.mode === viewMode) ?? viewOptions[1]
+  const CurrentViewIcon = currentView.icon
+
   // NEW: Error state
   if (queryError) {
     return (
       <div className="p-6">
         <QueryError error={queryError} title="Error al cargar clientes" onRetry={refetch} />
+      </div>
+    )
+  }
+
+  // Loading skeleton — matches client list layout
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-4 lg:p-6 space-y-6">
+        {/* Stats skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+            >
+              <Skeleton className="h-3 w-16 mb-2" />
+              <Skeleton className="h-7 w-12 mb-1" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          ))}
+        </div>
+        {/* Search bar skeleton */}
+        <Skeleton className="h-11 w-full rounded-xl" />
+        {/* Client rows skeleton */}
+        <div className="space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
+            >
+              <Skeleton className="w-11 h-11 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -598,18 +645,7 @@ export default function ClientesPageV2() {
           }}
         >
           <div className="min-h-screen relative overflow-x-hidden">
-            <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1], x: [0, 100, 0], y: [0, -50, 0] }}
-                transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -top-1/4 -left-1/4 h-1/2 w-1/2 rounded-full brand-mesh-1 blur-3xl"
-              />
-              <motion.div
-                animate={{ scale: [1, 1.3, 1], x: [0, -100, 0], y: [0, 100, 0] }}
-                transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -right-1/4 -bottom-1/4 h-1/2 w-1/2 rounded-full brand-mesh-2 blur-3xl"
-              />
-            </div>
+            {/* Mesh background removed for desktop premium — cleaner, less noise */}
 
             <div className="relative z-10 space-y-4 sm:space-y-6">
               {/* Header - Mobile optimized with gradient */}
@@ -632,107 +668,104 @@ export default function ClientesPageV2() {
                 </Button>
               </div>
 
-              {/* Stats Section - Wrapped in error boundary */}
-              <ComponentErrorBoundary
-                fallbackTitle="Error en estadísticas"
-                fallbackDescription="No se pudieron cargar las métricas de clientes"
-              >
-                <div className="-mx-4 px-4 lg:mx-0 lg:px-0">
-                  <div className="flex gap-3 overflow-x-auto pb-2 lg:pb-0 lg:grid lg:grid-cols-4 lg:gap-4 scrollbar-hide">
-                    {/* Clientes Nuevos */}
-                    <motion.div
-                      className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
-                      whileTap={{ scale: 0.98 }}
-                      transition={animations.spring.gentle}
-                    >
-                      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_8px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.32)] cursor-pointer">
-                        <div className="flex items-start justify-between mb-1.5 lg:mb-2">
-                          <div className="rounded-xl bg-green-500/15 dark:bg-green-500/25 p-2 lg:p-2.5">
-                            <UserPlus className="h-4 w-4 lg:h-5 lg:w-5 text-green-600 dark:text-green-400" />
+              <div className={`${statsExpanded ? '' : 'hidden lg:block'}`}>
+                <ComponentErrorBoundary
+                  fallbackTitle="Error en estadísticas"
+                  fallbackDescription="No se pudieron cargar las métricas de clientes"
+                >
+                  <div className="-mx-4 px-4 lg:mx-0 lg:px-0">
+                    <div className="flex gap-3 overflow-x-auto pb-2 lg:pb-0 lg:grid lg:grid-cols-4 lg:gap-4 scrollbar-hide">
+                      {/* Clientes Nuevos */}
+                      <motion.div
+                        className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
+                        whileTap={{ scale: 0.98 }}
+                        transition={animations.spring.gentle}
+                      >
+                        <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] cursor-pointer">
+                          <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent lg:block" />
+                          <div className="flex items-start justify-between mb-1.5 lg:mb-2">
+                            <div className="rounded-xl bg-green-500/15 dark:bg-green-500/25 p-2 lg:p-2.5">
+                              <UserPlus className="h-4 w-4 lg:h-5 lg:w-5 text-green-600 dark:text-green-400" />
+                            </div>
+                            <Sparkles className="h-3.5 w-3.5 lg:hidden text-green-500/40" />
                           </div>
-                          <Sparkles className="h-3.5 w-3.5 lg:h-4 lg:w-4 text-green-500/40" />
+                          <p className="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-white leading-none">
+                            {metrics.newThisMonth}
+                          </p>
+                          <p className="text-xs text-muted mt-1 lg:mt-1.5">nuevos</p>
+                          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-green-400/8 to-emerald-400/8 rounded-full blur-2xl lg:hidden" />
                         </div>
-                        <p className="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-white leading-none">
-                          {metrics.newThisMonth}
-                        </p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 lg:mt-1.5">
-                          nuevos
-                        </p>
-                        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-green-400/8 to-emerald-400/8 rounded-full blur-2xl" />
-                      </div>
-                    </motion.div>
+                      </motion.div>
 
-                    {/* Clientes Activos */}
-                    <motion.div
-                      className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
-                      whileTap={{ scale: 0.98 }}
-                      transition={animations.spring.gentle}
-                    >
-                      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_8px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.32)] cursor-pointer">
-                        <div className="flex items-start justify-between mb-1.5 lg:mb-2">
-                          <div className="rounded-xl bg-blue-500/15 dark:bg-blue-500/25 p-2 lg:p-2.5">
-                            <Users className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600 dark:text-blue-400" />
+                      {/* Clientes Activos */}
+                      <motion.div
+                        className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
+                        whileTap={{ scale: 0.98 }}
+                        transition={animations.spring.gentle}
+                      >
+                        <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] cursor-pointer">
+                          <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent lg:block" />
+                          <div className="flex items-start justify-between mb-1.5 lg:mb-2">
+                            <div className="rounded-xl bg-blue-500/15 dark:bg-blue-500/25 p-2 lg:p-2.5">
+                              <Users className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <TrendingUp className="h-3.5 w-3.5 lg:hidden text-blue-500/60" />
                           </div>
-                          <TrendingUp className="h-3.5 w-3.5 lg:h-4 lg:w-4 text-blue-500/60" />
+                          <p className="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-white leading-none">
+                            {metrics.recentActive}
+                          </p>
+                          <p className="text-xs text-muted mt-1 lg:mt-1.5">activos</p>
+                          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-blue-400/8 to-indigo-400/8 rounded-full blur-2xl lg:hidden" />
                         </div>
-                        <p className="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-white leading-none">
-                          {metrics.recentActive}
-                        </p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 lg:mt-1.5">
-                          activos
-                        </p>
-                        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-blue-400/8 to-indigo-400/8 rounded-full blur-2xl" />
-                      </div>
-                    </motion.div>
+                      </motion.div>
 
-                    {/* Ingresos Totales */}
-                    <motion.div
-                      className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
-                      whileTap={{ scale: 0.98 }}
-                      transition={animations.spring.gentle}
-                    >
-                      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_8px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.32)] cursor-pointer">
-                        <div className="flex items-start justify-between mb-1.5 lg:mb-2">
-                          <div className="rounded-xl bg-emerald-500/15 dark:bg-emerald-500/25 p-2 lg:p-2.5">
-                            <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 dark:text-emerald-400" />
+                      {/* Ingresos Totales */}
+                      <motion.div
+                        className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
+                        whileTap={{ scale: 0.98 }}
+                        transition={animations.spring.gentle}
+                      >
+                        <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] cursor-pointer">
+                          <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent lg:block" />
+                          <div className="flex items-start justify-between mb-1.5 lg:mb-2">
+                            <div className="rounded-xl bg-emerald-500/15 dark:bg-emerald-500/25 p-2 lg:p-2.5">
+                              <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <TrendingUp className="h-3.5 w-3.5 lg:hidden text-emerald-500/60" />
                           </div>
-                          <TrendingUp className="h-3.5 w-3.5 lg:h-4 lg:w-4 text-emerald-500/60" />
+                          <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-white leading-none truncate">
+                            {formatCurrencyCompact(metrics.totalRevenue)}
+                          </p>
+                          <p className="text-xs text-muted mt-1 lg:mt-1.5">ingresos</p>
+                          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-emerald-400/8 to-teal-400/8 rounded-full blur-2xl lg:hidden" />
                         </div>
-                        <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-white leading-none truncate">
-                          {formatCurrencyCompact(metrics.totalRevenue)}
-                        </p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 lg:mt-1.5">
-                          ingresos
-                        </p>
-                        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-emerald-400/8 to-teal-400/8 rounded-full blur-2xl" />
-                      </div>
-                    </motion.div>
+                      </motion.div>
 
-                    {/* Valor Promedio */}
-                    <motion.div
-                      className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
-                      whileTap={{ scale: 0.98 }}
-                      transition={animations.spring.gentle}
-                    >
-                      <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_8px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.32)] cursor-pointer">
-                        <div className="flex items-start justify-between mb-1.5 lg:mb-2">
-                          <div className="rounded-xl bg-purple-500/15 dark:bg-purple-500/25 p-2 lg:p-2.5">
-                            <Activity className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600 dark:text-purple-400" />
+                      {/* Valor Promedio */}
+                      <motion.div
+                        className="shrink-0 min-w-[140px] flex-shrink-0 lg:min-w-0"
+                        whileTap={{ scale: 0.98 }}
+                        transition={animations.spring.gentle}
+                      >
+                        <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] px-3 py-3 lg:px-4 lg:py-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] cursor-pointer">
+                          <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent lg:block" />
+                          <div className="flex items-start justify-between mb-1.5 lg:mb-2">
+                            <div className="rounded-xl bg-purple-500/15 dark:bg-purple-500/25 p-2 lg:p-2.5">
+                              <Activity className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600 dark:text-purple-400" />
+                            </div>
+                            <Target className="h-3.5 w-3.5 lg:hidden text-purple-500/40" />
                           </div>
-                          <Target className="h-3.5 w-3.5 lg:h-4 lg:w-4 text-purple-500/40" />
+                          <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-white leading-none truncate">
+                            {formatCurrencyCompact(metrics.avgValue)}
+                          </p>
+                          <p className="text-xs text-muted mt-1 lg:mt-1.5">promedio</p>
+                          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-purple-400/8 to-violet-400/8 rounded-full blur-2xl lg:hidden" />
                         </div>
-                        <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-white leading-none truncate">
-                          {formatCurrencyCompact(metrics.avgValue)}
-                        </p>
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 lg:mt-1.5">
-                          promedio
-                        </p>
-                        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-gradient-to-br from-purple-400/8 to-violet-400/8 rounded-full blur-2xl" />
-                      </div>
-                    </motion.div>
+                      </motion.div>
+                    </div>
                   </div>
-                </div>
-              </ComponentErrorBoundary>
+                </ComponentErrorBoundary>
+              </div>
 
               {/* Smart Notifications Banner (from demo Fusion) */}
               <AnimatePresence>
@@ -743,7 +776,7 @@ export default function ClientesPageV2() {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="rounded-2xl border border-zinc-200/75 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/85 p-4 shadow-[0_8px_24px_rgba(0,0,0,0.1)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                    <div className="rounded-2xl border border-zinc-200/75 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/85 p-4 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <Bell className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -754,12 +787,13 @@ export default function ClientesPageV2() {
                             {notifications.length}
                           </span>
                         </div>
-                        <button
+                        <Button
+                          variant="ghost"
                           onClick={() => setShowNotifications(false)}
-                          className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                          className="text-muted hover:text-zinc-900 dark:hover:text-white h-auto p-0"
                         >
                           <X className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         {notifications.slice(0, 3).map((client) => {
@@ -807,7 +841,8 @@ export default function ClientesPageV2() {
                 )}
               </AnimatePresence>
 
-              <div className="space-y-3 sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-white/10 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_8px_24px_rgba(0,0,0,0.1)] sm:dark:shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
+              {/* Toolbar: Search + Controls */}
+              <div className="space-y-3 sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-zinc-800/80 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] sm:dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)]">
                 {/* Search */}
                 <Input
                   type="text"
@@ -815,72 +850,142 @@ export default function ClientesPageV2() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   leftIcon={<Search className="h-4 w-4" />}
-                  className="h-11 border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] text-sm focus:ring-violet-400/45 focus:border-violet-400/45 backdrop-blur-xl"
+                  className="h-11 border border-zinc-200/70 dark:border-zinc-800/80 bg-white/65 dark:bg-white/[0.04] text-sm focus:ring-violet-400/45 focus:border-violet-400/45 backdrop-blur-xl"
                 />
 
-                {/* View Mode Tabs + Segment Filters (SAME LINE like demo) */}
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  {/* View Mode Switcher - LEFT */}
-                  <div
-                    ref={viewModeTabsRef}
-                    className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl"
-                  >
-                    {[
-                      {
-                        mode: 'dashboard' as ViewMode,
-                        icon: BarChart3,
-                        label: 'Tablero',
-                        mobile: true,
-                      },
-                      { mode: 'cards' as ViewMode, icon: LayoutGrid, label: 'Lista', mobile: true },
-                      { mode: 'table' as ViewMode, icon: TableIcon, label: 'Tabla', mobile: true },
-                      {
-                        mode: 'calendar' as ViewMode,
-                        icon: CalendarIcon,
-                        label: 'Calendario',
-                        mobile: true,
-                      },
-                    ].map(({ mode, icon: Icon, label, mobile }) => (
+                {/* Controls row: View selector + Filtros button */}
+                <div className="flex items-center gap-2">
+                  {/* Mobile/tablet: Vistas dropdown */}
+                  <div ref={viewDropdownRef} className="relative lg:hidden">
+                    <button
+                      onClick={() => {
+                        setViewDropdownOpen(!viewDropdownOpen)
+                        if (isMobileDevice()) haptics.selection()
+                      }}
+                      aria-haspopup="true"
+                      aria-expanded={viewDropdownOpen}
+                      className="h-10 px-3 flex items-center gap-2 text-sm font-medium text-muted border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] rounded-xl hover:bg-zinc-100/80 dark:hover:bg-white/10 transition-colors"
+                    >
+                      <CurrentViewIcon className="h-4 w-4" />
+                      <span className="hidden sm:inline">{currentView.label}</span>
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform duration-200 ${viewDropdownOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                    <AnimatePresence>
+                      {viewDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: animations.duration.fast }}
+                          className="absolute top-full left-0 mt-1.5 w-48 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-xl z-50 p-1.5 space-y-0.5"
+                        >
+                          {viewOptions.map(({ mode, icon: Icon, label }) => (
+                            <button
+                              key={mode}
+                              onClick={() => {
+                                setViewMode(mode)
+                                setViewDropdownOpen(false)
+                                if (isMobileDevice()) haptics.selection()
+                              }}
+                              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
+                                viewMode === mode
+                                  ? 'brand-tab-active'
+                                  : 'text-muted hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                              }`}
+                            >
+                              <Icon className="h-4 w-4" />
+                              {label}
+                              {viewMode === mode && <Check className="h-4 w-4 ml-auto" />}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Desktop: segmented visible view selector */}
+                  <div className="hidden lg:flex items-center gap-1 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1">
+                    {viewOptions.map(({ mode, icon: Icon, label }) => (
                       <button
                         key={mode}
-                        onClick={() => {
-                          setViewMode(mode)
-                          if (isMobileDevice()) haptics.selection()
-                        }}
-                        data-view-chip={mode}
-                        className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
-                          !mobile ? 'hidden lg:flex' : ''
-                        } ${
+                        onClick={() => setViewMode(mode)}
+                        className={`h-8 px-2.5 flex items-center gap-1.5 rounded-lg text-xs font-medium transition-colors ${
                           viewMode === mode
-                            ? 'brand-tab-active border'
-                            : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                            ? 'brand-tab-active'
+                            : 'text-muted hover:bg-zinc-100/80 dark:hover:bg-white/10'
                         }`}
+                        aria-pressed={viewMode === mode}
+                        aria-label={`Ver ${label.toLowerCase()}`}
                       >
-                        <Icon className="h-4 w-4" />
-                        <span className="inline">{label}</span>
+                        <Icon className="h-3.5 w-3.5" />
+                        <span>{label}</span>
                       </button>
                     ))}
                   </div>
 
-                  {/* Segment Filters - RIGHT (same line as tabs like demo) */}
-                  <div
-                    ref={segmentTabsRef}
-                    className="flex items-center gap-2 overflow-x-auto scrollbar-hide"
+                  {/* Filtros button */}
+                  <button
+                    onClick={() => {
+                      setSegmentSheetOpen(true)
+                      if (isMobileDevice()) haptics.selection()
+                    }}
+                    className="h-10 px-3 flex items-center gap-2 text-sm font-medium text-muted border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] rounded-xl hover:bg-zinc-100/80 dark:hover:bg-white/10 transition-colors"
                   >
+                    <Filter className="h-4 w-4" />
+                    <span className="hidden sm:inline">Filtros</span>
+                    {selectedSegment !== 'all' && (
+                      <span className="bg-[var(--brand-primary)] text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        1
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Stats toggle - below controls, secondary action */}
+                <button
+                  onClick={() => setStatsExpanded(!statsExpanded)}
+                  className="lg:hidden flex items-center gap-2 px-1 py-1 text-xs text-muted"
+                >
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-200 ${statsExpanded ? 'rotate-180' : ''}`}
+                  />
+                  <span>{statsExpanded ? 'Ocultar estadísticas' : 'Ver estadísticas'}</span>
+                </button>
+              </div>
+
+              {/* Segment Filter Sheet */}
+              <Sheet open={segmentSheetOpen} onOpenChange={setSegmentSheetOpen}>
+                <SheetContent side="bottom" centered>
+                  <SheetClose onClose={() => setSegmentSheetOpen(false)} />
+                  <SheetHeader>
+                    <SheetTitle>Filtrar por Segmento</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-4 space-y-1">
+                    {/* "Todos" option */}
                     <button
                       onClick={() => {
                         setSelectedSegment('all')
+                        setSegmentSheetOpen(false)
                         if (isMobileDevice()) haptics.selection()
                       }}
-                      data-segment-chip="all"
-                      className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 ${
+                      className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl min-h-[44px] transition-colors ${
                         selectedSegment === 'all'
-                          ? 'brand-tab-active border'
-                          : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                          ? 'bg-zinc-100 dark:bg-zinc-800'
+                          : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                       }`}
                     >
-                      Todos ({metrics.total})
+                      <Users className="h-5 w-5 text-zinc-500" />
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-zinc-900 dark:text-white">Todos</p>
+                        <p className="text-xs text-muted">{metrics.total} clientes</p>
+                      </div>
+                      {selectedSegment === 'all' && (
+                        <Check className="h-4 w-4 text-[var(--brand-primary)]" />
+                      )}
                     </button>
+                    {/* Segment options */}
                     {(Object.keys(segmentConfig) as Array<keyof typeof segmentConfig>).map(
                       (segment) => {
                         const config = segmentConfig[segment]
@@ -891,24 +996,34 @@ export default function ClientesPageV2() {
                             key={segment}
                             onClick={() => {
                               setSelectedSegment(segment)
+                              setSegmentSheetOpen(false)
                               if (isMobileDevice()) haptics.selection()
                             }}
-                            data-segment-chip={segment}
-                            className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 sm:gap-1.5 border shrink-0 ${
+                            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl min-h-[44px] transition-colors ${
                               selectedSegment === segment
-                                ? 'brand-tab-active border'
-                                : 'text-zinc-600 dark:text-zinc-400 border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                                ? 'bg-zinc-100 dark:bg-zinc-800'
+                                : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                             }`}
                           >
-                            <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                            {config.label} ({count})
+                            <Icon className="h-5 w-5 text-zinc-500" />
+                            <div className="flex-1 text-left">
+                              <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                                {config.label}
+                              </p>
+                              <p className="text-xs text-muted">
+                                {config.description} ({count})
+                              </p>
+                            </div>
+                            {selectedSegment === segment && (
+                              <Check className="h-4 w-4 text-[var(--brand-primary)]" />
+                            )}
                           </button>
                         )
                       }
                     )}
                   </div>
-                </div>
-              </div>
+                </SheetContent>
+              </Sheet>
 
               {/* Client List - Wrapped in error boundary */}
               <AnimatePresence mode="wait">
@@ -919,14 +1034,13 @@ export default function ClientesPageV2() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+                    className={`grid grid-cols-1 gap-6 ${selectedCardClient ? 'lg:grid-cols-5' : 'lg:grid-cols-1'}`}
                   >
-                    {/* Left: Compact client list (demo-accurate) */}
-                    <div className="lg:col-span-1 space-y-3">
-                      <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
-                        Clientes ({filteredClients.length})
-                      </h3>
-                      <div className="space-y-3 max-h-[calc(100vh-24rem)] overflow-y-auto lg:pr-2 scrollbar-thin">
+                    {/* Left: Compact client list */}
+                    <div
+                      className={`space-y-2 ${selectedCardClient ? 'lg:col-span-2' : 'lg:col-span-1'}`}
+                    >
+                      <div className="space-y-2 max-h-[calc(100vh-24rem)] overflow-y-auto lg:pr-2 scrollbar-thin">
                         {filteredClients.map((client) => {
                           const segment = getClientSegment(client)
                           const tier = getSpendingTier(client)
@@ -1122,143 +1236,51 @@ export default function ClientesPageV2() {
                                   </div>
                                 </motion.button>
                               </SwipeableRow>
-                              {/* Desktop: regular card without swipe */}
+                              {/* Desktop: compact card without swipe — single loyalty indicator */}
                               <motion.button
                                 onClick={() => {
                                   setSelectedCardClient(client)
-                                  setIsMobileDetailOpen(true)
                                 }}
                                 whileTap={{ scale: 0.98 }}
                                 transition={animations.spring.snappy}
-                                className={`relative w-full text-left rounded-2xl p-4 transition-all border-2 hidden lg:block ${
+                                className={`group/card relative w-full text-left rounded-xl p-3 transition-all border hidden lg:flex items-center gap-3 ${
                                   isSelected
-                                    ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-950 dark:border-blue-500 dark:shadow-lg'
-                                    : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-900 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
+                                    ? 'bg-zinc-100 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-600'
+                                    : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                                 }`}
                               >
-                                {/* Loyalty ring - desktop (full SVG) */}
-                                <div className="absolute top-3 right-3">
-                                  <div className="relative w-12 h-12">
-                                    <svg className="w-12 h-12 transform -rotate-90">
-                                      <circle
-                                        cx="24"
-                                        cy="24"
-                                        r="20"
-                                        stroke="currentColor"
-                                        strokeWidth="3"
-                                        fill="none"
-                                        className="text-zinc-700 dark:text-zinc-600"
-                                      />
-                                      <circle
-                                        cx="24"
-                                        cy="24"
-                                        r="20"
-                                        stroke="currentColor"
-                                        strokeWidth="3"
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        className={`transition-all duration-700 ${
-                                          loyalty >= 80
-                                            ? 'text-green-500'
-                                            : loyalty >= 50
-                                              ? 'text-blue-500'
-                                              : loyalty >= 30
-                                                ? 'text-amber-500'
-                                                : 'text-zinc-500'
-                                        }`}
-                                        style={{
-                                          strokeDasharray: `${2 * Math.PI * 20}`,
-                                          strokeDashoffset: `${2 * Math.PI * 20 * (1 - loyalty / 100)}`,
-                                        }}
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <span className="text-[11px] font-bold text-zinc-700 dark:text-white">
-                                        {Math.round(loyalty)}%
-                                      </span>
-                                    </div>
+                                {/* Avatar */}
+                                <div className="relative shrink-0">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300">
+                                    {client.name.charAt(0).toUpperCase()}
                                   </div>
+                                  {segment === 'vip' && (
+                                    <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-amber-500 p-0.5">
+                                      <Crown className="h-2.5 w-2.5 text-white" />
+                                    </div>
+                                  )}
                                 </div>
 
-                                {/* Content */}
-                                <div className="pr-14">
-                                  {/* Avatar + Name + VIP badge */}
-                                  <div className="flex items-start gap-3 mb-3">
-                                    <div className="relative shrink-0">
-                                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 dark:from-zinc-600 dark:to-zinc-700 text-lg font-bold text-white">
-                                        {client.name.charAt(0).toUpperCase()}
-                                      </div>
-                                      {segment === 'vip' && (
-                                        <div className="absolute -bottom-1 -right-1 rounded-full bg-amber-500 p-1">
-                                          <Crown className="h-3 w-3 text-white" />
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <p className="font-bold text-base text-zinc-900 dark:text-white truncate">
-                                          {client.name}
-                                        </p>
-                                        {segment === 'vip' && (
-                                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                                            <Crown className="h-2.5 w-2.5" />
-                                            VIP
-                                          </span>
-                                        )}
-                                      </div>
-                                      {/* Engagement badge */}
-                                      <div className="flex items-center gap-1">
-                                        <div className="flex gap-[2px]">
-                                          {Array.from({
-                                            length: Math.min(Math.ceil(loyalty / 25), 4),
-                                          }).map((_, i) => (
-                                            <div
-                                              key={i}
-                                              className="w-1 h-3 rounded-full bg-green-500"
-                                            />
-                                          ))}
-                                          {Array.from({
-                                            length: Math.max(0, 4 - Math.ceil(loyalty / 25)),
-                                          }).map((_, i) => (
-                                            <div
-                                              key={i}
-                                              className="w-1 h-3 rounded-full bg-zinc-300 dark:bg-zinc-700"
-                                            />
-                                          ))}
-                                        </div>
-                                        <span className="text-xs text-muted">
-                                          {loyalty}% engagement
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Metrics row */}
-                                  <div className="grid grid-cols-2 gap-2 mb-2">
-                                    <div>
-                                      <p className="text-xs text-muted mb-0.5">Gastado</p>
-                                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                        {formatCurrencyCompact(Number(client.total_spent || 0))}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-xs text-muted mb-0.5">Visitas</p>
-                                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                        {client.total_visits || 0}
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  {/* Spending tier badge */}
-                                  <div className="flex items-center gap-1.5">
-                                    <Award className="h-3.5 w-3.5 text-muted" />
-                                    <span
-                                      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tierColors[tier]}`}
-                                    >
-                                      {tierLabels[tier]}
-                                    </span>
-                                  </div>
+                                {/* Name + segment */}
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-medium text-sm text-zinc-900 dark:text-white truncate">
+                                    {client.name}
+                                  </p>
+                                  <p className="text-xs text-muted">
+                                    {client.total_visits || 0} visitas ·{' '}
+                                    {formatCurrencyCompact(Number(client.total_spent || 0))}
+                                  </p>
                                 </div>
+
+                                {/* Segment badge */}
+                                <span
+                                  className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border ${segmentConfig[segment].color}`}
+                                >
+                                  {segmentConfig[segment].label}
+                                </span>
+
+                                {/* Chevron on hover */}
+                                <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity" />
                               </motion.button>
                             </Fragment>
                           )
@@ -1266,8 +1288,8 @@ export default function ClientesPageV2() {
                       </div>
                     </div>
 
-                    {/* Right: Detail panel - Desktop only */}
-                    <div className="hidden lg:block lg:col-span-2">
+                    {/* Right: Detail panel - Desktop only, only visible when client selected */}
+                    <div className={`hidden ${selectedCardClient ? 'lg:block lg:col-span-3' : ''}`}>
                       {selectedCardClient ? (
                         <motion.div
                           key={selectedCardClient.id}
@@ -1472,14 +1494,7 @@ export default function ClientesPageV2() {
                             </div>
                           )}
                         </motion.div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full min-h-[400px] rounded-2xl bg-zinc-50 dark:bg-zinc-900 border-2 border-dashed border-zinc-300 dark:border-zinc-700">
-                          <div className="text-center">
-                            <User className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-600 mb-3" />
-                            <p className="text-muted">Selecciona un cliente para ver detalles</p>
-                          </div>
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   </motion.div>
                 )}
@@ -1606,9 +1621,7 @@ export default function ClientesPageV2() {
                                   className="h-2 w-2 rounded-full ring-2 ring-white dark:ring-zinc-900"
                                   style={{ backgroundColor: item.color }}
                                 />
-                                <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                                  {item.name}
-                                </span>
+                                <span className="text-xs font-medium text-muted">{item.name}</span>
                               </div>
                               <span className="text-xs font-bold text-zinc-900 dark:text-white">
                                 {item.value}
@@ -1823,9 +1836,10 @@ export default function ClientesPageV2() {
                         <thead className="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
                           <tr>
                             <th className="px-4 py-3 text-left">
-                              <button
+                              <Button
+                                variant="ghost"
                                 onClick={() => handleSort('name')}
-                                className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                                className="flex items-center gap-2 text-xs font-semibold text-muted hover:text-zinc-900 dark:hover:text-white h-auto p-0"
                               >
                                 Cliente
                                 <SortIndicator
@@ -1833,12 +1847,13 @@ export default function ClientesPageV2() {
                                   sortColumn={sortColumn}
                                   sortDirection={sortDirection}
                                 />
-                              </button>
+                              </Button>
                             </th>
                             <th className="px-4 py-3 text-left">
-                              <button
+                              <Button
+                                variant="ghost"
                                 onClick={() => handleSort('segment')}
-                                className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                                className="flex items-center gap-2 text-xs font-semibold text-muted hover:text-zinc-900 dark:hover:text-white h-auto p-0"
                               >
                                 Segmento
                                 <SortIndicator
@@ -1846,12 +1861,13 @@ export default function ClientesPageV2() {
                                   sortColumn={sortColumn}
                                   sortDirection={sortDirection}
                                 />
-                              </button>
+                              </Button>
                             </th>
                             <th className="px-4 py-3 text-right">
-                              <button
+                              <Button
+                                variant="ghost"
                                 onClick={() => handleSort('spent')}
-                                className="flex items-center justify-end gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors ml-auto"
+                                className="flex items-center justify-end gap-2 text-xs font-semibold text-muted hover:text-zinc-900 dark:hover:text-white ml-auto h-auto p-0"
                               >
                                 Gastado
                                 <SortIndicator
@@ -1859,12 +1875,13 @@ export default function ClientesPageV2() {
                                   sortColumn={sortColumn}
                                   sortDirection={sortDirection}
                                 />
-                              </button>
+                              </Button>
                             </th>
                             <th className="px-4 py-3 text-right">
-                              <button
+                              <Button
+                                variant="ghost"
                                 onClick={() => handleSort('visits')}
-                                className="flex items-center justify-end gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors ml-auto"
+                                className="flex items-center justify-end gap-2 text-xs font-semibold text-muted hover:text-zinc-900 dark:hover:text-white ml-auto h-auto p-0"
                               >
                                 Visitas
                                 <SortIndicator
@@ -1872,10 +1889,10 @@ export default function ClientesPageV2() {
                                   sortColumn={sortColumn}
                                   sortDirection={sortDirection}
                                 />
-                              </button>
+                              </Button>
                             </th>
-                            <th className="px-4 py-3 text-center text-xs font-semibold text-zinc-600 dark:text-zinc-400">
-                              Acciones
+                            <th className="px-4 py-3 text-center text-xs font-semibold text-muted">
+                              <span className="sr-only">Acciones</span>
                             </th>
                           </tr>
                         </thead>
@@ -1888,7 +1905,7 @@ export default function ClientesPageV2() {
                             return (
                               <tr
                                 key={client.id}
-                                className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                                className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                               >
                                 <td className="px-4 py-3">
                                   <div className="flex items-center gap-3">
@@ -1922,19 +1939,20 @@ export default function ClientesPageV2() {
                                   </p>
                                 </td>
                                 <td className="px-4 py-3">
-                                  <div className="flex items-center justify-center gap-1">
+                                  <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                                     <button
                                       onClick={() => handleWhatsApp(client.phone)}
                                       className="rounded-lg p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                                     >
                                       <MessageCircle className="h-4 w-4" />
                                     </button>
-                                    <button
+                                    <Button
+                                      variant="ghost"
                                       onClick={() => setSelectedClient(client)}
-                                      className="rounded-lg p-1.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                      className="rounded-lg p-1.5 text-muted hover:bg-zinc-100 dark:hover:bg-zinc-800 h-auto"
                                     >
                                       <User className="h-4 w-4" />
-                                    </button>
+                                    </Button>
                                   </div>
                                 </td>
                               </tr>
@@ -1969,7 +1987,7 @@ export default function ClientesPageV2() {
                           }}
                           className="rounded-lg p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                         >
-                          <ChevronRight className="h-5 w-5 rotate-180 text-zinc-600 dark:text-zinc-400" />
+                          <ChevronRight className="h-5 w-5 rotate-180 text-muted" />
                         </button>
                         <span className="text-lg font-semibold text-zinc-900 dark:text-white px-4">
                           {format(currentMonth, 'MMMM yyyy', { locale: es })}
@@ -1982,7 +2000,7 @@ export default function ClientesPageV2() {
                           }}
                           className="rounded-lg p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                         >
-                          <ChevronRight className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
+                          <ChevronRight className="h-5 w-5 text-muted" />
                         </button>
                       </div>
                     </div>
@@ -2076,7 +2094,7 @@ export default function ClientesPageV2() {
                       </div>
 
                       {/* Stats for current month */}
-                      <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <div className="text-sm text-muted">
                         {
                           clients.filter((c) => {
                             if (!c.last_visit_at) return false
@@ -2226,12 +2244,13 @@ export default function ClientesPageV2() {
                       <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
                         Nuevo Cliente
                       </h2>
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() => setShowModal(false)}
-                        className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        className="rounded-lg p-2 text-muted hover:bg-zinc-100 dark:hover:bg-zinc-800 h-auto"
                       >
                         <X className="h-5 w-5" />
-                      </button>
+                      </Button>
                     </div>
 
                     <ComponentErrorBoundary
@@ -2340,12 +2359,13 @@ export default function ClientesPageV2() {
                           </span>
                         </div>
                       </div>
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() => setSelectedClient(null)}
-                        className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        className="rounded-lg p-2 text-muted hover:bg-zinc-100 dark:hover:bg-zinc-800 h-auto"
                       >
                         <X className="h-5 w-5" />
-                      </button>
+                      </Button>
                     </div>
 
                     {/* Client Profile Content - Wrapped with specialized error boundary */}

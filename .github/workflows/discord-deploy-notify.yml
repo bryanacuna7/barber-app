@@ -3,6 +3,8 @@ name: Discord Deploy Notification
 on:
   push:
     branches: [main]
+    paths:
+      - 'RELEASE_NOTES.md'
 
 jobs:
   notify:
@@ -14,50 +16,59 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Parse release notes
-        id: notes
-        run: |
-          # Extract version from RELEASE_NOTES.md (first ## line)
-          VERSION=$(grep -m1 '^## ' RELEASE_NOTES.md | sed 's/^## //')
-
-          # Extract sections and format for Discord
-          # Read everything after the first ## line
-          BODY=$(awk '/^## /{if(found) exit; found=1; next} found' RELEASE_NOTES.md)
-
-          # Format sections with Discord markdown
-          # Convert ### headers to bold, keep bullet points
-          FORMATTED=$(echo "$BODY" | sed '/^<!--/,/-->/d' | sed '/^$/N;/^\n$/d' | sed 's/^### \(.*\)/**\1**/' | head -30)
-
-          # Escape for JSON
-          FORMATTED_JSON=$(echo "$FORMATTED" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read().strip()))')
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "body=$FORMATTED_JSON" >> $GITHUB_OUTPUT
-          echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" >> $GITHUB_OUTPUT
-
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          VERSION="${{ steps.notes.outputs.version }}"
-          BODY=${{ steps.notes.outputs.body }}
-          TIMESTAMP="${{ steps.notes.outputs.timestamp }}"
+          # Extract version from RELEASE_NOTES.md
+          VERSION=$(grep -m1 '^## ' RELEASE_NOTES.md | sed 's/^## //')
 
-          # Build the JSON payload
-          cat > /tmp/payload.json << PAYLOAD
-          {
-            "embeds": [{
-              "title": "📲 BarberApp — $VERSION",
-              "description": $BODY,
-              "color": 5025616,
-              "footer": {
-                "text": "BarberApp Updates"
-              },
-              "timestamp": "$TIMESTAMP"
-            }]
+          # Extract body: everything after the first ## line until EOF
+          BODY=$(awk '/^## /{if(found) exit; found=1; next} found' RELEASE_NOTES.md)
+
+          # Format: remove HTML comments, convert ### to bold
+          FORMATTED=$(echo "$BODY" \
+            | sed '/^<!--/,/-->/d' \
+            | sed 's/^### \(.*\)/**\1**/' \
+            | sed '/^$/N;/^\n$/d')
+
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+
+          # Build JSON payload using python3 for safe escaping
+          python3 -c "
+          import json, sys
+
+          description = sys.stdin.read().strip()
+          version = '$VERSION'
+          timestamp = '$TIMESTAMP'
+
+          payload = {
+              'embeds': [{
+                  'title': f'\U0001f4f2 BarberApp — {version}',
+                  'description': description,
+                  'color': 5025616,
+                  'footer': {'text': 'BarberApp Updates'},
+                  'timestamp': timestamp
+              }]
           }
-          PAYLOAD
 
-          curl -s -H "Content-Type: application/json" \
+          print(json.dumps(payload, ensure_ascii=False))
+          " <<< "$FORMATTED" > /tmp/payload.json
+
+          # Send to Discord
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Content-Type: application/json" \
             -d @/tmp/payload.json \
-            "$DISCORD_WEBHOOK"
+            "$DISCORD_WEBHOOK")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY_RESP=$(echo "$RESPONSE" | head -n -1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY_RESP"
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Discord notification failed with status $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "Discord notification sent successfully"

@@ -22,12 +22,16 @@ export function formatRelative(date: Date | string): string {
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('es-CR', {
-    style: 'currency',
-    currency: 'CRC',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
+  return `₡${Math.round(amount).toLocaleString('en-US')}`
+}
+
+export function formatCurrencyCompactMillions(amount: number): string {
+  if (Math.abs(amount) < 1000000) {
+    return formatCurrency(amount)
+  }
+
+  const millions = amount / 1000000
+  return `₡${millions.toFixed(1)}M`
 }
 
 export function formatCurrencyCompactMillions(amount: number): string {
@@ -40,16 +44,7 @@ export function formatCurrencyCompactMillions(amount: number): string {
 }
 
 export function formatCurrencyCompact(amount: number): string {
-  if (amount >= 1000000) {
-    return `₡${(amount / 1000000).toFixed(1)}M`
-  }
-  if (amount >= 100000) {
-    return `₡${Math.round(amount / 1000)}k`
-  }
-  if (amount >= 10000) {
-    return `₡${(amount / 1000).toFixed(1)}k`
-  }
-  return `₡${amount.toLocaleString('es-CR')}`
+  return formatCurrencyCompactMillions(amount)
 }
 
 export function formatPhone(phone: string): string {

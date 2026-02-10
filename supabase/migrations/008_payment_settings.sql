@@ -15,7 +15,7 @@ VALUES (
   'sinpe_details',
   '{
     "phone_number": "8888-8888",
-    "account_name": "BarberShop Pro",
+    "account_name": "BarberApp",
     "notes": "Realiza el SINPE Móvil al número indicado y sube el comprobante"
   }'::jsonb
 ) ON CONFLICT (key) DO NOTHING;

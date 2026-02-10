@@ -1,6 +1,6 @@
-# BarberShop Pro
+# BarberApp
 
-BarberShop Pro is a web app for barbershops to manage appointments, clients, services, and staff, and to offer a branded online booking experience to customers.
+BarberApp is a web app for barbershops to manage appointments, clients, services, and staff, and to offer a branded online booking experience to customers.
 
 ## What the app does
 

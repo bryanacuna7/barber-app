@@ -165,7 +165,7 @@ export default function AdminBusinessDetailPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{business.name}</h1>
+              <h1 className="app-page-title">{business.name}</h1>
               <span
                 className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                   business.is_active

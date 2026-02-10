@@ -9,9 +9,14 @@ import type { TodayAppointment } from '@/types/custom'
 interface MiDiaTimelineProps {
   appointments: TodayAppointment[]
   onCheckIn?: (appointmentId: string) => void
-  onComplete?: (appointmentId: string) => void
+  onComplete?: (appointmentId: string, paymentMethod?: 'cash' | 'sinpe' | 'card') => void
   onNoShow?: (appointmentId: string) => void
   loadingAppointmentId?: string | null
+  acceptedPaymentMethods?: ('cash' | 'sinpe' | 'card')[]
+  /** Barber name for WhatsApp message templates */
+  barberName?: string
+  /** Business name for WhatsApp message templates */
+  businessName?: string
   className?: string
 }
 
@@ -25,6 +30,9 @@ export function MiDiaTimeline({
   onComplete,
   onNoShow,
   loadingAppointmentId,
+  acceptedPaymentMethods,
+  barberName,
+  businessName,
   className,
 }: MiDiaTimelineProps) {
   const now = new Date()
@@ -78,7 +86,7 @@ export function MiDiaTimeline({
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">
           No hay citas hoy
         </h3>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center max-w-sm">
+        <p className="text-sm text-muted text-center max-w-sm">
           No tienes citas programadas para hoy. Disfruta tu día libre o espera nuevas reservas.
         </p>
       </motion.div>
@@ -152,6 +160,19 @@ export function MiDiaTimeline({
                 onComplete={onComplete}
                 onNoShow={onNoShow}
                 isLoading={loadingAppointmentId === appointment.id}
+                acceptedPaymentMethods={acceptedPaymentMethods}
+                nextAppointment={
+                  sortedAppointments
+                    .slice(index + 1)
+                    .find(
+                      (a) =>
+                        a.status !== 'completed' &&
+                        a.status !== 'cancelled' &&
+                        a.status !== 'no_show'
+                    ) ?? null
+                }
+                barberName={barberName}
+                businessName={businessName}
               />
             </motion.div>
           ))}

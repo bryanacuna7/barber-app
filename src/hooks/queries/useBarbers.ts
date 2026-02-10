@@ -8,6 +8,9 @@ import { createClient } from '@/lib/supabase/client'
 import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptBarbers } from '@/lib/adapters/barbers'
 
+const BARBER_SELECT =
+  'id, name, email, user_id, business_id, is_active, bio, photo_url, display_order, created_at, updated_at'
+
 export function useBarbers(businessId: string) {
   return useQuery({
     queryKey: queryKeys.barbers.list(businessId),
@@ -15,14 +18,12 @@ export function useBarbers(businessId: string) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('barbers')
-        .select(
-          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
-        )
+        .select(BARBER_SELECT)
         .eq('business_id', businessId)
         .order('name', { ascending: true })
 
       if (error) throw error
-      return adaptBarbers(data || [])
+      return adaptBarbers((data as any) || [])
     },
     enabled: !!businessId,
   })
@@ -34,8 +35,7 @@ export function useCreateBarber() {
   return useMutation({
     mutationFn: async (barber: {
       name: string
-      email: string // Required by Supabase schema
-      phone?: string
+      email: string
       user_id?: string
       business_id: string
       is_active?: boolean
@@ -44,9 +44,7 @@ export function useCreateBarber() {
       const { data, error } = await supabase
         .from('barbers')
         .insert(barber)
-        .select(
-          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
-        )
+        .select(BARBER_SELECT)
         .single()
       if (error) throw error
       return data
@@ -65,9 +63,7 @@ export function useUpdateBarber() {
         .from('barbers')
         .update(updates)
         .eq('id', id)
-        .select(
-          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
-        )
+        .select(BARBER_SELECT)
         .single()
       if (error) throw error
       return data
@@ -89,6 +85,38 @@ export function useDeleteBarber() {
   })
 }
 
+export function useInviteBarber() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: { name: string; email: string }) => {
+      const res = await fetch('/api/barbers/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        throw new Error(json.error || json.message || 'Error al invitar barbero')
+      }
+      return json
+    },
+    onSuccess: () => invalidateQueries.afterBarberChange(queryClient),
+  })
+}
+
+export function usePendingInvitations(businessId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.barbers.list(businessId), 'invitations'],
+    queryFn: async () => {
+      const res = await fetch('/api/barbers/invitations')
+      if (!res.ok) throw new Error('Failed to fetch invitations')
+      return res.json()
+    },
+    enabled: !!businessId,
+  })
+}
+
 export function useBarberById(barberId: string | undefined) {
   return useQuery({
     queryKey: queryKeys.barbers.detail(barberId || ''),
@@ -97,9 +125,7 @@ export function useBarberById(barberId: string | undefined) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('barbers')
-        .select(
-          'id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at, role_id'
-        )
+        .select(BARBER_SELECT)
         .eq('id', barberId)
         .single()
 

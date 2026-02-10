@@ -293,7 +293,6 @@ lsof -i :3000 2>/dev/null | grep LISTEN
 
 - `src/app/**/*.tsx`
 - `src/components/**/*.tsx`
-- `src/pages/**/*.tsx`
 - `*.css`, `*.scss`, `tailwind.config.*`
 
 **Flujo OBLIGATORIO después de cambio UI:**
@@ -314,9 +313,9 @@ lsof -i :3000 2>/dev/null | grep LISTEN
 **Comandos Playwright a usar:**
 
 ```
-mcp__playwright__playwright_navigate → ir a la URL
-mcp__playwright__playwright_screenshot → capturar pantalla
-mcp__playwright__playwright_click → interactuar si necesario
+mcp__playwright__browser_navigate → ir a la URL
+mcp__playwright__browser_take_screenshot → capturar pantalla
+mcp__playwright__browser_click → interactuar si necesario
 ```
 
 **Output esperado:**
@@ -394,7 +393,7 @@ grep "package-name" package.json
 
 ### Después de crear API route → Update .env.example
 
-**Trigger:** Crear archivo en `src/app/api/**` o `pages/api/**`
+**Trigger:** Crear archivo en `src/app/api/**`
 
 **Acción OBLIGATORIA:**
 
@@ -621,9 +620,6 @@ Claude: Para entender el problema:
 **10 Equipos Disponibles:**
 
 ---
-
-| Keywords en request | Agente | Archivo a leer |
-| ------------------- | ------ | -------------- |
 
 #### 1. 🔒 Security Team
 
@@ -1032,15 +1028,17 @@ npx pa11y http://localhost:3000
 
 ## Project Overview
 
-**[Project Name]**
+**BarberApp**
 
-[Brief description of your project]
+Sistema de gestión de citas para barberías. Dashboard administrativo, reservas online, gamificación, y branding personalizable. PWA mobile-first con soporte iOS/Android.
 
 ## Tech Stack
 
-- [Framework/Language]
-- [Database]
-- [Other tools]
+- Next.js 16 + React 19 (App Router)
+- TypeScript (strict)
+- Supabase (PostgreSQL + Auth + Storage + Realtime)
+- TailwindCSS v4 + Framer Motion
+- Deployed on Vercel
 
 ## Development Commands
 
@@ -1053,27 +1051,41 @@ npm test
 
 # Build for production
 npm run build
+
+# Lint
+npm run lint
 ```
 
 ## Architecture
 
 ### Key Directories
 
-- `src/` - Source code
-- `tests/` - Test files
-- `docs/` - Documentation
+- `src/app/(dashboard)/` - Dashboard pages (citas, barberos, clientes, servicios, analiticas)
+- `src/app/(admin)/` - Super admin panel
+- `src/app/api/` - API routes
+- `src/components/` - Shared UI components
+- `src/lib/` - Utilities, Supabase client, design system
+- `supabase/migrations/` - Database migrations (001-024)
+- `docs/` - Technical documentation
 
 ### Key Files
 
-- [Important file] - [Purpose]
+- `src/lib/supabase/middleware.ts` - Auth middleware
+- `src/lib/design-system.ts` - Motion/spacing tokens
+- `src/components/dashboard/bottom-nav.tsx` - Mobile tab bar
+- `src/app/manifest.ts` - PWA manifest
+- `public/sw.js` - Service worker
+- `DATABASE_SCHEMA.md` - Single source of truth for DB schema
 
 ## Critical Rules
 
-| Rule       | Description               |
-| ---------- | ------------------------- |
-| TypeScript | All code must be typed    |
-| Tests      | PRs require test coverage |
-| Formatting | Use Prettier/ESLint       |
+| Rule       | Description                                      |
+| ---------- | ------------------------------------------------ |
+| TypeScript | All code must be typed                           |
+| DB Schema  | ALWAYS verify against DATABASE_SCHEMA.md         |
+| Formatting | Prettier + ESLint (auto-fix on commit)           |
+| PWA        | Verify visually with Playwright after UI changes |
+| Deploy     | Bump version + CHANGELOG.md + RELEASE_NOTES.md   |
 
 ## High-Risk Areas
 
@@ -1081,9 +1093,10 @@ Changes to these require extra review:
 
 | Area                | Risk              |
 | ------------------- | ----------------- |
-| Authentication      | Security critical |
-| Payment             | Financial data    |
+| Authentication/RLS  | Security critical |
 | Database migrations | Data integrity    |
+| Service Worker      | PWA update flow   |
+| Supabase queries    | Egress management |
 
 ## File Location Rules
 
@@ -1092,6 +1105,8 @@ Changes to these require extra review:
 | Governance docs | Root (UPPERCASE.md) |
 | Technical docs  | docs/reference/     |
 | Specs           | docs/specs/         |
+| Planning        | docs/planning/      |
+| Security        | docs/security/      |
 | Archive         | docs/archive/       |
 
 ## Commit Format

@@ -73,7 +73,7 @@ function LoginForm() {
     <Card data-testid="login-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-        <CardDescription>Ingresa a tu cuenta de BarberShop Pro</CardDescription>
+        <CardDescription>Ingresa a tu cuenta de BarberApp</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleLogin} data-testid="login-form">

@@ -89,13 +89,13 @@ const extraServices = [
 const extraBarbers = [
   {
     name: 'Julian Soto',
-    email: 'julian.soto@barbershop.pro',
+    email: 'julian.soto@barberapp.com',
     bio: 'Skin fades and classic scissor cuts',
     display_order: 20,
   },
   {
     name: 'Ricardo Leon',
-    email: 'ricardo.leon@barbershop.pro',
+    email: 'ricardo.leon@barberapp.com',
     bio: 'Beard specialist and styling',
     display_order: 21,
   },

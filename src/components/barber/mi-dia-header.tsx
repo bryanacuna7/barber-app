@@ -25,7 +25,9 @@ interface MiDiaHeaderProps {
  */
 export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }: MiDiaHeaderProps) {
   const formatDate = (dateString: string) => {
-    const dateObj = new Date(dateString)
+    // Append T12:00:00 to avoid UTC midnight timezone shift
+    // "2026-02-09" parsed as UTC → in CR (UTC-6) becomes Feb 8 at 6PM
+    const dateObj = new Date(`${dateString}T12:00:00`)
     return new Intl.DateTimeFormat('es-CR', {
       weekday: 'long',
       day: 'numeric',
@@ -58,10 +60,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-white truncate">Mi Día</h1>
-          <p
-            className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 truncate"
-            data-testid="barber-name"
-          >
+          <p className="text-sm text-muted mt-1 truncate" data-testid="barber-name">
             {barberName}
           </p>
         </div>
@@ -71,7 +70,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           className="flex items-center gap-2 px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl"
           data-testid="current-date"
         >
-          <Calendar className="h-4 w-4 text-zinc-600 dark:text-zinc-400" aria-hidden="true" />
+          <Calendar className="h-4 w-4 text-muted" aria-hidden="true" />
           <span className="text-sm font-medium text-zinc-900 dark:text-white capitalize">
             {formatDate(date)}
           </span>
@@ -87,7 +86,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5"
           data-testid="stat-total"
         >
-          <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Total</p>
+          <p className="text-xs text-muted font-medium">Total</p>
           <p className="text-2xl font-bold text-zinc-900 dark:text-white mt-0.5">{stats.total}</p>
         </motion.div>
 

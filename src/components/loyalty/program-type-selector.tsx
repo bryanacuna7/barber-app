@@ -34,7 +34,7 @@ export function ProgramTypeSelector({ value, onChange, options }: Props) {
           return (
             <RadioGroupItem key={option.value} value={option.value}>
               {/* Icon */}
-              <div className="flex-shrink-0 rounded-lg bg-muted/50 p-2">
+              <div className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-zinc-200/80 bg-zinc-100/90 dark:border-zinc-700/60 dark:bg-zinc-800/80">
                 <Icon className="h-5 w-5 text-foreground" />
               </div>
 

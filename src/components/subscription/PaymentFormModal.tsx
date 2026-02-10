@@ -43,7 +43,7 @@ export function PaymentFormModal({
 
   // SINPE details from config or defaults
   const sinpePhone = sinpeConfig?.phone_number || '8888-8888'
-  const sinpeName = sinpeConfig?.account_name || 'BarberShop Pro'
+  const sinpeName = sinpeConfig?.account_name || 'BarberApp'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

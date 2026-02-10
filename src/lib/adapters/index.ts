@@ -22,8 +22,19 @@ export * from './barbers'
 // Analytics adapter (Reportes)
 export * from './analytics'
 
-// Calendar adapter (Citas)
-export * from './calendar'
+// Calendar adapter (Citas) — explicit exports to avoid calculateDayStats collision with appointments
+export {
+  adaptToCalendarEvent,
+  groupIntoTimeBlocks,
+  findGaps,
+  getCalendarQuery,
+  generateWeekView,
+  filterByBarber,
+  type UICalendarEvent,
+  type UITimeBlock,
+  type UIGap,
+} from './calendar'
+// Note: calendar.calculateDayStats excluded — use appointments.calculateDayStats instead
 
 // Settings adapter (Configuración)
 export * from './settings'

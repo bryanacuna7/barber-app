@@ -14,31 +14,39 @@ import {
   UserPlus,
   CalendarPlus,
   LayoutGrid,
+  CalendarClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { MoreMenuDrawer } from './more-menu-drawer'
+import { useBusiness } from '@/contexts/business-context'
+import type { UserRole } from '@/lib/auth/roles'
 
-const navigation = [
+const ownerNavigation = [
   { name: 'Citas', href: '/citas', icon: Calendar },
   { name: 'Clientes', href: '/clientes', icon: Users },
   // Center slot is the + button (rendered separately)
   { name: 'Servicios', href: '/servicios', icon: Scissors },
 ]
 
-// Pages accessible through "More" menu
-const morePages = [
+type NavItem = (typeof ownerNavigation)[number]
+
+// Pages accessible through "More" menu (for active indicator)
+const ownerMorePages = [
   '/dashboard',
   '/analiticas',
   '/lealtad/configuracion',
   '/barberos',
+  '/mi-dia',
   '/suscripcion',
   '/changelog',
   '/configuracion',
 ]
 
-const quickActions = [
+const barberMorePages = ['/clientes', '/analiticas', '/changelog']
+
+const ownerQuickActions = [
   { name: 'Nueva Cita', href: '/citas', icon: CalendarPlus, action: 'create-appointment' },
   { name: 'Nuevo Cliente', href: '/clientes', icon: UserPlus, action: 'create-client' },
   { name: 'Nuevo Servicio', href: '/servicios', icon: LayoutGrid, action: 'create-service' },
@@ -46,13 +54,60 @@ const quickActions = [
 
 interface BottomNavProps {
   isAdmin?: boolean
+  isBarber?: boolean
 }
 
-export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
+export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false)
+
+  // Try to read role from context (may fail if outside provider during SSR edge cases)
+  let userRole: UserRole = 'owner'
+  let staffPermissions = {
+    nav_citas: true,
+    nav_servicios: true,
+    nav_clientes: false,
+    nav_analiticas: false,
+    nav_changelog: true,
+    can_create_citas: true,
+    can_view_all_citas: false,
+  }
+  try {
+    const ctx = useBusiness()
+    userRole = ctx.userRole
+    staffPermissions = ctx.staffPermissions
+  } catch {
+    // Fallback: use props
+    userRole = isBarber ? 'barber' : isAdmin ? 'admin' : 'owner'
+  }
+
+  const isBarberRole = userRole === 'barber'
+
+  // Build navigation based on role + permissions
+  let navigation = ownerNavigation
+  if (isBarberRole) {
+    const barberTabs: NavItem[] = []
+    // Mi Día always first for barbers
+    barberTabs.push({ name: 'Mi Día', href: '/mi-dia', icon: CalendarClock })
+    // Citas if enabled
+    if (staffPermissions.nav_citas) {
+      barberTabs.push({ name: 'Citas', href: '/citas', icon: Calendar })
+    }
+    // Servicios if enabled (right side of + button)
+    // We'll handle the split below
+    navigation = barberTabs
+  }
+
+  const rightNavItems = isBarberRole
+    ? staffPermissions.nav_servicios
+      ? [{ name: 'Servicios', href: '/servicios', icon: Scissors }]
+      : []
+    : ownerNavigation.slice(2)
+
+  // Determine which "more" pages for active indicator
+  const morePages = isBarberRole ? barberMorePages : ownerMorePages
 
   // Check if current page is in "More" menu
   const currentPath = pathname || ''
@@ -60,20 +115,35 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
     currentPath.length > 0 &&
     morePages.some((page) => currentPath === page || currentPath.startsWith(`${page}/`))
 
-  const handleQuickAction = (action: (typeof quickActions)[number]) => {
+  // Should the + button be visible? For barbers, only if can_create_citas
+  const showPlusButton = !isBarberRole || staffPermissions.can_create_citas
+
+  const handleQuickAction = (action: (typeof ownerQuickActions)[number]) => {
     setIsQuickActionOpen(false)
     if (isMobileDevice()) haptics.selection()
-    // Navigate with intent=create so destination page auto-opens create form
     router.push(`${action.href}?intent=create`)
   }
+
+  const handlePlusClick = () => {
+    if (isMobileDevice()) haptics.tap()
+    if (isBarberRole) {
+      // Barber: go directly to create cita (skip action sheet)
+      router.push('/citas?intent=create')
+    } else {
+      setIsQuickActionOpen(true)
+    }
+  }
+
+  // Left tabs (before + button)
+  const leftTabs = isBarberRole ? navigation : ownerNavigation.slice(0, 2)
 
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
         <div className="px-2 pb-3 pb-safe-offset-3">
-          <div className="mx-auto flex max-w-[95%] items-center justify-around gap-0 rounded-full bg-white/80 dark:bg-black/60 px-1.5 py-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08),0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),0_-2px_12px_rgba(0,0,0,0.15)] backdrop-blur-xl border border-black/10 dark:border-white/10">
-            {/* Left tabs: Citas, Clientes */}
-            {navigation.slice(0, 2).map((item) => {
+          <div className="mx-auto flex max-w-[95%] items-center justify-around gap-0 rounded-full bg-white/80 dark:bg-black/60 px-1.5 py-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08),0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),0_-2px_12px_rgba(0,0,0,0.15)] backdrop-blur-xl border border-black/10 dark:border-zinc-800/80">
+            {/* Left tabs */}
+            {leftTabs.map((item) => {
               const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
               return (
                 <Link
@@ -122,35 +192,34 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
             })}
 
             {/* Center: + Button (Global Create Action) */}
-            <button
-              onClick={() => {
-                setIsQuickActionOpen(true)
-                if (isMobileDevice()) haptics.tap()
-              }}
-              aria-label="Crear nuevo"
-              aria-haspopup="true"
-              aria-expanded={isQuickActionOpen}
-              className="relative flex flex-col items-center justify-center gap-0.5 rounded-full px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2"
-              style={{ '--tw-ring-color': 'var(--brand-primary)' } as React.CSSProperties}
-            >
-              <motion.div
-                whileTap={{ scale: 0.9 }}
-                className="flex h-[36px] w-[36px] items-center justify-center rounded-full"
-                style={{
-                  background: `linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark, var(--brand-primary)))`,
-                  boxShadow: `0 4px 14px rgba(var(--brand-primary-rgb), 0.4)`,
-                }}
+            {showPlusButton && (
+              <button
+                onClick={handlePlusClick}
+                aria-label="Crear nuevo"
+                aria-haspopup={!isBarberRole}
+                aria-expanded={isQuickActionOpen}
+                className="relative flex flex-col items-center justify-center gap-0.5 rounded-full px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2"
+                style={{ '--tw-ring-color': 'var(--brand-primary)' } as React.CSSProperties}
               >
-                <Plus
-                  className="h-5 w-5"
-                  style={{ color: 'var(--brand-primary-contrast, #fff)' }}
-                  strokeWidth={2.5}
-                />
-              </motion.div>
-            </button>
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className="flex h-[36px] w-[36px] items-center justify-center rounded-full"
+                  style={{
+                    background: `linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark, var(--brand-primary)))`,
+                    boxShadow: `0 4px 14px rgba(var(--brand-primary-rgb), 0.4)`,
+                  }}
+                >
+                  <Plus
+                    className="h-5 w-5"
+                    style={{ color: 'var(--brand-primary-contrast, #fff)' }}
+                    strokeWidth={2.5}
+                  />
+                </motion.div>
+              </button>
+            )}
 
-            {/* Right tabs: Servicios */}
-            {navigation.slice(2).map((item) => {
+            {/* Right tabs: Servicios (or empty for barber if disabled) */}
+            {rightNavItems.map((item) => {
               const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
               return (
                 <Link
@@ -248,9 +317,9 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
         </div>
       </nav>
 
-      {/* Quick Action Sheet */}
+      {/* Quick Action Sheet (owner only) */}
       <AnimatePresence>
-        {isQuickActionOpen && (
+        {isQuickActionOpen && !isBarberRole && (
           <>
             {/* Backdrop */}
             <motion.div
@@ -284,7 +353,7 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
                 </div>
                 {/* Actions */}
                 <div className="px-2 pb-4 pt-1">
-                  {quickActions.map((action) => (
+                  {ownerQuickActions.map((action) => (
                     <button
                       key={action.action}
                       onClick={() => handleQuickAction(action)}
@@ -309,7 +378,12 @@ export function BottomNav({ isAdmin = false }: BottomNavProps = {}) {
       </AnimatePresence>
 
       {/* More Menu Drawer */}
-      <MoreMenuDrawer isOpen={isMoreOpen} onClose={() => setIsMoreOpen(false)} isAdmin={isAdmin} />
+      <MoreMenuDrawer
+        isOpen={isMoreOpen}
+        onClose={() => setIsMoreOpen(false)}
+        isAdmin={isAdmin}
+        isBarber={isBarber}
+      />
     </>
   )
 }

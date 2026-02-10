@@ -3,8 +3,9 @@
 import { cn } from '@/lib/utils/cn'
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Users, Calendar, Search, Database } from 'lucide-react'
+import { animations } from '@/lib/design-system'
 
 export interface EmptyStateProps {
   icon?: LucideIcon
@@ -23,12 +24,14 @@ export function EmptyState({
   variant = 'default',
   className,
 }: EmptyStateProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   if (variant === 'minimal') {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+        animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+        transition={{ duration: animations.duration.slow }}
         className={cn('flex flex-col items-center justify-center py-8 px-4 text-center', className)}
       >
         {Icon && <Icon className="w-8 h-8 text-zinc-400 dark:text-zinc-600 mb-3" />}
@@ -45,7 +48,7 @@ export function EmptyState({
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, type: 'spring', stiffness: 200 }}
+        transition={prefersReducedMotion ? { duration: 0.01 } : animations.spring.gentle}
         className={cn(
           'flex flex-col items-center justify-center py-16 px-4 text-center',
           className
@@ -54,14 +57,22 @@ export function EmptyState({
         {Icon && (
           <motion.div
             className="relative mb-6"
-            animate={{
-              y: [0, -8, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            animate={
+              prefersReducedMotion
+                ? {}
+                : {
+                    y: [0, -8, 0],
+                  }
+            }
+            transition={
+              prefersReducedMotion
+                ? {}
+                : {
+                    duration: animations.duration.slow * 9,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }
+            }
           >
             <div className="relative flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-950/30 dark:to-purple-950/30">
               <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white dark:bg-zinc-800">
@@ -69,16 +80,28 @@ export function EmptyState({
               </div>
             </div>
             {/* Decorative circles */}
-            <motion.div
-              className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-blue-200 dark:bg-blue-900/50"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-            />
-            <motion.div
-              className="absolute -bottom-2 -left-2 w-6 h-6 rounded-full bg-purple-200 dark:bg-purple-900/50"
-              animate={{ scale: [1, 1.3, 1] }}
-              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-            />
+            {!prefersReducedMotion && (
+              <>
+                <motion.div
+                  className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-blue-200 dark:bg-blue-900/50"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{
+                    duration: animations.duration.slow * 6,
+                    repeat: Infinity,
+                    delay: animations.duration.slow,
+                  }}
+                />
+                <motion.div
+                  className="absolute -bottom-2 -left-2 w-6 h-6 rounded-full bg-purple-200 dark:bg-purple-900/50"
+                  animate={{ scale: [1, 1.3, 1] }}
+                  transition={{
+                    duration: animations.duration.slow * 6,
+                    repeat: Infinity,
+                    delay: animations.duration.slow * 3,
+                  }}
+                />
+              </>
+            )}
           </motion.div>
         )}
 
@@ -92,16 +115,16 @@ export function EmptyState({
   // Default variant
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+      animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      transition={{ duration: animations.duration.slow }}
       className={cn('flex flex-col items-center justify-center py-16 px-4 text-center', className)}
     >
       {Icon && (
         <motion.div
           className="mb-4 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50"
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: 'spring', stiffness: 300 }}
+          whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+          transition={animations.spring.default}
         >
           <Icon className="w-10 h-10 text-zinc-400 dark:text-zinc-500" />
         </motion.div>
@@ -113,6 +136,22 @@ export function EmptyState({
   )
 }
 
+// CTA button for empty states (respects reduced motion)
+function EmptyStateCTA({ onClick, label }: { onClick: () => void; label: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  return (
+    <motion.button
+      onClick={onClick}
+      className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+      whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+      whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+    >
+      {label}
+    </motion.button>
+  )
+}
+
 // Predefined empty states for common scenarios
 export function EmptyAppointments({ onCreateNew }: { onCreateNew?: () => void }) {
   return (
@@ -121,18 +160,7 @@ export function EmptyAppointments({ onCreateNew }: { onCreateNew?: () => void })
       icon={Calendar}
       title="No hay citas programadas"
       description="Comienza creando tu primera cita para gestionar tu agenda."
-      action={
-        onCreateNew ? (
-          <motion.button
-            onClick={onCreateNew}
-            className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Crear Cita
-          </motion.button>
-        ) : undefined
-      }
+      action={onCreateNew ? <EmptyStateCTA onClick={onCreateNew} label="Crear Cita" /> : undefined}
     />
   )
 }
@@ -145,16 +173,7 @@ export function EmptyClients({ onAddClient }: { onAddClient?: () => void }) {
       title="No hay clientes registrados"
       description="Agrega tu primer cliente para empezar a gestionar tu base de datos."
       action={
-        onAddClient ? (
-          <motion.button
-            onClick={onAddClient}
-            className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Agregar Cliente
-          </motion.button>
-        ) : undefined
+        onAddClient ? <EmptyStateCTA onClick={onAddClient} label="Agregar Cliente" /> : undefined
       }
     />
   )

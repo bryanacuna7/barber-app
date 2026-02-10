@@ -21,6 +21,7 @@ import { type NameType, type ValueType } from 'recharts/types/component/DefaultT
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartTooltip } from '@/components/analytics/chart-tooltip'
+import { formatCurrencyCompactMillions } from '@/lib/utils'
 
 interface RevenueChartProps {
   data: Array<{
@@ -78,14 +79,17 @@ function useChartColors() {
   return colors
 }
 
-function RevenueTooltip({
-  active,
-  payload,
-  label,
-  tone,
-}: TooltipProps<ValueType, NameType> & {
-  tone: { bg: string; border: string; text: string }
-}) {
+function RevenueTooltip(
+  props: TooltipProps<ValueType, NameType> & {
+    tone: { bg: string; border: string; text: string }
+  }
+) {
+  const { active, payload, label, tone } = props as {
+    active?: boolean
+    payload?: Array<{ value?: ValueType }>
+    label?: string
+    tone: { bg: string; border: string; text: string }
+  }
   if (!active || !payload?.length) return null
 
   const rawValue = payload[0]?.value
@@ -122,10 +126,8 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
 
   // Format currency for mobile - shorter format
   const formatCurrency = (value: number, isMobile: boolean = false) => {
-    if (isMobile && value >= 1000) {
-      return `₡${Math.round(value / 1000)}k`
-    }
-    return `₡${value.toLocaleString()}`
+    if (isMobile) return formatCurrencyCompactMillions(value)
+    return `₡${value.toLocaleString('es-CR')}`
   }
 
   // Prevent label overlap on small screens.

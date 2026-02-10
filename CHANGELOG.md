@@ -1,213 +1,83 @@
 # Changelog
 
-All notable changes to BarberShop Pro will be documented in this file.
+Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
+Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
+Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.9.3] - 2026-02-10
 
----
+### Nuevo
 
-## [Unreleased]
+- Seguimiento en vivo de tu cita: al reservar recibis un link para ver tu posicion en la fila en tiempo real
+- Recordatorios automaticos por email y notificacion push 24 horas y 1 hora antes de tu cita
+- Notificacion "Llega antes" cuando tu barbero termina antes de lo esperado
+- Portal de cliente: ahora podes ver tus citas y perfil desde /mi-cuenta sin necesitar acceso al dashboard
+- Experiencia desktop premium: sidebar colapsable, paleta de comandos (Ctrl+K), tablas con acciones hover
+- Invitacion de barberos por email con roles y permisos diferenciados
 
-### In Progress
+### Mejorado
 
-- **Área 0: Technical Debt Cleanup** (Task 4 - 80% complete)
-  - 15 TypeScript errors remaining (down from 201)
-  - See [PROGRESS.md](PROGRESS.md) for details
+- Interfaz simplificada en todas las pantallas: menos ruido visual, mejor jerarquia de informacion
+- Animaciones mas suaves y consistentes con soporte para movimiento reducido
+- Skeletons de carga nativos en todas las pantallas principales
+- Gestos de swipe mejorados en listas de citas y clientes
+- Las paginas de datos (citas, clientes, servicios) ahora tienen vista de tabla en desktop y lista en movil
+- Configuracion reorganizada en subrutas mas claras (general, horario, branding, equipo, pagos)
+- Email de confirmacion de cita ahora incluye link de seguimiento en vivo
 
-### Planned
+### Corregido
 
-See [docs/planning/implementation-v2.5.md](docs/planning/implementation-v2.5.md) for full roadmap:
+- Tokens de seguimiento expirados ya no permiten acceso a datos de la fila
+- Citas canceladas ya no aparecen en el seguimiento publico
+- Recordatorios no se envian duplicados gracias a sistema de deduplicacion mejorado
+- Citas agendadas el mismo dia ahora reciben correctamente el recordatorio de 1 hora
 
-1. Client Subscription & Basic Plan
-2. Staff Experience - Vista Mi Día
-3. Advance Payments & No-Show
-4. Rebranding Barber → Staff
-5. Client Referrals + Full Dashboard
-6. Web Push Notifications
-7. Testing & QA Sprint
+## [0.9.2] - 2026-02-07
 
----
+### Corregido
 
-## [0.9.0] - 2026-02-03
+- La app en iPhone ahora se actualiza sola sin tener que borrar y reinstalar
+- La navegacion en la pagina de citas ahora se siente mas fluida en iPhone
+- Se ajusto el espacio superior de la pantalla principal para una vista mas limpia
 
-### Added
+### Mejorado
 
-- **Observability Infrastructure**
-  - Structured logging with Pino (logger.ts)
-  - Sentry error tracking (client + server + edge)
-  - Distributed rate limiting with Upstash Redis
-  - Error boundary components
+- El icono de la app ahora es mas grande y limpio (barber pole con forma de pastilla)
+- La app chequea actualizaciones cada vez que la abres (antes solo cada hora)
 
-- **Security Hardening**
-  - IP spoofing protection in rate limiters
-  - File validation with magic bytes (not just MIME types)
-  - Path traversal prevention
-  - Authorization refactored in 4 admin endpoints
+## [0.9.1] - 2026-02-07
 
-- **Performance Optimization**
-  - 7 database indexes created (4-8x query speedup)
-  - N+1 query fix in admin businesses endpoint (61 → 4 queries, 15x faster)
+### Nuevo
 
-- **Documentation**
-  - DATABASE_SCHEMA.md (complete schema reference, source of truth)
-  - LESSONS_LEARNED.md (11 critical patterns from real bugs)
-  - Database Change Protocol in CLAUDE.md
-  - Documentation reorganization (planning, reference, specs, archive)
-  - PROGRESS.md optimization (1,167 → 309 lines)
+- Sistema de colores rediseñado con mejor legibilidad en todo el app
+- Graficas de analiticas rediseñadas con colores de la marca
+- Monitoreo interno mejorado para detectar y resolver incidencias mas rapido
 
-- **Database**
-  - Migration 019b: Performance indexes
-  - Migration 020: Loyalty trigger error handling
-  - Migration 021: RLS policies for barber_stats + SECURITY DEFINER
+### Mejorado
 
-### Fixed
+- Mejor visibilidad del texto en modo claro y oscuro
+- Numeros grandes en la pantalla principal ahora se muestran de forma compacta (ej: ₡1.3M)
+- Tarjetas de estadisticas se adaptan mejor a pantallas pequeñas
+- Icono de la app rediseñado con estilo minimalista (barber pole monocromatico)
 
-- **Critical: Appointments "Completed" Status** (Session 69)
-  - Fixed RLS violation when marking appointments as completed
-  - Added 3 RLS policies to barber_stats table
-  - Added SECURITY DEFINER to trigger functions
+### Corregido
 
-- **TypeScript**
-  - Reduced errors from 201 → 15 (92.5% reduction)
-  - Regenerated Supabase types (1,624 lines)
-  - Created custom types system (30+ type definitions)
-  - Fixed Suspense boundary in /register page
+- Los colores de las graficas ahora se ven correctamente en todos los navegadores
 
-### Changed
+## [0.9.0] - 2026-02-07
 
-- Server Components now use direct Supabase queries (not internal fetch)
-- Archive files organized by date (2026-01/)
-- Spec files use lowercase-with-hyphens naming
+### Nuevo
 
----
+- Rediseño completo de la pantalla principal para uso mas comodo desde el celular
+- Interfaz visual unificada con mejor consistencia en tipografia, colores y movimientos
+- 5 paginas del dashboard modernizadas (Citas, Barberos, Clientes, Servicios, Analiticas)
+- Nuevo panel administrativo con herramientas avanzadas para la gestion del negocio
+- La app mantiene funciones clave con conexion inestable y conserva tu identidad de marca
 
-## [0.8.0] - 2026-02-02
+### Mejorado
 
-### Added
-
-- **Business Referral System** (Complete - 6 Phases)
-  - 8 API endpoints (referral management + admin analytics)
-  - 10 React components (business + admin dashboards)
-  - QR code generation and tracking
-  - Cookie-based conversion tracking (30-day persistence)
-  - Milestone-based rewards system
-  - Admin analytics dashboard with Recharts
-  - Database migration 019: business_referrals, referral_conversions tables
-
-- **Claude Code Infrastructure**
-  - Clean-up scripts for AI assistant directories
-  - 8 skill symlinks (error-handling, security-scanning, etc.)
-
-- **Documentation**
-  - Implementation Plan v2.5 (post-multi-expert audit)
-  - CLIENT_REFERRAL_DASHBOARD_PLAN.md
-  - REFERRAL_SYSTEM_PLAN.md
-
-### Fixed
-
-- **Critical: Authentication in /referencias** (Session 55)
-  - Server Components fetch doesn't pass cookies
-  - Fixed by using direct Supabase client queries
-
-- Navigation links for Referencias in both business and admin sidebars
-- Layout group bug (admin sidebar not persisting)
-- npm security vulnerabilities (tar package)
-
-### Changed
-
-- Branch cleanup: Merged feature/gamification-system → main
-- Deleted 4 old branches
-- Main branch updated (+16,062 lines)
-
----
-
-## [0.7.0] - 2026-01-28
-
-### Added
-
-- **Gamification System Complete**
-  - Phase 1: Client Loyalty (points, tiers, rewards)
-  - Phase 2: Barber Gamification (achievements, leaderboards, challenges)
-  - Phase 3: Business Referral System (see 0.8.0)
-
-- **Database Migrations**
-  - 015: Notification trigger fix
-  - 016: Loyalty programs RLS
-  - 017: Public read for loyalty programs
-  - 018: Barber gamification tables
-
-### Fixed
-
-- Loyalty program RLS policies
-- Notification trigger errors
-
----
-
-## [0.6.0] - 2026-01-15
-
-### Added
-
-- PWA support with offline capabilities
-- Branding customization for businesses
-- Automatic notifications system
-- Dashboard administrativo completo
-
----
-
-## [0.5.0] - 2026-01-01
-
-### Added
-
-- Sistema de reservas online público (/reservar/[slug])
-- Client booking flow with availability checking
-- Barbero management
-- Services management
-
----
-
-## Guidelines for Updating CHANGELOG
-
-### When to Update
-
-- After completing a significant feature
-- Before creating a release/deploy
-- When fixing critical bugs
-
-### Format
-
-```markdown
-### Added
-
-- New features
-
-### Changed
-
-- Changes in existing functionality
-
-### Deprecated
-
-- Soon-to-be removed features
-
-### Removed
-
-- Removed features
-
-### Fixed
-
-- Bug fixes
-
-### Security
-
-- Security improvements
-```
-
-### Version Numbering
-
-- **Major (1.0.0):** Breaking changes, major new features
-- **Minor (0.x.0):** New features, non-breaking changes
-- **Patch (0.0.x):** Bug fixes, small improvements
-
----
-
-**Last Updated:** 2026-02-03 (Session 70)
+- App mas rapida al cargar datos clave en modulos como Citas y Analiticas
+- Seguridad reforzada para proteger mejor cuentas, sesiones y datos del negocio
+- Mayor estabilidad general con mejoras de monitoreo y control de errores
+- 11 mejoras criticas de experiencia movil para una navegacion mas clara y comoda
+- Optimizacion de infraestructura para reducir interrupciones y mantener mejor rendimiento

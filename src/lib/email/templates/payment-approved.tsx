@@ -83,7 +83,7 @@ export default function PaymentApprovedEmail({
           </Text>
 
           <Section style={buttonSection}>
-            <Button style={button} href="https://app.barbershoppro.com/dashboard">
+            <Button style={button} href="https://app.barberapp.com/dashboard">
               Ir al Dashboard
             </Button>
           </Section>
@@ -95,10 +95,10 @@ export default function PaymentApprovedEmail({
 
           <Text style={footer}>
             ¿Tienes preguntas?{' '}
-            <Link href="https://app.barbershoppro.com/suscripcion">Ver mi suscripción</Link>
+            <Link href="https://app.barberapp.com/suscripcion">Ver mi suscripción</Link>
           </Text>
 
-          <Text style={footer}>BarberShop Pro - Tu barbería, sin complicaciones</Text>
+          <Text style={footer}>BarberApp - Tu barbería, sin complicaciones</Text>
         </Container>
       </Body>
     </Html>

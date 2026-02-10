@@ -8,7 +8,8 @@
 
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 interface Props {
   title: string
@@ -24,6 +25,7 @@ export function CollapsibleSection({
   className = '',
 }: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <div className={className}>
@@ -31,7 +33,7 @@ export function CollapsibleSection({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-xl bg-zinc-50 px-4 py-3 text-left shadow-sm transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+        className="flex w-full items-center justify-between rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-white/[0.04] px-4 py-3 text-left shadow-sm transition-colors hover:bg-zinc-100/80 dark:hover:bg-white/10"
         aria-expanded={isOpen}
         aria-controls={`collapsible-${title.replace(/\s+/g, '-').toLowerCase()}`}
       >
@@ -51,7 +53,14 @@ export function CollapsibleSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            transition={
+              prefersReducedMotion
+                ? { duration: reducedMotion.spring.default.duration }
+                : {
+                    duration: animations.duration.normal,
+                    ease: animations.easing.easeInOut as [number, number, number, number],
+                  }
+            }
             style={{ overflow: 'hidden' }}
           >
             <div className="pt-4">{children}</div>

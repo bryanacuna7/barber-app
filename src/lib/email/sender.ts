@@ -102,7 +102,7 @@ export async function sendEmail({ to, subject, react, from }: SendEmailOptions) 
 
   try {
     const { data, error } = await resend.emails.send({
-      from: from || process.env.EMAIL_FROM || 'BarberShop Pro <noreply@barbershoppro.com>',
+      from: from || process.env.EMAIL_FROM || 'BarberApp <noreply@barberapp.com>',
       to: [to],
       subject,
       react,

@@ -7,6 +7,7 @@
 ## Root Cause Analysis
 
 ### The Problem
+
 Client pages (`clientes/page-v2.tsx` and `citas/page-v2.tsx`) were attempting to fetch business ID from a non-existent API endpoint:
 
 ```typescript
@@ -14,7 +15,7 @@ Client pages (`clientes/page-v2.tsx` and `citas/page-v2.tsx`) were attempting to
 const [businessId, setBusinessId] = useState<string | null>(null)
 
 useEffect(() => {
-  fetch('/api/auth/session')  // ❌ This endpoint doesn't exist!
+  fetch('/api/auth/session') // ❌ This endpoint doesn't exist!
     .then((res) => res.json()) // ❌ Parsing HTML 404 page as JSON
     .then((data) => {
       if (data.user?.businessId) {
@@ -28,12 +29,14 @@ useEffect(() => {
 ```
 
 ### Why This Failed
+
 1. **`/api/auth/session` doesn't exist** in the codebase
 2. Next.js returned a **404 HTML error page** (starting with `<!DOCTYPE html>`)
 3. `.json()` tried to parse HTML, causing: `Unexpected token '<'`
 4. Pages couldn't get `businessId`, breaking React Query hooks
 
 ### Architecture Mismatch
+
 - **Layout** (`src/app/(dashboard)/layout.tsx`): Server-side, uses `await supabase.auth.getUser()`
 - **Pages** (`page-v2.tsx`): Client-side (`'use client'`), can't access server auth directly
 - **Missing Bridge:** No way to pass auth data from server layout to client pages
@@ -108,11 +111,13 @@ const { businessId } = useBusiness() // ✅ Direct access from context
 ```
 
 **Removed:**
+
 - ❌ `useState` for `businessId`
 - ❌ `useEffect` with fetch call
 - ❌ Loading state check for `businessId`
 
 **Result:**
+
 - ✅ Business ID available immediately from context
 - ✅ No network requests needed
 - ✅ No JSON parsing errors
@@ -128,12 +133,14 @@ const { businessId } = useBusiness() // ✅ Direct access from context
 ## Testing Verification
 
 ### Before Fix
+
 ```
 Console Error: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
 Status: Pages fail to load, businessId is null
 ```
 
 ### After Fix
+
 ```
 Console: Clean (no errors)
 Status: Pages load immediately with businessId from context
@@ -167,11 +174,13 @@ export default function MyPage() {
 ## Prevention
 
 ### DO:
+
 - ✅ Use `useBusiness()` hook in client components
 - ✅ Pass `businessId` from context to React Query hooks
 - ✅ Keep auth logic in server components (layouts)
 
 ### DON'T:
+
 - ❌ Fetch `/api/auth/session` (doesn't exist)
 - ❌ Try to access `supabase.auth.getUser()` in client components
 - ❌ Create new auth endpoints when context exists
@@ -179,6 +188,7 @@ export default function MyPage() {
 ## Related Patterns
 
 This pattern mirrors:
+
 - **TourProvider** (`src/lib/tours/tour-provider.tsx`) - Already passed `businessId`
 - **ThemeProvider** - Passes theme colors from server
 - **React Query** - Prefetched data passed via context

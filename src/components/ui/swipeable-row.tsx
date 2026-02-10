@@ -3,8 +3,13 @@
 /**
  * SwipeableRow - Generic swipeable list item component
  *
- * Inspired by iOS Mail app swipe actions
- * Supports left and right swipe actions with haptic feedback
+ * Inspired by iOS Mail app swipe actions.
+ * Supports left and right swipe actions with haptic feedback.
+ *
+ * Gesture safety:
+ * - 24px edge exclusion zone preserves iOS back/forward gestures
+ * - Direction-aware: only captures swipe if actions exist for that direction
+ * - prefers-reduced-motion: instant animations, actions still reachable
  *
  * Usage:
  * <SwipeableRow
@@ -22,12 +27,16 @@ import {
   useTransform,
   animate,
   useDragControls,
+  useReducedMotion,
   type MotionValue,
 } from 'framer-motion'
 import { cn } from '@/lib/utils/cn'
 import { animations } from '@/lib/design-system'
 import { haptics } from '@/lib/utils/mobile'
 import { useRef, useCallback } from 'react'
+
+/** px from viewport edges where system gestures take priority */
+const EDGE_EXCLUSION_ZONE = 24
 
 export interface SwipeAction {
   icon: React.ReactNode
@@ -40,6 +49,7 @@ export interface SwipeableRowProps {
   children: React.ReactNode
   rightActions?: SwipeAction[] // revealed on swipe left
   leftActions?: SwipeAction[] // revealed on swipe right (optional)
+  showAffordance?: boolean
   className?: string
   containerClassName?: string
   threshold?: number // default 72
@@ -110,6 +120,7 @@ export function SwipeableRow({
   children,
   rightActions = [],
   leftActions = [],
+  showAffordance = true,
   className,
   containerClassName,
   threshold = 72,
@@ -119,6 +130,7 @@ export function SwipeableRow({
   const pointerStartRef = useRef<{ id: number; x: number; y: number } | null>(null)
   const dragStartedRef = useRef(false)
   const x = useMotionValue(0)
+  const prefersReducedMotion = useReducedMotion()
   const ACTION_SIZE = 46
   const ACTION_GAP = 8
   const ACTION_EDGE_PADDING = 8
@@ -170,14 +182,23 @@ export function SwipeableRow({
         targetX = rightConstraint
       }
 
-      animate(x, targetX, {
-        type: 'spring',
-        stiffness: targetX === 0 ? 560 : 500,
-        damping: targetX === 0 ? 42 : 38,
-        mass: 0.58,
-      })
+      const springConfig = prefersReducedMotion
+        ? { duration: 0.05 }
+        : targetX === 0
+          ? animations.spring.swipeClose
+          : animations.spring.swipeOpen
+
+      animate(x, targetX, springConfig)
     },
-    [leftActions.length, rightActions.length, threshold, leftConstraint, rightConstraint, x]
+    [
+      leftActions.length,
+      rightActions.length,
+      threshold,
+      leftConstraint,
+      rightConstraint,
+      x,
+      prefersReducedMotion,
+    ]
   )
 
   const resetPointerTracking = useCallback(() => {
@@ -188,6 +209,15 @@ export function SwipeableRow({
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (!hasActions) return
+
+      // Edge exclusion — preserve system back/forward gestures
+      const viewportX = event.clientX
+      if (
+        viewportX <= EDGE_EXCLUSION_ZONE ||
+        viewportX >= window.innerWidth - EDGE_EXCLUSION_ZONE
+      ) {
+        return
+      }
 
       pointerStartRef.current = {
         id: event.pointerId,
@@ -211,19 +241,31 @@ export function SwipeableRow({
 
       // Start swipe only on clear horizontal intent; let vertical pan scroll naturally.
       if (absX > 10 && absX > absY + 4) {
-        dragStartedRef.current = true
-        dragControls.start(event)
+        const isSwipingLeft = deltaX < 0
+        const isSwipingRight = deltaX > 0
+
+        // Only capture if actions exist for the swipe direction
+        const hasMatchingActions =
+          (isSwipingLeft && rightActions.length > 0) || (isSwipingRight && leftActions.length > 0)
+
+        if (hasMatchingActions) {
+          dragStartedRef.current = true
+          dragControls.start(event)
+        } else {
+          // No actions for this direction — release pointer
+          pointerStartRef.current = null
+        }
       } else if (absY > 10 && absY > absX) {
         pointerStartRef.current = null
       }
     },
-    [dragControls, hasActions]
+    [dragControls, hasActions, rightActions.length, leftActions.length]
   )
 
   return (
     <div className={cn('relative overflow-hidden rounded-xl', containerClassName)}>
       {/* Swipe affordance indicator (3 dots on right edge) */}
-      {rightActions.length > 0 && (
+      {showAffordance && rightActions.length > 0 && (
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-0.5 opacity-20 pointer-events-none z-0">
           <div className="w-1 h-6 rounded-full bg-zinc-400 dark:bg-zinc-500" />
           <div className="w-1 h-6 rounded-full bg-zinc-400 dark:bg-zinc-500" />
@@ -281,7 +323,6 @@ export function SwipeableRow({
         dragControls={dragControls}
         dragListener={false}
         dragDirectionLock
-        dragPropagation
         dragConstraints={{ left: leftConstraint, right: rightConstraint }}
         dragElastic={0.1}
         dragMomentum={false}

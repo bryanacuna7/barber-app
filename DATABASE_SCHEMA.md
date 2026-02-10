@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-05 (Session [current] - Realtime Configuration)
-> **Last Verified Against:** All migrations 001-024
+> **Last Updated:** 2026-02-09 (Session 160 - Client Dashboard RLS)
+> **Last Verified Against:** All migrations 001-029
 
 ---
 
@@ -20,7 +20,7 @@
 ### `businesses`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `003_branding.sql`, `004_admin.sql`
+**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`
 
 ```sql
 - id                        UUID PRIMARY KEY
@@ -40,6 +40,9 @@
 - brand_primary_color       TEXT (added in 003)
 - brand_logo_url           TEXT (added in 003)
 - brand_favicon_url        TEXT (added in 003)
+- accepted_payment_methods  JSONB DEFAULT '["cash"]' (added in 025)
+- notification_settings     JSONB DEFAULT '{...}' (added in 025)
+- staff_permissions         JSONB DEFAULT '{...}' (added in 027) -- owner-configurable UI permissions for staff
 ```
 
 ### `services`
@@ -62,7 +65,7 @@
 ### `clients`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `014_loyalty_system.sql`, `024_enable_realtime.sql`
+**Modified in:** `014_loyalty_system.sql`, `024_enable_realtime.sql`, `029_client_dashboard_rls.sql`
 
 ```sql
 - id                UUID PRIMARY KEY
@@ -78,7 +81,14 @@
 - last_visit_at     TIMESTAMPTZ
 - user_id           UUID REFERENCES auth.users(id) (added in 014)
 UNIQUE(business_id, phone)
+INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added in 029)
 ```
+
+**RLS Policies:**
+
+- "Business owner manages clients" — FOR ALL (owner_id = auth.uid())
+- "Clients view own records" — FOR SELECT (user_id = auth.uid()) (added in 029)
+- "Clients update own profile" — FOR UPDATE (user_id = auth.uid()) (added in 029)
 
 **Realtime:** ✅ Enabled (REPLICA IDENTITY FULL)
 
@@ -89,7 +99,7 @@ UNIQUE(business_id, phone)
 ### `appointments`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`
+**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`
 
 ```sql
 - id                      UUID PRIMARY KEY
@@ -107,15 +117,32 @@ UNIQUE(business_id, phone)
 - client_notes            TEXT
 - internal_notes          TEXT
 - barber_id               UUID REFERENCES barbers(id) (added in 002)
+- started_at              TIMESTAMPTZ (added in 025)
+- actual_duration_minutes INT (added in 025)
+- payment_method          TEXT CHECK (payment_method IN ('cash', 'sinpe', 'card')) (added in 025)
+- tracking_token          UUID DEFAULT gen_random_uuid() (added in 031)
+- tracking_expires_at     TIMESTAMPTZ (added in 031)
 ```
+
+**Indexes:**
+
+- `idx_appointments_tracking_token` UNIQUE on `tracking_token` WHERE NOT NULL (added in 031)
+
+**RLS Policies:**
+
+- "Business owner manages appointments" — FOR ALL (owner_id = auth.uid())
+- "Public can create appointments" — FOR INSERT (true)
+- "Barbers can view own appointments" — FOR SELECT (barber user_id = auth.uid())
+- "Barbers can update status of own appointments" — FOR UPDATE (barber user_id = auth.uid())
+- "Clients view own appointments" — FOR SELECT (client_id → clients.user_id = auth.uid()) (added in 029)
 
 **Realtime:** ✅ Enabled (REPLICA IDENTITY FULL)
 
 **❌ DOES NOT HAVE:**
 
-- `deposit_paid` (not implemented yet)
-- `deposit_verified_at` (not implemented yet)
-- `deposit_amount` (not implemented yet)
+- `deposit_paid` (not implemented yet — planned for 025b)
+- `deposit_verified_at` (not implemented yet — planned for 025b)
+- `deposit_amount` (not implemented yet — planned for 025b)
 
 ### `barbers`
 
@@ -370,6 +397,28 @@ UNIQUE(business_id, email)
 - appointment_confirmations     BOOLEAN
 - marketing_emails              BOOLEAN
 ```
+
+### `push_subscriptions`
+
+**Created in:** `028_push_subscriptions.sql`
+
+Stores browser push notification subscriptions. Supports multi-device (one user can have subscriptions on phone + desktop).
+
+```sql
+- id              UUID PRIMARY KEY
+- user_id         UUID REFERENCES auth.users(id) ON DELETE CASCADE
+- endpoint        TEXT NOT NULL UNIQUE
+- p256dh          TEXT NOT NULL
+- auth            TEXT NOT NULL
+- is_active       BOOLEAN DEFAULT true
+- failed_count    INTEGER DEFAULT 0
+- created_at      TIMESTAMPTZ
+- updated_at      TIMESTAMPTZ (auto-updated via trigger)
+```
+
+**RLS:** Users can insert/select/delete their own subscriptions. Server-side updates via service client.
+
+**Index:** `idx_push_subs_user_active` on `user_id WHERE is_active = true`
 
 ---
 
@@ -763,10 +812,10 @@ WHERE business_id = X
 
 **These tables/features are planned but NOT implemented:**
 
-### ❌ `push_subscriptions`
+### ✅ `push_subscriptions` (Migration 028)
 
-- Not created in any migration
-- Related to Web Push Notifications (Área 5 - not started)
+- **Created in migration 028** — Web Push Notifications
+- See table documentation below
 
 ### ❌ `deposits` or deposit-related columns in appointments
 
@@ -986,7 +1035,7 @@ The following gamification endpoints were refactored to use the centralized `get
 
 ---
 
-## Realtime Configuration (Session [current])
+## Realtime Configuration (Session 140)
 
 **Supabase Realtime** enables WebSocket subscriptions for instant UI updates.
 

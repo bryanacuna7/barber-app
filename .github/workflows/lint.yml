@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate public changelog copy
+        run: npm run validate:changelog
+
       - name: Run ESLint
         run: npm run lint || echo "::warning::ESLint found issues. See logs for details."
         continue-on-error: true

@@ -28,6 +28,9 @@ const mockAppointments: TodayAppointment[] = [
     status: 'pending',
     client_notes: 'Primera vez, quiere un corte moderno',
     internal_notes: 'Cliente nuevo',
+    started_at: null,
+    actual_duration_minutes: null,
+    payment_method: null,
     client: {
       id: 'c1',
       name: 'Carlos Rodríguez',
@@ -49,6 +52,9 @@ const mockAppointments: TodayAppointment[] = [
     status: 'confirmed',
     client_notes: null,
     internal_notes: 'Cliente regular, le gusta el fade',
+    started_at: new Date(new Date().setHours(10, 15, 0)).toISOString(),
+    actual_duration_minutes: null,
+    payment_method: null,
     client: {
       id: 'c2',
       name: 'María González',
@@ -70,6 +76,9 @@ const mockAppointments: TodayAppointment[] = [
     status: 'completed',
     client_notes: null,
     internal_notes: null,
+    started_at: null,
+    actual_duration_minutes: 22,
+    payment_method: 'cash' as const,
     client: {
       id: 'c3',
       name: 'José Martínez',
@@ -91,6 +100,9 @@ const mockAppointments: TodayAppointment[] = [
     status: 'pending',
     client_notes: 'Quiere cambio de look completo',
     internal_notes: 'Consulta de color',
+    started_at: null,
+    actual_duration_minutes: null,
+    payment_method: null,
     client: {
       id: 'c4',
       name: 'Ana Sánchez',
@@ -112,6 +124,9 @@ const mockAppointments: TodayAppointment[] = [
     status: 'no_show',
     client_notes: null,
     internal_notes: 'No contestó llamada',
+    started_at: null,
+    actual_duration_minutes: null,
+    payment_method: null,
     client: {
       id: 'c5',
       name: 'Pedro Ramírez',

@@ -30,29 +30,29 @@ export function StatsCards({
       title: 'Total Referidos',
       value: totalReferrals,
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-50/80 dark:bg-blue-900/20',
     },
     {
       title: 'Referidos Activos',
       value: successfulReferrals,
       icon: UserCheck,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-emerald-50/80 dark:bg-emerald-900/20',
     },
     {
       title: 'Milestone Actual',
       value: `${currentMilestone}/5`,
       icon: Trophy,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+      color: 'text-amber-600 dark:text-amber-400',
+      bgColor: 'bg-amber-50/80 dark:bg-amber-900/20',
     },
     {
       title: 'Tasa de Conversión',
       value: `${conversionRate}%`,
       icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      color: 'text-violet-600 dark:text-violet-400',
+      bgColor: 'bg-violet-50/80 dark:bg-violet-900/20',
     },
   ]
 
@@ -67,16 +67,18 @@ export function StatsCards({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card className="p-6 hover:shadow-lg transition-shadow">
+            <Card className="h-full border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] p-4 lg:p-5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-colors hover:bg-zinc-100/70 dark:hover:bg-white/[0.06]">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">{card.title}</p>
-                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                  <p className="text-xs text-muted mb-1">{card.title}</p>
+                  <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                     {card.value}
                   </p>
                 </div>
-                <div className={`p-3 rounded-xl ${card.bgColor}`}>
-                  <Icon className={`h-6 w-6 ${card.color}`} />
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 ${card.bgColor}`}
+                >
+                  <Icon className={`h-5 w-5 ${card.color}`} />
                 </div>
               </div>
             </Card>

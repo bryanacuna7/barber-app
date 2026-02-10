@@ -1,4 +1,4 @@
-# Auditoría de Accesibilidad UI - Barber App
+# Auditoría de Accesibilidad UI - BarberApp
 
 **Fecha:** 28 de enero de 2026
 **Enfoque:** Contraste de colores y legibilidad con personalización de marca

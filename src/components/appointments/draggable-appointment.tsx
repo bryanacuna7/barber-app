@@ -142,9 +142,7 @@ export const DraggableAppointment = memo(function DraggableAppointment({
             {appointment.client?.name || 'Sin cliente'}
           </div>
           {appointment.service && (
-            <div className="text-[9px] opacity-75 truncate mt-0.5">
-              {appointment.service.name}
-            </div>
+            <div className="text-[9px] opacity-75 truncate mt-0.5">{appointment.service.name}</div>
           )}
         </>
       )}

@@ -59,7 +59,7 @@ export function HeroSection() {
               transition={{
                 delay: 0.1,
                 duration: 0.8,
-                ease: [0.21, 0.47, 0.32, 0.98], // Custom easing
+                ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number], // Custom easing
               }}
               className="text-5xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-6xl lg:text-7xl"
             >
@@ -197,7 +197,11 @@ export function HeroSection() {
           <motion.div
             initial={{ opacity: 0, x: 40, rotateY: -15 }}
             animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            transition={{ delay: 0.3, duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
+            transition={{
+              delay: 0.3,
+              duration: 0.8,
+              ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
+            }}
             whileHover={{
               scale: 1.02,
               rotateY: 5,

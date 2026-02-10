@@ -8,10 +8,9 @@
  * Demo: preview-fusion
  */
 
-import { Database } from '@/types/supabase'
-
 // Supabase types
-type SupabaseClient = Database['public']['Tables']['clients']['Row']
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseClient = any
 
 // UI types for demo
 export interface UIClient {

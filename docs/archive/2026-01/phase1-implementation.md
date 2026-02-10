@@ -87,7 +87,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 # Regístrate gratis en: https://resend.com/signup
 # Obtén tu API key en: https://resend.com/api-keys
 RESEND_API_KEY=re_your_api_key_here
-EMAIL_FROM=BarberShop Pro <noreply@yourdomain.com>
+EMAIL_FROM=BarberApp <noreply@yourdomain.com>
 
 # 2. Notification API Secret
 # Genera uno: openssl rand -base64 32
@@ -98,7 +98,7 @@ NOTIFICATION_API_SECRET=your_random_secret_here
 CRON_SECRET=your_cron_secret_here
 
 # 4. App URL (opcional)
-NEXT_PUBLIC_APP_URL=https://app.barbershoppro.com
+NEXT_PUBLIC_APP_URL=https://app.barberapp.com
 ```
 
 **Generar secrets:**
@@ -124,13 +124,13 @@ openssl rand -base64 32
 
 3. **Configura dominio (opcional pero recomendado):**
    - Dashboard → Domains → Add Domain
-   - Agrega tu dominio (ej: `barbershoppro.com`)
+   - Agrega tu dominio (ej: `barberapp.com`)
    - Configura DNS records (SPF, DKIM)
    - Esto mejora deliverability
 
 4. **Actualiza EMAIL_FROM:**
    ```
-   EMAIL_FROM=BarberShop Pro <noreply@tudominio.com>
+   EMAIL_FROM=BarberApp <noreply@tudominio.com>
    ```
 
 ---

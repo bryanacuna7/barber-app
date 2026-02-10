@@ -4,97 +4,48 @@ Implementation plans and project roadmaps.
 
 ---
 
-## 📋 Roadmap Hierarchy (Which to Use When)
+## Single Source of Truth
 
-### 1. [MVP_ROADMAP.md](MVP_ROADMAP.md) - PRIMARY for MVP Launch 🎯
+### [ROADMAP.md](../../ROADMAP.md)
 
-**Use for:** Getting to production with core business features
-**Status:** Active - Pre-launch
-**Scope:** Essential barbershop operations (appointments, clients, services, payments)
-**Timeline:** Launch-critical features only
+**The only active roadmap.** Contains:
 
-### 2. [POST_MVP_ROADMAP.md](POST_MVP_ROADMAP.md) - Post-Launch Features 🚀
+- What's built (completed features)
+- Current sprint (UX polish from AUDIT.md)
+- Post-launch features (Tiers 1-4)
+- Platform/admin improvements
+- UX contracts reference
 
-**Use for:** Features to build AFTER MVP is live
-**Status:** Planned - Post-launch
-**Scope:** Advanced features (analytics, marketing, advanced automation)
-**Timeline:** After stable production deployment
-
-### 3. [UI/UX Redesign Roadmap](../ui-ux-redesign/UI_UX_REDESIGN_ROADMAP.md) - Visual Transformation 🎨
-
-**Use for:** Awwwards-level UI/UX improvements (9.3/10 target)
-**Status:** Design phase complete (7/7 modules decided)
-**Scope:** Visual redesign of all 7 main modules
-**Timeline:** Can run in parallel with Post-MVP Tier 1 OR after MVP launch
-**See also:** [UI/UX Redesign README](../ui-ux-redesign/README.md) for all 7 winning demos
-
----
-
-## Active Implementation Plans
-
-### [Implementation Plan v2.5](implementation-v2.5.md)
-
-**Status:** Active - Technical Debt Cleanup
-**Scope:** Major app transformation (Audited & Improved)
-**Estimated:** 154-200 hours (8-10 weeks)
-**Score:** 6.0/10 → 8.5/10 projected
-
-**Current Progress:** Área 0 - Technical Debt Cleanup (80% complete)
-
-**Key Areas:**
-
-1. ✅ Task 1: Security Fixes (4 vulnerabilities)
-2. ✅ Task 2: DB Performance (7 indexes, N+1 fix)
-3. ✅ Task 3: Observability (Pino, Sentry, Redis)
-4. 🔄 Task 4: TypeScript Strict Mode (15 errors remaining)
-
-**Next:** Área 1 - Client Subscription & Basic Plan
-
----
-
-## Completed Plans
-
-See [archive](../archive/) for historical implementation plans.
-
----
-
-## Creating New Plans
-
-When creating a new implementation plan:
-
-1. **Use this template:**
-
-   ```markdown
-   # [Feature Name] Implementation Plan
-
-   ## Overview
-
-   - Goal: [What we're building]
-   - Estimated: [Hours/weeks]
-   - Status: [Planning/Active/Complete]
-
-   ## Tasks
-
-   1. Task 1 (estimated time)
-   2. Task 2 (estimated time)
-
-   ## Dependencies
-
-   - What needs to be done first
-
-   ## Risks
-
-   - What could go wrong
-   ```
-
-2. **Save as:** `docs/planning/[feature-name]-plan.md`
-3. **Update this index** with link and summary
-4. **Reference in PROGRESS.md** under "In Progress"
+All previous roadmaps (MVP, Post-MVP, Implementation v2.5, UI/UX Redesign, Frontend Modernization) have been consolidated into this single file and archived.
 
 ---
 
 ## Related Documentation
 
-- [PROGRESS.md](../../PROGRESS.md) - Current session state
+- [ROADMAP.md](../../ROADMAP.md) - What's next (single source of truth)
+- [PROGRESS.md](../../PROGRESS.md) - Session state and history
+- [AUDIT.md](../../AUDIT.md) - UX contracts and release gates
 - [DECISIONS.md](../../DECISIONS.md) - Architectural decisions
 - [docs/specs/](../specs/) - Feature specifications
+
+---
+
+## Archived Plans
+
+All previous planning documents are in [docs/archive/2026-02/](../archive/2026-02/):
+
+| Document                               | Why Archived                                   |
+| -------------------------------------- | ---------------------------------------------- |
+| MVP_ROADMAP.md                         | MVP scope exceeded, all items done             |
+| POST_MVP_ROADMAP.md                    | Consolidated into ROADMAP.md                   |
+| IMPLEMENTATION_ROADMAP_FINAL.md        | Outdated, referenced completed work as pending |
+| implementation-v2.5.md                 | Deprecated since Session 75                    |
+| UI_UX_REDESIGN_ROADMAP.md              | Fully implemented and merged                   |
+| FRONTEND_MODERNIZATION_PLAN.md         | Fully implemented                              |
+| CITAS_PAGE_SIMPLIFICATION.md           | Superseded by UI/UX redesign                   |
+| MI_DIA_CHECKLIST.md                    | Historical                                     |
+| MI_DIA_IMPLEMENTATION.md               | Historical                                     |
+| QUICK_WINS_IMPLEMENTED.md              | Already done                                   |
+| REFACTORING_SESSION_SUMMARY.md         | Historical                                     |
+| VERBOSITY_AUDIT_REPORT.md              | Historical                                     |
+| ARCHITECTURE_MODERNIZATION_ANALYSIS.md | Historical                                     |

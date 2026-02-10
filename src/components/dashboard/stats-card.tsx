@@ -1,8 +1,9 @@
 'use client'
 
 import { type LucideIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 interface StatsCardProps {
   title: string
@@ -21,7 +22,7 @@ const variants = {
   default: {
     bg: 'bg-white dark:bg-zinc-900',
     iconBg: 'bg-zinc-100 dark:bg-zinc-800',
-    iconColor: 'text-zinc-600 dark:text-zinc-400',
+    iconColor: 'text-muted',
     gradient: null,
     shadow: 'shadow-sm hover:shadow-md',
   },
@@ -64,6 +65,7 @@ export function StatsCard({
   variant = 'default',
   delay = 0,
 }: StatsCardProps) {
+  const prefersReducedMotion = useReducedMotion()
   const styles = variants[variant]
   const isGradient = styles.gradient
   const valueText = typeof value === 'number' ? value.toLocaleString('es-CR') : String(value)
@@ -74,13 +76,16 @@ export function StatsCard({
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        type: 'spring',
-        stiffness: 300,
-        damping: 24,
-        delay,
-      }}
-      whileHover={{ y: -4, scale: 1.01, transition: { duration: 0.2 } }}
+      transition={
+        prefersReducedMotion
+          ? { ...reducedMotion.spring.card, delay }
+          : { ...animations.spring.card, delay }
+      }
+      whileHover={
+        prefersReducedMotion
+          ? {}
+          : { y: -2, scale: 1.005, transition: { duration: animations.duration.fast } }
+      }
       className={cn(
         'relative overflow-hidden rounded-2xl p-3.5 sm:p-5',
         'transition-all duration-300',
@@ -93,11 +98,17 @@ export function StatsCard({
       {isGradient && (
         <>
           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-          {/* Shine effect */}
+          {/* Static sheen for desktop: keeps premium feel without motion noise */}
+          <div className="pointer-events-none absolute inset-0 hidden lg:block bg-gradient-to-br from-white/[0.08] via-transparent to-transparent" />
+          <div className="pointer-events-none absolute inset-x-5 top-0 hidden h-px bg-gradient-to-r from-transparent via-white/60 to-transparent lg:block" />
+          {/* Shine effect — mobile only */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/10 to-white/0 opacity-0"
-            whileHover={{ opacity: [0, 1, 0], x: ['-100%', '100%'] }}
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/10 to-white/0 opacity-0 lg:hidden"
+            whileHover={prefersReducedMotion ? {} : { opacity: [0, 1, 0], x: ['-100%', '100%'] }}
+            transition={{
+              duration: animations.duration.slow * 2,
+              ease: animations.easing.easeInOut as [number, number, number, number],
+            }}
           />
         </>
       )}
@@ -117,7 +128,7 @@ export function StatsCard({
             key={String(value)}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            transition={animations.spring.snappy}
             className={cn(
               'mt-1.5 font-bold tracking-tight leading-[1.05] [overflow-wrap:anywhere]',
               hasVeryLongValue
@@ -172,9 +183,9 @@ export function StatsCard({
         </div>
       </div>
 
-      {/* Decorative circle */}
+      {/* Decorative circle — mobile only */}
       {isGradient && (
-        <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/10" />
+        <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/10 lg:hidden" />
       )}
     </motion.div>
   )

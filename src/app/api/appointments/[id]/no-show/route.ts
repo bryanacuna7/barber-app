@@ -7,6 +7,7 @@ import {
 } from '@/lib/api/middleware'
 import { logger, logSecurity } from '@/lib/logger'
 import { canModifyBarberAppointments } from '@/lib/rbac'
+import { sendPushToBusinessOwner } from '@/lib/push/sender'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -144,6 +145,14 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       }
 
       logger.info({ appointmentId, status: 'no_show' }, 'Appointment marked as no-show')
+
+      // Push to business owner (async, non-blocking)
+      sendPushToBusinessOwner(business.id, {
+        title: 'No show',
+        body: `${(updatedAppointment as any)?.client?.name || 'Cliente'} no se presentó`,
+        url: '/citas',
+        tag: `noshow-${appointmentId}`,
+      }).catch((err) => logger.error({ err, appointmentId }, 'Push error on no-show'))
 
       return NextResponse.json(updatedAppointment as AppointmentStatusUpdateResponse)
     } catch (error) {

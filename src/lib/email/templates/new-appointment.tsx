@@ -29,6 +29,7 @@ interface NewAppointmentEmailProps {
   price: string
   logoUrl?: string
   brandColor?: string
+  trackingUrl?: string
 }
 
 export default function NewAppointmentEmail({
@@ -41,6 +42,7 @@ export default function NewAppointmentEmail({
   price = '₡5,000',
   logoUrl,
   brandColor = '#3b82f6',
+  trackingUrl,
 }: NewAppointmentEmailProps) {
   const formattedDate = appointmentDate
     ? format(new Date(appointmentDate), "EEEE d 'de' MMMM 'a las' h:mm a", { locale: es })
@@ -93,10 +95,21 @@ export default function NewAppointmentEmail({
           </Section>
 
           <Section style={buttonSection}>
-            <Button style={button} href="https://app.barbershoppro.com/citas">
+            <Button
+              style={{ ...button, backgroundColor: brandColor }}
+              href="https://app.barberapp.com/citas"
+            >
               Ver en Dashboard
             </Button>
           </Section>
+
+          {trackingUrl && (
+            <Section style={buttonSection}>
+              <Button style={trackingButton} href={trackingUrl}>
+                📍 Seguir cita en vivo
+              </Button>
+            </Section>
+          )}
 
           <Text style={tip}>
             💡 <strong>Tip:</strong> Puedes ver todas tus citas del día en el dashboard y recibir
@@ -105,10 +118,10 @@ export default function NewAppointmentEmail({
 
           <Text style={footer}>
             ¿Necesitas cambiar algo?{' '}
-            <Link href="https://app.barbershoppro.com/citas">Gestionar citas</Link>
+            <Link href="https://app.barberapp.com/citas">Gestionar citas</Link>
           </Text>
 
-          <Text style={footer}>BarberShop Pro - Tu barbería, sin complicaciones</Text>
+          <Text style={footer}>BarberApp - Tu barbería, sin complicaciones</Text>
         </Container>
       </Body>
     </Html>
@@ -191,6 +204,19 @@ const button = {
   textAlign: 'center' as const,
   display: 'inline-block',
   padding: '12px 32px',
+}
+
+const trackingButton = {
+  backgroundColor: '#ffffff',
+  borderRadius: '8px',
+  color: '#374151',
+  fontSize: '14px',
+  fontWeight: '600' as const,
+  textDecoration: 'none',
+  textAlign: 'center' as const,
+  display: 'inline-block',
+  padding: '10px 24px',
+  border: '1px solid #e5e7eb',
 }
 
 const tip = {

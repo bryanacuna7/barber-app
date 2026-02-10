@@ -43,7 +43,6 @@ import {
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
 import {
   format,
@@ -69,9 +68,15 @@ import {
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { animations } from '@/lib/design-system'
+import { usePreference } from '@/lib/preferences'
+import { formatCurrencyCompactMillions } from '@/lib/utils'
 
 // React Query hooks
-import { useCalendarAppointments, useCreateAppointment } from '@/hooks/queries/useAppointments'
+import {
+  useCalendarAppointments,
+  useCreateAppointment,
+  useUpdateAppointmentStatus,
+} from '@/hooks/queries/useAppointments'
 import { useClients } from '@/hooks/queries/useClients'
 import { useServices } from '@/hooks/queries/useServices'
 import { useBarbers } from '@/hooks/queries/useBarbers'
@@ -82,6 +87,7 @@ import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 // Error boundaries
 import { ComponentErrorBoundary, CalendarErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Business context
 import { useBusiness } from '@/contexts/business-context'
@@ -200,7 +206,7 @@ function StatsContent({
         <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-500/10 to-red-500/10 dark:from-amber-500/20 dark:to-red-500/20 rounded-lg border border-amber-500/20 dark:border-amber-500/30">
           <span className="text-sm font-bold text-zinc-900 dark:text-white">Revenue</span>
           <span className="text-lg font-bold text-amber-500 dark:text-amber-500">
-            ₡{(stats.totalRevenue / 1000).toFixed(0)}k
+            {formatCurrencyCompactMillions(stats.totalRevenue)}
           </span>
         </div>
       </div>
@@ -209,29 +215,32 @@ function StatsContent({
 }
 
 function CitasCalendarFusionContent() {
-  const { businessId } = useBusiness()
-  const [viewMode, setViewMode] = useState<ViewMode>('day')
+  const { businessId, isBarber, barberId, staffPermissions } = useBusiness()
+  const searchParams = useSearchParams()
+  const [viewMode, setViewMode] = usePreference<ViewMode>('citas_view', 'day', [
+    'day',
+    'week',
+    'month',
+  ])
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
+  const today = useMemo(() => startOfDay(new Date()), [])
+  const intentHandled = useRef(false)
   const [isStatsOpen, setIsStatsOpen] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false)
   const [activePickerField, setActivePickerField] = useState<
     'client' | 'service' | 'barber' | null
   >(null)
-  const [createForm, setCreateForm] = useState({
+  const [createForm, setCreateForm] = useState(() => ({
     client_id: '',
     service_id: '',
-    barber_id: '',
+    barber_id: isBarber && barberId ? barberId : '',
     time: '09:00',
     notes: '',
-  })
-
-  const today = useMemo(() => new Date(), [])
-  const searchParams = useSearchParams()
-  const intentHandled = useRef(false)
+  }))
 
   // Auto-open create sheet when navigated with ?intent=create
   useEffect(() => {
@@ -281,6 +290,7 @@ function CitasCalendarFusionContent() {
   const { data: servicesData } = useServices(businessId || '')
   const { data: barbersData } = useBarbers(businessId || '')
   const createAppointment = useCreateAppointment()
+  const updateAppointmentStatus = useUpdateAppointmentStatus()
 
   const clients = clientsData?.clients || []
   const services = servicesData || []
@@ -301,9 +311,18 @@ function CitasCalendarFusionContent() {
 
   const handleToday = useCallback(() => setSelectedDate(new Date()), [])
 
+  // Barber filtering: only show own appointments unless can_view_all_citas
+  const roleFilteredAppointments = useMemo(() => {
+    if (isBarber && !staffPermissions.can_view_all_citas && barberId) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return appointments.filter((apt: any) => apt.barber_id === barberId)
+    }
+    return appointments
+  }, [appointments, isBarber, staffPermissions.can_view_all_citas, barberId])
+
   // Filter appointments by view
   const filteredAppointments = useMemo(() => {
-    return appointments.filter((apt) => {
+    return roleFilteredAppointments.filter((apt) => {
       const aptDate = parseISO(apt.scheduled_at)
       if (!isValid(aptDate)) return false
 
@@ -318,7 +337,7 @@ function CitasCalendarFusionContent() {
         return aptDate >= monthStart && aptDate <= monthEnd
       }
     })
-  }, [appointments, viewMode, selectedDate])
+  }, [roleFilteredAppointments, viewMode, selectedDate])
 
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments]
@@ -380,12 +399,12 @@ function CitasCalendarFusionContent() {
     const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
     return eachDayOfInterval({ start: weekStart, end: weekEnd }).map((day) => ({
       date: day,
-      appointments: appointments.filter((apt) => {
+      appointments: roleFilteredAppointments.filter((apt) => {
         const aptDate = parseISO(apt.scheduled_at)
         return isValid(aptDate) && isSameDay(aptDate, day)
       }),
     }))
-  }, [viewMode, selectedDate, appointments])
+  }, [viewMode, selectedDate, roleFilteredAppointments])
 
   // Mobile week days (3 days: current + next 2)
   const mobileWeekDays = useMemo(() => {
@@ -406,13 +425,13 @@ function CitasCalendarFusionContent() {
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 })
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd }).map((day) => ({
       date: day,
-      appointments: appointments.filter((apt) => {
+      appointments: roleFilteredAppointments.filter((apt) => {
         const aptDate = parseISO(apt.scheduled_at)
         return isValid(aptDate) && isSameDay(aptDate, day)
       }),
       isCurrentMonth: isSameMonth(day, selectedDate),
     }))
-  }, [viewMode, selectedDate, appointments])
+  }, [viewMode, selectedDate, roleFilteredAppointments])
 
   // Mini calendar for sidebar
   const miniCalendarDays = useMemo(() => {
@@ -489,6 +508,46 @@ function CitasCalendarFusionContent() {
     }
     return format(selectedDate, 'MMM yyyy', { locale: es })
   }, [selectedDate, viewMode])
+  const desktopContextLabel = useMemo(() => {
+    if (viewMode === 'day') {
+      return format(selectedDate, 'EEE d MMM yyyy', { locale: es })
+    }
+    if (viewMode === 'week') {
+      const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
+      const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
+      const weekStartLabel = format(weekStart, 'EEE d MMM', { locale: es })
+      const weekEndLabel = format(weekEnd, 'EEE d MMM yyyy', { locale: es })
+      return `Semana: ${weekStartLabel} - ${weekEndLabel}`
+    }
+    return format(selectedDate, 'MMMM yyyy', { locale: es })
+  }, [selectedDate, viewMode])
+  const jumpToCurrentLabel = useMemo(() => {
+    if (viewMode === 'day') return 'Hoy'
+    if (viewMode === 'week') return 'Esta semana'
+    return 'Este mes'
+  }, [viewMode])
+  const projectionWindowLabel = useMemo(() => {
+    if (viewMode === 'day') return 'del día'
+    if (viewMode === 'week') return 'de la semana'
+    return 'del mes'
+  }, [viewMode])
+  const projectedRevenueDisplay = useMemo(
+    () => formatCurrencyCompactMillions(stats.projectedRevenue),
+    [stats.projectedRevenue]
+  )
+  const unscheduledAppointmentsCount = useMemo(
+    () =>
+      filteredAppointments.filter((apt) => {
+        if (!apt?.scheduled_at) return true
+        const date = parseISO(apt.scheduled_at)
+        return !isValid(date)
+      }).length,
+    [filteredAppointments]
+  )
+  const mobileProjectionAppointmentsLabel = useMemo(
+    () => `${filteredAppointments.length} citas`,
+    [filteredAppointments.length]
+  )
 
   // Handle form submission
   const handleCreateAppointment = async () => {
@@ -522,11 +581,11 @@ function CitasCalendarFusionContent() {
       toast.success('Cita creada exitosamente')
       setIsCreateOpen(false)
 
-      // Reset form
+      // Reset form (keep barber_id for barber role)
       setCreateForm({
         client_id: '',
         service_id: '',
-        barber_id: '',
+        barber_id: isBarber && barberId ? barberId : '',
         time: '09:00',
         notes: '',
       })
@@ -535,6 +594,48 @@ function CitasCalendarFusionContent() {
       console.error(error)
     }
   }
+
+  const handleAppointmentStatusChange = useCallback(
+    async (appointmentId: string, status: 'confirmed' | 'completed' | 'cancelled') => {
+      try {
+        await updateAppointmentStatus.mutateAsync({
+          appointmentId,
+          status,
+        })
+        if (status === 'confirmed') toast.success('Cita confirmada')
+        if (status === 'completed') toast.success('Cita completada')
+        if (status === 'cancelled') toast.success('Cita cancelada')
+      } catch (error) {
+        toast.error('No se pudo actualizar la cita')
+        console.error(error)
+      }
+    },
+    [updateAppointmentStatus]
+  )
+
+  const handleConfirmPendingAppointments = useCallback(async () => {
+    const pendingAppointments = filteredAppointments.filter((apt) => apt.status === 'pending')
+    if (pendingAppointments.length === 0) return
+
+    let updatedCount = 0
+    for (const appointment of pendingAppointments) {
+      try {
+        await updateAppointmentStatus.mutateAsync({
+          appointmentId: appointment.id,
+          status: 'confirmed',
+        })
+        updatedCount += 1
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    if (updatedCount > 0) {
+      toast.success(updatedCount === 1 ? '1 cita confirmada' : `${updatedCount} citas confirmadas`)
+    } else {
+      toast.error('No se pudieron confirmar las citas')
+    }
+  }, [filteredAppointments, updateAppointmentStatus])
 
   // Derive form date from selectedDate
   const formDate = format(selectedDate, 'yyyy-MM-dd')
@@ -550,11 +651,7 @@ function CitasCalendarFusionContent() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      {/* Subtle mesh gradients (15% opacity) - Only in dark mode */}
-      <div className="hidden dark:block fixed inset-0 opacity-15 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500 rounded-full mix-blend-screen filter blur-3xl animate-blob" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl animate-blob animation-delay-2000" />
-      </div>
+      {/* Mesh gradients removed for desktop premium — cleaner, less noise */}
 
       <div className="relative z-10 flex">
         {/* Main content area */}
@@ -565,8 +662,8 @@ function CitasCalendarFusionContent() {
               {/* DESKTOP HEADER - Single row layout (unchanged) */}
               <div className="hidden lg:flex items-center justify-between mb-4 gap-2">
                 {/* Left: Month/Year context */}
-                <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400 min-w-0 flex-shrink-0">
-                  {format(selectedDate, 'MMMM yyyy', { locale: es })}
+                <div className="text-sm font-medium text-muted min-w-0 flex-shrink-0">
+                  {desktopContextLabel}
                 </div>
 
                 {/* Center: View Switcher */}
@@ -605,24 +702,30 @@ function CitasCalendarFusionContent() {
 
                 {/* Right: Navigation */}
                 <div className="flex items-center gap-3">
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={handlePrevious}
-                    className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                    className="p-1 h-auto hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
+                    aria-label="Anterior"
                   >
                     <ChevronLeft className="w-5 h-5 text-muted" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
                     onClick={handleToday}
-                    className="px-3 py-1 text-sm font-medium text-red-500 dark:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                    className="px-3 py-1 h-auto text-sm font-medium text-red-500 dark:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
+                    aria-label={`Ir a ${jumpToCurrentLabel.toLowerCase()}`}
                   >
-                    Hoy
-                  </button>
-                  <button
+                    {jumpToCurrentLabel}
+                  </Button>
+                  <Button
+                    variant="ghost"
                     onClick={handleNext}
-                    className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                    className="p-1 h-auto hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
+                    aria-label="Siguiente"
                   >
                     <ChevronRight className="w-5 h-5 text-muted" />
-                  </button>
+                  </Button>
                   <Button
                     onClick={() => setIsCreateOpen(true)}
                     data-testid="create-appointment-btn"
@@ -635,114 +738,91 @@ function CitasCalendarFusionContent() {
                 </div>
               </div>
 
-              {/* MOBILE HEADER - Compact toolbar + full-width segmented control */}
-              <div className="lg:hidden mb-4 rounded-2xl border border-zinc-200/70 dark:border-zinc-700/70 bg-white/75 dark:bg-zinc-900/85 p-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-                {/* Row 1: Date nav group + Today + Create */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center flex-1 min-w-0 rounded-2xl border border-zinc-200/70 dark:border-zinc-700/70 bg-white/70 dark:bg-zinc-800/80 backdrop-blur-xl px-1 py-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_28px_rgba(0,0,0,0.35)]">
-                    <button
-                      onClick={handlePrevious}
-                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-muted hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
-                      aria-label="Anterior"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <div className="flex-1 text-center px-2 min-w-0">
-                      <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 truncate">
-                        <span className="hidden min-[390px]:inline">{mobileDateLabel}</span>
-                        <span className="min-[390px]:hidden">{mobileDateLabelCompact}</span>
-                      </div>
+              {/* MOBILE HEADER - 2 rows: Row1=navigation, Row2=view switcher */}
+              <div className="lg:hidden mb-3 rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/80 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.35)] p-2.5 space-y-2">
+                {/* Row 1: < Date > Hoy + */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    onClick={handlePrevious}
+                    className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-muted"
+                    aria-label="Anterior"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </Button>
+                  <div className="flex-1 text-center min-w-0">
+                    <div className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+                      <span className="hidden min-[390px]:inline">{mobileDateLabel}</span>
+                      <span className="min-[390px]:hidden">{mobileDateLabelCompact}</span>
                     </div>
-                    <button
-                      onClick={handleNext}
-                      className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl flex items-center justify-center text-muted hover:bg-zinc-200/70 dark:hover:bg-white/10 transition-colors"
-                      aria-label="Siguiente"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
                   </div>
+                  <Button
+                    variant="ghost"
+                    onClick={handleNext}
+                    className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-muted"
+                    aria-label="Siguiente"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
 
                   {!isSelectedDateToday && (
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={handleToday}
-                      className="min-h-[44px] h-11 px-2.5 text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center flex-shrink-0"
+                      className="min-h-[44px] h-auto px-2 text-xs font-semibold text-blue-600 dark:text-blue-400 flex-shrink-0"
                       aria-label="Ir a hoy"
                     >
-                      Ir a hoy
-                    </button>
+                      Hoy
+                    </Button>
                   )}
 
                   <Button
                     variant="gradient"
                     onClick={() => setIsCreateOpen(true)}
                     data-testid="create-appointment-btn"
-                    className="min-w-[44px] min-h-[44px] h-11 w-11 rounded-xl p-0 flex-shrink-0"
+                    className="min-w-[44px] min-h-[44px] h-10 w-10 rounded-xl p-0 flex-shrink-0"
                     aria-label="Crear cita"
                   >
                     <Plus className="h-5 w-5" />
                   </Button>
                 </div>
 
-                {/* Row 2: View switcher */}
-                <div className="grid grid-cols-3 gap-1.5 rounded-2xl border border-zinc-200/70 dark:border-zinc-700/70 bg-white/65 dark:bg-zinc-800/70 backdrop-blur-xl p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                  <button
-                    onClick={() => setViewMode('day')}
-                    className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
-                      viewMode === 'day'
-                        ? 'brand-tab-active border'
-                        : 'text-zinc-500 dark:text-zinc-300 border border-zinc-200/70 dark:border-zinc-700 bg-white/55 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-700/70'
-                    }`}
-                  >
-                    Día
-                  </button>
-                  <button
-                    onClick={() => setViewMode('week')}
-                    className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
-                      viewMode === 'week'
-                        ? 'brand-tab-active border'
-                        : 'text-zinc-500 dark:text-zinc-300 border border-zinc-200/70 dark:border-zinc-700 bg-white/55 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-700/70'
-                    }`}
-                  >
-                    Semana
-                  </button>
-                  <button
-                    onClick={() => setViewMode('month')}
-                    className={`min-h-[44px] h-11 rounded-xl font-medium text-sm transition-all duration-200 ${
-                      viewMode === 'month'
-                        ? 'brand-tab-active border'
-                        : 'text-zinc-500 dark:text-zinc-300 border border-zinc-200/70 dark:border-zinc-700 bg-white/55 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-700/70'
-                    }`}
-                  >
-                    Mes
-                  </button>
+                {/* Row 2: D/S/M segmented control (full width) */}
+                <div className="flex items-center gap-1 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1">
+                  {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
+                    <button
+                      type="button"
+                      key={mode}
+                      onClick={() => setViewMode(mode)}
+                      aria-pressed={viewMode === mode}
+                      className={`flex-1 min-h-[38px] rounded-lg border border-transparent text-xs font-semibold transition-colors ${
+                        viewMode === mode
+                          ? 'brand-tab-active'
+                          : 'text-muted hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      {mode === 'day' ? 'Día' : mode === 'week' ? 'Semana' : 'Mes'}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="pt-1 border-t border-zinc-200/70 dark:border-zinc-800/80">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-semibold text-zinc-900 dark:text-white">
+                      {projectedRevenueDisplay}
+                    </span>
+                    <span className="text-muted">{mobileProjectionAppointmentsLabel}</span>
+                  </div>
                 </div>
               </div>
-
-              {/* Large date header (Day view only) */}
-              {viewMode === 'day' && (
-                <div className="hidden lg:flex items-baseline gap-4 mb-3">
-                  <div className="text-6xl font-bold text-zinc-900 dark:text-white">
-                    {format(selectedDate, 'd')}
-                  </div>
-                  <div className="text-2xl text-muted">
-                    {format(selectedDate, 'EEEE', { locale: es })}
-                  </div>
-                </div>
-              )}
 
               {/* Revenue stats - Mobile compact, Desktop expanded */}
-              {/* Mobile: Single compact line */}
-              <div className="lg:hidden text-sm text-muted">
-                ₡{(stats.projectedRevenue / 1000).toFixed(0)}k proyectado ·{' '}
-                {filteredAppointments.length} citas
-              </div>
-
               {/* Desktop: Full stats with progress bar */}
               <div className="hidden lg:flex items-center gap-6 text-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted">Proyectado:</span>
+                  <span className="text-muted">Proyección {projectionWindowLabel}:</span>
                   <span className="font-bold text-amber-500 dark:text-amber-500">
-                    ₡{(stats.projectedRevenue / 1000).toFixed(0)}k
+                    {projectedRevenueDisplay}
                   </span>
                 </div>
                 {viewMode === 'day' && (
@@ -764,197 +844,150 @@ function CitasCalendarFusionContent() {
           </header>
 
           {/* View Content */}
-          <PullToRefresh
-            onRefresh={async () => {
-              await refetch()
-            }}
-          >
-            <div className="px-0 pb-4 lg:p-6">
-              {/* Loading state */}
-              {isLoading && (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-muted">Cargando citas...</div>
+          <div className="px-0 pb-4 lg:p-6">
+            {/* Loading skeleton */}
+            {isLoading && (
+              <div className="space-y-4">
+                {/* Day header skeleton */}
+                <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+                  <Skeleton className="h-3 w-20 mb-3" />
+                  <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
-              )}
+                {/* Time slots skeleton */}
+                <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-4">
+                      <Skeleton className="h-4 w-14" />
+                      <div className="flex-1 flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-1/3" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                        <Skeleton className="h-5 w-14 rounded-full" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {/* DAY VIEW */}
-              {!isLoading && viewMode === 'day' && (
-                <div className="space-y-4">
-                  {/* All Day section */}
+            {/* DAY VIEW */}
+            {!isLoading && viewMode === 'day' && (
+              <div className="space-y-4">
+                {unscheduledAppointmentsCount > 0 && (
                   <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
                     <span className="text-xs font-medium uppercase tracking-wide text-muted">
-                      Todo el día
+                      Sin hora asignada · {unscheduledAppointmentsCount}
                     </span>
                   </div>
+                )}
 
-                  {/* Time blocks (Cinema feature) */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-                    {timeBlocks.map((block, blockIndex) => (
-                      <motion.div
-                        key={block.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
-                        className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm"
-                      >
-                        {/* Block header */}
-                        <div className="mb-4">
-                          <div className="flex flex-col gap-1.5 xl:flex-row xl:items-center xl:justify-between xl:gap-3">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <block.icon className={`w-5 h-5 ${block.iconColor}`} />
-                              <h3 className="truncate text-lg font-semibold text-zinc-900 dark:text-white leading-tight">
-                                {block.label}
-                              </h3>
-                            </div>
-                            <span className="pl-7 text-xs sm:text-sm font-medium text-muted xl:pl-0 xl:shrink-0">
-                              {block.start > 12 ? block.start - 12 : block.start}
-                              {block.start >= 12 ? 'pm' : 'am'} -{' '}
-                              {block.end > 12 ? block.end - 12 : block.end}
-                              {block.end >= 12 ? 'pm' : 'am'}
-                            </span>
+                {/* Time blocks (Cinema feature) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+                  {timeBlocks.map((block, blockIndex) => (
+                    <motion.div
+                      key={block.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
+                      className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm"
+                    >
+                      {/* Block header */}
+                      <div className="mb-4">
+                        <div className="flex flex-col gap-1.5 xl:flex-row xl:items-center xl:justify-between xl:gap-3">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <block.icon className={`w-5 h-5 ${block.iconColor}`} />
+                            <h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white leading-tight uppercase tracking-wide">
+                              {block.label}
+                            </h3>
                           </div>
-
-                          {/* Occupancy bar (Cinema feature) */}
-                          <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 p-3">
-                            <div className="flex items-center justify-between mb-2 text-sm">
-                              <span className="text-zinc-900 dark:text-white">
-                                {block.count} citas
-                              </span>
-                              <span
-                                className={`font-bold ${
-                                  block.occupancyPercent >= 90
-                                    ? 'text-red-500 dark:text-red-500'
-                                    : block.occupancyPercent >= 60
-                                      ? 'text-amber-500 dark:text-amber-500'
-                                      : 'text-green-500 dark:text-emerald-500'
-                                }`}
-                              >
-                                {block.occupancyPercent}%
-                              </span>
-                            </div>
-                            <div className="h-1.5 bg-zinc-200/70 dark:bg-zinc-800/80 rounded-full overflow-hidden">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${block.occupancyPercent}%` }}
-                                className={`h-full ${
-                                  block.occupancyPercent >= 90
-                                    ? 'bg-red-500 dark:bg-red-500'
-                                    : block.occupancyPercent >= 60
-                                      ? 'bg-amber-500 dark:bg-amber-500'
-                                      : 'bg-green-500 dark:bg-emerald-500'
-                                }`}
-                              />
-                            </div>
-                          </div>
+                          <span className="pl-7 text-xs sm:text-sm font-medium text-muted xl:pl-0 xl:shrink-0">
+                            {block.start > 12 ? block.start - 12 : block.start}
+                            {block.start >= 12 ? 'pm' : 'am'} -{' '}
+                            {block.end > 12 ? block.end - 12 : block.end}
+                            {block.end >= 12 ? 'pm' : 'am'}
+                          </span>
                         </div>
 
-                        {/* Appointments (grouped rows inside block card) */}
-                        <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950/60">
-                          {block.appointments.length === 0 && (
-                            <div className="px-4 py-3 text-sm text-muted">
-                              Sin citas programadas
-                            </div>
-                          )}
+                        {/* Occupancy bar (Cinema feature) */}
+                        <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 p-3">
+                          <div className="flex items-center justify-between mb-2 text-sm">
+                            <span className="text-zinc-900 dark:text-white">
+                              {block.count} citas
+                            </span>
+                            <span
+                              className={`font-bold ${
+                                block.occupancyPercent >= 90
+                                  ? 'text-red-500 dark:text-red-500'
+                                  : block.occupancyPercent >= 60
+                                    ? 'text-amber-500 dark:text-amber-500'
+                                    : 'text-green-500 dark:text-emerald-500'
+                              }`}
+                            >
+                              {block.occupancyPercent}%
+                            </span>
+                          </div>
+                          <div className="h-1.5 bg-zinc-200/70 dark:bg-zinc-800/80 rounded-full overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${block.occupancyPercent}%` }}
+                              className={`h-full ${
+                                block.occupancyPercent >= 90
+                                  ? 'bg-red-500 dark:bg-red-500'
+                                  : block.occupancyPercent >= 60
+                                    ? 'bg-amber-500 dark:bg-amber-500'
+                                    : 'bg-green-500 dark:bg-emerald-500'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                          {block.appointments.map((apt, aptIndex) => {
-                            const canConfirm = apt.status === 'pending'
-                            const canCancel =
-                              apt.status !== 'cancelled' && apt.status !== 'completed'
-                            const isLast = aptIndex === block.appointments.length - 1
+                      {/* Appointments (grouped rows inside block card) */}
+                      <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950/60">
+                        {block.appointments.length === 0 && (
+                          <div className="px-4 py-3 text-sm text-muted">Sin citas programadas</div>
+                        )}
 
-                            const rightActions = []
-                            if (canConfirm) {
-                              rightActions.push({
-                                icon: <CheckCircle className="h-5 w-5" />,
-                                label: 'Confirmar',
-                                color: 'bg-emerald-500',
-                                onClick: () => {
-                                  // TODO: Call onStatusChange when integrated
-                                  toast.success('Cita confirmada')
-                                },
-                              })
-                            }
-                            if (canCancel) {
-                              rightActions.push({
-                                icon: <X className="h-5 w-5" />,
-                                label: 'Cancelar',
-                                color: 'bg-red-500',
-                                onClick: () => {
-                                  // TODO: Call onStatusChange when integrated
-                                  toast.info('Cita cancelada')
-                                },
-                              })
-                            }
+                        {block.appointments.map((apt, aptIndex) => {
+                          const canConfirm = apt.status === 'pending'
+                          const canCancel = apt.status !== 'cancelled' && apt.status !== 'completed'
+                          const isLast = aptIndex === block.appointments.length - 1
 
-                            return (
-                              <div
-                                key={apt.id}
-                                className={
-                                  isLast ? '' : 'border-b border-zinc-200/70 dark:border-white/10'
-                                }
-                              >
-                                <div className="lg:hidden">
-                                  <SwipeableRow
-                                    rightActions={rightActions}
-                                    containerClassName="rounded-none"
-                                  >
-                                    <div
-                                      onClick={() => setSelectedId(apt.id)}
-                                      className="cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900"
-                                    >
-                                      <div className="flex items-start justify-between mb-2">
-                                        <div className="flex-1">
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <div
-                                              className={`w-1.5 h-1.5 rounded-full ${
-                                                apt.status === 'completed'
-                                                  ? 'bg-emerald-500'
-                                                  : apt.status === 'confirmed'
-                                                    ? 'bg-blue-500'
-                                                    : 'bg-amber-500'
-                                              }`}
-                                            />
-                                            <span className="font-medium text-zinc-900 dark:text-white text-sm">
-                                              {apt.client?.name || 'Cliente'}
-                                            </span>
-                                          </div>
-                                          <div className="text-xs text-muted leading-tight">
-                                            {apt.service?.name || 'Servicio'}
-                                          </div>
-                                        </div>
-                                        <div className="text-right text-xs">
-                                          <div className="text-muted font-mono">
-                                            {format(parseISO(apt.scheduled_at), 'h:mm a')}
-                                          </div>
-                                          <div className="text-amber-500 dark:text-amber-500 font-semibold mt-0.5">
-                                            ₡{((apt.service?.price || 0) / 1000).toFixed(0)}k
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </SwipeableRow>
-                                </div>
-                                {/* Desktop: draggable version */}
-                                <motion.div
-                                  className="hidden lg:block"
-                                  drag
-                                  dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                                  dragElastic={0.05}
-                                  onDragStart={() => setDraggedId(apt.id)}
-                                  onDragEnd={() => {
-                                    setDraggedId(null)
-                                    toast.info('Rescheduling (demo)')
-                                  }}
-                                  whileTap={{ scale: 0.98 }}
-                                  whileDrag={{ scale: 1.05, zIndex: 50 }}
-                                  onClick={() => setSelectedId(apt.id)}
+                          const rightActions = []
+                          if (canConfirm) {
+                            rightActions.push({
+                              icon: <CheckCircle className="h-5 w-5" />,
+                              label: 'Confirmar',
+                              color: 'bg-emerald-500',
+                              onClick: () => handleAppointmentStatusChange(apt.id, 'confirmed'),
+                            })
+                          }
+                          if (canCancel) {
+                            rightActions.push({
+                              icon: <X className="h-5 w-5" />,
+                              label: 'Cancelar',
+                              color: 'bg-red-500',
+                              onClick: () => handleAppointmentStatusChange(apt.id, 'cancelled'),
+                            })
+                          }
+
+                          return (
+                            <div
+                              key={apt.id}
+                              className={
+                                isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/80'
+                              }
+                            >
+                              <div className="lg:hidden">
+                                <SwipeableRow
+                                  rightActions={rightActions}
+                                  showAffordance={false}
+                                  containerClassName="rounded-none"
                                 >
                                   <div
-                                    className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-all ${
-                                      draggedId === apt.id
-                                        ? 'opacity-50'
-                                        : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
-                                    }`}
+                                    onClick={() => setSelectedId(apt.id)}
+                                    className="cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900"
                                   >
                                     <div className="flex items-start justify-between mb-2">
                                       <div className="flex-1">
@@ -972,354 +1005,391 @@ function CitasCalendarFusionContent() {
                                             {apt.client?.name || 'Cliente'}
                                           </span>
                                         </div>
-                                        <div className="text-xs text-muted">
+                                        <div className="text-xs text-muted leading-tight">
                                           {apt.service?.name || 'Servicio'}
                                         </div>
                                       </div>
                                       <div className="text-right text-xs">
-                                        <div className="text-muted font-mono">
+                                        <div className="text-muted font-medium tabular-nums leading-tight">
                                           {format(parseISO(apt.scheduled_at), 'h:mm a')}
                                         </div>
-                                        <div className="text-amber-500 dark:text-amber-500 font-semibold mt-0.5">
-                                          ₡{((apt.service?.price || 0) / 1000).toFixed(0)}k
+                                        <div className="mt-1 text-[13px] leading-tight font-semibold text-amber-500 dark:text-amber-500">
+                                          {formatCurrencyCompactMillions(apt.service?.price || 0)}
                                         </div>
                                       </div>
                                     </div>
                                   </div>
-                                </motion.div>
+                                </SwipeableRow>
                               </div>
-                            )
-                          })}
-                        </div>
-
-                        {/* Gap indicators (Cinema feature) */}
-                        <div className="mt-3 space-y-1.5 lg:space-y-2">
-                          {gaps
-                            .filter((gap) => {
-                              const gapHour = parseISO(gap.start).getHours()
-                              return gapHour >= block.start && gapHour < block.end
-                            })
-                            .map((gap, gapIndex) => (
+                              {/* Desktop: draggable version */}
                               <motion.div
-                                key={`gap-${blockIndex}-${gapIndex}`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
+                                className="hidden lg:block"
+                                drag
+                                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                                dragElastic={0.05}
+                                onDragStart={() => setDraggedId(apt.id)}
+                                onDragEnd={() => {
+                                  setDraggedId(null)
+                                  toast.info('Rescheduling (demo)')
+                                }}
                                 whileTap={{ scale: 0.98 }}
-                                className="rounded-xl border border-dashed border-emerald-300/70 dark:border-emerald-500/30 bg-emerald-50/80 dark:bg-emerald-500/10 p-2 lg:p-3 cursor-pointer hover:bg-emerald-100/80 dark:hover:bg-emerald-500/15 transition-all"
-                                onClick={() => toast.info('Sugerir clientes para gap')}
+                                whileDrag={{ scale: 1.05, zIndex: 50 }}
+                                onClick={() => setSelectedId(apt.id)}
                               >
-                                <div className="flex items-center gap-2">
-                                  <Zap className="w-4 h-4 text-green-600 dark:text-emerald-500" />
-                                  <div className="flex-1">
-                                    <div className="text-xs font-bold text-green-600 dark:text-emerald-500">
-                                      {gap.minutes} MIN GAP
+                                <div
+                                  className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-all ${
+                                    draggedId === apt.id
+                                      ? 'opacity-50'
+                                      : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
+                                  }`}
+                                >
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <div
+                                          className={`w-1.5 h-1.5 rounded-full ${
+                                            apt.status === 'completed'
+                                              ? 'bg-emerald-500'
+                                              : apt.status === 'confirmed'
+                                                ? 'bg-blue-500'
+                                                : 'bg-amber-500'
+                                          }`}
+                                        />
+                                        <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                          {apt.client?.name || 'Cliente'}
+                                        </span>
+                                      </div>
+                                      <div className="text-xs text-muted">
+                                        {apt.service?.name || 'Servicio'}
+                                      </div>
                                     </div>
-                                    <div className="text-xs text-muted">
-                                      {format(parseISO(gap.start), 'h:mm a')} -{' '}
-                                      {format(parseISO(gap.end), 'h:mm a')}
+                                    <div className="text-right text-xs">
+                                      <div className="text-muted font-medium tabular-nums leading-tight">
+                                        {format(parseISO(apt.scheduled_at), 'h:mm a')}
+                                      </div>
+                                      <div className="mt-1 text-[13px] leading-tight font-semibold text-amber-500 dark:text-amber-500">
+                                        {formatCurrencyCompactMillions(apt.service?.price || 0)}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </motion.div>
-                            ))}
-                        </div>
-                      </motion.div>
-                    ))}
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Gap indicators (Cinema feature) */}
+                      <div className="mt-3 space-y-1.5 lg:space-y-2">
+                        {gaps
+                          .filter((gap) => {
+                            const gapHour = parseISO(gap.start).getHours()
+                            return gapHour >= block.start && gapHour < block.end
+                          })
+                          .map((gap, gapIndex) => (
+                            <motion.div
+                              key={`gap-${blockIndex}-${gapIndex}`}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 p-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all"
+                              onClick={() => toast.info('Sugerir clientes para gap')}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Plus className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
+                                <div className="flex-1">
+                                  <div className="text-xs text-zinc-400 dark:text-zinc-500">
+                                    {gap.minutes} min disponible ·{' '}
+                                    {format(parseISO(gap.start), 'h:mm a')} -{' '}
+                                    {format(parseISO(gap.end), 'h:mm a')}
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Quick Actions — subtle inline bar */}
+                {stats.pending > 0 && (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                    <span className="text-sm text-muted">{stats.pending} pendientes</span>
+                    <Button
+                      onClick={handleConfirmPendingAppointments}
+                      variant="outline"
+                      className="h-8 text-xs rounded-lg"
+                    >
+                      <Check className="w-3.5 h-3.5 mr-1.5" />
+                      Confirmar todas
+                    </Button>
                   </div>
+                )}
+              </div>
+            )}
 
-                  {/* Quick Actions (Cinema feature) */}
-                  {(stats.pending > 0 || gaps.length > 0) && (
-                    <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
-                      <div className="mb-3 flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-amber-500 dark:text-amber-500" />
-                        <span className="text-sm font-semibold text-zinc-900 dark:text-white">
-                          Acciones rápidas
-                        </span>
+            {/* WEEK VIEW */}
+            {!isLoading && viewMode === 'week' && (
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  {/* Unscheduled section (only when needed) */}
+                  {unscheduledAppointmentsCount > 0 && (
+                    <>
+                      {/* Mobile: 3-day view */}
+                      <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] border-b border-zinc-200 dark:border-zinc-800 mb-4">
+                        <div className="p-2">
+                          <span className="text-xs text-muted">Sin hora</span>
+                        </div>
+                        {mobileWeekDays.map((day) => (
+                          <div
+                            key={day.date.toISOString()}
+                            className="border-l border-zinc-200 dark:border-zinc-800 p-2 min-h-[40px]"
+                          />
+                        ))}
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {stats.pending > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => toast.success(`${stats.pending} confirmadas`)}
-                            className="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-white bg-blue-500 hover:bg-blue-500/85 dark:bg-blue-500 dark:hover:bg-blue-500/85 shadow-[0_8px_20px_rgba(10,132,255,0.28)] transition-colors"
-                          >
-                            Confirmar ({stats.pending})
-                          </button>
-                        )}
-                        {gaps.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => toast.info('Llenar gaps')}
-                            className="min-h-[44px] rounded-xl px-3 text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-500/85 dark:bg-emerald-500 dark:hover:bg-emerald-500/85 shadow-[0_8px_20px_rgba(52,199,89,0.28)] transition-colors"
-                          >
-                            Llenar {gaps.length} gaps
-                          </button>
-                        )}
+                      {/* Desktop: 7-day view */}
+                      <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] border-b border-zinc-200 dark:border-zinc-800 mb-4">
+                        <div className="p-2">
+                          <span className="text-xs text-muted">Sin hora</span>
+                        </div>
+                        {weekDays.map((day) => (
+                          <div
+                            key={day.date.toISOString()}
+                            className="border-l border-zinc-200 dark:border-zinc-800 p-2 min-h-[40px]"
+                          />
+                        ))}
                       </div>
-                    </div>
+                    </>
                   )}
-                </div>
-              )}
 
-              {/* WEEK VIEW */}
-              {!isLoading && viewMode === 'week' && (
-                <div className="overflow-x-auto">
-                  <div className="min-w-[800px]">
-                    {/* All Day section */}
-                    {/* Mobile: 3-day view */}
-                    <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] border-b border-zinc-200 dark:border-zinc-800 mb-4">
-                      <div className="p-2">
-                        <span className="text-xs text-muted">Todo el día</span>
-                      </div>
-                      {mobileWeekDays.map((day) => (
-                        <div
-                          key={day.date.toISOString()}
-                          className="border-l border-zinc-200 dark:border-zinc-800 p-2 min-h-[40px]"
-                        />
-                      ))}
-                    </div>
-                    {/* Desktop: 7-day view */}
-                    <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] border-b border-zinc-200 dark:border-zinc-800 mb-4">
-                      <div className="p-2">
-                        <span className="text-xs text-muted">Todo el día</span>
-                      </div>
-                      {weekDays.map((day) => (
-                        <div
-                          key={day.date.toISOString()}
-                          className="border-l border-zinc-200 dark:border-zinc-800 p-2 min-h-[40px]"
-                        />
-                      ))}
-                    </div>
-
-                    {/* Day headers - Mobile: 3 days */}
-                    <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] mb-4">
-                      <div />
-                      {mobileWeekDays.map((day) => (
-                        <div
-                          key={day.date.toISOString()}
-                          className="text-center border-l border-zinc-200 dark:border-zinc-800 py-2"
-                        >
-                          <div
-                            className={`inline-flex items-center justify-center ${
-                              isSameDay(day.date, today)
-                                ? 'bg-red-500 dark:bg-red-500 text-white w-8 h-8 rounded-full font-bold'
-                                : 'text-muted'
-                            }`}
-                          >
-                            <span className="text-sm">{format(day.date, 'd')}</span>
-                          </div>
-                          <div className="text-xs text-muted mt-1">
-                            {format(day.date, 'EEE', { locale: es })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Day headers - Desktop: 7 days */}
-                    <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] mb-4">
-                      <div />
-                      {weekDays.map((day) => (
-                        <div
-                          key={day.date.toISOString()}
-                          className="text-center border-l border-zinc-200 dark:border-zinc-800 py-2"
-                        >
-                          <div
-                            className={`inline-flex items-center justify-center ${
-                              isSameDay(day.date, today)
-                                ? 'bg-red-500 dark:bg-red-500 text-white w-8 h-8 rounded-full font-bold'
-                                : 'text-muted'
-                            }`}
-                          >
-                            <span className="text-sm">{format(day.date, 'd')}</span>
-                          </div>
-                          <div className="text-xs text-muted mt-1">
-                            {format(day.date, 'EEE', { locale: es })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Timeline grid - Mobile: 3 days */}
-                    <div className="relative lg:hidden">
-                      {/* Hour rows */}
-                      {Array.from({ length: 14 }).map((_, i) => {
-                        const hour = 7 + i
-                        return (
-                          <div
-                            key={hour}
-                            className="grid grid-cols-[60px_repeat(3,1fr)] border-t border-zinc-200 dark:border-zinc-800"
-                            style={{ minHeight: '60px' }}
-                          >
-                            {/* Hour label */}
-                            <div className="text-xs text-muted text-right pr-2 pt-1">
-                              {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
-                            </div>
-
-                            {/* Day columns */}
-                            {mobileWeekDays.map((day) => {
-                              const hourAppointments = day.appointments.filter((apt) => {
-                                const aptDate = parseISO(apt.scheduled_at)
-                                return isValid(aptDate) && aptDate.getHours() === hour
-                              })
-                              return (
-                                <div
-                                  key={`${day.date.toISOString()}-${hour}`}
-                                  className="border-l border-zinc-200 dark:border-zinc-800 p-1 relative"
-                                >
-                                  {hourAppointments.map((apt) => (
-                                    <div
-                                      key={apt.id}
-                                      onClick={() => setSelectedId(apt.id)}
-                                      className="bg-blue-500/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-blue-500 transition-colors text-xs"
-                                    >
-                                      <div className="font-medium text-white truncate">
-                                        {apt.client?.name || 'Cliente'}
-                                      </div>
-                                      <div className="text-[11px] text-white/80 truncate">
-                                        {apt.service?.name || 'Servicio'}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )
-                      })}
-                    </div>
-                    {/* Timeline grid - Desktop: 7 days */}
-                    <div className="relative hidden lg:block">
-                      {/* Hour rows */}
-                      {Array.from({ length: 14 }).map((_, i) => {
-                        const hour = 7 + i
-                        return (
-                          <div
-                            key={hour}
-                            className="grid grid-cols-[60px_repeat(7,1fr)] border-t border-zinc-200 dark:border-zinc-800"
-                            style={{ minHeight: '60px' }}
-                          >
-                            {/* Hour label */}
-                            <div className="text-xs text-muted text-right pr-2 pt-1">
-                              {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
-                            </div>
-
-                            {/* Day columns */}
-                            {weekDays.map((day) => {
-                              const hourAppointments = day.appointments.filter((apt) => {
-                                const aptDate = parseISO(apt.scheduled_at)
-                                return isValid(aptDate) && aptDate.getHours() === hour
-                              })
-                              return (
-                                <div
-                                  key={`${day.date.toISOString()}-${hour}`}
-                                  className="border-l border-zinc-200 dark:border-zinc-800 p-1 relative"
-                                >
-                                  {hourAppointments.map((apt) => (
-                                    <div
-                                      key={apt.id}
-                                      onClick={() => setSelectedId(apt.id)}
-                                      className="bg-blue-500/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-blue-500 transition-colors text-xs"
-                                    >
-                                      <div className="font-medium text-white truncate">
-                                        {apt.client?.name || 'Cliente'}
-                                      </div>
-                                      <div className="text-[11px] text-white/80 truncate">
-                                        {apt.service?.name || 'Servicio'}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )
-                      })}
-
-                      {/* Current time indicator (Week view) */}
-                      {currentTime.getHours() >= 7 && currentTime.getHours() < 21 && (
-                        <div
-                          className="absolute inset-x-0 h-0.5 bg-red-500 dark:bg-red-500 z-20 pointer-events-none"
-                          style={{ top: `${currentTimePercent}%` }}
-                        >
-                          <div className="absolute left-0 w-2 h-2 bg-red-500 dark:bg-red-500 rounded-full -translate-y-1/2 animate-pulse" />
-                          <div className="absolute left-3 -translate-y-1/2 text-xs font-bold text-white bg-red-500 dark:bg-red-500 px-2 py-0.5 rounded shadow-sm">
-                            {format(currentTime, 'h:mm a')}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* MONTH VIEW */}
-              {!isLoading && viewMode === 'month' && (
-                <div>
-                  {/* Weekday headers */}
-                  <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-zinc-800 mb-px">
-                    {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
+                  {/* Day headers - Mobile: 3 days */}
+                  <div className="grid lg:hidden grid-cols-[60px_repeat(3,1fr)] mb-4">
+                    <div />
+                    {mobileWeekDays.map((day) => (
                       <div
-                        key={day}
-                        className="bg-white dark:bg-zinc-900 text-center text-xs text-muted py-2 font-medium"
-                      >
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Calendar grid */}
-                  <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-zinc-800">
-                    {monthDays.map((day) => (
-                      <motion.div
                         key={day.date.toISOString()}
-                        onClick={() => {
-                          setSelectedDate(day.date)
-                          setViewMode('day')
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`bg-white dark:bg-zinc-900 aspect-square p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${
-                          !day.isCurrentMonth ? 'opacity-30' : ''
-                        }`}
+                        className="text-center border-l border-zinc-200 dark:border-zinc-800 py-2"
                       >
                         <div
                           className={`inline-flex items-center justify-center ${
                             isSameDay(day.date, today)
-                              ? 'bg-red-500 dark:bg-red-500 text-white w-6 h-6 rounded-full font-bold text-sm'
-                              : 'text-zinc-900 dark:text-white text-sm'
+                              ? 'bg-red-500 dark:bg-red-500 text-white w-8 h-8 rounded-full font-bold'
+                              : 'text-muted'
                           }`}
                         >
-                          {format(day.date, 'd')}
+                          <span className="text-sm">{format(day.date, 'd')}</span>
                         </div>
-
-                        {/* Event indicators (max 3 dots) */}
-                        {day.appointments.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {day.appointments.slice(0, 3).map((apt, i) => (
-                              <div
-                                key={i}
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  apt.status === 'completed'
-                                    ? 'bg-emerald-500'
-                                    : apt.status === 'confirmed'
-                                      ? 'bg-blue-500'
-                                      : 'bg-amber-500'
-                                }`}
-                              />
-                            ))}
-                            {day.appointments.length > 3 && (
-                              <div className="text-[11px] text-muted">
-                                +{day.appointments.length - 3}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
+                        <div className="text-xs text-muted mt-1">
+                          {format(day.date, 'EEE', { locale: es })}
+                        </div>
+                      </div>
                     ))}
                   </div>
+                  {/* Day headers - Desktop: 7 days */}
+                  <div className="hidden lg:grid grid-cols-[60px_repeat(7,1fr)] mb-4">
+                    <div />
+                    {weekDays.map((day) => (
+                      <div
+                        key={day.date.toISOString()}
+                        className="text-center border-l border-zinc-200 dark:border-zinc-800 py-2"
+                      >
+                        <div
+                          className={`inline-flex items-center justify-center ${
+                            isSameDay(day.date, today)
+                              ? 'bg-red-500 dark:bg-red-500 text-white w-8 h-8 rounded-full font-bold'
+                              : 'text-muted'
+                          }`}
+                        >
+                          <span className="text-sm">{format(day.date, 'd')}</span>
+                        </div>
+                        <div className="text-xs text-muted mt-1">
+                          {format(day.date, 'EEE', { locale: es })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Timeline grid - Mobile: 3 days */}
+                  <div className="relative lg:hidden">
+                    {/* Hour rows */}
+                    {Array.from({ length: 14 }).map((_, i) => {
+                      const hour = 7 + i
+                      return (
+                        <div
+                          key={hour}
+                          className="grid grid-cols-[60px_repeat(3,1fr)] border-t border-zinc-200 dark:border-zinc-800"
+                          style={{ minHeight: '60px' }}
+                        >
+                          {/* Hour label */}
+                          <div className="text-xs text-muted text-right pr-2 pt-1">
+                            {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                          </div>
+
+                          {/* Day columns */}
+                          {mobileWeekDays.map((day) => {
+                            const hourAppointments = day.appointments.filter((apt) => {
+                              const aptDate = parseISO(apt.scheduled_at)
+                              return isValid(aptDate) && aptDate.getHours() === hour
+                            })
+                            return (
+                              <div
+                                key={`${day.date.toISOString()}-${hour}`}
+                                className="border-l border-zinc-200 dark:border-zinc-800 p-1 relative"
+                              >
+                                {hourAppointments.map((apt) => (
+                                  <div
+                                    key={apt.id}
+                                    onClick={() => setSelectedId(apt.id)}
+                                    className="bg-blue-500/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-blue-500 transition-colors text-xs"
+                                  >
+                                    <div className="font-medium text-white truncate">
+                                      {apt.client?.name || 'Cliente'}
+                                    </div>
+                                    <div className="text-[11px] text-white/80 truncate">
+                                      {apt.service?.name || 'Servicio'}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {/* Timeline grid - Desktop: 7 days */}
+                  <div className="relative hidden lg:block">
+                    {/* Hour rows */}
+                    {Array.from({ length: 14 }).map((_, i) => {
+                      const hour = 7 + i
+                      return (
+                        <div
+                          key={hour}
+                          className="grid grid-cols-[60px_repeat(7,1fr)] border-t border-zinc-200 dark:border-zinc-800"
+                          style={{ minHeight: '60px' }}
+                        >
+                          {/* Hour label */}
+                          <div className="text-xs text-muted text-right pr-2 pt-1">
+                            {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
+                          </div>
+
+                          {/* Day columns */}
+                          {weekDays.map((day) => {
+                            const hourAppointments = day.appointments.filter((apt) => {
+                              const aptDate = parseISO(apt.scheduled_at)
+                              return isValid(aptDate) && aptDate.getHours() === hour
+                            })
+                            return (
+                              <div
+                                key={`${day.date.toISOString()}-${hour}`}
+                                className="border-l border-zinc-200 dark:border-zinc-800 p-1 relative"
+                              >
+                                {hourAppointments.map((apt) => (
+                                  <div
+                                    key={apt.id}
+                                    onClick={() => setSelectedId(apt.id)}
+                                    className="bg-blue-500/80 rounded p-1.5 mb-1 cursor-pointer hover:bg-blue-500 transition-colors text-xs"
+                                  >
+                                    <div className="font-medium text-white truncate">
+                                      {apt.client?.name || 'Cliente'}
+                                    </div>
+                                    <div className="text-[11px] text-white/80 truncate">
+                                      {apt.service?.name || 'Servicio'}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+
+                    {/* Current time indicator (Week view) */}
+                    {currentTime.getHours() >= 7 && currentTime.getHours() < 21 && (
+                      <div
+                        className="absolute inset-x-0 h-0.5 bg-red-500 dark:bg-red-500 z-20 pointer-events-none"
+                        style={{ top: `${currentTimePercent}%` }}
+                      >
+                        <div className="absolute left-0 w-2 h-2 bg-red-500 dark:bg-red-500 rounded-full -translate-y-1/2 animate-pulse" />
+                        <div className="absolute left-3 -translate-y-1/2 text-xs font-bold text-white bg-red-500 dark:bg-red-500 px-2 py-0.5 rounded shadow-sm">
+                          {format(currentTime, 'h:mm a')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </PullToRefresh>
+              </div>
+            )}
+
+            {/* MONTH VIEW */}
+            {!isLoading && viewMode === 'month' && (
+              <div>
+                {/* Weekday headers */}
+                <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-zinc-800 mb-px">
+                  {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
+                    <div
+                      key={day}
+                      className="bg-white dark:bg-zinc-900 text-center text-xs text-muted py-2 font-medium"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar grid */}
+                <div className="grid grid-cols-7 gap-px bg-zinc-200 dark:bg-zinc-800">
+                  {monthDays.map((day) => (
+                    <motion.div
+                      key={day.date.toISOString()}
+                      onClick={() => {
+                        setSelectedDate(day.date)
+                        setViewMode('day')
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`bg-white dark:bg-zinc-900 aspect-square p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors ${
+                        !day.isCurrentMonth ? 'opacity-30' : ''
+                      }`}
+                    >
+                      <div
+                        className={`inline-flex items-center justify-center ${
+                          isSameDay(day.date, today)
+                            ? 'bg-red-500 dark:bg-red-500 text-white w-6 h-6 rounded-full font-bold text-sm'
+                            : 'text-zinc-900 dark:text-white text-sm'
+                        }`}
+                      >
+                        {format(day.date, 'd')}
+                      </div>
+
+                      {/* Event indicators (max 3 dots) */}
+                      {day.appointments.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {day.appointments.slice(0, 3).map((apt, i) => (
+                            <div
+                              key={i}
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                apt.status === 'completed'
+                                  ? 'bg-emerald-500'
+                                  : apt.status === 'confirmed'
+                                    ? 'bg-blue-500'
+                                    : 'bg-amber-500'
+                              }`}
+                            />
+                          ))}
+                          {day.appointments.length > 3 && (
+                            <div className="text-[11px] text-muted">
+                              +{day.appointments.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* RIGHT SIDEBAR: Mini Calendar (macOS feature) - Hidden on mobile */}
@@ -1328,7 +1398,7 @@ function CitasCalendarFusionContent() {
             <StatsContent
               today={today}
               miniCalendarDays={miniCalendarDays}
-              appointments={appointments}
+              appointments={roleFilteredAppointments}
               selectedDate={selectedDate}
               stats={stats}
               setSelectedDate={setSelectedDate}
@@ -1355,7 +1425,7 @@ function CitasCalendarFusionContent() {
             <StatsContent
               today={today}
               miniCalendarDays={miniCalendarDays}
-              appointments={appointments}
+              appointments={roleFilteredAppointments}
               selectedDate={selectedDate}
               stats={stats}
               setSelectedDate={setSelectedDate}
@@ -1376,13 +1446,14 @@ function CitasCalendarFusionContent() {
           <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Nueva Cita</h2>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setIsCreateOpen(false)}
-                className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-lg p-2 h-auto text-muted hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 aria-label="Cerrar"
               >
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4">
@@ -1438,29 +1509,31 @@ function CitasCalendarFusionContent() {
                 </button>
               </div>
 
-              {/* Barbero */}
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Barbero
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setActivePickerField('barber')}
-                  className="flex w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-4 py-3 text-left text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-                >
-                  <span
-                    className={
-                      createForm.barber_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
-                    }
+              {/* Barbero - hidden for barbers (auto-assigned) */}
+              {!isBarber && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Barbero
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setActivePickerField('barber')}
+                    className="flex w-full items-center justify-between rounded-xl border border-zinc-300 bg-white px-4 py-3 text-left text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                   >
-                    {createForm.barber_id
-                      ? barbers.find((b) => b.id === createForm.barber_id)?.name ||
-                        'Selecciona un barbero'
-                      : 'Selecciona un barbero'}
-                  </span>
-                  <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
-                </button>
-              </div>
+                    <span
+                      className={
+                        createForm.barber_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
+                      }
+                    >
+                      {createForm.barber_id
+                        ? barbers.find((b) => b.id === createForm.barber_id)?.name ||
+                          'Selecciona un barbero'
+                        : 'Selecciona un barbero'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+                  </button>
+                </div>
+              )}
 
               {/* Fecha y Hora */}
               <div className="grid grid-cols-2 gap-3">
@@ -1541,7 +1614,8 @@ function CitasCalendarFusionContent() {
       >
         <SheetContent
           side="bottom"
-          className="max-h-[60vh] bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 rounded-t-2xl pb-safe md:inset-x-auto md:bottom-6 md:left-1/2 md:w-[min(42rem,calc(100%-2rem))] md:-translate-x-1/2 md:rounded-2xl md:max-h-[70vh] md:border md:border-zinc-200 md:shadow-2xl md:dark:border-zinc-800"
+          centered
+          className="w-[min(42rem,calc(100%-1rem))] max-h-[72vh] overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 pb-safe md:max-h-[70vh]"
         >
           <SheetHeader>
             <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
@@ -1550,7 +1624,7 @@ function CitasCalendarFusionContent() {
               {activePickerField === 'barber' && 'Seleccionar Barbero'}
             </SheetTitle>
           </SheetHeader>
-          <div className="mt-4 overflow-y-auto max-h-[calc(60vh-80px)] px-2">
+          <div className="mt-4 overflow-y-auto max-h-[calc(72vh-96px)] px-2 pb-4 pb-safe">
             {activePickerField === 'client' &&
               clients.map((client) => (
                 <button
@@ -1615,7 +1689,7 @@ function CitasCalendarFusionContent() {
       <AnimatePresence>
         {selectedId &&
           (() => {
-            const apt = appointments.find((a) => a.id === selectedId)
+            const apt = roleFilteredAppointments.find((a) => a.id === selectedId)
             if (!apt) return null
             return (
               <motion.div
@@ -1696,8 +1770,8 @@ function CitasCalendarFusionContent() {
                     {apt.status === 'pending' && (
                       <Button
                         variant="primary"
-                        onClick={() => {
-                          toast.success('Confirmada')
+                        onClick={async () => {
+                          await handleAppointmentStatusChange(apt.id, 'confirmed')
                           setSelectedId(null)
                         }}
                         className="flex-1 bg-blue-500 hover:bg-blue-500/80"
@@ -1708,8 +1782,8 @@ function CitasCalendarFusionContent() {
                     {apt.status === 'confirmed' && (
                       <Button
                         variant="success"
-                        onClick={() => {
-                          toast.success('Check-in completo')
+                        onClick={async () => {
+                          await handleAppointmentStatusChange(apt.id, 'completed')
                           setSelectedId(null)
                         }}
                         className="flex-1 bg-emerald-500 hover:bg-emerald-500/80"

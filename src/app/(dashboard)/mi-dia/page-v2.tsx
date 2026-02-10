@@ -30,6 +30,10 @@ function MiDiaPageContent() {
   const router = useRouter()
   const [barberId, setBarberId] = useState<string | null>(null)
   const [businessId, setBusinessId] = useState<string | null>(null)
+  const [acceptedPaymentMethods, setAcceptedPaymentMethods] = useState<
+    ('cash' | 'sinpe' | 'card')[] | null
+  >(null)
+  const [businessName, setBusinessName] = useState('')
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
 
@@ -73,7 +77,28 @@ function MiDiaPageContent() {
           return
         }
 
-        // 4. Set barber ID and business ID
+        // 4. Fetch business payment methods
+        const { data: bizData, error: bizError } = (await supabase
+          .from('businesses')
+          .select('name, accepted_payment_methods')
+          .eq('id', barber.business_id)
+          .single()) as { data: Record<string, unknown> | null; error: unknown }
+
+        if (bizError || !bizData) {
+          // Keep null → card falls back to showing all payment methods (safe default)
+          console.error('Error fetching payment methods:', bizError)
+        } else {
+          if (typeof bizData.name === 'string') {
+            setBusinessName(bizData.name)
+          }
+          if (Array.isArray(bizData.accepted_payment_methods)) {
+            setAcceptedPaymentMethods(
+              bizData.accepted_payment_methods as ('cash' | 'sinpe' | 'card')[]
+            )
+          }
+        }
+
+        // 5. Set barber ID and business ID
         setBarberId(barber.id)
         setBusinessId(barber.business_id)
       } catch (error) {
@@ -176,7 +201,7 @@ function MiDiaPageContent() {
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
             Error de Autenticación
           </h2>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">{authError}</p>
+          <p className="text-sm text-muted mb-6">{authError}</p>
           <Button onClick={() => router.push('/login')} variant="primary" className="w-full">
             Volver al Inicio de Sesión
           </Button>
@@ -276,6 +301,9 @@ function MiDiaPageContent() {
             onComplete={complete}
             onNoShow={noShow}
             loadingAppointmentId={loadingAppointmentId}
+            acceptedPaymentMethods={acceptedPaymentMethods ?? undefined}
+            barberName={data.barber.name}
+            businessName={businessName}
           />
         </ComponentErrorBoundary>
       </main>

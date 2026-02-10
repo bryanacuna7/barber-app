@@ -62,9 +62,7 @@ export function Footer() {
               >
                 <Scissors className="h-5 w-5 text-white" />
               </motion.div>
-              <span className="text-lg font-bold text-zinc-900 dark:text-white">
-                BarberShop Pro
-              </span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-white">BarberApp</span>
             </Link>
             <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
               La plataforma más completa para gestionar tu barbería. Agenda, clientes y pagos en un
@@ -75,9 +73,9 @@ export function Footer() {
             <div className="mt-6 space-y-2">
               {[
                 {
-                  href: 'mailto:soporte@barbershop.pro',
+                  href: 'mailto:soporte@barberapp.com',
                   icon: Mail,
-                  text: 'soporte@barbershop.pro',
+                  text: 'soporte@barberapp.com',
                 },
                 { href: 'https://wa.me/50688888888', icon: MessageCircle, text: '+506 8888-8888' },
               ].map((contact, i) => {
@@ -179,7 +177,7 @@ export function Footer() {
         >
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-muted">
-              &copy; 2026 BarberShop Pro. Todos los derechos reservados.
+              &copy; 2026 BarberApp. Todos los derechos reservados.
             </p>
             <div className="flex gap-6">
               <motion.div whileHover={{ x: -2 }}>

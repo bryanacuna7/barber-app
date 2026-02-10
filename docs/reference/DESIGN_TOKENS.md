@@ -449,5 +449,5 @@ border-b border-zinc-100 dark:border-zinc-800
 ---
 
 **Creado por:** Claude Sonnet 4.5
-**Sistema:** BarberShop Pro Premium UI
+**Sistema:** BarberApp Premium UI
 **Versión:** 1.0.0

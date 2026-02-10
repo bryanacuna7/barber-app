@@ -28,7 +28,7 @@ VALUES (
     "enabled": false,
     "bank_name": "Banco Nacional",
     "account_number": "IBAN CR00 0000 0000 0000 0000 00",
-    "account_holder": "BarberShop Pro S.A.",
+    "account_holder": "BarberApp S.A.",
     "notes": "Cuenta en dólares - próximamente"
   }'::jsonb
 ) ON CONFLICT (key) DO NOTHING;

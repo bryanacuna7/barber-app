@@ -4,6 +4,9 @@ import { z } from 'zod'
 import { processAppointmentLoyalty } from '@/lib/gamification/loyalty-calculator-server'
 import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
 import { logger, logRequest, logResponse, logBusiness, logSecurity } from '@/lib/logger'
+import { sendNotificationEmail, sendEmail } from '@/lib/email/sender'
+import { sendPushToBusinessOwner } from '@/lib/push/sender'
+import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 
 const bookingSchema = z.object({
   service_id: z.string().uuid(),
@@ -64,7 +67,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   // Get business
   const { data: business, error: businessError } = await supabase
     .from('businesses')
-    .select('id')
+    .select('id, name, logo_url, brand_primary_color, owner_id')
     .eq('slug', slug)
     .eq('is_active', true)
     .single()
@@ -78,7 +81,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   // Get service
   const { data: service, error: serviceError } = await supabase
     .from('services')
-    .select('id, duration_minutes, price')
+    .select('id, name, duration_minutes, price')
     .eq('id', service_id)
     .eq('business_id', business.id)
     .eq('is_active', true)
@@ -96,7 +99,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   // Validate barber exists and belongs to business
   const { data: barber, error: barberError } = await supabase
     .from('barbers')
-    .select('id')
+    .select('id, name')
     .eq('id', barber_id)
     .eq('business_id', business.id)
     .eq('is_active', true)
@@ -147,22 +150,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     logBusiness('client_created', business.id, { clientId: client.id, clientPhone: client_phone })
   }
 
-  // Create appointment
-  const { data: appointment, error: appointmentError } = await supabase
-    .from('appointments')
-    .insert({
-      business_id: business.id,
-      client_id: client.id,
-      service_id: service.id,
-      barber_id: barber_id,
-      scheduled_at,
-      duration_minutes: service.duration_minutes ?? 30,
-      price: service.price,
-      status: 'pending',
-      client_notes: notes || null,
-    })
-    .select('id')
-    .single()
+  // Calculate tracking expiry (scheduled_at + duration + 2h)
+  const durationMin = service.duration_minutes ?? 30
+  const trackingExpiresAt = new Date(
+    new Date(scheduled_at).getTime() + (durationMin + 120) * 60_000
+  ).toISOString()
+
+  // Create appointment (as any: tracking_expires_at not in generated types yet)
+  const { data: appointment, error: appointmentError } = (await (
+    supabase
+      .from('appointments')
+      .insert({
+        business_id: business.id,
+        client_id: client.id,
+        service_id: service.id,
+        barber_id: barber_id,
+        scheduled_at,
+        duration_minutes: durationMin,
+        price: service.price,
+        status: 'pending',
+        client_notes: notes || null,
+        tracking_expires_at: trackingExpiresAt,
+      } as any)
+      .select('id, tracking_token') as any
+  ).single()) as any
 
   if (appointmentError) {
     logger.error(
@@ -212,6 +223,74 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     }
   )
 
+  // Send email notification to business owner (async, non-blocking)
+  // If email fails, the booking is still successful
+  sendBookingNotification({
+    businessId: business.id,
+    businessName: business.name,
+    logoUrl: business.logo_url,
+    brandColor: business.brand_primary_color,
+    ownerId: business.owner_id,
+    clientName: client_name,
+    serviceName: service.name,
+    barberName: barber.name,
+    scheduledAt: scheduled_at,
+    duration: service.duration_minutes ?? 30,
+    price: service.price,
+    supabase,
+  }).catch((error) => {
+    logger.error(
+      {
+        appointmentId: appointment.id,
+        businessId: business.id,
+        error,
+      },
+      'Email notification error (booking still successful)'
+    )
+  })
+
+  // Send push notification to business owner (async, non-blocking)
+  sendPushToBusinessOwner(business.id, {
+    title: 'Nueva cita agendada',
+    body: `${client_name} — ${service.name}`,
+    url: '/citas',
+    tag: `booking-${appointment.id}`,
+  }).catch((error) => {
+    logger.error({ appointmentId: appointment.id, error }, 'Push notification error')
+  })
+
+  // Send confirmation email to client with tracking link (async, non-blocking)
+  if (client_email) {
+    const trackingToken = (appointment as any).tracking_token
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.barberapp.com'
+    const trackingUrl = trackingToken ? `${appUrl}/track/${trackingToken}` : undefined
+
+    const formattedPrice = new Intl.NumberFormat('es-CR', {
+      style: 'currency',
+      currency: 'CRC',
+      minimumFractionDigits: 0,
+    }).format(service.price)
+
+    sendEmail({
+      to: client_email,
+      subject: `Cita confirmada — ${business.name}`,
+      react: NewAppointmentEmail({
+        businessName: business.name,
+        clientName: client_name,
+        serviceName: service.name,
+        barberName: barber.name,
+        appointmentDate: scheduled_at,
+        duration: service.duration_minutes ?? 30,
+        price: formattedPrice,
+        logoUrl: business.logo_url || undefined,
+        brandColor: business.brand_primary_color || undefined,
+        trackingUrl,
+      }),
+    }).catch((error) => {
+      logger.error({ appointmentId: appointment.id, error }, 'Client confirmation email error')
+    })
+  }
+
   const duration = Date.now() - startTime
   logResponse(request, 200, duration, {
     appointmentId: appointment.id,
@@ -223,6 +302,79 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     appointment_id: appointment.id,
     client_id: client.id,
     client_email: client_email || null,
+    tracking_token: (appointment as any).tracking_token ?? null,
     message: 'Cita reservada exitosamente',
+  })
+}
+
+/**
+ * Send email + in-app notification to business owner when a booking is made.
+ * Runs async — failures are logged but never block the booking.
+ */
+async function sendBookingNotification({
+  businessId,
+  businessName,
+  logoUrl,
+  brandColor,
+  ownerId,
+  clientName,
+  serviceName,
+  barberName,
+  scheduledAt,
+  duration,
+  price,
+  supabase,
+}: {
+  businessId: string
+  businessName: string
+  logoUrl: string | null
+  brandColor: string | null
+  ownerId: string
+  clientName: string
+  serviceName: string
+  barberName: string
+  scheduledAt: string
+  duration: number
+  price: number
+  supabase: Awaited<ReturnType<typeof createServiceClient>>
+}) {
+  // Get owner email
+  const { data: owner } = await supabase.auth.admin.getUserById(ownerId)
+  const ownerEmail = owner?.user?.email
+  if (!ownerEmail) return
+
+  const formattedPrice = new Intl.NumberFormat('es-CR', {
+    style: 'currency',
+    currency: 'CRC',
+    minimumFractionDigits: 0,
+  }).format(price)
+
+  // Send email (respects notification preferences)
+  await sendNotificationEmail({
+    businessId,
+    notificationType: 'new_appointment',
+    to: ownerEmail,
+    subject: `Nueva cita: ${clientName} - ${serviceName}`,
+    react: NewAppointmentEmail({
+      businessName,
+      clientName,
+      serviceName,
+      barberName,
+      appointmentDate: scheduledAt,
+      duration,
+      price: formattedPrice,
+      logoUrl: logoUrl || undefined,
+      brandColor: brandColor || undefined,
+    }),
+  })
+
+  // Create in-app notification
+  await supabase.from('notifications').insert({
+    business_id: businessId,
+    type: 'new_appointment',
+    title: 'Nueva cita agendada',
+    message: `${clientName} - ${serviceName}`,
+    reference_type: 'appointment',
+    is_read: false,
   })
 }

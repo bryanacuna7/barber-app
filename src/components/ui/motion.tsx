@@ -29,7 +29,11 @@ export function FadeInUp({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay, ease: [0.33, 1, 0.68, 1] }}
+      transition={{
+        duration: animations.duration.slow,
+        delay,
+        ease: animations.easing.easeOut as [number, number, number, number],
+      }}
       className={className}
     >
       {children}
@@ -76,11 +80,9 @@ export function StaggeredList({
 export function StaggeredItem({
   children,
   className,
-  index,
 }: {
   children: ReactNode
   className?: string
-  index?: number
 }) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -120,7 +122,11 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(
       <motion.button
         ref={ref}
         whileTap={prefersReducedMotion ? {} : { scale }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.1 }}
+        transition={
+          prefersReducedMotion
+            ? { duration: reducedMotion.spring.default.duration }
+            : { duration: animations.duration.fast }
+        }
         className={cn('cursor-pointer', className)}
         {...props}
       >
@@ -133,11 +139,17 @@ Pressable.displayName = 'Pressable'
 
 // Hover lift animation
 export function HoverLift({ children, className }: { children: ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       whileHover={{
         y: -2,
-        transition: { duration: 0.2 },
+        transition: { duration: animations.duration.fast },
       }}
       className={className}
     >
@@ -148,8 +160,10 @@ export function HoverLift({ children, className }: { children: ReactNode; classN
 
 // Scale on hover (for cards)
 export function ScaleOnHover({ children, className }: { children: ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
-    <motion.div whileTap={{ scale: 0.98 }} className={className}>
+    <motion.div whileTap={prefersReducedMotion ? {} : { scale: 0.98 }} className={className}>
       {children}
     </motion.div>
   )
@@ -171,7 +185,7 @@ export function PageTransition({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.1 }}
+        transition={{ duration: reducedMotion.spring.default.duration }}
         className={className}
       >
         {children}
@@ -184,7 +198,10 @@ export function PageTransition({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
+      transition={{
+        duration: animations.duration.slow,
+        ease: animations.easing.easeOut as [number, number, number, number],
+      }}
       className={className}
     >
       {children}
@@ -194,6 +211,12 @@ export function PageTransition({
 
 // Slide in from right (for navigation)
 export function SlideInRight({ children, className }: { children: ReactNode; className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -209,6 +232,12 @@ export function SlideInRight({ children, className }: { children: ReactNode; cla
 
 // Number counter animation
 export function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  if (prefersReducedMotion) {
+    return <span className={className}>{value}</span>
+  }
+
   return (
     <motion.span
       key={value}
@@ -224,15 +253,19 @@ export function AnimatedNumber({ value, className }: { value: number; className?
 
 // Success checkmark animation
 export function SuccessCheckmark({ className }: { className?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
   const checkVariants: Variants = {
     hidden: { pathLength: 0, opacity: 0 },
     visible: {
       pathLength: 1,
       opacity: 1,
-      transition: {
-        pathLength: { duration: 0.4, ease: 'easeOut' },
-        opacity: { duration: 0.1 },
-      },
+      transition: prefersReducedMotion
+        ? { duration: reducedMotion.spring.default.duration }
+        : {
+            pathLength: { duration: animations.duration.slow, ease: 'easeOut' },
+            opacity: { duration: animations.duration.fast },
+          },
     },
   }
 
@@ -241,7 +274,7 @@ export function SuccessCheckmark({ className }: { className?: string }) {
     visible: {
       scale: 1,
       opacity: 1,
-      transition: animations.spring.default,
+      transition: prefersReducedMotion ? reducedMotion.spring.default : animations.spring.default,
     },
   }
 
@@ -274,22 +307,6 @@ export function SuccessCheckmark({ className }: { className?: string }) {
         variants={checkVariants}
       />
     </motion.svg>
-  )
-}
-
-// Skeleton loader with shimmer
-export function Skeleton({ className, ...props }: ComponentProps<'div'>) {
-  return (
-    <div
-      className={cn(
-        'relative overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800',
-        'before:absolute before:inset-0 before:-translate-x-full',
-        'before:animate-[shimmer_2s_infinite]',
-        'before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent',
-        className
-      )}
-      {...props}
-    />
   )
 }
 

@@ -1,9 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import {
   Clock,
-  User,
   Scissors,
   Phone,
   MoreVertical,
@@ -18,6 +16,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { StatusBadge, type AppointmentStatus } from '@/components/ui/badge'
 import { Dropdown, DropdownItem, DropdownSeparator, DropdownLabel } from '@/components/ui/dropdown'
+import { SwipeableRow, type SwipeAction } from '@/components/ui/swipeable-row'
 import { cn } from '@/lib/utils/cn'
 import { formatTime, formatCurrency } from '@/lib/utils/format'
 import type { Appointment } from '@/types'
@@ -61,57 +60,38 @@ export function AppointmentCard({
     const canComplete = appointment.status === 'confirmed' || appointment.status === 'pending'
     const canCancel = appointment.status !== 'cancelled' && appointment.status !== 'completed'
 
-    return (
-      <div className="relative rounded-xl overflow-hidden">
-        {/* Swipe affordance indicator */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-0.5 opacity-20 pointer-events-none z-0">
-          <div className="w-1 h-6 rounded-full bg-zinc-400" />
-          <div className="w-1 h-6 rounded-full bg-zinc-400" />
-          <div className="w-1 h-6 rounded-full bg-zinc-400" />
-        </div>
+    // Build swipe actions from status
+    const compactActions: SwipeAction[] = []
+    if (canConfirm || canComplete) {
+      compactActions.push({
+        icon: canConfirm ? <CalendarCheck className="h-5 w-5" /> : <Check className="h-5 w-5" />,
+        label: canConfirm ? 'Confirmar' : 'Completar',
+        color: 'bg-emerald-500',
+        onClick: () => {
+          if (canConfirm) onStatusChange?.(appointment.id, 'confirmed')
+          else onStatusChange?.(appointment.id, 'completed')
+        },
+      })
+    }
+    if (canCancel) {
+      compactActions.push({
+        icon: <X className="h-5 w-5" />,
+        label: 'Cancelar',
+        color: 'bg-red-500',
+        onClick: () => onStatusChange?.(appointment.id, 'cancelled'),
+      })
+    }
 
-        {/* Swipeable content */}
-        <motion.div
-          drag="x"
-          dragConstraints={{ left: -160, right: 0 }}
-          dragElastic={0.1}
-          dragMomentum={false}
+    return (
+      <SwipeableRow rightActions={compactActions}>
+        <div
           className={cn(
-            'group relative z-10 w-full flex items-center gap-3 p-3 rounded-xl',
-            'bg-zinc-50 dark:bg-zinc-800',
-            'touch-pan-y border-l-4',
+            'flex items-center gap-3 p-3 rounded-xl',
+            'bg-zinc-50 dark:bg-zinc-800 border-l-4',
             statusColors[appointment.status as AppointmentStatus],
             className
           )}
         >
-          {/* Action buttons - positioned absolutely on the right edge */}
-          <div className="absolute right-0 top-0 bottom-0 flex translate-x-full">
-            {/* Primary action: Confirm or Complete */}
-            {(canConfirm || canComplete) && (
-              <button
-                onClick={() => {
-                  if (canConfirm) {
-                    onStatusChange?.(appointment.id, 'confirmed')
-                  } else if (canComplete) {
-                    onStatusChange?.(appointment.id, 'completed')
-                  }
-                }}
-                className="flex h-full w-20 items-center justify-center bg-emerald-500 text-white"
-              >
-                {canConfirm ? <CalendarCheck className="h-5 w-5" /> : <Check className="h-5 w-5" />}
-              </button>
-            )}
-            {/* Secondary action: Cancel or Delete */}
-            {canCancel && (
-              <button
-                onClick={() => onStatusChange?.(appointment.id, 'cancelled')}
-                className="flex h-full w-20 items-center justify-center bg-red-500 text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
-
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-medium text-zinc-900 dark:text-white truncate">
@@ -130,11 +110,50 @@ export function AppointmentCard({
               </span>
             </div>
           </div>
-          <span className="font-semibold text-zinc-900 dark:text-white">
-            {formatCurrency(Number(appointment.price))}
-          </span>
-        </motion.div>
-      </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="font-semibold text-zinc-900 dark:text-white">
+              {formatCurrency(Number(appointment.price))}
+            </span>
+            <Dropdown
+              trigger={
+                <button className="p-1 rounded-lg transition-colors hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+              }
+              align="right"
+            >
+              {canConfirm && (
+                <DropdownItem
+                  icon={<CalendarCheck className="w-4 h-4" />}
+                  onClick={() => onStatusChange?.(appointment.id, 'confirmed')}
+                >
+                  Confirmar
+                </DropdownItem>
+              )}
+              {canComplete && (
+                <DropdownItem
+                  icon={<Check className="w-4 h-4" />}
+                  onClick={() => onStatusChange?.(appointment.id, 'completed')}
+                >
+                  Completar
+                </DropdownItem>
+              )}
+              {canCancel && (
+                <>
+                  <DropdownSeparator />
+                  <DropdownItem
+                    icon={<X className="w-4 h-4" />}
+                    danger
+                    onClick={() => onStatusChange?.(appointment.id, 'cancelled')}
+                  >
+                    Cancelar
+                  </DropdownItem>
+                </>
+              )}
+            </Dropdown>
+          </div>
+        </div>
+      </SwipeableRow>
     )
   }
 

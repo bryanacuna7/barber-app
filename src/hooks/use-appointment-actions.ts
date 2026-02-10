@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import type { TodayAppointment, AppointmentStatusUpdateResponse } from '@/types/custom'
 
 type AppointmentAction = 'check-in' | 'complete' | 'no-show'
+type PaymentMethod = 'cash' | 'sinpe' | 'card'
 
 interface UseAppointmentActionsOptions {
   barberId: string | null
@@ -13,7 +14,10 @@ interface UseAppointmentActionsOptions {
 
 interface UseAppointmentActionsReturn {
   checkIn: (appointmentId: string) => Promise<AppointmentStatusUpdateResponse | null>
-  complete: (appointmentId: string) => Promise<AppointmentStatusUpdateResponse | null>
+  complete: (
+    appointmentId: string,
+    paymentMethod?: PaymentMethod
+  ) => Promise<AppointmentStatusUpdateResponse | null>
   noShow: (appointmentId: string) => Promise<AppointmentStatusUpdateResponse | null>
   isLoading: boolean
   error: Error | null
@@ -35,7 +39,8 @@ export function useAppointmentActions({
   const executeAction = useCallback(
     async (
       appointmentId: string,
-      action: AppointmentAction
+      action: AppointmentAction,
+      extraBody?: Record<string, unknown>
     ): Promise<AppointmentStatusUpdateResponse | null> => {
       // Guard: Don't execute if barberId is not available
       if (!barberId) {
@@ -57,7 +62,7 @@ export function useAppointmentActions({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ barberId }),
+          body: JSON.stringify({ barberId, ...extraBody }),
         })
 
         if (!response.ok) {
@@ -98,7 +103,12 @@ export function useAppointmentActions({
   )
 
   const complete = useCallback(
-    (appointmentId: string) => executeAction(appointmentId, 'complete'),
+    (appointmentId: string, paymentMethod?: PaymentMethod) =>
+      executeAction(
+        appointmentId,
+        'complete',
+        paymentMethod ? { payment_method: paymentMethod } : undefined
+      ),
     [executeAction]
   )
 
