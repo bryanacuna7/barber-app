@@ -17,6 +17,10 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
   const shouldHideHeader =
     pathname === '/citas' ||
     pathname.startsWith('/citas/') ||
+    pathname === '/clientes' ||
+    pathname.startsWith('/clientes/') ||
+    pathname === '/servicios' ||
+    pathname.startsWith('/servicios/') ||
     pathname === '/mi-dia' ||
     pathname.startsWith('/mi-dia/')
 
