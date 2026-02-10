@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { animations } from '@/lib/design-system'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -228,7 +229,7 @@ export function KPICard({
     return (
       <motion.div
         whileHover={{ scale: onClick ? 1.02 : 1 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        transition={animations.spring.default}
         onClick={onClick}
         className={cn(
           'relative overflow-hidden rounded-xl h-full',
@@ -294,7 +295,7 @@ export function KPICard({
     return (
       <motion.div
         whileHover={{ scale: onClick ? 1.02 : 1 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        transition={animations.spring.snappy}
         onClick={onClick}
         className={cn(
           'rounded-xl border border-zinc-200 bg-white p-4 shadow-sm',
@@ -334,7 +335,7 @@ export function KPICard({
   return (
     <motion.div
       whileHover={{ scale: onClick ? 1.02 : 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      transition={animations.spring.default}
       onClick={onClick}
       className={cn(
         'rounded-xl bg-white dark:bg-zinc-900 p-5 sm:p-6',

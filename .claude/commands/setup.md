@@ -129,7 +129,7 @@ Si falla, muestra el error y guía al usuario para solucionarlo.
 ### 3.1 Nombre del Proyecto
 
 Si existe `package.json`, lee el nombre y sugiere una versión display:
-- `barber-app` → sugiere "Barber App" o "BarberShop Pro"
+- `barber-app` → sugiere "BarberApp" o "BarberApp"
 
 Opciones:
 - Nombre sugerido basado en la carpeta

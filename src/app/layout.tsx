@@ -7,6 +7,9 @@ import { SkipToContent } from '@/components/accessibility/skip-to-content'
 import { PremiumBackground } from '@/components/ui/premium-background'
 import './globals.css'
 
+const manifestVersion =
+  process.env.NEXT_PUBLIC_MANIFEST_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '1'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -19,23 +22,31 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'BarberShop Pro',
-    template: '%s | BarberShop Pro',
+    default: 'BarberApp',
+    template: '%s | BarberApp',
   },
   description: 'Sistema de gestión de citas para barberías. Agenda fácil, clientes felices.',
   keywords: ['barbería', 'citas', 'agenda', 'gestión', 'peluquería'],
-  authors: [{ name: 'BarberShop Pro' }],
-  creator: 'BarberShop Pro',
-  manifest: '/manifest.webmanifest',
+  authors: [{ name: 'BarberApp' }],
+  creator: 'BarberApp',
+  manifest: `/api/pwa/manifest?v=${manifestVersion}`,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'BarberShop Pro',
+    title: 'BarberApp',
   },
   openGraph: {
     type: 'website',
     locale: 'es_CR',
-    siteName: 'BarberShop Pro',
+    siteName: 'BarberApp',
+  },
+  icons: {
+    icon: [
+      { url: '/api/pwa/icon?size=64', sizes: '64x64', type: 'image/png' },
+      { url: '/api/pwa/icon?size=192', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/api/pwa/icon?size=180', sizes: '180x180', type: 'image/png' }],
+    shortcut: ['/api/pwa/icon?size=64'],
   },
   icons: {
     icon: [
@@ -52,8 +63,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: light)', color: '#f6f7f9' },
+    { media: '(prefers-color-scheme: dark)', color: '#10141b' },
   ],
 }
 
@@ -65,7 +76,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning className="pt-safe">
       <head>
-        <link rel="apple-touch-icon" href="/api/pwa/icon?size=180" />
+        <link rel="apple-touch-icon" href={`/api/pwa/icon?size=180&v=${manifestVersion}`} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
       </head>

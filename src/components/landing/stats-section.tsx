@@ -20,7 +20,7 @@ const stats = [
   },
   {
     icon: DollarSign,
-    value: '₡450k',
+    value: '₡450,000',
     label: 'Ingresos adicionales',
     description: 'Promedio mensual por menos no-shows',
     color: 'emerald',
@@ -52,7 +52,7 @@ const item = {
     scale: 1,
     transition: {
       duration: 0.6,
-      ease: [0.21, 0.47, 0.32, 0.98],
+      ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
     },
   },
 }
@@ -75,7 +75,7 @@ export function StatsSection() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-            Únete a las barberías que ya transformaron su negocio con BarberShop Pro
+            Únete a las barberías que ya transformaron su negocio con BarberApp
           </p>
         </motion.div>
 

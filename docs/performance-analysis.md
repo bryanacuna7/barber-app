@@ -1,4 +1,4 @@
-# Performance Analysis Report - Barber App
+# Performance Analysis Report - BarberApp
 
 **Fecha:** 2026-02-03
 **Análisis realizado por:** Performance Profiler Agent

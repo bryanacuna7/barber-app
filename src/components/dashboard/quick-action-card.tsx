@@ -4,6 +4,7 @@ import { type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { animations } from '@/lib/design-system'
 
 interface QuickActionCardProps {
   href: string
@@ -31,7 +32,7 @@ export function QuickActionCard({
         )}
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+        transition={animations.spring.snappy}
       >
         <motion.div
           className={cn(
@@ -41,7 +42,7 @@ export function QuickActionCard({
               : 'group-hover:shadow-md'
           )}
           whileHover={{ scale: 1.1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+          transition={animations.spring.snappy}
         >
           <Icon className={cn('h-6 w-6', isWarning ? 'text-white' : '')} />
         </motion.div>

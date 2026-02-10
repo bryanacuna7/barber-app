@@ -22,7 +22,7 @@ export function useServices(businessId: string) {
         .order('display_order', { ascending: true })
 
       if (error) throw error
-      return adaptServices(data || [])
+      return adaptServices((data as any) || [])
     },
     enabled: !!businessId,
   })

@@ -1,6 +1,6 @@
 # MVP Roadmap - Minimum Viable Product
 
-**Project:** BarberShop Pro → Salon Booking Platform
+**Project:** BarberApp → Salon Booking Platform
 **Version:** MVP 1.0
 **Date:** 2026-02-03
 **Goal:** Launch-ready platform with core features

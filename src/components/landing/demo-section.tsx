@@ -113,7 +113,7 @@ export function DemoSection() {
                   <div className="h-3 w-3 rounded-full bg-green-500" />
                 </div>
                 <div className="ml-4 flex-1 rounded-lg bg-zinc-900 px-4 py-1 text-sm text-zinc-500">
-                  barbershop.pro/dashboard
+                  barberapp.com/dashboard
                 </div>
               </div>
 
@@ -158,7 +158,7 @@ function DashboardPreview() {
   return (
     <div className="h-full p-6">
       <div className="grid grid-cols-3 gap-4">
-        {['Citas hoy: 12', 'Ingresos: ₡128k', 'Clientes: 84'].map((stat, i) => (
+        {['Citas hoy: 12', 'Ingresos: ₡128,000', 'Clientes: 84'].map((stat, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0.8 }}

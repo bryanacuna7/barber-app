@@ -21,7 +21,7 @@ import type { LoyaltyProgram } from '@/lib/gamification/loyalty-calculator'
 import type { ProgramType, ReferralRewardType } from '@/types'
 
 export const metadata = {
-  title: 'Configuración de Lealtad | BarberShop Pro',
+  title: 'Configuración de Lealtad | BarberApp',
   description: 'Configura tu programa de lealtad para recompensar a tus clientes',
 }
 
@@ -116,7 +116,7 @@ export default async function LoyaltyConfigPage() {
   return (
     <>
       {/* Mobile Section Header */}
-      <header className="mb-4 lg:hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+      <header className="mb-4 lg:hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 px-3 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl">
         <div className="flex min-h-[44px] items-center gap-3">
           <Link
             href="/dashboard"
@@ -134,10 +134,8 @@ export default async function LoyaltyConfigPage() {
 
       {/* Desktop Header */}
       <div className="mb-5 hidden lg:mb-6 lg:block">
-        <h1 className="text-2xl font-bold tracking-tight">Programa de Lealtad</h1>
-        <p className="text-sm text-muted-foreground">
-          Configura recompensas para tus clientes más fieles
-        </p>
+        <h1 className="app-page-title">Programa de Lealtad</h1>
+        <p className="text-sm text-muted">Configura recompensas para tus clientes más fieles</p>
       </div>
 
       {/* Stats Cards - Only show if program exists and has data */}
@@ -154,7 +152,7 @@ export default async function LoyaltyConfigPage() {
                     <Users className="h-4 w-4 text-primary lg:h-5 lg:w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground lg:text-xs">Inscritos</p>
+                    <p className="text-[11px] text-muted lg:text-xs">Inscritos</p>
                     <p className="text-xl font-bold lg:text-2xl">{stats.enrolledClients}</p>
                   </div>
                 </div>
@@ -166,7 +164,7 @@ export default async function LoyaltyConfigPage() {
                     <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400 lg:h-5 lg:w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground lg:text-xs">Puntos</p>
+                    <p className="text-[11px] text-muted lg:text-xs">Puntos</p>
                     <p className="text-xl font-bold lg:text-2xl">
                       {stats.totalPointsAwarded.toLocaleString()}
                     </p>
@@ -180,7 +178,7 @@ export default async function LoyaltyConfigPage() {
                     <Gift className="h-4 w-4 text-emerald-600 dark:text-emerald-400 lg:h-5 lg:w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground lg:text-xs">Canjeados</p>
+                    <p className="text-[11px] text-muted lg:text-xs">Canjeados</p>
                     <p className="text-xl font-bold lg:text-2xl">{stats.totalRewardsRedeemed}</p>
                   </div>
                 </div>
@@ -192,11 +190,11 @@ export default async function LoyaltyConfigPage() {
       {/* Empty State when no program or no stats */}
       {program && stats && stats.enrolledClients === 0 && stats.totalPointsAwarded === 0 && (
         <Card className="mt-4 mb-5 border-border/50 bg-muted/20 p-6 text-center lg:mb-6 lg:mt-0">
-          <Sparkles className="mx-auto h-12 w-12 text-muted-foreground/50" />
+          <Sparkles className="mx-auto h-12 w-12 text-muted/50" />
           <p className="mt-3 text-sm font-medium text-foreground">
             Activa el programa y tus clientes comenzarán a acumular puntos
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted">
             Los primeros datos aparecerán aquí después de la primera reserva
           </p>
         </Card>

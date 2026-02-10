@@ -37,7 +37,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
               Error en el Dashboard
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted">
               No pudimos cargar esta sección. Intenta recargar o vuelve al inicio.
             </p>
           </div>
@@ -53,18 +53,14 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
                   <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
                     Mensaje:
                   </p>
-                  <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400 break-all">
-                    {error.message}
-                  </p>
+                  <p className="text-xs font-mono text-muted break-all">{error.message}</p>
                 </div>
                 {error.digest && (
                   <div>
                     <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
                       Error ID:
                     </p>
-                    <p className="text-xs font-mono text-zinc-600 dark:text-zinc-400">
-                      {error.digest}
-                    </p>
+                    <p className="text-xs font-mono text-muted">{error.digest}</p>
                   </div>
                 )}
                 {error.stack && (
@@ -72,7 +68,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
                     <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
                       Stack:
                     </p>
-                    <pre className="text-xs font-mono text-zinc-600 dark:text-zinc-400 overflow-auto max-h-32 whitespace-pre-wrap">
+                    <pre className="text-xs font-mono text-muted overflow-auto max-h-32 whitespace-pre-wrap">
                       {error.stack}
                     </pre>
                   </div>

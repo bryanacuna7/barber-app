@@ -1,6 +1,6 @@
 # UI/UX Redesign Roadmap - Awwwards-Level
 
-**Project:** BarberShop Pro → Salon Booking Platform
+**Project:** BarberApp → Salon Booking Platform
 **Version:** Post-MVP UI/UX Transformation
 **Date:** 2026-02-04
 **Total Estimated:** 140-180 hours (7-9 weeks @ 20h/week)

@@ -281,7 +281,7 @@ COMMENT ON TABLE tour_progress IS 'Tracks completion status of interactive produ
 COMMENT ON COLUMN tour_progress.tour_id IS 'Tour identifier: dashboard, citas, clientes, etc.';
 COMMENT ON COLUMN tour_progress.completed IS 'Whether the tour has been completed';
 COMMENT ON COLUMN tour_progress.completed_at IS 'Timestamp when tour was completed';
--- BarberShop Pro - Phase 1: Client Loyalty System
+-- BarberApp - Phase 1: Client Loyalty System
 -- Run this in Supabase SQL Editor after manual review
 
 -- ===========================================
@@ -858,7 +858,7 @@ SELECT
 FROM pg_policies
 WHERE tablename = 'loyalty_programs'
 ORDER BY policyname;
--- BarberShop Pro - Phase 2: Barber Gamification System
+-- BarberApp - Phase 2: Barber Gamification System
 -- Run this in Supabase SQL Editor after manual review
 
 -- ===========================================

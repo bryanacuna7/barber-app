@@ -34,6 +34,7 @@ import {
   CircleDot,
   Sparkle,
   AlertTriangle,
+  BarChart3,
   type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -53,6 +54,7 @@ import {
 import { useBusiness } from '@/contexts/business-context'
 import { ComponentErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useRealtimeServices } from '@/hooks/use-realtime-services'
 
 // ============================================================================
@@ -336,6 +338,7 @@ function ServiciosContent() {
   const [error, setError] = useState('')
   const [editingService, setEditingService] = useState<{ id: string } | null>(null)
   const [deleteService, setDeleteService] = useState<MockService | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -394,7 +397,7 @@ function ServiciosContent() {
   }, [selectedCategory, searchQuery, prefersReducedMotion, listTransitionControls])
 
   // React Query hooks
-  const { isLoading: _loading, isError, error: queryError, refetch } = useServices(businessId)
+  const { isLoading, isError, error: queryError, refetch } = useServices(businessId)
   const createService = useCreateService()
   const updateService = useUpdateService()
   const deleteServiceMutation = useDeleteService()
@@ -552,6 +555,40 @@ function ServiciosContent() {
     }
   }
 
+  // Loading skeleton
+  if (isLoading) {
+    return (
+      <div className="min-h-screen lg:pb-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-36" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-11 w-40 rounded-xl" />
+        </div>
+        {/* Search bar */}
+        <Skeleton className="h-11 w-full rounded-xl" />
+        {/* Mobile cards */}
+        <div className="lg:hidden space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-[88px] rounded-2xl" />
+          ))}
+        </div>
+        {/* Desktop table */}
+        <div className="hidden lg:block rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+          <Skeleton className="h-12 rounded-none" />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              className="h-[60px] rounded-none border-t border-zinc-100 dark:border-zinc-800"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   // Error state
   if (isError) {
     return (
@@ -563,35 +600,37 @@ function ServiciosContent() {
 
   return (
     <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
-      {/* Subtle Mesh Gradients (15% opacity) */}
-      <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 brand-mesh-1 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, -100, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 brand-mesh-2 rounded-full blur-3xl"
-        />
-      </div>
+      {/* Subtle Mesh Gradients (15% opacity) — disabled for reduced motion */}
+      {!prefersReducedMotion && (
+        <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 brand-mesh-1 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, -100, 0],
+              y: [0, 100, 0],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 brand-mesh-2 rounded-full blur-3xl"
+          />
+        </div>
+      )}
 
       <PullToRefresh
         onRefresh={async () => {
@@ -609,21 +648,36 @@ function ServiciosContent() {
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="app-page-title brand-gradient-text">Servicios</h1>
-                <p className="app-page-subtitle mt-1">
-                  Gestiona tus servicios con insights en tiempo real
-                </p>
+                <p className="app-page-subtitle mt-1">{totalServices} servicios</p>
               </div>
-              <Button
-                variant="gradient"
-                onClick={() => {
-                  openCreateServiceForm()
-                  if (isMobileDevice()) haptics.tap()
-                }}
-                className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
-              >
-                <Plus className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">Nuevo Servicio</span>
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="ghost"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="hidden lg:flex items-center gap-2 min-h-[44px] h-10 px-3"
+                  aria-label={sidebarOpen ? 'Ocultar insights' : 'Ver insights'}
+                >
+                  <BarChart3
+                    className={`h-4 w-4 transition-colors ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
+                  />
+                  <span
+                    className={`text-sm ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
+                  >
+                    Insights
+                  </span>
+                </Button>
+                <Button
+                  variant="gradient"
+                  onClick={() => {
+                    openCreateServiceForm()
+                    if (isMobileDevice()) haptics.tap()
+                  }}
+                  className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+                >
+                  <Plus className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Nuevo Servicio</span>
+                </Button>
+              </div>
             </div>
           </motion.div>
 
@@ -636,8 +690,9 @@ function ServiciosContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...animations.spring.default, delay: 0.1 }}
-                className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-white/10 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_8px_24px_rgba(0,0,0,0.1)] sm:dark:shadow-[0_12px_30px_rgba(0,0,0,0.35)]"
+                className="relative overflow-hidden mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-zinc-800/80 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] sm:dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)]"
               >
+                <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent lg:block" />
                 {/* Search */}
                 <div className="w-full sm:flex-1 sm:max-w-md">
                   <Input
@@ -646,12 +701,12 @@ function ServiciosContent() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     leftIcon={<Search className="h-4 w-4" />}
-                    className="h-11 border border-zinc-200/70 dark:border-white/10 bg-white/65 dark:bg-white/[0.04] focus:ring-violet-400/45 focus:border-violet-400/45"
+                    className="h-11 border border-zinc-200/70 dark:border-zinc-800/80 bg-white/65 dark:bg-white/[0.04] focus:ring-violet-400/45 focus:border-violet-400/45"
                   />
                 </div>
 
                 {/* Category Filter */}
-                <div className="relative w-full sm:w-auto rounded-xl border border-zinc-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] p-1.5">
+                <div className="relative w-full sm:w-auto rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.03] p-1.5">
                   <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/90 dark:from-zinc-950 z-10 sm:hidden rounded-r-xl" />
                   <div
                     ref={categoryTabsRef}
@@ -676,7 +731,7 @@ function ServiciosContent() {
                         className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                           selectedCategory === cat
                             ? 'brand-tab-active'
-                            : 'text-zinc-600 dark:text-zinc-400 border border-zinc-200/70 dark:border-white/10 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                            : 'text-muted border border-zinc-200/70 dark:border-zinc-800/80 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
                         }`}
                       >
                         {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
@@ -712,7 +767,7 @@ function ServiciosContent() {
 
                   return (
                     <SwipeableRow key={service.id} rightActions={rightActions}>
-                      <div className="rounded-2xl border border-zinc-200/80 dark:border-white/10 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
+                      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
                         {/* Row 1: Icon + Name */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -732,7 +787,7 @@ function ServiciosContent() {
                                 >
                                   {getCategoryLabel(service.category)}
                                 </span>
-                                <span className="text-xs text-zinc-500">
+                                <span className="text-xs text-muted">
                                   {service.duration_minutes} min
                                 </span>
                               </div>
@@ -745,7 +800,7 @@ function ServiciosContent() {
                           <span className="font-bold text-zinc-900 dark:text-white">
                             {formatCurrency(service.price)}
                           </span>
-                          <span className="text-sm text-zinc-500">
+                          <span className="text-sm text-muted">
                             {service.bookings_this_month} reservas
                           </span>
                           <span className="flex items-center gap-1 text-sm">
@@ -777,71 +832,74 @@ function ServiciosContent() {
                         <tr>
                           {/* Service Name */}
                           <th className="px-4 py-3 text-left">
-                            <button
+                            <Button
+                              variant="ghost"
                               onClick={() => handleSort('name')}
-                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
                             >
                               Servicio
                               {getSortIcon('name')}
-                            </button>
+                            </Button>
                           </th>
 
                           {/* Category */}
                           <th className="px-4 py-3 text-left">
-                            <button
+                            <Button
+                              variant="ghost"
                               onClick={() => handleSort('category')}
-                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
                             >
                               Categoría
                               {getSortIcon('category')}
-                            </button>
+                            </Button>
                           </th>
 
                           {/* Bookings */}
                           <th className="px-4 py-3 text-right">
-                            <button
+                            <Button
+                              variant="ghost"
                               onClick={() => handleSort('bookings')}
-                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
                             >
                               Reservas
                               {getSortIcon('bookings')}
-                            </button>
+                            </Button>
                           </th>
 
                           {/* Duration */}
                           <th className="px-4 py-3 text-right">
-                            <button
+                            <Button
+                              variant="ghost"
                               onClick={() => handleSort('duration')}
-                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
                             >
                               Duración
                               {getSortIcon('duration')}
-                            </button>
+                            </Button>
                           </th>
 
                           {/* Price */}
                           <th className="px-4 py-3 text-right">
-                            <button
+                            <Button
+                              variant="ghost"
                               onClick={() => handleSort('price')}
-                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
                             >
                               Precio
                               {getSortIcon('price')}
-                            </button>
+                            </Button>
                           </th>
 
                           {/* Rating */}
                           <th className="px-4 py-3 text-right">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                               Rating
                             </span>
                           </th>
 
                           {/* Actions */}
                           <th className="w-24 px-4 py-3 text-right">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
-                              Acciones
-                            </span>
+                            <span className="sr-only">Acciones</span>
                           </th>
                         </tr>
                       </thead>
@@ -862,7 +920,7 @@ function ServiciosContent() {
                           return (
                             <tr
                               key={service.id}
-                              className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
+                              className="group transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
                             >
                               {/* Service Name */}
                               <td className="px-4 py-3">
@@ -877,7 +935,7 @@ function ServiciosContent() {
                                     <p className="font-medium text-zinc-900 dark:text-white">
                                       {service.name}
                                     </p>
-                                    <p className="text-xs text-zinc-500 line-clamp-1">
+                                    <p className="text-xs text-muted line-clamp-1">
                                       {service.barber_names.length} barberos
                                     </p>
                                   </div>
@@ -912,7 +970,7 @@ function ServiciosContent() {
 
                               {/* Duration */}
                               <td className="px-4 py-3 text-right">
-                                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                                <span className="text-sm text-muted">
                                   {service.duration_minutes} min
                                 </span>
                               </td>
@@ -934,23 +992,25 @@ function ServiciosContent() {
                                 </div>
                               </td>
 
-                              {/* Actions */}
+                              {/* Actions — visible on row hover */}
                               <td className="px-4 py-3">
-                                <div className="flex items-center justify-end gap-1">
-                                  <button
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-zinc-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                                  <Button
+                                    variant="ghost"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                                     title="Editar"
                                     onClick={() => openEditServiceForm(service)}
                                   >
                                     <Pencil className="h-3.5 w-3.5" />
-                                  </button>
-                                  <button
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                                     title="Eliminar"
                                     onClick={() => setDeleteService(service)}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
+                                  </Button>
                                 </div>
                               </td>
                             </tr>
@@ -977,142 +1037,144 @@ function ServiciosContent() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ ...animations.spring.default, delay: 0.3 }}
-                className="mt-3 text-xs text-zinc-500 text-center"
+                className="mt-3 text-xs text-muted text-center"
               >
                 Mostrando {sortedServices.length} de {mockServices.length} servicios
               </motion.p>
             </div>
 
-            {/* Sidebar (Right) - Insights */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ ...animations.spring.default, delay: 0.2 }}
-              className="hidden lg:block w-[320px] shrink-0 space-y-4"
-            >
-              {/* Quick Stats */}
-              <div className="space-y-3">
-                {/* Total Services */}
-                <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  transition={animations.spring.snappy}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-muted">Servicios Activos</p>
-                      <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
-                        {totalServices}
-                      </p>
-                    </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
-                      <Package className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Top Service */}
-                <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  transition={animations.spring.snappy}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-muted">Más Popular</p>
-                      <div className="mt-1 flex items-center gap-2 min-w-0">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
-                          <ServiceIcon
-                            iconName={topService.iconName}
-                            className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
-                          />
-                        </span>
-                        <p className="text-base font-bold text-zinc-900 dark:text-white truncate">
-                          {topService.name}
+            {/* Sidebar (Right) - Insights (collapsible) */}
+            {sidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ ...animations.spring.default, delay: 0.1 }}
+                className="hidden lg:block w-[320px] shrink-0 space-y-4"
+              >
+                {/* Quick Stats */}
+                <div className="space-y-3">
+                  {/* Total Services */}
+                  <motion.div
+                    whileTap={{ scale: 0.98 }}
+                    transition={animations.spring.snappy}
+                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-muted">Servicios Activos</p>
+                        <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
+                          {totalServices}
                         </p>
                       </div>
-                      <p className="text-xs text-zinc-500">
-                        {topService.bookings_this_month} reservas
-                      </p>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
+                        <Package className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                      </div>
                     </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-                      <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                    </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
 
-                {/* Average Rating */}
+                  {/* Top Service */}
+                  <motion.div
+                    whileTap={{ scale: 0.98 }}
+                    transition={animations.spring.snappy}
+                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-muted">Más Popular</p>
+                        <div className="mt-1 flex items-center gap-2 min-w-0">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
+                            <ServiceIcon
+                              iconName={topService.iconName}
+                              className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
+                            />
+                          </span>
+                          <p className="text-base font-bold text-zinc-900 dark:text-white truncate">
+                            {topService.name}
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted">
+                          {topService.bookings_this_month} reservas
+                        </p>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
+                        <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Average Rating */}
+                  <motion.div
+                    whileTap={{ scale: 0.98 }}
+                    transition={animations.spring.snappy}
+                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-muted">Rating Promedio</p>
+                        <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
+                          {(
+                            activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /
+                            activeServices.length
+                          ).toFixed(1)}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {activeServices.reduce((sum, s) => sum + s.total_reviews, 0)} reviews
+                        </p>
+                      </div>
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30">
+                        <Star className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Mini Chart */}
                 <motion.div
                   whileTap={{ scale: 0.98 }}
                   transition={animations.spring.snappy}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                  className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-muted">Rating Promedio</p>
-                      <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
-                        {(
-                          activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /
-                          activeServices.length
-                        ).toFixed(1)}
-                      </p>
-                      <p className="text-xs text-zinc-500">
-                        {activeServices.reduce((sum, s) => sum + s.total_reviews, 0)} reviews
-                      </p>
-                    </div>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30">
-                      <Star className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
+                  <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
+                    Top 5 Servicios
+                  </h3>
+                  <div className="space-y-3">
+                    {top5Services.map((service, idx) => {
+                      const percentage = (service.bookings_this_month / maxBookings) * 100
+                      const categoryColor = getCategoryColor(service.category)
 
-              {/* Mini Chart */}
-              <motion.div
-                whileTap={{ scale: 0.98 }}
-                transition={animations.spring.snappy}
-                className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
-                  Top 5 Servicios
-                </h3>
-                <div className="space-y-3">
-                  {top5Services.map((service, idx) => {
-                    const percentage = (service.bookings_this_month / maxBookings) * 100
-                    const categoryColor = getCategoryColor(service.category)
-
-                    return (
-                      <div key={service.id}>
-                        <div className="mb-1 flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
-                              <ServiceIcon
-                                iconName={service.iconName}
-                                className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
-                              />
-                            </span>
-                            <span className="font-medium text-zinc-900 dark:text-white truncate">
-                              {service.name}
+                      return (
+                        <div key={service.id}>
+                          <div className="mb-1 flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
+                                <ServiceIcon
+                                  iconName={service.iconName}
+                                  className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
+                                />
+                              </span>
+                              <span className="font-medium text-zinc-900 dark:text-white truncate">
+                                {service.name}
+                              </span>
+                            </div>
+                            <span className="ml-2 shrink-0 text-xs text-muted">
+                              {service.bookings_this_month}
                             </span>
                           </div>
-                          <span className="ml-2 shrink-0 text-xs text-zinc-500">
-                            {service.bookings_this_month}
-                          </span>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentage}%` }}
+                              transition={{ duration: 0.8, delay: 0.4 + idx * 0.1 }}
+                              className={`h-full rounded-full ${categoryColor.bg}`}
+                            />
+                          </div>
                         </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentage}%` }}
-                            transition={{ duration: 0.8, delay: 0.4 + idx * 0.1 }}
-                            className={`h-full rounded-full ${categoryColor.bg}`}
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                      )
+                    })}
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
+            )}
           </div>
         </div>
 
@@ -1217,7 +1279,7 @@ function ServiciosContent() {
                 <p className="text-lg text-zinc-900 dark:text-white">
                   ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
                 </p>
-                <p className="mt-2 text-base text-zinc-500">
+                <p className="mt-2 text-base text-muted">
                   Esta acción no se puede deshacer. Las citas existentes con este servicio no se
                   verán afectadas.
                 </p>

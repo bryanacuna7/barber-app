@@ -8,10 +8,8 @@
  * Demo: preview-b
  */
 
-import { Database } from '@/types/supabase'
-
-// Supabase types
-type SupabaseBarber = Database['public']['Tables']['barbers']['Row']
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseBarber = any
 
 // UI types for demo
 export interface UIBarber {

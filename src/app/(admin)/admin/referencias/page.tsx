@@ -4,6 +4,7 @@ import { GlobalStatsCards } from '@/components/admin/referrals/global-stats-card
 import { TopReferrersTable } from '@/components/admin/referrals/top-referrers-table'
 import { ConversionsTimeline } from '@/components/admin/referrals/conversions-timeline'
 import { ReferralAnalyticsCharts } from '@/components/admin/referrals/referral-analytics-charts'
+import { CollapsibleSection } from '@/components/ui/collapsible-section'
 import { Shield, AlertTriangle } from 'lucide-react'
 
 /**
@@ -42,7 +43,7 @@ export default async function AdminReferralsPage() {
           </p>
           <a
             href="/dashboard"
-            className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-block px-6 py-2.5 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 transition-colors font-medium text-sm"
           >
             Volver al Dashboard
           </a>
@@ -203,12 +204,10 @@ export default async function AdminReferralsPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <Shield className="h-8 w-8 text-blue-600" />
-                <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-                  Admin - Sistema de Referencias
-                </h1>
+                <Shield className="h-8 w-8 text-zinc-900 dark:text-white" />
+                <h1 className="app-page-title">Admin - Sistema de Referencias</h1>
               </div>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted">
                 Vista global del programa de referencias y métricas de rendimiento
               </p>
             </div>
@@ -229,43 +228,49 @@ export default async function AdminReferralsPage() {
             />
           </section>
 
-          {/* Top Referrers */}
-          <section>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-              Ranking de Referrers
-            </h2>
-            <TopReferrersTable referrers={formattedReferrers} />
-          </section>
+          {/* Top Referrers — collapsible on mobile */}
+          <CollapsibleSection title="Ranking de Referrers" badge={formattedReferrers.length}>
+            <section>
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4 hidden lg:block">
+                Ranking de Referrers
+              </h2>
+              <TopReferrersTable referrers={formattedReferrers} />
+            </section>
+          </CollapsibleSection>
 
-          {/* Analytics Charts */}
-          <section>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-              Analytics y Tendencias
-            </h2>
-            <ReferralAnalyticsCharts
-              analytics={{
-                conversionsByMonth: Object.keys(conversionsByMonth)
-                  .sort()
-                  .map((month) => ({ month, conversions: conversionsByMonth[month] })),
-                milestoneDistribution: Object.keys(milestoneDistribution)
-                  .map((m) => ({
-                    milestone: parseInt(m),
-                    count: milestoneDistribution[parseInt(m)],
-                  }))
-                  .sort((a, b) => a.milestone - b.milestone),
-                statusBreakdown,
-                growthRate,
-              }}
-            />
-          </section>
+          {/* Analytics Charts — collapsible on mobile */}
+          <CollapsibleSection title="Analytics y Tendencias">
+            <section>
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4 hidden lg:block">
+                Analytics y Tendencias
+              </h2>
+              <ReferralAnalyticsCharts
+                analytics={{
+                  conversionsByMonth: Object.keys(conversionsByMonth)
+                    .sort()
+                    .map((month) => ({ month, conversions: conversionsByMonth[month] })),
+                  milestoneDistribution: Object.keys(milestoneDistribution)
+                    .map((m) => ({
+                      milestone: parseInt(m),
+                      count: milestoneDistribution[parseInt(m)],
+                    }))
+                    .sort((a, b) => a.milestone - b.milestone),
+                  statusBreakdown,
+                  growthRate,
+                }}
+              />
+            </section>
+          </CollapsibleSection>
 
-          {/* Recent Conversions */}
-          <section>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
-              Conversiones Recientes
-            </h2>
-            <ConversionsTimeline conversions={formattedConversions} />
-          </section>
+          {/* Recent Conversions — collapsible on mobile */}
+          <CollapsibleSection title="Conversiones Recientes" badge={formattedConversions.length}>
+            <section>
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4 hidden lg:block">
+                Conversiones Recientes
+              </h2>
+              <ConversionsTimeline conversions={formattedConversions} />
+            </section>
+          </CollapsibleSection>
         </div>
       </div>
     )
@@ -281,12 +286,12 @@ export default async function AdminReferralsPage() {
           <p className="text-zinc-600 dark:text-zinc-400 mb-6">
             Hubo un problema al cargar los datos del dashboard. Por favor intenta de nuevo.
           </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          <a
+            href="/admin/referencias"
+            className="inline-block px-6 py-2.5 bg-zinc-900 text-white rounded-xl hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 transition-colors font-medium text-sm"
           >
             Reintentar
-          </button>
+          </a>
         </div>
       </div>
     )

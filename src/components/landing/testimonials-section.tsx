@@ -84,7 +84,7 @@ const item = {
     scale: 1,
     transition: {
       duration: 0.6,
-      ease: [0.21, 0.47, 0.32, 0.98],
+      ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
     },
   },
 }
@@ -107,7 +107,7 @@ export function TestimonialsSection() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-            Miles de barberías confían en BarberShop Pro para transformar su negocio
+            Miles de barberías confían en BarberApp para transformar su negocio
           </p>
         </motion.div>
 

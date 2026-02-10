@@ -3,19 +3,23 @@
 /**
  * Business Context Provider
  *
- * Provides business and user authentication data to client components.
- * This solves the issue where client pages need businessId but can't
- * access server-side auth directly.
- *
- * Created: Session 122 - Fix for JSON parsing error in Clientes/Citas pages
+ * Provides business, user, and role data to client components.
+ * Extended in Feature 0A with role detection and staff permissions.
  */
 
 import React, { createContext, useContext } from 'react'
+import type { UserRole, StaffPermissions } from '@/lib/auth/roles'
 
 interface BusinessContextValue {
   businessId: string
   userId: string
   userEmail?: string
+  userRole: UserRole
+  isOwner: boolean
+  isBarber: boolean
+  isAdmin: boolean
+  barberId?: string
+  staffPermissions: StaffPermissions
 }
 
 const BusinessContext = createContext<BusinessContextValue | undefined>(undefined)
@@ -25,6 +29,12 @@ interface BusinessProviderProps {
   businessId: string
   userId: string
   userEmail?: string
+  userRole: UserRole
+  isOwner: boolean
+  isBarber: boolean
+  isAdmin: boolean
+  barberId?: string
+  staffPermissions: StaffPermissions
 }
 
 export function BusinessProvider({
@@ -32,11 +42,23 @@ export function BusinessProvider({
   businessId,
   userId,
   userEmail,
+  userRole,
+  isOwner,
+  isBarber,
+  isAdmin,
+  barberId,
+  staffPermissions,
 }: BusinessProviderProps) {
   const value: BusinessContextValue = {
     businessId,
     userId,
     userEmail,
+    userRole,
+    isOwner,
+    isBarber,
+    isAdmin,
+    barberId,
+    staffPermissions,
   }
 
   return <BusinessContext.Provider value={value}>{children}</BusinessContext.Provider>
@@ -48,9 +70,9 @@ export function BusinessProvider({
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { businessId, userId } = useBusiness()
- *   const { data: clients } = useClients(businessId)
- *   return <ClientList clients={clients} />
+ *   const { businessId, userId, userRole, staffPermissions } = useBusiness()
+ *   // Role-aware rendering
+ *   if (userRole === 'barber' && !staffPermissions.nav_clientes) return null
  * }
  * ```
  */

@@ -6,7 +6,7 @@
 > - **Then read:** [POST_MVP_ROADMAP.md](./POST_MVP_ROADMAP.md) - Feature expansion
 > - **This document:** Full historical context + comprehensive view
 
-**Project:** BarberShop Pro → Salon Booking Platform
+**Project:** BarberApp → Salon Booking Platform
 **Version:** 2.5 (Post Multi-Expert Panel Review)
 **Date:** 2026-02-03
 **Last Updated:** 2026-02-03 (Session 85) - MVP/POST-MVP Split

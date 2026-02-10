@@ -1,7 +1,7 @@
-# ROADMAP - BarberShop Pro
+# ROADMAP - BarberApp
 
 **Version:** 0.9.2
-**Updated:** 2026-02-07 (Session 152)
+**Updated:** 2026-02-10 (Session 168)
 **Source of Truth:** This is the ONLY roadmap document. All others are archived.
 
 ---
@@ -31,6 +31,9 @@ Everything below is DONE and in production on `main`:
 ## Current Sprint: UX Polish (from AUDIT.md)
 
 These items come from the mobile UX audit and are the immediate next work.
+
+> Update de estado: las Olas 1-9 del plan mobile/PWA fueron cerradas en alcance pragmático.
+> Ver detalle y criterios: `UI_PREMIUM_SIMPLIFICATION_PLAN.md`.
 
 ### P0 — Must Fix
 
@@ -186,4 +189,4 @@ The following documents have been moved to `docs/archive/2026-02/` because they 
 
 ---
 
-**Last Updated:** Session 152 (2026-02-07)
+**Last Updated:** Session 168 (2026-02-10)

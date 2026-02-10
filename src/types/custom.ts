@@ -1,5 +1,5 @@
 /**
- * Custom TypeScript types for BarberShop Pro
+ * Custom TypeScript types for BarberApp
  *
  * This file contains type definitions that extend or complement
  * the auto-generated Supabase types from database.ts
@@ -266,6 +266,9 @@ export interface TodayAppointment {
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
   client_notes: string | null
   internal_notes: string | null
+  started_at: string | null
+  actual_duration_minutes: number | null
+  payment_method: 'cash' | 'sinpe' | 'card' | null
   client: TodayAppointmentClient | null
   service: TodayAppointmentService | null
 }

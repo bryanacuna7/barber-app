@@ -8,14 +8,11 @@
  * Demo: demo-a
  */
 
-import { Database } from '@/types/supabase'
-
 // Supabase types
-type SupabaseBusiness = Database['public']['Tables']['businesses']['Row'] & {
-  brand_logo_url?: string | null
-  brand_favicon_url?: string | null
-}
-type SupabaseBarber = Database['public']['Tables']['barbers']['Row']
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseBusiness = any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseBarber = any
 
 // UI types for settings
 export interface UIBusinessSettings {

@@ -113,7 +113,7 @@ const item = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: [0.21, 0.47, 0.32, 0.98],
+      ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
     },
   },
 }
@@ -153,7 +153,7 @@ export function FeaturesSection() {
                 transition={{
                   delay: index * 0.1,
                   duration: 0.5,
-                  ease: [0.21, 0.47, 0.32, 0.98],
+                  ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
                 }}
                 whileHover={{
                   scale: 1.05,
@@ -250,7 +250,7 @@ export function FeaturesSection() {
           className="mt-20 overflow-hidden rounded-3xl border border-zinc-200 bg-gradient-to-br from-blue-50 to-purple-50 p-8 dark:border-zinc-800 dark:from-blue-950/20 dark:to-purple-950/20 sm:p-12"
         >
           <h3 className="mb-8 text-center text-2xl font-bold text-zinc-900 dark:text-white">
-            ¿Por qué BarberShop Pro?
+            ¿Por qué BarberApp?
           </h3>
 
           <div className="grid gap-8 lg:grid-cols-2">
@@ -298,7 +298,7 @@ export function FeaturesSection() {
               className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
             >
               <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
-                <p className="font-semibold text-zinc-600 dark:text-zinc-400">BarberShop Pro</p>
+                <p className="font-semibold text-zinc-600 dark:text-zinc-400">BarberApp</p>
                 <span className="text-2xl">🚀</span>
               </div>
               <div className="space-y-3 text-sm">

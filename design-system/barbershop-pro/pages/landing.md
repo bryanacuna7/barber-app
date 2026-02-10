@@ -1,6 +1,6 @@
 # Landing Page Overrides
 
-> **PROJECT:** BarberShop Pro
+> **PROJECT:** BarberApp
 > **Generated:** 2026-02-06 08:21:47
 > **Page Type:** Landing / Marketing
 

@@ -86,8 +86,8 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Panel de Administrador</h1>
-        <p className="mt-1 text-muted">Vista general de tu plataforma SaaS</p>
+        <h1 className="app-page-title">Panel de Administrador</h1>
+        <p className="app-page-subtitle mt-1 lg:hidden">Vista general de tu plataforma SaaS</p>
       </div>
 
       {/* Main Stats */}

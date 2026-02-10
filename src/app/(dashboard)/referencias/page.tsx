@@ -6,6 +6,7 @@ import { MilestoneProgress } from '@/components/referrals/milestone-progress'
 import { BadgesShowcase } from '@/components/referrals/badges-showcase'
 import { ConversionsTable } from '@/components/referrals/conversions-table'
 import { GenerateReferralCode } from '@/components/referrals/generate-referral-code'
+import { CollapsibleSection } from '@/components/ui/collapsible-section'
 
 /**
  * Referencias Page
@@ -148,82 +149,114 @@ export default async function ReferenciasPage() {
   // Check if referral code exists
   if (!data.referralCode) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 p-4 md:p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-              Sistema de Referencias
-            </h2>
-            <p className="text-zinc-600 dark:text-zinc-400">
-              Refiere otros negocios y gana recompensas increíbles
-            </p>
-          </div>
+      <div className="space-y-6 pb-24 lg:pb-6 mx-auto w-full max-w-[1280px]">
+        <div>
+          <h1 className="app-page-title">Sistema de Referencias</h1>
+          <p className="app-page-subtitle mt-1 lg:hidden">
+            Refiere otros negocios y gana recompensas increíbles
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-stretch">
           <GenerateReferralCode businessId={(business as any).id} />
+          {/* Desktop: Show milestones preview alongside CTA */}
+          <div className="hidden lg:block">
+            <div className="h-full rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] p-6 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-900 dark:text-white mb-4">
+                Recompensas por Nivel
+              </h3>
+              <div className="space-y-3">
+                {[
+                  { refs: 1, reward: '20% descuento', tier: 'bronze' },
+                  { refs: 3, reward: '1 mes gratis', tier: 'silver' },
+                  { refs: 5, reward: '2 meses gratis', tier: 'gold' },
+                  { refs: 10, reward: '4 meses gratis', tier: 'platinum' },
+                  { refs: 20, reward: '1 año gratis', tier: 'diamond' },
+                ].map((m) => (
+                  <div
+                    key={m.refs}
+                    className="flex items-center gap-3 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-white/[0.04] p-3"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200/70 dark:border-zinc-800/80 bg-white/75 dark:bg-zinc-800/70 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                      {m.refs}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                        {m.reward}
+                      </p>
+                      <p className="text-xs text-muted">
+                        {m.refs} referido{m.refs > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div>
-          <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-            Sistema de Referencias
-          </h2>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Refiere otros negocios y gana recompensas increíbles
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <StatsCards
-          totalReferrals={data.totalReferrals}
-          successfulReferrals={data.successfulReferrals}
-          currentMilestone={data.currentMilestone}
-          conversionRate={parseFloat(data.conversionRate)}
-        />
-
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Referral Code Card */}
-          <div className="lg:col-span-1">
-            <ReferralCodeCard
-              referralCode={data.referralCode}
-              signupUrl={data.signupUrl}
-              qrCodeUrl={data.qrCodeUrl}
-            />
-          </div>
-
-          {/* Milestone Progress */}
-          <div className="lg:col-span-2">
-            <MilestoneProgress
-              currentReferrals={data.successfulReferrals}
-              currentMilestone={data.currentMilestone}
-              nextMilestone={
-                data.nextMilestone
-                  ? {
-                      number: data.nextMilestone.number,
-                      remaining: data.nextMilestone.remaining,
-                      reward: data.nextMilestone.reward,
-                      referrals_required: data.nextMilestone.referralsRequired,
-                    }
-                  : null
-              }
-              milestones={data.milestones}
-            />
-          </div>
-        </div>
-
-        {/* Badges Showcase */}
-        {data.earnedBadges && data.earnedBadges.length > 0 && (
-          <BadgesShowcase earnedBadges={data.earnedBadges} />
-        )}
-
-        {/* Conversions Table */}
-        <ConversionsTable conversions={data.conversions || []} />
+    <div className="space-y-6 pb-24 lg:pb-6 mx-auto w-full max-w-[1280px]">
+      {/* Header */}
+      <div>
+        <h1 className="app-page-title">Sistema de Referencias</h1>
+        <p className="app-page-subtitle mt-1 lg:hidden">
+          Refiere otros negocios y gana recompensas increíbles
+        </p>
       </div>
+
+      {/* Stats Cards */}
+      <StatsCards
+        totalReferrals={data.totalReferrals}
+        successfulReferrals={data.successfulReferrals}
+        currentMilestone={data.currentMilestone}
+        conversionRate={parseFloat(data.conversionRate)}
+      />
+
+      {/* Referral Code Card — always visible (primary action) */}
+      <ReferralCodeCard
+        referralCode={data.referralCode}
+        signupUrl={data.signupUrl}
+        qrCodeUrl={data.qrCodeUrl}
+      />
+
+      {/* Milestone Progress — collapsible on mobile */}
+      <CollapsibleSection
+        title="Progreso de Hitos"
+        badge={data.nextMilestone ? `${data.nextMilestone.remaining} restantes` : undefined}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+          <MilestoneProgress
+            currentReferrals={data.successfulReferrals}
+            currentMilestone={data.currentMilestone}
+            nextMilestone={
+              data.nextMilestone
+                ? {
+                    number: data.nextMilestone.number,
+                    remaining: data.nextMilestone.remaining,
+                    reward: data.nextMilestone.reward,
+                    referrals_required: data.nextMilestone.referralsRequired,
+                  }
+                : null
+            }
+            milestones={data.milestones}
+          />
+        </div>
+      </CollapsibleSection>
+
+      {/* Badges Showcase — collapsible on mobile */}
+      {data.earnedBadges && data.earnedBadges.length > 0 && (
+        <CollapsibleSection title="Insignias Ganadas" badge={data.earnedBadges.length}>
+          <BadgesShowcase earnedBadges={data.earnedBadges} />
+        </CollapsibleSection>
+      )}
+
+      {/* Conversions Table — collapsible on mobile */}
+      <CollapsibleSection title="Conversiones" badge={data.conversions?.length || 0}>
+        <ConversionsTable conversions={data.conversions || []} />
+      </CollapsibleSection>
     </div>
   )
 }

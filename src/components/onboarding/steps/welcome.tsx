@@ -42,7 +42,7 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
         transition={{ delay: 0.2 }}
         className="text-4xl font-bold text-zinc-900 dark:text-white mb-4"
       >
-        ¡Bienvenido a BarberShop Pro!
+        ¡Bienvenido a BarberApp!
       </motion.h1>
 
       {/* Description */}

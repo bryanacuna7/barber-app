@@ -63,7 +63,7 @@ export function QueryError({ error, onRetry, title, className }: QueryErrorProps
         description={errorMessage}
         action={
           onRetry ? (
-            <Button onClick={onRetry} variant="default">
+            <Button onClick={onRetry} variant="primary">
               <RefreshCw className="h-4 w-4 mr-2" />
               Reintentar
             </Button>

@@ -1,6 +1,6 @@
 // Service Worker with offline support and caching strategies
-const CACHE_NAME = 'barbershop-pro-v2'
-const RUNTIME_CACHE = 'barbershop-runtime-v2'
+const CACHE_NAME = 'barberapp-v4'
+const RUNTIME_CACHE = 'barberapp-runtime-v4'
 
 // Only precache offline fallback and icons — NEVER cache HTML shells
 // HTML is served network-first so it's always fresh when online
@@ -43,6 +43,42 @@ self.addEventListener('message', (event) => {
   }
 })
 
+// Push notification received from server
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() ?? {}
+  const title = data.title || 'BarberApp'
+  const options = {
+    body: data.body || '',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    data: { url: data.url || '/' },
+    tag: data.tag || 'default',
+    renotify: !!data.tag,
+  }
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+// Handle notification click — navigate to relevant page
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = event.notification.data?.url || '/'
+  event.waitUntil(
+    clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((windowClients) => {
+        // Try to focus an existing window
+        for (const client of windowClients) {
+          if (client.url.includes(self.location.origin) && 'focus' in client) {
+            client.navigate(url)
+            return client.focus()
+          }
+        }
+        // No existing window — open new one
+        return clients.openWindow(url)
+      })
+  )
+})
+
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
   const { request } = event
@@ -50,6 +86,16 @@ self.addEventListener('fetch', (event) => {
 
   // Skip cross-origin requests
   if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // Never cache manifests; force fresh network fetch for PWA metadata updates
+  if (
+    url.pathname === '/manifest.webmanifest' ||
+    url.pathname === '/api/pwa/manifest' ||
+    /^\/api\/public\/[^/]+\/manifest$/.test(url.pathname)
+  ) {
+    event.respondWith(fetch(request))
     return
   }
 

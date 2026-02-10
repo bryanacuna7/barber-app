@@ -81,7 +81,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
     return (
       <Link
         href="/suscripcion"
-        className="mb-5 flex w-full items-center justify-between gap-3 rounded-2xl border border-zinc-200/60 bg-white/70 px-3.5 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-colors hover:bg-zinc-50/90 dark:border-white/10 dark:bg-black/25 dark:hover:bg-black/35"
+        className="mb-5 flex w-full items-center justify-between gap-3 rounded-2xl border border-zinc-200/60 bg-white/70 px-3.5 py-3 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-colors hover:bg-zinc-50/90 dark:border-zinc-800/80 dark:bg-black/25 dark:hover:bg-black/35"
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100/80 dark:bg-white/10">

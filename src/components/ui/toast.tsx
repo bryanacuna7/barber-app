@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode, useEf
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { animations } from '@/lib/design-system'
 
 // Types
 type ToastType = 'success' | 'error' | 'warning' | 'info'
@@ -160,7 +161,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       dragElastic={0.7}
       onDragEnd={handleDragEnd}
       whileDrag={{ scale: 1.05, rotate: 5 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      transition={animations.spring.snappy}
       className={cn(
         'pointer-events-auto relative overflow-hidden',
         'flex items-start gap-3 p-4 rounded-xl border shadow-lg',

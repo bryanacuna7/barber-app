@@ -31,7 +31,7 @@ export function useBusinessSettings(businessId: string) {
         .single()
 
       if (!modernResult.error) {
-        return adaptBusinessSettings(modernResult.data)
+        return adaptBusinessSettings(modernResult.data as any)
       }
 
       if (!isMissingColumnError(modernResult.error)) {
@@ -45,7 +45,7 @@ export function useBusinessSettings(businessId: string) {
         .single()
 
       if (legacyResult.error) throw legacyResult.error
-      return adaptBusinessSettings(legacyResult.data)
+      return adaptBusinessSettings(legacyResult.data as any)
     },
     enabled: !!businessId,
   })
@@ -58,10 +58,10 @@ export function useTeamMembers(businessId: string) {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('barbers')
-        .select('id, name, email, phone, role, is_active, avatar_url, user_id')
+        .select('id, name, email, is_active, bio, photo_url, user_id, display_order')
         .eq('business_id', businessId)
       if (error) throw error
-      return adaptTeamMembers(data || [])
+      return adaptTeamMembers((data as any) || [])
     },
     enabled: !!businessId,
   })

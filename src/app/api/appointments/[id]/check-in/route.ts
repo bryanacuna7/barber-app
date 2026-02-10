@@ -7,6 +7,7 @@ import {
 } from '@/lib/api/middleware'
 import { logger, logSecurity } from '@/lib/logger'
 import { canModifyBarberAppointments } from '@/lib/rbac'
+import { sendPushToBusinessOwner } from '@/lib/push/sender'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -117,10 +118,15 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         )
       }
 
-      // 4. Update status to confirmed
-      const { data: updatedAppointment, error: updateError } = await supabase
+      // 4. Update status to confirmed + set started_at for duration tracking
+      // Note: started_at, actual_duration_minutes, payment_method columns exist after migration 025
+      // Using `as any` until Supabase types are regenerated
+      const { data: updatedAppointment, error: updateError } = (await supabase
         .from('appointments')
-        .update({ status: 'confirmed' })
+        .update({
+          status: 'confirmed',
+          started_at: new Date().toISOString(),
+        } as any)
         .eq('id', appointmentId)
         .eq('business_id', business.id)
         .select(
@@ -132,11 +138,14 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         price,
         client_notes,
         internal_notes,
+        started_at,
+        actual_duration_minutes,
+        payment_method,
         client:clients(id, name, phone, email),
         service:services(id, name, duration_minutes, price)
       `
         )
-        .single()
+        .single()) as any
 
       if (updateError) {
         console.error('Error updating appointment status:', updateError)
@@ -145,7 +154,15 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
 
       logger.info({ appointmentId, status: 'confirmed' }, 'Appointment checked in successfully')
 
-      return NextResponse.json(updatedAppointment as AppointmentStatusUpdateResponse)
+      // Push to business owner (async, non-blocking)
+      sendPushToBusinessOwner(business.id, {
+        title: 'Cita iniciada',
+        body: `${(updatedAppointment as any).client?.name || 'Cliente'}`,
+        url: '/mi-dia',
+        tag: `checkin-${appointmentId}`,
+      }).catch((err) => logger.error({ err, appointmentId }, 'Push error on check-in'))
+
+      return NextResponse.json(updatedAppointment)
     } catch (error) {
       console.error('Unexpected error in PATCH /api/appointments/[id]/check-in:', error)
       return errorResponse('Error interno del servidor')

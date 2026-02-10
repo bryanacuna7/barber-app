@@ -1,6 +1,6 @@
 # Post-MVP Roadmap - Feature Expansion
 
-**Project:** BarberShop Pro → Salon Booking Platform
+**Project:** BarberApp → Salon Booking Platform
 **Version:** Post-MVP (Phases 2-4)
 **Date:** 2026-02-03
 **Total Estimated:** 387-504 hours (19-25 weeks @ 20h/week)

@@ -67,7 +67,7 @@ export default function TrialExpiringEmail({
           </Text>
 
           <Section style={buttonSection}>
-            <Button style={button} href="https://app.barbershoppro.com/suscripcion">
+            <Button style={button} href="https://app.barberapp.com/suscripcion">
               Reportar Pago y Continuar con Pro
             </Button>
           </Section>
@@ -83,10 +83,10 @@ export default function TrialExpiringEmail({
           </Section>
 
           <Text style={footer}>
-            ¿Tienes preguntas? <Link href="https://app.barbershoppro.com/precios">Ver precios</Link>
+            ¿Tienes preguntas? <Link href="https://app.barberapp.com/precios">Ver precios</Link>
           </Text>
 
-          <Text style={footer}>BarberShop Pro - Tu barbería, sin complicaciones</Text>
+          <Text style={footer}>BarberApp - Tu barbería, sin complicaciones</Text>
         </Container>
       </Body>
     </Html>

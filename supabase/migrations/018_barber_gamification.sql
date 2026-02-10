@@ -1,4 +1,4 @@
--- BarberShop Pro - Phase 2: Barber Gamification System
+-- BarberApp - Phase 2: Barber Gamification System
 -- Run this in Supabase SQL Editor after manual review
 
 -- ===========================================

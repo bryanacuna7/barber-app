@@ -36,7 +36,7 @@ export default async function ChangelogPage() {
               Historial de versiones
             </p>
             <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Novedades</h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-muted">
               Cambios ya aplicados y disponibles en la app, organizados por versión.
             </p>
           </div>

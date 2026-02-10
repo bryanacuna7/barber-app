@@ -1,8 +1,9 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 export interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -18,6 +19,17 @@ const sizeClasses = {
 }
 
 export function Spinner({ size = 'md', variant = 'default', className }: SpinnerProps) {
+  const prefersReducedMotion = useReducedMotion()
+
+  // Reduced motion: static icon for ALL variants
+  if (prefersReducedMotion) {
+    return (
+      <div className={cn('inline-flex', className)}>
+        <Loader2 className={cn(sizeClasses[size], 'text-muted')} />
+      </div>
+    )
+  }
+
   if (variant === 'dots') {
     return <DotsSpinner size={size} className={className} />
   }
@@ -36,7 +48,7 @@ export function Spinner({ size = 'md', variant = 'default', className }: Spinner
       className={cn('inline-flex', className)}
       animate={{ rotate: 360 }}
       transition={{
-        duration: 1,
+        duration: animations.duration.slow * 3,
         repeat: Infinity,
         ease: 'linear',
       }}
@@ -61,9 +73,9 @@ function DotsSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className
             opacity: [0.5, 1, 0.5],
           }}
           transition={{
-            duration: 1,
+            duration: animations.duration.slow * 3,
             repeat: Infinity,
-            delay: i * 0.15,
+            delay: i * animations.duration.fast,
             ease: 'easeInOut',
           }}
         />
@@ -88,7 +100,7 @@ function PulseSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'classNam
           opacity: [1, 0],
         }}
         transition={{
-          duration: 1.5,
+          duration: animations.duration.slow * 4,
           repeat: Infinity,
           ease: 'easeOut',
         }}
@@ -100,9 +112,9 @@ function PulseSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'classNam
           opacity: [1, 0],
         }}
         transition={{
-          duration: 1.5,
+          duration: animations.duration.slow * 4,
           repeat: Infinity,
-          delay: 0.75,
+          delay: animations.duration.slow * 2,
           ease: 'easeOut',
         }}
       />
@@ -131,9 +143,9 @@ function BarsSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className
             scaleY: [1, 1.5, 1],
           }}
           transition={{
-            duration: 0.8,
+            duration: animations.duration.slow * 2,
             repeat: Infinity,
-            delay: i * 0.1,
+            delay: i * (animations.duration.fast * 0.67),
             ease: 'easeInOut',
           }}
         />
@@ -144,14 +156,20 @@ function BarsSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'className
 
 // Full page loader
 export function PageLoader({ message }: { message?: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm">
       <Spinner size="xl" variant="pulse" />
       {message && (
         <motion.p
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={
+            prefersReducedMotion
+              ? { duration: reducedMotion.spring.default.duration }
+              : { ...animations.spring.gentle, delay: 0.2 }
+          }
           className="mt-6 text-lg font-medium text-zinc-700 dark:text-zinc-300"
         >
           {message}
@@ -179,7 +197,7 @@ export function ProgressBar({ value, max = 100, className, showLabel = false }: 
           className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: animations.duration.slow, ease: 'easeOut' }}
         />
       </div>
       {showLabel && (

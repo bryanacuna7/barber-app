@@ -8,8 +8,6 @@
  * Demo: preview-fusion
  */
 
-import { Database } from '@/types/supabase'
-
 // UI types for analytics dashboard
 export interface UIAnalytics {
   // Period metadata

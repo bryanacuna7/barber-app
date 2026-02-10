@@ -33,7 +33,7 @@ export function useAppointments(date: Date, businessId: string) {
 
       if (error) throw error
 
-      return adaptAppointments(data || [])
+      return adaptAppointments((data as any) || [])
     },
     enabled: !!businessId,
   })
@@ -146,6 +146,9 @@ export function useBarberDayAppointments(barberId: string | null) {
           status,
           client_notes,
           internal_notes,
+          started_at,
+          actual_duration_minutes,
+          payment_method,
           client:clients!appointments_client_id_fkey (
             id,
             name,
@@ -185,6 +188,9 @@ export function useBarberDayAppointments(barberId: string | null) {
         status: appt.status,
         client_notes: appt.client_notes,
         internal_notes: appt.internal_notes,
+        started_at: appt.started_at ?? null,
+        actual_duration_minutes: appt.actual_duration_minutes ?? null,
+        payment_method: appt.payment_method ?? null,
         client: appt.client
           ? {
               id: appt.client.id,

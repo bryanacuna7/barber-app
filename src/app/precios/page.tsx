@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'Precios - BarberShop Pro',
+  title: 'Precios - BarberApp',
   description: 'Elige el plan perfecto para tu barbería. 7 días de prueba gratis.',
 }
 
@@ -86,7 +86,7 @@ export default function PreciosPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100">
               <Scissors className="h-4 w-4 text-white dark:text-zinc-900" />
             </div>
-            <span className="font-semibold text-zinc-900 dark:text-white">BarberShop Pro</span>
+            <span className="font-semibold text-zinc-900 dark:text-white">BarberApp</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link
@@ -272,7 +272,7 @@ export default function PreciosPage() {
       {/* Footer */}
       <footer className="border-t border-zinc-200 bg-white py-8 dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mx-auto max-w-5xl px-4 text-center text-sm text-zinc-500">
-          <p>&copy; 2026 BarberShop Pro. Todos los derechos reservados.</p>
+          <p>&copy; 2026 BarberApp. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>

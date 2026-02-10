@@ -59,7 +59,7 @@ export default function AdminConfiguracion() {
   // SINPE Móvil details state
   const [sinpe, setSinpe] = useState<SinpeDetailsValue>({
     phone_number: '8888-8888',
-    account_name: 'BarberShop Pro',
+    account_name: 'BarberApp',
     notes: '',
   })
 
@@ -228,8 +228,8 @@ export default function AdminConfiguracion() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Configuración</h1>
-        <p className="mt-1 text-muted">Configuración global de la plataforma</p>
+        <h1 className="app-page-title">Configuración</h1>
+        <p className="app-page-subtitle mt-1 lg:hidden">Configuración global de la plataforma</p>
       </div>
 
       {/* Alerts */}
@@ -407,7 +407,7 @@ export default function AdminConfiguracion() {
                     account_holder: e.target.value,
                   })
                 }
-                placeholder="Ej: BarberShop Pro S.A."
+                placeholder="Ej: BarberApp S.A."
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
             </div>
@@ -592,7 +592,7 @@ export default function AdminConfiguracion() {
                     account_name: e.target.value,
                   })
                 }
-                placeholder="Ej: BarberShop Pro"
+                placeholder="Ej: BarberApp"
                 className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
               />
             </div>

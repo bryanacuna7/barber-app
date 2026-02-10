@@ -50,7 +50,7 @@ export function useRealtimeAppointments({
 }: UseRealtimeAppointmentsOptions) {
   const queryClient = useQueryClient()
   const reconnectAttempts = useRef(0)
-  const pollingIntervalRef = useRef<NodeJS.Timeout>()
+  const pollingIntervalRef = useRef<NodeJS.Timeout>(undefined)
 
   useEffect(() => {
     if (!enabled || !businessId) return
@@ -87,7 +87,11 @@ export function useRealtimeAppointments({
         },
         (payload) => {
           // Real-time update received - invalidate React Query cache
-          console.log('📡 Appointment change detected:', payload.eventType, payload.new?.id)
+          console.log(
+            '📡 Appointment change detected:',
+            payload.eventType,
+            (payload.new as any)?.id
+          )
 
           // Invalidate appointments, calendar, and analytics queries
           invalidateQueries.afterAppointmentChange(queryClient)

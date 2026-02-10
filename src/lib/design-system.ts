@@ -121,6 +121,9 @@ export const animations = {
     snappy: { type: 'spring', stiffness: 400, damping: 30 },
     sheet: { type: 'spring', stiffness: 300, damping: 30 },
     bouncy: { type: 'spring', stiffness: 300, damping: 10 },
+    card: { type: 'spring', stiffness: 400, damping: 17 },
+    swipeClose: { type: 'spring', stiffness: 560, damping: 42, mass: 0.58 },
+    swipeOpen: { type: 'spring', stiffness: 500, damping: 38, mass: 0.58 },
   },
 
   // Durations
@@ -145,7 +148,7 @@ export const shadows = {
   lg: 'shadow-lg shadow-black/8 dark:shadow-black/40',
   xl: 'shadow-xl shadow-black/10 dark:shadow-black/50',
   card: 'shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]',
-  elevated: 'shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]',
+  elevated: 'shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.42)]',
 } as const
 
 // Glass effects
@@ -165,5 +168,8 @@ export const reducedMotion = {
     snappy: { duration: 0.01 },
     sheet: { duration: 0.15 }, // keep minimal for sheets
     bouncy: { duration: 0.01 },
+    card: { duration: 0.01 },
+    swipeClose: { duration: 0.05 },
+    swipeOpen: { duration: 0.05 },
   },
 } as const

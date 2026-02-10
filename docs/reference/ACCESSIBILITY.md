@@ -1,6 +1,6 @@
 # Accessibility Guidelines
 
-This document outlines the accessibility (a11y) standards and best practices for the BarberShop Pro application.
+This document outlines the accessibility (a11y) standards and best practices for the BarberApp application.
 
 ---
 

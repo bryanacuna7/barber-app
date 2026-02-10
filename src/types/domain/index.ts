@@ -22,8 +22,17 @@ export * from './barbers'
 // Analytics domain (Reportes)
 export * from './analytics'
 
-// Calendar domain (Citas)
-export * from './calendar'
+// Calendar domain (Citas) — explicit exports to avoid DayStatistics collision
+export type {
+  CalendarView,
+  TimeBlockLabel,
+  GapOpportunity,
+  CalendarEvent,
+  TimeBlock,
+  SchedulingGap,
+  DaySchedule,
+  WeekView,
+} from './calendar'
 
 // Settings domain (Configuración)
 export * from './settings'

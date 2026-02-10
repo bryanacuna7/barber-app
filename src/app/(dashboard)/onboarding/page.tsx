@@ -212,7 +212,7 @@ export default function OnboardingPage() {
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-zinc-600 dark:text-zinc-400">Cargando...</p>
+          <p className="text-muted">Cargando...</p>
         </div>
       </div>
     )
@@ -223,7 +223,7 @@ export default function OnboardingPage() {
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-zinc-600 dark:text-zinc-400">Guardando tu configuración...</p>
+          <p className="text-muted">Guardando tu configuración...</p>
         </div>
       </div>
     )

@@ -83,9 +83,7 @@ export default function ConfiguracionPage() {
   const [activeTab, setActiveTab] = useState('general') // Keep for search navigation compatibility
 
   // Sheet navigation state
-  const [openSheet, setOpenSheet] = useState<
-    'general' | 'horario' | 'branding' | 'avanzado' | null
-  >(null)
+  const [openSheet, setOpenSheet] = useState<'general' | 'horario' | 'branding' | 'avanzado' | null>(null)
 
   // Calculate contrast colors for preview
   const contrastColors = useMemo(
@@ -508,114 +506,104 @@ export default function ConfiguracionPage() {
                 {/* Sheet Content */}
                 <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
                   <div className="space-y-6">
-                    {/* Public Booking Link */}
-                    <FadeInUp delay={0.05}>
-                      <Card
-                        id="booking-link"
-                        className="border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50/50 dark:border-violet-900 dark:from-violet-950/30 dark:to-purple-950/20 overflow-hidden transition-all"
+            {/* Public Booking Link */}
+            <FadeInUp delay={0.05}>
+              <Card
+                id="booking-link"
+                className="border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50/50 dark:border-violet-900 dark:from-violet-950/30 dark:to-purple-950/20 overflow-hidden transition-all"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[17px] text-violet-900 dark:text-violet-300">
+                    <Globe className="h-5 w-5" />
+                    Tu Página de Reservas
+                  </CardTitle>
+                  <CardDescription className="text-violet-700/80 dark:text-violet-400/80">
+                    Comparte este enlace con tus clientes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
+                    <div className="flex-1 min-w-0 rounded-xl border border-violet-200 bg-white/80 px-4 py-3.5 text-[15px] font-medium text-violet-900 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300 truncate">
+                      {bookingUrl || 'Cargando...'}
+                    </div>
+                    <div className="flex gap-2">
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={copyBookingLink}
+                        className="flex h-12 min-w-[48px] flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border-2 border-violet-200 bg-white px-4 text-violet-700 transition-colors hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
                       >
-                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-[17px] text-violet-900 dark:text-violet-300">
-                            <Globe className="h-5 w-5" />
-                            Tu Página de Reservas
-                          </CardTitle>
-                          <CardDescription className="text-violet-700/80 dark:text-violet-400/80">
-                            Comparte este enlace con tus clientes
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
-                            <div className="flex-1 min-w-0 rounded-xl border border-violet-200 bg-white/80 px-4 py-3.5 text-[15px] font-medium text-violet-900 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300 truncate">
-                              {bookingUrl || 'Cargando...'}
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.button
-                                type="button"
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={copyBookingLink}
-                                className="flex h-12 min-w-[48px] flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border-2 border-violet-200 bg-white px-4 text-violet-700 transition-colors hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
-                              >
-                                {copied ? (
-                                  <Check className="h-5 w-5" />
-                                ) : (
-                                  <Copy className="h-5 w-5" />
-                                )}
-                                <span className="text-[15px] font-medium sm:hidden">Copiar</span>
-                              </motion.button>
-                              <motion.a
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                href={bookingUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex h-12 min-w-[48px] flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border-2 border-violet-200 bg-white px-4 text-violet-700 transition-colors hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
-                              >
-                                <ExternalLink className="h-5 w-5" />
-                                <span className="text-[15px] font-medium sm:hidden">Abrir</span>
-                              </motion.a>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </FadeInUp>
+                        {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                        <span className="text-[15px] font-medium sm:hidden">Copiar</span>
+                      </motion.button>
+                      <motion.a
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        href={bookingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-12 min-w-[48px] flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border-2 border-violet-200 bg-white px-4 text-violet-700 transition-colors hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300"
+                      >
+                        <ExternalLink className="h-5 w-5" />
+                        <span className="text-[15px] font-medium sm:hidden">Abrir</span>
+                      </motion.a>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </FadeInUp>
 
-                    {/* Business Info */}
-                    <FadeInUp delay={0.1}>
-                      <Card id="business-name" className="transition-all">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-[17px]">
-                            <Building2 className="h-5 w-5" />
-                            Información del Negocio
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-5">
-                          <Input
-                            label="Nombre del negocio"
-                            type="text"
-                            placeholder="Barbería El Patrón"
-                            value={formData.name}
-                            onChange={(e) =>
-                              setFormData((prev) => ({ ...prev, name: e.target.value }))
-                            }
-                            required
-                          />
+            {/* Business Info */}
+            <FadeInUp delay={0.1}>
+              <Card id="business-name" className="transition-all">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[17px]">
+                    <Building2 className="h-5 w-5" />
+                    Información del Negocio
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <Input
+                    label="Nombre del negocio"
+                    type="text"
+                    placeholder="Barbería El Patrón"
+                    value={formData.name}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    required
+                  />
 
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <Input
-                              label="Teléfono"
-                              type="tel"
-                              placeholder="2222-3333"
-                              value={formData.phone}
-                              onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, phone: e.target.value }))
-                              }
-                            />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Input
+                      label="Teléfono"
+                      type="tel"
+                      placeholder="2222-3333"
+                      value={formData.phone}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                    />
 
-                            <Input
-                              label="WhatsApp"
-                              type="tel"
-                              placeholder="87175866"
-                              value={formData.whatsapp}
-                              onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, whatsapp: e.target.value }))
-                              }
-                            />
-                          </div>
+                    <Input
+                      label="WhatsApp"
+                      type="tel"
+                      placeholder="87175866"
+                      value={formData.whatsapp}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, whatsapp: e.target.value }))
+                      }
+                    />
+                  </div>
 
-                          <Input
-                            label="Dirección"
-                            type="text"
-                            placeholder="San José, Costa Rica"
-                            value={formData.address}
-                            onChange={(e) =>
-                              setFormData((prev) => ({ ...prev, address: e.target.value }))
-                            }
-                          />
-                        </CardContent>
-                      </Card>
-                    </FadeInUp>
+                  <Input
+                    label="Dirección"
+                    type="text"
+                    placeholder="San José, Costa Rica"
+                    value={formData.address}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+                  />
+                </CardContent>
+              </Card>
+            </FadeInUp>
                   </div>
 
                   {/* Sheet Footer with Save Button */}
@@ -679,135 +667,129 @@ export default function ConfiguracionPage() {
                 {/* Sheet Content */}
                 <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
                   <div className="space-y-6">
-                    {/* Operating Hours */}
-                    <FadeInUp delay={0.1}>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-[17px]">
-                            <Clock className="h-5 w-5" />
-                            Horario de Atencion
-                          </CardTitle>
-                          <CardDescription>Toca las horas para cambiarlas</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <StaggeredList className="space-y-2">
-                            {DAYS.map(({ key, label, short }) => {
-                              const hours = formData.operating_hours[key]
-                              const isOpen = hours !== null && hours !== undefined
+            {/* Operating Hours */}
+            <FadeInUp delay={0.1}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[17px]">
+                    <Clock className="h-5 w-5" />
+                    Horario de Atencion
+                  </CardTitle>
+                  <CardDescription>Toca las horas para cambiarlas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <StaggeredList className="space-y-2">
+                    {DAYS.map(({ key, label, short }) => {
+                      const hours = formData.operating_hours[key]
+                      const isOpen = hours !== null && hours !== undefined
 
-                              return (
-                                <StaggeredItem key={key}>
-                                  <motion.div
-                                    layout
-                                    className={`flex items-center gap-3 rounded-2xl p-3 transition-colors border-2 ${
-                                      isOpen
-                                        ? 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
-                                        : 'bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/50'
-                                    }`}
-                                  >
-                                    <IOSToggle
-                                      checked={isOpen}
-                                      onChange={() => toggleDay(key)}
-                                      size="sm"
-                                    />
-                                    <span
-                                      className={`text-[15px] font-medium w-20 sm:w-24 ${
-                                        isOpen
-                                          ? 'text-zinc-900 dark:text-white'
-                                          : 'text-zinc-400 dark:text-zinc-600'
-                                      }`}
-                                    >
-                                      <span className="hidden sm:inline">{label}</span>
-                                      <span className="sm:hidden">{short}</span>
-                                    </span>
-                                    {isOpen ? (
-                                      <div className="flex items-center gap-2 ml-auto">
-                                        <TimePickerTrigger
-                                          value={hours?.open || '09:00'}
-                                          onClick={() => openTimePicker(key, 'open')}
-                                        />
-                                        <span className="text-zinc-400 text-[15px]">a</span>
-                                        <TimePickerTrigger
-                                          value={hours?.close || '18:00'}
-                                          onClick={() => openTimePicker(key, 'close')}
-                                        />
-                                      </div>
-                                    ) : (
-                                      <span className="text-[15px] text-zinc-400 ml-auto">
-                                        Cerrado
-                                      </span>
-                                    )}
-                                  </motion.div>
-                                </StaggeredItem>
-                              )
-                            })}
-                          </StaggeredList>
-                        </CardContent>
-                      </Card>
-                    </FadeInUp>
+                      return (
+                        <StaggeredItem key={key}>
+                          <motion.div
+                            layout
+                            className={`flex items-center gap-3 rounded-2xl p-3 transition-colors border-2 ${
+                              isOpen
+                                ? 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
+                                : 'bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/50'
+                            }`}
+                          >
+                            <IOSToggle checked={isOpen} onChange={() => toggleDay(key)} size="sm" />
+                            <span
+                              className={`text-[15px] font-medium w-20 sm:w-24 ${
+                                isOpen
+                                  ? 'text-zinc-900 dark:text-white'
+                                  : 'text-zinc-400 dark:text-zinc-600'
+                              }`}
+                            >
+                              <span className="hidden sm:inline">{label}</span>
+                              <span className="sm:hidden">{short}</span>
+                            </span>
+                            {isOpen ? (
+                              <div className="flex items-center gap-2 ml-auto">
+                                <TimePickerTrigger
+                                  value={hours?.open || '09:00'}
+                                  onClick={() => openTimePicker(key, 'open')}
+                                />
+                                <span className="text-zinc-400 text-[15px]">a</span>
+                                <TimePickerTrigger
+                                  value={hours?.close || '18:00'}
+                                  onClick={() => openTimePicker(key, 'close')}
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-[15px] text-zinc-400 ml-auto">Cerrado</span>
+                            )}
+                          </motion.div>
+                        </StaggeredItem>
+                      )
+                    })}
+                  </StaggeredList>
+                </CardContent>
+              </Card>
+            </FadeInUp>
 
-                    {/* Booking Settings - With Progressive Disclosure */}
-                    <FadeInUp delay={0.15}>
-                      <AdvancedSettingsSection
-                        title="Configuración Avanzada de Reservas"
-                        description="Personaliza tiempos de buffer y anticipación de reservas"
-                        badge="Avanzado"
-                        defaultExpanded={false}
+            {/* Booking Settings - With Progressive Disclosure */}
+            <FadeInUp delay={0.15}>
+              <AdvancedSettingsSection
+                title="Configuración Avanzada de Reservas"
+                description="Personaliza tiempos de buffer y anticipación de reservas"
+                badge="Avanzado"
+                defaultExpanded={false}
+              >
+                <div className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div id="buffer-time">
+                      <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                        Tiempo entre citas
+                      </label>
+                      <select
+                        value={formData.booking_buffer_minutes}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            booking_buffer_minutes: Number(e.target.value),
+                          }))
+                        }
+                        className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
                       >
-                        <div className="space-y-4">
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <div id="buffer-time">
-                              <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                                Tiempo entre citas
-                              </label>
-                              <select
-                                value={formData.booking_buffer_minutes}
-                                onChange={(e) =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    booking_buffer_minutes: Number(e.target.value),
-                                  }))
-                                }
-                                className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
-                              >
-                                <option value={0}>Sin tiempo extra</option>
-                                <option value={5}>5 minutos</option>
-                                <option value={10}>10 minutos</option>
-                                <option value={15}>15 minutos</option>
-                                <option value={30}>30 minutos</option>
-                              </select>
-                              <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
-                                Tiempo adicional entre citas para preparación o limpieza
-                              </p>
-                            </div>
-                            <div id="advance-booking">
-                              <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                                Días de anticipación
-                              </label>
-                              <select
-                                value={formData.advance_booking_days}
-                                onChange={(e) =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    advance_booking_days: Number(e.target.value),
-                                  }))
-                                }
-                                className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
-                              >
-                                <option value={7}>1 semana</option>
-                                <option value={14}>2 semanas</option>
-                                <option value={21}>3 semanas</option>
-                                <option value={30}>1 mes</option>
-                                <option value={60}>2 meses</option>
-                              </select>
-                              <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
-                                Con cuánta anticipación los clientes pueden reservar
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </AdvancedSettingsSection>
-                    </FadeInUp>
+                        <option value={0}>Sin tiempo extra</option>
+                        <option value={5}>5 minutos</option>
+                        <option value={10}>10 minutos</option>
+                        <option value={15}>15 minutos</option>
+                        <option value={30}>30 minutos</option>
+                      </select>
+                      <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+                        Tiempo adicional entre citas para preparación o limpieza
+                      </p>
+                    </div>
+                    <div id="advance-booking">
+                      <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                        Días de anticipación
+                      </label>
+                      <select
+                        value={formData.advance_booking_days}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            advance_booking_days: Number(e.target.value),
+                          }))
+                        }
+                        className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                      >
+                        <option value={7}>1 semana</option>
+                        <option value={14}>2 semanas</option>
+                        <option value={21}>3 semanas</option>
+                        <option value={30}>1 mes</option>
+                        <option value={60}>2 meses</option>
+                      </select>
+                      <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
+                        Con cuánta anticipación los clientes pueden reservar
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </AdvancedSettingsSection>
+            </FadeInUp>
                   </div>
 
                   {/* Sheet Footer with Save Button */}
@@ -871,210 +853,210 @@ export default function ConfiguracionPage() {
                 {/* Sheet Content */}
                 <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
                   <div className="space-y-6">
-                    {/* Brand Customization */}
-                    <FadeInUp delay={0.1}>
-                      <Card className="overflow-hidden">
+            {/* Brand Customization */}
+            <FadeInUp delay={0.1}>
+              <Card className="overflow-hidden">
+                <div
+                  className="absolute inset-x-0 top-0 h-1"
+                  style={{
+                    background: `linear-gradient(90deg, ${brandColor}, ${brandSecondary || brandColor})`,
+                  }}
+                />
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[17px]">
+                    <Palette className="h-5 w-5" />
+                    Personaliza tu Marca
+                  </CardTitle>
+                  <CardDescription>Colores y logo que veran tus clientes</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Color Picker */}
+                  <ColorPicker
+                    label="Color principal"
+                    value={brandColor}
+                    onChange={setBrandColor}
+                  />
+
+                  {/* Live Preview - Dual Mode */}
+                  <div>
+                    <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      Vista previa
+                    </label>
+                    <div className="space-y-3">
+                      {/* Light Mode Preview */}
+                      <div>
+                        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                          Modo claro
+                        </div>
                         <div
-                          className="absolute inset-x-0 top-0 h-1"
-                          style={{
-                            background: `linear-gradient(90deg, ${brandColor}, ${brandSecondary || brandColor})`,
-                          }}
-                        />
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-[17px]">
-                            <Palette className="h-5 w-5" />
-                            Personaliza tu Marca
-                          </CardTitle>
-                          <CardDescription>Colores y logo que veran tus clientes</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                          {/* Color Picker */}
-                          <ColorPicker
-                            label="Color principal"
-                            value={brandColor}
-                            onChange={setBrandColor}
-                          />
-
-                          {/* Live Preview - Dual Mode */}
-                          <div>
-                            <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                              Vista previa
-                            </label>
-                            <div className="space-y-3">
-                              {/* Light Mode Preview */}
-                              <div>
-                                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                                  Modo claro
-                                </div>
-                                <div
-                                  className="rounded-2xl border-2 border-zinc-300 bg-white p-4"
-                                  style={generateThemeStyle(brandColor, brandSecondary || null)}
-                                >
-                                  <div className="flex items-center gap-3 mb-3">
-                                    {logoUrl ? (
-                                      <img
-                                        src={logoUrl}
-                                        alt="Logo"
-                                        className="h-10 w-10 rounded-xl object-cover"
-                                      />
-                                    ) : (
-                                      <div
-                                        className="flex h-10 w-10 items-center justify-center rounded-xl"
-                                        style={{ backgroundColor: brandColor }}
-                                      >
-                                        <Scissors
-                                          className="h-5 w-5"
-                                          style={{ color: contrastColors.primaryContrast }}
-                                        />
-                                      </div>
-                                    )}
-                                    <span className="font-semibold text-zinc-900">
-                                      {formData.name || 'Tu Barberia'}
-                                    </span>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <span
-                                      className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg"
-                                      style={{
-                                        backgroundColor: brandColor,
-                                        color: contrastColors.primaryContrast,
-                                      }}
-                                    >
-                                      Reservar ahora
-                                    </span>
-                                    <span
-                                      className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold text-zinc-900"
-                                      style={{ borderColor: brandColor }}
-                                    >
-                                      Ver servicios
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Dark Mode Preview */}
-                              <div>
-                                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                                  Modo oscuro
-                                </div>
-                                <div
-                                  className="rounded-2xl border-2 border-zinc-700 bg-zinc-950 p-4"
-                                  style={generateThemeStyle(brandColor, brandSecondary || null)}
-                                >
-                                  <div className="flex items-center gap-3 mb-3">
-                                    {logoUrl ? (
-                                      <img
-                                        src={logoUrl}
-                                        alt="Logo"
-                                        className="h-10 w-10 rounded-xl object-cover"
-                                      />
-                                    ) : (
-                                      <div
-                                        className="flex h-10 w-10 items-center justify-center rounded-xl"
-                                        style={{ backgroundColor: brandColor }}
-                                      >
-                                        <Scissors
-                                          className="h-5 w-5"
-                                          style={{ color: contrastColors.primaryContrast }}
-                                        />
-                                      </div>
-                                    )}
-                                    <span className="font-semibold text-white">
-                                      {formData.name || 'Tu Barberia'}
-                                    </span>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <span
-                                      className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg"
-                                      style={{
-                                        backgroundColor: brandColor,
-                                        color: contrastColors.primaryContrast,
-                                      }}
-                                    >
-                                      Reservar ahora
-                                    </span>
-                                    <span
-                                      className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold text-white"
-                                      style={{ borderColor: brandColor }}
-                                    >
-                                      Ver servicios
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Logo Upload */}
-                          <div>
-                            <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                              Logo del negocio
-                            </label>
+                          className="rounded-2xl border-2 border-zinc-300 bg-white p-4"
+                          style={generateThemeStyle(brandColor, brandSecondary || null)}
+                        >
+                          <div className="flex items-center gap-3 mb-3">
                             {logoUrl ? (
-                              <div className="flex items-center gap-4">
-                                <img
-                                  src={logoUrl}
-                                  alt="Logo"
-                                  className="h-20 w-20 rounded-2xl object-cover border-2 border-zinc-200 dark:border-zinc-700"
-                                />
-                                <div className="flex flex-col gap-2">
-                                  <label className="cursor-pointer rounded-xl bg-zinc-100 px-4 py-2.5 text-[13px] font-semibold text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors text-center">
-                                    <Upload className="inline h-4 w-4 mr-1.5 -mt-0.5" />
-                                    Cambiar
-                                    <input
-                                      type="file"
-                                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                      onChange={handleLogoUpload}
-                                      className="hidden"
-                                    />
-                                  </label>
-                                  <button
-                                    type="button"
-                                    onClick={handleLogoDelete}
-                                    className="rounded-xl bg-red-50 px-4 py-2.5 text-[13px] font-semibold text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
-                                  >
-                                    <X className="inline h-4 w-4 mr-1.5 -mt-0.5" />
-                                    Eliminar
-                                  </button>
-                                </div>
-                              </div>
+                              <img
+                                src={logoUrl}
+                                alt="Logo"
+                                className="h-10 w-10 rounded-xl object-cover"
+                              />
                             ) : (
-                              <label
-                                className={cn(
-                                  'flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 px-6 py-8 transition-colors hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600 dark:hover:bg-zinc-800',
-                                  logoUploading && 'opacity-60 pointer-events-none'
-                                )}
+                              <div
+                                className="flex h-10 w-10 items-center justify-center rounded-xl"
+                                style={{ backgroundColor: brandColor }}
                               >
-                                {logoUploading ? (
-                                  <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                    className="h-8 w-8 rounded-full border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
-                                  />
-                                ) : (
-                                  <ImageIcon className="h-8 w-8 text-zinc-400" />
-                                )}
-                                <div className="text-center">
-                                  <p className="text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
-                                    {logoUploading ? 'Subiendo...' : 'Sube tu logo'}
-                                  </p>
-                                  <p className="mt-1 text-[13px] text-zinc-400">
-                                    PNG, JPG, WebP o SVG - Maximo 2MB
-                                  </p>
-                                </div>
-                                <input
-                                  type="file"
-                                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                  onChange={handleLogoUpload}
-                                  className="hidden"
-                                  disabled={logoUploading}
+                                <Scissors
+                                  className="h-5 w-5"
+                                  style={{ color: contrastColors.primaryContrast }}
                                 />
-                              </label>
+                              </div>
                             )}
+                            <span className="font-semibold text-zinc-900">
+                              {formData.name || 'Tu Barberia'}
+                            </span>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </FadeInUp>
+                          <div className="flex gap-2">
+                            <span
+                              className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg"
+                              style={{
+                                backgroundColor: brandColor,
+                                color: contrastColors.primaryContrast,
+                              }}
+                            >
+                              Reservar ahora
+                            </span>
+                            <span
+                              className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold text-zinc-900"
+                              style={{ borderColor: brandColor }}
+                            >
+                              Ver servicios
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Dark Mode Preview */}
+                      <div>
+                        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                          Modo oscuro
+                        </div>
+                        <div
+                          className="rounded-2xl border-2 border-zinc-700 bg-zinc-950 p-4"
+                          style={generateThemeStyle(brandColor, brandSecondary || null)}
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            {logoUrl ? (
+                              <img
+                                src={logoUrl}
+                                alt="Logo"
+                                className="h-10 w-10 rounded-xl object-cover"
+                              />
+                            ) : (
+                              <div
+                                className="flex h-10 w-10 items-center justify-center rounded-xl"
+                                style={{ backgroundColor: brandColor }}
+                              >
+                                <Scissors
+                                  className="h-5 w-5"
+                                  style={{ color: contrastColors.primaryContrast }}
+                                />
+                              </div>
+                            )}
+                            <span className="font-semibold text-white">
+                              {formData.name || 'Tu Barberia'}
+                            </span>
+                          </div>
+                          <div className="flex gap-2">
+                            <span
+                              className="inline-flex items-center rounded-full px-3 py-1.5 text-[13px] font-semibold shadow-lg"
+                              style={{
+                                backgroundColor: brandColor,
+                                color: contrastColors.primaryContrast,
+                              }}
+                            >
+                              Reservar ahora
+                            </span>
+                            <span
+                              className="inline-flex items-center rounded-full border-2 px-3 py-1.5 text-[13px] font-semibold text-white"
+                              style={{ borderColor: brandColor }}
+                            >
+                              Ver servicios
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Logo Upload */}
+                  <div>
+                    <label className="mb-3 block text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      Logo del negocio
+                    </label>
+                    {logoUrl ? (
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={logoUrl}
+                          alt="Logo"
+                          className="h-20 w-20 rounded-2xl object-cover border-2 border-zinc-200 dark:border-zinc-700"
+                        />
+                        <div className="flex flex-col gap-2">
+                          <label className="cursor-pointer rounded-xl bg-zinc-100 px-4 py-2.5 text-[13px] font-semibold text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors text-center">
+                            <Upload className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+                            Cambiar
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleLogoDelete}
+                            className="rounded-xl bg-red-50 px-4 py-2.5 text-[13px] font-semibold text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors"
+                          >
+                            <X className="inline h-4 w-4 mr-1.5 -mt-0.5" />
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label
+                        className={cn(
+                          'flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 px-6 py-8 transition-colors hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50 dark:hover:border-zinc-600 dark:hover:bg-zinc-800',
+                          logoUploading && 'opacity-60 pointer-events-none'
+                        )}
+                      >
+                        {logoUploading ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                            className="h-8 w-8 rounded-full border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white"
+                          />
+                        ) : (
+                          <ImageIcon className="h-8 w-8 text-zinc-400" />
+                        )}
+                        <div className="text-center">
+                          <p className="text-[15px] font-medium text-zinc-700 dark:text-zinc-300">
+                            {logoUploading ? 'Subiendo...' : 'Sube tu logo'}
+                          </p>
+                          <p className="mt-1 text-[13px] text-zinc-400">
+                            PNG, JPG, WebP o SVG - Maximo 2MB
+                          </p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                          disabled={logoUploading}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </FadeInUp>
                   </div>
 
                   {/* Sheet Footer with Save Button */}
@@ -1138,59 +1120,54 @@ export default function ConfiguracionPage() {
                 {/* Sheet Content */}
                 <div className="overflow-y-auto h-[calc(100%-80px)] px-6 py-6">
                   <div className="space-y-6">
-                    {/* Notification Preferences */}
-                    <NotificationPreferencesSection />
+            {/* Notification Preferences */}
+            <NotificationPreferencesSection />
 
-                    {/* Loyalty Program */}
-                    <FadeInUp delay={0.1}>
-                      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 dark:border-amber-900 dark:from-amber-950/30 dark:to-orange-950/20 overflow-hidden">
-                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-[17px] text-amber-900 dark:text-amber-300">
-                            <Gift className="h-5 w-5" />
-                            Programa de Lealtad
-                          </CardTitle>
-                          <CardDescription className="text-amber-700/80 dark:text-amber-400/80">
-                            Configura recompensas para tus clientes más fieles
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <motion.button
-                            type="button"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => router.push('/lealtad/configuracion')}
-                            className="flex w-full items-center justify-between rounded-xl border-2 border-amber-200 bg-white/80 px-4 py-3.5 text-[15px] font-medium text-amber-900 transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 dark:hover:bg-amber-950/70"
-                          >
-                            <span>Configurar programa de lealtad</span>
-                            <ArrowRight className="h-5 w-5" />
-                          </motion.button>
-                        </CardContent>
-                      </Card>
-                    </FadeInUp>
+            {/* Loyalty Program */}
+            <FadeInUp delay={0.1}>
+              <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 dark:border-amber-900 dark:from-amber-950/30 dark:to-orange-950/20 overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[17px] text-amber-900 dark:text-amber-300">
+                    <Gift className="h-5 w-5" />
+                    Programa de Lealtad
+                  </CardTitle>
+                  <CardDescription className="text-amber-700/80 dark:text-amber-400/80">
+                    Configura recompensas para tus clientes más fieles
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/lealtad/configuracion')}
+                    className="flex w-full items-center justify-between rounded-xl border-2 border-amber-200 bg-white/80 px-4 py-3.5 text-[15px] font-medium text-amber-900 transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 dark:hover:bg-amber-950/70"
+                  >
+                    <span>Configurar programa de lealtad</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </motion.button>
+                </CardContent>
+              </Card>
+            </FadeInUp>
 
-                    {/* Session */}
-                    <FadeInUp delay={0.15}>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2 text-[17px]">
-                            <LogOut className="h-5 w-5" />
-                            Sesion
-                          </CardTitle>
-                          <CardDescription>Cierra sesion en este dispositivo</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleLogout}
-                          >
-                            Cerrar sesion
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </FadeInUp>
+            {/* Session */}
+            <FadeInUp delay={0.15}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-[17px]">
+                    <LogOut className="h-5 w-5" />
+                    Sesion
+                  </CardTitle>
+                  <CardDescription>Cierra sesion en este dispositivo</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button type="button" variant="outline" className="w-full" onClick={handleLogout}>
+                    Cerrar sesion
+                  </Button>
+                </CardContent>
+              </Card>
+            </FadeInUp>
                   </div>
 
                   {/* Sheet Footer with Save Button */}

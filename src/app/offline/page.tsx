@@ -1,37 +1,102 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { WifiOff, RefreshCw } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { getStaleCache } from '@/lib/cache'
+
 export default function OfflinePage() {
+  const [reconnecting, setReconnecting] = useState(false)
+  // Lazy initializer: offline page is only rendered when offline, hydration mismatch is acceptable
+  const [lastOnline] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    const cached = getStaleCache<string>('last_online_at')
+    return cached?.data ?? null
+  })
+
+  useEffect(() => {
+    // Auto-reload when connection returns
+    const handleOnline = () => {
+      setReconnecting(true)
+      // Small delay so user sees "Reconectando..." before reload
+      setTimeout(() => window.location.reload(), 800)
+    }
+
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [])
+
+  const formatLastOnline = (iso: string) => {
+    try {
+      const date = new Date(iso)
+      const now = new Date()
+      const diffMs = now.getTime() - date.getTime()
+      const diffMin = Math.floor(diffMs / 60000)
+
+      if (diffMin < 1) return 'hace un momento'
+      if (diffMin < 60) return `hace ${diffMin} min`
+      const diffHours = Math.floor(diffMin / 60)
+      if (diffHours < 24) return `hace ${diffHours}h`
+      return date.toLocaleDateString('es-CR', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return null
+    }
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 px-4">
-      <div className="text-center">
-        <div className="mb-6">
-          <svg
-            className="mx-auto h-24 w-24 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"
-            />
-          </svg>
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4">
+      <div className="text-center max-w-sm">
+        {/* Floating icon */}
+        <motion.div
+          className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800 shadow-lg"
+          animate={reconnecting ? { scale: [1, 0.95, 1] } : { y: [0, -6, 0] }}
+          transition={
+            reconnecting
+              ? { duration: 0.6, repeat: Infinity }
+              : { duration: 3, repeat: Infinity, ease: 'easeInOut' }
+          }
+        >
+          {reconnecting ? (
+            <RefreshCw className="h-9 w-9 text-blue-500 animate-spin" />
+          ) : (
+            <WifiOff className="h-9 w-9 text-zinc-400 dark:text-zinc-500" />
+          )}
+        </motion.div>
 
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">Sin conexión</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">
+          {reconnecting ? 'Reconectando...' : 'Sin conexión'}
+        </h1>
 
-        <p className="mb-8 text-gray-600">
-          No hay conexión a internet. Por favor, verifica tu conexión y vuelve a intentar.
+        <p className="mt-2 text-muted">
+          {reconnecting
+            ? 'Se detectó conexión, recargando la página...'
+            : 'No hay conexión a internet. Verifica tu conexión y vuelve a intentar.'}
         </p>
 
-        <button
-          onClick={() => window.location.reload()}
-          className="rounded-full bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          Reintentar
-        </button>
+        {lastOnline && !reconnecting && (
+          <p className="mt-1 text-xs text-subtle">
+            Última conexión: {formatLastOnline(lastOnline)}
+          </p>
+        )}
+
+        {!reconnecting && (
+          <div className="mt-8">
+            <Button
+              variant="primary"
+              onClick={() => window.location.reload()}
+              className="min-w-[160px]"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Reintentar
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

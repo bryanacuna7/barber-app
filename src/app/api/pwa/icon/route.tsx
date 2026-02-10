@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { detectUserRole } from '@/lib/auth/roles'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
@@ -27,7 +28,7 @@ async function getBusinessBranding(
 
     return {
       logoUrl: data?.logo_url ?? null,
-      name: data?.name ?? 'BarberShop Pro',
+      name: data?.name ?? 'BarberApp',
     }
   }
 
@@ -37,18 +38,24 @@ async function getBusinessBranding(
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return { logoUrl: null, name: 'BarberShop Pro' }
+    return { logoUrl: null, name: 'BarberApp' }
+  }
+
+  const roleInfo = await detectUserRole(supabase, user.id)
+
+  if (!roleInfo?.businessId) {
+    return { logoUrl: null, name: 'BarberApp' }
   }
 
   const { data } = await supabase
     .from('businesses')
     .select('name, logo_url')
-    .eq('owner_id', user.id)
+    .eq('id', roleInfo.businessId)
     .maybeSingle()
 
   return {
     logoUrl: data?.logo_url ?? null,
-    name: data?.name ?? 'BarberShop Pro',
+    name: data?.name ?? 'BarberApp',
   }
 }
 

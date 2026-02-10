@@ -1,4 +1,4 @@
--- BarberShop Pro - Multi-Barber Migration
+-- BarberApp - Multi-Barber Migration
 -- Run this in Supabase SQL Editor
 
 -- 1. Create Barbers Table

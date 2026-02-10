@@ -5,7 +5,6 @@ import { motion } from 'framer-motion'
 import {
   CreditCard,
   AlertCircle,
-  Loader2,
   Users,
   Scissors,
   UserCheck,
@@ -13,8 +12,12 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   RefreshCw,
+  ChevronDown,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import type { SubscriptionPlan } from '@/types/database'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useSubscriptionData } from '@/hooks/useSubscriptionData'
 import { StatusBadge } from '@/components/subscription/StatusBadge'
 import { UsageCard } from '@/components/subscription/UsageCard'
@@ -40,11 +43,31 @@ export default function SuscripcionPage() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null)
   const [showChangePlanModal, setShowChangePlanModal] = useState(false)
   const [changingPlan, setChangingPlan] = useState(false)
+  const [plansExpanded, setPlansExpanded] = useState(false)
+  const [historyExpanded, setHistoryExpanded] = useState(false)
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-40" />
+        {/* Plan card skeleton */}
+        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 rounded-xl" />
+            ))}
+          </div>
+        </div>
+        {/* Collapsible section headers */}
+        <Skeleton className="h-14 rounded-xl" />
+        <Skeleton className="h-14 rounded-xl" />
       </div>
     )
   }
@@ -99,8 +122,8 @@ export default function SuscripcionPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Suscripción</h1>
-        <p className="mt-1 text-zinc-600 dark:text-zinc-400">Gestiona tu plan y métodos de pago</p>
+        <h1 className="app-page-title">Suscripción</h1>
+        <p className="app-page-subtitle mt-1 lg:hidden">Gestiona tu plan y métodos de pago</p>
       </div>
 
       {/* Urgent Action Banner */}
@@ -150,24 +173,20 @@ export default function SuscripcionPage() {
                 </p>
               </div>
             </div>
-            <button
+            <Button
+              variant={isExpired ? 'danger' : 'primary'}
               onClick={() => {
-                // Pre-select current plan or Pro for renewal
                 const renewPlan = plans.find((p) => p.name === 'pro') || currentPlan
                 if (renewPlan) {
                   setSelectedPlan(renewPlan)
                   setShowPaymentForm(true)
                 }
               }}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${
-                isExpired
-                  ? 'bg-red-600 text-white hover:bg-red-700'
-                  : 'bg-amber-600 text-white hover:bg-amber-700'
-              }`}
+              className="flex items-center gap-2 whitespace-nowrap"
             >
               <RefreshCw className="h-4 w-4" />
               {isExpired ? 'Reactivar Ahora' : 'Renovar Ahora'}
-            </button>
+            </Button>
           </div>
         </motion.div>
       )}
@@ -187,7 +206,7 @@ export default function SuscripcionPage() {
                 </h2>
                 <StatusBadge status={subscription.status} />
               </div>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="mt-1 text-sm text-muted">
                 {isTrialing && subscription.days_remaining !== null && (
                   <>Te quedan {subscription.days_remaining} días de prueba</>
                 )}
@@ -204,38 +223,38 @@ export default function SuscripcionPage() {
               <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                 ${currentPlan?.price_usd}
               </div>
-              <div className="text-sm text-zinc-500">/ mes</div>
+              <div className="text-sm text-muted">/ mes</div>
             </div>
           </div>
 
           {/* Quick Actions */}
           <div className="mt-4 flex flex-wrap gap-3">
             {/* Reportar Pago - always visible */}
-            <button
+            <Button
+              variant="primary"
               onClick={() => {
                 setSelectedPlan(currentPlan || plans.find((p) => p.name === 'pro') || null)
                 setShowPaymentForm(true)
               }}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              className="flex items-center gap-2"
             >
               <CreditCard className="h-4 w-4" />
               Reportar Pago
-            </button>
+            </Button>
 
             {/* Cambiar Plan button */}
             {otherPlan && (
-              <button
+              <Button
+                variant="outline"
                 onClick={() => {
                   setSelectedPlan(otherPlan)
                   if (otherPlan.price_usd > (currentPlan?.price_usd || 0)) {
-                    // Upgrade - go to payment
                     setShowPaymentForm(true)
                   } else {
-                    // Downgrade - show confirmation
                     setShowChangePlanModal(true)
                   }
                 }}
-                className="flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                className="flex items-center gap-2"
               >
                 {otherPlan.price_usd > (currentPlan?.price_usd || 0) ? (
                   <ArrowUpCircle className="h-4 w-4 text-green-500" />
@@ -243,7 +262,7 @@ export default function SuscripcionPage() {
                   <ArrowDownCircle className="h-4 w-4 text-amber-500" />
                 )}
                 Cambiar a {otherPlan.display_name}
-              </button>
+              </Button>
             )}
           </div>
 
@@ -274,36 +293,52 @@ export default function SuscripcionPage() {
 
       {/* Plans Comparison */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
+        <button
+          onClick={() => setPlansExpanded(!plansExpanded)}
+          className="flex items-center justify-between w-full px-1 py-2 lg:hidden"
+          aria-expanded={plansExpanded}
+        >
+          <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+            Planes Disponibles
+          </span>
+          <ChevronDown
+            className={cn(
+              'h-4 w-4 text-muted transition-transform duration-200',
+              plansExpanded && 'rotate-180'
+            )}
+          />
+        </button>
+        <h2 className="mb-4 hidden text-lg font-semibold text-zinc-900 dark:text-white lg:block">
           Planes disponibles
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {plans.map((plan) => {
-            const isCurrent = currentPlan?.name === plan.name
-            const isUpgrade = (currentPlan?.price_usd || 0) < plan.price_usd
+        <div className={cn(plansExpanded ? '' : 'hidden lg:block')}>
+          <div className="grid gap-4 sm:grid-cols-2 mt-3 lg:mt-0">
+            {plans.map((plan) => {
+              const isCurrent = currentPlan?.name === plan.name
+              const isUpgrade = (currentPlan?.price_usd || 0) < plan.price_usd
 
-            return (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                isCurrentPlan={isCurrent}
-                isRecommended={plan.name === 'pro' && !isCurrent}
-                currentPlanPrice={currentPlan?.price_usd}
-                exchangeRate={exchangeRate}
-                onSelect={() => {
-                  if (isUpgrade) {
-                    setSelectedPlan(plan)
-                    setShowPaymentForm(true)
-                  } else {
-                    // For downgrade, show confirmation
-                    setSelectedPlan(plan)
-                    setShowChangePlanModal(true)
-                  }
-                }}
-                disabled={false}
-              />
-            )
-          })}
+              return (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  isCurrentPlan={isCurrent}
+                  isRecommended={plan.name === 'pro' && !isCurrent}
+                  currentPlanPrice={currentPlan?.price_usd}
+                  exchangeRate={exchangeRate}
+                  onSelect={() => {
+                    if (isUpgrade) {
+                      setSelectedPlan(plan)
+                      setShowPaymentForm(true)
+                    } else {
+                      setSelectedPlan(plan)
+                      setShowChangePlanModal(true)
+                    }
+                  }}
+                  disabled={false}
+                />
+              )
+            })}
+          </div>
         </div>
       </div>
 
@@ -348,13 +383,33 @@ export default function SuscripcionPage() {
       {/* Payment History */}
       {payments.length > 0 && (
         <div>
-          <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-white">
+          <button
+            onClick={() => setHistoryExpanded(!historyExpanded)}
+            className="flex items-center justify-between w-full px-1 py-2 lg:hidden"
+            aria-expanded={historyExpanded}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                Historial de Pagos
+              </span>
+              <span className="text-xs text-muted">({payments.length})</span>
+            </div>
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted transition-transform duration-200',
+                historyExpanded && 'rotate-180'
+              )}
+            />
+          </button>
+          <h2 className="mb-4 hidden text-lg font-semibold text-zinc-900 dark:text-white lg:block">
             Historial de pagos
           </h2>
-          <div className="space-y-3">
-            {payments.map((payment) => (
-              <PaymentHistoryItem key={payment.id} payment={payment} />
-            ))}
+          <div className={cn(historyExpanded ? '' : 'hidden lg:block')}>
+            <div className="space-y-3 mt-3 lg:mt-0">
+              {payments.map((payment) => (
+                <PaymentHistoryItem key={payment.id} payment={payment} />
+              ))}
+            </div>
           </div>
         </div>
       )}

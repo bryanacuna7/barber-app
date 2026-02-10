@@ -1028,7 +1028,7 @@ npx pa11y http://localhost:3000
 
 ## Project Overview
 
-**BarberShop Pro**
+**BarberApp**
 
 Sistema de gestión de citas para barberías. Dashboard administrativo, reservas online, gamificación, y branding personalizable. PWA mobile-first con soporte iOS/Android.
 

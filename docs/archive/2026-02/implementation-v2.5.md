@@ -13,7 +13,7 @@
 
 **🔥 VERSIÓN AUDITADA Y OPTIMIZADA**
 
-**Proyecto:** BarberShop Pro → Salon Booking Platform
+**Proyecto:** BarberApp → Salon Booking Platform
 **Fecha:** 2026-02-02 (Actualizado post-audit con 6 expertos)
 **Estimado Total:** 154-200 horas (7-9 semanas)
 **Archivos Afectados:** ~200 archivos

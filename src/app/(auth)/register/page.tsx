@@ -148,7 +148,7 @@ function RegisterForm({
     <Card className={REGISTER_CARD_STABLE_HEIGHT} data-testid="register-card">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
-        <CardDescription>Registra tu barbería en BarberShop Pro</CardDescription>
+        <CardDescription>Registra tu barbería en BarberApp</CardDescription>
       </CardHeader>
 
       <form onSubmit={handleRegister} data-testid="register-form">

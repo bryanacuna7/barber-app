@@ -2,8 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+
   let supabaseResponse = NextResponse.next({
-    request,
+    request: {
+      headers: requestHeaders,
+    },
   })
 
   const supabase = createServerClient(
@@ -17,7 +22,9 @@ export async function updateSession(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
-            request,
+            request: {
+              headers: requestHeaders,
+            },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -39,7 +46,13 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/clientes') ||
     request.nextUrl.pathname.startsWith('/barberos') ||
     request.nextUrl.pathname.startsWith('/configuracion') ||
-    request.nextUrl.pathname.startsWith('/admin')
+    request.nextUrl.pathname.startsWith('/mi-dia') ||
+    request.nextUrl.pathname.startsWith('/analiticas') ||
+    request.nextUrl.pathname.startsWith('/lealtad') ||
+    request.nextUrl.pathname.startsWith('/suscripcion') ||
+    request.nextUrl.pathname.startsWith('/changelog') ||
+    request.nextUrl.pathname.startsWith('/admin') ||
+    request.nextUrl.pathname.startsWith('/mi-cuenta')
 
   // Auth routes (login, register)
   const isAuthRoute =

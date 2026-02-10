@@ -24,9 +24,10 @@ export async function GET() {
 
   const { data: invitations, error } = await supabase
     .from('barber_invitations')
-    .select('*')
+    .select('id, email, token, business_id, created_at, expires_at')
     .eq('business_id', business.id)
     .is('used_at', null)
+    .gt('expires_at', new Date().toISOString())
 
   if (error) {
     return NextResponse.json({ error: 'Failed to fetch invitations' }, { status: 500 })

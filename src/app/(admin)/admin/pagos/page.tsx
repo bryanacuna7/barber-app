@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -161,8 +162,8 @@ export default function AdminPaymentsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Pagos Reportados</h1>
-        <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+        <h1 className="app-page-title">Pagos Reportados</h1>
+        <p className="app-page-subtitle mt-1 lg:hidden">
           Revisa y aprueba los pagos de suscripción
         </p>
       </div>
@@ -181,17 +182,14 @@ export default function AdminPaymentsPage() {
 
         <div className="flex gap-2">
           {['pending', 'approved', 'rejected', 'all'].map((status) => (
-            <button
+            <Button
               key={status}
+              variant={statusFilter === status ? 'primary' : 'secondary'}
+              size="sm"
               onClick={() => {
                 setStatusFilter(status)
                 updateFilters(undefined, status, 1)
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                statusFilter === status
-                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
-              }`}
             >
               {status === 'all'
                 ? 'Todos'
@@ -200,7 +198,7 @@ export default function AdminPaymentsPage() {
                   : status === 'approved'
                     ? 'Aprobados'
                     : 'Rechazados'}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -283,10 +281,11 @@ export default function AdminPaymentsPage() {
 
                     {payment.status === 'pending' && (
                       <>
-                        <button
+                        <Button
+                          size="sm"
                           onClick={() => handleAction(payment.id, 'approve')}
                           disabled={processingId === payment.id}
-                          className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+                          className="bg-green-600 hover:bg-green-700"
                         >
                           {processingId === payment.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -294,19 +293,21 @@ export default function AdminPaymentsPage() {
                             <CheckCircle className="h-4 w-4" />
                           )}
                           Aprobar
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => {
                             const reason = prompt('Razón del rechazo (opcional):')
                             handleAction(payment.id, 'reject', reason || undefined)
                           }}
                           disabled={processingId === payment.id}
-                          className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50 disabled:opacity-50"
+                          className="border-red-200 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
                         >
                           <XCircle className="h-4 w-4" />
                           Rechazar
-                        </button>
+                        </Button>
                       </>
                     )}
 
@@ -340,20 +341,22 @@ export default function AdminPaymentsPage() {
           </p>
 
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => updateFilters(undefined, undefined, currentPage - 1)}
               disabled={currentPage === 1}
-              className="rounded-lg border border-zinc-200 p-2 text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => updateFilters(undefined, undefined, currentPage + 1)}
               disabled={currentPage === pagination.totalPages}
-              className="rounded-lg border border-zinc-200 p-2 text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
             >
               <ChevronRight className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}

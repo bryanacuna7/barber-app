@@ -64,7 +64,7 @@ export function useRealtimeSubscriptions({
 }: UseRealtimeSubscriptionsOptions) {
   const queryClient = useQueryClient()
   const reconnectAttempts = useRef(0)
-  const pollingIntervalRef = useRef<NodeJS.Timeout>()
+  const pollingIntervalRef = useRef<NodeJS.Timeout>(undefined)
 
   useEffect(() => {
     if (!enabled || !businessId) return
@@ -104,7 +104,7 @@ export function useRealtimeSubscriptions({
           console.log(
             '📡 Subscription change detected:',
             payload.eventType,
-            payload.new?.status || payload.old?.status
+            (payload.new as any)?.status || (payload.old as any)?.status
           )
 
           // Invalidate business settings queries (includes subscription)

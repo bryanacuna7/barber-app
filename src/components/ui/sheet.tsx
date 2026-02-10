@@ -7,8 +7,15 @@
 
 import * as React from 'react'
 import { X } from 'lucide-react'
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion'
-import { animations } from '@/lib/design-system'
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  useReducedMotion,
+  PanInfo,
+} from 'framer-motion'
+import { animations, reducedMotion } from '@/lib/design-system'
 import { haptics } from '@/lib/utils/mobile'
 
 interface SheetProps {
@@ -19,6 +26,7 @@ interface SheetProps {
 
 interface SheetContentProps {
   side?: 'bottom' | 'right' | 'left' | 'top'
+  centered?: boolean
   className?: string
   children: React.ReactNode
 }
@@ -70,7 +78,7 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+              className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm"
             />
             {children}
           </>
@@ -80,8 +88,14 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
   )
 }
 
-export function SheetContent({ side = 'bottom', className = '', children }: SheetContentProps) {
+export function SheetContent({
+  side = 'bottom',
+  centered = false,
+  className = '',
+  children,
+}: SheetContentProps) {
   const { onOpenChange } = useSheetContext()
+  const prefersReducedMotion = useReducedMotion()
   const [isDragging, setIsDragging] = React.useState(false)
 
   // Drag state for bottom sheets
@@ -111,8 +125,15 @@ export function SheetContent({ side = 'bottom', className = '', children }: Shee
     },
   }
 
-  const variants = slideVariants[side]
-  const isBottomSheet = side === 'bottom'
+  const isCenteredBottomSheet = side === 'bottom' && centered
+  const variants = isCenteredBottomSheet
+    ? {
+        initial: { opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' },
+        animate: { opacity: 1, scale: 1, x: '-50%', y: '-50%' },
+        exit: { opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' },
+      }
+    : slideVariants[side]
+  const isBottomSheet = side === 'bottom' && !centered
 
   // Drag handlers for bottom sheets only
   const handleDragStart = () => {
@@ -153,7 +174,7 @@ export function SheetContent({ side = 'bottom', className = '', children }: Shee
       initial={variants.initial}
       animate={variants.animate}
       exit={variants.exit}
-      transition={animations.spring.sheet}
+      transition={prefersReducedMotion ? reducedMotion.spring.sheet : animations.spring.sheet}
       {...(isBottomSheet && {
         drag: 'y',
         dragDirectionLock: true,
@@ -167,14 +188,16 @@ export function SheetContent({ side = 'bottom', className = '', children }: Shee
           opacity: sheetOpacity,
         },
       })}
-      className={`fixed z-50 flex flex-col gap-4 bg-background p-6 shadow-lg ${
-        side === 'bottom'
-          ? 'inset-x-0 bottom-0 rounded-t-2xl border-t touch-pan-x'
-          : side === 'right'
-            ? 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l sm:max-w-md'
-            : side === 'left'
-              ? 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r sm:max-w-md'
-              : 'inset-x-0 top-0 rounded-b-2xl border-b'
+      className={`fixed z-[71] flex flex-col gap-4 bg-background p-6 shadow-lg ${
+        isCenteredBottomSheet
+          ? 'left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-lg rounded-2xl border'
+          : side === 'bottom'
+            ? 'inset-x-0 bottom-0 rounded-t-2xl border-t touch-pan-x'
+            : side === 'right'
+              ? 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l sm:max-w-md'
+              : side === 'left'
+                ? 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r sm:max-w-md'
+                : 'inset-x-0 top-0 rounded-b-2xl border-b'
       } ${className}`}
     >
       {/* Drag handle for bottom sheets */}

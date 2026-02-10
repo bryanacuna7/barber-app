@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** BarberShop Pro
+**Project:** BarberApp
 **Generated:** 2026-02-06 08:21:47
 **Category:** Legal Services
 
