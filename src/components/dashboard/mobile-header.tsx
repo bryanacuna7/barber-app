@@ -14,6 +14,16 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
 
+  const shouldHideHeader =
+    pathname === '/citas' ||
+    pathname.startsWith('/citas/') ||
+    pathname === '/mi-dia' ||
+    pathname.startsWith('/mi-dia/')
+
+  if (shouldHideHeader) {
+    return null
+  }
+
   const titleByExactPath: Record<string, string> = {
     '/dashboard': businessName,
     '/citas': 'Citas',
@@ -115,7 +125,13 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
   const showBack = !isDashboardHome && !topLevelRoutes.has(pathname)
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-zinc-950 lg:hidden">
+    <header
+      className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-zinc-950 lg:hidden"
+      style={{
+        marginTop: 'calc(env(safe-area-inset-top) * -1)',
+        paddingTop: 'env(safe-area-inset-top)',
+      }}
+    >
       <div className="flex h-14 items-center justify-between px-4">
         {isDashboardHome ? (
           <Link href="/dashboard" className="flex items-center gap-2">

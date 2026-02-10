@@ -222,10 +222,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Sidebar businessName={businessName} logoUrl={logoUrl} isAdmin={roleInfo.isAdmin} />
             )}
 
-            {/* Mobile header with notification bell */}
-            {!isCitasRoute && !isMiDiaRoute && (
-              <MobileHeader businessName={businessName} logoUrl={logoUrl} />
-            )}
+            {/* Mobile header with notification bell (self-managed by pathname on client) */}
+            <MobileHeader businessName={businessName} logoUrl={logoUrl} />
 
             {/* Main content */}
             <main id="main-content" className={roleInfo.isOwner ? 'lg:pl-64' : ''}>

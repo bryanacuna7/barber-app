@@ -21,6 +21,19 @@ const CK = {
   sinpe: 'setting_sinpe',
 } as const
 
+async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response | null> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    return await fetch(url, { signal: controller.signal })
+  } catch {
+    return null
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export function useSubscriptionData() {
   const [subscription, setSubscription] = useState<SubscriptionStatusResponse | null>(null)
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
@@ -76,25 +89,25 @@ export function useSubscriptionData() {
       // Only fetch stale/missing data
       const fetches: Promise<Response | null>[] = [
         !cachedStatus || cachedStatus.isStale
-          ? fetch('/api/subscription/status')
+          ? fetchWithTimeout('/api/subscription/status')
           : Promise.resolve(null),
         !cachedPlans || cachedPlans.isStale
-          ? fetch('/api/subscription/plans')
+          ? fetchWithTimeout('/api/subscription/plans')
           : Promise.resolve(null),
         !cachedPayments || cachedPayments.isStale
-          ? fetch('/api/subscription/payments')
+          ? fetchWithTimeout('/api/subscription/payments')
           : Promise.resolve(null),
         !cachedExchange || cachedExchange.isStale
-          ? fetch('/api/exchange-rate')
+          ? fetchWithTimeout('/api/exchange-rate')
           : Promise.resolve(null),
         !cachedBank || cachedBank.isStale
-          ? fetch('/api/settings?key=usd_bank_account')
+          ? fetchWithTimeout('/api/settings?key=usd_bank_account')
           : Promise.resolve(null),
         !cachedWhatsapp || cachedWhatsapp.isStale
-          ? fetch('/api/settings?key=support_whatsapp')
+          ? fetchWithTimeout('/api/settings?key=support_whatsapp')
           : Promise.resolve(null),
         !cachedSinpe || cachedSinpe.isStale
-          ? fetch('/api/settings?key=sinpe_details')
+          ? fetchWithTimeout('/api/settings?key=sinpe_details')
           : Promise.resolve(null),
       ]
 

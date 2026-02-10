@@ -243,12 +243,20 @@ export function SwipeableRow({
       if (absX > 10 && absX > absY + 4) {
         const isSwipingLeft = deltaX < 0
         const isSwipingRight = deltaX > 0
+        const currentX = x.get()
+        const isOpenToRightActions = currentX < -2
+        const isOpenToLeftActions = currentX > 2
 
-        // Only capture if actions exist for the swipe direction
-        const hasMatchingActions =
+        // Capture rules:
+        // 1) Normal open gesture when actions exist in that direction.
+        // 2) Return swipe when row is already open (allows closing back to center).
+        const canOpenInDirection =
           (isSwipingLeft && rightActions.length > 0) || (isSwipingRight && leftActions.length > 0)
+        const canCloseOpenedRow =
+          (isOpenToRightActions && isSwipingRight) || (isOpenToLeftActions && isSwipingLeft)
+        const canCaptureSwipe = canOpenInDirection || canCloseOpenedRow
 
-        if (hasMatchingActions) {
+        if (canCaptureSwipe) {
           dragStartedRef.current = true
           dragControls.start(event)
         } else {
@@ -259,7 +267,7 @@ export function SwipeableRow({
         pointerStartRef.current = null
       }
     },
-    [dragControls, hasActions, rightActions.length, leftActions.length]
+    [dragControls, hasActions, rightActions.length, leftActions.length, x]
   )
 
   return (
