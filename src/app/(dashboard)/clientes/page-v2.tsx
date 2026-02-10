@@ -80,6 +80,7 @@ import { Input } from '@/components/ui/input'
 // import { CardContent } from '@/components/ui/card'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { format, startOfMonth, isAfter, subDays, isSameDay, getDaysInMonth } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -654,18 +655,23 @@ export default function ClientesPageV2() {
                   <h1 className="app-page-title brand-gradient-text">Clientes</h1>
                   <p className="app-page-subtitle mt-1">{totalClients} registrados</p>
                 </div>
-                <Button
-                  variant="gradient"
-                  data-tour="clients-add-button"
-                  onClick={() => {
-                    setShowModal(true)
-                    if (isMobileDevice()) haptics.tap()
-                  }}
-                  className="min-w-[44px] min-h-[44px] h-10 border-0"
-                >
-                  <Plus className="h-5 w-5 sm:mr-2" />
-                  <span className="hidden sm:inline">Nuevo Cliente</span>
-                </Button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="lg:hidden">
+                    <NotificationBell />
+                  </div>
+                  <Button
+                    variant="gradient"
+                    data-tour="clients-add-button"
+                    onClick={() => {
+                      setShowModal(true)
+                      if (isMobileDevice()) haptics.tap()
+                    }}
+                    className="min-w-[44px] min-h-[44px] h-10 border-0"
+                  >
+                    <Plus className="h-5 w-5 sm:mr-2" />
+                    <span className="hidden sm:inline">Nuevo Cliente</span>
+                  </Button>
+                </div>
               </div>
 
               <div className={`${statsExpanded ? '' : 'hidden lg:block'}`}>

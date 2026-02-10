@@ -42,6 +42,7 @@ import { Modal } from '@/components/ui/modal'
 import { Input } from '@/components/ui/input'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 import { formatCurrency } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
@@ -651,6 +652,9 @@ function ServiciosContent() {
                 <p className="app-page-subtitle mt-1">{totalServices} servicios</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                <div className="lg:hidden">
+                  <NotificationBell />
+                </div>
                 <Button
                   variant="ghost"
                   onClick={() => setSidebarOpen(!sidebarOpen)}
