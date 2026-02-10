@@ -34,15 +34,6 @@ export function formatCurrencyCompactMillions(amount: number): string {
   return `₡${millions.toFixed(1)}M`
 }
 
-export function formatCurrencyCompactMillions(amount: number): string {
-  if (Math.abs(amount) < 1000000) {
-    return formatCurrency(amount)
-  }
-
-  const millions = amount / 1000000
-  return `₡${millions.toFixed(1)}M`
-}
-
 export function formatCurrencyCompact(amount: number): string {
   return formatCurrencyCompactMillions(amount)
 }
