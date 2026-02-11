@@ -65,12 +65,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const supabase = await createServiceClient()
 
   // Get business
-  const { data: business, error: businessError } = await supabase
+  // Note: smart_duration_enabled added in migration 033, using `as any` until types regenerated
+  const { data: business, error: businessError } = (await supabase
     .from('businesses')
-    .select('id, name, logo_url, brand_primary_color, owner_id')
+    .select('id, name, logo_url, brand_primary_color, owner_id, smart_duration_enabled')
     .eq('slug', slug)
     .eq('is_active', true)
-    .single()
+    .single()) as any
 
   if (businessError || !business) {
     logger.warn({ slug, error: businessError }, 'Business not found for booking')
@@ -150,8 +151,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     logBusiness('client_created', business.id, { clientId: client.id, clientPhone: client_phone })
   }
 
+  // Smart duration: predict if enabled, otherwise use fixed service duration
+  let durationMin = service.duration_minutes ?? 30
+  if ((business as any).smart_duration_enabled) {
+    const { getPredictedDuration } = await import('@/lib/utils/duration-predictor')
+    durationMin = await getPredictedDuration(business.id, service_id, barber_id, durationMin)
+  }
+
   // Calculate tracking expiry (scheduled_at + duration + 2h)
-  const durationMin = service.duration_minutes ?? 30
   const trackingExpiresAt = new Date(
     new Date(scheduled_at).getTime() + (durationMin + 120) * 60_000
   ).toISOString()

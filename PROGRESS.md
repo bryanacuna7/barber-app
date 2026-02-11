@@ -8,7 +8,7 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-10 (Session 175 - P0 Tracking Público + Reminders COMPLETE)
+- **Last Updated:** 2026-02-10 (Session 177 - P1 Smart Duration Complete)
 - **Current Branch:** `feature/customer-discovery-features` (from main)
 - **Current Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** `ROADMAP.md` (single source of truth for what's next)
@@ -79,6 +79,83 @@
 ---
 
 ## Recent Sessions
+
+### Session 177: P1 — Duración Dinámica + Scheduling Inteligente (2026-02-10)
+
+**Status:** Code complete. Migrations pending execution.
+
+**Objective:** Close the gap between fixed `service.duration_minutes` and actual appointment durations. System now learns from completed appointments to predict future durations, enabling tighter scheduling and recovered time.
+
+**D1 — Migrations 032-033:**
+
+- `032_service_duration_stats.sql` — Stats table with partial unique indexes (NULL-safe for PostgreSQL), RLS owner read
+- `033_smart_duration_flag.sql` — `smart_duration_enabled` boolean on businesses + `update_duration_stats` SECURITY DEFINER RPC (service_role only, outlier filtering >3x/<0.33x, INSERT ON CONFLICT for concurrency safety)
+- Backfill SQL for cold start (populates from historical completed appointments)
+
+**D2 — Duration Predictor:**
+
+- `src/lib/utils/duration-predictor.ts` — Cascade lookup: barber+service (≥5 samples) → service-wide (≥3 samples) → default. Structured logging with cascadeLevel/sampleCount. Graceful degradation on any error.
+
+**D3 — Complete API Integration:**
+
+- `src/app/api/appointments/[id]/complete/route.ts` — Added `service_id` to select, calls `update_duration_stats` RPC async (non-blocking `.catch()`)
+
+**D4 — Availability + Booking Integration:**
+
+- `src/app/api/public/[slug]/availability/route.ts` — Accepts `barber_id` query param, uses predictor when flag ON
+- `src/app/api/public/[slug]/book/route.ts` — Uses predicted duration for appointment insert when flag ON
+
+**D5 — Analytics:**
+
+- `src/app/api/analytics/duration/route.ts` — GET endpoint with per-service breakdown + recovered minutes
+- `src/components/analytics/duration-insights.tsx` — Card with KPIs (recovered time, avg duration, analyzed count) + per-service list
+- `src/hooks/queries/useAnalytics.ts` — Added `useDurationAnalytics()` hook
+- `src/app/(dashboard)/analiticas/page-v2.tsx` — DurationInsights integrated after charts
+
+**D6 — Feature Toggle + Docs:**
+
+- `src/components/settings/smart-duration-toggle.tsx` — IOSToggle component in Configuración > Avanzado
+- `DATABASE_SCHEMA.md` — Updated businesses table + new `service_duration_stats` table
+
+**Architecture:** Per-business feature flag (OFF by default). Instant rollback = flip toggle. Stats collection continues regardless. Outlier rejection (>3x or <0.33x avg after 3+ samples). Concurrency-safe upserts via INSERT ON CONFLICT with partial indexes.
+
+**New files (5):** `032_service_duration_stats.sql`, `033_smart_duration_flag.sql`, `duration-predictor.ts`, `api/analytics/duration/route.ts`, `duration-insights.tsx`, `smart-duration-toggle.tsx`
+**Modified files (7):** `complete/route.ts`, `availability/route.ts`, `book/route.ts`, `analiticas/page-v2.tsx`, `useAnalytics.ts`, `avanzado/page.tsx`, `DATABASE_SCHEMA.md`, `react-query/config.ts`
+
+**BLOCKER:** Migrations 032+033 + backfill must be executed in Supabase Dashboard before the feature works.
+
+**Next:** Execute migrations → enable flag → verify end-to-end → commit → deploy
+
+---
+
+### Session 176: Deploy v0.9.3 — Build Fixes + Vercel Cron Limit (2026-02-10)
+
+**Status:** ✅ v0.9.3 LIVE on production
+
+**Problems found (deploy was blocked):**
+
+1. **Duplicate function in `format.ts`** — `formatCurrencyCompactMillions` was defined twice (lines 28-35 and 37-44). Turbopack build failed. Removed the duplicate.
+
+2. **Unused `page-old.tsx` in analiticas** — Had stale TypeScript errors (passing `index` prop to `StaggeredItem` which no longer accepts it). Deleted the file (page-v2 is active via re-export).
+
+3. **Vercel Hobby cron limit** — `vercel.json` had `*/15 * * * *` (every 15 min) for appointment reminders. Vercel Hobby plan only allows **1 cron execution per day**. Changed to `0 8 * * *` (daily at 8am UTC). This was the main blocker — Vercel CLI refused to deploy entirely.
+
+**Impact of cron change:**
+
+- Appointment reminders now run **once daily at 8am** instead of every 15 min
+- 24h reminders: still work (cron runs at 8am, catches appointments for next day)
+- 1h reminders: **degraded** — only catches appointments between ~8am-9am
+- **To restore 15-min frequency:** Upgrade to Vercel Pro ($20/mo) OR use external cron service (cron-job.org, Upstash QStash) calling `/api/cron/appointment-reminders`
+
+**Commits:**
+
+- `5e59f0f` — fix(build): remove duplicate function and unused old page
+- `1099024` — fix(build): resolve merge conflict in format.ts
+- `794bc4d` — fix(deploy): change reminder cron to daily (Hobby plan limit)
+
+**Deploy:** `vercel --prod` manual deploy successful → https://barber-app-umber.vercel.app
+
+---
 
 ### Session 175: P0 Tracking Público + Reminders al Cliente (2026-02-10)
 
@@ -993,6 +1070,6 @@
 
 ---
 
-**Last Update:** Session 171 (2026-02-10)
-**Status:** Desktop Premium Plan D0-D4 complete. D5-D8 pending.
-**Next:** D5 (Motion & feedback premium) → D6-D8 → squash merge to main → deploy v0.9.3
+**Last Update:** Session 177 (2026-02-10)
+**Status:** v0.9.3 LIVE. P1 Smart Duration code complete (migrations pending).
+**Next:** Execute migrations 032+033+backfill → enable flag → verify → commit → deploy v0.9.4

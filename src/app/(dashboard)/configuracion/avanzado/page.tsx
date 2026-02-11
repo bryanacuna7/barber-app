@@ -1,12 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { BellRing, Gift, LogOut, ArrowRight } from 'lucide-react'
+import { BellRing, Clock, Gift, LogOut, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { FadeInUp } from '@/components/ui/motion'
 import { NotificationPreferencesSection } from '@/components/settings/notification-preferences-section'
 import { PushNotificationToggle } from '@/components/settings/push-notification-toggle'
+import { SmartDurationToggle } from '@/components/settings/smart-duration-toggle'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { SettingsSubrouteHeader } from '@/components/settings/settings-subroute-header'
 import { createClient } from '@/lib/supabase/client'
@@ -55,8 +56,26 @@ export default function AvanzadoPage() {
             </Card>
           </FadeInUp>
 
-          {/* Loyalty Program */}
+          {/* Smart Duration */}
           <FadeInUp delay={0.1}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-[17px]">
+                  <Clock className="h-5 w-5" />
+                  Duración Inteligente
+                </CardTitle>
+                <CardDescription>
+                  Predice la duración de citas usando datos históricos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SmartDurationToggle />
+              </CardContent>
+            </Card>
+          </FadeInUp>
+
+          {/* Loyalty Program */}
+          <FadeInUp delay={0.15}>
             <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 dark:border-amber-900 dark:from-amber-950/30 dark:to-orange-950/20 overflow-hidden">
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
               <CardHeader>
@@ -84,7 +103,7 @@ export default function AvanzadoPage() {
           </FadeInUp>
 
           {/* Session / Logout */}
-          <FadeInUp delay={0.15}>
+          <FadeInUp delay={0.2}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[17px]">

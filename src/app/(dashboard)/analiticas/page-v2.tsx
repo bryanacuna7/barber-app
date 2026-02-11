@@ -26,6 +26,7 @@ import { AnalyticsErrorBoundary } from '@/components/error-boundaries/AnalyticsE
 import { QueryError } from '@/components/ui/query-error'
 import {
   useBusinessAnalytics,
+  useDurationAnalytics,
   type AnalyticsPeriod,
   type OverviewMetrics,
 } from '@/hooks/queries/useAnalytics'
@@ -57,6 +58,17 @@ const BarbersLeaderboard = dynamic(
   () =>
     import('@/components/analytics/barbers-leaderboard').then((mod) => ({
       default: mod.BarbersLeaderboard,
+    })),
+  {
+    loading: () => <ChartSkeleton />,
+    ssr: false,
+  }
+)
+
+const DurationInsights = dynamic(
+  () =>
+    import('@/components/analytics/duration-insights').then((mod) => ({
+      default: mod.DurationInsights,
     })),
   {
     loading: () => <ChartSkeleton />,
@@ -155,6 +167,9 @@ function AnalyticsContent() {
     error: analyticsError,
     refetch,
   } = useBusinessAnalytics(period)
+
+  // Duration analytics (separate query, loads independently)
+  const { data: durationData, isLoading: durationLoading } = useDurationAnalytics(period)
 
   // Real-time: Subscribe to appointment changes
   useRealtimeAppointments({
@@ -378,6 +393,15 @@ function AnalyticsContent() {
           </div>
         </div>
       </AnalyticsErrorBoundary>
+
+      {/* Duration Insights */}
+      <ComponentErrorBoundary
+        fallbackTitle="Error al cargar duración"
+        fallbackDescription="No pudimos cargar los datos de duración."
+        showReset
+      >
+        <DurationInsights data={durationData ?? null} isLoading={durationLoading} />
+      </ComponentErrorBoundary>
     </div>
   )
 }

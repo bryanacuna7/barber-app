@@ -20,7 +20,7 @@
 ### `businesses`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`
+**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`
 
 ```sql
 - id                        UUID PRIMARY KEY
@@ -43,6 +43,7 @@
 - accepted_payment_methods  JSONB DEFAULT '["cash"]' (added in 025)
 - notification_settings     JSONB DEFAULT '{...}' (added in 025)
 - staff_permissions         JSONB DEFAULT '{...}' (added in 027) -- owner-configurable UI permissions for staff
+- smart_duration_enabled    BOOLEAN DEFAULT false (added in 033) -- per-business toggle for smart duration prediction
 ```
 
 ### `services`
@@ -419,6 +420,35 @@ Stores browser push notification subscriptions. Supports multi-device (one user 
 **RLS:** Users can insert/select/delete their own subscriptions. Server-side updates via service client.
 
 **Index:** `idx_push_subs_user_active` on `user_id WHERE is_active = true`
+
+### `service_duration_stats`
+
+**Created in:** `032_service_duration_stats.sql`
+
+Aggregated duration statistics for smart duration prediction. Each row represents the running average for a business+service combo, optionally per barber. Rows with `barber_id IS NULL` represent the service-wide average across all barbers.
+
+```sql
+- id                    UUID PRIMARY KEY
+- business_id           UUID REFERENCES businesses(id) ON DELETE CASCADE
+- service_id            UUID REFERENCES services(id) ON DELETE CASCADE
+- barber_id             UUID REFERENCES barbers(id) ON DELETE CASCADE (nullable — NULL = service-wide avg)
+- avg_duration_minutes  DECIMAL(5,1) NOT NULL
+- min_duration_minutes  INT NOT NULL
+- max_duration_minutes  INT NOT NULL
+- sample_count          INT NOT NULL DEFAULT 0
+- created_at            TIMESTAMPTZ
+- last_updated_at       TIMESTAMPTZ
+```
+
+**RLS:** Owners can SELECT their own stats. Writes via `update_duration_stats` SECURITY DEFINER RPC (service_role only).
+
+**Indexes:**
+
+- `idx_duration_stats_barber_specific` UNIQUE on `(business_id, service_id, barber_id) WHERE barber_id IS NOT NULL`
+- `idx_duration_stats_service_wide` UNIQUE on `(business_id, service_id) WHERE barber_id IS NULL`
+- `idx_duration_stats_lookup` on `(business_id, service_id, barber_id)`
+
+**RPC:** `update_duration_stats(p_business_id, p_service_id, p_barber_id, p_actual_duration)` — SECURITY DEFINER, SET search_path = public, GRANT to service_role only. Handles outlier filtering (>3x or <0.33x avg after 3+ samples) and INSERT ON CONFLICT for concurrency safety.
 
 ---
 

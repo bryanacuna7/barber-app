@@ -86,6 +86,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         barber_id,
         business_id,
         client_id,
+        service_id,
         price,
         started_at,
         barber:barbers!appointments_barber_id_fkey(id, name)
@@ -153,6 +154,23 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       const updateData: Record<string, unknown> = { status: 'completed' }
       if (paymentMethod) updateData.payment_method = paymentMethod
       if (actualDurationMinutes !== null) updateData.actual_duration_minutes = actualDurationMinutes
+
+      // Update duration stats for smart scheduling (async, non-blocking)
+      if (actualDurationMinutes !== null && appointment.service_id) {
+        const serviceClient = createServiceClient()
+        ;(serviceClient.rpc as any)('update_duration_stats', {
+          p_business_id: business.id,
+          p_service_id: appointment.service_id,
+          p_barber_id: appointment.barber_id,
+          p_actual_duration: actualDurationMinutes,
+        })
+          .then(() =>
+            logger.info({ appointmentId, actualDurationMinutes }, 'Duration stats updated')
+          )
+          .catch((err) =>
+            logger.error({ err, appointmentId }, 'Duration stats update failed (non-critical)')
+          )
+      }
 
       // Note: started_at, actual_duration_minutes, payment_method columns exist after migration 025
       // Using `as any` until Supabase types are regenerated

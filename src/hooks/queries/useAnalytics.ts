@@ -148,6 +148,46 @@ export function useBusinessAnalytics(period: AnalyticsPeriod = 'month') {
 }
 
 /**
+ * Duration analytics response
+ */
+export interface DurationAnalytics {
+  smartDurationEnabled: boolean
+  overall: {
+    completedWithDuration: number
+    avgScheduledMinutes: number
+    avgActualMinutes: number
+    totalRecoveredMinutes: number
+    avgRecoveredPerAppointment: number
+  }
+  services: Array<{
+    serviceId: string
+    serviceName: string
+    completedCount: number
+    avgScheduled: number
+    avgActual: number
+    recoveredMinutes: number
+  }>
+}
+
+/**
+ * Fetch duration analytics for smart duration insights
+ */
+export function useDurationAnalytics(period: AnalyticsPeriod = 'month') {
+  return useQuery({
+    queryKey: queryKeys.analytics.duration(period),
+    queryFn: async (): Promise<DurationAnalytics> => {
+      const response = await fetch(`/api/analytics/duration?period=${period}`)
+      if (!response.ok) {
+        throw new Error(`Duration analytics fetch failed: ${response.statusText}`)
+      }
+      return response.json()
+    },
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  })
+}
+
+/**
  * Hook for overview metrics only (lighter query)
  *
  * Use this when you only need KPI metrics without charts.

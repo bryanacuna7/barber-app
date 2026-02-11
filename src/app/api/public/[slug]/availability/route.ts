@@ -9,6 +9,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const { searchParams } = new URL(request.url)
   const dateStr = searchParams.get('date')
   const serviceId = searchParams.get('service_id')
+  const barberId = searchParams.get('barber_id')
 
   if (!dateStr || !serviceId) {
     return NextResponse.json({ error: 'date and service_id are required' }, { status: 400 })
@@ -21,13 +22,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   const supabase = await createServiceClient()
 
-  // Get business
-  const { data: business, error: businessError } = await supabase
+  // Get business with smart duration flag
+  // Note: smart_duration_enabled added in migration 033, using `as any` until types regenerated
+  const { data: business, error: businessError } = (await supabase
     .from('businesses')
-    .select('id, operating_hours, booking_buffer_minutes')
+    .select('id, operating_hours, booking_buffer_minutes, smart_duration_enabled')
     .eq('slug', slug)
     .eq('is_active', true)
-    .single()
+    .single()) as any
 
   if (businessError || !business) {
     return NextResponse.json({ error: 'Business not found' }, { status: 404 })
@@ -45,17 +47,35 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'Service not found' }, { status: 404 })
   }
 
-  // Get existing appointments for this date
+  // Smart duration: predict if enabled, otherwise use fixed service duration
+  let serviceDuration = service.duration_minutes ?? 30
+  if ((business as any).smart_duration_enabled) {
+    const { getPredictedDuration } = await import('@/lib/utils/duration-predictor')
+    serviceDuration = await getPredictedDuration(
+      business.id,
+      serviceId,
+      barberId ?? undefined,
+      serviceDuration
+    )
+  }
+
+  // Get existing appointments for this date (filter by barber if provided)
   const dayStart = startOfDay(date)
   const dayEnd = endOfDay(date)
 
-  const { data: appointments } = await supabase
+  let query = supabase
     .from('appointments')
     .select('scheduled_at, duration_minutes')
     .eq('business_id', business.id)
     .gte('scheduled_at', dayStart.toISOString())
     .lte('scheduled_at', dayEnd.toISOString())
     .in('status', ['pending', 'confirmed'])
+
+  if (barberId) {
+    query = query.eq('barber_id', barberId)
+  }
+
+  const { data: appointments } = await query
 
   // Calculate available slots
   const operatingHours = business.operating_hours
@@ -66,7 +86,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     date,
     operatingHours,
     existingAppointments: appointments || [],
-    serviceDuration: service.duration_minutes ?? 30,
+    serviceDuration,
     bufferMinutes: business.booking_buffer_minutes ?? 15,
   })
 

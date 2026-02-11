@@ -112,6 +112,8 @@ export const queryKeys = {
     // Modern: period based ('week' | 'month' | 'year')
     byPeriod: (period: 'week' | 'month' | 'year') =>
       [...queryKeys.analytics.all, 'by-period', period] as const,
+    duration: (period: 'week' | 'month' | 'year') =>
+      [...queryKeys.analytics.all, 'duration', period] as const,
   },
 
   // Calendar (Citas)
