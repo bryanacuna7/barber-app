@@ -8,8 +8,8 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase)
-- **Last Updated:** 2026-02-10 (Session 177 - P1 Smart Duration Complete)
-- **Current Branch:** `feature/customer-discovery-features` (from main)
+- **Last Updated:** 2026-02-10 (Session 178 - P1 Committed + Verified)
+- **Current Branch:** `feature/ui-ux-redesign`
 - **Current Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** `ROADMAP.md` (single source of truth for what's next)
 - **Color Audit:** COMPLETE (archived to `docs/archive/2026-02/color-audit.md`)
@@ -80,9 +80,22 @@
 
 ## Recent Sessions
 
+### Session 178: P1 Commit + Verification (2026-02-10)
+
+**Status:** COMMITTED (`427ba13`). Migrations 032+033 executed. Backfill applied. Feature verified via Playwright E2E.
+
+- Migrations 032, 033, and backfill SQL executed in Supabase Dashboard
+- SmartDurationToggle verified ON in /configuracion/avanzado
+- DurationInsights card visible in /analiticas with "ON" badge
+- All 16 files committed in `feat(p1)` commit
+
+**Next:** Deploy v0.9.4 when ready. Also remaining unstaged changes: barberos page-v2.tsx, mobile-header.tsx.
+
+---
+
 ### Session 177: P1 — Duración Dinámica + Scheduling Inteligente (2026-02-10)
 
-**Status:** Code complete. Migrations pending execution.
+**Status:** Code complete. Migrations executed. Committed in Session 178.
 
 **Objective:** Close the gap between fixed `service.duration_minutes` and actual appointment durations. System now learns from completed appointments to predict future durations, enabling tighter scheduling and recovered time.
 
@@ -122,9 +135,9 @@
 **New files (5):** `032_service_duration_stats.sql`, `033_smart_duration_flag.sql`, `duration-predictor.ts`, `api/analytics/duration/route.ts`, `duration-insights.tsx`, `smart-duration-toggle.tsx`
 **Modified files (7):** `complete/route.ts`, `availability/route.ts`, `book/route.ts`, `analiticas/page-v2.tsx`, `useAnalytics.ts`, `avanzado/page.tsx`, `DATABASE_SCHEMA.md`, `react-query/config.ts`
 
-**BLOCKER:** Migrations 032+033 + backfill must be executed in Supabase Dashboard before the feature works.
+**Migrations:** 032+033 + backfill executed in Supabase Dashboard. Feature flag ON for Bryan's business.
 
-**Next:** Execute migrations → enable flag → verify end-to-end → commit → deploy
+**Committed:** `427ba13` — `feat(p1): smart duration scheduling - complete implementation`
 
 ---
 

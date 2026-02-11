@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { useToast } from '@/components/ui/toast'
+import { NotificationBell } from '@/components/notifications/notification-bell'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { useBusiness } from '@/contexts/business-context'
 import {
@@ -119,17 +120,22 @@ export default function BarberosPage() {
                 {activeCount !== 1 ? 's' : ''}
               </p>
             </div>
-            <Button
-              variant="gradient"
-              onClick={() => {
-                setIsInviteOpen(true)
-                if (isMobileDevice()) haptics.tap()
-              }}
-              className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
-            >
-              <Plus className="h-5 w-5 sm:mr-2" />
-              <span className="hidden sm:inline">Invitar Barbero</span>
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="lg:hidden">
+                <NotificationBell />
+              </div>
+              <Button
+                variant="gradient"
+                onClick={() => {
+                  setIsInviteOpen(true)
+                  if (isMobileDevice()) haptics.tap()
+                }}
+                className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+              >
+                <Plus className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Invitar Barbero</span>
+              </Button>
+            </div>
           </div>
         </motion.div>
 
