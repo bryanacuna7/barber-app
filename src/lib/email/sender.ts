@@ -59,6 +59,7 @@ const EMAIL_PREFERENCE_MAP = {
   payment_rejected: 'email_payment_status',
   new_appointment: 'email_new_appointment',
   appointment_reminder: 'email_appointment_reminder',
+  appointment_cancelled: 'email_new_appointment',
   new_business: 'email_new_business',
   payment_pending: 'email_payment_pending',
 } as const
