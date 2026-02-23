@@ -8,20 +8,16 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.4
+## v0.9.5
 
 ### Nuevo
 
-- Duracion inteligente: el sistema aprende cuanto tarda cada servicio y ajusta los horarios disponibles automaticamente
-- Podes activar o desactivar esta funcion desde Configuracion > Avanzado
-- Nueva tarjeta en Analiticas que muestra tiempo recuperado y duracion promedio por servicio
+- Horarios inteligentes con descuento: crea reglas para ofrecer precios mas bajos en horas de poca demanda y llenar tu agenda
+- Mapa de calor de demanda: ve de un vistazo que dias y horas tienen mas citas en Analiticas
+- Pagina de promociones en Configuracion para crear, editar y eliminar reglas de descuento facilmente
+- Los clientes ven el descuento directamente al elegir horario: precio original tachado y precio con descuento
 
 ### Mejoras
 
-- Documentacion interna del proyecto reorganizada y optimizada
-
-### Correcciones
-
-- El boton de volver en Configuracion ya no recarga la pagina
-- "Clientes" ya no aparece repetido en el menu "Mas"
-- Las tarjetas de clientes ya no quedan escondidas detras de la barra inferior
+- La confirmacion de cita ahora muestra el detalle del descuento aplicado
+- Los horarios disponibles indican automaticamente cuando hay una promocion activa

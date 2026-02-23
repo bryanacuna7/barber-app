@@ -4,6 +4,20 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.5] - 2026-02-23
+
+### Nuevo
+
+- Horarios inteligentes con descuento: configura reglas para ofrecer precios reducidos en horas de baja demanda
+- Mapa de calor de demanda en Analiticas: visualiza que dias y horas tienen mas citas de un vistazo
+- Pagina de configuracion de promociones en Configuracion > Promociones para crear y administrar reglas de descuento
+- Al reservar, los horarios con descuento muestran el precio original tachado y el precio con descuento
+
+### Mejorado
+
+- El sistema de reservas ahora muestra automaticamente los descuentos disponibles en cada horario
+- La confirmacion de cita incluye detalle del descuento aplicado cuando corresponde
+
 ## [0.9.4] - 2026-02-23
 
 ### Nuevo
