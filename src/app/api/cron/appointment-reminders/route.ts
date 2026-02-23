@@ -130,13 +130,13 @@ export async function GET(request: Request) {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-      const { data: oldProofs } = (await serviceClient
+      const { data: oldProofs } = (await (serviceClient as any)
         .from('appointments')
         .select('id, advance_payment_proof_url')
         .in('advance_payment_status', ['verified', 'rejected'])
         .lt('verified_at', thirtyDaysAgo)
         .not('advance_payment_proof_url', 'is', null)
-        .limit(50)) as any
+        .limit(50)) as { data: Array<{ id: string; advance_payment_proof_url: string }> | null }
 
       if (oldProofs?.length) {
         const paths = oldProofs.map((p: any) => p.advance_payment_proof_url).filter(Boolean)
