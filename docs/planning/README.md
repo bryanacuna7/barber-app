@@ -11,7 +11,7 @@ Implementation plans and project roadmaps.
 **The only active roadmap.** Contains:
 
 - What's built (completed features)
-- Current sprint (UX polish from AUDIT.md)
+- Current sprint (UX polish from Mobile UX Audit)
 - Post-launch features (Tiers 1-4)
 - Platform/admin improvements
 - UX contracts reference
@@ -24,7 +24,7 @@ All previous roadmaps (MVP, Post-MVP, Implementation v2.5, UI/UX Redesign, Front
 
 - [ROADMAP.md](../../ROADMAP.md) - What's next (single source of truth)
 - [PROGRESS.md](../../PROGRESS.md) - Session state and history
-- [AUDIT.md](../../AUDIT.md) - UX contracts and release gates
+- [MOBILE_UX_AUDIT.md](../reference/MOBILE_UX_AUDIT.md) - UX contracts and release gates
 - [DECISIONS.md](../../DECISIONS.md) - Architectural decisions
 - [docs/specs/](../specs/) - Feature specifications
 

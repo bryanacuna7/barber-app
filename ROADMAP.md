@@ -1,7 +1,7 @@
 # ROADMAP - BarberApp
 
-**Version:** 0.9.2
-**Updated:** 2026-02-10 (Session 168)
+**Version:** 0.9.7
+**Updated:** 2026-02-23 (Session 182)
 **Source of Truth:** This is the ONLY roadmap document. All others are archived.
 
 ---
@@ -10,36 +10,61 @@
 
 Everything below is DONE and in production on `main`:
 
-- **Core Platform:** Booking system, dashboard, client management, services, barber profiles
-- **Gamification:** Client loyalty + barber leaderboard + SaaS referral system
-- **PWA:** Mobile-first, installable, auto-update (iOS fix), custom barber pole icon
-- **Subscriptions:** Basic ($12/mo) + Pro ($29/mo), SINPE payment, trial system
-- **Security:** RBAC, IDOR fixes, rate limiting, XSS/CSRF protection, 28+ security tests
-- **Performance:** 7 DB indexes, N+1 fixes (7-10x faster), WebSocket for Mi Dia
-- **Observability:** Pino structured logging, Sentry error tracking, Redis rate limiting
-- **UI/UX Redesign:** All 5 dashboard pages modernized (squash-merged 138 commits)
-- **Color Audit:** 3 phases complete — brand tokens, gradient unification, data viz theming, contrast fixes
-- **Super Admin Panel:** 6 pages + 11 API routes
-- **Egress Optimization:** Migrated Supabase project, caching, selective queries
-- **Motion Tokens:** Unified design system for animations
-- **Discord Deploys:** GitHub Action sends release notes to Discord on push to main
-- **TypeScript:** 0 errors, strict mode
-- **ESLint:** 0 errors
+### Core Platform
+
+- Booking system, dashboard, client management, services, barber profiles
+- Gamification (Client Loyalty + Barber Leaderboard + SaaS Referral)
+- PWA mobile-first, installable, auto-update (iOS fix), custom barber pole icon
+- Subscriptions: Basic ($12/mo) + Pro ($29/mo), SINPE payment, trial system
+
+### Security & Infrastructure
+
+- RBAC (4 roles: admin, owner, barber, client)
+- IDOR fixes, rate limiting, XSS/CSRF protection, 28+ security tests
+- 7 DB indexes, N+1 fixes (7-10x faster), WebSocket for Mi Dia
+- Pino structured logging, Sentry error tracking, Redis rate limiting
+- Supabase egress optimization (migrated project, caching, selective queries)
+- TypeScript strict mode (0 errors), ESLint (0 errors)
+
+### UI/UX
+
+- All 5 dashboard pages modernized (squash-merged 138 commits)
+- Color Audit (3 phases) — brand tokens, gradient unification, data viz theming
+- Motion Tokens — unified design system for animations
+- Desktop Premium — command palette (Cmd+K), sidebar, hover actions, skeletons
+- 9 Olas of mobile UX premium simplification
+- Configuracion decomposed into 7 Next.js subroutes
+
+### Customer Discovery Features (Sessions 152-182)
+
+- **Duration Tracking** — Iniciar > Timer > Completar > Pago (3 taps max)
+- **Smart Duration (P1)** — ML-style duration prediction, per-business toggle
+- **Smart Slots + Descuentos** — Demand heatmap, promo rules config, booking discounts
+- **Client Cancel/Reschedule** — From tracking page, configurable policy, auto-notifications
+- **SINPE Advance Payment** — Optional prepayment with discount, proof upload/WhatsApp, owner verification
+- **Payment Methods** — Owner-configurable (Efectivo/SINPE/Tarjeta), smart completion flow
+- **Push Notifications** — VAPID + SW + 4 event triggers
+- **WhatsApp Deep Links** — "Llega Antes" CTA, pre-filled messages
+- **Client Dashboard** — `/mi-cuenta` with home, profile, loyalty, multi-business
+- **Public Tracking** — Uber-style `/track/[token]` (5 states), cron reminders (24h + 1h)
+- **Invite Barbers** — Email invitations with credentials
+
+### Admin & Ops
+
+- Super Admin Panel (6 pages + 11 API routes)
+- Discord Deploys (GitHub Action sends release notes on push to main)
 
 ---
 
-## Current Sprint: UX Polish (from AUDIT.md)
+## Paused: UX Polish (from Mobile UX Audit)
 
-These items come from the mobile UX audit and are the immediate next work.
-
-> Update de estado: las Olas 1-9 del plan mobile/PWA fueron cerradas en alcance pragmático.
-> Ver detalle y criterios: `UI_PREMIUM_SIMPLIFICATION_PLAN.md`.
+Items from `docs/reference/MOBILE_UX_AUDIT.md`, paused during customer discovery phase.
 
 ### P0 — Must Fix
 
 | #   | Item                             | Status  | Details                                                               |
 | --- | -------------------------------- | ------- | --------------------------------------------------------------------- |
-| 1   | **Button migration**             | Pending | citas: ~22 manual `<button>` → `<Button>`, barberos: ~7 manual        |
+| 1   | **Button migration**             | Pending | citas: ~22 manual `<button>` > `<Button>`, barberos: ~7 manual        |
 | 2   | **Charts mobile-first** (Gate E) | FAIL    | Touch-first redesign, readable at 360/375/390, tactile interaction    |
 | 3   | **Card padre / double inset**    | Pending | Remove wrapper containers in citas/servicios that create "boxed" feel |
 | 4   | **Create Modal Contract**        | Pending | Unify Nueva Cita / Nuevo Cliente / Nuevo Servicio visual parity       |
@@ -65,7 +90,7 @@ These items come from the mobile UX audit and are the immediate next work.
 | 14  | **Focus ring colors**            | Low     | 6 inputs still use `focus:ring-violet-400`                |
 | 15  | **Safe Area matrix**             | Pending | Hardware testing on notch/dynamic island/cutout devices   |
 
-### Release Gates (from AUDIT.md)
+### Release Gates (from Mobile UX Audit)
 
 | Gate | Description               | Status                  |
 | ---- | ------------------------- | ----------------------- |
@@ -81,46 +106,45 @@ These items come from the mobile UX audit and are the immediate next work.
 
 ---
 
-## Post-Launch Features (Future)
+## Next Up: Remaining Features
 
 Features not yet started, ordered by business priority.
 
-### Tier 1 — High Priority (estimated Month 2)
+### Tier 1 — High Priority
 
-| Feature                                      | Hours | ROI                   | Notes                                                  |
-| -------------------------------------------- | ----- | --------------------- | ------------------------------------------------------ |
-| **Appointment reminders**                    | 4-6h  | 30-50% fewer no-shows | Email cron 24h before, needs `reminder_sent_at` column |
-| **Calendar mobile refinement**               | 8-10h | Better field staff UX | Week view swipeable days, Month view dot indicators    |
-| **Settings search + progressive disclosure** | 6h    | 10x faster settings   | Fuse.js fuzzy search, Cmd+K shortcut                   |
-| **Navigation accessibility**                 | 2h    | WCAG compliance       | Focus rings, skip links, aria-labels                   |
+| Feature                                      | ROI                   | Notes                                               |
+| -------------------------------------------- | --------------------- | --------------------------------------------------- |
+| **Calendar mobile refinement**               | Better field staff UX | Week view swipeable days, Month view dot indicators |
+| **Settings search + progressive disclosure** | 10x faster settings   | Fuse.js fuzzy search, Cmd+K integration             |
+| **Navigation accessibility**                 | WCAG compliance       | Focus rings, skip links, aria-labels                |
+| **E2E test alignment**                       | Release confidence    | Fix P0 findings from AUDITORIA_E2E_COMPLETA.md      |
 
-### Tier 2 — Medium Priority (Months 3-4)
+### Tier 2 — Medium Priority
 
-| Feature                      | Hours  | ROI                  | Notes                                           |
-| ---------------------------- | ------ | -------------------- | ----------------------------------------------- |
-| **Advance payments (SINPE)** | 12-16h | Deposit verification | Needs `deposit_paid` column + verification flow |
-| **Push notifications**       | 12-16h | Real-time alerts     | Browser push for appointments                   |
-| **Client referrals**         | 8-10h  | Organic growth       | Tracking + rewards system                       |
-| **RBAC system**              | 22-30h | Multi-role access    | Owner / Manager / Staff roles                   |
-| **Business types + Kash**    | 24-29h | Multi-vertical       | Support beyond barber shops + Kash payments     |
+| Feature                    | ROI              | Notes                                                 |
+| -------------------------- | ---------------- | ----------------------------------------------------- |
+| **Business types + Kash**  | Multi-vertical   | Support beyond barber shops + Kash payments           |
+| **Notification hardening** | Delivery quality | Orchestrator unico, dedup, retries, trazabilidad      |
+| **Granular permissions**   | Enterprise       | Per-barber permission toggles (0C from customer plan) |
+| **Agenda blocks**          | Operational      | Break/vacation blocking without fake appointments     |
 
-### Tier 3 — Lower Priority (Months 5-6)
+### Tier 3 — Lower Priority
 
-| Feature                    | Hours  | ROI              | Notes                                                    |
-| -------------------------- | ------ | ---------------- | -------------------------------------------------------- |
-| **Retention / CRM Lite**   | 30-44h | Client retention | Rebooking automation, WhatsApp links, variable durations |
-| **Extended test coverage** | 43-55h | Code quality     | From current coverage to comprehensive suite             |
-| **UX refinement sprint**   | 12-16h | Polish           | Dieter Rams-level attention to detail                    |
+| Feature                    | ROI          | Notes                                         |
+| -------------------------- | ------------ | --------------------------------------------- |
+| **Extended test coverage** | Code quality | From current coverage to comprehensive suite  |
+| **CSV exports**            | Operational  | Basic client/appointment data export          |
+| **appointment_source**     | Analytics    | Track origin (public, walk-in, owner, barber) |
 
-### Tier 4 — Strategic (Months 7-9)
+### Tier 4 — Strategic
 
-| Feature                         | Hours  | ROI            | Notes                                        |
-| ------------------------------- | ------ | -------------- | -------------------------------------------- |
-| **Complete rebranding**         | 40-60h | Multi-vertical | barber → staff migration throughout codebase |
-| **Performance optimizations**   | 15-20h | Scale          | Redis caching, CDN, advanced optimizations   |
-| **Security Phase 2**            | 16-19h | Hardening      | Advanced threat protection                   |
-| **Accessibility certification** | 12-16h | Compliance     | WCAG AA full certification                   |
-| **Public API + integrations**   | 60-84h | Platform play  | REST API, Zapier, webhooks                   |
+| Feature                         | ROI            | Notes                                        |
+| ------------------------------- | -------------- | -------------------------------------------- |
+| **Complete rebranding**         | Multi-vertical | barber > staff migration throughout codebase |
+| **Performance optimizations**   | Scale          | Redis caching, CDN, advanced optimizations   |
+| **Security Phase 2**            | Hardening      | Advanced threat protection                   |
+| **Accessibility certification** | Compliance     | WCAG AA full certification                   |
+| **Public API + integrations**   | Platform play  | REST API, Zapier, webhooks                   |
 
 ---
 
@@ -137,7 +161,7 @@ Features not yet started, ordered by business priority.
 
 ## UX Contracts (Reference)
 
-The 12 non-negotiable contracts from AUDIT.md. These define the quality bar:
+The 12 non-negotiable contracts from `docs/reference/MOBILE_UX_AUDIT.md`:
 
 1. **Navigation Contract** — Single tab bar, consistent active states
 2. **Page Shell Contract** — No double insets, edge-to-edge feel
@@ -156,10 +180,10 @@ The 12 non-negotiable contracts from AUDIT.md. These define the quality bar:
 
 ## Archived Documents
 
-The following documents have been moved to `docs/archive/2026-02/` because they are outdated or completed:
-
 | Document                                               | Reason                                           |
 | ------------------------------------------------------ | ------------------------------------------------ |
+| `docs/archive/P1_DYNAMIC_DURATION_SCHEDULING_PLAN.md`  | All phases mostly complete (Sessions 178-182)    |
+| `docs/archive/PLAN_CUSTOMER_DISCOVERY.md`              | Features 0-5 implemented (Sessions 152-182)      |
 | `docs/planning/MVP_ROADMAP.md`                         | MVP scope exceeded; all items done or superseded |
 | `docs/planning/POST_MVP_ROADMAP.md`                    | Consolidated into this file                      |
 | `docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md`        | Outdated; references completed work as pending   |
@@ -180,13 +204,15 @@ The following documents have been moved to `docs/archive/2026-02/` because they 
 **Documents that remain active:**
 
 - `PROGRESS.md` — Session state and history
-- `AUDIT.md` — UX contracts and release gates (reference)
+- `docs/reference/MOBILE_UX_AUDIT.md` — UX contracts and release gates
+- `AUDITORIA_E2E_COMPLETA.md` — E2E test findings and fixes needed
 - `ROADMAP.md` — This file (single source of truth for what's next)
 - `DATABASE_SCHEMA.md` — Database structure
 - `DECISIONS.md` — Architectural decisions
+- `GUARDRAILS.md` — Non-negotiable behavior rules
 - `docs/reference/*` — Technical reference docs
 - `docs/security/*` — Security documentation
 
 ---
 
-**Last Updated:** Session 168 (2026-02-10)
+**Last Updated:** Session 182 (2026-02-23)

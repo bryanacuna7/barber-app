@@ -171,7 +171,7 @@ Before committing auth/payment code:
 2. **Create migration file:**
    ```bash
    # Format: XXX_descriptive_name.sql
-   supabase/migrations/022_add_feature_name.sql
+   supabase/migrations/038_add_feature_name.sql
    ```
 3. **Include in migration:**
    - Tables/columns creation
@@ -319,4 +319,4 @@ By contributing, you agree that your contributions will be licensed under the pr
 
 ---
 
-**Last Updated:** 2026-02-03 (Session 70 - Documentation Reorganization)
+**Last Updated:** 2026-02-23 (Session 182)

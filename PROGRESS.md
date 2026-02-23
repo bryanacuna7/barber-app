@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-23 (Session 181 — Feature 3 Part 1: Client Cancel/Reschedule)
+- **Last Updated:** 2026-02-23 (Session 182 — Feature 3 Part 2: SINPE Advance Payment)
 - **Branch:** `feature/ui-ux-redesign`
-- **Version:** `0.9.6` (LIVE on production)
+- **Version:** `0.9.7` (LIVE on production)
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -31,6 +31,7 @@
 - **Smart Duration (P1)** — ML-style duration prediction from historical data, per-business toggle
 - **Smart Slots + Descuentos (Feature 2)** — Demand heatmap, promo rules config, booking discounts
 - **Client Cancel/Reschedule (Feature 3 Part 1)** — Cancel/reschedule from tracking page, configurable policy, auto-notifications
+- **SINPE Advance Payment (Feature 3 Part 2)** — Optional prepayment with configurable discount, proof upload/WhatsApp, owner verification
 - **Payment Methods** — Owner-configurable (Efectivo/SINPE/Tarjeta), smart completion flow, in-app documentation
 - **Push Notifications** — VAPID + SW + 4 event triggers (booking, check-in, complete, no-show)
 - **WhatsApp Deep Links** — "Llega Antes" CTA, pre-filled messages
@@ -65,6 +66,27 @@
 ---
 
 ## Recent Sessions
+
+### Session 182: Feature 3 Part 2 — SINPE Advance Payment (2026-02-23)
+
+**Status:** COMPLETE. Deployed as v0.9.7.
+
+**What was built:**
+
+- **Advance Payment Config** — 5 business columns (enabled, discount %, deadline hours, SINPE phone, holder name)
+- **Settings API** (`/api/settings/advance-payment`) — GET/PUT for owner config with validation
+- **Public Info API** (`/api/public/advance-payment/[slug]`) — SINPE details + discount calculation for clients
+- **Proof Submit API** (`/api/public/advance-payment/submit`) — Handles both file upload (Supabase Storage) and WhatsApp channel
+- **Verify/Reject API** (`/api/appointments/[id]/verify-payment`) — Owner approves or rejects with audit trail
+- **Payment Proof API** (`/api/appointments/[id]/payment-proof`) — Signed URL (1h expiry) for viewing proofs
+- **Config UI** (`AdvancePaymentSection`) — Toggle + 4 fields in Configuracion > Pagos
+- **Booking Success Banner** — Post-booking CTA with discount amount when business has advance payment enabled
+- **Submit Component** (`advance-payment-submit.tsx`) — SINPE copy, WhatsApp deep link, file upload, 4-state flow
+- **Owner Badge + Verification** — Amber "Pago pendiente" / Green "Pago verificado" badges on appointment cards + verification modal
+- **Email Template** (`advance-payment-verified.tsx`) — Dual variant (verified/rejected)
+- **Storage Cleanup** — 30-day auto-cleanup of verified/rejected proofs in cron
+- **Migration 037** — 10 appointment columns + 5 business columns + CHECK constraints + partial index
+- **Storage Bucket** — `deposit-proofs` (private, 5MB, images only)
 
 ### Session 181: Feature 3 Part 1 — Client Cancel/Reschedule (2026-02-23)
 
@@ -113,11 +135,11 @@
 
 ### Working
 
-- v0.9.6 LIVE (Cancel/Reschedule + Payment docs + RLS security)
+- v0.9.7 LIVE (SINPE Advance Payment + Cancel/Reschedule + Payment docs)
 - Brand tokens, `text-muted`, `<Button>` component migrated
 - Charts theme-aware, PWA native, gestures hardened
 
 ### Next Steps
 
-1. **Customer Discovery Phase Part 2** — SINPE Deposits feature
+1. **Customer Discovery Phase** — Next feature TBD
 2. **UX Polish (paused)** — Button migration, charts mobile-first, card hierarchy, Spanish copy

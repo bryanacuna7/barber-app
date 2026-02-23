@@ -66,31 +66,31 @@ Tener en un solo plan ejecutable TODO lo pendiente de `PLAN_CUSTOMER_DISCOVERY.m
 ### Entregables
 
 - [ ] **A1. Migracion `032_duration_stats.sql`**  
-      Verify: tabla `service_duration_stats` + indices por `(business_id, barber_id, client_id, service_id)`.
+       Verify: tabla `service_duration_stats` + indices por `(business_id, barber_id, client_id, service_id)`.
 
 - [ ] **A2. Update de schema de appointments**  
-      Verify: `scheduled_duration_minutes` persistida en cada cita nueva.
+       Verify: `scheduled_duration_minutes` persistida en cada cita nueva.
 
 - [ ] **A3. RPC/funcion de agregacion en complete**  
-      Verify: actualiza stats; ignora outliers extremos (`actual > 3x avg` o piso configurable).
+       Verify: actualiza stats; ignora outliers extremos (`actual > 3x avg` o piso configurable).
 
 - [ ] **A4. Predictor por cascada**  
-      Verify: `barbero+cliente+servicio -> barbero+servicio -> servicio -> default`.
+       Verify: `barbero+cliente+servicio -> barbero+servicio -> servicio -> default`.
 
 - [ ] **A5. Integracion en availability** (`/api/public/[slug]/availability/route.ts`)  
-      Verify: slots/conflictos calculados con duracion predicha.
+       Verify: slots/conflictos calculados con duracion predicha.
 
 - [ ] **A6. Integracion en booking** (`/api/public/[slug]/book/route.ts`)  
-      Verify: cita persiste la duracion estimada usada.
+       Verify: cita persiste la duracion estimada usada.
 
 - [ ] **A7. Analytics operativa**  
-      Verify: dashboard muestra `actual_vs_scheduled`, `recovered_idle_minutes`, `prediction_error_minutes`.
+       Verify: dashboard muestra `actual_vs_scheduled`, `recovered_idle_minutes`, `prediction_error_minutes`.
 
 - [ ] **A8. Feature flag por negocio**  
-      Verify: `smart_duration_enabled` con rollback inmediato a duracion fija.
+       Verify: `smart_duration_enabled` con rollback inmediato a duracion fija.
 
 - [ ] **A9. Test suite**  
-      Verify: casos de fallback, outliers, same-day, colisiones de agenda.
+       Verify: casos de fallback, outliers, same-day, colisiones de agenda.
 
 ### Done when
 
@@ -103,38 +103,38 @@ Tener en un solo plan ejecutable TODO lo pendiente de `PLAN_CUSTOMER_DISCOVERY.m
 ## Fase B (P5 core): Cerrar experiencia cliente que falta
 
 - [ ] **B1. Cancelar/reagendar desde cliente**  
-      Verify: flujo completo con reglas de negocio y auditoria.
+       Verify: flujo completo con reglas de negocio y auditoria.
 
 - [ ] **B2. Politica de cancelacion configurable**  
-      Verify: owner define ventana minima (ej. 2h) y excepciones.
+       Verify: owner define ventana minima (ej. 2h) y excepciones.
 
 - [ ] **B3. Booking publico -> crear cuenta cliente**  
-      Verify: CTA post-booking y en email de confirmacion.
+       Verify: CTA post-booking y en email de confirmacion.
 
 - [ ] **B4. CTA de instalacion PWA cliente**  
-      Verify: visible en confirmacion + reminder email.
+       Verify: visible en confirmacion + reminder email.
 
 - [ ] **B5. Onboarding de barbero invitado**  
-      Verify: primer login guiado con checklist corto.
+       Verify: primer login guiado con checklist corto.
 
 - [ ] **B6. Completar 5D exclusivas in-app**  
-      Verify: al menos 2 beneficios bloqueados para usuarios con app/cuenta.
+       Verify: al menos 2 beneficios bloqueados para usuarios con app/cuenta.
 
 ---
 
 ## Fase C (P4 hardening): Notificaciones confiables end-to-end
 
 - [ ] **C1. Orquestador unico de notificaciones por evento**  
-      Verify: estrategia `push -> email -> whatsapp` centralizada.
+       Verify: estrategia `push -> email -> whatsapp` centralizada.
 
 - [ ] **C2. Dedup + retries por canal**  
-      Verify: idempotencia por evento/cita/cliente.
+       Verify: idempotencia por evento/cita/cliente.
 
 - [ ] **C3. Trazabilidad minima de delivery**  
-      Verify: log por canal (sent/failed/retry) para debugging operativo.
+       Verify: log por canal (sent/failed/retry) para debugging operativo.
 
 - [ ] **C4. Reminders 24h/1h con reglas claras**  
-      Verify: no duplicados y cobertura de citas same-day.
+       Verify: no duplicados y cobertura de citas same-day.
 
 ---
 
