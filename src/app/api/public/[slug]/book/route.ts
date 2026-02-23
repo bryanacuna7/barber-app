@@ -81,7 +81,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const { data: business, error: businessError } = (await supabase
     .from('businesses')
     .select(
-      'id, name, logo_url, brand_primary_color, owner_id, smart_duration_enabled, promotional_slots, timezone'
+      'id, name, logo_url, brand_primary_color, owner_id, smart_duration_enabled, promotional_slots, timezone, advance_payment_enabled'
     )
     .eq('slug', slug)
     .eq('is_active', true)
@@ -348,6 +348,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     client_email: client_email || null,
     tracking_token: (appointment as any).tracking_token ?? null,
     pricing,
+    advance_payment_enabled: !!business.advance_payment_enabled,
     message: 'Cita reservada exitosamente',
   })
 }

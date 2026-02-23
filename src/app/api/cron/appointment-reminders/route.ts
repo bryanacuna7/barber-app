@@ -126,6 +126,37 @@ export async function GET(request: Request) {
 
     logger.info({ sent24h, sent1h, errors }, 'Appointment reminders cron completed')
 
+    // === Cleanup old payment proofs (30 days) ===
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+      const { data: oldProofs } = (await serviceClient
+        .from('appointments')
+        .select('id, advance_payment_proof_url')
+        .in('advance_payment_status', ['verified', 'rejected'])
+        .lt('verified_at', thirtyDaysAgo)
+        .not('advance_payment_proof_url', 'is', null)
+        .limit(50)) as any
+
+      if (oldProofs?.length) {
+        const paths = oldProofs.map((p: any) => p.advance_payment_proof_url).filter(Boolean)
+
+        if (paths.length) {
+          await serviceClient.storage.from('deposit-proofs').remove(paths)
+
+          const ids = oldProofs.map((p: any) => p.id)
+          await (serviceClient as any)
+            .from('appointments')
+            .update({ advance_payment_proof_url: null })
+            .in('id', ids)
+        }
+
+        console.log(`Cleaned up ${paths.length} old payment proofs`)
+      }
+    } catch (err) {
+      console.error('Payment proof cleanup error:', err)
+    }
+
     return NextResponse.json({
       ok: true,
       sent24h,
