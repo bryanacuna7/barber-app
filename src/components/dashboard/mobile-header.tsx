@@ -113,16 +113,9 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
 
   function handleBack() {
     const fallback = getBackFallback(pathname)
-    const hasInternalReferrer =
-      typeof document !== 'undefined' &&
-      document.referrer &&
-      document.referrer.startsWith(window.location.origin)
-
-    if (hasInternalReferrer) {
-      router.back()
-      return
-    }
-
+    // Always use router.push for known parent routes — router.back() is unreliable
+    // in SPAs because document.referrer doesn't update on client-side navigations,
+    // causing unpredictable behavior (full reloads, wrong destination).
     router.push(fallback)
   }
 

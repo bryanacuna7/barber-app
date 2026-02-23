@@ -8,25 +8,20 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.3
+## v0.9.4
 
 ### Nuevo
 
-- Seguimiento en vivo de tu cita: al reservar recibis un link para ver tu posicion en la fila en tiempo real
-- Recordatorios automaticos 24h y 1h antes de tu cita (por email y notificacion push)
-- Si tu barbero termina antes, te avisamos para que llegues mas rapido
-- Portal de cliente: ve tus citas y perfil desde /mi-cuenta
-- Experiencia desktop mejorada: sidebar, paleta de comandos (Ctrl+K), tablas interactivas
+- Duracion inteligente: el sistema aprende cuanto tarda cada servicio y ajusta los horarios disponibles automaticamente
+- Podes activar o desactivar esta funcion desde Configuracion > Avanzado
+- Nueva tarjeta en Analiticas que muestra tiempo recuperado y duracion promedio por servicio
 
 ### Mejoras
 
-- Interfaz mas limpia en todas las pantallas, con menos distracciones
-- Animaciones mas suaves y soporte para movimiento reducido
-- Vista de tabla en desktop + lista en movil para paginas de datos
-- Email de confirmacion ahora incluye link de seguimiento en vivo
+- Documentacion interna del proyecto reorganizada y optimizada
 
 ### Correcciones
 
-- Citas canceladas ya no aparecen en el seguimiento publico
-- Recordatorios no se envian duplicados
-- Citas del mismo dia ahora reciben correctamente el recordatorio de 1 hora
+- El boton de volver en Configuracion ya no recarga la pagina
+- "Clientes" ya no aparece repetido en el menu "Mas"
+- Las tarjetas de clientes ya no quedan escondidas detras de la barra inferior

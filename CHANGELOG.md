@@ -4,6 +4,24 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.4] - 2026-02-23
+
+### Nuevo
+
+- Duracion inteligente: el sistema aprende cuanto tarda cada servicio por barbero y ajusta la disponibilidad automaticamente
+- Toggle para activar/desactivar duracion inteligente en Configuracion > Avanzado
+- Tarjeta de insights de duracion en Analiticas con tiempo recuperado y promedios
+
+### Mejorado
+
+- Documentacion del proyecto optimizada y reorganizada (archivos de planes completados movidos a archivo)
+
+### Corregido
+
+- Boton de volver en subrutas de Configuracion ya no recarga la pagina completa
+- "Clientes" ya no aparece duplicado en el menu "Mas" para owners
+- Las tarjetas de clientes ya no quedan cortadas detras de la barra de navegacion inferior
+
 ## [0.9.3] - 2026-02-10
 
 ### Nuevo

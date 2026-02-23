@@ -601,7 +601,7 @@ export default function ClientesPageV2() {
   // Loading skeleton — matches client list layout
   if (isLoading) {
     return (
-      <div className="min-h-screen p-4 lg:p-6 space-y-6">
+      <div className="p-4 lg:p-6 space-y-6">
         {/* Stats skeleton */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -645,7 +645,7 @@ export default function ClientesPageV2() {
             await refetch()
           }}
         >
-          <div className="min-h-screen relative overflow-x-hidden">
+          <div className="relative overflow-x-hidden pb-4">
             {/* Mesh background removed for desktop premium — cleaner, less noise */}
 
             <div className="relative z-10 space-y-4 sm:space-y-6">

@@ -1,4 +1,4 @@
-# Color Audit - BarberApp (Dark + Light)
+# Color Audit - Barber App (Dark + Light)
 
 Fecha: 2026-02-07  
 Objetivo: elevar el lenguaje de color a estándar premium global (nivel Awwwards) y reducir la sensación "pintoresca".

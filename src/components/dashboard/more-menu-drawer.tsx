@@ -45,6 +45,8 @@ interface MenuItem {
   barberPermission?: keyof StaffPermissions
   /** If true, this item is NEVER shown to barbers */
   ownerOnly?: boolean
+  /** If true, this item is only shown in "Más" for barbers (owners have it in bottom nav) */
+  barberMenuOnly?: boolean
 }
 
 const menuItems: MenuItem[] = [
@@ -92,6 +94,7 @@ const menuItems: MenuItem[] = [
     color: 'text-rose-600 dark:text-rose-400',
     bgColor: 'bg-rose-100 dark:bg-rose-900/30',
     barberPermission: 'nav_clientes',
+    barberMenuOnly: true,
   },
   {
     name: 'Suscripción',
@@ -180,8 +183,9 @@ export function MoreMenuDrawer({
   // Build filtered menu items based on role
   const filteredItems = (() => {
     if (!isBarberRole) {
-      // Owner/admin: show all items + Mi Día if also barber
-      return isBarber ? [barberMenuItem, ...menuItems] : menuItems
+      // Owner/admin: show all items except those already in bottom nav
+      const ownerItems = menuItems.filter((item) => !item.barberMenuOnly)
+      return isBarber ? [barberMenuItem, ...ownerItems] : ownerItems
     }
 
     // Barber role: filter by permissions
