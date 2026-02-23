@@ -140,7 +140,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           aria-live="polite"
         >
           <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>Actualizado {formatTime(lastUpdated)}</span>
+          <span data-testid="last-updated">Actualizado {formatTime(lastUpdated)}</span>
         </motion.div>
       )}
     </motion.div>

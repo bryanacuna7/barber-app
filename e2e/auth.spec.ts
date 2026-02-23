@@ -47,11 +47,11 @@ test.describe('Authentication Flow', () => {
     // Click login button
     await page.getByRole('button', { name: /entrar/i }).click()
 
-    // Wait for navigation to dashboard
-    await page.waitForURL('/dashboard', { timeout: 10000 })
+    // Wait for navigation — owners go to /dashboard, barbers to /mi-dia
+    await page.waitForURL(/\/(dashboard|mi-dia)/, { timeout: 10000 })
 
-    // Verify dashboard elements are present
-    await expect(page.getByText(/dashboard/i)).toBeVisible()
+    // Verify dashboard or Mi Día elements are present
+    await expect(page.getByText(/dashboard|mi día/i)).toBeVisible()
   })
 
   test('should protect dashboard route when not authenticated', async ({ page, context }) => {
@@ -75,8 +75,8 @@ test.describe('Authentication Flow', () => {
     await page.getByPlaceholder(/contraseña/i).fill(testPassword)
     await page.getByRole('button', { name: /entrar/i }).click()
 
-    // Wait for dashboard
-    await page.waitForURL('/dashboard', { timeout: 10000 })
+    // Wait for dashboard or Mi Día
+    await page.waitForURL(/\/(dashboard|mi-dia)/, { timeout: 10000 })
 
     // Find and click logout button (adjust selector based on your UI)
     await page.getByRole('button', { name: /cerrar sesión/i }).click()

@@ -23,8 +23,8 @@ test.describe('Appointment Booking - Public Flow', () => {
   })
 
   test('should display public booking page correctly', async ({ page }) => {
-    // Verify page loads
-    await expect(page.locator('h1, h2')).toBeVisible()
+    // Verify page loads — use heading role instead of ambiguous h1/h2
+    await expect(page.getByRole('heading').first()).toBeVisible()
 
     // Verify business info is displayed
     const hasBusinessInfo = (await page.getByText(/selecciona|servicio|barbero/i).count()) > 0
@@ -172,8 +172,8 @@ test.describe('Appointment Management - Dashboard', () => {
     await page.getByPlaceholder(/contraseña/i).fill(testPassword)
     await page.getByRole('button', { name: /entrar/i }).click()
 
-    // Wait for dashboard
-    await page.waitForURL('/dashboard', { timeout: 10000 })
+    // Wait for dashboard or Mi Día (barbers redirect to /mi-dia)
+    await page.waitForURL(/\/(dashboard|mi-dia)/, { timeout: 10000 })
 
     // Navigate to appointments page
     await page.goto('/citas')

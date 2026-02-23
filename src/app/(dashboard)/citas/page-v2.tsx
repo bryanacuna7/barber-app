@@ -728,7 +728,7 @@ function CitasCalendarFusionContent() {
                   </Button>
                   <Button
                     onClick={() => setIsCreateOpen(true)}
-                    data-testid="create-appointment-btn"
+                    data-testid="create-appointment-btn-desktop"
                     variant="ghost"
                     className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
                     aria-label="Crear cita"
@@ -779,7 +779,7 @@ function CitasCalendarFusionContent() {
                   <Button
                     variant="gradient"
                     onClick={() => setIsCreateOpen(true)}
-                    data-testid="create-appointment-btn"
+                    data-testid="create-appointment-btn-mobile"
                     className="min-w-[44px] min-h-[44px] h-10 w-10 rounded-xl p-0 flex-shrink-0"
                     aria-label="Crear cita"
                   >

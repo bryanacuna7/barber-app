@@ -278,12 +278,10 @@ export default function BookingPage() {
                   : 0
               }
               onCreateAccount={() => {
-                // TODO: Implement account creation flow
-                window.location.href = '/auth/signup'
+                window.location.href = '/register'
               }}
               onSignIn={() => {
-                // TODO: Implement sign in flow
-                window.location.href = '/auth/login'
+                window.location.href = '/login'
               }}
             />
           </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, MessageCircle, Share2, Smartphone } from 'lucide-react'
+import { CalendarPlus, CheckCircle, MessageCircle, Share2, Smartphone } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { AnimatePresence } from 'framer-motion'
@@ -227,6 +227,32 @@ export function BookingSuccess({
               Activar beneficios de lealtad
             </button>
           )}
+
+          {/* Post-booking navigation */}
+          {date && time && service && (
+            <button
+              onClick={() => {
+                const start = new Date(date)
+                const [h, m] = time.split(':').map(Number)
+                start.setHours(h, m, 0)
+                const end = new Date(start.getTime() + (service.duration_minutes || 30) * 60000)
+                const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+                const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.name + ' - ' + (business?.name || ''))}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent('Reserva en ' + (business?.name || ''))}`
+                window.open(url, '_blank')
+              }}
+              className="flex items-center justify-center gap-2.5 rounded-2xl bg-zinc-200/80 px-5 py-4 text-[17px] font-semibold text-zinc-700 ios-press dark:bg-zinc-700 dark:text-zinc-200"
+            >
+              <CalendarPlus className="h-5 w-5" />
+              Agregar al Calendario
+            </button>
+          )}
+
+          <a
+            href={`/reservar/${business?.slug}`}
+            className="flex items-center justify-center rounded-2xl px-5 py-4 text-[15px] font-medium text-muted ios-press"
+          >
+            Volver a reservar
+          </a>
 
           <p className="text-center text-[13px] text-muted">
             Te enviaremos un recordatorio antes de tu cita.

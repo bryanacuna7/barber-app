@@ -26,10 +26,23 @@ export function createQueryClient(): QueryClient {
           if (error?.status === 401 || error?.status === 403) {
             return false
           }
+          // Don't retry on rate limit (let retryDelay handle backoff naturally)
+          if (error?.status === 429 && failureCount >= 2) {
+            return false
+          }
           // Retry network errors up to 3 times
           return failureCount < 3
         },
-        retryDelay: (attemptIndex) => {
+        retryDelay: (attemptIndex, error: any) => {
+          // Respect Retry-After header from server on 429
+          if (error?.status === 429) {
+            const retryAfter = error?.headers?.get?.('retry-after')
+            if (retryAfter) {
+              return Math.min(Number(retryAfter) * 1000, 30000)
+            }
+            // Longer backoff for rate limits: 3s, 6s
+            return Math.min(3000 * 2 ** attemptIndex, 30000)
+          }
           // Exponential backoff: 1s, 2s, 4s
           return Math.min(1000 * 2 ** attemptIndex, 30000)
         },
