@@ -10,7 +10,6 @@ import {
   Heading,
   Html,
   Img,
-  Link,
   Preview,
   Section,
   Text,
@@ -21,8 +20,9 @@ interface BarberInviteEmailProps {
   businessName: string
   barberName: string
   email: string
-  tempPassword: string
+  setPasswordUrl?: string
   loginUrl: string
+  mode?: 'add' | 'invite'
   logoUrl?: string
   brandColor?: string
 }
@@ -31,11 +31,15 @@ export default function BarberInviteEmail({
   businessName = 'Tu Barbería',
   barberName = 'Barbero',
   email = 'barbero@email.com',
-  tempPassword = '••••••••',
+  setPasswordUrl,
   loginUrl = 'https://app.barberapp.com/login',
+  mode = 'invite',
   logoUrl,
   brandColor = '#3b82f6',
 }: BarberInviteEmailProps) {
+  const title =
+    mode === 'add' ? `Te agregaron a ${businessName}` : `Te han invitado a ${businessName}`
+
   return (
     <Html>
       <Head />
@@ -48,37 +52,36 @@ export default function BarberInviteEmail({
             </Section>
           )}
 
-          <Heading style={{ ...heading, color: brandColor }}>
-            Te han invitado a {businessName}
-          </Heading>
+          <Heading style={{ ...heading, color: brandColor }}>{title}</Heading>
 
           <Text style={paragraph}>
             Hola <strong>{barberName}</strong>,
           </Text>
 
           <Text style={paragraph}>
-            Te han agregado como barbero en <strong>{businessName}</strong>. Usa las siguientes
-            credenciales para iniciar sesión:
+            Te agregaron como barbero en <strong>{businessName}</strong>. Usa este correo para
+            ingresar y configurar tu contraseña:
           </Text>
 
           <Section style={detailsBox}>
             <Text style={detailsLabel}>Correo electrónico:</Text>
             <Text style={detailsValue}>{email}</Text>
-
-            <Text style={detailsLabel}>Contraseña temporal:</Text>
-            <Text style={detailsValue}>{tempPassword}</Text>
           </Section>
 
           <Section style={buttonSection}>
-            <Button style={{ ...button, backgroundColor: brandColor }} href={loginUrl}>
-              Iniciar Sesión
+            <Button
+              style={{ ...button, backgroundColor: brandColor }}
+              href={setPasswordUrl || loginUrl}
+            >
+              {setPasswordUrl ? 'Configurar contraseña' : 'Iniciar Sesión'}
             </Button>
           </Section>
 
-          <Text style={tip}>
-            🔒 <strong>Tip:</strong> Te recomendamos cambiar tu contraseña después de iniciar sesión
-            por primera vez.
-          </Text>
+          {setPasswordUrl && (
+            <Text style={tip}>
+              🔒 <strong>Tip:</strong> El enlace te llevará a crear tu contraseña de acceso.
+            </Text>
+          )}
 
           <Text style={footer}>Si no esperabas esta invitación, puedes ignorar este correo.</Text>
 

@@ -20,10 +20,8 @@ import {
   Phone,
   Shield,
   Trash2,
-  Clock,
   CheckCircle2,
   XCircle,
-  Send,
 } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
@@ -36,17 +34,16 @@ import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { useBusiness } from '@/contexts/business-context'
 import {
   useBarbers,
+  useAddBarber,
   useInviteBarber,
   useUpdateBarber,
   useDeleteBarber,
-  usePendingInvitations,
 } from '@/hooks/queries/useBarbers'
 import type { UIBarber } from '@/lib/adapters/barbers'
 
 export default function BarberosPage() {
   const { businessId } = useBusiness()
   const { data: barbers, isLoading, error } = useBarbers(businessId)
-  const { data: pendingInvitations } = usePendingInvitations(businessId)
 
   const [searchQuery, setSearchQuery] = useState('')
   const [isInviteOpen, setIsInviteOpen] = useState(false)
@@ -133,7 +130,7 @@ export default function BarberosPage() {
                 className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">Invitar Barbero</span>
+                <span className="hidden sm:inline">Agregar Barbero</span>
               </Button>
             </div>
           </div>
@@ -178,7 +175,7 @@ export default function BarberosPage() {
                 className="mt-4 min-h-[44px]"
               >
                 <Plus className="h-5 w-5 mr-2" />
-                Invitar Barbero
+                Agregar Barbero
               </Button>
             )}
           </motion.div>
@@ -361,50 +358,6 @@ export default function BarberosPage() {
           </motion.div>
         )}
 
-        {/* Pending Invitations */}
-        {pendingInvitations && pendingInvitations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="space-y-3"
-          >
-            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider px-1">
-              Invitaciones Pendientes
-            </h2>
-            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 backdrop-blur-xl">
-              {pendingInvitations.map(
-                (inv: { id: string; email: string; created_at: string }, index: number) => (
-                  <div
-                    key={inv.id}
-                    className={`flex items-center gap-3 p-3.5 ${
-                      index < pendingInvitations.length - 1
-                        ? 'border-b border-zinc-200/70 dark:border-zinc-800/80'
-                        : ''
-                    }`}
-                  >
-                    <div className="h-11 w-11 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                      <Send className="h-5 w-5 text-muted" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-[15px] text-zinc-900 dark:text-white truncate">
-                        {inv.email}
-                      </p>
-                      <p className="text-xs text-muted">
-                        <Clock className="h-3 w-3 inline mr-1" />
-                        Enviada {formatTimeAgo(inv.created_at)}
-                      </p>
-                    </div>
-                    <span className="inline-flex items-center px-2 py-1 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-medium flex-shrink-0">
-                      Pendiente
-                    </span>
-                  </div>
-                )
-              )}
-            </div>
-          </motion.div>
-        )}
-
         {/* Bottom spacing for nav */}
         <div className="h-24 lg:h-0" />
       </div>
@@ -436,7 +389,9 @@ function InviteBarberModal({
   onOpenChange: (open: boolean) => void
 }) {
   const toast = useToast()
+  const addBarber = useAddBarber()
   const inviteBarber = useInviteBarber()
+  const [mode, setMode] = useState<'add' | 'invite'>('add')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
 
@@ -445,10 +400,26 @@ function InviteBarberModal({
     if (!name.trim() || !email.trim()) return
 
     try {
-      await inviteBarber.mutateAsync({ name: name.trim(), email: email.trim() })
-      toast.success(`Invitación enviada a ${email}`)
+      const result =
+        mode === 'add'
+          ? await addBarber.mutateAsync({ name: name.trim(), email: email.trim() })
+          : await inviteBarber.mutateAsync({ name: name.trim(), email: email.trim() })
+
+      if (mode === 'add') {
+        if (result.email_sent) {
+          toast.success(`Barbero agregado y correo enviado a ${email}`)
+        } else {
+          toast.warning(
+            result.warning || 'Barbero agregado, pero no se pudo enviar el correo de acceso.'
+          )
+        }
+      } else {
+        toast.success(`Invitación enviada a ${email}`)
+      }
+
       setName('')
       setEmail('')
+      setMode('add')
       onOpenChange(false)
       if (isMobileDevice()) haptics.success()
     } catch (err) {
@@ -460,6 +431,7 @@ function InviteBarberModal({
   const handleClose = () => {
     setName('')
     setEmail('')
+    setMode('add')
     onOpenChange(false)
   }
 
@@ -467,10 +439,39 @@ function InviteBarberModal({
     <Modal
       isOpen={open}
       onClose={handleClose}
-      title="Invitar Barbero"
-      description="El barbero recibirá un email con credenciales temporales para iniciar sesión."
+      title={mode === 'add' ? 'Agregar Barbero' : 'Invitar Barbero'}
+      description={
+        mode === 'add'
+          ? 'Crea su cuenta y envíale un enlace para establecer su contraseña.'
+          : 'Envía una invitación por correo para que complete su acceso.'
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 p-1">
+          <button
+            type="button"
+            onClick={() => setMode('add')}
+            className={`h-10 rounded-lg text-sm font-medium transition-colors ${
+              mode === 'add'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                : 'text-zinc-500 dark:text-zinc-400'
+            }`}
+          >
+            Agregar
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('invite')}
+            className={`h-10 rounded-lg text-sm font-medium transition-colors ${
+              mode === 'invite'
+                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                : 'text-zinc-500 dark:text-zinc-400'
+            }`}
+          >
+            Invitar
+          </button>
+        </div>
+
         <Input
           label="Nombre"
           type="text"
@@ -495,11 +496,11 @@ function InviteBarberModal({
           </Button>
           <Button
             type="submit"
-            isLoading={inviteBarber.isPending}
+            isLoading={addBarber.isPending || inviteBarber.isPending}
             disabled={!name.trim() || !email.trim()}
             className="h-11"
           >
-            Enviar Invitación
+            {mode === 'add' ? 'Agregar Barbero' : 'Enviar Invitación'}
           </Button>
         </div>
       </form>
@@ -696,21 +697,4 @@ function BarberDetailModal({
       </div>
     </Modal>
   )
-}
-
-// ─── Helpers ──────────────────────────────────────────────────
-
-function formatTimeAgo(dateStr: string): string {
-  const now = new Date()
-  const date = new Date(dateStr)
-  const diffMs = now.getTime() - date.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMins / 60)
-  const diffDays = Math.floor(diffHours / 24)
-
-  if (diffMins < 1) return 'ahora'
-  if (diffMins < 60) return `hace ${diffMins} min`
-  if (diffHours < 24) return `hace ${diffHours}h`
-  if (diffDays === 1) return 'ayer'
-  return `hace ${diffDays} días`
 }

@@ -16,11 +16,11 @@
       "verboseAnnouncements": true,
       "silentAnalysis": true
     },
-    "defaultModel": "claude-sonnet-4.5",
+    "defaultModel": "claude-sonnet-4-6",
     "specializedModels": {
-      "context-manager": "claude-opus-4.5",
-      "performance-profiler": "claude-sonnet-4.5",
-      "security-auditor": "claude-sonnet-4.5"
+      "context-manager": "claude-opus-4-6",
+      "performance-profiler": "claude-sonnet-4-6",
+      "security-auditor": "claude-sonnet-4-6"
     },
     "socraticGate": {
       "enabled": true,
@@ -139,8 +139,8 @@
     }
   },
   "meta": {
-    "configVersion": "1.0.0",
-    "lastUpdated": "2026-02-02",
-    "compatibleWith": "claude-code >= 1.0.0"
+    "configVersion": "1.1.0",
+    "lastUpdated": "2026-02-23",
+    "compatibleWith": "claude-code >= 2.1.41"
   }
 }

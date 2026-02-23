@@ -10,6 +10,7 @@ import BarberInviteEmail from '@/lib/email/templates/barber-invite'
 const inviteSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100),
   email: z.string().email('Email inválido'),
+  mode: z.enum(['add', 'invite']).optional().default('add'),
 })
 
 export const POST = withAuth(async (request, context, { business, supabase }) => {
@@ -28,7 +29,8 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     )
   }
 
-  const { name, email } = parsed.data
+  const { name, mode } = parsed.data
+  const email = parsed.data.email.trim().toLowerCase()
 
   // Check subscription limits
   const limitCheck = await canAddBarber(supabase, business.id)
@@ -45,7 +47,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     )
   }
 
-  // Check if barber email already exists in this business
+  // Check if barber email already exists in this business (normalized)
   const { data: existingBarber } = await supabase
     .from('barbers')
     .select('id')
@@ -109,7 +111,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       role: 'barber',
       is_active: true,
       user_id: authUserId,
-    } as any)
+    })
     .select('id, name, email, phone, user_id, business_id, is_active, role, avatar_url, created_at')
     .single()
 
@@ -121,40 +123,78 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     )
   }
 
-  // Create invitation record (non-blocking)
-  const token = crypto.randomUUID()
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  // Generate password setup link (preferred over sending temp password)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.barberapp.com'
+  const redirectTo = `${appUrl}/reset-password`
+  const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
+    type: 'recovery',
+    email,
+    options: { redirectTo },
+  })
 
-  supabase
-    .from('barber_invitations')
-    .insert({
-      business_id: business.id,
-      email,
-      token,
-      expires_at: expiresAt,
-    } as any)
-    .then(({ error: invError }) => {
-      if (invError) console.error('Failed to create invitation record:', invError)
-    })
+  if (linkError) {
+    console.error('Failed to generate password setup link:', linkError)
+  }
 
-  // Send invitation email (non-blocking)
+  const setPasswordUrl = linkData?.properties?.action_link
+
+  // Keep invite mode available without making it the default flow.
+  if (mode === 'invite') {
+    const token = crypto.randomUUID()
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    const { error: inviteError } = await supabase.from('barber_invitations').upsert(
+      {
+        business_id: business.id,
+        email,
+        token,
+        expires_at: expiresAt,
+        used_at: null,
+      },
+      {
+        onConflict: 'business_id,email',
+      }
+    )
+
+    if (inviteError) {
+      console.error('Failed to upsert invitation record:', inviteError)
+    }
+  }
+
+  // Send onboarding email
   const loginUrl = process.env.NEXT_PUBLIC_APP_URL
     ? `${process.env.NEXT_PUBLIC_APP_URL}/login`
     : 'https://app.barberapp.com/login'
 
-  sendEmail({
+  const emailResult = await sendEmail({
     to: email,
-    subject: `${business.name || 'Tu Barbería'} te ha invitado como barbero`,
+    subject:
+      mode === 'add'
+        ? `${business.name || 'Tu Barbería'} te agregó como barbero`
+        : `${business.name || 'Tu Barbería'} te invitó como barbero`,
     react: BarberInviteEmail({
       businessName: business.name || 'Tu Barbería',
       barberName: name,
       email,
-      tempPassword,
+      setPasswordUrl,
       loginUrl,
+      mode,
     }),
-  }).catch((err) => {
-    console.error('Failed to send invite email:', err)
   })
 
-  return NextResponse.json(barber)
+  if (!emailResult.success) {
+    return NextResponse.json({
+      barber,
+      mode,
+      email_sent: false,
+      warning:
+        'Barbero agregado, pero no pudimos enviar el correo. Pídele usar "Olvidé mi contraseña".',
+    })
+  }
+
+  return NextResponse.json({
+    barber,
+    mode,
+    email_sent: true,
+  })
 })

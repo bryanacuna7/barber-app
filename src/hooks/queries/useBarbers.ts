@@ -85,7 +85,20 @@ export function useDeleteBarber() {
   })
 }
 
-export function useInviteBarber() {
+type OnboardMode = 'add' | 'invite'
+
+type OnboardResponse = {
+  barber: {
+    id: string
+    name: string
+    email: string
+  }
+  mode: OnboardMode
+  email_sent: boolean
+  warning?: string
+}
+
+function useOnboardBarber(mode: OnboardMode) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -93,16 +106,24 @@ export function useInviteBarber() {
       const res = await fetch('/api/barbers/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, mode }),
       })
       const json = await res.json()
       if (!res.ok) {
         throw new Error(json.error || json.message || 'Error al invitar barbero')
       }
-      return json
+      return json as OnboardResponse
     },
     onSuccess: () => invalidateQueries.afterBarberChange(queryClient),
   })
+}
+
+export function useAddBarber() {
+  return useOnboardBarber('add')
+}
+
+export function useInviteBarber() {
+  return useOnboardBarber('invite')
 }
 
 export function usePendingInvitations(businessId: string) {
