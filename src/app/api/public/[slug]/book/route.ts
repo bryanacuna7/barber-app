@@ -6,7 +6,10 @@ import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
 import { logger, logRequest, logResponse, logBusiness, logSecurity } from '@/lib/logger'
 import { sendNotificationEmail, sendEmail } from '@/lib/email/sender'
 import { sendPushToBusinessOwner } from '@/lib/push/sender'
+import { evaluatePromo } from '@/lib/promo-engine'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
+import type { PromoRule } from '@/types/promo'
+import type { BookingPricing } from '@/types/api'
 
 const bookingSchema = z.object({
   service_id: z.string().uuid(),
@@ -16,6 +19,7 @@ const bookingSchema = z.object({
   client_phone: z.string().min(8),
   client_email: z.string().email().optional(),
   notes: z.string().optional(),
+  promo_rule_id: z.string().uuid().optional(),
 })
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -59,16 +63,26 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     )
   }
 
-  const { service_id, barber_id, scheduled_at, client_name, client_phone, client_email, notes } =
-    parsed.data
+  const {
+    service_id,
+    barber_id,
+    scheduled_at,
+    client_name,
+    client_phone,
+    client_email,
+    notes,
+    promo_rule_id,
+  } = parsed.data
 
   const supabase = await createServiceClient()
 
   // Get business
-  // Note: smart_duration_enabled added in migration 033, using `as any` until types regenerated
+  // Note: smart_duration_enabled/promotional_slots added in migrations 033/034, using `as any`
   const { data: business, error: businessError } = (await supabase
     .from('businesses')
-    .select('id, name, logo_url, brand_primary_color, owner_id, smart_duration_enabled')
+    .select(
+      'id, name, logo_url, brand_primary_color, owner_id, smart_duration_enabled, promotional_slots, timezone'
+    )
     .eq('slug', slug)
     .eq('is_active', true)
     .single()) as any
@@ -158,6 +172,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     durationMin = await getPredictedDuration(business.id, service_id, barber_id, durationMin)
   }
 
+  // Evaluate promotional discount (shared engine — same as availability API)
+  const promoRules: PromoRule[] = (business.promotional_slots as PromoRule[]) || []
+  const tz = business.timezone || 'America/Costa_Rica'
+  const promoEval = evaluatePromo(
+    promoRules,
+    new Date(scheduled_at),
+    service_id,
+    service.price ?? 0,
+    tz
+  )
+  const finalPrice = promoEval.applied ? promoEval.final_price : (service.price ?? 0)
+
+  const pricing: BookingPricing = {
+    original_price: service.price ?? 0,
+    final_price: finalPrice,
+    discount_applied: promoEval.applied,
+    discount_label: promoEval.rule?.label,
+    discount_amount: promoEval.discount_amount,
+    reason: promoEval.reason,
+  }
+
   // Calculate tracking expiry (scheduled_at + duration + 2h)
   const trackingExpiresAt = new Date(
     new Date(scheduled_at).getTime() + (durationMin + 120) * 60_000
@@ -174,7 +209,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
         barber_id: barber_id,
         scheduled_at,
         duration_minutes: durationMin,
-        price: service.price,
+        price: finalPrice,
         status: 'pending',
         client_notes: notes || null,
         tracking_expires_at: trackingExpiresAt,
@@ -209,7 +244,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     clientId: client.id,
     serviceId: service.id,
     barberId: barber_id,
-    price: service.price,
+    price: finalPrice,
+    originalPrice: service.price,
+    discountApplied: promoEval.applied,
     scheduledAt: scheduled_at,
   })
 
@@ -243,7 +280,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     barberName: barber.name,
     scheduledAt: scheduled_at,
     duration: service.duration_minutes ?? 30,
-    price: service.price,
+    price: finalPrice,
     supabase,
   }).catch((error) => {
     logger.error(
@@ -276,7 +313,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       style: 'currency',
       currency: 'CRC',
       minimumFractionDigits: 0,
-    }).format(service.price)
+    }).format(finalPrice)
 
     sendEmail({
       to: client_email,
@@ -310,6 +347,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     client_id: client.id,
     client_email: client_email || null,
     tracking_token: (appointment as any).tracking_token ?? null,
+    pricing,
     message: 'Cita reservada exitosamente',
   })
 }

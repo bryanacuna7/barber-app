@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { format, addDays, startOfDay } from 'date-fns'
 import type { Service, Business, TimeSlot, Barber } from '@/types'
+import type { EnrichedTimeSlot, BookingPricing } from '@/types/api'
 
 type Step = 'service' | 'barber' | 'datetime' | 'info' | 'confirm'
 
@@ -8,7 +9,7 @@ interface BookingData {
   service: Service | null
   barber: Barber | null
   date: Date | null
-  time: TimeSlot | null
+  time: EnrichedTimeSlot | null
   clientName: string
   clientPhone: string
   clientEmail: string
@@ -19,7 +20,7 @@ export function useBookingData(slug: string) {
   const [business, setBusiness] = useState<Business | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [barbers, setBarbers] = useState<Barber[]>([])
-  const [slots, setSlots] = useState<TimeSlot[]>([])
+  const [slots, setSlots] = useState<EnrichedTimeSlot[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingSlots, setLoadingSlots] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -27,6 +28,7 @@ export function useBookingData(slug: string) {
   const [step, setStep] = useState<Step>('service')
   const [bookingComplete, setBookingComplete] = useState(false)
   const [createdClientId, setCreatedClientId] = useState<string | null>(null)
+  const [bookingPricing, setBookingPricing] = useState<BookingPricing | null>(null)
 
   const [booking, setBooking] = useState<BookingData>({
     service: null,
@@ -127,7 +129,7 @@ export function useBookingData(slug: string) {
     setBooking((prev) => ({ ...prev, date, time: null }))
   }
 
-  const handleTimeSelect = (time: TimeSlot) => {
+  const handleTimeSelect = (time: EnrichedTimeSlot) => {
     setBooking((prev) => ({ ...prev, time }))
     setStep('info')
   }
@@ -159,6 +161,7 @@ export function useBookingData(slug: string) {
         client_phone: booking.clientPhone,
         client_email: booking.clientEmail || undefined,
         notes: booking.notes || undefined,
+        promo_rule_id: booking.time.discount?.ruleId || undefined,
       }
 
       const res = await fetch(`/api/public/${slug}/book`, {
@@ -178,6 +181,11 @@ export function useBookingData(slug: string) {
       // Store client_id for loyalty modal
       if (data.client_id) {
         setCreatedClientId(data.client_id)
+      }
+
+      // Store pricing info from transparent response
+      if (data.pricing) {
+        setBookingPricing(data.pricing)
       }
 
       setBookingComplete(true)
@@ -203,6 +211,7 @@ export function useBookingData(slug: string) {
     booking,
     availableDates,
     createdClientId,
+    bookingPricing,
     // Setters
     setStep,
     setBooking,

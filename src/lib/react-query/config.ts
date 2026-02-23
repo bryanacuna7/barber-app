@@ -114,6 +114,7 @@ export const queryKeys = {
       [...queryKeys.analytics.all, 'by-period', period] as const,
     duration: (period: 'week' | 'month' | 'year') =>
       [...queryKeys.analytics.all, 'duration', period] as const,
+    heatmap: () => [...queryKeys.analytics.all, 'heatmap'] as const,
   },
 
   // Calendar (Citas)

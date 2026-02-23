@@ -38,6 +38,26 @@ export interface DashboardStats {
   }
 }
 
+export interface SlotDiscount {
+  type: 'percent' | 'fixed'
+  value: number
+  label: string
+  ruleId: string
+}
+
+export interface EnrichedTimeSlot extends TimeSlot {
+  discount: SlotDiscount | null
+}
+
+export interface BookingPricing {
+  original_price: number
+  final_price: number
+  discount_applied: boolean
+  discount_label?: string
+  discount_amount?: number
+  reason: string
+}
+
 export interface ApiError {
   error: string
   message: string

@@ -11,6 +11,7 @@ import {
   Settings,
   Users,
   Banknote,
+  Tag,
   ArrowRight,
   Search,
 } from 'lucide-react'
@@ -69,6 +70,14 @@ const SETTINGS_CARDS = [
     color: 'emerald',
     delay: 0.6,
   },
+  {
+    href: '/configuracion/promociones',
+    title: 'Slots Promocionales',
+    subtitle: 'Descuentos en horarios de baja demanda para llenar tu agenda',
+    icon: Tag,
+    color: 'orange',
+    delay: 0.7,
+  },
 ] as const
 
 const COLOR_CLASSES: Record<
@@ -122,6 +131,13 @@ const COLOR_CLASSES: Record<
     iconBgHover: 'group-hover:bg-emerald-500/20 dark:group-hover:bg-emerald-500/30',
     iconText: 'text-emerald-600 dark:text-emerald-400',
     arrowHover: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
+  },
+  orange: {
+    hoverBorder: 'hover:border-orange-300 dark:hover:border-orange-600',
+    iconBg: 'bg-orange-500/10 dark:bg-orange-500/20',
+    iconBgHover: 'group-hover:bg-orange-500/20 dark:group-hover:bg-orange-500/30',
+    iconText: 'text-orange-600 dark:text-orange-400',
+    arrowHover: 'group-hover:text-orange-600 dark:group-hover:text-orange-400',
   },
 }
 

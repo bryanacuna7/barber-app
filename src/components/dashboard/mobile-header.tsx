@@ -46,6 +46,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
     '/configuracion/equipo': 'Equipo y Accesos',
     '/configuracion/pagos': 'Métodos de Pago',
     '/configuracion/avanzado': 'Configuración Avanzada',
+    '/configuracion/promociones': 'Slots Promocionales',
     '/suscripcion': 'Suscripción',
     '/changelog': 'Novedades',
     '/referencias': 'Referencias',

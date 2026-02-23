@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-09 (Session 160 - Client Dashboard RLS)
-> **Last Verified Against:** All migrations 001-029
+> **Last Updated:** 2026-02-23 (Session 180 - Promotional Slots)
+> **Last Verified Against:** All migrations 001-034
 
 ---
 
@@ -20,7 +20,7 @@
 ### `businesses`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`
+**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`
 
 ```sql
 - id                        UUID PRIMARY KEY
@@ -44,6 +44,7 @@
 - notification_settings     JSONB DEFAULT '{...}' (added in 025)
 - staff_permissions         JSONB DEFAULT '{...}' (added in 027) -- owner-configurable UI permissions for staff
 - smart_duration_enabled    BOOLEAN DEFAULT false (added in 033) -- per-business toggle for smart duration prediction
+- promotional_slots         JSONB DEFAULT '[]' (added in 034) -- Array of PromoRule objects (max 20, enforced in API)
 ```
 
 ### `services`

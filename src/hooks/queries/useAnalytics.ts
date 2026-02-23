@@ -188,6 +188,44 @@ export function useDurationAnalytics(period: AnalyticsPeriod = 'month') {
 }
 
 /**
+ * Heatmap cell from demand analytics
+ */
+export interface HeatmapCell {
+  day: number
+  hour: number
+  count: number
+}
+
+/**
+ * Demand heatmap response
+ */
+export interface HeatmapData {
+  cells: HeatmapCell[]
+  maxCount: number
+  totalAppointments: number
+  operatingHours: Record<string, { open: string; close: string; enabled: boolean }> | null
+}
+
+/**
+ * Fetch demand heatmap for last 90 days
+ * Used by Configuracion > Promociones to visualize slow hours.
+ */
+export function useHeatmapAnalytics() {
+  return useQuery({
+    queryKey: queryKeys.analytics.heatmap(),
+    queryFn: async (): Promise<HeatmapData> => {
+      const response = await fetch('/api/analytics/heatmap')
+      if (!response.ok) {
+        throw new Error(`Heatmap fetch failed: ${response.statusText}`)
+      }
+      return response.json()
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  })
+}
+
+/**
  * Hook for overview metrics only (lighter query)
  *
  * Use this when you only need KPI metrics without charts.

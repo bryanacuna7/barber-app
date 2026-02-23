@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { calculateAvailableSlots } from '@/lib/utils/availability'
 import { startOfDay, endOfDay } from 'date-fns'
+import { evaluatePromo, computeDiscountedPrice } from '@/lib/promo-engine'
 import type { OperatingHours } from '@/types'
+import type { PromoRule } from '@/types/promo'
+import type { SlotDiscount, EnrichedTimeSlot } from '@/types/api'
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -22,11 +25,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   const supabase = await createServiceClient()
 
-  // Get business with smart duration flag
-  // Note: smart_duration_enabled added in migration 033, using `as any` until types regenerated
+  // Get business with smart duration flag + promotional slots
+  // Note: smart_duration_enabled/promotional_slots added in migrations 033/034, using `as any`
   const { data: business, error: businessError } = (await supabase
     .from('businesses')
-    .select('id, operating_hours, booking_buffer_minutes, smart_duration_enabled')
+    .select(
+      'id, operating_hours, booking_buffer_minutes, smart_duration_enabled, promotional_slots, timezone'
+    )
     .eq('slug', slug)
     .eq('is_active', true)
     .single()) as any
@@ -35,10 +40,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'Business not found' }, { status: 404 })
   }
 
-  // Get service duration
+  // Get service duration + price (price needed for promo evaluation)
   const { data: service, error: serviceError } = await supabase
     .from('services')
-    .select('duration_minutes')
+    .select('duration_minutes, price')
     .eq('id', serviceId)
     .eq('business_id', business.id)
     .single()
@@ -90,5 +95,32 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     bufferMinutes: business.booking_buffer_minutes ?? 15,
   })
 
-  return NextResponse.json(slots)
+  // Enrich slots with promotional discount info
+  const promoRules: PromoRule[] = (business.promotional_slots as PromoRule[]) || []
+  const servicePrice = service.price ?? 0
+  const tz = business.timezone || 'America/Costa_Rica'
+
+  const enrichedSlots: EnrichedTimeSlot[] = slots.map((slot) => {
+    if (!slot.available || promoRules.length === 0) {
+      return { ...slot, discount: null }
+    }
+
+    const slotDate = new Date(slot.datetime)
+    const evaluation = evaluatePromo(promoRules, slotDate, serviceId, servicePrice, tz)
+
+    if (!evaluation.applied || !evaluation.rule) {
+      return { ...slot, discount: null }
+    }
+
+    const discount: SlotDiscount = {
+      type: evaluation.rule.discount_type,
+      value: evaluation.rule.discount_value,
+      label: evaluation.rule.label,
+      ruleId: evaluation.rule.id,
+    }
+
+    return { ...slot, discount }
+  })
+
+  return NextResponse.json(enrichedSlots)
 }

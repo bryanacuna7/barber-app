@@ -340,6 +340,7 @@ export default function BookingPage() {
             notes={booking.notes}
             submitting={submitting}
             error={error}
+            discount={booking.time.discount}
             onChangeName={(value) => setBooking((prev) => ({ ...prev, clientName: value }))}
             onChangePhone={(value) => setBooking((prev) => ({ ...prev, clientPhone: value }))}
             onChangeEmail={(value) => setBooking((prev) => ({ ...prev, clientEmail: value }))}

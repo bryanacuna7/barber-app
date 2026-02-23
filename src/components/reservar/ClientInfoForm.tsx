@@ -1,10 +1,12 @@
-import { Scissors, ChevronLeft } from 'lucide-react'
+import { Scissors, ChevronLeft, Tag } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatCurrency } from '@/lib/utils'
+import { computeDiscountedPrice } from '@/lib/promo-engine'
 import type { Service } from '@/types'
+import type { SlotDiscount } from '@/types/api'
 
 interface ClientInfoFormProps {
   service: Service
@@ -16,6 +18,7 @@ interface ClientInfoFormProps {
   notes: string
   submitting: boolean
   error: string
+  discount?: SlotDiscount | null
   onChangeName: (value: string) => void
   onChangePhone: (value: string) => void
   onChangeEmail: (value: string) => void
@@ -34,6 +37,7 @@ export function ClientInfoForm({
   notes,
   submitting,
   error,
+  discount,
   onChangeName,
   onChangePhone,
   onChangeEmail,
@@ -41,6 +45,8 @@ export function ClientInfoForm({
   onSubmit,
   onBack,
 }: ClientInfoFormProps) {
+  const originalPrice = Number(service.price)
+  const displayPrice = discount ? computeDiscountedPrice(originalPrice, discount) : originalPrice
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
@@ -65,6 +71,19 @@ export function ClientInfoForm({
             <p className="text-[15px] text-muted">
               {format(date, "EEEE d 'de' MMMM", { locale: es })} · {time}
             </p>
+            {discount && (
+              <div className="mt-1 flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-[13px] font-medium text-emerald-600 dark:text-emerald-400">
+                  {discount.label}
+                  {' · '}
+                  <span className="line-through text-zinc-400">
+                    {formatCurrency(originalPrice)}
+                  </span>{' '}
+                  {formatCurrency(displayPrice)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -136,7 +155,7 @@ export function ClientInfoForm({
             size="lg"
             isLoading={submitting}
           >
-            Confirmar Reservación · {formatCurrency(Number(service.price))}
+            Confirmar Reservación · {formatCurrency(displayPrice)}
           </Button>
         </div>
       </form>

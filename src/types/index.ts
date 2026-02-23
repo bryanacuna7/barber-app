@@ -52,9 +52,14 @@ export type {
 
 export type {
   TimeSlot,
+  SlotDiscount,
+  EnrichedTimeSlot,
   BookingRequest,
   BookingResponse,
+  BookingPricing,
   DashboardStats,
   ApiError,
   PaginatedResponse,
 } from './api'
+
+export type { PromoRule, PromoEvaluation } from './promo'
