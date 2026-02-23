@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-23 (Session 181 - Cancellation Policy)
-> **Last Verified Against:** All migrations 001-036
+> **Last Updated:** 2026-02-23 (Session 182 - Advance Payment SINPE)
+> **Last Verified Against:** All migrations 001-037
 
 ---
 
@@ -20,7 +20,7 @@
 ### `businesses`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`, `036_cancellation_policy.sql`
+**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`, `036_cancellation_policy.sql`, `037_advance_payment.sql`
 
 ```sql
 - id                        UUID PRIMARY KEY
@@ -46,6 +46,11 @@
 - smart_duration_enabled    BOOLEAN DEFAULT false (added in 033) -- per-business toggle for smart duration prediction
 - promotional_slots         JSONB DEFAULT '[]' (added in 034) -- Array of PromoRule objects (max 20, enforced in API)
 - cancellation_policy       JSONB DEFAULT '{"enabled":false,"deadline_hours":24,"allow_reschedule":true}' (added in 036)
+- advance_payment_enabled   BOOLEAN DEFAULT false (added in 037) -- toggle SINPE advance payment
+- advance_payment_discount  INT DEFAULT 10 CHECK (5-50) (added in 037) -- discount percentage for advance payment
+- advance_payment_deadline_hours INT DEFAULT 2 CHECK (0-48) (added in 037) -- hours before appointment to pay
+- sinpe_phone               TEXT (added in 037) -- SINPE mobile number for receiving payments
+- sinpe_holder_name         TEXT (added in 037) -- name shown to client for SINPE transfer
 ```
 
 ### `services`
@@ -102,7 +107,7 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 ### `appointments`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`, `036_cancellation_policy.sql`
+**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`, `036_cancellation_policy.sql`, `037_advance_payment.sql`
 
 ```sql
 - id                      UUID PRIMARY KEY
@@ -129,12 +134,28 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 - cancelled_at            TIMESTAMPTZ (added in 036)
 - reschedule_count        INT DEFAULT 0 (added in 036)
 - rescheduled_from        UUID REFERENCES appointments(id) (added in 036)
+- advance_payment_status  TEXT DEFAULT 'none' CHECK ('none','pending','verified','rejected') (added in 037)
+- proof_channel           TEXT CHECK ('whatsapp','upload') (added in 037)
+- advance_payment_proof_url TEXT (added in 037) -- URL to uploaded proof image
+- proof_submitted_at      TIMESTAMPTZ (added in 037)
+- verified_by_user_id     UUID (added in 037) -- who verified the payment
+- verified_at             TIMESTAMPTZ (added in 037)
+- base_price_snapshot     DECIMAL(10,2) (added in 037) -- original service price at booking time
+- discount_pct_snapshot   INT (added in 037) -- discount % applied
+- discount_amount_snapshot DECIMAL(10,2) (added in 037) -- calculated discount amount
+- final_price_snapshot    DECIMAL(10,2) (added in 037) -- final price after discount
 ```
+
+**Constraints (added in 037):**
+
+- `chk_advance_none` — If status='none', proof fields must be NULL
+- `chk_advance_verified` — If status='verified', verified_by and verified_at must be set
 
 **Indexes:**
 
 - `idx_appointments_tracking_token` UNIQUE on `tracking_token` WHERE NOT NULL (added in 031)
 - `idx_appointments_rescheduled_from` on `rescheduled_from` WHERE rescheduled_from IS NOT NULL (added in 036)
+- `idx_appointments_advance_payment` on `(business_id, advance_payment_status)` WHERE advance_payment_status != 'none' (added in 037)
 
 **RLS Policies:**
 
@@ -854,12 +875,12 @@ WHERE business_id = X
 - **Created in migration 028** — Web Push Notifications
 - See table documentation below
 
-### ❌ `deposits` or deposit-related columns in appointments
+### ✅ Advance Payment columns in appointments (Migration 037)
 
-- `appointments.deposit_paid` - does not exist
-- `appointments.deposit_verified_at` - does not exist
-- `appointments.deposit_amount` - does not exist
-- Related to Advance Payments (Área 2 - not started)
+- `appointments.advance_payment_status` - tracks SINPE payment state
+- `appointments.advance_payment_proof_url` - proof image URL
+- See appointments table for full column list
+- **Note:** Old planned columns (`deposit_paid`, `deposit_verified_at`, `deposit_amount`) were NOT used; replaced by migration 037 design
 
 ### ❌ `appointment_reminders`
 

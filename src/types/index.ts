@@ -63,6 +63,8 @@ export type {
   CancellationPolicy,
   CancelRequest,
   CancelResponse,
+  AdvancePaymentConfig,
+  AdvancePaymentInfo,
   RescheduleRequest,
   RescheduleResponse,
 } from './api'

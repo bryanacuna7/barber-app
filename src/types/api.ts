@@ -93,6 +93,27 @@ export interface CancelResponse {
   refund_eligible: boolean
 }
 
+// === Advance Payment (SINPE) ===
+
+export interface AdvancePaymentConfig {
+  enabled: boolean
+  discount: number // percentage 5-50
+  deadline_hours: number // 0-48
+  sinpe_phone: string
+  sinpe_holder_name: string
+}
+
+export interface AdvancePaymentInfo {
+  enabled: boolean
+  discount: number
+  deadline_hours: number
+  sinpe_phone: string
+  sinpe_holder_name: string
+  service_price: number
+  discount_amount: number
+  final_price: number
+}
+
 // POST /api/public/reschedule
 export interface RescheduleRequest {
   token: string
