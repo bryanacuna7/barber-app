@@ -23,11 +23,11 @@ export function InstallPrompt() {
     <>
       <AnimatePresence>
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
+          initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          exit={{ y: -100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed bottom-24 left-4 right-4 z-50 lg:left-auto lg:right-6 lg:bottom-6 lg:w-[360px]"
+          className="fixed top-[calc(env(safe-area-inset-top,0px)+16px)] left-4 right-4 z-50 lg:top-auto lg:left-auto lg:right-6 lg:bottom-6 lg:w-[360px]"
         >
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 shadow-xl">
             <div className="flex items-start gap-3">

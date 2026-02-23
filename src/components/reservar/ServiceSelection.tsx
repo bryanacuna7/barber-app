@@ -82,10 +82,10 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                     <span>{service.duration_minutes} min</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <p
                     data-testid="service-price"
-                    className="text-[20px] font-bold text-zinc-900 dark:text-white"
+                    className="text-[20px] font-bold text-zinc-900 dark:text-white whitespace-nowrap"
                   >
                     {formatCurrency(Number(service.price))}
                   </p>

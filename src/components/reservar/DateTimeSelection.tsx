@@ -173,7 +173,7 @@ export function DateTimeSelection({
                     className={cn(
                       'relative rounded-2xl py-4 text-[15px] font-semibold transition-all',
                       !slot.available
-                        ? 'cursor-not-allowed bg-zinc-100 text-zinc-300 dark:bg-zinc-800/50 dark:text-zinc-600'
+                        ? 'cursor-not-allowed bg-zinc-100 text-zinc-400 line-through dark:bg-zinc-800/50 dark:text-zinc-600'
                         : isSelected
                           ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/30 dark:bg-white dark:text-zinc-900'
                           : hasDiscount

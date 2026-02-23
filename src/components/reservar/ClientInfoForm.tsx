@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Scissors, ChevronLeft, Tag } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -27,6 +28,22 @@ interface ClientInfoFormProps {
   onBack: () => void
 }
 
+function validateFields(name: string, phone: string, email: string) {
+  const errors: { name?: string; phone?: string; email?: string } = {}
+  if (!name.trim() || name.trim().length < 2) {
+    errors.name = 'Ingresa tu nombre completo'
+  }
+  if (!phone.trim()) {
+    errors.phone = 'El teléfono es requerido'
+  } else if (!/^\d{8}$/.test(phone.replace(/\D/g, ''))) {
+    errors.phone = 'El teléfono debe tener 8 dígitos'
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = 'Ingresa un email válido'
+  }
+  return errors
+}
+
 export function ClientInfoForm({
   service,
   date,
@@ -45,8 +62,23 @@ export function ClientInfoForm({
   onSubmit,
   onBack,
 }: ClientInfoFormProps) {
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string
+    phone?: string
+    email?: string
+  }>({})
+
   const originalPrice = Number(service.price)
   const displayPrice = discount ? computeDiscountedPrice(originalPrice, discount) : originalPrice
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const errors = validateFields(clientName, clientPhone, clientEmail)
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) return
+    onSubmit(e)
+  }
+
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
@@ -88,7 +120,7 @@ export function ClientInfoForm({
         </div>
       </div>
 
-      <form data-testid="client-info-form" onSubmit={onSubmit} className="space-y-4">
+      <form data-testid="client-info-form" onSubmit={handleSubmit} noValidate className="space-y-4">
         <div className="px-1">
           <h3 className="text-[20px] font-bold text-zinc-900 dark:text-white">Tus datos</h3>
           <p className="mt-1 text-[15px] text-muted">Para enviarte confirmación y recordatorios</p>
@@ -103,34 +135,56 @@ export function ClientInfoForm({
           </div>
         )}
 
-        <Input
-          name="name"
-          label="Nombre completo"
-          type="text"
-          placeholder="Tu nombre"
-          value={clientName}
-          onChange={(e) => onChangeName(e.target.value)}
-          required
-        />
+        <div>
+          <Input
+            name="name"
+            label="Nombre completo"
+            type="text"
+            placeholder="Tu nombre"
+            value={clientName}
+            onChange={(e) => {
+              onChangeName(e.target.value)
+              if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }))
+            }}
+          />
+          {fieldErrors.name && (
+            <p className="mt-1.5 text-[13px] font-medium text-red-500">{fieldErrors.name}</p>
+          )}
+        </div>
 
-        <Input
-          name="phone"
-          label="Teléfono"
-          type="tel"
-          placeholder="8 dígitos (ej: 87175866)"
-          value={clientPhone}
-          onChange={(e) => onChangePhone(e.target.value)}
-          required
-        />
+        <div>
+          <Input
+            name="phone"
+            label="Teléfono"
+            type="tel"
+            placeholder="8 dígitos (ej: 87175866)"
+            value={clientPhone}
+            onChange={(e) => {
+              onChangePhone(e.target.value)
+              if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: undefined }))
+            }}
+          />
+          {fieldErrors.phone && (
+            <p className="mt-1.5 text-[13px] font-medium text-red-500">{fieldErrors.phone}</p>
+          )}
+        </div>
 
-        <Input
-          name="email"
-          label="Email (opcional)"
-          type="email"
-          placeholder="tu@email.com"
-          value={clientEmail}
-          onChange={(e) => onChangeEmail(e.target.value)}
-        />
+        <div>
+          <Input
+            name="email"
+            label="Email (opcional)"
+            type="email"
+            placeholder="tu@email.com"
+            value={clientEmail}
+            onChange={(e) => {
+              onChangeEmail(e.target.value)
+              if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }))
+            }}
+          />
+          {fieldErrors.email && (
+            <p className="mt-1.5 text-[13px] font-medium text-red-500">{fieldErrors.email}</p>
+          )}
+        </div>
 
         <div>
           <label className="mb-2 block text-[13px] font-semibold uppercase tracking-wide text-muted">
