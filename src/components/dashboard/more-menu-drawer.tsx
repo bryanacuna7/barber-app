@@ -149,6 +149,16 @@ const externalLinks = [
   },
 ]
 
+function dedupeMenuItemsByHref(items: MenuItem[]): MenuItem[] {
+  const seen = new Set<string>()
+
+  return items.filter((item) => {
+    if (seen.has(item.href)) return false
+    seen.add(item.href)
+    return true
+  })
+}
+
 export function MoreMenuDrawer({
   isOpen,
   onClose,
@@ -185,7 +195,8 @@ export function MoreMenuDrawer({
     if (!isBarberRole) {
       // Owner/admin: show all items except those already in bottom nav
       const ownerItems = menuItems.filter((item) => !item.barberMenuOnly)
-      return isBarber ? [barberMenuItem, ...ownerItems] : ownerItems
+      const items = isBarber ? [barberMenuItem, ...ownerItems] : ownerItems
+      return dedupeMenuItemsByHref(items)
     }
 
     // Barber role: filter by permissions
@@ -203,7 +214,7 @@ export function MoreMenuDrawer({
       }
     }
 
-    return items
+    return dedupeMenuItemsByHref(items)
   })()
 
   const handleLinkClick = () => {
@@ -232,7 +243,7 @@ export function MoreMenuDrawer({
 
               return (
                 <motion.div
-                  key={item.name}
+                  key={item.href}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
