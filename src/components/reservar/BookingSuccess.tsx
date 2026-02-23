@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, MessageCircle, Share2 } from 'lucide-react'
+import { CheckCircle, MessageCircle, Share2, Smartphone } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import type { Service, Business } from '@/types'
+import { AnimatePresence } from 'framer-motion'
+import type { Service, Business, AdvancePaymentInfo } from '@/types'
+import { Button } from '@/components/ui/button'
 import { ClientAccountModal } from '@/components/loyalty/client-account-modal'
+import { AdvancePaymentSubmit } from '@/components/reservar/advance-payment-submit'
 import { createClient } from '@/lib/supabase/client'
 
 interface BookingSuccessProps {
@@ -15,6 +18,7 @@ interface BookingSuccessProps {
   business: Business | null
   clientId: string | null
   clientEmail: string
+  trackingToken: string | null
 }
 
 export function BookingSuccess({
@@ -24,9 +28,13 @@ export function BookingSuccess({
   business,
   clientId,
   clientEmail,
+  trackingToken,
 }: BookingSuccessProps) {
   const [showLoyaltyModal, setShowLoyaltyModal] = useState(false)
   const [hasLoyaltyProgram, setHasLoyaltyProgram] = useState(false)
+  const [advancePaymentInfo, setAdvancePaymentInfo] = useState<AdvancePaymentInfo | null>(null)
+  const [showAdvancePayment, setShowAdvancePayment] = useState(false)
+  const [advancePaymentSubmitted, setAdvancePaymentSubmitted] = useState(false)
 
   // Check if business has active loyalty program
   useEffect(() => {
@@ -55,6 +63,23 @@ export function BookingSuccess({
 
     checkLoyaltyProgram()
   }, [business?.id, clientId])
+
+  useEffect(() => {
+    async function checkAdvancePayment() {
+      if (!business?.slug || !service?.price) return
+      try {
+        const res = await fetch(
+          `/api/public/advance-payment/${business.slug}?price=${service.price}`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          if (data.enabled) setAdvancePaymentInfo(data)
+        }
+      } catch {}
+    }
+    checkAdvancePayment()
+  }, [business?.slug, service?.price])
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-[#F2F2F7] dark:bg-[#1C1C1E]">
       <div
@@ -138,6 +163,60 @@ export function BookingSuccess({
             <Share2 className="h-5 w-5" />
             Recomendar a un amigo
           </button>
+
+          {/* Advance Payment CTA */}
+          <AnimatePresence>
+            {advancePaymentInfo && !advancePaymentSubmitted && !showAdvancePayment && (
+              <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/30">
+                <p className="text-[15px] font-semibold text-blue-900 dark:text-blue-100">
+                  Pagá antes y ahorrá {advancePaymentInfo.discount}%
+                </p>
+                <p className="mt-1 text-[13px] text-blue-700 dark:text-blue-300">
+                  Precio con descuento: ₡{advancePaymentInfo.final_price.toLocaleString()}
+                  <span className="ml-2 line-through text-blue-400">
+                    ₡{advancePaymentInfo.service_price.toLocaleString()}
+                  </span>
+                </p>
+                <Button
+                  onClick={() => setShowAdvancePayment(true)}
+                  className="mt-3 w-full h-11"
+                  variant="secondary"
+                >
+                  <Smartphone className="h-4 w-4 mr-2" />
+                  Pagar por adelantado
+                </Button>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Advance Payment Submit Flow */}
+          {showAdvancePayment && advancePaymentInfo && trackingToken && (
+            <AdvancePaymentSubmit
+              advancePaymentInfo={advancePaymentInfo}
+              trackingToken={trackingToken}
+              businessWhatsapp={business?.whatsapp || null}
+              clientName=""
+              appointmentDate={date ? format(date, "d 'de' MMMM", { locale: es }) : ''}
+              appointmentTime={time || ''}
+              onSuccess={() => {
+                setAdvancePaymentSubmitted(true)
+                setShowAdvancePayment(false)
+              }}
+              onCancel={() => setShowAdvancePayment(false)}
+            />
+          )}
+
+          {/* Success state */}
+          {advancePaymentSubmitted && (
+            <div className="rounded-2xl bg-emerald-50 p-4 text-center dark:bg-emerald-950/30">
+              <p className="text-[15px] font-semibold text-emerald-700 dark:text-emerald-300">
+                Comprobante enviado
+              </p>
+              <p className="mt-1 text-[13px] text-muted">
+                Pendiente de verificación por el negocio
+              </p>
+            </div>
+          )}
 
           {/* Manual loyalty CTA (prevents success screen interruption) */}
           {hasLoyaltyProgram && (

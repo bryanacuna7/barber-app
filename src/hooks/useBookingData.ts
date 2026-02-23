@@ -29,6 +29,7 @@ export function useBookingData(slug: string) {
   const [bookingComplete, setBookingComplete] = useState(false)
   const [createdClientId, setCreatedClientId] = useState<string | null>(null)
   const [bookingPricing, setBookingPricing] = useState<BookingPricing | null>(null)
+  const [trackingToken, setTrackingToken] = useState<string | null>(null)
 
   const [booking, setBooking] = useState<BookingData>({
     service: null,
@@ -188,6 +189,11 @@ export function useBookingData(slug: string) {
         setBookingPricing(data.pricing)
       }
 
+      // Store tracking token for advance payment flow
+      if (data.tracking_token) {
+        setTrackingToken(data.tracking_token)
+      }
+
       setBookingComplete(true)
     } catch {
       setError('Error de conexión. Intenta de nuevo.')
@@ -212,6 +218,7 @@ export function useBookingData(slug: string) {
     availableDates,
     createdClientId,
     bookingPricing,
+    trackingToken,
     // Setters
     setStep,
     setBooking,
