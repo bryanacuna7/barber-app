@@ -15,10 +15,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Calendar, Scissors, User, Clock, Activity, AlertCircle, CalendarPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { animations } from '@/lib/design-system'
+import { CancelRescheduleActions } from '@/components/track/cancel-reschedule-actions'
+import type { CancellationPolicy } from '@/types'
 
 // =====================================================
 // Types
@@ -151,8 +153,10 @@ function formatDate(date: Date) {
 
 export default function TrackingPage() {
   const params = useParams()
+  const router = useRouter()
   const token = params.token as string
   const { data, isLoading, error } = usePublicQueue(token)
+  const [cancelPolicy, setCancelPolicy] = useState<CancellationPolicy | null>(null)
 
   // Apply brand color as CSS variable
   useEffect(() => {
@@ -164,8 +168,20 @@ export default function TrackingPage() {
     }
   }, [data?.brandColor])
 
+  // Fetch cancel policy once businessSlug is available
+  useEffect(() => {
+    if (data?.businessSlug) {
+      fetch(`/api/public/cancel-policy/${data.businessSlug}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((policyData: CancellationPolicy | null) => setCancelPolicy(policyData))
+        .catch(() => {}) // silently fail — cancel actions simply won't show
+    }
+  }, [data?.businessSlug])
+
   // Determine state
-  const trackingState: TrackingState = useMemo(() => {
+  const [localTrackingState, setLocalTrackingState] = useState<TrackingState | null>(null)
+
+  const derivedTrackingState: TrackingState = useMemo(() => {
     if (isLoading) return 'loading'
     if (error instanceof Error && error.message === 'NOT_FOUND') return 'not-found'
     if (data?.expired) return 'expired'
@@ -178,6 +194,9 @@ export default function TrackingPage() {
     if (data) return 'valid'
     return 'not-found'
   }, [isLoading, error, data])
+
+  // Local override wins (e.g. client just cancelled via the UI)
+  const trackingState: TrackingState = localTrackingState ?? derivedTrackingState
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -196,7 +215,15 @@ export default function TrackingPage() {
       {/* Content */}
       <main className="mx-auto max-w-lg px-4 py-6">
         {trackingState === 'loading' && <TrackingSkeleton />}
-        {trackingState === 'valid' && data && <ValidTracking data={data} />}
+        {trackingState === 'valid' && data && (
+          <ValidTracking
+            data={data}
+            token={token}
+            cancelPolicy={cancelPolicy}
+            onCancelled={() => setLocalTrackingState('cancelled')}
+            onRescheduled={(newToken) => router.push('/track/' + newToken)}
+          />
+        )}
         {trackingState === 'completed' && data && <CompletedTracking data={data} />}
         {trackingState === 'cancelled' && data && <CancelledTracking data={data} />}
         {trackingState === 'expired' && data && (
@@ -217,7 +244,21 @@ export default function TrackingPage() {
 // Valid Tracking — Live Queue
 // =====================================================
 
-function ValidTracking({ data }: { data: PublicQueueResponse }) {
+interface ValidTrackingProps {
+  data: PublicQueueResponse
+  token: string
+  cancelPolicy: CancellationPolicy | null
+  onCancelled: () => void
+  onRescheduled: (newToken: string) => void
+}
+
+function ValidTracking({
+  data,
+  token,
+  cancelPolicy,
+  onCancelled,
+  onRescheduled,
+}: ValidTrackingProps) {
   const prefersReducedMotion = useReducedMotion()
   const { appointmentDetails } = data
   const timeLeft = useCountdown(appointmentDetails.scheduledAt)
@@ -248,42 +289,72 @@ function ValidTracking({ data }: { data: PublicQueueResponse }) {
     }
   }, [phase])
 
+  // Show cancel/reschedule only for scheduled appointments that haven't started yet
+  const showCancelActions =
+    phase !== 'your-turn' && appointmentDetails.status === 'scheduled' && cancelPolicy !== null
+
   return (
-    <AnimatePresence mode="wait">
-      {phase === 'countdown' && (
-        <motion.div
-          key="countdown"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={springConfig}
-        >
-          <PublicCountdownPhase data={data} timeLeft={timeLeft} />
-        </motion.div>
-      )}
-      {phase === 'live-queue' && (
-        <motion.div
-          key="live-queue"
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={springConfig}
-        >
-          <PublicLiveQueuePhase data={data} timeLeft={timeLeft} />
-        </motion.div>
-      )}
-      {phase === 'your-turn' && (
-        <motion.div
-          key="your-turn"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={springConfig}
-        >
-          <PublicYourTurnPhase data={data} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="space-y-4">
+      <AnimatePresence mode="wait">
+        {phase === 'countdown' && (
+          <motion.div
+            key="countdown"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={springConfig}
+          >
+            <PublicCountdownPhase data={data} timeLeft={timeLeft} />
+          </motion.div>
+        )}
+        {phase === 'live-queue' && (
+          <motion.div
+            key="live-queue"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={springConfig}
+          >
+            <PublicLiveQueuePhase data={data} timeLeft={timeLeft} />
+          </motion.div>
+        )}
+        {phase === 'your-turn' && (
+          <motion.div
+            key="your-turn"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={springConfig}
+          >
+            <PublicYourTurnPhase data={data} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cancel / Reschedule actions — shown below the tracking card */}
+      <AnimatePresence>
+        {showCancelActions && (
+          <motion.div
+            key="cancel-actions"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={springConfig}
+          >
+            <CancelRescheduleActions
+              token={token}
+              scheduledAt={appointmentDetails.scheduledAt}
+              policy={cancelPolicy!}
+              serviceName={appointmentDetails.serviceName}
+              barberName={data.barberName}
+              businessSlug={data.businessSlug}
+              onCancelled={onCancelled}
+              onRescheduled={onRescheduled}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 

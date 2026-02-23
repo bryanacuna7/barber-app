@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useBusiness } from '@/contexts/business-context'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { SettingsSubrouteHeader } from '@/components/settings/settings-subroute-header'
+import { CancellationPolicySection } from '@/components/settings/cancellation-policy-section'
 
 // =====================================================
 // Payment Method Definitions
@@ -195,6 +196,14 @@ export default function PagosSettingsPage() {
                     : `Con ${activeCount} métodos activos: el barbero elige al completar la cita.`}
               </p>
             </div>
+          </FadeInUp>
+
+          {/* Divider */}
+          <div className="border-t border-zinc-200 dark:border-zinc-700" />
+
+          {/* Cancellation Policy */}
+          <FadeInUp delay={0.15}>
+            <CancellationPolicySection businessId={businessId} />
           </FadeInUp>
         </div>
 
