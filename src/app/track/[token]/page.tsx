@@ -289,9 +289,11 @@ function ValidTracking({
     }
   }, [phase])
 
-  // Show cancel/reschedule only for scheduled appointments that haven't started yet
+  // Show cancel/reschedule only for pending/confirmed appointments that haven't started yet
   const showCancelActions =
-    phase !== 'your-turn' && appointmentDetails.status === 'scheduled' && cancelPolicy !== null
+    phase !== 'your-turn' &&
+    (appointmentDetails.status === 'pending' || appointmentDetails.status === 'confirmed') &&
+    cancelPolicy !== null
 
   return (
     <div className="space-y-4">

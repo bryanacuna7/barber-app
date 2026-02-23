@@ -35,10 +35,8 @@ interface AppointmentRow {
   service_id: string | null
   barber_id: string | null
   business_id: string
-  client_name: string | null
-  client_phone: string | null
-  client_email: string | null
   cancelled_by: string | null
+  client: { name: string | null; phone: string | null; email: string | null } | null
 }
 
 interface BusinessRow {
@@ -84,7 +82,7 @@ export async function POST(request: NextRequest) {
     const { data: appointment, error: apptError } = (await (serviceClient as any)
       .from('appointments')
       .select(
-        'id, status, scheduled_at, service_id, barber_id, business_id, client_name, client_phone, client_email, cancelled_by'
+        'id, status, scheduled_at, service_id, barber_id, business_id, cancelled_by, client:clients(name, phone, email)'
       )
       .eq('tracking_token', token)
       .single()) as { data: AppointmentRow | null; error: unknown }
@@ -93,8 +91,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
     }
 
-    // 5. Guard: must be in 'scheduled' status
-    if (appointment.status !== 'scheduled') {
+    // 5. Guard: must be in 'pending' or 'confirmed' status
+    if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
       return NextResponse.json({ error: 'La cita ya no puede ser cancelada' }, { status: 400 })
     }
 
@@ -150,7 +148,7 @@ export async function POST(request: NextRequest) {
     // 10. Format date for notifications
     const formattedDate = format(scheduledAt, "EEEE d 'de' MMMM 'a las' h:mm a", { locale: es })
 
-    const clientName = appointment.client_name ?? 'Cliente'
+    const clientName = appointment.client?.name ?? 'Cliente'
 
     // 11. Fire notifications (non-blocking)
 
@@ -203,9 +201,9 @@ export async function POST(request: NextRequest) {
     })()
 
     // Confirmation email to client (if email exists)
-    if (appointment.client_email) {
+    if (appointment.client?.email) {
       sendEmail({
-        to: appointment.client_email,
+        to: appointment.client.email,
         subject: `Tu cita en ${business.name} ha sido cancelada`,
         react: AppointmentCancelledEmail({
           businessName: business.name,

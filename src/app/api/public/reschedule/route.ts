@@ -38,12 +38,11 @@ interface AppointmentRow {
   service_id: string | null
   barber_id: string | null
   business_id: string
-  client_name: string | null
-  client_phone: string | null
-  client_email: string | null
+  client_id: string | null
   notes: string | null
   reschedule_count: number | null
   duration_minutes: number | null
+  client: { name: string | null; phone: string | null; email: string | null } | null
 }
 
 interface BusinessRow {
@@ -108,7 +107,7 @@ export async function POST(request: NextRequest) {
     const { data: appointment, error: apptError } = (await (serviceClient as any)
       .from('appointments')
       .select(
-        'id, status, scheduled_at, service_id, barber_id, business_id, client_name, client_phone, client_email, notes, reschedule_count, duration_minutes'
+        'id, status, scheduled_at, service_id, barber_id, business_id, client_id, notes, reschedule_count, duration_minutes, client:clients(name, phone, email)'
       )
       .eq('tracking_token', token)
       .single()) as { data: AppointmentRow | null; error: unknown }
@@ -117,8 +116,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
     }
 
-    // 6. Guard: must be in 'scheduled' status
-    if (appointment.status !== 'scheduled') {
+    // 6. Guard: must be in 'pending' or 'confirmed' status
+    if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
       return NextResponse.json({ error: 'La cita ya no puede ser reagendada' }, { status: 400 })
     }
 
@@ -248,10 +247,8 @@ export async function POST(request: NextRequest) {
       business_id: appointment.business_id,
       scheduled_at: newScheduledAt.toISOString(),
       duration_minutes: durationMin,
-      status: 'scheduled',
-      client_name: (appointment as any).client_name,
-      client_phone: (appointment as any).client_phone,
-      client_email: (appointment as any).client_email,
+      status: 'pending',
+      client_id: appointment.client_id,
       notes: appointment.notes,
       rescheduled_from: appointment.id,
       reschedule_count: currentRescheduleCount + 1,
@@ -290,8 +287,8 @@ export async function POST(request: NextRequest) {
       locale: es,
     })
 
-    const clientName = (appointment as any).client_name ?? 'Cliente'
-    const clientEmail = (appointment as any).client_email as string | null
+    const clientName = appointment.client?.name ?? 'Cliente'
+    const clientEmail = appointment.client?.email ?? null
 
     // 18a. In-app notification for business owner (non-blocking)
     createNotification(serviceClient as any, {
