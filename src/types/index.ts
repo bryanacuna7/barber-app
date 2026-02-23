@@ -60,6 +60,11 @@ export type {
   DashboardStats,
   ApiError,
   PaginatedResponse,
+  CancellationPolicy,
+  CancelRequest,
+  CancelResponse,
+  RescheduleRequest,
+  RescheduleResponse,
 } from './api'
 
 export type { PromoRule, PromoEvaluation } from './promo'

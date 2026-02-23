@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-23 (Session 180 - Promotional Slots)
-> **Last Verified Against:** All migrations 001-034
+> **Last Updated:** 2026-02-23 (Session 181 - Cancellation Policy)
+> **Last Verified Against:** All migrations 001-036
 
 ---
 
@@ -20,7 +20,7 @@
 ### `businesses`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`
+**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`, `036_cancellation_policy.sql`
 
 ```sql
 - id                        UUID PRIMARY KEY
@@ -45,6 +45,7 @@
 - staff_permissions         JSONB DEFAULT '{...}' (added in 027) -- owner-configurable UI permissions for staff
 - smart_duration_enabled    BOOLEAN DEFAULT false (added in 033) -- per-business toggle for smart duration prediction
 - promotional_slots         JSONB DEFAULT '[]' (added in 034) -- Array of PromoRule objects (max 20, enforced in API)
+- cancellation_policy       JSONB DEFAULT '{"enabled":false,"deadline_hours":24,"allow_reschedule":true}' (added in 036)
 ```
 
 ### `services`
@@ -101,7 +102,7 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 ### `appointments`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`
+**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`, `036_cancellation_policy.sql`
 
 ```sql
 - id                      UUID PRIMARY KEY
@@ -124,11 +125,16 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 - payment_method          TEXT CHECK (payment_method IN ('cash', 'sinpe', 'card')) (added in 025)
 - tracking_token          UUID DEFAULT gen_random_uuid() (added in 031)
 - tracking_expires_at     TIMESTAMPTZ (added in 031)
+- cancelled_by            TEXT CHECK (cancelled_by IN ('owner', 'barber', 'client')) (added in 036)
+- cancelled_at            TIMESTAMPTZ (added in 036)
+- reschedule_count        INT DEFAULT 0 (added in 036)
+- rescheduled_from        UUID REFERENCES appointments(id) (added in 036)
 ```
 
 **Indexes:**
 
 - `idx_appointments_tracking_token` UNIQUE on `tracking_token` WHERE NOT NULL (added in 031)
+- `idx_appointments_rescheduled_from` on `rescheduled_from` WHERE rescheduled_from IS NOT NULL (added in 036)
 
 **RLS Policies:**
 

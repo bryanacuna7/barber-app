@@ -71,3 +71,41 @@ export interface PaginatedResponse<T> {
   per_page: number
   total_pages: number
 }
+
+// === Cancellation Policy (Feature 3) ===
+
+// Stored in businesses.cancellation_policy JSONB
+export interface CancellationPolicy {
+  enabled: boolean
+  deadline_hours: number
+  allow_reschedule: boolean
+}
+
+// POST /api/public/cancel
+export interface CancelRequest {
+  token: string
+  reason?: string
+}
+
+export interface CancelResponse {
+  success: boolean
+  message: string
+  refund_eligible: boolean
+}
+
+// POST /api/public/reschedule
+export interface RescheduleRequest {
+  token: string
+  new_scheduled_at: string
+  new_barber_id?: string
+}
+
+export interface RescheduleResponse {
+  success: boolean
+  message: string
+  appointment_id: string
+  tracking_token: string
+  tracking_url: string
+  scheduled_at: string
+  discount?: import('./promo').PromoEvaluation | null
+}
