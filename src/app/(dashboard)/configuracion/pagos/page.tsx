@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Banknote, Smartphone, CreditCard } from 'lucide-react'
+import { Save, Banknote, Smartphone, CreditCard, Info } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { IOSToggle } from '@/components/ui/ios-toggle'
@@ -23,19 +23,19 @@ const PAYMENT_METHOD_OPTIONS = [
   {
     key: 'cash' as PaymentMethodKey,
     label: 'Efectivo',
-    description: 'Pago en efectivo al completar el servicio',
+    description: 'El cliente paga en efectivo en el local',
     icon: Banknote,
   },
   {
     key: 'sinpe' as PaymentMethodKey,
     label: 'SINPE Móvil',
-    description: 'Transferencia SINPE desde el celular del cliente',
+    description: 'El cliente transfiere por SINPE al número del local',
     icon: Smartphone,
   },
   {
     key: 'card' as PaymentMethodKey,
     label: 'Tarjeta',
-    description: 'Pago con tarjeta de débito o crédito',
+    description: 'El cliente paga con tarjeta en el datáfono del local',
     icon: CreditCard,
   },
 ]
@@ -121,7 +121,7 @@ export default function PagosSettingsPage() {
         <FadeInUp>
           <SettingsSubrouteHeader
             title="Métodos de Pago"
-            subtitle="Qué métodos de pago aceptas en tu negocio"
+            subtitle="Configurá cómo registrás los pagos de tus clientes"
           />
         </FadeInUp>
         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -144,11 +144,28 @@ export default function PagosSettingsPage() {
         <FadeInUp>
           <SettingsSubrouteHeader
             title="Métodos de Pago"
-            subtitle="Qué métodos de pago aceptas en tu negocio"
+            subtitle="Configurá cómo registrás los pagos de tus clientes"
           />
         </FadeInUp>
 
         <div className="space-y-8 max-w-3xl mx-auto">
+          {/* How it works explanation */}
+          <FadeInUp delay={0.03}>
+            <div className="flex gap-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 px-4 py-3.5">
+              <Info className="h-5 w-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-[14px] font-medium text-blue-900 dark:text-blue-100">
+                  ¿Cómo funciona?
+                </p>
+                <p className="text-[13px] text-blue-700 dark:text-blue-300 leading-relaxed">
+                  Estos métodos se usan para <strong>registrar</strong> cómo pagó cada cliente al
+                  completar una cita. El cobro se hace en persona — la app solo lleva el registro
+                  para tu contabilidad.
+                </p>
+              </div>
+            </div>
+          </FadeInUp>
+
           {/* Payment Method Toggles */}
           <FadeInUp delay={0.05}>
             <div>
