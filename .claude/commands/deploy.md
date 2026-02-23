@@ -143,10 +143,20 @@ Before any deployment:
 
 | Platform | Detection | Command |
 |----------|-----------|---------|
-| Vercel | vercel.json | `vercel --prod` |
+| Vercel | vercel.json | `npm run deploy:prod` |
 | Railway | railway.toml | `railway up` |
 | Netlify | netlify.toml | `netlify deploy --prod` |
 | Docker | Dockerfile | `docker compose up -d` |
+
+### IMPORTANT: Vercel Deploy Rule
+
+**NEVER run `vercel deploy` or `vercel --prod` directly.**
+
+Always use the npm scripts which run `scripts/deploy-with-push.sh`:
+- `npm run deploy:prod` — production (git push + vercel deploy --prod)
+- `npm run deploy:preview` — preview (git push + vercel deploy)
+
+The script ensures `git push` happens BEFORE deploy, which triggers the Discord release notification via GitHub Actions. A PreToolUse hook blocks direct `vercel` commands.
 
 ---
 
