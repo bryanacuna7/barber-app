@@ -79,7 +79,11 @@ export default function ClientHomePage() {
         {loadingUpcoming ? (
           <UpcomingCardSkeleton />
         ) : upcoming ? (
-          <LiveQueueCard appointment={upcoming} businessId={businessId} />
+          <LiveQueueCard
+            appointment={upcoming}
+            businessId={businessId}
+            businessSlug={businessSlug}
+          />
         ) : (
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 text-center">
             <Calendar className="h-8 w-8 text-muted mx-auto mb-2" />

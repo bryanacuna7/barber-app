@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 // Upcoming appointment (next confirmed/pending)
 // =====================================================
 
-/** Upcoming appointment type — includes fields added by migration 025 */
+/** Upcoming appointment type — includes fields added by migration 025 + 031 */
 export interface ClientUpcomingAppointment {
   id: string
   scheduled_at: string
@@ -15,6 +15,7 @@ export interface ClientUpcomingAppointment {
   client_notes: string | null
   started_at: string | null
   actual_duration_minutes: number | null
+  tracking_token: string | null
   service: { id: string; name: string } | null
   barber: { id: string; name: string; phone: string | null } | null
 }
@@ -29,7 +30,7 @@ export function useClientUpcoming(clientId: string) {
         supabase
           .from('appointments')
           .select(
-            'id, scheduled_at, duration_minutes, price, status, client_notes, started_at, actual_duration_minutes, service:services!appointments_service_id_fkey(id, name), barber:barbers!appointments_barber_id_fkey(id, name, phone)'
+            'id, scheduled_at, duration_minutes, price, status, client_notes, started_at, actual_duration_minutes, tracking_token, service:services!appointments_service_id_fkey(id, name), barber:barbers!appointments_barber_id_fkey(id, name, phone)'
           ) as any
       )
         .eq('client_id', clientId)

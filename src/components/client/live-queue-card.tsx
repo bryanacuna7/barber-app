@@ -9,16 +9,19 @@
  * C) Your Turn (your appointment started) — live timer
  */
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Calendar, Scissors, User, MessageCircle, Clock, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { buildWhatsAppLink } from '@/lib/whatsapp/deep-link'
 import { haptics } from '@/lib/utils/mobile'
 import { formatDate, formatTime } from '@/lib/utils/format'
 import { animations } from '@/lib/design-system'
+import { createClient } from '@/lib/supabase/client'
+import { CancelRescheduleActions } from '@/components/track/cancel-reschedule-actions'
 import type { ClientUpcomingAppointment } from '@/hooks/queries/useClientDashboard'
+import type { CancellationPolicy } from '@/types'
 
 // =====================================================
 // Types
@@ -55,6 +58,7 @@ type Phase = 'countdown' | 'live-queue' | 'your-turn'
 interface LiveQueueCardProps {
   appointment: ClientUpcomingAppointment
   businessId: string
+  businessSlug: string
 }
 
 // =====================================================
@@ -124,8 +128,27 @@ function useBarberQueue(barberId: string, businessId: string, enabled: boolean) 
 // Main Component
 // =====================================================
 
-export function LiveQueueCard({ appointment, businessId }: LiveQueueCardProps) {
+function useCancelPolicy(businessId: string) {
+  return useQuery<CancellationPolicy | null>({
+    queryKey: ['cancel-policy-by-id', businessId],
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data } = await (supabase as any)
+        .from('businesses')
+        .select('cancellation_policy, slug')
+        .eq('id', businessId)
+        .single()
+      if (!data) return null
+      return (data.cancellation_policy as CancellationPolicy) ?? null
+    },
+    enabled: !!businessId,
+    staleTime: 5 * 60_000,
+  })
+}
+
+export function LiveQueueCard({ appointment, businessId, businessSlug }: LiveQueueCardProps) {
   const prefersReducedMotion = useReducedMotion()
+  const queryClient = useQueryClient()
   const timeLeft = useCountdown(appointment.scheduled_at)
   const minutesUntil = timeLeft.totalMs / 60_000
 
@@ -148,6 +171,9 @@ export function LiveQueueCard({ appointment, businessId }: LiveQueueCardProps) {
     phase === 'live-queue' && !!barberId
   )
 
+  // Fetch cancellation policy for this business
+  const { data: cancelPolicy } = useCancelPolicy(businessId)
+
   // Haptic feedback on phase transitions
   const prevPhaseRef = useRef<Phase>(phase)
   useEffect(() => {
@@ -161,6 +187,33 @@ export function LiveQueueCard({ appointment, businessId }: LiveQueueCardProps) {
 
   const springConfig = prefersReducedMotion ? { duration: 0.01 } : animations.spring.card
 
+  // Invalidate upcoming query after cancel so the card disappears
+  function handleCancelled() {
+    queryClient.invalidateQueries({ queryKey: ['client-upcoming'] })
+  }
+
+  // Whether to show cancel/reschedule actions (not during your-turn, and must have token + policy)
+  const trackingToken = (appointment as any).tracking_token as string | null
+  const showActions =
+    phase !== 'your-turn' &&
+    !!trackingToken &&
+    !!cancelPolicy &&
+    (appointment.status === 'pending' || appointment.status === 'confirmed')
+
+  const cancelActions = showActions ? (
+    <div className="mt-4">
+      <CancelRescheduleActions
+        token={trackingToken!}
+        scheduledAt={appointment.scheduled_at}
+        policy={cancelPolicy!}
+        serviceName={appointment.service?.name ?? 'Servicio'}
+        barberName={appointment.barber?.name ?? 'Barbero'}
+        businessSlug={businessSlug}
+        onCancelled={handleCancelled}
+      />
+    </div>
+  ) : null
+
   return (
     <AnimatePresence mode="wait">
       {phase === 'countdown' && (
@@ -171,7 +224,11 @@ export function LiveQueueCard({ appointment, businessId }: LiveQueueCardProps) {
           exit={{ opacity: 0, y: -12 }}
           transition={springConfig}
         >
-          <CountdownPhase appointment={appointment} timeLeft={timeLeft} />
+          <CountdownPhase
+            appointment={appointment}
+            timeLeft={timeLeft}
+            cancelActions={cancelActions}
+          />
         </motion.div>
       )}
 
@@ -188,6 +245,7 @@ export function LiveQueueCard({ appointment, businessId }: LiveQueueCardProps) {
             queueData={queueData ?? null}
             queueLoading={queueLoading}
             timeLeft={timeLeft}
+            cancelActions={cancelActions}
           />
         </motion.div>
       )}
@@ -214,9 +272,11 @@ export function LiveQueueCard({ appointment, businessId }: LiveQueueCardProps) {
 function CountdownPhase({
   appointment,
   timeLeft,
+  cancelActions,
 }: {
   appointment: ClientUpcomingAppointment
   timeLeft: ReturnType<typeof computeTimeLeft>
+  cancelActions: React.ReactNode
 }) {
   const countdownText =
     timeLeft.hours > 0
@@ -267,6 +327,9 @@ function CountdownPhase({
           </Button>
         </a>
       )}
+
+      {/* Cancel / Reschedule actions */}
+      {cancelActions}
     </div>
   )
 }
@@ -280,11 +343,13 @@ function LiveQueuePhase({
   queueData,
   queueLoading,
   timeLeft,
+  cancelActions,
 }: {
   appointment: ClientUpcomingAppointment
   queueData: QueueResponse | null
   queueLoading: boolean
   timeLeft: ReturnType<typeof computeTimeLeft>
+  cancelActions: React.ReactNode
 }) {
   // Check if all non-yours items are pending (barber not using "Iniciar")
   const allPending = queueData?.queue.filter((q) => !q.isYours).every((q) => q.status === 'pending')
@@ -368,6 +433,9 @@ function LiveQueuePhase({
             {formatTime(new Date(appointment.scheduled_at))}
           </span>
         </div>
+
+        {/* Cancel / Reschedule actions */}
+        {cancelActions}
       </div>
     </div>
   )

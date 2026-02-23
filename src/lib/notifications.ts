@@ -12,6 +12,7 @@ export type NotificationType =
   | 'new_appointment'
   | 'appointment_reminder'
   | 'appointment_cancelled'
+  | 'appointment_rescheduled'
   // Admin notifications
   | 'new_business'
   | 'payment_pending'
@@ -318,9 +319,14 @@ export function getNotificationStyle(type: NotificationType): {
       bgColor: 'bg-blue-100 dark:bg-blue-900/30',
     },
     appointment_cancelled: {
-      icon: 'calendar-x',
-      color: 'text-zinc-600',
-      bgColor: 'bg-zinc-100 dark:bg-zinc-800',
+      icon: 'XCircle',
+      color: 'text-red-500',
+      bgColor: 'bg-red-50 dark:bg-red-900/20',
+    },
+    appointment_rescheduled: {
+      icon: 'RefreshCw',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     },
     // Admin notifications
     new_business: {
