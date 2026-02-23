@@ -269,6 +269,16 @@ export interface TodayAppointment {
   started_at: string | null
   actual_duration_minutes: number | null
   payment_method: 'cash' | 'sinpe' | 'card' | null
+  /** Advance payment status — set when client pays a deposit upfront */
+  advance_payment_status?: 'none' | 'pending' | 'verified' | 'rejected' | null
+  /** Channel used to submit the payment proof */
+  proof_channel?: 'whatsapp' | 'upload' | null
+  /** Discount percentage applied at booking time */
+  discount_pct_snapshot?: number | null
+  /** Final price after discount */
+  final_price_snapshot?: number | null
+  /** Original base price before discount */
+  base_price_snapshot?: number | null
   client: TodayAppointmentClient | null
   service: TodayAppointmentService | null
 }

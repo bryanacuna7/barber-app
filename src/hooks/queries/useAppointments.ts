@@ -149,6 +149,11 @@ export function useBarberDayAppointments(barberId: string | null) {
           started_at,
           actual_duration_minutes,
           payment_method,
+          advance_payment_status,
+          proof_channel,
+          base_price_snapshot,
+          discount_pct_snapshot,
+          final_price_snapshot,
           client:clients!appointments_client_id_fkey (
             id,
             name,
@@ -191,6 +196,11 @@ export function useBarberDayAppointments(barberId: string | null) {
         started_at: appt.started_at ?? null,
         actual_duration_minutes: appt.actual_duration_minutes ?? null,
         payment_method: appt.payment_method ?? null,
+        advance_payment_status: appt.advance_payment_status ?? null,
+        proof_channel: appt.proof_channel ?? null,
+        base_price_snapshot: appt.base_price_snapshot ?? null,
+        discount_pct_snapshot: appt.discount_pct_snapshot ?? null,
+        final_price_snapshot: appt.final_price_snapshot ?? null,
         client: appt.client
           ? {
               id: appt.client.id,

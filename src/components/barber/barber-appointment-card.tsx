@@ -22,6 +22,7 @@ import { StatusBadge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { haptics } from '@/lib/utils/mobile'
 import { buildWhatsAppLink, buildArriveEarlyLink } from '@/lib/whatsapp/deep-link'
+import { AdvancePaymentVerifyModal } from './advance-payment-verify'
 import type { TodayAppointment } from '@/types/custom'
 
 type PaymentMethod = 'cash' | 'sinpe' | 'card'
@@ -93,6 +94,7 @@ export function BarberAppointmentCard({
   className,
 }: BarberAppointmentCardProps) {
   const [paymentSheetOpen, setPaymentSheetOpen] = useState(false)
+  const [showPaymentVerify, setShowPaymentVerify] = useState(false)
 
   // Filter payment options based on business settings
   // null/undefined = legacy (no config yet) → show all methods
@@ -299,6 +301,41 @@ export function BarberAppointmentCard({
             </div>
           )}
 
+          {/* Advance Payment Badges */}
+          {appointment.advance_payment_status === 'pending' && (
+            <div className="mb-3">
+              <button
+                onClick={() => setShowPaymentVerify(true)}
+                className="flex items-center gap-2 py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 ios-press w-full text-left"
+                aria-label="Verificar pago anticipado pendiente"
+              >
+                <Smartphone
+                  className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                  Pago pendiente — verificar
+                </span>
+              </button>
+            </div>
+          )}
+          {appointment.advance_payment_status === 'verified' && (
+            <div className="mb-3">
+              <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30">
+                <Smartphone
+                  className="h-4 w-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                  Pago verificado
+                  {appointment.discount_pct_snapshot
+                    ? ` (${appointment.discount_pct_snapshot}% desc.)`
+                    : ''}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Completion Info (for completed appointments) */}
           {appointment.status === 'completed' && (
             <div className="space-y-2 mb-3">
@@ -461,6 +498,22 @@ export function BarberAppointmentCard({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Advance Payment Verification Modal */}
+      {showPaymentVerify && (
+        <AdvancePaymentVerifyModal
+          appointmentId={appointment.id}
+          proofChannel={appointment.proof_channel || 'whatsapp'}
+          basePrice={appointment.base_price_snapshot ?? undefined}
+          discountPct={appointment.discount_pct_snapshot ?? undefined}
+          finalPrice={appointment.final_price_snapshot ?? undefined}
+          isOpen={showPaymentVerify}
+          onClose={() => setShowPaymentVerify(false)}
+          onVerified={() => {
+            setShowPaymentVerify(false)
+          }}
+        />
+      )}
     </>
   )
 }

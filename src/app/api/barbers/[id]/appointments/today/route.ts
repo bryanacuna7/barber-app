@@ -37,6 +37,11 @@ export interface TodayAppointment {
   actual_duration_minutes: number | null
   payment_method: 'cash' | 'sinpe' | 'card' | null
   tracking_token: string | null
+  advance_payment_status?: 'none' | 'pending' | 'verified' | 'rejected' | null
+  proof_channel?: 'whatsapp' | 'upload' | null
+  base_price_snapshot?: number | null
+  discount_pct_snapshot?: number | null
+  final_price_snapshot?: number | null
   client: TodayAppointmentClient | null
   service: TodayAppointmentService | null
 }
@@ -140,6 +145,11 @@ export const GET = withAuth<RouteParams>(
         actual_duration_minutes,
         payment_method,
         tracking_token,
+        advance_payment_status,
+        proof_channel,
+        base_price_snapshot,
+        discount_pct_snapshot,
+        final_price_snapshot,
         client:clients(id, name, phone, email),
         service:services(id, name, duration_minutes, price)
       `
