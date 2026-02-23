@@ -7,7 +7,7 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-23 (Session 182 — Feature 3 Part 2: SINPE Advance Payment)
+- **Last Updated:** 2026-02-23 (Session 183 — E2E Audit Fixes)
 - **Branch:** `feature/ui-ux-redesign`
 - **Version:** `0.9.7` (LIVE on production)
 - **Phase:** Customer Discovery — solving real barber pains
@@ -52,7 +52,8 @@
 - Security Hardening (IDOR fixed, rate limiting, referral RLS tightened)
 - Performance (7 DB indices, N+1 fixed, 7-10x faster)
 - Egress Optimization (migrated Supabase project)
-- Migrations: 025–036 all executed
+- Migrations: 025–037 all executed
+- E2E Audit: 12/13 findings resolved (Session 183)
 
 ---
 
@@ -66,6 +67,22 @@
 ---
 
 ## Recent Sessions
+
+### Session 183: E2E Audit — Full Fix Pass (2026-02-23)
+
+**Status:** COMPLETE. 12/13 issues resolved across 3 commits.
+
+**What was done:**
+
+- Reviewed `AUDITORIA_E2E_COMPLETA.md` (7 P0, 6 P1, 3 P2 findings)
+- Verified all findings against actual codebase — all confirmed real
+- **Ronda 1 (P0 quick wins):** Fixed broken auth CTAs (`/auth/signup`→`/register`), added post-booking navigation (calendar + "Volver a reservar"), added 429 rate limit guard in React Query
+- **Ronda 2 (Test alignment):** Rewrote `mi-dia.spec.ts` with correct testids, fixed auth redirect regex in all E2E specs (`/dashboard` → `/(dashboard|mi-dia)/`), split duplicate testid, fixed ambiguous heading selector
+- **Ronda 3-4 (UX polish):** Spanish field-level validation on booking form, disabled slot line-through + contrast, install prompt repositioned to top on mobile, service card price layout fix
+
+**Commits:** `845a1c0` (P0 blockers), `2d06e35` (docs), `aa81b6c` (P1/P2 UX)
+
+**Not fixed:** P2-BAR-01 (calendar timezone) — uses `new Date()` directly, not actionable without repro
 
 ### Session 182: Feature 3 Part 2 — SINPE Advance Payment (2026-02-23)
 
