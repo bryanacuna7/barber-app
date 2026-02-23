@@ -8,16 +8,21 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.5
+## v0.9.6
 
 ### Nuevo
 
-- Horarios inteligentes con descuento: crea reglas para ofrecer precios mas bajos en horas de poca demanda y llenar tu agenda
-- Mapa de calor de demanda: ve de un vistazo que dias y horas tienen mas citas en Analiticas
-- Pagina de promociones en Configuracion para crear, editar y eliminar reglas de descuento facilmente
-- Los clientes ven el descuento directamente al elegir horario: precio original tachado y precio con descuento
+- Cancelacion y reagendamiento de citas: tus clientes pueden cancelar o reagendar desde su enlace de seguimiento, sin necesidad de llamar
+- Politica de cancelacion configurable: activa cancelaciones, define cuantas horas de anticipacion necesitas y decide si permites reagendamiento
+- Notificaciones automaticas: cuando un cliente cancela o reagenda, recibis notificacion push, email e in-app al instante
 
 ### Mejoras
 
-- La confirmacion de cita ahora muestra el detalle del descuento aplicado
-- Los horarios disponibles indican automaticamente cuando hay una promocion activa
+- La pagina de seguimiento ahora muestra opciones claras de cancelar y reagendar cuando la politica esta activa
+- Si el plazo para cancelar ya paso, el cliente ve un mensaje explicativo en vez de botones activos
+- Metodos de Pago ahora incluye una explicacion de como funciona el registro para nuevos usuarios
+- Descripciones de metodos de pago mas claras
+
+### Seguridad
+
+- Acceso mas restringido a datos internos de referidos

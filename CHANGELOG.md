@@ -4,6 +4,27 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.6] - 2026-02-23
+
+### Nuevo
+
+- Los clientes ahora pueden cancelar o reagendar sus citas desde el enlace de seguimiento, si el negocio lo permite
+- Configuracion de politica de cancelacion en Configuracion > Pagos: activar cancelaciones, definir horas de anticipacion y permitir reagendamiento
+- Al cancelar, el dueno recibe notificacion push, email e in-app automaticamente
+- Texto explicativo en Metodos de Pago para entender como funciona el registro de pagos
+
+### Mejorado
+
+- La pagina de seguimiento muestra los botones de cancelar y reagendar cuando la politica esta activa
+- Si el plazo para cancelar ya paso, los botones se deshabilitan con un mensaje claro
+- Descripciones de metodos de pago mas claras: ahora explican que el cobro es en persona
+
+### Seguridad
+
+- Politicas de acceso mas estrictas en la tabla de conversiones de referidos
+
+---
+
 ## [0.9.5] - 2026-02-23
 
 ### Nuevo

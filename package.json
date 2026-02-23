@@ -1,6 +1,6 @@
 {
   "name": "barberapp",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -41,6 +41,8 @@
     "record:flow": "bash scripts/record-user-flow.sh",
     "test:performance": "lighthouse http://localhost:3000/mi-dia --only-categories=performance --output=html --output-path=./performance-report.html",
     "test:all": "npm run test:security && npm run test:unit && npm run test:integration && npm run test:e2e",
+    "deploy:preview": "bash scripts/deploy-with-push.sh",
+    "deploy:prod": "bash scripts/deploy-with-push.sh --prod",
     "validate:changelog": "node scripts/validate-public-changelog.mjs",
     "ci": "npm run validate:changelog && npm run format:check && npm run test:unit && npm run build:skip-ts",
     "ci:full": "npm run ci && npm run test:e2e",
