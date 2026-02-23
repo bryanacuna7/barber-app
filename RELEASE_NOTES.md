@@ -8,21 +8,21 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.6
+## v0.9.7
 
 ### Nuevo
 
-- Cancelacion y reagendamiento de citas: tus clientes pueden cancelar o reagendar desde su enlace de seguimiento, sin necesidad de llamar
-- Politica de cancelacion configurable: activa cancelaciones, define cuantas horas de anticipacion necesitas y decide si permites reagendamiento
-- Notificaciones automaticas: cuando un cliente cancela o reagenda, recibis notificacion push, email e in-app al instante
+- Pago anticipado con SINPE: ofrece un descuento a clientes que pagan antes de la cita. El cliente envia su comprobante por WhatsApp o lo sube directo en la app
+- Verificacion de pagos: cuando un cliente envia su comprobante, te aparece un badge "Pago pendiente" en la cita. Tocalo para ver el comprobante y aprobarlo o rechazarlo
+- Configuracion en Pagos: activa el pago anticipado, ingresa tu numero SINPE, nombre del titular, el porcentaje de descuento que queres dar y el plazo limite
 
 ### Mejoras
 
-- La pagina de seguimiento ahora muestra opciones claras de cancelar y reagendar cuando la politica esta activa
-- Si el plazo para cancelar ya paso, el cliente ve un mensaje explicativo en vez de botones activos
-- Metodos de Pago ahora incluye una explicacion de como funciona el registro para nuevos usuarios
-- Descripciones de metodos de pago mas claras
+- Despues de reservar, el cliente ve una invitacion a pagar por adelantado con el monto y descuento calculado
+- Los precios se congelan al momento del pago para que no haya sorpresas si despues cambias tarifas
+- Los comprobantes se eliminan automaticamente 30 dias despues de ser revisados para no ocupar espacio
 
 ### Seguridad
 
-- Acceso mas restringido a datos internos de referidos
+- Los comprobantes son privados: solo vos y tus barberos pueden verlos
+- Solo se aceptan imagenes de hasta 5MB

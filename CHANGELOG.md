@@ -4,6 +4,30 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.7] - 2026-02-23
+
+### Nuevo
+
+- Pago anticipado SINPE: los clientes pueden pagar antes de la cita y recibir un descuento configurable (5-50%)
+- Dos formas de enviar comprobante: subir foto directamente o enviar por WhatsApp con mensaje prellenado
+- Verificacion de pagos: el dueno revisa el comprobante y aprueba o rechaza desde el dashboard
+- Configuracion completa en Configuracion > Pagos: numero SINPE, nombre del titular, porcentaje de descuento y plazo limite
+- Badges en citas del dashboard: "Pago pendiente" (amarillo) y "Pago verificado" (verde)
+
+### Mejorado
+
+- La pantalla de confirmacion de reserva muestra un banner invitando a pagar por adelantado cuando el negocio lo tiene activo
+- Los precios se congelan al momento del pago anticipado para evitar inconsistencias
+- Limpieza automatica de comprobantes 30 dias despues de verificacion o rechazo
+
+### Seguridad
+
+- Comprobantes almacenados en bucket privado con URLs firmadas de 1 hora
+- Validacion de tipo de archivo (solo imagenes) y tamano maximo de 5MB
+- Solo el dueno y barberos del negocio pueden ver los comprobantes
+
+---
+
 ## [0.9.6] - 2026-02-23
 
 ### Nuevo
