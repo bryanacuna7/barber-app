@@ -76,8 +76,11 @@ export function useUpdateAppointmentStatus() {
       if (error) throw error
       return data
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       invalidateQueries.afterAppointmentChange(queryClient)
+      if (['completed', 'cancelled', 'no_show'].includes(variables.status)) {
+        invalidateQueries.afterAnalyticsRelevantChange(queryClient)
+      }
     },
   })
 }

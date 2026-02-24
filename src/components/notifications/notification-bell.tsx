@@ -104,18 +104,27 @@ export function NotificationBell() {
   }, [])
 
   useEffect(() => {
-    const initialFetch = setTimeout(() => {
-      void fetchNotifications()
-    }, 0)
+    const initialFetch = setTimeout(() => void fetchNotifications(), 0)
 
-    // Poll for new notifications every 30 seconds
+    // Poll every 60s, but only when tab is visible
     const interval = setInterval(() => {
-      void fetchNotifications()
-    }, 30000)
+      if (document.visibilityState === 'visible') {
+        void fetchNotifications()
+      }
+    }, 60000)
+
+    // Also refetch when tab becomes visible after being hidden
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchNotifications()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
       clearTimeout(initialFetch)
       clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [fetchNotifications])
 

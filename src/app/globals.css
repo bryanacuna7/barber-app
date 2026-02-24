@@ -474,6 +474,25 @@ a:focus-visible:not(.focus-ring),
   animation: ripple 600ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Premium background ambient animations — CSS compositor thread, zero JS cost */
+@keyframes ambient-drift-1 {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.15) translate(60px, -30px); }
+}
+@keyframes ambient-drift-2 {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.2) translate(-60px, 60px); }
+}
+.animate-ambient-1 {
+  animation: ambient-drift-1 25s ease-in-out infinite;
+}
+.animate-ambient-2 {
+  animation: ambient-drift-2 30s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-ambient-1, .animate-ambient-2 { animation: none; }
+}
+
 /* Animate-in utility class */
 .animate-in {
   animation-duration: 300ms;

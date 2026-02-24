@@ -168,10 +168,14 @@ export const queryKeys = {
  * Cache invalidation helpers
  */
 export const invalidateQueries = {
-  // Invalidate after appointment changes
+  // Invalidate after appointment changes (appointments + calendar only)
   afterAppointmentChange: (queryClient: QueryClient) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.appointments.all })
     queryClient.invalidateQueries({ queryKey: queryKeys.calendar.all })
+  },
+
+  // Invalidate analytics (only call for completed/cancelled/no_show status changes)
+  afterAnalyticsRelevantChange: (queryClient: QueryClient) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.analytics.all })
   },
 

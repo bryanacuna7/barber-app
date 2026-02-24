@@ -4,6 +4,16 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.10] - 2026-02-24
+
+### Mejorado
+
+- La app carga mas rapido al abrir el panel principal (consultas iniciales optimizadas)
+- Animaciones de fondo mas fluidas y con menor consumo de bateria
+- Las notificaciones solo se consultan cuando la app esta visible, reduciendo consumo de datos
+- El calendario se actualiza de forma mas inteligente: solo recarga estadisticas cuando hay cambios relevantes
+- Colores de la app y configuracion se guardan correctamente cuando no hay conexion
+
 ## [0.9.9] - 2026-02-24
 
 ### Nuevo

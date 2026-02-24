@@ -99,22 +99,33 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // API requests - network first, cache fallback
+  // API requests - only cache GET requests, skip mutations entirely
   if (url.pathname.startsWith('/api/')) {
+    if (request.method !== 'GET') {
+      // Mutations (POST, PATCH, DELETE) always go to network, never cached
+      return
+    }
+
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Clone and cache successful responses
+          // Only cache stable read endpoints, not frequently-changing lists
           if (response.ok) {
-            const responseClone = response.clone()
-            caches.open(RUNTIME_CACHE).then((cache) => {
-              cache.put(request, responseClone)
-            })
+            const cacheable =
+              url.pathname.startsWith('/api/pwa/') ||
+              url.pathname.startsWith('/api/settings/') ||
+              url.pathname.startsWith('/api/public/')
+            if (cacheable) {
+              const responseClone = response.clone()
+              caches.open(RUNTIME_CACHE).then((cache) => {
+                cache.put(request, responseClone)
+              })
+            }
           }
           return response
         })
         .catch(() => {
-          // Fallback to cache
+          // Fallback to cache for offline support
           return caches.match(request).then((cachedResponse) => {
             return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), {
               status: 503,

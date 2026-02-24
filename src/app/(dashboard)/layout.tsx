@@ -99,23 +99,31 @@ export default async function DashboardLayout({ children }: { children: React.Re
     )
   }
 
-  // Fetch business data (owner queries by owner_id, barber queries by business_id)
+  // Fetch business data AND onboarding in parallel to reduce TTFB
   // staff_permissions from migration 027 — not in generated types yet, using `as any`
-  const { data: business } = (await (roleInfo.isOwner
-    ? supabase
-        .from('businesses')
-        .select(
-          'id, name, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
-        )
-        .eq('owner_id', user.id)
-        .single()
-    : supabase
-        .from('businesses')
-        .select(
-          'id, name, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
-        )
-        .eq('id', roleInfo.businessId)
-        .single())) as { data: any }
+  const businessSelect =
+    'id, name, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
+  const needsOnboarding =
+    roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')
+
+  const [businessResult, onboardingResult] = await Promise.all([
+    (roleInfo.isOwner
+      ? supabase.from('businesses').select(businessSelect).eq('owner_id', user.id).single()
+      : supabase
+          .from('businesses')
+          .select(businessSelect)
+          .eq('id', roleInfo.businessId)
+          .single()) as unknown as Promise<{ data: any }>,
+    needsOnboarding && roleInfo.businessId
+      ? supabase
+          .from('business_onboarding')
+          .select('completed')
+          .eq('business_id', roleInfo.businessId)
+          .single()
+      : Promise.resolve({ data: null }),
+  ])
+
+  const business = businessResult.data
 
   if (!business) {
     return (
@@ -152,17 +160,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isCitasRoute = pathname.startsWith('/citas')
   const isMiDiaRoute = pathname.startsWith('/mi-dia')
 
-  // Check onboarding status (skip for admin, barbers, and if already on onboarding page)
-  if (roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')) {
-    const { data: onboarding } = await supabase
-      .from('business_onboarding')
-      .select('completed')
-      .eq('business_id', business.id)
-      .single()
-
-    if (onboarding && !(onboarding as { completed: boolean }).completed) {
-      redirect('/onboarding')
-    }
+  // Check onboarding status (already fetched in parallel above)
+  if (
+    needsOnboarding &&
+    onboardingResult.data &&
+    !(onboardingResult.data as { completed: boolean }).completed
+  ) {
+    redirect('/onboarding')
   }
 
   // If business is inactive, show suspended message (skip for admin)

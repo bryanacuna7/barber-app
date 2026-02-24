@@ -93,8 +93,14 @@ export function useRealtimeAppointments({
             (payload.new as any)?.id
           )
 
-          // Invalidate appointments, calendar, and analytics queries
+          // Always invalidate appointments + calendar
           invalidateQueries.afterAppointmentChange(queryClient)
+
+          // Only invalidate analytics for status changes that affect totals
+          const status = (payload.new as any)?.status
+          if (['completed', 'cancelled', 'no_show'].includes(status)) {
+            invalidateQueries.afterAnalyticsRelevantChange(queryClient)
+          }
 
           // Reset reconnect counter on successful event
           reconnectAttempts.current = 0
