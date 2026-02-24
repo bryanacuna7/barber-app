@@ -222,7 +222,7 @@ export function ClientStatusCard({ status, program, businessName }: Props) {
 
       {/* Tier Progress */}
       {nextTier && (
-        <div className="mt-4 rounded-lg border border-border/50 bg-background/50 p-3 sm:mt-6">
+        <div className="mt-4 rounded-lg bg-background/50 p-3 sm:mt-6">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-3.5 w-3.5 text-muted-foreground sm:h-4 sm:w-4" />
             <p className="text-[11px] font-medium text-muted-foreground sm:text-xs">

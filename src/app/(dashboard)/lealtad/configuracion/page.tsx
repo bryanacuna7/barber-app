@@ -134,8 +134,8 @@ export default async function LoyaltyConfigPage() {
 
       {/* Desktop Header */}
       <div className="mb-5 hidden lg:mb-6 lg:block">
-        <h1 className="app-page-title">Programa de Lealtad</h1>
-        <p className="text-sm text-muted">Configura recompensas para tus clientes más fieles</p>
+        <h1 className="app-page-title brand-gradient-text">Programa de Lealtad</h1>
+        <p className="app-page-subtitle mt-1">Configura recompensas para tus clientes más fieles</p>
       </div>
 
       {/* Stats Cards - Only show if program exists and has data */}

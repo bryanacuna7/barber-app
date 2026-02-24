@@ -75,7 +75,7 @@ export function LoyaltyPreview({ program }: Props) {
         </div>
 
         {/* Mock Client Status Card */}
-        <div className="rounded-xl border border-border/50 bg-card/60 p-3.5 backdrop-blur-sm sm:p-4">
+        <div className="rounded-xl bg-background/50 p-3.5 sm:p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-[11px] font-medium text-muted-foreground sm:text-xs">Tus Puntos</p>

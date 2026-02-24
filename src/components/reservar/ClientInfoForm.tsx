@@ -172,7 +172,7 @@ export function ClientInfoForm({
         <div>
           <Input
             name="email"
-            label="Email (opcional)"
+            label="Correo (opcional)"
             type="email"
             placeholder="tu@email.com"
             value={clientEmail}

@@ -138,7 +138,7 @@ export function NotificationPreferencesSection() {
               />
               <ChannelCard
                 icon={<Mail className="w-5 h-5" />}
-                label="Solo Email"
+                label="Solo Correo"
                 description="Recibir por correo electrónico"
                 active={preferences.channel === 'email'}
                 onClick={() => handleChannelChange('email')}
@@ -166,7 +166,7 @@ export function NotificationPreferencesSection() {
               exit={{ opacity: 0, height: 0 }}
             >
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                Email alternativo (opcional)
+                Correo alternativo (opcional)
               </label>
               <div className="flex gap-2">
                 <Input

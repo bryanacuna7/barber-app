@@ -121,9 +121,11 @@ export default function SuscripcionPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="app-page-title">Suscripción</h1>
-        <p className="app-page-subtitle mt-1 lg:hidden">Gestiona tu plan y métodos de pago</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="app-page-title brand-gradient-text">Suscripción</h1>
+          <p className="app-page-subtitle mt-1">Gestiona tu plan y métodos de pago</p>
+        </div>
       </div>
 
       {/* Urgent Action Banner */}

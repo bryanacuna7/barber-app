@@ -329,10 +329,8 @@ export default function ConfiguracionPage() {
         <FadeInUp>
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-white">
-                Configuración
-              </h1>
-              <p className="text-[15px] text-muted mt-1">
+              <h1 className="app-page-title brand-gradient-text">Configuración</h1>
+              <p className="app-page-subtitle mt-1">
                 Administra los datos y preferencias de tu negocio
               </p>
             </div>
