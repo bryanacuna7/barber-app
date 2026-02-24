@@ -1,9 +1,5 @@
-'use client'
-
 import { type LucideIcon } from 'lucide-react'
-import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { animations, reducedMotion } from '@/lib/design-system'
 
 interface StatsCardProps {
   title: string
@@ -65,7 +61,6 @@ export function StatsCard({
   variant = 'default',
   delay = 0,
 }: StatsCardProps) {
-  const prefersReducedMotion = useReducedMotion()
   const styles = variants[variant]
   const isGradient = styles.gradient
   const valueText = typeof value === 'number' ? value.toLocaleString('es-CR') : String(value)
@@ -73,19 +68,7 @@ export function StatsCard({
   const hasVeryLongValue = valueText.length >= 13
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={
-        prefersReducedMotion
-          ? { ...reducedMotion.spring.card, delay }
-          : { ...animations.spring.card, delay }
-      }
-      whileHover={
-        prefersReducedMotion
-          ? {}
-          : { y: -2, scale: 1.005, transition: { duration: animations.duration.fast } }
-      }
+    <div
       className={cn(
         'relative overflow-hidden rounded-2xl p-3.5 sm:p-5',
         'transition-all duration-300',
@@ -101,15 +84,8 @@ export function StatsCard({
           {/* Static sheen for desktop: keeps premium feel without motion noise */}
           <div className="pointer-events-none absolute inset-0 hidden lg:block bg-gradient-to-br from-white/[0.08] via-transparent to-transparent" />
           <div className="pointer-events-none absolute inset-x-5 top-0 hidden h-px bg-gradient-to-r from-transparent via-white/60 to-transparent lg:block" />
-          {/* Shine effect — mobile only */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-white/0 via-white/10 to-white/0 opacity-0 lg:hidden"
-            whileHover={prefersReducedMotion ? {} : { opacity: [0, 1, 0], x: ['-100%', '100%'] }}
-            transition={{
-              duration: animations.duration.slow * 2,
-              ease: animations.easing.easeInOut as [number, number, number, number],
-            }}
-          />
+          {/* Static shine — mobile only */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/0 via-white/5 to-white/0 lg:hidden" />
         </>
       )}
 
@@ -124,11 +100,7 @@ export function StatsCard({
             {title}
           </p>
 
-          <motion.p
-            key={String(value)}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={animations.spring.snappy}
+          <p
             className={cn(
               'mt-1.5 font-bold tracking-tight leading-[1.05] [overflow-wrap:anywhere]',
               hasVeryLongValue
@@ -140,7 +112,7 @@ export function StatsCard({
             )}
           >
             {value}
-          </motion.p>
+          </p>
 
           {description && (
             <p
@@ -187,34 +159,23 @@ export function StatsCard({
       {isGradient && (
         <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/10 lg:hidden" />
       )}
-    </motion.div>
+    </div>
   )
 }
 
 // Alternative compact stats for mobile
 export function StatsRow({ stats }: { stats: Array<{ label: string; value: string | number }> }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-around rounded-2xl bg-zinc-900 p-4 dark:bg-zinc-800"
-    >
+    <div className="flex items-center justify-around rounded-2xl bg-zinc-900 p-4 dark:bg-zinc-800">
       {stats.map((stat, i) => (
         <div key={stat.label} className="flex flex-col items-center">
           {i > 0 && (
             <div className="absolute left-0 top-1/2 h-8 w-px -translate-y-1/2 bg-zinc-700" />
           )}
           <span className="text-[11px] uppercase tracking-wide text-zinc-400">{stat.label}</span>
-          <motion.span
-            key={String(stat.value)}
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            className="mt-0.5 text-2xl font-bold text-white"
-          >
-            {stat.value}
-          </motion.span>
+          <span className="mt-0.5 text-2xl font-bold text-white">{stat.value}</span>
         </div>
       ))}
-    </motion.div>
+    </div>
   )
 }

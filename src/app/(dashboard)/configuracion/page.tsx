@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import {
   Building2,
   Clock,
@@ -16,9 +15,7 @@ import {
   Search,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { FadeInUp } from '@/components/ui/motion'
 import { SettingsSearchModal } from '@/components/settings/settings-search-modal'
-import { animations } from '@/lib/design-system'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 
 const SETTINGS_CARDS = [
@@ -28,7 +25,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Nombre, teléfono, dirección y enlace de reservas',
     icon: Building2,
     color: 'blue',
-    delay: 0.1,
   },
   {
     href: '/configuracion/horario',
@@ -36,7 +32,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Días y horas de operación, tiempos de buffer',
     icon: Clock,
     color: 'purple',
-    delay: 0.2,
   },
   {
     href: '/configuracion/branding',
@@ -44,7 +39,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Colores, logo y personalización visual',
     icon: Palette,
     color: 'pink',
-    delay: 0.3,
   },
   {
     href: '/configuracion/avanzado',
@@ -52,7 +46,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Notificaciones, lealtad y opciones avanzadas',
     icon: Settings,
     color: 'amber',
-    delay: 0.4,
   },
   {
     href: '/configuracion/equipo',
@@ -60,7 +53,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Qué pueden ver y hacer tus miembros del equipo',
     icon: Users,
     color: 'teal',
-    delay: 0.5,
   },
   {
     href: '/configuracion/pagos',
@@ -68,7 +60,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Qué métodos de pago aceptas en tu negocio',
     icon: Banknote,
     color: 'emerald',
-    delay: 0.6,
   },
   {
     href: '/configuracion/promociones',
@@ -76,7 +67,6 @@ const SETTINGS_CARDS = [
     subtitle: 'Descuentos en horarios de baja demanda para llenar tu agenda',
     icon: Tag,
     color: 'orange',
-    delay: 0.7,
   },
 ] as const
 
@@ -170,33 +160,34 @@ export default function ConfiguracionPage() {
     >
       <div className="min-h-screen pb-24 lg:pb-6">
         {/* Header */}
-        <FadeInUp>
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <h1 className="app-page-title">Configuración</h1>
-              <p className="app-page-subtitle mt-1 lg:hidden">
-                Administra los datos y preferencias de tu negocio
-              </p>
-            </div>
-            {/* Search Button with Cmd+K */}
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setSearchModalOpen(true)}
-              className="h-10 px-4"
-              aria-label="Buscar configuraciones"
-            >
-              <Search className="h-4 w-4" />
-              <span className="hidden sm:inline text-[13px]">Buscar</span>
-              <kbd className="hidden lg:inline px-1.5 py-0.5 rounded bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-[11px] font-mono text-zinc-500">
-                {typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Mac') !== -1
-                  ? '\u2318'
-                  : 'Ctrl'}
-                K
-              </kbd>
-            </Button>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="app-page-title">Configuración</h1>
+            <p className="app-page-subtitle mt-1 lg:hidden">
+              Administra los datos y preferencias de tu negocio
+            </p>
           </div>
-        </FadeInUp>
+          {/* Search Button with Cmd+K */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setSearchModalOpen(true)}
+            className="h-10 px-4"
+            aria-label="Buscar configuraciones"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline text-[13px]">Buscar</span>
+            <kbd
+              className="hidden lg:inline px-1.5 py-0.5 rounded bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-[11px] font-mono text-zinc-500"
+              suppressHydrationWarning
+            >
+              {typeof navigator !== 'undefined' && navigator.userAgent.indexOf('Mac') !== -1
+                ? '\u2318'
+                : 'Ctrl'}
+              K
+            </kbd>
+          </Button>
+        </div>
 
         {/* Navigation Cards Grid */}
         <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
@@ -206,12 +197,8 @@ export default function ConfiguracionPage() {
 
             return (
               <Link key={card.href} href={card.href} className="block">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: card.delay, ...animations.spring.gentle }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 ${colors.hoverBorder} transition-all shadow-sm hover:shadow-md text-left group`}
+                <div
+                  className={`w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 ${colors.hoverBorder} transition-all shadow-sm hover:shadow-md active:scale-[0.98] text-left group`}
                 >
                   <div className="flex items-start gap-4">
                     <div
@@ -229,7 +216,7 @@ export default function ConfiguracionPage() {
                       className={`h-5 w-5 text-zinc-400 dark:text-zinc-500 ${colors.arrowHover} transition-colors flex-shrink-0 mt-1`}
                     />
                   </div>
-                </motion.div>
+                </div>
               </Link>
             )
           })}

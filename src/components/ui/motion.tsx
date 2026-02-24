@@ -9,36 +9,17 @@ import { animations, reducedMotion } from '@/lib/design-system'
 export const springTransition = animations.spring.snappy
 export const gentleSpring = animations.spring.gentle
 
-// Fade In Up animation (for page content)
+// Fade In Up — renders instantly (no entrance animation to avoid SSR hydration flash)
 export function FadeInUp({
   children,
-  delay = 0,
+  delay: _delay = 0,
   className,
 }: {
   children: ReactNode
   delay?: number
   className?: string
 }) {
-  const prefersReducedMotion = useReducedMotion()
-
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: animations.duration.slow,
-        delay,
-        ease: animations.easing.easeOut as [number, number, number, number],
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
+  return <div className={className}>{children}</div>
 }
 
 // Staggered list animation
