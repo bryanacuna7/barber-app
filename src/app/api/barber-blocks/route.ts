@@ -65,7 +65,7 @@ export const POST = withAuthAndRateLimit(
         .single()
 
       if (!barber) {
-        return NextResponse.json({ error: 'Barbero no encontrado' }, { status: 404 })
+        return NextResponse.json({ error: 'Miembro del equipo no encontrado' }, { status: 404 })
       }
 
       // Validate start_time is not in the past (5 min tolerance)

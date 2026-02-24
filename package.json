@@ -43,8 +43,10 @@
     "test:all": "npm run test:security && npm run test:unit && npm run test:integration && npm run test:e2e",
     "deploy:preview": "bash scripts/deploy-with-push.sh",
     "deploy:prod": "bash scripts/deploy-with-push.sh --prod",
+    "docs:features": "node scripts/generate-feature-documentation.mjs",
+    "docs:features:check": "node scripts/generate-feature-documentation.mjs --check",
     "validate:changelog": "node scripts/validate-public-changelog.mjs",
-    "ci": "npm run validate:changelog && npm run format:check && npm run test:unit && npm run build:skip-ts",
+    "ci": "npm run validate:changelog && npm run docs:features:check && npm run format:check && npm run test:unit && npm run build:skip-ts",
     "ci:full": "npm run ci && npm run test:e2e",
     "ci:lint": "npm run lint",
     "ci:security": "npm run test:security"

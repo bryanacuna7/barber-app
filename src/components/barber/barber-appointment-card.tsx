@@ -172,7 +172,7 @@ export function BarberAppointmentCard({
 
     return buildArriveEarlyLink(nextAppointment.client.phone, {
       clientName: nextAppointment.client.name,
-      barberName: barberName || 'Tu barbero',
+      barberName: barberName || 'Tu miembro del equipo',
       businessName: businessName || 'Tu barbería',
       trackingUrl,
     })

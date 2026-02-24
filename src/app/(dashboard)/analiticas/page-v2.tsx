@@ -359,7 +359,7 @@ function AnalyticsContent() {
                 icon={<Users className="h-4 w-4" />}
                 className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
               >
-                Barberos
+                Equipo
               </TabsTrigger>
             </TabsList>
 

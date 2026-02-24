@@ -149,7 +149,7 @@ export async function canAddBarber(
   if (current >= max) {
     return {
       allowed: false,
-      reason: `Has alcanzado el límite de ${max} barberos en tu plan ${status.plan.display_name}. Actualiza a Pro para agregar más.`,
+      reason: `Has alcanzado el límite de ${max} miembros del equipo en tu plan ${status.plan.display_name}. Actualiza a Pro para agregar más.`,
       current,
       max,
     }

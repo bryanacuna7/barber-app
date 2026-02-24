@@ -16,7 +16,7 @@ export * from './services'
 // Clients domain (Clientes)
 export * from './clients'
 
-// Barbers domain (Barberos)
+// Barbers domain (Equipo)
 export * from './barbers'
 
 // Analytics domain (Reportes)

@@ -24,7 +24,7 @@ const SOURCE_MAP: Record<string, string> = {
   web_booking: 'Web',
   walk_in: 'Presencial',
   owner_created: 'Dueño',
-  barber_created: 'Barbero',
+  barber_created: 'Miembro del equipo',
 }
 
 const PAYMENT_METHOD_MAP: Record<string, string> = {
@@ -57,7 +57,7 @@ export const GET = withAuthAndRateLimit(
       'Fecha',
       'Cliente',
       'Servicio',
-      'Barbero',
+      'Miembro del equipo',
       'Estado',
       'Precio',
       'Método Pago',

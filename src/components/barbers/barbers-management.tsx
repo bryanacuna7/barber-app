@@ -90,13 +90,13 @@ export function BarbersManagement() {
           id: editingBarber.id,
           data: formData,
         })
-        toast.success('Barbero actualizado correctamente.')
+        toast.success('Miembro del equipo actualizado correctamente.')
       } else {
         await createBarber.mutateAsync({
           name: formData.name,
           phone: formData.email,
         })
-        toast.success('Barbero agregado correctamente.')
+        toast.success('Miembro del equipo agregado correctamente.')
       }
 
       resetForm()
@@ -110,7 +110,7 @@ export function BarbersManagement() {
 
     try {
       await deleteBarberMutation.mutateAsync(deleteBarber.id)
-      toast.success('El barbero ha sido removido del staff.')
+      toast.success('El miembro del equipo ha sido removido del staff.')
       setDeleteBarber(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar')
@@ -128,7 +128,7 @@ export function BarbersManagement() {
         data: { is_active: nextValue },
       })
     } catch {
-      toast.error('No pudimos actualizar el estado del barbero.')
+      toast.error('No pudimos actualizar el estado del miembro del equipo.')
     } finally {
       setTogglingIds((prev) => prev.filter((id) => id !== barber.id))
     }
@@ -161,7 +161,7 @@ export function BarbersManagement() {
               className="w-full sm:w-auto h-12 px-6 text-[15px] font-semibold"
             >
               <Plus className="mr-2 h-5 w-5" />
-              Agregar Barbero
+              Agregar Miembro del equipo
             </Button>
           </motion.div>
         </div>
@@ -171,7 +171,7 @@ export function BarbersManagement() {
       <Modal
         isOpen={showForm}
         onClose={resetForm}
-        title={editingBarber ? 'Editar Barbero' : 'Nuevo Barbero'}
+        title={editingBarber ? 'Editar Miembro del equipo' : 'Nuevo Miembro del equipo'}
       >
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
@@ -215,14 +215,14 @@ export function BarbersManagement() {
               isLoading={createBarber.isPending || updateBarber.isPending}
               className="h-11"
             >
-              {editingBarber ? 'Actualizar' : 'Agregar'} Barbero
+              {editingBarber ? 'Actualizar' : 'Agregar'} Miembro del equipo
             </Button>
           </div>
         </form>
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={!!deleteBarber} onClose={() => setDeleteBarber(null)} title="Eliminar Barbero">
+      <Modal isOpen={!!deleteBarber} onClose={() => setDeleteBarber(null)} title="Eliminar Miembro del equipo">
         <div className="space-y-5">
           <div className="flex items-start gap-4">
             <motion.div
@@ -276,7 +276,7 @@ export function BarbersManagement() {
                 <CardTitle className="text-[17px] font-semibold">Equipo</CardTitle>
                 {!loading && filteredBarbers.length > 0 && (
                   <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[13px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                    {filteredBarbers.length} {filteredBarbers.length === 1 ? 'barbero' : 'barberos'}
+                    {filteredBarbers.length} {filteredBarbers.length === 1 ? 'miembro del equipo' : 'miembros del equipo'}
                   </span>
                 )}
               </div>
@@ -328,12 +328,12 @@ export function BarbersManagement() {
                 </div>
                 <p className="mt-5 text-[17px] font-medium text-zinc-900 dark:text-white">
                   {statusFilter === 'inactive'
-                    ? 'No hay barberos inactivos'
-                    : 'Aún no tienes barberos'}
+                    ? 'No hay miembros del equipo inactivos'
+                    : 'Aún no tienes miembros del equipo'}
                 </p>
                 <p className="mt-1 text-[15px] text-zinc-500">
                   {statusFilter === 'inactive'
-                    ? 'Todos tus barberos están activos.'
+                    ? 'Todos tus miembros del equipo están activos.'
                     : 'Agrega a tu primer profesional para gestionar citas.'}
                 </p>
                 <motion.div
@@ -344,7 +344,7 @@ export function BarbersManagement() {
                   {statusFilter !== 'inactive' && (
                     <Button onClick={() => setShowForm(true)} className="h-11">
                       <Plus className="mr-2 h-4 w-4" />
-                      Agregar Barbero
+                      Agregar Miembro del equipo
                     </Button>
                   )}
                 </motion.div>

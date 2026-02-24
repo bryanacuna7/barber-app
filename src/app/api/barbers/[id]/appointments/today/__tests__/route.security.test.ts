@@ -84,7 +84,7 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
 
       expect(response.status).toBe(404)
       const body = await response.json()
-      expect(body.error).toBe('Barbero no encontrado')
+      expect(body.error).toBe('Miembro del equipo no encontrado')
       expect(body).not.toHaveProperty('appointments')
       expect(body).not.toHaveProperty('barber')
     })
@@ -120,7 +120,7 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
       const body = await response.json()
 
       // Should not reveal that barber exists in another business
-      expect(body.error).toBe('Barbero no encontrado')
+      expect(body.error).toBe('Miembro del equipo no encontrado')
       expect(body.error).not.toContain('otro negocio')
       expect(body.error).not.toContain('different business')
     })
@@ -588,7 +588,7 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
 
       expect(response.status).toBe(401)
       const body = await response.json()
-      expect(body.error).toBe('No tienes permiso para ver las citas de este barbero')
+      expect(body.error).toBe('No tienes permiso para ver las citas de este miembro del equipo')
 
       // Should log security event
       expect(logSecurity).toHaveBeenCalledWith(

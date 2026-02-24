@@ -2,10 +2,28 @@ import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { calculateAvailableSlots } from '@/lib/utils/availability'
 import { startOfDay, endOfDay } from 'date-fns'
-import { evaluatePromo, computeDiscountedPrice } from '@/lib/promo-engine'
+import { evaluatePromo } from '@/lib/promo-engine'
 import type { OperatingHours } from '@/types'
 import type { PromoRule } from '@/types/promo'
 import type { SlotDiscount, EnrichedTimeSlot } from '@/types/api'
+
+type BusinessAvailabilityConfig = {
+  id: string
+  operating_hours: unknown
+  booking_buffer_minutes: number | null
+  smart_duration_enabled?: boolean | null
+  promotional_slots?: unknown
+  timezone?: string | null
+}
+
+type SupabaseQueryError = {
+  code?: string
+} | null
+
+type BusinessQueryResult = {
+  data: BusinessAvailabilityConfig | null
+  error: SupabaseQueryError
+}
 
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -25,19 +43,47 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   const supabase = await createServiceClient()
 
-  // Get business with smart duration flag + promotional slots
-  // Note: smart_duration_enabled/promotional_slots added in migrations 033/034, using `as any`
-  const { data: business, error: businessError } = (await supabase
+  // Try full schema first, then fall back to legacy schema if optional columns are not present.
+  const baseBusinessSelect = 'id, operating_hours, booking_buffer_minutes'
+  const fullBusinessSelect = `${baseBusinessSelect}, smart_duration_enabled, promotional_slots, timezone`
+
+  const fullBusinessResult = (await supabase
     .from('businesses')
-    .select(
-      'id, operating_hours, booking_buffer_minutes, smart_duration_enabled, promotional_slots, timezone'
-    )
+    .select(fullBusinessSelect)
     .eq('slug', slug)
     .eq('is_active', true)
-    .single()) as any
+    .single()) as unknown as BusinessQueryResult
+
+  let business = fullBusinessResult.data
+  let businessError = fullBusinessResult.error
 
   if (businessError || !business) {
-    return NextResponse.json({ error: 'Business not found' }, { status: 404 })
+    const fallbackBusinessResult = (await supabase
+      .from('businesses')
+      .select(baseBusinessSelect)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()) as unknown as BusinessQueryResult
+
+    if (!fallbackBusinessResult.error && fallbackBusinessResult.data) {
+      business = {
+        ...fallbackBusinessResult.data,
+        smart_duration_enabled: false,
+        promotional_slots: [],
+        timezone: null,
+      }
+      businessError = null
+    } else {
+      businessError = fallbackBusinessResult.error || businessError
+    }
+  }
+
+  if (businessError || !business) {
+    const isNotFound = businessError?.code === 'PGRST116'
+    return NextResponse.json(
+      { error: isNotFound ? 'Business not found' : 'Failed to load business settings' },
+      { status: isNotFound ? 404 : 500 }
+    )
   }
 
   // Get service duration + price (price needed for promo evaluation)
@@ -49,12 +95,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     .single()
 
   if (serviceError || !service) {
-    return NextResponse.json({ error: 'Service not found' }, { status: 404 })
+    const isNotFound = serviceError?.code === 'PGRST116' || !service
+    return NextResponse.json(
+      { error: isNotFound ? 'Service not found' : 'Failed to load service' },
+      { status: isNotFound ? 404 : 500 }
+    )
   }
 
   // Smart duration: predict if enabled, otherwise use fixed service duration
   let serviceDuration = service.duration_minutes ?? 30
-  if ((business as any).smart_duration_enabled) {
+  if (business.smart_duration_enabled) {
     const { getPredictedDuration } = await import('@/lib/utils/duration-predictor')
     serviceDuration = await getPredictedDuration(
       business.id,

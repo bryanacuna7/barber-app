@@ -12,7 +12,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
   // Dynamic step labels based on barber count
   const stepLabels =
     barberCount > 1
-      ? ['Servicio', 'Barbero', 'Fecha y Hora', 'Tus Datos']
+      ? ['Servicio', 'Miembro del equipo', 'Fecha y Hora', 'Tus Datos']
       : ['Servicio', 'Fecha y Hora', 'Tus Datos']
 
   const stepKeys =

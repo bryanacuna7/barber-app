@@ -80,7 +80,7 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
             desc: 'Define cuándo está abierta tu barbería',
           },
           { icon: Scissors, title: 'Agrega tus servicios', desc: 'Cortes, afeitados y más' },
-          { icon: UserRound, title: 'Registra tus barberos', desc: 'Tu equipo en un solo lugar' },
+          { icon: UserRound, title: 'Registra tus miembros del equipo', desc: 'Tu equipo en un solo lugar' },
         ].map((feature, i) => (
           <motion.div
             key={i}

@@ -34,7 +34,7 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
     // Validation
     const newErrors: Record<string, string> = {}
     if (!barber.name.trim()) {
-      newErrors.name = 'El nombre del barbero es requerido'
+      newErrors.name = 'El nombre del miembro del equipo es requerido'
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -57,7 +57,7 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
           <User className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Tu Primer Barbero</h2>
+        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Tu Primer Miembro del equipo</h2>
         <p className="text-zinc-600 dark:text-zinc-400">Registra el primer miembro de tu equipo</p>
       </div>
 
@@ -140,8 +140,8 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
         {/* Info box */}
         <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-4 border border-blue-200 dark:border-blue-800">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            💡 <strong>Tip:</strong> Puedes agregar más barberos después desde la sección
-            &ldquo;Barberos&rdquo; en el menú.
+            💡 <strong>Tip:</strong> Puedes agregar más miembros del equipo después desde la sección
+            &ldquo;Equipo&rdquo; en el menú.
           </p>
         </div>
 

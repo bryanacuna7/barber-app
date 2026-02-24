@@ -22,7 +22,7 @@ export function PlanCard({
   const priceCRC = exchangeRate ? Math.round(plan.price_usd * exchangeRate.usd_to_crc) : null
   const features = [
     {
-      label: `${plan.max_barbers || 'Ilimitados'} barberos`,
+      label: `${plan.max_barbers || 'Ilimitados'} miembros del equipo`,
       included: true,
     },
     {

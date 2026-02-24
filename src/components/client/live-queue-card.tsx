@@ -207,7 +207,7 @@ export function LiveQueueCard({ appointment, businessId, businessSlug }: LiveQue
         scheduledAt={appointment.scheduled_at}
         policy={cancelPolicy!}
         serviceName={appointment.service?.name ?? 'Servicio'}
-        barberName={appointment.barber?.name ?? 'Barbero'}
+        barberName={appointment.barber?.name ?? 'Miembro del equipo'}
         businessSlug={businessSlug}
         onCancelled={handleCancelled}
       />
@@ -323,7 +323,7 @@ function CountdownPhase({
         <a href={whatsAppLink} target="_blank" rel="noopener noreferrer">
           <Button variant="outline" className="w-full h-11 gap-2">
             <MessageCircle className="h-4 w-4" />
-            Contactar barbero
+            Contactar miembro del equipo
           </Button>
         </a>
       )}
@@ -463,7 +463,7 @@ function YourTurnPhase({ appointment }: { appointment: ClientUpcomingAppointment
             Es tu turno
           </span>
           <p className="text-xs text-muted">
-            {appointment.barber?.name ?? 'Tu barbero'} te está atendiendo
+            {appointment.barber?.name ?? 'Tu miembro del equipo'} te está atendiendo
           </p>
         </div>
       </div>

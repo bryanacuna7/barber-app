@@ -93,7 +93,7 @@ export const GET = withAuth<RouteParams>(
         .single()
 
       if (barberError || !barber) {
-        return notFoundResponse('Barbero no encontrado')
+        return notFoundResponse('Miembro del equipo no encontrado')
       }
 
       // 2. IDOR PROTECTION: Verify authenticated user can access this barber's appointments
@@ -118,7 +118,7 @@ export const GET = withAuth<RouteParams>(
           businessId: business.id,
           endpoint: '/api/barbers/[id]/appointments/today',
         })
-        return unauthorizedResponse('No tienes permiso para ver las citas de este barbero')
+        return unauthorizedResponse('No tienes permiso para ver las citas de este miembro del equipo')
       }
 
       // 3. Get today's date range in business timezone (or UTC if not set)

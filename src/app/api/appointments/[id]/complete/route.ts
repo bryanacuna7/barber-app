@@ -295,7 +295,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
           .single()
 
         if (nextClient?.user_id) {
-          const barberName = (appointment.barber as any)?.name || 'Tu barbero'
+          const barberName = (appointment.barber as any)?.name || 'Tu miembro del equipo'
           const trackingPath = nextAppt.tracking_token
             ? `/track/${nextAppt.tracking_token}`
             : '/mi-cuenta'

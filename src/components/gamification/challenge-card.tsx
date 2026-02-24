@@ -196,12 +196,12 @@ export function ChallengeCard({
                   {/* Avatar & Name */}
                   <Avatar
                     src={participant.barber?.photo_url}
-                    alt={participant.barber?.name || 'Barbero'}
+                    alt={participant.barber?.name || 'Miembro del equipo'}
                     fallback={participant.barber?.name?.charAt(0) || 'B'}
                     size="sm"
                   />
                   <span className="flex-1 text-[15px] font-medium text-zinc-900 dark:text-zinc-100">
-                    {participant.barber?.name || 'Barbero'}
+                    {participant.barber?.name || 'Miembro del equipo'}
                   </span>
 
                   {/* Value */}

@@ -10,7 +10,7 @@
  * - Clientes Fusion (preview-fusion/page.tsx:453)
  * - Reportes Fusion (preview-fusion/page.tsx:123)
  * - Configuración Demo A (demo-a/page.tsx:96)
- * - Barberos Demo B (preview-b/page.tsx:169)
+ * - Equipo Demo B (preview-b/page.tsx:169)
  * - Citas Demo B Fusion (used in headers)
  *
  * @example

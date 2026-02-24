@@ -1,6 +1,6 @@
 /**
  * Barbers Query Hooks
- * Module: Barberos (Visual CRM Canvas)
+ * Module: Equipo (Visual CRM Canvas)
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -110,7 +110,7 @@ function useOnboardBarber(mode: OnboardMode) {
       })
       const json = await res.json()
       if (!res.ok) {
-        throw new Error(json.error || json.message || 'Error al invitar barbero')
+        throw new Error(json.error || json.message || 'Error al invitar miembro del equipo')
       }
       return json as OnboardResponse
     },

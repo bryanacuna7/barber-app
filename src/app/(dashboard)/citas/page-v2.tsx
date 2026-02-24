@@ -1509,11 +1509,11 @@ function CitasCalendarFusionContent() {
                 </button>
               </div>
 
-              {/* Barbero - hidden for barbers (auto-assigned) */}
+              {/* Miembro del equipo - hidden for barbers (auto-assigned) */}
               {!isBarber && (
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Barbero
+                    Miembro del equipo
                   </label>
                   <button
                     type="button"
@@ -1527,8 +1527,8 @@ function CitasCalendarFusionContent() {
                     >
                       {createForm.barber_id
                         ? barbers.find((b) => b.id === createForm.barber_id)?.name ||
-                          'Selecciona un barbero'
-                        : 'Selecciona un barbero'}
+                          'Selecciona un miembro del equipo'
+                        : 'Selecciona un miembro del equipo'}
                     </span>
                     <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
                   </button>
@@ -1621,7 +1621,7 @@ function CitasCalendarFusionContent() {
             <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
               {activePickerField === 'client' && 'Seleccionar Cliente'}
               {activePickerField === 'service' && 'Seleccionar Servicio'}
-              {activePickerField === 'barber' && 'Seleccionar Barbero'}
+              {activePickerField === 'barber' && 'Seleccionar Miembro del equipo'}
             </SheetTitle>
           </SheetHeader>
           <div className="mt-4 overflow-y-auto max-h-[calc(72vh-96px)] px-2 pb-4 pb-safe">

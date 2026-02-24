@@ -104,7 +104,7 @@ export const queryKeys = {
     timeline: (id: string) => [...queryKeys.clients.detail(id), 'timeline'] as const,
   },
 
-  // Barbers (Barberos)
+  // Barbers (Equipo)
   barbers: {
     all: ['barbers'] as const,
     lists: () => [...queryKeys.barbers.all, 'list'] as const,

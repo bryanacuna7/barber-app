@@ -1,5 +1,5 @@
 /**
- * Mock Data for Barberos Module Demos
+ * Mock Data for Equipo Module Demos
  *
  * Includes business intelligence, performance metrics, gamification,
  * and activity data for realistic team management demos.
@@ -112,7 +112,7 @@ export const mockBarbers: MockBarber[] = [
       xp: 8450,
       xp_to_next_level: 1550,
       badges: [
-        { id: 'master', name: 'Maestro Barbero', icon: 'Crown', earned_date: '2024-12-01' },
+        { id: 'master', name: 'Maestro Miembro del equipo', icon: 'Crown', earned_date: '2024-12-01' },
         { id: 'streak', name: 'Racha de 100 días', icon: 'Flame', earned_date: '2024-11-15' },
         { id: 'revenue', name: 'Súper Ventas', icon: 'TrendingUp', earned_date: '2024-10-20' },
       ],
@@ -301,7 +301,7 @@ export const mockBarbers: MockBarber[] = [
     name: 'Andrés Vargas',
     email: 'andres@barbershop.com',
     phone: '+506 8888-3456',
-    bio: 'Barbero versátil, especializado en estilos para jóvenes.',
+    bio: 'Miembro del equipo versátil, especializado en estilos para jóvenes.',
     photo_url: null,
     role: 'junior',
     is_active: true,
@@ -566,7 +566,7 @@ export const mockBarbers: MockBarber[] = [
     name: 'Ricardo Mora',
     email: 'ricardo@barbershop.com',
     phone: '+506 8888-4567',
-    bio: 'Barbero experimentado en técnicas de coloración y tratamientos.',
+    bio: 'Miembro del equipo experimentado en técnicas de coloración y tratamientos.',
     photo_url: null,
     role: 'senior',
     is_active: false,

@@ -36,7 +36,7 @@ export default function AppointmentReminderEmail({
   businessName = 'Tu Barbería',
   clientName = 'Cliente',
   serviceName = 'Corte de Cabello',
-  barberName = 'Barbero',
+  barberName = 'Miembro del equipo',
   appointmentDate,
   duration = 30,
   price = '₡5,000',
@@ -84,7 +84,7 @@ export default function AppointmentReminderEmail({
             <Text style={detailsLabel}>Servicio:</Text>
             <Text style={detailsValue}>{serviceName}</Text>
 
-            <Text style={detailsLabel}>Barbero:</Text>
+            <Text style={detailsLabel}>Miembro del equipo:</Text>
             <Text style={detailsValue}>{barberName}</Text>
 
             <Text style={detailsLabel}>Fecha y hora:</Text>
@@ -107,7 +107,7 @@ export default function AppointmentReminderEmail({
 
           <Text style={tip}>
             {isOneHour
-              ? '⚡ Si el barbero termina antes, te avisaremos para que puedas llegar temprano.'
+              ? '⚡ Si el miembro del equipo termina antes, te avisaremos para que puedas llegar temprano.'
               : '💡 El día de tu cita podrás seguir tu turno en tiempo real.'}
           </Text>
 

@@ -2,7 +2,7 @@
  * Barbers Domain Types
  *
  * Business logic types for team management and performance tracking.
- * Module: Barberos (Visual CRM Canvas)
+ * Module: Equipo (Visual CRM Canvas)
  */
 
 export type BarberRole = 'owner' | 'barber'

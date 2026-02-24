@@ -35,7 +35,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
     '/citas': 'Citas',
     '/clientes': 'Clientes',
     '/servicios': 'Servicios',
-    '/barberos': 'Barberos',
+    '/barberos': 'Equipo',
     '/barberos/logros': 'Logros',
     '/barberos/desafios': 'Desafíos',
     '/analiticas': 'Analíticas',
@@ -85,7 +85,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
     if (titleByExactPath[currentPath]) return titleByExactPath[currentPath]
 
     for (const [prefix, title] of [
-      ['/barberos/', 'Barberos'],
+      ['/barberos/', 'Equipo'],
       ['/clientes/', 'Clientes'],
       ['/citas/', 'Citas'],
       ['/servicios/', 'Servicios'],

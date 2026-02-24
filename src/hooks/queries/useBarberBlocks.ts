@@ -1,6 +1,6 @@
 /**
  * Barber Blocks Query Hooks
- * Module: Bloqueos de Barberos (breaks, vacation, personal time)
+ * Module: Bloqueos de Equipo (breaks, vacation, personal time)
  *
  * Table: barber_blocks (migration 038)
  * Note: Uses `as any` casts because barber_blocks is not yet in generated Supabase types.

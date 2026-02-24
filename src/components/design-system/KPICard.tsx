@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
  * - Analiticas Demo Fusion (lines 188-242, 537-586): Hero + Secondary
  * - Servicios Demo D (lines 468-540): Sidebar stats
  * - Mi Día Demo B (lines 699-724): Simple stat cards
- * - Barberos Demo B (lines 381-409): Mini stats grid
+ * - Equipo Demo B (lines 381-409): Mini stats grid
  *
  * @example
  * // Default variant
@@ -290,7 +290,7 @@ export function KPICard({
     )
   }
 
-  // Compact variant (from Servicios Demo D - lines 468-540, Barberos Demo B - lines 381-409)
+  // Compact variant (from Servicios Demo D - lines 468-540, Equipo Demo B - lines 381-409)
   if (variant === 'compact') {
     return (
       <motion.div

@@ -272,7 +272,7 @@ export default function SuscripcionPage() {
           <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <UsageCard
               icon={Users}
-              label="Barberos"
+              label="Equipo"
               current={subscription.usage.barbers.current}
               max={subscription.usage.barbers.max}
             />

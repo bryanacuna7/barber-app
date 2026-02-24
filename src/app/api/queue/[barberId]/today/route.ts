@@ -104,7 +104,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       .maybeSingle()
 
     if (!clientAppt) {
-      return NextResponse.json({ error: 'No tienes cita con este barbero hoy' }, { status: 403 })
+      return NextResponse.json({ error: 'No tienes cita con este miembro del equipo hoy' }, { status: 403 })
     }
 
     // 3. Fetch barber name
@@ -209,7 +209,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       : 0
 
     const response: QueueResponse = {
-      barberName: barber?.name ?? 'Barbero',
+      barberName: barber?.name ?? 'Miembro del equipo',
       date: now.toISOString().split('T')[0],
       yourAppointmentId,
       queue,

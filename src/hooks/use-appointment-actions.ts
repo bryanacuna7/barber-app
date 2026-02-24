@@ -44,7 +44,7 @@ export function useAppointmentActions({
     ): Promise<AppointmentStatusUpdateResponse | null> => {
       // Guard: Don't execute if barberId is not available
       if (!barberId) {
-        const error = new Error('ID de barbero no disponible')
+        const error = new Error('ID de miembro del equipo no disponible')
         setError(error)
         if (onError) {
           onError(action, error)

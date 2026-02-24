@@ -79,7 +79,7 @@ export default function NewAppointmentEmail({
 
             {barberName && (
               <>
-                <Text style={detailsLabel}>Barbero:</Text>
+                <Text style={detailsLabel}>Miembro del equipo:</Text>
                 <Text style={detailsValue}>{barberName}</Text>
               </>
             )}

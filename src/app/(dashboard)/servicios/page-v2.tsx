@@ -940,7 +940,7 @@ function ServiciosContent() {
                                       {service.name}
                                     </p>
                                     <p className="text-xs text-muted line-clamp-1">
-                                      {service.barber_names.length} barberos
+                                      {service.barber_names.length} miembros del equipo
                                     </p>
                                   </div>
                                 </div>

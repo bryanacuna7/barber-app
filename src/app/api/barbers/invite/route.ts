@@ -57,7 +57,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
 
   if (existingBarber) {
     return NextResponse.json(
-      { error: 'Ya existe un barbero con ese email en tu negocio' },
+      { error: 'Ya existe un miembro del equipo con ese email en tu negocio' },
       { status: 400 }
     )
   }
@@ -91,11 +91,11 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
         authUserId = existingUser.id
       } else {
         console.error('Auth user creation failed:', authError)
-        return errorResponse('No se pudo crear la cuenta del barbero', 500)
+        return errorResponse('No se pudo crear la cuenta del miembro del equipo', 500)
       }
     } else {
       console.error('Auth user creation failed:', authError)
-      return errorResponse('No se pudo crear la cuenta del barbero', 500)
+      return errorResponse('No se pudo crear la cuenta del miembro del equipo', 500)
     }
   } else {
     authUserId = authData.user.id
@@ -118,7 +118,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
   if (barberError) {
     console.error('Barber record creation failed:', barberError)
     return NextResponse.json(
-      { error: 'No se pudo crear el registro del barbero', details: barberError.message },
+      { error: 'No se pudo crear el registro del miembro del equipo', details: barberError.message },
       { status: 500 }
     )
   }
@@ -170,8 +170,8 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     to: email,
     subject:
       mode === 'add'
-        ? `${business.name || 'Tu Barbería'} te agregó como barbero`
-        : `${business.name || 'Tu Barbería'} te invitó como barbero`,
+        ? `${business.name || 'Tu Barbería'} te agregó como miembro del equipo`
+        : `${business.name || 'Tu Barbería'} te invitó como miembro del equipo`,
     react: BarberInviteEmail({
       businessName: business.name || 'Tu Barbería',
       barberName: name,
@@ -188,7 +188,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       mode,
       email_sent: false,
       warning:
-        'Barbero agregado, pero no pudimos enviar el correo. Pídele usar "Olvidé mi contraseña".',
+        'Miembro del equipo agregado, pero no pudimos enviar el correo. Pídele usar "Olvidé mi contraseña".',
     })
   }
 

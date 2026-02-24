@@ -16,7 +16,7 @@ export * from './services'
 // Clients adapter (Clientes)
 export * from './clients'
 
-// Barbers adapter (Barberos)
+// Barbers adapter (Equipo)
 export * from './barbers'
 
 // Analytics adapter (Reportes)

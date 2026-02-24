@@ -31,7 +31,7 @@ const tabs = [
     label: 'Analytics',
     icon: BarChart3,
     title: 'Reportes detallados',
-    description: 'Ingresos, servicios top, rendimiento de barberos',
+    description: 'Ingresos, servicios top, rendimiento de miembros del equipo',
   },
 ]
 

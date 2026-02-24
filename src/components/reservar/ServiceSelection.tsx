@@ -28,7 +28,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
       </div>
       {noBarbers && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200">
-          Esta barbería aún no tiene barberos configurados. Contacta al negocio para reservar.
+          Esta barbería aún no tiene miembros del equipo configurados. Contacta al negocio para reservar.
         </div>
       )}
 

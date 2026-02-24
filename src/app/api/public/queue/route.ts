@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
       : 0
 
     const response: PublicQueueResponse = {
-      barberName: barber?.name ?? 'Barbero',
+      barberName: barber?.name ?? 'Miembro del equipo',
       businessName: business?.name ?? 'Barbería',
       brandColor: business?.brand_primary_color ?? null,
       businessSlug: business?.slug ?? '',
@@ -235,7 +235,7 @@ export async function GET(request: NextRequest) {
       appointmentDetails: {
         scheduledAt: appointment.scheduled_at,
         serviceName: appointment.service?.name ?? 'Servicio',
-        barberName: barber?.name ?? 'Barbero',
+        barberName: barber?.name ?? 'Miembro del equipo',
         durationMinutes: appointment.duration_minutes ?? 30,
         status: appointment.status,
         startedAt: appointment.started_at,

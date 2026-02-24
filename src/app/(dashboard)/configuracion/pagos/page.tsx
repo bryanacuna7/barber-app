@@ -211,7 +211,7 @@ export default function PagosSettingsPage() {
                   ? 'Sin métodos activos: al completar una cita no se preguntará el método de pago.'
                   : activeCount === 1
                     ? 'Con 1 método activo: se seleccionará automáticamente al completar (2 taps).'
-                    : `Con ${activeCount} métodos activos: el barbero elige al completar la cita.`}
+                    : `Con ${activeCount} métodos activos: el miembro del equipo elige al completar la cita.`}
               </p>
             </div>
           </FadeInUp>

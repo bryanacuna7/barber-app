@@ -29,8 +29,8 @@ interface BarberInviteEmailProps {
 
 export default function BarberInviteEmail({
   businessName = 'Tu Barbería',
-  barberName = 'Barbero',
-  email = 'barbero@email.com',
+  barberName = 'Miembro del equipo',
+  email = 'miembro del equipo@email.com',
   setPasswordUrl,
   loginUrl = 'https://app.barberapp.com/login',
   mode = 'invite',
@@ -43,7 +43,7 @@ export default function BarberInviteEmail({
   return (
     <Html>
       <Head />
-      <Preview>{businessName} te ha invitado como barbero</Preview>
+      <Preview>{businessName} te ha invitado como miembro del equipo</Preview>
       <Body style={main}>
         <Container style={container}>
           {logoUrl && (
@@ -59,7 +59,7 @@ export default function BarberInviteEmail({
           </Text>
 
           <Text style={paragraph}>
-            Te agregaron como barbero en <strong>{businessName}</strong>. Usa este correo para
+            Te agregaron como miembro del equipo en <strong>{businessName}</strong>. Usa este correo para
             ingresar y configurar tu contraseña:
           </Text>
 

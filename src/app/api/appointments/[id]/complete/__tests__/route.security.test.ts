@@ -82,7 +82,7 @@ describe('Security Tests - PATCH /api/appointments/[id]/complete', () => {
 
       expect(response.status).toBe(401)
       const body = await response.json()
-      expect(body.error).toBe('Esta cita no pertenece a este barbero')
+      expect(body.error).toBe('Esta cita no pertenece a este miembro del equipo')
     })
 
     it('should allow business owner to complete any appointment', async () => {

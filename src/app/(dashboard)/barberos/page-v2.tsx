@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Barberos Page V2 - Team Management
+ * Equipo Page V2 - Team Management
  * Feature 0B: Owner can invite/manage barbers
  *
  * Real data from Supabase via React Query hooks.
@@ -96,7 +96,7 @@ export default function BarberosPage() {
         <div className="text-center space-y-3">
           <XCircle className="h-12 w-12 text-red-400 mx-auto" />
           <p className="text-lg font-semibold text-zinc-900 dark:text-white">
-            Error al cargar barberos
+            Error al cargar miembros del equipo
           </p>
           <p className="text-sm text-muted">{(error as Error).message}</p>
         </div>
@@ -113,7 +113,7 @@ export default function BarberosPage() {
             <div className="min-w-0">
               <h1 className="app-page-title brand-gradient-text">Equipo</h1>
               <p className="app-page-subtitle mt-1">
-                {activeCount} barbero{activeCount !== 1 ? 's' : ''} activo
+                {activeCount} miembro del equipo{activeCount !== 1 ? 's' : ''} activo
                 {activeCount !== 1 ? 's' : ''}
               </p>
             </div>
@@ -130,7 +130,7 @@ export default function BarberosPage() {
                 className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">Agregar Barbero</span>
+                <span className="hidden sm:inline">Agregar Miembro del equipo</span>
               </Button>
             </div>
           </div>
@@ -161,12 +161,12 @@ export default function BarberosPage() {
           >
             <UserRound className="h-12 w-12 text-zinc-300 dark:text-zinc-600 mx-auto" />
             <p className="text-lg font-semibold text-zinc-900 dark:text-white">
-              {searchQuery ? 'Sin resultados' : 'Sin barberos'}
+              {searchQuery ? 'Sin resultados' : 'Sin miembros del equipo'}
             </p>
             <p className="text-sm text-muted">
               {searchQuery
                 ? 'Intenta con otro término de búsqueda'
-                : 'Invita a tu primer barbero para empezar'}
+                : 'Invita a tu primer miembro del equipo para empezar'}
             </p>
             {!searchQuery && (
               <Button
@@ -175,7 +175,7 @@ export default function BarberosPage() {
                 className="mt-4 min-h-[44px]"
               >
                 <Plus className="h-5 w-5 mr-2" />
-                Agregar Barbero
+                Agregar Miembro del equipo
               </Button>
             )}
           </motion.div>
@@ -259,7 +259,7 @@ export default function BarberosPage() {
                 <thead>
                   <tr className="border-b border-zinc-200 dark:border-zinc-800/80">
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                      Barbero
+                      Miembro del equipo
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                       Email
@@ -328,7 +328,7 @@ export default function BarberosPage() {
                             Dueño
                           </span>
                         ) : (
-                          <span className="text-sm text-muted">Barbero</span>
+                          <span className="text-sm text-muted">Miembro del equipo</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -407,10 +407,10 @@ function InviteBarberModal({
 
       if (mode === 'add') {
         if (result.email_sent) {
-          toast.success(`Barbero agregado y correo enviado a ${email}`)
+          toast.success(`Miembro del equipo agregado y correo enviado a ${email}`)
         } else {
           toast.warning(
-            result.warning || 'Barbero agregado, pero no se pudo enviar el correo de acceso.'
+            result.warning || 'Miembro del equipo agregado, pero no se pudo enviar el correo de acceso.'
           )
         }
       } else {
@@ -423,7 +423,7 @@ function InviteBarberModal({
       onOpenChange(false)
       if (isMobileDevice()) haptics.success()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al invitar barbero'
+      const msg = err instanceof Error ? err.message : 'Error al invitar miembro del equipo'
       toast.error(msg)
     }
   }
@@ -439,7 +439,7 @@ function InviteBarberModal({
     <Modal
       isOpen={open}
       onClose={handleClose}
-      title={mode === 'add' ? 'Agregar Barbero' : 'Invitar Barbero'}
+      title={mode === 'add' ? 'Agregar Miembro del equipo' : 'Invitar Miembro del equipo'}
       description={
         mode === 'add'
           ? 'Crea su cuenta y envíale un enlace para establecer su contraseña.'
@@ -500,7 +500,7 @@ function InviteBarberModal({
             disabled={!name.trim() || !email.trim()}
             className="h-11"
           >
-            {mode === 'add' ? 'Agregar Barbero' : 'Enviar Invitación'}
+            {mode === 'add' ? 'Agregar Miembro del equipo' : 'Enviar Invitación'}
           </Button>
         </div>
       </form>
@@ -544,7 +544,7 @@ function BarberDetailModal({
       onOpenChange(false)
       if (isMobileDevice()) haptics.tap()
     } catch {
-      toast.error('Error al eliminar barbero')
+      toast.error('Error al eliminar miembro del equipo')
     }
   }
 
@@ -558,7 +558,7 @@ function BarberDetailModal({
       isOpen={open}
       onClose={handleClose}
       title={barber.name}
-      description={barber.role === 'owner' ? 'Dueño' : 'Barbero'}
+      description={barber.role === 'owner' ? 'Dueño' : 'Miembro del equipo'}
     >
       <div className="space-y-5">
         {/* Avatar + status */}
@@ -661,7 +661,7 @@ function BarberDetailModal({
                 className="w-full h-11 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Eliminar barbero
+                Eliminar miembro del equipo
               </Button>
             ) : (
               <motion.div

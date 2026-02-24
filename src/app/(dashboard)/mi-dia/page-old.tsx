@@ -63,14 +63,14 @@ export default function MiDiaPage() {
           .single()
 
         if (barberError || !barber) {
-          setAuthError('No se encontró el perfil de barbero')
+          setAuthError('No se encontró el perfil de miembro del equipo')
           setAuthLoading(false)
           return
         }
 
         // 3. Verify barber is active
         if (!barber.is_active) {
-          setAuthError('Tu cuenta de barbero está inactiva')
+          setAuthError('Tu cuenta de miembro del equipo está inactiva')
           setAuthLoading(false)
           return
         }

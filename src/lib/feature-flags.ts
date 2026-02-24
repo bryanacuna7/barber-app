@@ -26,7 +26,7 @@ export const featureFlags = {
   // Module 5: Configuración (Bento Grid Luxury)
   use_new_configuracion: process.env.NEXT_PUBLIC_FF_NEW_CONFIGURACION === 'true',
 
-  // Module 6: Barberos (Visual CRM Canvas)
+  // Module 6: Equipo (Visual CRM Canvas)
   use_new_barberos: process.env.NEXT_PUBLIC_FF_NEW_BARBEROS === 'true',
 
   // Module 7: Citas (Calendar Cinema + macOS)

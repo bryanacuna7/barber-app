@@ -50,7 +50,7 @@ export const tours: Record<string, TourDefinition> = {
         target: '[data-tour="sidebar"]',
         title: '🧭 Menú de Navegación',
         content:
-          'Usa el menú lateral para navegar entre Citas, Clientes, Servicios, Barberos, Analíticas y Configuración.',
+          'Usa el menú lateral para navegar entre Citas, Clientes, Servicios, Equipo, Analíticas y Configuración.',
         placement: 'right',
         spotlight: true,
         isLastStep: true,
@@ -85,7 +85,7 @@ export const tours: Record<string, TourDefinition> = {
         target: '[data-tour="appointments-new-button"]',
         title: '➕ Nueva Cita',
         content:
-          'Haz clic aquí para crear una nueva cita. Selecciona cliente, servicio, barbero, fecha y hora.',
+          'Haz clic aquí para crear una nueva cita. Selecciona cliente, servicio, miembro del equipo, fecha y hora.',
         placement: 'left',
         spotlight: true,
         isLastStep: true,

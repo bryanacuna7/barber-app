@@ -69,7 +69,7 @@ export default async function BarberosPage() {
             {/* Header */}
             <div>
               <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-                🏆 Logros de Barberos
+                🏆 Logros de Equipo
               </h1>
               <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
                 Desbloquea logros completando hitos y mejorando tu desempeño

@@ -146,7 +146,7 @@ export function Success({ onComplete, businessName }: SuccessProps) {
               { icon: Calendar, text: 'Crear y gestionar citas' },
               { icon: Users, text: 'Agregar más clientes' },
               { icon: Scissors, text: 'Configurar más servicios' },
-              { icon: UserRound, text: 'Invitar más barberos' },
+              { icon: UserRound, text: 'Invitar más miembros del equipo' },
               { icon: BarChart3, text: 'Ver estadísticas y analíticas' },
               { icon: Palette, text: 'Personalizar tu marca' },
             ].map((feature, i) => (

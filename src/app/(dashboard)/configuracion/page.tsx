@@ -57,7 +57,7 @@ const SETTINGS_CARDS = [
   {
     href: '/configuracion/equipo',
     title: 'Equipo y Accesos',
-    subtitle: 'Qué pueden ver y hacer tus barberos',
+    subtitle: 'Qué pueden ver y hacer tus miembros del equipo',
     icon: Users,
     color: 'teal',
     delay: 0.5,

@@ -120,7 +120,10 @@ const item = {
 
 export function FeaturesSection() {
   return (
-    <section className="border-t border-zinc-200 bg-white py-20 dark:border-zinc-800 dark:bg-zinc-900">
+    <section
+      id="features"
+      className="border-t border-zinc-200 bg-white py-20 dark:border-zinc-800 dark:bg-zinc-900"
+    >
       <div className="mx-auto max-w-7xl px-6">
         {/* Header */}
         <motion.div

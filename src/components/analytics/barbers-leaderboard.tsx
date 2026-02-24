@@ -45,7 +45,7 @@ export function BarbersLeaderboard({ data, period }: BarbersLeaderboardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-500" />
-            <CardTitle className="text-base lg:text-lg">Ranking de Barberos</CardTitle>
+            <CardTitle className="text-base lg:text-lg">Ranking de Equipo</CardTitle>
           </div>
           <div className="text-xs lg:text-sm text-muted">Por ingresos</div>
         </div>

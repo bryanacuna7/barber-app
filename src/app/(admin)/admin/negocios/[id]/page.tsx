@@ -208,7 +208,7 @@ export default function AdminBusinessDetailPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard icon={Users} label="Barberos" value={stats.totalBarbers} />
+        <StatCard icon={Users} label="Equipo" value={stats.totalBarbers} />
         <StatCard icon={Scissors} label="Servicios" value={stats.totalServices} />
         <StatCard icon={Calendar} label="Citas Totales" value={stats.totalAppointments} />
         <StatCard icon={CheckCircle2} label="Completadas" value={stats.completedAppointments} />
@@ -265,10 +265,10 @@ export default function AdminBusinessDetailPage() {
         {/* Barbers */}
         <Card>
           <CardHeader>
-            <CardTitle>Barberos ({barbers.length})</CardTitle>
+            <CardTitle>Equipo ({barbers.length})</CardTitle>
           </CardHeader>
           {barbers.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin barberos registrados</p>
+            <p className="text-sm text-zinc-500">Sin miembros del equipo registrados</p>
           ) : (
             <div className="space-y-2">
               {barbers.map((barber) => (

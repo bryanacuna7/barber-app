@@ -64,7 +64,7 @@ const ACTION_PERMISSIONS: PermissionToggle[] = [
   {
     key: 'can_view_all_citas',
     label: 'Ver todas las citas',
-    description: 'Ven citas de todos los barberos, no solo las suyas',
+    description: 'Ven citas de todos los miembros del equipo, no solo las suyas',
   },
 ]
 
@@ -146,7 +146,7 @@ export default function EquipoSettingsPage() {
         <FadeInUp>
           <SettingsSubrouteHeader
             title="Equipo y Accesos"
-            subtitle="Qué pueden ver y hacer tus barberos"
+            subtitle="Qué pueden ver y hacer tus miembros del equipo"
           />
         </FadeInUp>
 
@@ -155,7 +155,7 @@ export default function EquipoSettingsPage() {
           <FadeInUp delay={0.05}>
             <div>
               <h3 className="text-[15px] font-semibold text-muted uppercase tracking-wider mb-4">
-                Qué pueden ver tus barberos
+                Qué pueden ver tus miembros del equipo
               </h3>
               <div className="space-y-1">
                 {VIEW_PERMISSIONS.map((perm) => (
@@ -183,7 +183,7 @@ export default function EquipoSettingsPage() {
           <FadeInUp delay={0.1}>
             <div>
               <h3 className="text-[15px] font-semibold text-muted uppercase tracking-wider mb-4">
-                Qué pueden hacer tus barberos
+                Qué pueden hacer tus miembros del equipo
               </h3>
               <div className="space-y-1">
                 {ACTION_PERMISSIONS.map((perm) => (
@@ -211,7 +211,7 @@ export default function EquipoSettingsPage() {
           <FadeInUp delay={0.15}>
             <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/50 px-4 py-3">
               <p className="text-[13px] text-muted">
-                Estos permisos aplican a todos los barberos de tu negocio. Mi Día siempre está
+                Estos permisos aplican a todos los miembros del equipo de tu negocio. Mi Día siempre está
                 disponible para ellos.
               </p>
             </div>

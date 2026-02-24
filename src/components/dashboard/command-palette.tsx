@@ -85,10 +85,10 @@ const COMMANDS: Command[] = [
   },
   {
     id: 'nav-barberos',
-    label: 'Barberos',
+    label: 'Equipo',
     icon: UserRound,
     category: 'navigate',
-    keywords: ['barbero', 'equipo', 'staff', 'empleado'],
+    keywords: ['miembro del equipo', 'equipo', 'staff', 'empleado'],
     path: '/barberos',
     action: (r) => r.push('/barberos'),
   },
@@ -171,7 +171,7 @@ const COMMANDS: Command[] = [
   {
     id: 'nav-config-equipo',
     label: 'Equipo y Accesos',
-    description: 'Permisos de barberos',
+    description: 'Permisos de miembros del equipo',
     icon: UsersRound,
     category: 'settings',
     keywords: ['equipo', 'acceso', 'permiso', 'rol'],

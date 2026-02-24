@@ -473,7 +473,7 @@ export function getRoleDescription(role: Role): string {
   const descriptions: Record<Role, string> = {
     owner: 'Propietario del negocio con acceso completo',
     admin: 'Administrador del sistema con casi todos los permisos',
-    staff: 'Personal (barberos/estilistas) que ven sus propias citas',
+    staff: 'Personal (miembros del equipo/estilistas) que ven sus propias citas',
     recepcionista: 'Recepcionista que gestiona citas y clientes',
   }
   return descriptions[role] || ''

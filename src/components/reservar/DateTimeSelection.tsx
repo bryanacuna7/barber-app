@@ -32,6 +32,8 @@ export function DateTimeSelection({
   onSelectTime,
   onBack,
 }: DateTimeSelectionProps) {
+  const safeSlots = Array.isArray(slots) ? slots : []
+
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
       <button
@@ -40,7 +42,7 @@ export function DateTimeSelection({
         className="inline-flex items-center gap-1 text-[15px] font-medium text-blue-500 ios-press"
       >
         <ChevronLeft className="h-5 w-5 -ml-1" />
-        {barberCount > 1 ? 'Barbero' : 'Servicios'}
+        {barberCount > 1 ? 'Miembro del equipo' : 'Servicios'}
       </button>
 
       {/* Selected Service */}
@@ -149,7 +151,7 @@ export function DateTimeSelection({
             <div className="flex justify-center py-12" data-testid="slots-loading">
               <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-zinc-200 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white" />
             </div>
-          ) : slots.length === 0 ? (
+          ) : safeSlots.length === 0 ? (
             <div className="ios-card p-8 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
                 <Clock className="h-7 w-7 text-zinc-400" />
@@ -160,7 +162,7 @@ export function DateTimeSelection({
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
-              {slots.map((slot) => {
+              {safeSlots.map((slot) => {
                 const hasDiscount = slot.available && slot.discount
                 const isSelected = selectedTime?.datetime === slot.datetime
 

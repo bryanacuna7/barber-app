@@ -390,7 +390,7 @@ function MiDiaPageContent() {
 
   // Error state - Not a barber
   if (!barberId) {
-    return <EmptyState title="No eres un barbero" description="Esta página es solo para barberos" />
+    return <EmptyState title="No eres un miembro del equipo" description="Esta página es solo para miembros del equipo" />
   }
 
   // Success - Render with error boundaries
@@ -403,7 +403,7 @@ function MiDiaPageContent() {
           fallbackTitle="No se pudo cargar las estadísticas"
           fallbackDescription="Mostrando vista simplificada"
         >
-          <MiDiaHeader stats={data?.stats} barberName="Barbero" />
+          <MiDiaHeader stats={data?.stats} barberName="Miembro del equipo" />
         </ComponentErrorBoundary>
 
         {/* Level 3: Timeline section */}

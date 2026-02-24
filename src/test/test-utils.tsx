@@ -85,7 +85,7 @@ export function createMockAppointmentsResponse(
     appointments,
     barber: {
       id: 'barber-123',
-      name: 'Carlos Barbero',
+      name: 'Carlos Miembro del equipo',
     },
     date: '2024-01-15',
     stats: {

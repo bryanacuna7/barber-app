@@ -56,7 +56,7 @@ export default function TrialExpiringEmail({
           </Text>
 
           <Section style={listSection}>
-            <Text style={listItem}>• Máximo 2 barberos</Text>
+            <Text style={listItem}>• Máximo 2 miembros del equipo</Text>
             <Text style={listItem}>• Máximo 3 servicios</Text>
             <Text style={listItem}>• Máximo 25 clientes</Text>
             <Text style={listItem}>• Sin personalización de marca</Text>
@@ -76,7 +76,7 @@ export default function TrialExpiringEmail({
             <strong>Plan Pro</strong> - $29/mes (₡14,500 aprox):
           </Text>
           <Section style={listSection}>
-            <Text style={listItem}>✅ Barberos ilimitados</Text>
+            <Text style={listItem}>✅ Equipo ilimitados</Text>
             <Text style={listItem}>✅ Servicios ilimitados</Text>
             <Text style={listItem}>✅ Clientes ilimitados</Text>
             <Text style={listItem}>✅ Personalización completa de marca</Text>

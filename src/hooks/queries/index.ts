@@ -15,7 +15,7 @@ export * from './useServices'
 // Clients hooks (Clientes)
 export * from './useClients'
 
-// Barbers hooks (Barberos)
+// Barbers hooks (Equipo)
 export * from './useBarbers'
 
 // Analytics hooks (Reportes)

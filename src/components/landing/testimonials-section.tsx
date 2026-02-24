@@ -36,7 +36,7 @@ const testimonials = [
   },
   {
     name: 'Luis Morales',
-    role: 'Barbero',
+    role: 'Miembro del equipo',
     business: 'Kings Barbershop',
     location: 'Cartago',
     avatar: 'LM',

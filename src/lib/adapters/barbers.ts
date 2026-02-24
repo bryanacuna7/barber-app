@@ -1,10 +1,10 @@
 /**
  * Barbers Data Adapter
  *
- * Transforms Supabase barbers data to UI-friendly format for Barberos module.
+ * Transforms Supabase barbers data to UI-friendly format for Equipo module.
  * Handles staff performance metrics and gamification data.
  *
- * Module: Barberos (Visual CRM Canvas)
+ * Module: Equipo (Visual CRM Canvas)
  * Demo: preview-b
  */
 

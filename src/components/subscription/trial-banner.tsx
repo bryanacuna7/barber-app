@@ -244,7 +244,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
           <div className="flex-1 pr-6">
             <h3 className="font-semibold text-zinc-900 dark:text-white">Estás en el plan Básico</h3>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Actualiza a Pro para desbloquear barberos y servicios ilimitados, personalización de
+              Actualiza a Pro para desbloquear miembros del equipo y servicios ilimitados, personalización de
               marca y más.
             </p>
 
@@ -263,7 +263,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
         {/* Usage limits */}
         <div className="mt-4 grid grid-cols-3 gap-3 border-t border-zinc-200 pt-4 dark:border-zinc-700">
           <UsageItem
-            label="Barberos"
+            label="Equipo"
             current={subscription.usage.barbers.current}
             max={subscription.usage.barbers.max}
           />
