@@ -10,6 +10,7 @@ import type { BookingPricing } from '@/types/api'
 import { Button } from '@/components/ui/button'
 import { ClientAccountModal } from '@/components/loyalty/client-account-modal'
 import { AdvancePaymentSubmit } from '@/components/reservar/advance-payment-submit'
+import { PushNudgeBanner } from '@/components/client/push-nudge-banner'
 import { createClient } from '@/lib/supabase/client'
 
 interface BookingSuccessProps {
@@ -42,6 +43,14 @@ export function BookingSuccess({
   const [advancePaymentInfo, setAdvancePaymentInfo] = useState<AdvancePaymentInfo | null>(null)
   const [showAdvancePayment, setShowAdvancePayment] = useState(false)
   const [advancePaymentSubmitted, setAdvancePaymentSubmitted] = useState(false)
+
+  // Haptic feedback on success — Apple-style celebration tap
+  useEffect(() => {
+    if ('vibrate' in navigator) {
+      // Double-tap pattern: short-pause-short (like iOS success)
+      navigator.vibrate([10, 50, 10])
+    }
+  }, [])
 
   // Check if business has active loyalty program
   useEffect(() => {
@@ -159,6 +168,9 @@ export function BookingSuccess({
               <p className="mt-1 text-[17px] font-semibold text-zinc-900 dark:text-white">{time}</p>
             </div>
           </div>
+          {/* Push notification nudge — best moment to ask */}
+          <PushNudgeBanner variant="booking" />
+
           {business?.whatsapp && (
             <a
               href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}`}
@@ -293,7 +305,7 @@ export function BookingSuccess({
           </a>
 
           <p className="text-center text-[13px] text-muted">
-            Te enviaremos un recordatorio antes de tu cita.
+            Recibirás un recordatorio antes de tu cita
           </p>
         </div>
       </div>

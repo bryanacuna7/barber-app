@@ -949,6 +949,7 @@ function CitasCalendarFusionContent() {
                           <div className="px-4 py-3 text-sm text-muted">Sin citas programadas</div>
                         )}
 
+                        <AnimatePresence mode="popLayout">
                         {block.appointments.map((apt, aptIndex) => {
                           const canConfirm = apt.status === 'pending'
                           const canCancel = apt.status !== 'cancelled' && apt.status !== 'completed'
@@ -973,8 +974,11 @@ function CitasCalendarFusionContent() {
                           }
 
                           return (
-                            <div
+                            <motion.div
                               key={apt.id}
+                              layout
+                              exit={{ opacity: 0, x: -80, transition: { duration: 0.2 } }}
+                              transition={animations.spring.layout}
                               className={
                                 isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/80'
                               }
@@ -1074,9 +1078,10 @@ function CitasCalendarFusionContent() {
                                   </div>
                                 </div>
                               </motion.div>
-                            </div>
+                            </motion.div>
                           )
                         })}
+                        </AnimatePresence>
                       </div>
 
                       {/* Gap indicators (Cinema feature) */}

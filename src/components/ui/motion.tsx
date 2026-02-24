@@ -1,7 +1,7 @@
 'use client'
 
-import { motion, AnimatePresence, type Variants, useReducedMotion } from 'framer-motion'
-import { forwardRef, type ReactNode, type ComponentProps } from 'react'
+import { motion, AnimatePresence, type Variants, useReducedMotion, useSpring, useTransform } from 'framer-motion'
+import { forwardRef, useEffect, type ReactNode, type ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
 import { animations, reducedMotion } from '@/lib/design-system'
 
@@ -211,25 +211,29 @@ export function SlideInRight({ children, className }: { children: ReactNode; cla
   )
 }
 
-// Number counter animation
-export function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+// Spring number counter — animates value changes, renders instantly on first paint (no SSR flash)
+export function AnimatedNumber({
+  value,
+  className,
+  locale = 'es-CR',
+  prefix = '',
+}: {
+  value: number
+  className?: string
+  locale?: string
+  prefix?: string
+}) {
   const prefersReducedMotion = useReducedMotion()
-
-  if (prefersReducedMotion) {
-    return <span className={className}>{value}</span>
-  }
-
-  return (
-    <motion.span
-      key={value}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={animations.spring.snappy}
-      className={className}
-    >
-      {value}
-    </motion.span>
+  const spring = useSpring(value, prefersReducedMotion ? { duration: 0 } : animations.spring.gentle)
+  const display = useTransform(spring, (v) =>
+    prefix + Math.round(v).toLocaleString(locale)
   )
+
+  useEffect(() => {
+    spring.set(value)
+  }, [spring, value])
+
+  return <motion.span className={className}>{display}</motion.span>
 }
 
 // Success checkmark animation

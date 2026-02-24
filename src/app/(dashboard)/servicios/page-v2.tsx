@@ -10,7 +10,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence, useAnimationControls, useReducedMotion } from 'framer-motion'
 import {
   Plus,
   Search,
@@ -751,6 +751,7 @@ function ServiciosContent() {
                 animate={listTransitionControls}
                 className="lg:hidden space-y-3"
               >
+                <AnimatePresence mode="popLayout">
                 {sortedServices.map((service) => {
                   const categoryColor = getCategoryColor(service.category)
 
@@ -770,7 +771,13 @@ function ServiciosContent() {
                   ]
 
                   return (
-                    <SwipeableRow key={service.id} rightActions={rightActions}>
+                    <motion.div
+                      key={service.id}
+                      layout
+                      exit={{ opacity: 0, x: -100 }}
+                      transition={animations.spring.layout}
+                    >
+                    <SwipeableRow rightActions={rightActions}>
                       <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
                         {/* Row 1: Icon + Name */}
                         <div className="flex items-start justify-between">
@@ -816,15 +823,14 @@ function ServiciosContent() {
                         </div>
                       </div>
                     </SwipeableRow>
+                    </motion.div>
                   )
                 })}
+                </AnimatePresence>
               </motion.div>
 
               {/* Desktop Table View */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...animations.spring.default, delay: 0.2 }}
+              <div
                 className="hidden lg:block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
               >
                 <div className="relative">
@@ -1034,7 +1040,7 @@ function ServiciosContent() {
                     </p>
                   </div>
                 )}
-              </motion.div>
+              </div>
 
               {/* Results count */}
               <motion.p

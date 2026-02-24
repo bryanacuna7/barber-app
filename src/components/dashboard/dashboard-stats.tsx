@@ -26,7 +26,6 @@ export function DashboardStats({
         icon={Calendar}
         description="programadas"
         variant="info"
-        delay={0}
       />
       <StatsCard
         title="Ingresos Hoy"
@@ -34,21 +33,18 @@ export function DashboardStats({
         icon={Banknote}
         description="generados"
         variant="success"
-        delay={0.05}
       />
       <StatsCard
         title="Ingresos Mes"
         value={monthRevenue}
         icon={Banknote}
         description={`${monthAppointments} citas`}
-        delay={0.1}
       />
       <StatsCard
         title="Clientes"
         value={totalClients}
         icon={Users}
         description="registrados"
-        delay={0.15}
       />
     </div>
   )

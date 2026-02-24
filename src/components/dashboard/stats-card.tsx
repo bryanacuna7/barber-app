@@ -1,5 +1,8 @@
+'use client'
+
 import { type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AnimatedNumber } from '@/components/ui/motion'
 
 interface StatsCardProps {
   title: string
@@ -11,7 +14,6 @@ interface StatsCardProps {
     isPositive: boolean
   }
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'info'
-  delay?: number
 }
 
 const variants = {
@@ -59,7 +61,6 @@ export function StatsCard({
   description,
   trend,
   variant = 'default',
-  delay = 0,
 }: StatsCardProps) {
   const styles = variants[variant]
   const isGradient = styles.gradient
@@ -111,7 +112,11 @@ export function StatsCard({
               isGradient ? 'text-white' : 'text-zinc-900 dark:text-white'
             )}
           >
-            {value}
+            {typeof value === 'number' ? (
+              <AnimatedNumber value={value} />
+            ) : (
+              value
+            )}
           </p>
 
           {description && (

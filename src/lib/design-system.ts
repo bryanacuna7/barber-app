@@ -124,6 +124,8 @@ export const animations = {
     card: { type: 'spring', stiffness: 400, damping: 17 },
     swipeClose: { type: 'spring', stiffness: 560, damping: 42, mass: 0.58 },
     swipeOpen: { type: 'spring', stiffness: 500, damping: 38, mass: 0.58 },
+    layout: { type: 'spring', stiffness: 500, damping: 35 },
+    indicator: { type: 'spring', stiffness: 500, damping: 30 },
   },
 
   // Durations
@@ -171,5 +173,7 @@ export const reducedMotion = {
     card: { duration: 0.01 },
     swipeClose: { duration: 0.05 },
     swipeOpen: { duration: 0.05 },
+    layout: { duration: 0.01 },
+    indicator: { duration: 0.01 },
   },
 } as const

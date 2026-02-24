@@ -1,12 +1,15 @@
 'use client'
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useId, useState, type ReactNode } from 'react'
+import { motion, useReducedMotion, LayoutGroup } from 'framer-motion'
 import { cn } from '@/lib/utils/cn'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 // Context
 interface TabsContextValue {
   activeTab: string
   setActiveTab: (value: string) => void
+  layoutId: string
 }
 
 const TabsContext = createContext<TabsContextValue | null>(null)
@@ -30,6 +33,7 @@ interface TabsProps {
 
 export function Tabs({ defaultValue = '', value, onValueChange, children, className }: TabsProps) {
   const [internalValue, setInternalValue] = useState(value ?? defaultValue)
+  const layoutId = useId()
 
   const activeTab = value ?? internalValue
   const setActiveTab = (newValue: string) => {
@@ -40,8 +44,10 @@ export function Tabs({ defaultValue = '', value, onValueChange, children, classN
   }
 
   return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab }}>
-      <div className={className}>{children}</div>
+    <TabsContext.Provider value={{ activeTab, setActiveTab, layoutId }}>
+      <LayoutGroup id={layoutId}>
+        <div className={className}>{children}</div>
+      </LayoutGroup>
     </TabsContext.Provider>
   )
 }
@@ -83,8 +89,9 @@ export function TabsTrigger({
   className,
   icon,
 }: TabsTriggerProps) {
-  const { activeTab, setActiveTab } = useTabsContext()
+  const { activeTab, setActiveTab, layoutId } = useTabsContext()
   const isActive = activeTab === value
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <button
@@ -97,18 +104,29 @@ export function TabsTrigger({
       onClick={() => setActiveTab(value)}
       className={cn(
         'relative px-4 py-2 text-sm font-medium rounded-lg',
-        'transition-all duration-200 ease-out',
+        'transition-colors duration-200 ease-out',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'flex items-center gap-2',
         isActive
-          ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm'
-          : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800',
+          ? 'text-zinc-900 dark:text-zinc-100'
+          : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100',
         className
       )}
     >
-      {icon}
-      {children}
+      {isActive && (
+        <motion.span
+          layoutId={`tab-indicator-${layoutId}`}
+          className="absolute inset-0 bg-white dark:bg-zinc-900 rounded-lg shadow-sm"
+          transition={
+            prefersReducedMotion ? reducedMotion.spring.indicator : animations.spring.indicator
+          }
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-2">
+        {icon}
+        {children}
+      </span>
     </button>
   )
 }
