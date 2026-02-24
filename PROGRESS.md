@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-24 (Session 184 — Full Pending Plan Implementation)
+- **Last Updated:** 2026-02-24 (Session 185 — UX Polish + Deploy v0.9.8)
 - **Branch:** `feature/ui-ux-redesign`
-- **Version:** `0.9.7` (LIVE on production)
+- **Version:** `0.9.8`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -62,16 +62,32 @@
 
 ---
 
-## Paused (resume after customer discovery)
+## UX Polish (all complete)
 
 - [x] Charts mobile-first redesign (Gate E: DONE — Session 184)
-- [ ] Copy UX Spanish consistency (Gate F: PENDING)
-- [ ] Card padre / double inset removal
-- [ ] Header CTA Contract consistency
+- [x] Copy UX Spanish consistency (Gate F: DONE — Session 185)
+- [x] Card padre / double inset removal (DONE — Session 185)
+- [x] Header CTA Contract consistency (DONE — Session 185)
 
 ---
 
 ## Recent Sessions
+
+### Session 185: UX Polish + Deploy v0.9.8 (2026-02-24)
+
+**Status:** COMPLETE. All UX polish gates resolved, deployed as v0.9.8.
+
+**What was done:**
+
+- **Gate F (Spanish Copy):** "Email" → "Correo" in booking form and notification preferences (3 labels)
+- **Header CTA Contract:** Standardized 4 deviant pages (Configuración, Changelog, Suscripción, Lealtad) to use `app-page-title` + `brand-gradient-text`
+- **Card Padre:** Removed double border/inset in loyalty-preview.tsx and client-status-card.tsx
+- **Root Cleanup:** Archived AUDIT.md, P1_DYNAMIC_DURATION_SCHEDULING_PLAN.md, PLAN_CUSTOMER_DISCOVERY.md to docs/archive/2026-02/
+- **Deploy:** Version bumped to v0.9.8 with CHANGELOG + RELEASE_NOTES
+
+**Commits:** `9b33ba8` (session 184 features), `5107d43` (UX polish), release commit
+
+---
 
 ### Session 184: Full Pending Plan Implementation (2026-02-24)
 
@@ -225,11 +241,12 @@
 
 ### Working
 
-- v0.9.7 LIVE (SINPE Advance Payment + Cancel/Reschedule + Payment docs)
+- v0.9.8 (Session 184+185: security, orchestrator, blocks, permissions, exports, UX polish)
+- All UX polish gates complete (E + F + card hierarchy + header CTA)
 - Brand tokens, `text-muted`, `<Button>` component migrated
 - Charts theme-aware, PWA native, gestures hardened
 
 ### Next Steps
 
 1. **Customer Discovery Phase** — Next feature TBD
-2. **UX Polish (paused)** — Button migration, charts mobile-first, card hierarchy, Spanish copy
+2. **Button migration** (~30 remaining raw buttons across dashboard pages)

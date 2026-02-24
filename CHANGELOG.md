@@ -4,6 +4,32 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.8] - 2026-02-24
+
+### Nuevo
+
+- Bloqueos de agenda: los barberos pueden marcar descansos, vacaciones y tiempo personal que se excluyen automaticamente de los horarios disponibles
+- Permisos por barbero: el dueno puede configurar que secciones del dashboard ve cada barbero de forma individual
+- Exportar CSV: descarga la lista de clientes o el historial de citas en formato CSV desde el dashboard
+- Checklist de bienvenida: los barberos nuevos ven una guia de 3 pasos (foto, horario, notificaciones) al entrar por primera vez
+- Registro de notificaciones: el dueno puede ver un historial de todas las notificaciones enviadas
+
+### Mejorado
+
+- Encabezados del dashboard unificados con estilo consistente en todas las paginas
+- Graficas adaptadas a movil: altura responsive y tooltips tactiles
+- "Email" cambiado a "Correo" en formularios para mantener todo en espanol
+- Tarjetas de lealtad simplificadas: se elimino doble borde visual
+- Mapa de demanda con scroll horizontal en pantallas pequenas
+
+### Seguridad
+
+- Corregido un problema de seguridad importante en la creacion de cuentas de clientes: ahora usa un token seguro de un solo uso
+- Las notificaciones pasan por un orquestador central con deduplicacion y registro de auditoria
+- Permisos de barbero protegidos contra auto-escalacion: un barbero no puede darse permisos de owner
+
+---
+
 ## [0.9.7] - 2026-02-23
 
 ### Nuevo

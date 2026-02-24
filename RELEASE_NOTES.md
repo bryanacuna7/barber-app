@@ -8,21 +8,25 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.7
+## v0.9.8
 
 ### Nuevo
 
-- Pago anticipado con SINPE: ofrece un descuento a clientes que pagan antes de la cita. El cliente envia su comprobante por WhatsApp o lo sube directo en la app
-- Verificacion de pagos: cuando un cliente envia su comprobante, te aparece un badge "Pago pendiente" en la cita. Tocalo para ver el comprobante y aprobarlo o rechazarlo
-- Configuracion en Pagos: activa el pago anticipado, ingresa tu numero SINPE, nombre del titular, el porcentaje de descuento que queres dar y el plazo limite
+- Bloqueos de agenda: marca descansos, vacaciones o tiempo personal y esos horarios desaparecen automaticamente de la pagina de reservas
+- Permisos por barbero: configura que secciones del dashboard puede ver cada barbero de forma individual
+- Exportar CSV: descarga tu lista de clientes o historial de citas en un archivo para Excel
+- Checklist de bienvenida para barberos nuevos: foto de perfil, horario y notificaciones push en 3 pasos faciles
+- Historial de notificaciones: ve que notificaciones se enviaron, a quien y si llegaron correctamente
 
 ### Mejoras
 
-- Despues de reservar, el cliente ve una invitacion a pagar por adelantado con el monto y descuento calculado
-- Los precios se congelan al momento del pago para que no haya sorpresas si despues cambias tarifas
-- Los comprobantes se eliminan automaticamente 30 dias despues de ser revisados para no ocupar espacio
+- Encabezados del dashboard con estilo unificado en todas las paginas
+- Las graficas se ven mejor en celular: mas compactas y con tooltips que se pueden tocar
+- Formularios ahora dicen "Correo" en vez de "Email" para mantener todo en espanol
+- Las tarjetas del programa de lealtad se ven mas limpias (sin bordes duplicados)
 
 ### Seguridad
 
-- Los comprobantes son privados: solo vos y tus barberos pueden verlos
-- Solo se aceptan imagenes de hasta 5MB
+- Corregido un problema de seguridad importante en la creacion de cuentas de clientes
+- Las notificaciones ahora pasan por un sistema central que evita envios duplicados
+- Los barberos no pueden darse permisos de administrador a si mismos
