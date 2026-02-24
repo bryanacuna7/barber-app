@@ -29,6 +29,8 @@ interface UsePushSubscriptionReturn {
   unsubscribe: () => Promise<boolean>
   /** Loading state during subscribe/unsubscribe */
   loading: boolean
+  /** Last error message for debugging */
+  error: string | null
 }
 
 function checkPushSupport(): boolean {
@@ -47,6 +49,7 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
   )
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Check existing subscription on mount
   useEffect(() => {
@@ -63,48 +66,73 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
     if (!isSupported) return false
 
     setLoading(true)
+    setError(null)
     try {
-      // 1. Request notification permission
+      // Step 1: Request notification permission
       const perm = await Notification.requestPermission()
       setPermission(perm)
 
       if (perm !== 'granted') {
+        setError(`Permiso denegado: ${perm}`)
         setLoading(false)
         return false
       }
 
-      // 2. Get SW registration
-      const registration = await navigator.serviceWorker.ready
+      // Step 2: Get SW registration
+      let registration: ServiceWorkerRegistration
+      try {
+        registration = await navigator.serviceWorker.ready
+      } catch (swErr: any) {
+        setError(`Service Worker no disponible: ${swErr?.message || swErr}`)
+        setLoading(false)
+        return false
+      }
 
-      // 3. Subscribe to push
+      // Step 3: Subscribe to push via PushManager
       const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
       if (!vapidKey) {
-        console.error('VAPID public key not configured')
+        setError('VAPID key no configurada')
         setLoading(false)
         return false
       }
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
-      })
+      let subscription: PushSubscription
+      try {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidKey) as BufferSource,
+        })
+      } catch (pushErr: any) {
+        setError(`PushManager.subscribe falló: ${pushErr?.message || pushErr}`)
+        setLoading(false)
+        return false
+      }
 
-      // 4. Send subscription to server
+      // Step 4: Send subscription to server
       const subJson = subscription.toJSON()
-      const res = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: subJson.endpoint,
-          keys: {
-            p256dh: subJson.keys?.p256dh,
-            auth: subJson.keys?.auth,
-          },
-        }),
-      })
+      let res: Response
+      try {
+        res = await fetch('/api/push/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            endpoint: subJson.endpoint,
+            keys: {
+              p256dh: subJson.keys?.p256dh,
+              auth: subJson.keys?.auth,
+            },
+          }),
+        })
+      } catch (fetchErr: any) {
+        setError(`Error de red al guardar: ${fetchErr?.message || fetchErr}`)
+        await subscription.unsubscribe()
+        setLoading(false)
+        return false
+      }
 
       if (!res.ok) {
-        // Server failed to save — unsubscribe from browser too
+        const body = await res.text().catch(() => '')
+        setError(`Servidor respondió ${res.status}: ${body}`)
         await subscription.unsubscribe()
         setLoading(false)
         return false
@@ -113,7 +141,9 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
       setIsSubscribed(true)
       setLoading(false)
       return true
-    } catch (err) {
+    } catch (err: any) {
+      const msg = err?.message || String(err)
+      setError(`Error inesperado: ${msg}`)
       console.error('Push subscribe error:', err)
       setLoading(false)
       return false
@@ -163,5 +193,6 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
     subscribe,
     unsubscribe,
     loading,
+    error,
   }
 }

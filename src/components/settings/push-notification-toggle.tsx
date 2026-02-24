@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/toast'
  * Handles: unsupported browser, permission denied, subscribe/unsubscribe flow.
  */
 export function PushNotificationToggle() {
-  const { isSupported, permission, isSubscribed, subscribe, unsubscribe, loading } =
+  const { isSupported, permission, isSubscribed, subscribe, unsubscribe, loading, error } =
     usePushSubscription()
   const toast = useToast()
 
@@ -78,21 +78,28 @@ export function PushNotificationToggle() {
 
   // Normal state (default or granted)
   return (
-    <div className="flex items-center justify-between py-3.5 px-1">
-      <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/30">
-          <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+    <div>
+      <div className="flex items-center justify-between py-3.5 px-1">
+        <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+            <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <p className="text-[16px] font-medium text-zinc-900 dark:text-white">
+              Notificaciones Push
+            </p>
+            <p className="text-[13px] text-muted">
+              {isSubscribed ? 'Recibes alertas instantáneas' : 'Recibe alertas de citas al instante'}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-[16px] font-medium text-zinc-900 dark:text-white">
-            Notificaciones Push
-          </p>
-          <p className="text-[13px] text-muted">
-            {isSubscribed ? 'Recibes alertas instantáneas' : 'Recibe alertas de citas al instante'}
-          </p>
-        </div>
+        <IOSToggle checked={isSubscribed} onChange={handleToggle} disabled={loading} />
       </div>
-      <IOSToggle checked={isSubscribed} onChange={handleToggle} disabled={loading} />
+      {error && (
+        <p className="text-[12px] text-red-500 dark:text-red-400 px-1 mt-1 break-words">
+          {error}
+        </p>
+      )}
     </div>
   )
 }
