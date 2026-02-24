@@ -18,24 +18,42 @@ export default async function BarberChallengesPage() {
     redirect('/login')
   }
 
-  // Get user's business
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('*')
-    .eq('owner_id', user.id)
-    .single()
+  // Get user's business — try owner first, then barber
+  let businessId: string | null = null
+  let barberId: string | null = null
 
-  if (!business) {
-    redirect('/dashboard')
+  const { data: ownedBusiness } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('owner_id', user.id)
+    .maybeSingle()
+
+  if (ownedBusiness) {
+    businessId = ownedBusiness.id
+    const { data: barber } = await supabase
+      .from('barbers')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('business_id', businessId)
+      .maybeSingle()
+    barberId = barber?.id ?? null
+  } else {
+    const { data: barberRecord } = await supabase
+      .from('barbers')
+      .select('id, business_id')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (barberRecord) {
+      businessId = barberRecord.business_id
+      barberId = barberRecord.id
+    }
   }
 
-  // Get barber (if user is a barber)
-  const { data: barber } = await supabase
-    .from('barbers')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('business_id', business.id)
-    .single()
+  if (!businessId) {
+    redirect('/dashboard')
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -50,7 +68,7 @@ export default async function BarberChallengesPage() {
       </div>
 
       {/* Challenges View */}
-      <ChallengesView businessId={business.id} barberId={barber?.id} />
+      <ChallengesView businessId={businessId} barberId={barberId} />
     </div>
   )
 }

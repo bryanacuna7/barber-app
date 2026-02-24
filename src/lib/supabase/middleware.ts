@@ -70,7 +70,10 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    // Respect explicit redirect param (e.g., ?redirect=/mi-cuenta for client users)
+    const redirectTo = request.nextUrl.searchParams.get('redirect')
+    url.pathname = redirectTo || '/dashboard'
+    url.searchParams.delete('redirect')
     return NextResponse.redirect(url)
   }
 

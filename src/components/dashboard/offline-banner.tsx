@@ -14,21 +14,27 @@ import { useToast } from '@/components/ui/toast'
 export function OfflineBanner() {
   const { isOnline, wasOffline } = useOnlineStatus()
   const toast = useToast()
+  const toastRef = useRef(toast)
   const hasNotifiedOffline = useRef(false)
   const hasNotifiedOnline = useRef(false)
 
+  // Keep toast ref in sync (must be in useEffect, not render)
+  useEffect(() => {
+    toastRef.current = toast
+  }, [toast])
+
   useEffect(() => {
     if (!isOnline && !hasNotifiedOffline.current) {
-      toast.warning('Sin conexión a internet')
+      toastRef.current.warning('Sin conexión a internet')
       hasNotifiedOffline.current = true
       hasNotifiedOnline.current = false
     }
     if (isOnline && wasOffline && !hasNotifiedOnline.current && hasNotifiedOffline.current) {
-      toast.info('Conexión restaurada')
+      toastRef.current.info('Conexión restaurada')
       hasNotifiedOnline.current = true
       hasNotifiedOffline.current = false
     }
-  }, [isOnline, wasOffline, toast])
+  }, [isOnline, wasOffline])
 
   return (
     <AnimatePresence>

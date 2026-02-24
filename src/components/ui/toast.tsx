@@ -1,6 +1,14 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode, useEffect } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  type ReactNode,
+  useEffect,
+} from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -27,10 +35,24 @@ interface ToastContextValue {
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
+const noop = () => {}
+const serverToastFallback: ToastContextValue = {
+  toasts: [],
+  addToast: noop,
+  removeToast: noop,
+  success: noop,
+  error: noop,
+  warning: noop,
+  info: noop,
+}
 
 export function useToast() {
   const context = useContext(ToastContext)
   if (!context) {
+    // In RSC/SSR pre-render, client context can be unavailable; avoid crashing and hydrate on client.
+    if (typeof window === 'undefined') {
+      return serverToastFallback
+    }
     throw new Error('useToast must be used within a ToastProvider')
   }
   return context
@@ -67,8 +89,13 @@ export function ToastProvider({ children }: ToastProviderProps) {
   const warning = useCallback((message: string) => addToast(message, 'warning'), [addToast])
   const info = useCallback((message: string) => addToast(message, 'info'), [addToast])
 
+  const value = useMemo(
+    () => ({ toasts, addToast, removeToast, success, error, warning, info }),
+    [toasts, addToast, removeToast, success, error, warning, info]
+  )
+
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, warning, info }}>
+    <ToastContext.Provider value={value}>
       {children}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>

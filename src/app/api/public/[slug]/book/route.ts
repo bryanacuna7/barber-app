@@ -11,15 +11,20 @@ import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 import type { PromoRule } from '@/types/promo'
 import type { BookingPricing } from '@/types/api'
 
+// UUID pattern that accepts any UUID-formatted string (not just RFC 4122)
+// This allows seed data UUIDs like aaaaaaaa-0001-0001-0001-000000000001
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 const bookingSchema = z.object({
-  service_id: z.string().uuid(),
-  barber_id: z.string().uuid(),
+  service_id: z.string().regex(uuidPattern, 'Invalid UUID'),
+  barber_id: z.string().regex(uuidPattern, 'Invalid UUID'),
   scheduled_at: z.string().datetime(),
   client_name: z.string().min(2),
   client_phone: z.string().min(8),
   client_email: z.string().email().optional(),
   notes: z.string().optional(),
-  promo_rule_id: z.string().uuid().optional(),
+  promo_rule_id: z.string().regex(uuidPattern, 'Invalid UUID').optional(),
+  smart_token: z.string().regex(uuidPattern, 'Invalid UUID').optional(),
 })
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -72,6 +77,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     client_email,
     notes,
     promo_rule_id,
+    smart_token,
   } = parsed.data
 
   const supabase = await createServiceClient()
@@ -264,6 +270,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     scheduledAt: scheduled_at,
   })
 
+  // Consume smart attribution token when present (non-blocking, never blocks booking)
+  if (smart_token) {
+    consumeSmartAttributionToken({
+      supabase,
+      token: smart_token,
+      businessId: business.id,
+      clientId: client.id,
+      appointmentId: appointment.id,
+    }).catch((error) => {
+      logger.warn(
+        { error, token: smart_token, businessId: business.id, clientId: client.id },
+        'Smart attribution token consume failed'
+      )
+    })
+  }
+
   // Process loyalty points and rewards
   // Note: This runs asynchronously and doesn't block the booking response
   // If it fails, the booking is still successful
@@ -399,4 +421,40 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     advance_payment_enabled: !!business.advance_payment_enabled,
     message: 'Cita reservada exitosamente',
   })
+}
+
+async function consumeSmartAttributionToken({
+  supabase,
+  token,
+  businessId,
+  clientId,
+  appointmentId,
+}: {
+  supabase: Awaited<ReturnType<typeof createServiceClient>>
+  token: string
+  businessId: string
+  clientId: string
+  appointmentId: string
+}) {
+  const nowIso = new Date().toISOString()
+
+  const { data: attribution } = await (supabase as any)
+    .from('smart_notification_attribution')
+    .select('id')
+    .eq('token', token)
+    .eq('business_id', businessId)
+    .eq('client_id', clientId)
+    .is('consumed_at', null)
+    .gt('expires_at', nowIso)
+    .maybeSingle()
+
+  if (!attribution) return
+
+  await (supabase as any)
+    .from('smart_notification_attribution')
+    .update({
+      consumed_at: nowIso,
+      consumed_appointment_id: appointmentId,
+    })
+    .eq('id', attribution.id)
 }

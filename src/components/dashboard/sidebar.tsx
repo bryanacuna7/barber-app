@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   Calendar,
@@ -26,7 +26,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Citas', href: '/citas', icon: Calendar },
   { name: 'Servicios', href: '/servicios', icon: Scissors },
-  { name: 'Barberos', href: '/barberos', icon: UserRound },
+  { name: 'Equipo', href: '/barberos', icon: UserRound },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Analíticas', href: '/analiticas', icon: TrendingUp },
   { name: 'Suscripción', href: '/suscripcion', icon: CreditCard },
@@ -144,13 +144,11 @@ function SidebarContent({
 
 export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
 
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
+    window.location.href = '/login'
   }
 
   return (

@@ -5,7 +5,7 @@
  * Context provider for interactive product tours
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import { TourContextValue, TourState, TourDefinition, TourStep } from './types'
 import { getTourById } from './tour-definitions'
 
@@ -41,23 +41,20 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
       .catch((err) => console.error('Failed to fetch tour progress:', err))
   }, [businessId])
 
-  const startTour = useCallback(
-    (tourId: string) => {
-      const tour = getTourById(tourId)
-      if (!tour) {
-        console.error(`Tour not found: ${tourId}`)
-        return
-      }
+  const startTour = useCallback((tourId: string) => {
+    const tour = getTourById(tourId)
+    if (!tour) {
+      console.error(`Tour not found: ${tourId}`)
+      return
+    }
 
-      setState({
-        activeTourId: tourId,
-        currentStepIndex: 0,
-        isRunning: true,
-        completedTours: state.completedTours,
-      })
-    },
-    [state.completedTours]
-  )
+    setState((prev) => ({
+      ...prev,
+      activeTourId: tourId,
+      currentStepIndex: 0,
+      isRunning: true,
+    }))
+  }, [])
 
   const nextStep = useCallback(() => {
     setState((prev) => {
@@ -91,39 +88,19 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
   }, [])
 
   const completeTour = useCallback(async () => {
-    if (!state.activeTourId) return
+    // Read activeTourId from current state via functional update pattern
+    let tourIdToComplete: string | null = null
+    setState((prev) => {
+      tourIdToComplete = prev.activeTourId
+      return prev // no-op update, just reading
+    })
 
-    try {
-      // Save completion to backend
-      await fetch('/api/tours', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tourId: state.activeTourId,
-          completed: true,
-        }),
-      })
+    if (!tourIdToComplete) return
 
-      // Update local state
+    const markComplete = () => {
       setState((prev) => {
         const newCompleted = new Set(prev.completedTours)
-        newCompleted.add(prev.activeTourId!)
-
-        return {
-          ...prev,
-          activeTourId: null,
-          currentStepIndex: 0,
-          isRunning: false,
-          completedTours: newCompleted,
-        }
-      })
-    } catch (err) {
-      console.error('Failed to complete tour:', err)
-      // Still mark as complete locally even if API fails
-      setState((prev) => {
-        const newCompleted = new Set(prev.completedTours)
-        newCompleted.add(prev.activeTourId!)
-
+        newCompleted.add(tourIdToComplete!)
         return {
           ...prev,
           activeTourId: null,
@@ -133,7 +110,19 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
         }
       })
     }
-  }, [state.activeTourId])
+
+    try {
+      await fetch('/api/tours', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tourId: tourIdToComplete, completed: true }),
+      })
+      markComplete()
+    } catch (err) {
+      console.error('Failed to complete tour:', err)
+      markComplete()
+    }
+  }, [])
 
   const isTourCompleted = useCallback(
     (tourId: string) => {
@@ -153,17 +142,30 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
     return tour.steps[state.currentStepIndex] || null
   }, [getCurrentTour, state.currentStepIndex])
 
-  const value: TourContextValue = {
-    ...state,
-    startTour,
-    nextStep,
-    previousStep,
-    skipTour,
-    completeTour,
-    isTourCompleted,
-    getCurrentTour,
-    getCurrentStep,
-  }
+  const value: TourContextValue = useMemo(
+    () => ({
+      ...state,
+      startTour,
+      nextStep,
+      previousStep,
+      skipTour,
+      completeTour,
+      isTourCompleted,
+      getCurrentTour,
+      getCurrentStep,
+    }),
+    [
+      state,
+      startTour,
+      nextStep,
+      previousStep,
+      skipTour,
+      completeTour,
+      isTourCompleted,
+      getCurrentTour,
+      getCurrentStep,
+    ]
+  )
 
   return <TourContext.Provider value={value}>{children}</TourContext.Provider>
 }

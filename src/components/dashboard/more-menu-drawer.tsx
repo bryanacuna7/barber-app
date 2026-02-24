@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   BarChart3,
@@ -19,6 +19,8 @@ import {
   Shield,
   CalendarClock,
   Users,
+  Trophy,
+  Target,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
@@ -78,7 +80,7 @@ const menuItems: MenuItem[] = [
     ownerOnly: true,
   },
   {
-    name: 'Barberos',
+    name: 'Equipo',
     href: '/barberos',
     icon: Scissors,
     description: 'Gestionar equipo',
@@ -113,6 +115,22 @@ const menuItems: MenuItem[] = [
     color: 'text-cyan-600 dark:text-cyan-400',
     bgColor: 'bg-cyan-100 dark:bg-cyan-900/30',
     barberPermission: 'nav_changelog',
+  },
+  {
+    name: 'Logros',
+    href: '/barberos/logros',
+    icon: Trophy,
+    description: 'Logros del equipo',
+    color: 'text-yellow-600 dark:text-yellow-400',
+    bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
+  },
+  {
+    name: 'Desafíos',
+    href: '/barberos/desafios',
+    icon: Target,
+    description: 'Competencias y retos',
+    color: 'text-orange-600 dark:text-orange-400',
+    bgColor: 'bg-orange-100 dark:bg-orange-900/30',
   },
   {
     name: 'Configuración',
@@ -166,7 +184,6 @@ export function MoreMenuDrawer({
   isBarber = false,
 }: MoreMenuDrawerProps) {
   const pathname = usePathname()
-  const router = useRouter()
 
   // Read role + permissions from context
   let userRole: UserRole = 'owner'
@@ -206,11 +223,14 @@ export function MoreMenuDrawer({
       // Skip owner-only items
       if (item.ownerOnly) continue
 
-      // Check barber permission
+      // Check barber permission (if configured)
       if (item.barberPermission) {
         if (staffPermissions[item.barberPermission]) {
           items.push(item)
         }
+      } else {
+        // Items without ownerOnly or barberPermission are visible to all roles
+        items.push(item)
       }
     }
 
@@ -226,9 +246,9 @@ export function MoreMenuDrawer({
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    onClose()
-    router.push('/login')
-    router.refresh()
+    // Hard redirect to avoid middleware race condition (cookies may not be cleared
+    // before a soft navigation hits the server, causing a bounce back to /dashboard)
+    window.location.href = '/login'
   }
 
   return (
@@ -342,6 +362,7 @@ export function MoreMenuDrawer({
           transition={{ delay: filteredItems.length * 0.05 }}
         >
           <button
+            type="button"
             onClick={handleLogout}
             data-testid="logout-button"
             className={cn(

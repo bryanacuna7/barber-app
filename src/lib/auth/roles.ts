@@ -145,6 +145,11 @@ export function canBarberAccessPath(
     return true
   }
 
+  // Gamification pages are always allowed for barbers (their own achievements/challenges)
+  if (pathname === '/barberos/logros' || pathname === '/barberos/desafios') {
+    return true
+  }
+
   // Owner-only paths are never allowed for barbers
   if (OWNER_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return false
