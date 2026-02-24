@@ -2,7 +2,7 @@ name: Discord Deploy Notification
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
     paths:
       - 'RELEASE_NOTES.md'
 
