@@ -46,7 +46,7 @@ export const gestureConfigs: Record<string, GestureConfig> = {
     pullToRefresh: false,
     rationale: 'Deep config routes must prioritize back navigation. No swipeable content.',
   },
-  miembros del equipo: {
+  'miembros del equipo': {
     swipeRows: false,
     pullToRefresh: false,
     rationale: 'Cards with button actions, no swipe gestures.',

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { format, addDays, startOfDay } from 'date-fns'
 import type { Service, Business, Barber } from '@/types'
@@ -47,7 +47,13 @@ export function useBookingData(slug: string) {
   })
 
   // Generate available dates (30 days ahead)
-  const availableDates = Array.from({ length: 30 }, (_, i) => addDays(startOfDay(new Date()), i))
+  // Memoize by date string to avoid recreating on every render
+  // Use T12:00:00 trick to avoid UTC midnight timezone shift (CR = UTC-6)
+  const todayKey = format(new Date(), 'yyyy-MM-dd')
+  const availableDates = useMemo(() => {
+    const today = new Date(`${todayKey}T12:00:00`)
+    return Array.from({ length: 30 }, (_, i) => addDays(startOfDay(today), i))
+  }, [todayKey])
 
   // Fetch business, services, and barbers
   useEffect(() => {

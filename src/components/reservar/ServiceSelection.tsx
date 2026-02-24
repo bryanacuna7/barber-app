@@ -50,7 +50,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                 onClick={() => onSelectService(service)}
                 disabled={noBarbers}
                 className={cn(
-                  'ios-card w-full flex items-center gap-4 p-4 text-left ios-press',
+                  'ios-card w-full flex items-center gap-4 p-4 text-left ios-press overflow-hidden',
                   noBarbers && 'opacity-60 cursor-not-allowed'
                 )}
               >
@@ -70,7 +70,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                     {service.name}
                   </p>
                   {service.description && (
-                    <p className="mt-0.5 text-[13px] text-muted line-clamp-1">
+                    <p className="mt-0.5 text-[13px] text-muted line-clamp-2">
                       {service.description}
                     </p>
                   )}

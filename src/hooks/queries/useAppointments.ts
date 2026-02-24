@@ -130,7 +130,9 @@ export function useBarberDayAppointments(barberId: string | null) {
       if (!barberId) throw new Error('Barber ID is required')
 
       const supabase = createClient()
-      const today = new Date()
+      // Use T12:00:00 to avoid UTC midnight timezone shift for CR (UTC-6)
+      const todayStr = format(new Date(), 'yyyy-MM-dd')
+      const today = new Date(`${todayStr}T12:00:00`)
       const startDate = startOfDay(today)
       const endDate = endOfDay(today)
 
