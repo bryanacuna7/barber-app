@@ -26,3 +26,6 @@ export * from './useCalendar'
 
 // Settings hooks (Configuración)
 export * from './useSettings'
+
+// Barber Blocks hooks (Bloqueos / Vacaciones)
+export * from './useBarberBlocks'

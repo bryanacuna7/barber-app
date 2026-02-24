@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { QueryError } from '@/components/ui/query-error'
+import { OnboardingChecklist } from '@/components/barber/onboarding-checklist'
 
 /**
  * Mi Día - Staff View Page (Modernized with React Query + Real-time)
@@ -36,6 +37,9 @@ function MiDiaPageContent() {
   const [businessName, setBusinessName] = useState('')
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [barberName, setBarberName] = useState('')
+  const [hasPhoto, setHasPhoto] = useState(false)
 
   const toast = useToast()
 
@@ -60,7 +64,7 @@ function MiDiaPageContent() {
         // 2. Get barber record for this user
         const { data: barber, error: barberError } = await supabase
           .from('barbers')
-          .select('id, business_id, is_active')
+          .select('id, business_id, is_active, name, photo_url')
           .eq('user_id', user.id)
           .single()
 
@@ -101,6 +105,14 @@ function MiDiaPageContent() {
         // 5. Set barber ID and business ID
         setBarberId(barber.id)
         setBusinessId(barber.business_id)
+        setBarberName((barber as any).name || '')
+        setHasPhoto(!!(barber as any).photo_url)
+
+        // 6. Detect first login — show onboarding if no photo
+        const dismissed = localStorage.getItem(`onboarding_dismissed_${barber.id}`)
+        if (!dismissed && !(barber as any).photo_url) {
+          setShowOnboarding(true)
+        }
       } catch (error) {
         console.error('Error authenticating barber:', error)
         setAuthError('Error al verificar la autenticación')
@@ -271,6 +283,23 @@ function MiDiaPageContent() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* Onboarding Checklist */}
+        {showOnboarding && barberId && (
+          <div className="mb-5">
+            <OnboardingChecklist
+              barberName={barberName}
+              hasPhoto={hasPhoto}
+              hasPushSubscription={false}
+              onDismiss={() => {
+                setShowOnboarding(false)
+                if (barberId) {
+                  localStorage.setItem(`onboarding_dismissed_${barberId}`, '1')
+                }
+              }}
+            />
+          </div>
+        )}
+
         {/* Refresh Button */}
         <div className="flex justify-end mb-4">
           <Button

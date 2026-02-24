@@ -106,10 +106,40 @@ export function getStaffPermissions(raw: unknown): StaffPermissions {
 }
 
 /**
+ * Merge per-barber custom_permissions over business-level staff_permissions.
+ * custom_permissions only contains overrides — missing keys fall back to business defaults.
+ */
+export function mergePermissions(
+  businessPermissions: StaffPermissions,
+  customPermissions: Partial<StaffPermissions> | null | undefined
+): StaffPermissions {
+  if (!customPermissions || typeof customPermissions !== 'object') {
+    return { ...businessPermissions }
+  }
+
+  const result = { ...businessPermissions }
+  for (const key of Object.keys(DEFAULT_STAFF_PERMISSIONS) as (keyof StaffPermissions)[]) {
+    if (key in customPermissions && typeof customPermissions[key] === 'boolean') {
+      result[key] = customPermissions[key] as boolean
+    }
+  }
+  return result
+}
+
+/**
  * Check if a barber can access a specific pathname based on staff_permissions.
  * Returns true if allowed, false if denied.
+ *
+ * When customPermissions is provided, it overrides the business-level permissions
+ * for any keys that are explicitly set.
  */
-export function canBarberAccessPath(pathname: string, permissions: StaffPermissions): boolean {
+export function canBarberAccessPath(
+  pathname: string,
+  permissions: StaffPermissions,
+  customPermissions?: Partial<StaffPermissions> | null
+): boolean {
+  // Merge custom overrides if present
+  const effectivePerms = mergePermissions(permissions, customPermissions)
   // Mi Día is always allowed for barbers
   if (pathname === '/mi-dia' || pathname.startsWith('/mi-dia/')) {
     return true
@@ -123,7 +153,7 @@ export function canBarberAccessPath(pathname: string, permissions: StaffPermissi
   // Check configurable paths
   for (const [permKey, path] of Object.entries(PERMISSION_TO_PATH)) {
     if (pathname === path || pathname.startsWith(`${path}/`)) {
-      return permissions[permKey as keyof StaffPermissions] as boolean
+      return effectivePerms[permKey as keyof StaffPermissions] as boolean
     }
   }
 

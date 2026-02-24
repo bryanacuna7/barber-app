@@ -82,6 +82,39 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   const { data: appointments } = await query
 
+  // Fetch barber blocks that overlap the requested date
+  let blocksQuery = (supabase as any)
+    .from('barber_blocks')
+    .select('start_time, end_time, all_day')
+    .eq('business_id', business.id)
+    .lte('start_time', dayEnd.toISOString())
+    .gte('end_time', dayStart.toISOString())
+
+  if (barberId) {
+    blocksQuery = blocksQuery.eq('barber_id', barberId)
+  }
+
+  const { data: blocks } = await blocksQuery
+
+  // Convert blocks to synthetic appointments so the existing overlap logic handles them
+  const blockAppointments = (blocks || []).map((b: any) => {
+    const start = new Date(b.start_time)
+    const end = new Date(b.end_time)
+    // For all-day blocks, ensure they cover the entire business day
+    if (b.all_day) {
+      return {
+        scheduled_at: dayStart.toISOString(),
+        duration_minutes: 24 * 60, // full day
+      }
+    }
+    return {
+      scheduled_at: b.start_time,
+      duration_minutes: Math.ceil((end.getTime() - start.getTime()) / 60000),
+    }
+  })
+
+  const allBlockers = [...(appointments || []), ...blockAppointments]
+
   // Calculate available slots
   const operatingHours = business.operating_hours
     ? (business.operating_hours as unknown as OperatingHours)
@@ -90,7 +123,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const slots = calculateAvailableSlots({
     date,
     operatingHours,
-    existingAppointments: appointments || [],
+    existingAppointments: allBlockers,
     serviceDuration,
     bufferMinutes: business.booking_buffer_minutes ?? 15,
   })

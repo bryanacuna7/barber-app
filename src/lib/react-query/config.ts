@@ -146,6 +146,22 @@ export const queryKeys = {
     business: () => [...queryKeys.settings.all, 'business'] as const,
     team: () => [...queryKeys.settings.all, 'team'] as const,
   },
+
+  // Barber Blocks (Bloqueos / Vacaciones)
+  barberBlocks: {
+    all: ['barberBlocks'] as const,
+    lists: () => [...queryKeys.barberBlocks.all, 'list'] as const,
+    list: (businessId: string, barberId?: string, from?: string, to?: string) =>
+      [
+        ...queryKeys.barberBlocks.lists(),
+        businessId,
+        ...(barberId ? [barberId] : []),
+        ...(from ? [from] : []),
+        ...(to ? [to] : []),
+      ] as const,
+    details: () => [...queryKeys.barberBlocks.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.barberBlocks.details(), id] as const,
+  },
 } as const
 
 /**
@@ -179,6 +195,12 @@ export const invalidateQueries = {
   // Invalidate after business settings change
   afterBusinessSettingsChange: (queryClient: QueryClient) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.settings.business() })
+  },
+
+  // Invalidate after barber block changes (blocks affect slot availability)
+  afterBlockChange: (queryClient: QueryClient) => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.barberBlocks.all })
+    queryClient.invalidateQueries({ queryKey: queryKeys.calendar.all })
   },
 }
 

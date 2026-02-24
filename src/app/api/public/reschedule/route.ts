@@ -16,9 +16,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit } from '@/lib/rate-limit'
-import { createNotification } from '@/lib/notifications'
-import { sendPushToBusinessOwner } from '@/lib/push/sender'
-import { sendNotificationEmail, sendEmail } from '@/lib/email/sender'
+import { notify } from '@/lib/notifications/orchestrator'
+import { sendEmail } from '@/lib/email/sender'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 import { evaluatePromo } from '@/lib/promo-engine'
 import { format } from 'date-fns'
@@ -290,55 +289,65 @@ export async function POST(request: NextRequest) {
     const clientName = appointment.client?.name ?? 'Cliente'
     const clientEmail = appointment.client?.email ?? null
 
-    // 18a. In-app notification for business owner (non-blocking)
-    createNotification(serviceClient as any, {
-      business_id: business.id,
-      user_id: business.owner_id,
-      type: 'new_appointment',
-      title: 'Cita reagendada por cliente',
-      message: `${clientName} reagendó su cita: ${formattedOldDate} → ${formattedNewDate}`,
-      reference_type: 'appointment',
-      reference_id: (newAppointment as any).id,
-    }).catch((err: unknown) => {
-      console.error('Reschedule: createNotification error:', err)
-    })
-
-    // 18b. Push notification to business owner (non-blocking)
-    sendPushToBusinessOwner(business.id, {
-      title: 'Cita reagendada',
-      body: `${clientName} reagendó su cita`,
-      url: '/citas',
-    }).catch((err: unknown) => {
-      console.error('Reschedule: sendPushToBusinessOwner error:', err)
-    })
-
-    // 18c. Email notification to business owner (non-blocking)
+    // 18a. Notify business owner: in-app + push + email (non-blocking)
     ;(async () => {
       try {
-        const { data: owner } = await serviceClient.auth.admin.getUserById(business.owner_id)
+        const serviceClientForOwner = createServiceClient()
+        const { data: owner } = await serviceClientForOwner.auth.admin.getUserById(
+          business.owner_id
+        )
         const ownerEmail = owner?.user?.email
-        if (ownerEmail) {
-          await sendNotificationEmail({
+
+        await notify(
+          'appointment_rescheduled',
+          {
             businessId: business.id,
-            notificationType: 'new_appointment',
-            to: ownerEmail,
-            subject: `Cita reagendada — ${clientName}`,
-            react: NewAppointmentEmail({
-              businessName: business.name,
+            appointmentId: (newAppointment as any).id,
+            userId: business.owner_id,
+            recipientEmail: ownerEmail || undefined,
+            data: {
               clientName,
-              serviceName: 'Cita reagendada',
-              appointmentDate: newScheduledAt.toISOString(),
-              duration: durationMin,
-              price: '',
-            }),
-          })
-        }
+              formattedOldDate,
+              formattedNewDate,
+              pushTitle: 'Cita reagendada',
+              pushBody: `${clientName} reagendó su cita`,
+              pushUrl: '/citas',
+            },
+          },
+          {
+            inApp: {
+              title: 'Cita reagendada por cliente',
+              message: `${clientName} reagendó su cita: ${formattedOldDate} → ${formattedNewDate}`,
+              referenceType: 'appointment',
+              referenceId: (newAppointment as any).id,
+            },
+            push: {
+              title: 'Cita reagendada',
+              body: `${clientName} reagendó su cita`,
+              url: '/citas',
+            },
+            email: ownerEmail
+              ? {
+                  to: ownerEmail,
+                  subject: `Cita reagendada — ${clientName}`,
+                  react: NewAppointmentEmail({
+                    businessName: business.name,
+                    clientName,
+                    serviceName: 'Cita reagendada',
+                    appointmentDate: newScheduledAt.toISOString(),
+                    duration: durationMin,
+                    price: '',
+                  }),
+                }
+              : undefined,
+          }
+        )
       } catch (err) {
-        console.error('Reschedule: owner email error:', err)
+        console.error('Reschedule: owner notification error:', err)
       }
     })()
 
-    // 18d. Confirmation email to client with new tracking link (non-blocking)
+    // 18b. Confirmation email to client with new tracking link (non-blocking)
     if (clientEmail && trackingUrl) {
       sendEmail({
         to: clientEmail,

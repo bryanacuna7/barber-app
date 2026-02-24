@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-23 (Session 182 - Advance Payment SINPE)
-> **Last Verified Against:** All migrations 001-037
+> **Last Updated:** 2026-02-24 (Session 184 - Full pending plan implementation)
+> **Last Verified Against:** All migrations 001-038
 
 ---
 
@@ -73,20 +73,22 @@
 ### `clients`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `014_loyalty_system.sql`, `024_enable_realtime.sql`, `029_client_dashboard_rls.sql`
+**Modified in:** `014_loyalty_system.sql`, `024_enable_realtime.sql`, `029_client_dashboard_rls.sql`, `038_notifications_blocks_source_permissions.sql`
 
 ```sql
-- id                UUID PRIMARY KEY
-- business_id       UUID REFERENCES businesses(id)
-- created_at        TIMESTAMPTZ
-- updated_at        TIMESTAMPTZ
-- name              TEXT
-- phone             TEXT
-- email             TEXT
-- notes             TEXT
-- total_visits      INT
-- total_spent       DECIMAL(10,2)
-- last_visit_at     TIMESTAMPTZ
+- id                      UUID PRIMARY KEY
+- business_id             UUID REFERENCES businesses(id)
+- created_at              TIMESTAMPTZ
+- updated_at              TIMESTAMPTZ
+- name                    TEXT
+- phone                   TEXT
+- email                   TEXT
+- notes                   TEXT
+- total_visits            INT
+- total_spent             DECIMAL(10,2)
+- last_visit_at           TIMESTAMPTZ
+- claim_token             UUID (nullable, partial index where NOT NULL)
+- claim_token_expires_at  TIMESTAMPTZ (nullable)
 - user_id           UUID REFERENCES auth.users(id) (added in 014)
 UNIQUE(business_id, phone)
 INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added in 029)
@@ -107,7 +109,7 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 ### `appointments`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`, `036_cancellation_policy.sql`, `037_advance_payment.sql`
+**Modified in:** `002_multi_barber.sql`, `024_enable_realtime.sql`, `025_smart_scheduling_features.sql`, `029_client_dashboard_rls.sql`, `031_tracking_token.sql`, `036_cancellation_policy.sql`, `037_advance_payment.sql`, `038_notifications_blocks_source_permissions.sql`
 
 ```sql
 - id                      UUID PRIMARY KEY
@@ -144,6 +146,7 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 - discount_pct_snapshot   INT (added in 037) -- discount % applied
 - discount_amount_snapshot DECIMAL(10,2) (added in 037) -- calculated discount amount
 - final_price_snapshot    DECIMAL(10,2) (added in 037) -- final price after discount
+- source                  TEXT CHECK (source IN ('web_booking','walk_in','owner_created','barber_created')) (added in 038)
 ```
 
 **Constraints (added in 037):**
@@ -176,22 +179,24 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 ### `barbers`
 
 **Created in:** `002_multi_barber.sql`
-**Modified in:** `023_rbac_system.sql`
+**Modified in:** `023_rbac_system.sql`, `038_notifications_blocks_source_permissions.sql`
 
 ```sql
-- id            UUID PRIMARY KEY
-- business_id   UUID REFERENCES businesses(id)
-- created_at    TIMESTAMPTZ
-- updated_at    TIMESTAMPTZ
-- name          TEXT
-- email         TEXT UNIQUE
-- phone         TEXT
-- role          TEXT CHECK (role IN ('owner', 'barber'))
-- is_active     BOOLEAN
-- avatar_url    TEXT
-- user_id       UUID REFERENCES auth.users(id) (added in 023)
-- role_id       UUID REFERENCES roles(id) (added in 023)
+- id                  UUID PRIMARY KEY
+- business_id         UUID REFERENCES businesses(id)
+- created_at          TIMESTAMPTZ
+- updated_at          TIMESTAMPTZ
+- name                TEXT
+- email               TEXT UNIQUE
+- phone               TEXT
+- role                TEXT CHECK (role IN ('owner', 'barber'))
+- is_active           BOOLEAN
+- avatar_url          TEXT
+- user_id             UUID REFERENCES auth.users(id) (added in 023)
+- role_id             UUID REFERENCES roles(id) (added in 023)
+- custom_permissions  JSONB DEFAULT NULL (added in 038) -- per-barber UI permission overrides
 UNIQUE(business_id, email)
+CONSTRAINT chk_custom_perms CHECK (custom_permissions IS NULL OR validate_custom_permissions(custom_permissions))
 ```
 
 **Indexes:**
@@ -415,16 +420,21 @@ UNIQUE(business_id, email)
 
 **Created in:** `009_notification_preferences.sql`
 
+> **IMPORTANT:** Keyed by `business_id` (UNIQUE), NOT by `user_id`.
+> Preferences are per-business. The orchestrator respects business-level preferences.
+
 ```sql
 - id                            UUID PRIMARY KEY
-- user_id                       UUID REFERENCES auth.users(id) UNIQUE
+- business_id                   UUID REFERENCES businesses(id) UNIQUE
+- channel                       TEXT ('app' | 'email' | 'both')
+- email_address                 TEXT
+- email_trial_expiring          BOOLEAN
+- email_subscription_expiring   BOOLEAN
+- email_payment_status          BOOLEAN
+- email_new_appointment         BOOLEAN
+- email_appointment_reminder    BOOLEAN
 - created_at                    TIMESTAMPTZ
 - updated_at                    TIMESTAMPTZ
-- email_enabled                 BOOLEAN
-- push_enabled                  BOOLEAN
-- appointment_reminders         BOOLEAN
-- appointment_confirmations     BOOLEAN
-- marketing_emails              BOOLEAN
 ```
 
 ### `push_subscriptions`
@@ -1133,6 +1143,69 @@ To verify Realtime is working:
 **Expected:** `🔌 Realtime subscription status: SUBSCRIBED`
 
 **If error occurs:** Check that table is in publication (Dashboard → Database → Replication)
+
+---
+
+### `notification_log`
+
+**Created in:** `038_notifications_blocks_source_permissions.sql`
+
+Immutable audit log for all outbound notification events. Written by the notification orchestrator via service-role client (bypasses RLS).
+
+```sql
+- id               UUID PRIMARY KEY
+- business_id      UUID REFERENCES businesses(id) ON DELETE CASCADE
+- appointment_id   UUID REFERENCES appointments(id) ON DELETE SET NULL
+- user_id          UUID REFERENCES auth.users(id) ON DELETE SET NULL
+- event_type       TEXT NOT NULL
+- channel          TEXT NOT NULL CHECK (channel IN ('push','email','whatsapp','in_app'))
+- status           TEXT NOT NULL CHECK (status IN ('sent','failed','retried','deduped','skipped'))
+- error_code       TEXT
+- error_message    TEXT
+- created_at       TIMESTAMPTZ DEFAULT NOW()
+```
+
+**Indexes:**
+
+- `idx_notif_log_dedup` on `(event_type, appointment_id, channel)` WHERE `status = 'sent'`
+- `idx_notif_log_business` on `(business_id, created_at DESC)`
+
+**RLS Policies:**
+
+- Owner views business notification log
+- Client views own notification history (restricted event types)
+
+---
+
+### `barber_blocks`
+
+**Created in:** `038_notifications_blocks_source_permissions.sql`
+
+Non-appointment agenda blocks (breaks, vacations, personal time) for barbers. Consumed by the scheduling engine to exclude blocked intervals from available slots.
+
+```sql
+- id               UUID PRIMARY KEY
+- business_id      UUID REFERENCES businesses(id) ON DELETE CASCADE
+- barber_id        UUID REFERENCES barbers(id) ON DELETE CASCADE
+- block_type       TEXT NOT NULL CHECK (block_type IN ('break','vacation','personal','other'))
+- title            TEXT
+- start_time       TIMESTAMPTZ NOT NULL
+- end_time         TIMESTAMPTZ NOT NULL
+- all_day          BOOLEAN DEFAULT false
+- recurrence_rule  TEXT
+- created_at       TIMESTAMPTZ DEFAULT NOW()
+CONSTRAINT chk_block_times CHECK (end_time > start_time)
+```
+
+**Indexes:**
+
+- `idx_barber_blocks_lookup` on `(barber_id, start_time, end_time)`
+- `idx_barber_blocks_business` on `(business_id, start_time)`
+
+**RLS Policies:**
+
+- Barbers manage own blocks
+- Owner manages business blocks
 
 ---
 

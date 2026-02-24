@@ -14,9 +14,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit } from '@/lib/rate-limit'
-import { createNotification } from '@/lib/notifications'
-import { sendPushToBusinessOwner } from '@/lib/push/sender'
-import { sendNotificationEmail, sendEmail } from '@/lib/email/sender'
+import { notify } from '@/lib/notifications/orchestrator'
+import { sendEmail } from '@/lib/email/sender'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 import AppointmentCancelledEmail from '@/lib/email/templates/appointment-cancelled'
 import { format } from 'date-fns'
@@ -152,51 +151,57 @@ export async function POST(request: NextRequest) {
 
     // 11. Fire notifications (non-blocking)
 
-    // In-app notification for business owner
-    createNotification(serviceClient as any, {
-      business_id: business.id,
-      user_id: business.owner_id,
-      type: 'appointment_cancelled',
-      title: 'Cita cancelada por cliente',
-      message: `${clientName} canceló su cita del ${formattedDate}`,
-      reference_type: 'appointment',
-      reference_id: appointment.id,
-    }).catch((err) => {
-      console.error('Cancel: createNotification error:', err)
-    })
-
-    // Push notification to business owner
-    sendPushToBusinessOwner(business.id, {
-      title: 'Cita cancelada',
-      body: `${clientName} canceló su cita`,
-      url: '/citas',
-    }).catch((err) => {
-      console.error('Cancel: sendPushToBusinessOwner error:', err)
-    })
-
-    // Email to business owner (respects notification preferences)
+    // Notify business owner: in-app + push + email
     ;(async () => {
       try {
         const { data: owner } = await serviceClient.auth.admin.getUserById(business.owner_id)
         const ownerEmail = owner?.user?.email
-        if (ownerEmail) {
-          await sendNotificationEmail({
+
+        await notify(
+          'appointment_cancelled',
+          {
             businessId: business.id,
-            notificationType: 'appointment_cancelled',
-            to: ownerEmail,
-            subject: `Cita cancelada — ${clientName}`,
-            react: NewAppointmentEmail({
-              businessName: business.name,
+            appointmentId: appointment.id,
+            userId: business.owner_id,
+            recipientEmail: ownerEmail || undefined,
+            data: {
               clientName,
-              serviceName: 'Cita cancelada',
-              appointmentDate: appointment.scheduled_at,
-              duration: 0,
-              price: '',
-            }),
-          })
-        }
+              formattedDate,
+              pushTitle: 'Cita cancelada',
+              pushBody: `${clientName} canceló su cita`,
+              pushUrl: '/citas',
+            },
+          },
+          {
+            inApp: {
+              title: 'Cita cancelada por cliente',
+              message: `${clientName} canceló su cita del ${formattedDate}`,
+              referenceType: 'appointment',
+              referenceId: appointment.id,
+            },
+            push: {
+              title: 'Cita cancelada',
+              body: `${clientName} canceló su cita`,
+              url: '/citas',
+            },
+            email: ownerEmail
+              ? {
+                  to: ownerEmail,
+                  subject: `Cita cancelada — ${clientName}`,
+                  react: NewAppointmentEmail({
+                    businessName: business.name,
+                    clientName,
+                    serviceName: 'Cita cancelada',
+                    appointmentDate: appointment.scheduled_at,
+                    duration: 0,
+                    price: '',
+                  }),
+                }
+              : undefined,
+          }
+        )
       } catch (err) {
-        console.error('Cancel: owner email error:', err)
+        console.error('Cancel: owner notification error:', err)
       }
     })()
 

@@ -7,7 +7,7 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-23 (Session 183 — E2E Audit Fixes)
+- **Last Updated:** 2026-02-24 (Session 184 — Full Pending Plan Implementation)
 - **Branch:** `feature/ui-ux-redesign`
 - **Version:** `0.9.7` (LIVE on production)
 - **Phase:** Customer Discovery — solving real barber pains
@@ -52,14 +52,19 @@
 - Security Hardening (IDOR fixed, rate limiting, referral RLS tightened)
 - Performance (7 DB indices, N+1 fixed, 7-10x faster)
 - Egress Optimization (migrated Supabase project)
-- Migrations: 025–037 all executed
+- Migrations: 025–038 all executed
 - E2E Audit: 12/13 findings resolved (Session 183)
+- Notification Orchestrator (centralized send with dedup + audit logging)
+- Barber Blocks (agenda blocks / vacations / breaks)
+- CSV Exports (clients + appointments)
+- Per-barber custom permissions
+- Account Claim Token (IDOR security fix)
 
 ---
 
 ## Paused (resume after customer discovery)
 
-- [ ] Charts mobile-first redesign (Gate E: FAIL)
+- [x] Charts mobile-first redesign (Gate E: DONE — Session 184)
 - [ ] Copy UX Spanish consistency (Gate F: PENDING)
 - [ ] Card padre / double inset removal
 - [ ] Header CTA Contract consistency
@@ -67,6 +72,74 @@
 ---
 
 ## Recent Sessions
+
+### Session 184: Full Pending Plan Implementation (2026-02-24)
+
+**Status:** COMPLETE. 6 sprints executed covering security, notifications, operations, client UX, and polish.
+
+**What was done:**
+
+- **Sprint 1 (Security + Foundation):**
+  - CRITICAL: Fixed IDOR vulnerability in client account claim flow (claim_token server-side)
+  - Created migration 038 (notification_log, barber_blocks, appointments.source, barbers.custom_permissions, clients.claim_token)
+  - Built Notification Orchestrator (`src/lib/notifications/orchestrator.ts`) with dedup, preference checking, and audit logging
+  - New API: `POST /api/public/claim-account` — secure token-based account creation
+
+- **Sprint 2 (Notification Hardening):**
+  - Migrated 4 API routes to use orchestrator: complete, reschedule, cancel, book
+  - Replaced 15+ inline notification calls with centralized `notify()` calls
+  - Created `GET /api/notifications/log` endpoint for owner audit dashboard
+
+- **Sprint 3 (Operations):**
+  - Barber blocks: CRUD hooks, API routes, availability integration (blocks filter slots)
+  - Per-barber custom permissions: `mergePermissions()`, separate owner/barber Zod schemas, anti-self-escalation
+  - Appointment source tracking: `source: 'owner_created'` in dashboard creation
+  - CSV exports: `GET /api/exports/clients` and `GET /api/exports/appointments` (rate limited, owner-only)
+
+- **Sprint 4 (Client UX):**
+  - Added `<InstallPrompt />` to mi-cuenta page
+  - Created barber onboarding checklist component (3 steps: photo, schedule, push)
+  - Integrated onboarding into mi-dia with localStorage dismiss
+
+- **Sprint 5 (UX Polish):**
+  - Charts mobile-first: responsive height (200px/300px), touch-friendly tooltips, smaller axis text
+  - Demand heatmap: horizontal scroll wrapper on mobile
+
+- **Sprint 6 (Documentation):**
+  - Updated DATABASE_SCHEMA.md with all migration 038 changes
+  - Fixed notification_preferences documentation (business_id, not user_id)
+  - Updated PROGRESS.md
+
+**Files created (15):**
+
+- `supabase/migrations/038_notifications_blocks_source_permissions.sql`
+- `src/app/api/public/claim-account/route.ts`
+- `src/lib/notifications/types.ts`, `dedup.ts`, `orchestrator.ts`, `index.ts`
+- `src/app/api/notifications/log/route.ts`
+- `src/app/api/barber-blocks/route.ts`, `[id]/route.ts`
+- `src/app/api/exports/clients/route.ts`, `appointments/route.ts`
+- `src/hooks/queries/useBarberBlocks.ts`
+- `src/components/barber/onboarding-checklist.tsx`
+
+**Files modified (15+):**
+
+- `src/app/api/public/[slug]/book/route.ts` (claim tokens + source + orchestrator)
+- `src/app/api/public/cancel/route.ts` (orchestrator)
+- `src/app/api/public/reschedule/route.ts` (orchestrator)
+- `src/app/api/appointments/[id]/complete/route.ts` (orchestrator)
+- `src/app/api/appointments/route.ts` (source tracking)
+- `src/app/api/barbers/[id]/route.ts` (custom_permissions, dual schemas)
+- `src/app/api/public/[slug]/availability/route.ts` (blocks integration)
+- `src/lib/auth/roles.ts` (mergePermissions, customPermissions param)
+- `src/hooks/useBookingData.ts` (claimToken state)
+- `src/app/(public)/reservar/[slug]/page.tsx` (pass claimToken)
+- `src/components/reservar/BookingSuccess.tsx` (claimToken prop)
+- `src/components/loyalty/client-account-modal.tsx` (complete rewrite)
+- `src/app/(client)/mi-cuenta/page.tsx` (InstallPrompt)
+- `src/app/(dashboard)/mi-dia/page-v2.tsx` (onboarding checklist)
+- 3 chart components (mobile-first responsive)
+
+---
 
 ### Session 183: E2E Audit — Full Fix Pass (2026-02-23)
 

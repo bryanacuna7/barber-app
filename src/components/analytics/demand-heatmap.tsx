@@ -230,99 +230,106 @@ export function DemandHeatmap({
       role="img"
       aria-label="Mapa de calor de demanda por día y hora"
     >
-      {/* Day labels row */}
-      <div className="flex items-center mb-1.5">
-        {/* Spacer for hour label column */}
-        <div className={cn('shrink-0', hourLabelWidth)} aria-hidden="true" />
-        {/* Day column headers */}
-        <div className="flex gap-0.5 flex-1">
-          {DAY_LABELS.map((label, colIdx) => {
-            // Check if this day is enabled in operating hours
-            const dayKey = Object.keys(DAY_NAME_TO_GRID_COL).find(
-              (k) => DAY_NAME_TO_GRID_COL[k] === colIdx
-            )
-            const isEnabled =
-              !operatingHours || !dayKey || operatingHours[dayKey]?.enabled !== false
-
-            return (
-              <div
-                key={label}
-                className={cn(
-                  'flex-1 text-center font-medium',
-                  labelTextSize,
-                  isEnabled ? 'text-zinc-700 dark:text-zinc-300' : 'text-muted'
-                )}
-                aria-label={label}
-              >
-                {label}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Grid rows — one per hour */}
-      <div className="flex flex-col gap-0.5" role="grid" aria-label="Celdas de demanda">
-        {hours.map((hour) => (
-          <div key={hour} className="flex items-center gap-0" role="row">
-            {/* Hour label */}
-            <div
-              className={cn(
-                'shrink-0 text-right pr-1.5 font-mono text-muted leading-none select-none',
-                labelTextSize,
-                hourLabelWidth
-              )}
-              aria-label={`${hour}:00`}
-            >
-              {hour}
-            </div>
-
-            {/* 7 day cells */}
+      {/* Horizontal scroll on narrow screens */}
+      <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
+        <div style={{ minWidth: compact ? '280px' : '320px' }}>
+          {/* Day labels row */}
+          <div className="flex items-center mb-1.5">
+            {/* Spacer for hour label column */}
+            <div className={cn('shrink-0', hourLabelWidth)} aria-hidden="true" />
+            {/* Day column headers */}
             <div className="flex gap-0.5 flex-1">
-              {Array.from({ length: 7 }, (_, colIdx) => {
-                const jsDow = GRID_COL_TO_JS_DOW[colIdx]
-                const count = cellMap.get(`${jsDow}-${hour}`) ?? 0
-                const bucket = intensityBucket(count, maxCount)
-                const hasPromo = cellHasPromo(promoRules, colIdx, hour)
-
-                // Check if this day/hour falls within operating hours
+              {DAY_LABELS.map((label, colIdx) => {
+                // Check if this day is enabled in operating hours
                 const dayKey = Object.keys(DAY_NAME_TO_GRID_COL).find(
                   (k) => DAY_NAME_TO_GRID_COL[k] === colIdx
                 )
-                const dayConfig = operatingHours && dayKey ? operatingHours[dayKey] : null
-                const isOutsideHours =
-                  dayConfig &&
-                  (dayConfig.enabled === false ||
-                    hour < parseHour(dayConfig.open, 0) ||
-                    hour >= parseHour(dayConfig.close, 24))
+                const isEnabled =
+                  !operatingHours || !dayKey || operatingHours[dayKey]?.enabled !== false
 
                 return (
                   <div
-                    key={colIdx}
-                    role="gridcell"
-                    aria-label={`${DAY_LABELS[colIdx]} ${hour}:00 — ${count} citas${hasPromo ? ' · promo activa' : ''}`}
+                    key={label}
                     className={cn(
-                      'flex-1 rounded-sm relative transition-opacity duration-150',
-                      cellSize,
-                      isOutsideHours
-                        ? 'opacity-30 bg-zinc-100 dark:bg-zinc-800/50'
-                        : CELL_BG[bucket]
+                      'flex-1 text-center font-medium',
+                      labelTextSize,
+                      isEnabled ? 'text-zinc-700 dark:text-zinc-300' : 'text-muted'
                     )}
+                    aria-label={label}
                   >
-                    {/* Promo indicator dot */}
-                    {hasPromo && !isOutsideHours && (
-                      <span
-                        className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm"
-                        aria-hidden="true"
-                      />
-                    )}
+                    {label}
                   </div>
                 )
               })}
             </div>
           </div>
-        ))}
+
+          {/* Grid rows — one per hour */}
+          <div className="flex flex-col gap-0.5" role="grid" aria-label="Celdas de demanda">
+            {hours.map((hour) => (
+              <div key={hour} className="flex items-center gap-0" role="row">
+                {/* Hour label */}
+                <div
+                  className={cn(
+                    'shrink-0 text-right pr-1.5 font-mono text-muted leading-none select-none',
+                    labelTextSize,
+                    hourLabelWidth
+                  )}
+                  aria-label={`${hour}:00`}
+                >
+                  {hour}
+                </div>
+
+                {/* 7 day cells */}
+                <div className="flex gap-0.5 flex-1">
+                  {Array.from({ length: 7 }, (_, colIdx) => {
+                    const jsDow = GRID_COL_TO_JS_DOW[colIdx]
+                    const count = cellMap.get(`${jsDow}-${hour}`) ?? 0
+                    const bucket = intensityBucket(count, maxCount)
+                    const hasPromo = cellHasPromo(promoRules, colIdx, hour)
+
+                    // Check if this day/hour falls within operating hours
+                    const dayKey = Object.keys(DAY_NAME_TO_GRID_COL).find(
+                      (k) => DAY_NAME_TO_GRID_COL[k] === colIdx
+                    )
+                    const dayConfig = operatingHours && dayKey ? operatingHours[dayKey] : null
+                    const isOutsideHours =
+                      dayConfig &&
+                      (dayConfig.enabled === false ||
+                        hour < parseHour(dayConfig.open, 0) ||
+                        hour >= parseHour(dayConfig.close, 24))
+
+                    return (
+                      <div
+                        key={colIdx}
+                        role="gridcell"
+                        aria-label={`${DAY_LABELS[colIdx]} ${hour}:00 — ${count} citas${hasPromo ? ' · promo activa' : ''}`}
+                        className={cn(
+                          'flex-1 rounded-sm relative transition-opacity duration-150',
+                          cellSize,
+                          isOutsideHours
+                            ? 'opacity-30 bg-zinc-100 dark:bg-zinc-800/50'
+                            : CELL_BG[bucket]
+                        )}
+                      >
+                        {/* Promo indicator dot */}
+                        {hasPromo && !isOutsideHours && (
+                          <span
+                            className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-sm"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* end min-width inner */}
       </div>
+      {/* end overflow-x-auto scroll wrapper */}
 
       {/* Legend */}
       {!compact && <Legend compact={false} />}

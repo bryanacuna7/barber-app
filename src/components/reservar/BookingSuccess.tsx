@@ -17,6 +17,7 @@ interface BookingSuccessProps {
   time: string | null
   business: Business | null
   clientId: string | null
+  claimToken: string | null
   clientEmail: string
   trackingToken: string | null
 }
@@ -27,6 +28,7 @@ export function BookingSuccess({
   time,
   business,
   clientId,
+  claimToken,
   clientEmail,
   trackingToken,
 }: BookingSuccessProps) {
@@ -261,13 +263,13 @@ export function BookingSuccess({
       </div>
 
       {/* Loyalty Account Modal */}
-      {hasLoyaltyProgram && clientId && business && (
+      {hasLoyaltyProgram && claimToken && business && (
         <ClientAccountModal
           isOpen={showLoyaltyModal}
           onClose={() => setShowLoyaltyModal(false)}
           businessName={business.name}
           businessId={business.id}
-          clientId={clientId}
+          claimToken={claimToken}
           prefillEmail={clientEmail}
         />
       )}

@@ -18,6 +18,7 @@ import {
   useClientLoyalty,
 } from '@/hooks/queries/useClientDashboard'
 import { LiveQueueCard } from '@/components/client/live-queue-card'
+import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { formatDate, formatCurrency } from '@/lib/utils/format'
 
 // Status labels and colors
@@ -69,6 +70,11 @@ export default function ClientHomePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Hola, {firstName}</h1>
         <p className="text-muted text-sm mt-0.5">{businessName}</p>
+      </div>
+
+      {/* PWA Install Prompt — only shows if not already installed */}
+      <div className="mb-5">
+        <InstallPrompt />
       </div>
 
       {/* Next Appointment */}

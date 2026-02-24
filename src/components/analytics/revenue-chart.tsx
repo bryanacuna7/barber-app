@@ -187,77 +187,81 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
         )}
       </CardHeader>
       <CardContent className="p-3 lg:p-6">
-        <ResponsiveContainer width="100%" height={height || 200}>
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="8%" stopColor={chart.accent} stopOpacity={0.46} />
-                <stop offset="92%" stopColor={chart.accent} stopOpacity={0.03} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="2 5"
-              stroke={chart.grid}
-              opacity={0.42}
-              className="hidden lg:block"
-            />
-            <XAxis
-              dataKey="mobileLabel"
-              stroke={chart.axis}
-              fontSize={11}
-              tickLine={false}
-              axisLine={false}
-              interval={xAxisInterval}
-              minTickGap={16}
-            />
-            <YAxis
-              stroke={chart.axis}
-              fontSize={11}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => formatCurrency(value, true)}
-              width={52}
-            />
-            <Tooltip
-              content={
-                <RevenueTooltip
-                  tone={{
-                    bg: chart.tooltipBg,
-                    border: chart.tooltipBorder,
-                    text: chart.tooltipText,
-                  }}
-                />
-              }
-              labelFormatter={(
-                label: string,
-                payload: readonly { payload?: { desktopLabel?: string } }[]
-              ) => {
-                const datum = payload?.[0]?.payload
-                return datum?.desktopLabel ?? label
-              }}
-              cursor={{
-                stroke: chart.accent,
-                strokeWidth: 1.5,
-                strokeDasharray: '4 4',
-                strokeOpacity: 0.75,
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="chartValue"
-              stroke={chart.accent}
-              strokeWidth={2.75}
-              fillOpacity={1}
-              fill="url(#colorRevenue)"
-              activeDot={{
-                r: 5,
-                fill: chart.accent,
-                stroke: 'var(--chart-tooltip-bg)',
-                strokeWidth: 2,
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <div className="h-[200px] sm:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="8%" stopColor={chart.accent} stopOpacity={0.46} />
+                  <stop offset="92%" stopColor={chart.accent} stopOpacity={0.03} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="2 5"
+                stroke={chart.grid}
+                opacity={0.42}
+                className="hidden lg:block"
+              />
+              <XAxis
+                dataKey="mobileLabel"
+                stroke={chart.axis}
+                fontSize={11}
+                tick={{ fontSize: 11, className: 'text-xs' }}
+                tickLine={false}
+                axisLine={false}
+                interval={xAxisInterval}
+                minTickGap={16}
+              />
+              <YAxis
+                stroke={chart.axis}
+                fontSize={11}
+                tick={{ fontSize: 11, className: 'text-xs' }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => formatCurrency(value, true)}
+                width={52}
+              />
+              <Tooltip
+                content={
+                  <RevenueTooltip
+                    tone={{
+                      bg: chart.tooltipBg,
+                      border: chart.tooltipBorder,
+                      text: chart.tooltipText,
+                    }}
+                  />
+                }
+                labelFormatter={(
+                  label: string,
+                  payload: readonly { payload?: { desktopLabel?: string } }[]
+                ) => {
+                  const datum = payload?.[0]?.payload
+                  return datum?.desktopLabel ?? label
+                }}
+                cursor={{
+                  stroke: chart.accent,
+                  strokeWidth: 1.5,
+                  strokeDasharray: '4 4',
+                  strokeOpacity: 0.75,
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="chartValue"
+                stroke={chart.accent}
+                strokeWidth={2.75}
+                fillOpacity={1}
+                fill="url(#colorRevenue)"
+                activeDot={{
+                  r: 5,
+                  fill: chart.accent,
+                  stroke: 'var(--chart-tooltip-bg)',
+                  strokeWidth: 2,
+                }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )

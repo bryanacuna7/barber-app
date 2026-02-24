@@ -112,7 +112,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     }
 
     // Create appointment
-    const { data: appointment, error } = await supabase
+    const { data: appointment, error } = await (supabase as any)
       .from('appointments')
       .insert({
         business_id: business.id,
@@ -124,6 +124,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
         client_notes: result.data.client_notes,
         internal_notes: result.data.internal_notes,
         status: 'pending',
+        source: 'owner_created',
       })
       .select(
         `

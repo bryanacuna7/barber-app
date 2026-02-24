@@ -167,54 +167,58 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
         {topServices.length === 0 ? (
           <div className="text-center py-8 text-muted">No hay datos para este período</div>
         ) : (
-          <ResponsiveContainer width="100%" height={height || 200}>
-            <BarChart data={topServices} layout="vertical">
-              <CartesianGrid
-                strokeDasharray="2 5"
-                stroke={chart.grid}
-                opacity={0.42}
-                className="hidden lg:block"
-              />
-              <XAxis
-                type="number"
-                stroke={chart.axis}
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => formatCurrency(value, true)}
-              />
-              <YAxis
-                type="category"
-                dataKey="name"
-                stroke={chart.axis}
-                fontSize={11}
-                width={80}
-                className="lg:!w-[120px]"
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                content={
-                  <ServicesTooltip
-                    tone={{
-                      bg: chart.tooltipBg,
-                      border: chart.tooltipBorder,
-                      text: chart.tooltipText,
-                    }}
-                  />
-                }
-                cursor={{ fill: `${chart.accent}1f` }}
-              />
-              <Bar dataKey="revenue" radius={[0, 9, 9, 0]}>
-                {topServices.map((_, idx) => (
-                  <Cell
-                    key={`service-bar-${idx}`}
-                    fill={idx === 0 ? chart.winner : (chart.bars[idx - 1] ?? chart.accent)}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-[200px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={topServices} layout="vertical">
+                <CartesianGrid
+                  strokeDasharray="2 5"
+                  stroke={chart.grid}
+                  opacity={0.42}
+                  className="hidden lg:block"
+                />
+                <XAxis
+                  type="number"
+                  stroke={chart.axis}
+                  fontSize={11}
+                  tick={{ fontSize: 11, className: 'text-xs' }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => formatCurrency(value, true)}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  stroke={chart.axis}
+                  fontSize={11}
+                  tick={{ fontSize: 11, className: 'text-xs' }}
+                  width={80}
+                  className="lg:!w-[120px]"
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  content={
+                    <ServicesTooltip
+                      tone={{
+                        bg: chart.tooltipBg,
+                        border: chart.tooltipBorder,
+                        text: chart.tooltipText,
+                      }}
+                    />
+                  }
+                  cursor={{ fill: `${chart.accent}1f` }}
+                />
+                <Bar dataKey="revenue" radius={[0, 9, 9, 0]}>
+                  {topServices.map((_, idx) => (
+                    <Cell
+                      key={`service-bar-${idx}`}
+                      fill={idx === 0 ? chart.winner : (chart.bars[idx - 1] ?? chart.accent)}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         )}
 
         {/* Service Stats */}

@@ -7,7 +7,8 @@ import {
 } from '@/lib/api/middleware'
 import { logger, logSecurity } from '@/lib/logger'
 import { canModifyBarberAppointments } from '@/lib/rbac'
-import { sendPushToBusinessOwner, sendPushToUser } from '@/lib/push/sender'
+import { sendPushToUser } from '@/lib/push/sender'
+import { notify } from '@/lib/notifications/orchestrator'
 import { createServiceClient } from '@/lib/supabase/service-client'
 
 interface RouteParams {
@@ -231,7 +232,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
 
       logger.info({ appointmentId, status: 'completed' }, 'Appointment status changed to completed')
 
-      // Push to business owner (async, non-blocking)
+      // Push to business owner via orchestrator (async, non-blocking)
       const clientName = (updatedAppointment as any).client?.name || 'Cliente'
       const durationStr = actualDurationMinutes ? `${actualDurationMinutes}min` : ''
       const paymentLabels: Record<string, string> = {
@@ -242,12 +243,28 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       const paymentStr = paymentMethod ? paymentLabels[paymentMethod] || '' : ''
       const pushBody = [clientName, durationStr, paymentStr].filter(Boolean).join(' · ')
 
-      sendPushToBusinessOwner(business.id, {
-        title: 'Cita completada',
-        body: pushBody,
-        url: '/citas',
-        tag: `complete-${appointmentId}`,
-      }).catch((err) => logger.error({ err, appointmentId }, 'Push error on complete'))
+      notify(
+        'new_appointment',
+        {
+          businessId: business.id,
+          appointmentId,
+          userId: business.owner_id,
+          data: {
+            pushTitle: 'Cita completada',
+            pushBody,
+            pushUrl: '/citas',
+          },
+        },
+        {
+          push: {
+            title: 'Cita completada',
+            body: pushBody,
+            url: '/citas',
+            tag: `complete-${appointmentId}`,
+          },
+          skipChannels: ['email', 'in_app', 'whatsapp'],
+        }
+      ).catch((err) => logger.error({ err, appointmentId }, 'Push error on complete'))
 
       // 8. Push "arrive early" to next client if their appointment is within 60 min
       // Uses service client to bypass RLS for cross-client lookup

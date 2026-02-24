@@ -49,6 +49,7 @@ export default function BookingPage() {
     booking,
     availableDates,
     createdClientId,
+    claimToken,
     trackingToken,
     setStep,
     setBooking,
@@ -225,6 +226,7 @@ export default function BookingPage() {
         time={booking.time?.time || null}
         business={business}
         clientId={createdClientId}
+        claimToken={claimToken}
         clientEmail={booking.clientEmail}
         trackingToken={trackingToken}
       />

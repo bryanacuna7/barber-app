@@ -28,6 +28,7 @@ export function useBookingData(slug: string) {
   const [step, setStep] = useState<Step>('service')
   const [bookingComplete, setBookingComplete] = useState(false)
   const [createdClientId, setCreatedClientId] = useState<string | null>(null)
+  const [claimToken, setClaimToken] = useState<string | null>(null)
   const [bookingPricing, setBookingPricing] = useState<BookingPricing | null>(null)
   const [trackingToken, setTrackingToken] = useState<string | null>(null)
 
@@ -179,9 +180,12 @@ export function useBookingData(slug: string) {
         return
       }
 
-      // Store client_id for loyalty modal
+      // Store client_id and claim_token for loyalty modal
       if (data.client_id) {
         setCreatedClientId(data.client_id)
+      }
+      if (data.claim_token) {
+        setClaimToken(data.claim_token)
       }
 
       // Store pricing info from transparent response
@@ -217,6 +221,7 @@ export function useBookingData(slug: string) {
     booking,
     availableDates,
     createdClientId,
+    claimToken,
     bookingPricing,
     trackingToken,
     // Setters

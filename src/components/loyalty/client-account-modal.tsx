@@ -4,21 +4,17 @@
  * Client Account Modal
  * CRITICAL COMPONENT: Post-booking signup prompt
  *
- * Triggers when:
- * - Client completes booking successfully
- * - Business has loyalty program active
- * - Client does NOT have account (clients.user_id IS NULL)
- *
- * Purpose:
- * - Incentivize account creation with loyalty benefits
- * - Quick signup flow (email + password)
- * - Link client record to auth.users
+ * Security: Uses server-side claim token flow via /api/public/claim-account
+ * to prevent IDOR attacks. The raw clientId is NEVER sent from the browser.
+ * Instead, a one-time claim_token (generated server-side during booking)
+ * proves ownership of the client record.
  *
  * Flow:
- * 1. Show modal immediately after booking confirmation
+ * 1. Show modal after booking if business has loyalty program
  * 2. Pre-fill email if provided in booking form
- * 3. On signup success → link client.user_id → create loyalty_status
- * 4. On dismiss → save preference (don't show for 30 days)
+ * 3. On signup → POST /api/public/claim-account with claim_token
+ * 4. Server links client.user_id + creates loyalty status
+ * 5. On dismiss → save preference (don't show for 30 days)
  */
 
 import { useState } from 'react'
@@ -35,7 +31,7 @@ interface Props {
   onClose: () => void
   businessName: string
   businessId: string
-  clientId: string
+  claimToken: string
   prefillEmail?: string
 }
 
@@ -44,7 +40,7 @@ export function ClientAccountModal({
   onClose,
   businessName,
   businessId,
-  clientId,
+  claimToken,
   prefillEmail = '',
 }: Props) {
   const toast = useToast()
@@ -55,14 +51,13 @@ export function ClientAccountModal({
   const [mode, setMode] = useState<'signup' | 'login'>('signup')
 
   const handleSignup = async () => {
-    // Validation
     if (!email || !password) {
       toast.error('Por favor completa todos los campos')
       return
     }
 
-    if (password.length < 6) {
-      toast.error('La contraseña debe tener al menos 6 caracteres')
+    if (password.length < 8) {
+      toast.error('La contraseña debe tener al menos 8 caracteres')
       return
     }
 
@@ -74,57 +69,30 @@ export function ClientAccountModal({
     setIsSigningUp(true)
 
     try {
-      const supabase = createClient()
-
-      // Create user account
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            signup_source: 'loyalty_prompt',
-            business_id: businessId,
-          },
-        },
+      const res = await fetch('/api/public/claim-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          claim_token: claimToken,
+          email,
+          password,
+        }),
       })
 
-      if (authError) throw authError
+      const data = await res.json()
 
-      if (!authData.user) {
-        throw new Error('Failed to create user')
-      }
-
-      // Link client record to user
-      // Note: user_id column added in migration 014_loyalty_system.sql
-      const { error: linkError } = await supabase
-        .from('clients')
-        .update({ user_id: authData.user.id } as Record<string, unknown>)
-        .eq('id', clientId)
-
-      if (linkError) {
-        console.error('Failed to link client to user:', linkError)
-        // Don't throw - account is created, just log error
-      }
-
-      // Create initial loyalty status (with 0 points - next visit will start accumulating)
-      // Note: client_loyalty_status table created in migration 014_loyalty_system.sql
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: loyaltyError } = await (supabase as any).from('client_loyalty_status').insert({
-        client_id: clientId,
-        business_id: businessId,
-        user_id: authData.user.id,
-        points_balance: 0,
-        lifetime_points: 0,
-        visit_count: 0,
-      })
-
-      if (loyaltyError) {
-        console.error('Failed to create loyalty status:', loyaltyError)
+      if (!res.ok) {
+        if (data.code === 'EMAIL_EXISTS') {
+          toast.error('Este email ya está registrado. Intenta iniciar sesión.')
+          setMode('login')
+        } else {
+          toast.error(data.error || 'Error al crear cuenta')
+        }
+        return
       }
 
       toast.success('¡Cuenta creada! Tu próxima visita empezará a sumar puntos')
 
-      // Track analytics
       if (typeof window !== 'undefined' && 'plausible' in window) {
         ;(window as any).plausible('Loyalty Account Created', {
           props: { business_id: businessId },
@@ -132,15 +100,8 @@ export function ClientAccountModal({
       }
 
       onClose()
-    } catch (error: any) {
-      console.error('Signup error:', error)
-
-      if (error.message?.includes('already registered')) {
-        toast.error('Este email ya está registrado. Intenta iniciar sesión.')
-        setMode('login')
-      } else {
-        toast.error('Error al crear cuenta. Intenta de nuevo.')
-      }
+    } catch {
+      toast.error('Error al crear cuenta. Intenta de nuevo.')
     } finally {
       setIsSigningUp(false)
     }
@@ -157,7 +118,6 @@ export function ClientAccountModal({
     try {
       const supabase = createClient()
 
-      // Sign in
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -169,41 +129,16 @@ export function ClientAccountModal({
         throw new Error('Login failed')
       }
 
-      // Link client record to existing user
-      // Note: user_id column added in migration 014_loyalty_system.sql
-      const { error: linkError } = await supabase
-        .from('clients')
-        .update({ user_id: authData.user.id } as Record<string, unknown>)
-        .eq('id', clientId)
-
-      if (linkError) {
-        console.error('Failed to link client to user:', linkError)
-      }
-
-      // Create loyalty status if doesn't exist
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: loyaltyError } = await (supabase as any)
-        .from('client_loyalty_status')
-        .insert({
-          client_id: clientId,
-          business_id: businessId,
-          user_id: authData.user.id,
-          points_balance: 0,
-          lifetime_points: 0,
-          visit_count: 0,
-        })
-        .onConflict('client_id')
-        .ignore()
-
-      if (loyaltyError) {
-        console.error('Failed to create loyalty status:', loyaltyError)
-      }
-
       toast.success('¡Sesión iniciada! Ahora puedes acumular puntos')
 
+      if (typeof window !== 'undefined' && 'plausible' in window) {
+        ;(window as any).plausible('Loyalty Account Login', {
+          props: { business_id: businessId },
+        })
+      }
+
       onClose()
-    } catch (error: any) {
-      console.error('Login error:', error)
+    } catch {
       toast.error('Error al iniciar sesión. Verifica tus credenciales.')
     } finally {
       setIsSigningUp(false)
@@ -211,13 +146,11 @@ export function ClientAccountModal({
   }
 
   const handleDismiss = () => {
-    // Save preference to not show again for 30 days
     if (typeof window !== 'undefined') {
-      const dismissedUntil = Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
+      const dismissedUntil = Date.now() + 30 * 24 * 60 * 60 * 1000
       localStorage.setItem(`loyalty_modal_dismissed_${businessId}`, dismissedUntil.toString())
     }
 
-    // Track analytics
     if (typeof window !== 'undefined' && 'plausible' in window) {
       ;(window as any).plausible('Loyalty Prompt Dismissed', {
         props: { business_id: businessId },
@@ -317,7 +250,7 @@ export function ClientAccountModal({
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                   disabled={isSigningUp}
                 />
               </div>
