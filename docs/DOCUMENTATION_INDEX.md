@@ -123,6 +123,7 @@ barber-app/
 
 | Document                                                                       | Description             |
 | ------------------------------------------------------------------------------ | ----------------------- |
+| [FEATURES_PLAYBOOK.md](FEATURES_PLAYBOOK.md)                                   | Comercial por perfil    |
 | [MI_DIA_SUMMARY.md](reference/MI_DIA_SUMMARY.md)                               | Mi Día feature overview |
 | [ORCHESTRATION_REPORT_AREA_6.md](reference/ORCHESTRATION_REPORT_AREA_6.md)     | Área 6 implementation   |
 | [RATE_LIMITING_FLOW.md](reference/RATE_LIMITING_FLOW.md)                       | Rate limiting system    |
@@ -195,6 +196,7 @@ barber-app/
 
 - [x] **Weekly:** Update PROGRESS.md
 - [x] **After features:** Update implementation plans
+- [x] **After user-facing features:** Update `src/content/feature-catalog.json` and run `npm run docs:features`
 - [x] **After bugs:** Update lessons-learned.md
 - [x] **After DB changes:** Update DATABASE_SCHEMA.md
 - [x] **After decisions:** Update DECISIONS.md
@@ -225,6 +227,6 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 
 ---
 
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-24
 
 **Maintainer:** @documentation-expert

@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { Calendar, Scissors, Trophy, Star, CalendarPlus } from 'lucide-react'
+import { Calendar, Scissors, Trophy, Star, CalendarPlus, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useClientContext } from '@/contexts/client-context'
 import {
@@ -20,6 +20,7 @@ import {
 import { LiveQueueCard } from '@/components/client/live-queue-card'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { formatDate, formatCurrency } from '@/lib/utils/format'
+import { ClientNotificationBell } from '@/components/client/client-notification-bell'
 
 // Status labels and colors
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
@@ -67,9 +68,21 @@ export default function ClientHomePage() {
   return (
     <div className="px-4 pt-safe-offset-4 pt-12">
       {/* Greeting */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Hola, {firstName}</h1>
-        <p className="text-muted text-sm mt-0.5">{businessName}</p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Hola, {firstName}</h1>
+          <p className="text-muted text-sm mt-0.5">{businessName}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <ClientNotificationBell businessId={businessId} />
+          <Link
+            href="/mi-cuenta/perfil"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-muted hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            aria-label="Mi Perfil"
+          >
+            <Settings className="h-5 w-5" />
+          </Link>
+        </div>
       </div>
 
       {/* PWA Install Prompt — only shows if not already installed */}
@@ -93,7 +106,7 @@ export default function ClientHomePage() {
         ) : (
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 text-center">
             <Calendar className="h-8 w-8 text-muted mx-auto mb-2" />
-            <p className="text-sm text-muted">No tenés citas próximas</p>
+            <p className="text-sm text-muted">No tienes citas próximas</p>
           </div>
         )}
       </section>
@@ -126,7 +139,7 @@ export default function ClientHomePage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 text-center">
-            <p className="text-sm text-muted">Aún no tenés citas anteriores</p>
+            <p className="text-sm text-muted">Aún no tienes citas anteriores</p>
           </div>
         )}
       </section>

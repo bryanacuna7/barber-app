@@ -7,20 +7,9 @@ import { Scissors, Mail, MessageCircle, Instagram, Facebook, Twitter } from 'luc
 const navigation = {
   product: [
     { name: 'Características', href: '#features' },
-    { name: 'Demo', href: '#demo' },
+    { name: 'Beneficios', href: '#beneficios-por-rol' },
     { name: 'Precios', href: '/precios' },
     { name: 'Testimonios', href: '#testimonials' },
-  ],
-  company: [
-    { name: 'Acerca de', href: '/about' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Contacto', href: '/contact' },
-    { name: 'Ayuda', href: '/help' },
-  ],
-  legal: [
-    { name: 'Privacidad', href: '/privacy' },
-    { name: 'Términos', href: '/terms' },
-    { name: 'Cookies', href: '/cookies' },
   ],
   social: [
     {
@@ -126,11 +115,9 @@ export function Footer() {
           </motion.div>
 
           {/* Links */}
-          <div className="grid gap-8 sm:grid-cols-3 lg:col-span-3">
+          <div className="grid gap-8 sm:grid-cols-2 lg:col-span-3">
             {[
               { title: 'Producto', items: navigation.product },
-              { title: 'Empresa', items: navigation.company },
-              { title: 'Legal', items: navigation.legal },
             ].map((section, sectionIndex) => (
               <motion.div
                 key={section.title}

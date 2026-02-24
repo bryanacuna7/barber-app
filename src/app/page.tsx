@@ -2,10 +2,12 @@ import type { Metadata } from 'next'
 import { HeroSection } from '@/components/landing/hero-section'
 import { StatsSection } from '@/components/landing/stats-section'
 import { FeaturesSection } from '@/components/landing/features-section'
+import { RoleBenefitsSection } from '@/components/landing/role-benefits-section'
 // import { DemoSection } from '@/components/landing/demo-section' // Removed - product shown in Hero
 import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { PricingSection } from '@/components/landing/pricing-section'
 import { Footer } from '@/components/landing/footer'
+import { LandingNavbar } from '@/components/landing/landing-navbar'
 
 export const metadata: Metadata = {
   title: 'BarberApp - Sistema de Gestión para Barberías | Agenda, Clientes y Pagos',
@@ -79,9 +81,11 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
+      <LandingNavbar />
       <HeroSection />
       <StatsSection />
       <FeaturesSection />
+      <RoleBenefitsSection />
       <TestimonialsSection />
       <PricingSection />
       <Footer />

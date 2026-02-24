@@ -72,6 +72,12 @@ Client
 - Framer Motion UI animations
 - Deployed on Vercel
 
+## Sales and feature documentation
+
+- Feature playbook (owner/barber/client): `docs/FEATURES_PLAYBOOK.md`
+- Source of truth for features: `src/content/feature-catalog.json`
+- Regenerate docs after any user-facing change: `npm run docs:features`
+
 ## Local development
 
 1. Install dependencies

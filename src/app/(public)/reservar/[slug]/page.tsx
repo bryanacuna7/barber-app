@@ -50,6 +50,7 @@ export default function BookingPage() {
     availableDates,
     createdClientId,
     claimToken,
+    bookingPricing,
     trackingToken,
     setStep,
     setBooking,
@@ -229,6 +230,8 @@ export default function BookingPage() {
         claimToken={claimToken}
         clientEmail={booking.clientEmail}
         trackingToken={trackingToken}
+        barberName={booking.barber?.name ?? null}
+        pricing={bookingPricing}
       />
     )
   }

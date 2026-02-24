@@ -7,15 +7,17 @@
  * business switcher (multi-business), logout.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Mail, Phone, Trophy, LogOut, Check, Building2 } from 'lucide-react'
+import { User, Mail, Phone, Trophy, LogOut, Check, Building2, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useClientContext } from '@/contexts/client-context'
 import { useClientLoyalty, useUpdateClientProfile } from '@/hooks/queries/useClientDashboard'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { ClientNotificationBell } from '@/components/client/client-notification-bell'
+import { IOSToggle } from '@/components/ui/ios-toggle'
 
 const TIER_CONFIG: Record<string, { label: string; color: string }> = {
   bronze: { label: 'Bronce', color: 'text-amber-700 dark:text-amber-500' },
@@ -44,8 +46,28 @@ export default function ClientProfilePage() {
   const [email, setEmail] = useState(clientEmail ?? '')
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [smartPromosEnabled, setSmartPromosEnabled] = useState(true)
+  const [prefLoading, setPrefLoading] = useState(true)
 
   const hasChanges = name !== clientName || email !== (clientEmail ?? '')
+
+  useEffect(() => {
+    async function loadClientPrefs() {
+      if (!businessId) return
+      try {
+        const res = await fetch(`/api/client/notification-preferences?business_id=${businessId}`, {
+          cache: 'no-store',
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        setSmartPromosEnabled(data.smart_promos_enabled !== false)
+      } finally {
+        setPrefLoading(false)
+      }
+    }
+
+    loadClientPrefs()
+  }, [businessId])
 
   const handleSave = useCallback(async () => {
     if (!hasChanges) return
@@ -74,19 +96,49 @@ export default function ClientProfilePage() {
       router.refresh()
       setTimeout(() => setSaved(false), 2000)
     } catch {
-      setError('Error al guardar. Intentá de nuevo.')
+      setError('Error al guardar. Intenta de nuevo.')
     }
   }, [clientId, name, email, hasChanges, updateProfile, router])
 
   const handleLogout = useCallback(async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/login')
-  }, [router])
+    // Hard redirect to avoid middleware race condition
+    window.location.href = '/login'
+  }, [])
+
+  const handleSmartPromoToggle = useCallback(async () => {
+    if (prefLoading) return
+    const nextValue = !smartPromosEnabled
+    setPrefLoading(true)
+
+    try {
+      const res = await fetch('/api/client/notification-preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_id: businessId,
+          smart_promos_enabled: nextValue,
+          smart_promos_paused_until: null,
+        }),
+      })
+
+      if (!res.ok) throw new Error('Failed to update smart promo preference')
+      const data = await res.json()
+      setSmartPromosEnabled(data.smart_promos_enabled !== false)
+    } catch {
+      // keep previous state on error
+    } finally {
+      setPrefLoading(false)
+    }
+  }, [businessId, prefLoading, smartPromosEnabled])
 
   return (
     <div className="px-4 pt-safe-offset-4 pt-12">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-6">Mi Perfil</h1>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Mi Perfil</h1>
+        <ClientNotificationBell businessId={businessId} />
+      </div>
 
       {/* Profile Form */}
       <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 mb-6">
@@ -183,6 +235,29 @@ export default function ClientProfilePage() {
           )}
         </section>
       )}
+
+      {/* Smart promo preference */}
+      <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 mb-6">
+        <h2 className="font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+          <Bell className="h-5 w-5" />
+          Notificaciones
+        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-zinc-900 dark:text-white">
+              Recibir promociones inteligentes
+            </p>
+            <p className="text-xs text-muted mt-1">
+              Ofertas automáticas según tu horario habitual en esta barbería
+            </p>
+          </div>
+          <IOSToggle
+            checked={smartPromosEnabled}
+            onChange={handleSmartPromoToggle}
+            disabled={prefLoading}
+          />
+        </div>
+      </section>
 
       {/* Business Switcher */}
       {isMultiBusiness && (

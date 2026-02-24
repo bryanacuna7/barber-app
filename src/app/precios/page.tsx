@@ -22,13 +22,13 @@ const plans = [
     price: 12,
     description: 'Perfecto para barberías pequeñas',
     features: [
-      { label: 'Hasta 2 barberos', included: true },
+      { label: 'Hasta 2 miembros del equipo', included: true },
       { label: 'Hasta 3 servicios', included: true },
       { label: 'Hasta 25 clientes', included: true },
       { label: 'Reservas en línea', included: true },
       { label: 'Dashboard de citas', included: true },
       { label: 'Personalización de marca', included: false },
-      { label: 'Barberos ilimitados', included: false },
+      { label: 'Equipo ilimitado', included: false },
       { label: 'Servicios ilimitados', included: false },
     ],
     cta: 'Empieza gratis',
@@ -39,7 +39,7 @@ const plans = [
     price: 29,
     description: 'Para barberías en crecimiento',
     features: [
-      { label: 'Barberos ilimitados', included: true },
+      { label: 'Equipo ilimitado', included: true },
       { label: 'Servicios ilimitados', included: true },
       { label: 'Clientes ilimitados', included: true },
       { label: 'Reservas en línea', included: true },
@@ -67,7 +67,7 @@ const faqs = [
   {
     question: '¿Puedo cambiar de plan después?',
     answer:
-      'Sí, puedes actualizar a Pro en cualquier momento. Si ya tienes más barberos, servicios o clientes de los permitidos en Básico, simplemente no podrás agregar más hasta que actualices.',
+      'Sí, puedes actualizar a Pro en cualquier momento. Si ya tienes más miembros del equipo, servicios o clientes de los permitidos en Básico, simplemente no podrás agregar más hasta que actualices.',
   },
   {
     question: '¿Qué pasa si cancelo?',
@@ -211,8 +211,8 @@ export default function PreciosPage() {
             />
             <FeatureCard
               icon={Scissors}
-              title="Multi-Barbero"
-              description="Cada barbero con su propio horario y disponibilidad."
+              title="Multi-Staff"
+              description="Cada miembro del equipo con su propio horario y disponibilidad."
             />
             <FeatureCard
               icon={Palette}

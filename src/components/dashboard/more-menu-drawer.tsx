@@ -437,7 +437,7 @@ export function MoreMenuDrawer({
           transition={{ delay: 0.3 }}
           className="pt-4 text-center"
         >
-          <p className="text-sm text-zinc-400 dark:text-zinc-600">BarberApp v1.0</p>
+          <p className="text-sm text-zinc-400 dark:text-zinc-600">BarberApp v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.9.8'}</p>
         </motion.div>
       </div>
     </Drawer>

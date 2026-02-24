@@ -58,6 +58,7 @@ git checkout -b feature/your-feature-name
 - ⚠️ **Database Changes:** ALWAYS verify columns exist in [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) first
 - ⚠️ **TypeScript:** No `@ts-ignore` or `any` types without justification
 - ⚠️ **Tests:** Add tests for new features
+- ⚠️ **Feature docs:** Any user-facing feature change must update `src/content/feature-catalog.json`
 - ⚠️ **Security:** Never commit secrets, API keys, or credentials
 
 ### 3. Test Your Changes
@@ -253,6 +254,16 @@ describe('calculateDiscount', () => {
 - **DB schema change:** Update [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)
 - **Critical bug:** Add to [docs/reference/lessons-learned.md](docs/reference/lessons-learned.md)
 - **API change:** Update API documentation
+- **User-facing feature change:** Update `src/content/feature-catalog.json` and run `npm run docs:features`
+
+### Feature Playbook Sync (Required)
+
+```bash
+npm run docs:features
+npm run docs:features:check
+```
+
+If `docs:features:check` fails, the PR is incomplete.
 
 ### Documentation Style
 

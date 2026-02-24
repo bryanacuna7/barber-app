@@ -6,6 +6,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { AnimatePresence } from 'framer-motion'
 import type { Service, Business, AdvancePaymentInfo } from '@/types'
+import type { BookingPricing } from '@/types/api'
 import { Button } from '@/components/ui/button'
 import { ClientAccountModal } from '@/components/loyalty/client-account-modal'
 import { AdvancePaymentSubmit } from '@/components/reservar/advance-payment-submit'
@@ -20,6 +21,8 @@ interface BookingSuccessProps {
   claimToken: string | null
   clientEmail: string
   trackingToken: string | null
+  barberName?: string | null
+  pricing?: BookingPricing | null
 }
 
 export function BookingSuccess({
@@ -31,6 +34,8 @@ export function BookingSuccess({
   claimToken,
   clientEmail,
   trackingToken,
+  barberName,
+  pricing,
 }: BookingSuccessProps) {
   const [showLoyaltyModal, setShowLoyaltyModal] = useState(false)
   const [hasLoyaltyProgram, setHasLoyaltyProgram] = useState(false)
@@ -106,7 +111,38 @@ export function BookingSuccess({
             <p className="mt-1 text-[17px] font-semibold text-zinc-900 dark:text-white">
               {service?.name}
             </p>
+            {pricing && (
+              <p className="mt-1 text-[15px] text-zinc-600 dark:text-zinc-400">
+                {pricing.discount_applied ? (
+                  <>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      ₡{pricing.final_price.toLocaleString()}
+                    </span>
+                    <span className="ml-2 line-through text-zinc-400">
+                      ₡{pricing.original_price.toLocaleString()}
+                    </span>
+                    {pricing.discount_label && (
+                      <span className="ml-2 text-[12px] text-emerald-600 dark:text-emerald-400">
+                        {pricing.discount_label}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="font-semibold">₡{pricing.final_price.toLocaleString()}</span>
+                )}
+              </p>
+            )}
           </div>
+          {barberName && (
+            <div className="rounded-2xl bg-zinc-100/80 p-4 dark:bg-zinc-800/80">
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                Profesional
+              </p>
+              <p className="mt-1 text-[17px] font-semibold text-zinc-900 dark:text-white">
+                {barberName}
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-2xl bg-zinc-100/80 p-4 dark:bg-zinc-800/80">
               <p className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
@@ -171,7 +207,7 @@ export function BookingSuccess({
             {advancePaymentInfo && !advancePaymentSubmitted && !showAdvancePayment && (
               <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/30">
                 <p className="text-[15px] font-semibold text-blue-900 dark:text-blue-100">
-                  Pagá antes y ahorrá {advancePaymentInfo.discount}%
+                  Paga antes y ahorra {advancePaymentInfo.discount}%
                 </p>
                 <p className="mt-1 text-[13px] text-blue-700 dark:text-blue-300">
                   Precio con descuento: ₡{advancePaymentInfo.final_price.toLocaleString()}
