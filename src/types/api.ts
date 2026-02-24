@@ -12,6 +12,8 @@ export interface BookingRequest {
   client_phone: string
   client_email?: string
   notes?: string
+  promo_rule_id?: string
+  smart_token?: string
 }
 
 export interface BookingResponse {

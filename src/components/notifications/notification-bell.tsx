@@ -14,6 +14,7 @@ import {
   Users,
   AlertTriangle,
   X,
+  Tag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatNotificationTime, type NotificationType } from '@/lib/notifications'
@@ -44,6 +45,7 @@ const notificationIcons: Record<string, React.ElementType> = {
   new_appointment: Calendar,
   appointment_reminder: Bell,
   appointment_cancelled: Calendar,
+  smart_promo_offer: Tag,
   new_business: Building,
   payment_pending: CreditCard,
   trials_expiring_bulk: Users,
@@ -60,6 +62,7 @@ const notificationColors: Record<string, { icon: string; bg: string }> = {
   new_appointment: { icon: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30' },
   appointment_reminder: { icon: 'text-blue-600', bg: 'bg-blue-100 dark:bg-blue-900/30' },
   appointment_cancelled: { icon: 'text-zinc-600', bg: 'bg-zinc-100 dark:bg-zinc-800' },
+  smart_promo_offer: { icon: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
   new_business: { icon: 'text-purple-600', bg: 'bg-purple-100 dark:bg-purple-900/30' },
   payment_pending: { icon: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },
   trials_expiring_bulk: { icon: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30' },

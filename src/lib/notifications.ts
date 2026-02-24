@@ -13,6 +13,8 @@ export type NotificationType =
   | 'appointment_reminder'
   | 'appointment_cancelled'
   | 'appointment_rescheduled'
+  // Client notifications
+  | 'smart_promo_offer'
   // Admin notifications
   | 'new_business'
   | 'payment_pending'
@@ -327,6 +329,11 @@ export function getNotificationStyle(type: NotificationType): {
       icon: 'RefreshCw',
       color: 'text-blue-500',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+    },
+    smart_promo_offer: {
+      icon: 'Tag',
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
     },
     // Admin notifications
     new_business: {

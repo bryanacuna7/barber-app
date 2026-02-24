@@ -1,8 +1,9 @@
 /**
  * GET /api/cron/appointment-reminders
  *
- * Vercel Cron — runs every 15 minutes.
+ * Vercel Cron — runs daily (current schedule in vercel.json).
  * Sends reminder push + email to clients 24h and 1h before their appointment.
+ * Also executes smart promo notifications for habitual client time slots.
  *
  * Security:
  * - Authenticated via CRON_SECRET Bearer token (Vercel auto-injects)
@@ -24,6 +25,7 @@ import { sendPushToUser } from '@/lib/push/sender'
 import { sendEmail } from '@/lib/email/sender'
 import AppointmentReminderEmail from '@/lib/email/templates/appointment-reminder'
 import { logger } from '@/lib/logger'
+import { runSmartPromoNotifications } from '@/lib/smart-notifications/daily-job'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60 // seconds
@@ -39,6 +41,8 @@ export async function GET(request: Request) {
   const now = new Date()
   let sent24h = 0
   let sent1h = 0
+  let smartSent = 0
+  let smartCandidates = 0
   let errors = 0
 
   try {
@@ -124,9 +128,23 @@ export async function GET(request: Request) {
       }
     }
 
-    logger.info({ sent24h, sent1h, errors }, 'Appointment reminders cron completed')
+    // 4. Smart promo notifications (daily window now..+28h due daily cron cadence)
+    try {
+      const smartStats = await runSmartPromoNotifications(serviceClient, now)
+      smartSent = smartStats.sent
+      smartCandidates = smartStats.candidatesFound
+      errors += smartStats.errors
+    } catch (err) {
+      errors++
+      logger.error({ err }, 'Failed smart promo notification job')
+    }
 
-    // === Cleanup old payment proofs (30 days) ===
+    logger.info(
+      { sent24h, sent1h, smartSent, smartCandidates, errors },
+      'Appointment reminders cron completed'
+    )
+
+    // 5. Cleanup old payment proofs (30 days)
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
@@ -161,6 +179,8 @@ export async function GET(request: Request) {
       ok: true,
       sent24h,
       sent1h,
+      smartSent,
+      smartCandidates,
       errors,
       timestamp: now.toISOString(),
     })
@@ -186,7 +206,7 @@ async function sendReminder(
   if (!client) return
 
   const serviceName = service?.name ?? 'Servicio'
-  const barberName = barber?.name ?? 'Barbero'
+  const barberName = barber?.name ?? 'Miembro del equipo'
   const businessName = business?.name ?? 'Barbería'
   const brandColor = business?.brand_primary_color ?? '#3b82f6'
 

@@ -1,0 +1,356 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-24",
+  "roles": [
+    {
+      "id": "owner",
+      "label": "Dueno de negocio",
+      "summary": "Controla operacion, ingresos, equipo y experiencia del cliente desde un solo lugar.",
+      "keyBenefits": [
+        "Menos tiempo operativo manual y menos errores de agenda",
+        "Mas citas efectivas con recordatorios y reglas automatizadas",
+        "Mayor ticket promedio con promociones, lealtad y pagos anticipados",
+        "Mejor visibilidad del negocio con metricas accionables"
+      ],
+      "landingFeatureIds": [
+        "smart-calendar",
+        "client-crm",
+        "analytics-suite",
+        "advance-payment-sinpe",
+        "promotional-slots",
+        "permission-controls"
+      ]
+    },
+    {
+      "id": "barber",
+      "label": "Miembro del equipo",
+      "summary": "Trabaja con una agenda clara, menos friccion operativa y foco total en atender mejor.",
+      "keyBenefits": [
+        "Dia de trabajo claro con prioridades visibles",
+        "Menos no-shows y mejor coordinacion con clientes",
+        "Autonomia para gestionar bloqueos y disponibilidad",
+        "Onboarding mas rapido para nuevos integrantes"
+      ],
+      "landingFeatureIds": [
+        "barber-day-workflow",
+        "barber-schedule-blocks",
+        "automated-notifications",
+        "smart-duration",
+        "onboarding-checklist",
+        "multi-barber-team"
+      ]
+    },
+    {
+      "id": "client",
+      "label": "Cliente final",
+      "summary": "Reserva facil, seguimiento en vivo y control de su cita sin llamadas ni friccion.",
+      "keyBenefits": [
+        "Reserva online 24/7 en pocos pasos",
+        "Visibilidad del turno en tiempo real",
+        "Opciones de cancelacion o reagendado segun politica del negocio",
+        "Historial, perfil y notificaciones en su portal"
+      ],
+      "landingFeatureIds": [
+        "public-booking-experience",
+        "live-queue-tracking",
+        "cancellation-policy",
+        "advance-payment-sinpe",
+        "client-portal",
+        "automated-notifications"
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": "smart-calendar",
+      "title": "Agenda inteligente multibarbero",
+      "description": "Gestion de citas con vista diaria/semanal, drag and drop y sincronizacion en tiempo real.",
+      "roles": ["owner", "barber"],
+      "benefit": "Reduce errores operativos y acelera la reprogramacion.",
+      "advantage": "Operacion agil incluso en horarios de alta demanda.",
+      "modules": ["/citas", "/mi-dia", "/dashboard"],
+      "roleBenefits": {
+        "owner": "Controla toda la operacion y reasigna citas en segundos.",
+        "barber": "Ve su dia con claridad y ajusta citas sin perder contexto."
+      }
+    },
+    {
+      "id": "multi-barber-team",
+      "title": "Gestion de equipo e invitaciones",
+      "description": "Invitacion de miembros del equipo por email, estados activo/inactivo y gestion de equipo.",
+      "roles": ["owner", "barber"],
+      "benefit": "Escala la barberia sin perder control de personal.",
+      "advantage": "Alta de nuevos miembros del equipo sin procesos manuales largos.",
+      "modules": ["/barberos", "/configuracion/equipo"],
+      "roleBenefits": {
+        "owner": "Administra crecimiento del equipo desde un panel central.",
+        "barber": "Recibe acceso formal y entra a operar rapido."
+      }
+    },
+    {
+      "id": "permission-controls",
+      "title": "Permisos por miembro del equipo",
+      "description": "El dueno define que secciones y acciones puede usar cada miembro del equipo.",
+      "roles": ["owner"],
+      "benefit": "Mejor control operativo y menos riesgo por accesos excesivos.",
+      "advantage": "Gestion granular sin depender de desarrollo.",
+      "modules": ["/configuracion/equipo"],
+      "roleBenefits": {
+        "owner": "Protege informacion sensible y delega con seguridad."
+      }
+    },
+    {
+      "id": "client-crm",
+      "title": "CRM de clientes",
+      "description": "Historial de visitas, gasto, segmentacion y datos de contacto en un solo lugar.",
+      "roles": ["owner"],
+      "benefit": "Mejora retencion y campanas dirigidas por comportamiento.",
+      "advantage": "Informacion accionable sin hojas de calculo.",
+      "modules": ["/clientes"],
+      "roleBenefits": {
+        "owner": "Detecta clientes VIP, frecuentes o inactivos y actua rapido."
+      }
+    },
+    {
+      "id": "exports-csv",
+      "title": "Exportacion CSV",
+      "description": "Descarga de clientes e historial de citas para analisis externo.",
+      "roles": ["owner"],
+      "benefit": "Facilita reportes comerciales y control administrativo.",
+      "advantage": "Datos listos para contabilidad y analisis sin integraciones complejas.",
+      "modules": ["/api/exports/clients", "/api/exports/appointments"],
+      "roleBenefits": {
+        "owner": "Extrae informacion del negocio para decisiones y auditoria."
+      }
+    },
+    {
+      "id": "service-catalog",
+      "title": "Catalogo de servicios",
+      "description": "Gestion de servicios, precios y duraciones base por negocio.",
+      "roles": ["owner"],
+      "benefit": "Estandariza la oferta y evita inconsistencias de precio.",
+      "advantage": "Control comercial centralizado.",
+      "modules": ["/servicios"],
+      "roleBenefits": {
+        "owner": "Actualiza tu oferta sin depender de terceros."
+      }
+    },
+    {
+      "id": "analytics-suite",
+      "title": "Analiticas y KPIs",
+      "description": "Panel con metricas de citas, ingresos, servicios y demanda.",
+      "roles": ["owner"],
+      "benefit": "Permite decisiones basadas en datos reales del negocio.",
+      "advantage": "Identifica oportunidades de crecimiento con rapidez.",
+      "modules": ["/analiticas", "/dashboard"],
+      "roleBenefits": {
+        "owner": "Detecta horas pico, rendimiento de servicios y tendencias de ingresos."
+      }
+    },
+    {
+      "id": "smart-duration",
+      "title": "Duracion inteligente",
+      "description": "El sistema aprende duraciones reales por servicio y miembro del equipo.",
+      "roles": ["owner", "barber"],
+      "benefit": "Mejora precision de disponibilidad y reduce atrasos.",
+      "advantage": "Agenda mas realista que se ajusta a la operacion real.",
+      "modules": ["/configuracion/avanzado", "/analiticas"],
+      "roleBenefits": {
+        "owner": "Optimiza capacidad de agenda y ocupacion.",
+        "barber": "Recibe una agenda mejor ajustada a su ritmo real."
+      }
+    },
+    {
+      "id": "promotional-slots",
+      "title": "Promociones por horario",
+      "description": "Descuentos automaticos en horas de baja demanda.",
+      "roles": ["owner", "client"],
+      "benefit": "Aumenta ocupacion en franjas ociosas.",
+      "advantage": "Monetiza mejor la capacidad no utilizada.",
+      "modules": ["/configuracion/promociones", "/reservar/[slug]"],
+      "roleBenefits": {
+        "owner": "Llena huecos de agenda con reglas automaticas.",
+        "client": "Encuentra horarios con mejor precio de forma transparente."
+      }
+    },
+    {
+      "id": "advance-payment-sinpe",
+      "title": "Pago anticipado SINPE",
+      "description": "Pago previo con comprobante y verificacion en dashboard.",
+      "roles": ["owner", "client"],
+      "benefit": "Disminuye ausencias y mejora flujo de caja.",
+      "advantage": "Asegura compromiso del cliente antes de la cita.",
+      "modules": ["/configuracion/pagos", "/reservar/[slug]", "/api/public/advance-payment"],
+      "roleBenefits": {
+        "owner": "Reduce riesgo de no-show y valida pagos en un flujo controlado.",
+        "client": "Puede asegurar su cita y acceder a descuento anticipado."
+      }
+    },
+    {
+      "id": "cancellation-policy",
+      "title": "Cancelacion y reagendado desde enlace",
+      "description": "El cliente puede cancelar o reagendar segun reglas del negocio.",
+      "roles": ["owner", "client"],
+      "benefit": "Reduce friccion de soporte y ordena cambios de agenda.",
+      "advantage": "Autogestion del cliente con reglas claras.",
+      "modules": ["/configuracion/pagos", "/track/[token]"],
+      "roleBenefits": {
+        "owner": "Define politicas y evita desorden operativo por cambios de ultimo minuto.",
+        "client": "Gestiona su cita sin llamadas ni espera."
+      }
+    },
+    {
+      "id": "automated-notifications",
+      "title": "Notificaciones automaticas",
+      "description": "Recordatorios y alertas por email/push, incluyendo aviso de llegada anticipada.",
+      "roles": ["owner", "barber", "client"],
+      "benefit": "Mejora asistencia y experiencia de servicio.",
+      "advantage": "Comunicacion proactiva sin carga manual.",
+      "modules": ["/api/cron/appointment-reminders", "/track/[token]", "/mi-cuenta/notificaciones"],
+      "roleBenefits": {
+        "owner": "Reduce no-shows con mensajes automatizados.",
+        "barber": "Coordina mejor su flujo diario con clientes informados.",
+        "client": "Recibe recordatorios y avisos utiles en el momento correcto."
+      }
+    },
+    {
+      "id": "notification-log",
+      "title": "Registro de notificaciones",
+      "description": "Historial auditable de notificaciones enviadas.",
+      "roles": ["owner"],
+      "benefit": "Permite control y trazabilidad de comunicaciones.",
+      "advantage": "Visibilidad completa sobre mensajes enviados.",
+      "modules": ["/api/notifications/log"],
+      "roleBenefits": {
+        "owner": "Verifica que notificaciones se enviaron y cuando."
+      }
+    },
+    {
+      "id": "loyalty-program",
+      "title": "Programa de lealtad",
+      "description": "Configuracion de recompensas para clientes recurrentes.",
+      "roles": ["owner", "client"],
+      "benefit": "Incrementa recurrencia y valor de vida del cliente.",
+      "advantage": "Retencion integrada sin herramientas externas.",
+      "modules": ["/lealtad/configuracion", "/mi-cuenta"],
+      "roleBenefits": {
+        "owner": "Fideliza clientes con incentivos configurables.",
+        "client": "Acumula beneficios por volver al negocio."
+      }
+    },
+    {
+      "id": "referrals-program",
+      "title": "Sistema de referencias",
+      "description": "Codigo de referidos, hitos y recompensas por conversion.",
+      "roles": ["owner"],
+      "benefit": "Genera crecimiento organico con menor costo de adquisicion.",
+      "advantage": "Canal de captacion propio medible desde la app.",
+      "modules": ["/referencias"],
+      "roleBenefits": {
+        "owner": "Convierte clientes satisfechos en canal activo de crecimiento."
+      }
+    },
+    {
+      "id": "barber-day-workflow",
+      "title": "Mi Dia para miembros del equipo",
+      "description": "Vista diaria mobile-first con estados de cita y acciones rapidas.",
+      "roles": ["barber"],
+      "benefit": "Aumenta foco y velocidad operativa durante la jornada.",
+      "advantage": "Flujo simple para operar sin perder tiempo en navegacion.",
+      "modules": ["/mi-dia"],
+      "roleBenefits": {
+        "barber": "Gestiona su jornada completa desde una pantalla optimizada."
+      }
+    },
+    {
+      "id": "barber-schedule-blocks",
+      "title": "Bloqueos de agenda",
+      "description": "Bloqueo de descansos, vacaciones o tiempos personales.",
+      "roles": ["barber", "owner"],
+      "benefit": "Evita sobrecarga y conflictos de disponibilidad.",
+      "advantage": "Agenda realista y sostenible para el equipo.",
+      "modules": ["/api/barber-blocks", "/mi-dia"],
+      "roleBenefits": {
+        "barber": "Protege su disponibilidad real sin gestion manual externa.",
+        "owner": "Mantiene una planificacion operativa mas confiable."
+      }
+    },
+    {
+      "id": "onboarding-checklist",
+      "title": "Checklist de onboarding",
+      "description": "Guia inicial para nuevos miembros del equipo (perfil, horario, notificaciones).",
+      "roles": ["barber", "owner"],
+      "benefit": "Acelera adopcion del equipo y reduce soporte interno.",
+      "advantage": "Incorporacion estandarizada desde el primer ingreso.",
+      "modules": ["/onboarding"],
+      "roleBenefits": {
+        "barber": "Empieza a usar la app con pasos claros y concretos.",
+        "owner": "Disminuye tiempo de capacitacion manual."
+      }
+    },
+    {
+      "id": "public-booking-experience",
+      "title": "Reserva online personalizada",
+      "description": "Flujo publico de reserva por negocio con branding, servicios y horarios.",
+      "roles": ["client", "owner"],
+      "benefit": "Habilita captacion 24/7 sin llamadas ni intermediarios.",
+      "advantage": "Experiencia digital propia de la marca.",
+      "modules": ["/reservar/[slug]", "/configuracion/branding", "/configuracion/general"],
+      "roleBenefits": {
+        "client": "Agenda su cita en minutos desde cualquier dispositivo.",
+        "owner": "Convierte trafico digital en citas confirmadas."
+      }
+    },
+    {
+      "id": "live-queue-tracking",
+      "title": "Seguimiento en vivo de cita",
+      "description": "Pagina publica de seguimiento con estado de cola en tiempo real.",
+      "roles": ["client", "barber", "owner"],
+      "benefit": "Reduce incertidumbre y mejora puntualidad.",
+      "advantage": "Experiencia tipo \"llega cuando toca\" para el cliente.",
+      "modules": ["/track/[token]", "/api/public/queue"],
+      "roleBenefits": {
+        "client": "Sabe exactamente en que estado va su turno.",
+        "barber": "Atiende clientes mejor preparados y a tiempo.",
+        "owner": "Eleva percepcion de servicio moderno y ordenado."
+      }
+    },
+    {
+      "id": "client-portal",
+      "title": "Portal de cliente",
+      "description": "Area personal con historial, perfil y preferencias de notificacion.",
+      "roles": ["client"],
+      "benefit": "Mejora experiencia post-reserva y relacion a largo plazo.",
+      "advantage": "Autoservicio completo para el cliente final.",
+      "modules": ["/mi-cuenta", "/mi-cuenta/perfil", "/mi-cuenta/notificaciones"],
+      "roleBenefits": {
+        "client": "Gestiona su informacion y revisa su historial cuando quiera."
+      }
+    },
+    {
+      "id": "branding-customization",
+      "title": "Personalizacion de marca",
+      "description": "Colores y logo del negocio reflejados en la experiencia publica.",
+      "roles": ["owner", "client"],
+      "benefit": "Fortalece identidad y confianza en cada punto de contacto.",
+      "advantage": "Experiencia white-label orientada a conversion.",
+      "modules": ["/configuracion/branding", "/reservar/[slug]"],
+      "roleBenefits": {
+        "owner": "Muestra una experiencia coherente con su marca.",
+        "client": "Reconoce facilmente la marca al reservar."
+      }
+    },
+    {
+      "id": "subscription-management",
+      "title": "Gestion de suscripcion",
+      "description": "Cambio de plan y gestion de pagos de la cuenta de negocio.",
+      "roles": ["owner"],
+      "benefit": "Control total del crecimiento y costos de la operacion.",
+      "advantage": "Administracion comercial centralizada en la plataforma.",
+      "modules": ["/suscripcion", "/api/subscription"],
+      "roleBenefits": {
+        "owner": "Ajusta su plan segun etapa del negocio sin friccion."
+      }
+    }
+  ]
+}

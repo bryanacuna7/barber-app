@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { format, addDays, startOfDay } from 'date-fns'
-import type { Service, Business, TimeSlot, Barber } from '@/types'
+import type { Service, Business, Barber } from '@/types'
 import type { EnrichedTimeSlot, BookingPricing } from '@/types/api'
 
 type Step = 'service' | 'barber' | 'datetime' | 'info' | 'confirm'
@@ -17,6 +18,8 @@ interface BookingData {
 }
 
 export function useBookingData(slug: string) {
+  const searchParams = useSearchParams()
+  const smartToken = searchParams.get('sn')
   const [business, setBusiness] = useState<Business | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [barbers, setBarbers] = useState<Barber[]>([])
@@ -87,12 +90,38 @@ export function useBookingData(slug: string) {
       setLoadingSlots(true)
       try {
         const dateStr = format(booking.date, 'yyyy-MM-dd')
-        const res = await fetch(
-          `/api/public/${slug}/availability?date=${dateStr}&service_id=${booking.service.id}`
-        )
-        const data = await res.json()
+        const params = new URLSearchParams({
+          date: dateStr,
+          service_id: booking.service.id,
+        })
+
+        if (booking.barber?.id) {
+          params.set('barber_id', booking.barber.id)
+        }
+
+        const res = await fetch(`/api/public/${slug}/availability?${params.toString()}`)
+        const data = await res.json().catch(() => null)
+
+        if (!res.ok) {
+          const apiError =
+            data && typeof data === 'object' && 'error' in data
+              ? String(data.error)
+              : 'No se pudieron cargar los horarios disponibles.'
+          setSlots([])
+          setError(apiError)
+          return
+        }
+
+        if (!Array.isArray(data)) {
+          setSlots([])
+          setError('No se pudieron cargar los horarios disponibles.')
+          return
+        }
+
+        setError('')
         setSlots(data)
       } catch {
+        setError('Error al cargar horarios disponibles. Intenta de nuevo.')
         setSlots([])
       } finally {
         setLoadingSlots(false)
@@ -100,11 +129,11 @@ export function useBookingData(slug: string) {
     }
 
     fetchSlots()
-  }, [slug, booking.service, booking.date])
+  }, [slug, booking.service, booking.date, booking.barber])
 
   const handleServiceSelect = (service: Service) => {
     if (barbers.length === 0) {
-      setError('Este negocio aún no tiene barberos configurados. Contacta a la barbería.')
+      setError('Este negocio aún no tiene miembros del equipo configurados. Contacta a la barbería.')
       return
     }
 
@@ -140,14 +169,14 @@ export function useBookingData(slug: string) {
     e.preventDefault()
     if (!booking.service || !booking.time) return
     if (barbers.length === 0) {
-      setError('Este negocio aún no tiene barberos configurados. Contacta a la barbería.')
+      setError('Este negocio aún no tiene miembros del equipo configurados. Contacta a la barbería.')
       return
     }
 
     // Validate barber_id exists
     const selectedBarberId = booking.barber?.id || barbers[0]?.id
     if (!selectedBarberId) {
-      setError('No se pudo asignar un barbero para esta cita. Contacta a la barbería.')
+      setError('No se pudo asignar un miembro del equipo para esta cita. Contacta a la barbería.')
       return
     }
 
@@ -164,6 +193,7 @@ export function useBookingData(slug: string) {
         client_email: booking.clientEmail || undefined,
         notes: booking.notes || undefined,
         promo_rule_id: booking.time.discount?.ruleId || undefined,
+        smart_token: smartToken || undefined,
       }
 
       const res = await fetch(`/api/public/${slug}/book`, {

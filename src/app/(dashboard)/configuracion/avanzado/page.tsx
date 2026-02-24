@@ -8,6 +8,7 @@ import { FadeInUp } from '@/components/ui/motion'
 import { NotificationPreferencesSection } from '@/components/settings/notification-preferences-section'
 import { PushNotificationToggle } from '@/components/settings/push-notification-toggle'
 import { SmartDurationToggle } from '@/components/settings/smart-duration-toggle'
+import { SmartNotificationsToggle } from '@/components/settings/smart-notifications-toggle'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { SettingsSubrouteHeader } from '@/components/settings/settings-subroute-header'
 import { createClient } from '@/lib/supabase/client'
@@ -70,6 +71,24 @@ export default function AvanzadoPage() {
               </CardHeader>
               <CardContent>
                 <SmartDurationToggle />
+              </CardContent>
+            </Card>
+          </FadeInUp>
+
+          {/* Smart Notifications */}
+          <FadeInUp delay={0.12}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-[17px]">
+                  <BellRing className="h-5 w-5" />
+                  Captación Inteligente
+                </CardTitle>
+                <CardDescription>
+                  Detecta hábitos y envía ofertas cuando haya promo disponible
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SmartNotificationsToggle />
               </CardContent>
             </Card>
           </FadeInUp>
