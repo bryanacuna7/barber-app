@@ -4,6 +4,35 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.9] - 2026-02-24
+
+### Nuevo
+
+- Notificaciones inteligentes para clientes: recordatorios de re-reserva y mensajes personalizados por frecuencia de visita
+- Navbar fijo en la pagina principal con navegacion y acceso directo a registro
+
+### Mejorado
+
+- "Barberos" renombrado a "Equipo" en toda la plataforma para reflejar equipos mas diversos
+- Confirmacion de reserva ahora muestra el nombre del profesional y el precio final (con descuento si aplica)
+- Tarjetas de servicio mas robustas en movil: textos largos ya no rompen el layout
+- Calendario corregido para mostrar siempre el dia correcto en zona horaria de Costa Rica
+- Notificaciones push con mensajes de error claros cuando algo falla al activarlas
+- Enlace directo a perfil desde la cuenta del cliente
+- Pie de pagina simplificado sin enlaces rotos
+- Cierre de sesion ahora redirige correctamente en todos los navegadores
+
+### Corregido
+
+- 7 problemas criticos de la auditoria E2E: rutas de autenticacion, pantalla post-reserva, indicadores de disponibilidad, datos fantasma y mas
+- Textos en espanol estandarizado (sin mezcla de vos/tu)
+- Version dinamica en el menu lateral (ya no dice "v1.0" fijo)
+- Corregido error de compilacion en configuracion de gestos
+- Precio fijo "Equipo ilimitado" (antes decia "ilimitados")
+- Colores de la app corregidos al instalarla en el celular
+
+---
+
 ## [0.9.8] - 2026-02-24
 
 ### Nuevo

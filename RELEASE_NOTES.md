@@ -8,25 +8,25 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.8
+## v0.9.9
 
 ### Nuevo
 
-- Bloqueos de agenda: marca descansos, vacaciones o tiempo personal y esos horarios desaparecen automaticamente de la pagina de reservas
-- Permisos por barbero: configura que secciones del dashboard puede ver cada barbero de forma individual
-- Exportar CSV: descarga tu lista de clientes o historial de citas en un archivo para Excel
-- Checklist de bienvenida para barberos nuevos: foto de perfil, horario y notificaciones push en 3 pasos faciles
-- Historial de notificaciones: ve que notificaciones se enviaron, a quien y si llegaron correctamente
+- Notificaciones inteligentes para clientes: recordatorios automaticos de re-reserva adaptados a la frecuencia de cada cliente
+- Navbar fijo en la pagina principal con acceso directo a registro e inicio de sesion
 
 ### Mejoras
 
-- Encabezados del dashboard con estilo unificado en todas las paginas
-- Las graficas se ven mejor en celular: mas compactas y con tooltips que se pueden tocar
-- Formularios ahora dicen "Correo" en vez de "Email" para mantener todo en espanol
-- Las tarjetas del programa de lealtad se ven mas limpias (sin bordes duplicados)
+- "Barberos" ahora se llama "Equipo" en toda la plataforma
+- Al confirmar una reserva, ahora ves el nombre del profesional y el precio final con descuento si aplica
+- Las tarjetas de servicio ya no se rompen con nombres o descripciones largas en celular
+- El calendario siempre muestra el dia correcto (corregido para zona horaria de Costa Rica)
+- Si las notificaciones push fallan al activarse, ahora ves un mensaje claro de que salio mal
+- Acceso rapido al perfil desde "Mi Cuenta"
+- Cierre de sesion funciona correctamente en todos los navegadores
 
-### Seguridad
+### Corregido
 
-- Corregido un problema de seguridad importante en la creacion de cuentas de clientes
-- Las notificaciones ahora pasan por un sistema central que evita envios duplicados
-- Los barberos no pueden darse permisos de administrador a si mismos
+- Resueltos los 7 problemas criticos detectados en la auditoria completa de calidad
+- 12 mejoras de prioridad media: textos en espanol correcto, version dinamica, enlaces rotos en el pie de pagina, y mas
+- 3 ajustes menores de pulido visual y estabilidad
