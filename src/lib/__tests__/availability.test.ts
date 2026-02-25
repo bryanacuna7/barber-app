@@ -182,7 +182,7 @@ describe('calculateAvailableSlots — gap-based algorithm basics', () => {
     const closedSchedule: OperatingHours = {
       mon: { open: '09:00', close: '17:00' },
       tue: { open: '09:00', close: '17:00' },
-      // Wednesday (wed) is absent / closed
+      wed: null as any, // Wednesday closed
       thu: { open: '09:00', close: '17:00' },
       fri: { open: '09:00', close: '17:00' },
       sat: { open: '09:00', close: '17:00' },
