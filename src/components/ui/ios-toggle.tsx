@@ -38,11 +38,11 @@ export function IOSToggle({
 }: IOSToggleProps) {
   const sizeConfig = sizes[size]
   const trackStateClasses = checked
-    ? 'bg-[var(--brand-primary)] shadow-[0_0_0_1px_rgba(var(--brand-primary-rgb),0.45),0_6px_16px_rgba(var(--brand-primary-rgb),0.35)]'
+    ? 'bg-[#30D158] dark:bg-[#30D158] ring-1 ring-[rgba(48,209,88,0.42)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_0_0_1px_rgba(48,209,88,0.22),0_8px_18px_rgba(0,0,0,0.28)]'
     : 'bg-[#D2D4DB] dark:bg-[#3A3D46] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]'
 
   const thumbStateClasses = checked
-    ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
+    ? 'bg-white shadow-[0_3px_10px_rgba(0,0,0,0.35)]'
     : 'bg-[#F5F5F7] dark:bg-[#D0D3DB] shadow-[0_1px_5px_rgba(0,0,0,0.25)]'
 
   return (
@@ -71,7 +71,7 @@ export function IOSToggle({
             damping: 30,
           }}
           className={cn(
-            'pointer-events-none rounded-full',
+            'pointer-events-none relative rounded-full',
             'ring-0',
             sizeConfig.thumb,
             thumbStateClasses
@@ -79,7 +79,15 @@ export function IOSToggle({
           style={{
             x: checked ? sizeConfig.translate : 0,
           }}
-        />
+        >
+          <span
+            aria-hidden="true"
+            className={cn(
+              'absolute inset-[35%] rounded-full transition-opacity duration-200',
+              checked ? 'opacity-100 bg-[#24A148]' : 'opacity-0 bg-transparent'
+            )}
+          />
+        </motion.span>
       </button>
       {label && (
         <span className="text-[17px] font-normal text-zinc-900 dark:text-white">{label}</span>
