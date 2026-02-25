@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ChallengesView } from '@/components/gamification/challenges-view'
@@ -58,13 +60,22 @@ export default async function BarberChallengesPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
-          🎯 Desafíos Activos
-        </h1>
-        <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
-          Compite con tus compañeros y gana recompensas
-        </p>
+      <div className="flex items-start gap-1">
+        <Link
+          href="/barberos"
+          className="flex items-center justify-center -ml-2 mt-1 h-10 w-10 rounded-xl text-zinc-500 dark:text-zinc-400 ios-press"
+          aria-label="Volver a equipo"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">
+            Desafíos Activos
+          </h1>
+          <p className="text-[15px] text-zinc-600 dark:text-zinc-400">
+            Compite con tus compañeros y gana recompensas
+          </p>
+        </div>
       </div>
 
       {/* Challenges View */}

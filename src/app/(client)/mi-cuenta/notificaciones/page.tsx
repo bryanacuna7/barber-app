@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Bell, CheckCheck, Tag } from 'lucide-react'
+import { Bell, CheckCheck, ChevronLeft, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 import { useClientContext } from '@/contexts/client-context'
 import { formatNotificationTime } from '@/lib/notifications'
 
@@ -20,6 +21,7 @@ interface ClientNotification {
 }
 
 export default function ClientNotificationsPage() {
+  const router = useRouter()
   const { businessId } = useClientContext()
   const [notifications, setNotifications] = useState<ClientNotification[]>([])
   const [loading, setLoading] = useState(true)
@@ -81,9 +83,18 @@ export default function ClientNotificationsPage() {
   return (
     <div className="px-4 pt-safe-offset-4 pt-12 pb-24">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Notificaciones</h1>
-          <p className="text-muted text-sm mt-0.5">Promociones inteligentes y ofertas activas</p>
+        <div className="flex items-start gap-1">
+          <button
+            onClick={() => router.push('/mi-cuenta')}
+            className="flex items-center justify-center -ml-2 mt-0.5 h-10 w-10 rounded-xl text-zinc-500 dark:text-zinc-400 ios-press"
+            aria-label="Volver al inicio"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Notificaciones</h1>
+            <p className="text-muted text-sm mt-0.5">Promociones inteligentes y ofertas activas</p>
+          </div>
         </div>
         <Button
           variant="outline"

@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 
 interface WelcomeProps {
   onNext: () => void
+  onSkip?: () => void
   businessName: string
 }
 
-export function Welcome({ onNext, businessName }: WelcomeProps) {
+export function Welcome({ onNext, onSkip, businessName }: WelcomeProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -80,7 +81,11 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
             desc: 'Define cuándo está abierta tu barbería',
           },
           { icon: Scissors, title: 'Agrega tus servicios', desc: 'Cortes, afeitados y más' },
-          { icon: UserRound, title: 'Registra tus miembros del equipo', desc: 'Tu equipo en un solo lugar' },
+          {
+            icon: UserRound,
+            title: 'Registra tus miembros del equipo',
+            desc: 'Tu equipo en un solo lugar',
+          },
         ].map((feature, i) => (
           <motion.div
             key={i}
@@ -112,6 +117,14 @@ export function Welcome({ onNext, businessName }: WelcomeProps) {
           Empezar Configuración
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
         </Button>
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            className="mt-4 block text-sm text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+          >
+            Configurar después
+          </button>
+        )}
       </motion.div>
     </motion.div>
   )

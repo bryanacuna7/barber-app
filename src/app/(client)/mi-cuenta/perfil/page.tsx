@@ -9,7 +9,17 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Mail, Phone, Trophy, LogOut, Check, Building2, Bell } from 'lucide-react'
+import {
+  User,
+  Mail,
+  Phone,
+  Trophy,
+  LogOut,
+  Check,
+  Building2,
+  Bell,
+  ChevronLeft,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useClientContext } from '@/contexts/client-context'
@@ -135,8 +145,17 @@ export default function ClientProfilePage() {
 
   return (
     <div className="px-4 pt-safe-offset-4 pt-12">
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Mi Perfil</h1>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => router.push('/mi-cuenta')}
+            className="flex items-center justify-center -ml-2 h-10 w-10 rounded-xl text-zinc-500 dark:text-zinc-400 ios-press"
+            aria-label="Volver al inicio"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Mi Perfil</h1>
+        </div>
         <ClientNotificationBell businessId={businessId} />
       </div>
 

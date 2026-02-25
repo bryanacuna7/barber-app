@@ -104,7 +104,17 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
 
   function getBackFallback(currentPath: string) {
     for (const [prefix, fallback] of parentFallbackByPrefix) {
-      if (currentPath.startsWith(prefix)) return fallback
+      if (!currentPath.startsWith(prefix)) continue
+
+      // Avoid self-loop for top-level routes such as /lealtad/configuracion.
+      if (fallback !== currentPath) return fallback
+      break
+    }
+
+    // Top-level pages outside of dashboard home should always have a
+    // predictable path back to the main dashboard.
+    if (currentPath !== '/dashboard' && topLevelRoutes.has(currentPath)) {
+      return '/dashboard'
     }
 
     const segments = currentPath.split('/').filter(Boolean)
@@ -122,7 +132,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
 
   const currentTitle = getTitle(pathname)
   const isDashboardHome = pathname === '/dashboard'
-  const showBack = !isDashboardHome && !topLevelRoutes.has(pathname)
+  const showBack = !isDashboardHome
 
   return (
     <header

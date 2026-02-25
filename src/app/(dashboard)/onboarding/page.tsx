@@ -242,7 +242,12 @@ export default function OnboardingPage() {
         {/* Steps */}
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
-            <Welcome key="welcome" onNext={handleNext} businessName={businessName} />
+            <Welcome
+              key="welcome"
+              onNext={handleNext}
+              onSkip={() => router.push('/dashboard')}
+              businessName={businessName}
+            />
           )}
 
           {currentStep === 2 && (

@@ -13,6 +13,7 @@ import {
   Tag,
   ArrowRight,
   Search,
+  ChevronLeft,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SettingsSearchModal } from '@/components/settings/settings-search-modal'
@@ -162,6 +163,13 @@ export default function ConfiguracionPage() {
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
+            <Link
+              href="/dashboard"
+              className="mb-3 inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200/70 bg-white/70 px-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-white dark:border-zinc-700/80 dark:bg-zinc-900/80 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Dashboard
+            </Link>
             <h1 className="app-page-title">Configuración</h1>
             <p className="app-page-subtitle mt-1 lg:hidden">
               Administra los datos y preferencias de tu negocio
