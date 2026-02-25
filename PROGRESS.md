@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-24 (Session 185 — UX Polish + Deploy v0.9.8)
-- **Branch:** `feature/ui-ux-redesign`
-- **Version:** `0.9.8`
+- **Last Updated:** 2026-02-25 (Session 186 — Smart Duration Per-Client + Gap-Based Slots)
+- **Branch:** `main`
+- **Version:** `0.9.13`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -246,7 +246,21 @@
 - Brand tokens, `text-muted`, `<Button>` component migrated
 - Charts theme-aware, PWA native, gestures hardened
 
+### Session 186: Smart Duration Per-Client + Gap-Based Slots (2026-02-25)
+
+**Status:** COMPLETE — All 8 steps implemented. Migration 043 pending execution.
+
+**Files created (3):** `src/lib/utils/phone.ts`, `src/lib/utils/resolve-client.ts`, `supabase/migrations/043_client_duration_index.sql`
+**Files modified (7):** `duration-predictor.ts` (5-level cascade), `availability.ts` (gap-based), `availability/route.ts` (server-side client + gapBased + predictedDuration meta), `book/route.ts` (phone normalization + predictorClientId split), `useBookingData.ts` (slotMeta export + reset), `DateTimeSelection.tsx` (~N min estimate), `page.tsx` (pass predictedDuration prop)
+**DATABASE_SCHEMA.md** updated with new index.
+
+**P3 adjustments applied:** Phone migration always uses collision guard, tail slot has dedup + past guards.
+
+**Pending:** Execute migration 043 in Supabase Dashboard, then commit + deploy.
+
+---
+
 ### Next Steps
 
-1. **Customer Discovery Phase** — Next feature TBD
+1. Execute migration 043 in Supabase, commit, deploy
 2. **Button migration** (~30 remaining raw buttons across dashboard pages)

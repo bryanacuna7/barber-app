@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-24 (Session 184 - Full pending plan implementation)
-> **Last Verified Against:** All migrations 001-038
+> **Last Updated:** 2026-02-25 (Session 186 - Per-client duration index)
+> **Last Verified Against:** All migrations 001-043
 
 ---
 
@@ -20,7 +20,7 @@
 ### `businesses`
 
 **Created in:** `001_initial_schema.sql`
-**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`, `036_cancellation_policy.sql`, `037_advance_payment.sql`
+**Modified in:** `003_branding.sql`, `004_admin.sql`, `025_smart_scheduling_features.sql`, `027_staff_permissions.sql`, `033_smart_duration_flag.sql`, `034_promotional_slots.sql`, `036_cancellation_policy.sql`, `037_advance_payment.sql`, `042_slot_interval.sql`
 
 ```sql
 - id                        UUID PRIMARY KEY
@@ -51,6 +51,7 @@
 - advance_payment_deadline_hours INT DEFAULT 2 CHECK (0-48) (added in 037) -- hours before appointment to pay
 - sinpe_phone               TEXT (added in 037) -- SINPE mobile number for receiving payments
 - sinpe_holder_name         TEXT (added in 037) -- name shown to client for SINPE transfer
+- slot_interval_minutes     INT DEFAULT 30 CHECK (5-60) (added in 042) -- interval between bookable slots; ignored when smart_duration_enabled=true
 ```
 
 ### `services`
@@ -159,6 +160,7 @@ INDEX idx_clients_user_id ON clients(user_id) WHERE user_id IS NOT NULL (added i
 - `idx_appointments_tracking_token` UNIQUE on `tracking_token` WHERE NOT NULL (added in 031)
 - `idx_appointments_rescheduled_from` on `rescheduled_from` WHERE rescheduled_from IS NOT NULL (added in 036)
 - `idx_appointments_advance_payment` on `(business_id, advance_payment_status)` WHERE advance_payment_status != 'none' (added in 037)
+- `idx_appointments_client_duration_lookup` on `(client_id, service_id, barber_id, scheduled_at DESC)` WHERE status='completed' AND actual_duration_minutes > 0 (added in 043)
 
 **RLS Policies:**
 
@@ -873,6 +875,30 @@ WHERE business_id = X
 - `idx_clients_top_visitors` - Clients by total visits
 - `idx_client_referrals_status` - Client referrals by status
 - `idx_client_referrals_referrer` - Client referrals by referrer
+
+#### `idx_appointments_client_duration_lookup` (NEW - Migration 043)
+
+**Created in:** `043_client_duration_index.sql`
+
+```sql
+CREATE INDEX idx_appointments_client_duration_lookup
+ON appointments(client_id, service_id, barber_id, scheduled_at DESC)
+WHERE status = 'completed' AND actual_duration_minutes > 0;
+```
+
+**Purpose:** Per-client duration prediction covering index. Covers both cascade levels:
+
+- Level 1: client_id + service_id + barber_id (per-client, per-barber)
+- Level 2: client_id + service_id (per-client, any barber — uses prefix)
+
+**Queries optimized:**
+
+```sql
+SELECT actual_duration_minutes FROM appointments
+WHERE business_id = X AND client_id = Y AND service_id = Z AND barber_id = W
+  AND status = 'completed' AND actual_duration_minutes > 0
+ORDER BY scheduled_at DESC LIMIT 20
+```
 
 ---
 

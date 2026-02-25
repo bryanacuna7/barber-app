@@ -15,6 +15,7 @@ interface DateTimeSelectionProps {
   slots: EnrichedTimeSlot[]
   loadingSlots: boolean
   barberCount: number
+  predictedDuration?: number | null
   onSelectDate: (date: Date) => void
   onSelectTime: (slot: EnrichedTimeSlot) => void
   onBack: () => void
@@ -28,11 +29,14 @@ export function DateTimeSelection({
   slots,
   loadingSlots,
   barberCount,
+  predictedDuration,
   onSelectDate,
   onSelectTime,
   onBack,
 }: DateTimeSelectionProps) {
   const safeSlots = Array.isArray(slots) ? slots : []
+  const displayDuration = predictedDuration ?? service.duration_minutes
+  const isEstimate = predictedDuration != null && predictedDuration !== service.duration_minutes
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-right duration-300">
@@ -63,11 +67,16 @@ export function DateTimeSelection({
                     computeDiscountedPrice(Number(service.price), selectedTime.discount)
                   )}
                 </span>
-                <span className="text-zinc-500"> · {service.duration_minutes} min</span>
+                <span className="text-zinc-500">
+                  {' '}
+                  · {isEstimate ? '~' : ''}
+                  {displayDuration} min
+                </span>
               </p>
             ) : (
               <p className="text-sm text-zinc-500">
-                {service.duration_minutes} min · {formatCurrency(Number(service.price))}
+                {isEstimate ? '~' : ''}
+                {displayDuration} min · {formatCurrency(Number(service.price))}
               </p>
             )}
           </div>
@@ -105,7 +114,7 @@ export function DateTimeSelection({
                   className={cn(
                     'relative flex min-w-[68px] flex-col items-center rounded-2xl px-3 py-3 transition-all ios-press flex-shrink-0 snap-start',
                     isSelected
-                      ? 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/30 dark:bg-white dark:text-zinc-900 dark:shadow-white/20'
+                      ? 'bg-zinc-900 text-white ring-1 ring-zinc-900/10 shadow-sm shadow-zinc-900/15 dark:bg-white dark:text-zinc-900 dark:ring-white/15 dark:shadow-white/20'
                       : 'bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700/80',
                     isToday && 'mt-2'
                   )}

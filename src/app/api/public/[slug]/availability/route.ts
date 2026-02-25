@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { calculateAvailableSlots } from '@/lib/utils/availability'
+import { resolveClientForBusiness } from '@/lib/utils/resolve-client'
 import { startOfDay, endOfDay } from 'date-fns'
 import { evaluatePromo } from '@/lib/promo-engine'
 import type { OperatingHours } from '@/types'
@@ -36,7 +37,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'date and service_id are required' }, { status: 400 })
   }
 
-  const date = new Date(dateStr)
+  // Append T12:00:00 to anchor in local day — plain "YYYY-MM-DD" creates midnight UTC
+  // which shifts back one day in UTC-6 (Costa Rica).
+  const date = new Date(dateStr + 'T12:00:00')
   if (isNaN(date.getTime())) {
     return NextResponse.json({ error: 'Invalid date format' }, { status: 400 })
   }
@@ -86,6 +89,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     )
   }
 
+  // Read slot_interval_minutes separately to avoid breaking fullBusinessSelect fallback
+  let slotIntervalMinutes = 30
+  try {
+    const { data: intervalData } = (await supabase
+      .from('businesses')
+      .select('slot_interval_minutes')
+      .eq('id', business.id)
+      .single()) as any
+    if (intervalData?.slot_interval_minutes) {
+      slotIntervalMinutes = intervalData.slot_interval_minutes
+    }
+  } catch {
+    // Column may not exist yet in partially-migrated environments — safe default
+  }
+
   // Get service duration + price (price needed for promo evaluation)
   const { data: service, error: serviceError } = await supabase
     .from('services')
@@ -104,27 +122,48 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   // Smart duration: predict if enabled, otherwise use fixed service duration
   let serviceDuration = service.duration_minutes ?? 30
+  let predictedDuration: number | null = null
   if (business.smart_duration_enabled) {
+    // Resolve client server-side from auth cookie (no client_id from query params — prevents spoofing)
+    let authUserId: string | null = null
+    try {
+      const authClient = await createClient()
+      const {
+        data: { user },
+      } = await authClient.auth.getUser()
+      if (user) authUserId = user.id
+    } catch {
+      // Not authenticated — continue without per-client prediction
+    }
+
+    const clientId = await resolveClientForBusiness(supabase, business.id, authUserId)
+
     const { getPredictedDuration } = await import('@/lib/utils/duration-predictor')
     serviceDuration = await getPredictedDuration(
       business.id,
       serviceId,
       barberId ?? undefined,
-      serviceDuration
+      serviceDuration,
+      clientId
     )
+    predictedDuration = serviceDuration
   }
 
+  // Determine slot interval: 5-min rolling for smart duration, configurable otherwise
+  const slotInterval = business.smart_duration_enabled ? 5 : slotIntervalMinutes
+
   // Get existing appointments for this date (filter by barber if provided)
+  // Include completed appointments so conflict detection can use their actual (shorter) duration
   const dayStart = startOfDay(date)
   const dayEnd = endOfDay(date)
 
   let query = supabase
     .from('appointments')
-    .select('scheduled_at, duration_minutes')
+    .select('scheduled_at, duration_minutes, status, started_at, actual_duration_minutes')
     .eq('business_id', business.id)
     .gte('scheduled_at', dayStart.toISOString())
     .lte('scheduled_at', dayEnd.toISOString())
-    .in('status', ['pending', 'confirmed'])
+    .in('status', ['pending', 'confirmed', 'completed'])
 
   if (barberId) {
     query = query.eq('barber_id', barberId)
@@ -176,6 +215,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     existingAppointments: allBlockers,
     serviceDuration,
     bufferMinutes: business.booking_buffer_minutes ?? 15,
+    slotInterval,
+    gapBased: !!business.smart_duration_enabled,
   })
 
   // Enrich slots with promotional discount info
@@ -205,5 +246,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return { ...slot, discount }
   })
 
-  return NextResponse.json(enrichedSlots)
+  // Return slots + meta for client-side gating (P1 fix: autoRefresh only when smart duration ON)
+  return NextResponse.json({
+    slots: enrichedSlots,
+    meta: {
+      autoRefresh: !!business.smart_duration_enabled,
+      slotInterval,
+      predictedDuration,
+    },
+  })
 }

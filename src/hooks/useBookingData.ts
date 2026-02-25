@@ -1,8 +1,14 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { format, addDays, startOfDay } from 'date-fns'
 import type { Service, Business, Barber } from '@/types'
 import type { EnrichedTimeSlot, BookingPricing } from '@/types/api'
+
+interface SlotMeta {
+  autoRefresh: boolean
+  slotInterval: number
+  predictedDuration: number | null
+}
 
 type Step = 'service' | 'barber' | 'datetime' | 'info' | 'confirm'
 
@@ -34,6 +40,7 @@ export function useBookingData(slug: string) {
   const [claimToken, setClaimToken] = useState<string | null>(null)
   const [bookingPricing, setBookingPricing] = useState<BookingPricing | null>(null)
   const [trackingToken, setTrackingToken] = useState<string | null>(null)
+  const [slotMeta, setSlotMeta] = useState<SlotMeta | null>(null)
 
   const [booking, setBooking] = useState<BookingData>({
     service: null,
@@ -60,9 +67,9 @@ export function useBookingData(slug: string) {
     async function fetchData() {
       try {
         const [businessRes, servicesRes, barbersRes] = await Promise.all([
-          fetch(`/api/public/${slug}`),
-          fetch(`/api/public/${slug}/services`),
-          fetch(`/api/public/${slug}/barbers`),
+          fetch(`/api/public/${slug}`, { cache: 'force-cache' }),
+          fetch(`/api/public/${slug}/services`, { cache: 'force-cache' }),
+          fetch(`/api/public/${slug}/barbers`, { cache: 'force-cache' }),
         ])
 
         if (!businessRes.ok) {
@@ -88,12 +95,12 @@ export function useBookingData(slug: string) {
     fetchData()
   }, [slug])
 
-  // Fetch available slots when date changes
-  useEffect(() => {
-    async function fetchSlots() {
+  // Extracted fetchSlots for reuse by initial load + auto-refresh
+  const fetchSlots = useCallback(
+    async (showLoading: boolean) => {
       if (!booking.service || !booking.date) return
 
-      setLoadingSlots(true)
+      if (showLoading) setLoadingSlots(true)
       try {
         const dateStr = format(booking.date, 'yyyy-MM-dd')
         const params = new URLSearchParams({
@@ -106,44 +113,88 @@ export function useBookingData(slug: string) {
         }
 
         const res = await fetch(`/api/public/${slug}/availability?${params.toString()}`)
-        const data = await res.json().catch(() => null)
+        const json = await res.json().catch(() => null)
 
         if (!res.ok) {
           const apiError =
-            data && typeof data === 'object' && 'error' in data
-              ? String(data.error)
+            json && typeof json === 'object' && 'error' in json
+              ? String(json.error)
               : 'No se pudieron cargar los horarios disponibles.'
           setSlots([])
           setError(apiError)
           return
         }
 
-        if (!Array.isArray(data)) {
+        // Handle both response shapes: array (legacy) or { slots, meta } (new)
+        const slotsData = Array.isArray(json) ? json : json?.slots
+        const meta: SlotMeta | null = Array.isArray(json) ? null : (json?.meta ?? null)
+
+        if (!Array.isArray(slotsData)) {
           setSlots([])
           setError('No se pudieron cargar los horarios disponibles.')
           return
         }
 
         setError('')
-        setSlots(data)
+        setSlots(slotsData)
+        setSlotMeta(meta)
       } catch {
         setError('Error al cargar horarios disponibles. Intenta de nuevo.')
         setSlots([])
       } finally {
-        setLoadingSlots(false)
+        if (showLoading) setLoadingSlots(false)
+      }
+    },
+    [slug, booking.service, booking.date, booking.barber]
+  )
+
+  // Fetch available slots when date/service/barber changes
+  useEffect(() => {
+    fetchSlots(true)
+  }, [fetchSlots])
+
+  // Auto-refresh slots every 60s — ONLY when smart duration is ON (P1 fix)
+  // Gate: API must have returned meta.autoRefresh=true AND selected date must be "today"
+  // in the business timezone (P2 fix: timezone-safe comparison)
+  useEffect(() => {
+    if (!slotMeta?.autoRefresh) return
+    if (!booking.service || !booking.date) return
+
+    // Timezone-safe: compare selected date against "today" in the business timezone
+    const tz = business?.timezone || 'America/Costa_Rica'
+    const selectedDateStr = format(booking.date, 'yyyy-MM-dd')
+    const todayInBizTz = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date())
+    if (selectedDateStr !== todayInBizTz) return
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void fetchSlots(false)
+      }
+    }, 60_000)
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchSlots(false)
       }
     }
 
-    fetchSlots()
-  }, [slug, booking.service, booking.date, booking.barber])
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [slotMeta?.autoRefresh, booking.service, booking.date, business, fetchSlots])
 
   const handleServiceSelect = (service: Service) => {
     if (barbers.length === 0) {
-      setError('Este negocio aún no tiene miembros del equipo configurados. Contacta a la barbería.')
+      setError(
+        'Este negocio aún no tiene miembros del equipo configurados. Contacta a la barbería.'
+      )
       return
     }
 
     setError('')
+    setSlotMeta(null)
     setBooking((prev) => ({ ...prev, service, barber: null, date: null, time: null }))
 
     // Smart barber routing
@@ -158,6 +209,7 @@ export function useBookingData(slug: string) {
   }
 
   const handleBarberSelect = (barber: Barber) => {
+    setSlotMeta(null)
     setBooking((prev) => ({ ...prev, barber, date: null, time: null }))
     setStep('datetime')
   }
@@ -175,7 +227,9 @@ export function useBookingData(slug: string) {
     e.preventDefault()
     if (!booking.service || !booking.time) return
     if (barbers.length === 0) {
-      setError('Este negocio aún no tiene miembros del equipo configurados. Contacta a la barbería.')
+      setError(
+        'Este negocio aún no tiene miembros del equipo configurados. Contacta a la barbería.'
+      )
       return
     }
 
@@ -260,6 +314,7 @@ export function useBookingData(slug: string) {
     claimToken,
     bookingPricing,
     trackingToken,
+    slotMeta,
     // Setters
     setStep,
     setBooking,

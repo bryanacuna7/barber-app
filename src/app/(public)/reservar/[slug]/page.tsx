@@ -52,6 +52,7 @@ export default function BookingPage() {
     claimToken,
     bookingPricing,
     trackingToken,
+    slotMeta,
     setStep,
     setBooking,
     setError,
@@ -309,6 +310,7 @@ export default function BookingPage() {
             slots={slots}
             loadingSlots={loadingSlots}
             barberCount={barbers.length}
+            predictedDuration={slotMeta?.predictedDuration}
             onSelectDate={handleDateSelect}
             onSelectTime={handleTimeSelect}
             onBack={() => setStep(barbers.length > 1 ? 'barber' : 'service')}

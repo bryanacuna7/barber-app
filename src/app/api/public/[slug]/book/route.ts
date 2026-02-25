@@ -7,6 +7,8 @@ import { logger, logRequest, logResponse, logBusiness, logSecurity } from '@/lib
 import { sendEmail } from '@/lib/email/sender'
 import { notify } from '@/lib/notifications/orchestrator'
 import { evaluatePromo } from '@/lib/promo-engine'
+import { normalizePhone, isValidCRPhone } from '@/lib/utils/phone'
+import { resolveClientForBusiness } from '@/lib/utils/resolve-client'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 import type { PromoRule } from '@/types/promo'
 import type { BookingPricing } from '@/types/api'
@@ -80,6 +82,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     smart_token,
   } = parsed.data
 
+  // Normalize and validate phone (Costa Rica 8-digit format)
+  const normalizedPhone = normalizePhone(client_phone)
+  if (!isValidCRPhone(normalizedPhone)) {
+    logger.warn({ slug, phone: client_phone }, 'Invalid phone format')
+    logResponse(request, 400, Date.now() - startTime)
+    return NextResponse.json({ error: 'Teléfono inválido (8 dígitos requeridos)' }, { status: 400 })
+  }
+
   const supabase = await createServiceClient()
 
   // Get business
@@ -147,7 +157,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     // Not authenticated — continue as public booking
   }
 
-  // Find or create client
+  // Resolve prediction client using shared resolver (same as availability route)
+  // This guarantees the same duration prediction the user saw when selecting their slot
+  const predictorClientId = await resolveClientForBusiness(supabase, business.id, authUserId)
+
+  // Find or create client (ownershipClient — may differ from predictorClientId)
   let client
 
   // 1. If authenticated, check if user already has a client record in this business
@@ -177,15 +191,51 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     }
   }
 
-  // 2. If no match by user_id, look up by phone (existing behavior)
+  // 2. If no match by user_id, look up by phone with dual lookup (normalized → raw fallback)
   if (!client) {
-    // claim_token/user_id not in generated types yet, cast with `as any`
-    const { data: existingClient } = (await supabase
+    // Try normalized phone first
+    let { data: existingClient } = (await supabase
       .from('clients')
       .select('id, user_id, claim_token')
       .eq('business_id', business.id)
-      .eq('phone', client_phone)
+      .eq('phone', normalizedPhone)
       .single()) as any
+
+    // Fallback: try raw format for legacy records (e.g., "8888-1234")
+    if (!existingClient && normalizedPhone !== client_phone) {
+      const { data: legacyClient } = (await supabase
+        .from('clients')
+        .select('id, user_id, claim_token')
+        .eq('business_id', business.id)
+        .eq('phone', client_phone)
+        .single()) as any
+
+      if (legacyClient) {
+        existingClient = legacyClient
+        // Safe gradual migration: only normalize if it won't collide with another record
+        const { data: collision } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('business_id', business.id)
+          .eq('phone', normalizedPhone)
+          .limit(1)
+        if (!collision?.[0]) {
+          await supabase
+            .from('clients')
+            .update({ phone: normalizedPhone } as any)
+            .eq('id', legacyClient.id)
+          logger.debug(
+            {
+              clientId: legacyClient.id,
+              businessId: business.id,
+              oldPhone: client_phone,
+              newPhone: normalizedPhone,
+            },
+            'Migrated legacy phone format to normalized'
+          )
+        }
+      }
+    }
 
     if (existingClient) {
       client = existingClient
@@ -223,7 +273,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       .insert({
         business_id: business.id,
         name: client_name,
-        phone: client_phone,
+        phone: normalizedPhone,
         email: client_email || null,
         ...(authUserId ? { user_id: authUserId } : {}),
         claim_token: authUserId ? null : crypto.randomUUID(),
@@ -248,10 +298,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   }
 
   // Smart duration: predict if enabled, otherwise use fixed service duration
+  // Uses predictorClientId (shared resolver) NOT ownershipClient.id — guarantees same prediction as availability
   let durationMin = service.duration_minutes ?? 30
   if ((business as any).smart_duration_enabled) {
     const { getPredictedDuration } = await import('@/lib/utils/duration-predictor')
-    durationMin = await getPredictedDuration(business.id, service_id, barber_id, durationMin)
+    durationMin = await getPredictedDuration(
+      business.id,
+      service_id,
+      barber_id,
+      durationMin,
+      predictorClientId
+    )
   }
 
   // Evaluate promotional discount (shared engine — same as availability API)
