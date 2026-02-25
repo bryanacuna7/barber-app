@@ -214,7 +214,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     operatingHours,
     existingAppointments: allBlockers,
     serviceDuration,
-    bufferMinutes: business.booking_buffer_minutes ?? 15,
+    bufferMinutes: business.booking_buffer_minutes ?? 0,
     slotInterval,
     gapBased: !!business.smart_duration_enabled,
   })
