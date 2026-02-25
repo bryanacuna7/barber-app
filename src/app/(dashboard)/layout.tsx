@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { detectUserRole, getStaffPermissions, canBarberAccessPath } from '@/lib/auth/roles'
 import { Sidebar } from '@/components/dashboard/sidebar'
@@ -15,6 +16,49 @@ import { CommandPaletteProvider } from '@/components/dashboard/command-palette'
 import { AlertTriangle, Lock } from 'lucide-react'
 import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
+
+const manifestVersion =
+  process.env.NEXT_PUBLIC_MANIFEST_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '1'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return {}
+
+  const roleInfo = await detectUserRole(supabase, user.id)
+  if (!roleInfo?.businessId) return {}
+
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('name, slug')
+    .eq('id', roleInfo.businessId)
+    .maybeSingle()
+
+  const businessName = business?.name?.trim()
+  if (!businessName) return {}
+
+  const params = new URLSearchParams({
+    businessName,
+    v: manifestVersion,
+  })
+
+  if (business.slug) {
+    params.set('businessSlug', business.slug)
+  }
+
+  return {
+    applicationName: businessName,
+    manifest: `/api/pwa/manifest?${params.toString()}`,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: businessName,
+    },
+  }
+}
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -103,8 +147,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // staff_permissions from migration 027 — not in generated types yet, using `as any`
   const businessSelect =
     'id, name, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
-  const needsOnboarding =
-    roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')
+  const needsOnboarding = roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')
 
   const [businessResult, onboardingResult] = await Promise.all([
     (roleInfo.isOwner

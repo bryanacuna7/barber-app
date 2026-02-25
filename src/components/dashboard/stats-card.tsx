@@ -54,6 +54,21 @@ const variants = {
   },
 }
 
+function compactCurrencyForMobile(value: string): string | null {
+  const trimmed = value.trim()
+  if (!trimmed.startsWith('₡')) return null
+  if (/[kKmM]|mil/.test(trimmed)) return null
+
+  const numericPart = trimmed.replace(/[^\d-]/g, '')
+  if (!numericPart) return null
+
+  const amount = Number(numericPart)
+  if (!Number.isFinite(amount)) return null
+  if (Math.abs(amount) < 1_000_000) return null
+
+  return `₡${(amount / 1_000_000).toFixed(1)}M`
+}
+
 export function StatsCard({
   title,
   value,
@@ -65,6 +80,9 @@ export function StatsCard({
   const styles = variants[variant]
   const isGradient = styles.gradient
   const valueText = typeof value === 'number' ? value.toLocaleString('es-CR') : String(value)
+  const isCurrencyValue = typeof value !== 'number' && valueText.trim().startsWith('₡')
+  const compactMobileCurrency =
+    typeof value === 'number' ? null : compactCurrencyForMobile(valueText)
   const hasLongValue = valueText.length >= 10
   const hasVeryLongValue = valueText.length >= 13
 
@@ -90,7 +108,7 @@ export function StatsCard({
         </>
       )}
 
-      <div className="relative flex items-start justify-between gap-2 sm:gap-3">
+      <div className="relative flex items-start justify-between gap-2.5 sm:gap-3">
         <div className="min-w-0 flex-1">
           <p
             className={cn(
@@ -103,17 +121,26 @@ export function StatsCard({
 
           <p
             className={cn(
-              'mt-1.5 font-bold tracking-tight leading-[1.05] [overflow-wrap:anywhere]',
+              'mt-1.5 font-bold tracking-tight leading-[1.05] whitespace-nowrap tabular-nums',
               hasVeryLongValue
-                ? 'text-[20px] sm:text-[28px]'
+                ? 'text-[18px] sm:text-[28px]'
                 : hasLongValue
-                  ? 'text-[22px] sm:text-[30px]'
-                  : 'text-[26px] sm:text-[32px]',
+                  ? isCurrencyValue
+                    ? 'text-[18px] sm:text-[30px]'
+                    : 'text-[22px] sm:text-[30px]'
+                  : isCurrencyValue
+                    ? 'text-[21px] sm:text-[32px]'
+                    : 'text-[26px] sm:text-[32px]',
               isGradient ? 'text-white' : 'text-zinc-900 dark:text-white'
             )}
           >
             {typeof value === 'number' ? (
               <AnimatedNumber value={value} />
+            ) : compactMobileCurrency ? (
+              <>
+                <span className="sm:hidden">{compactMobileCurrency}</span>
+                <span className="hidden sm:inline">{value}</span>
+              </>
             ) : (
               value
             )}
@@ -151,7 +178,7 @@ export function StatsCard({
 
         <div
           className={cn(
-            'flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl',
+            'mt-0.5 flex h-9 w-9 sm:mt-0 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl',
             styles.iconBg,
             isGradient && 'ring-4 ring-white/10'
           )}

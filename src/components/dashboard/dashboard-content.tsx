@@ -88,14 +88,16 @@ export function DashboardContent() {
 
         {/* Upcoming Appointments */}
         <Card variant="elevated" className="overflow-hidden" data-tour="dashboard-appointments">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
-            <div className="flex items-center gap-3">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 sm:gap-4 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="min-w-0 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
                 <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <CardTitle className="text-lg">Próximas Citas Hoy</CardTitle>
+              <CardTitle className="text-base sm:text-lg leading-tight">
+                Próximas Citas Hoy
+              </CardTitle>
             </div>
-            <Link href="/citas">
+            <Link href="/citas" className="ml-1 sm:ml-2 shrink-0">
               <Button
                 variant="gradient"
                 size="sm"

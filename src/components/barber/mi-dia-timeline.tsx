@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { BarberAppointmentCard } from './barber-appointment-card'
 import type { TodayAppointment } from '@/types/custom'
@@ -11,6 +11,7 @@ interface MiDiaTimelineProps {
   onCheckIn?: (appointmentId: string) => void
   onComplete?: (appointmentId: string, paymentMethod?: 'cash' | 'sinpe' | 'card') => void
   onNoShow?: (appointmentId: string) => void
+  onFocusMode?: (appointmentId: string) => void
   loadingAppointmentId?: string | null
   acceptedPaymentMethods?: ('cash' | 'sinpe' | 'card')[]
   /** Barber name for WhatsApp message templates */
@@ -22,45 +23,20 @@ interface MiDiaTimelineProps {
 
 /**
  * Timeline layout for displaying today's appointments
- * Shows current time indicator and groups appointments
+ * Groups appointments with status-colored dots
  */
 export function MiDiaTimeline({
   appointments,
   onCheckIn,
   onComplete,
   onNoShow,
+  onFocusMode,
   loadingAppointmentId,
   acceptedPaymentMethods,
   barberName,
   businessName,
   className,
 }: MiDiaTimelineProps) {
-  const now = new Date()
-  const currentHour = now.getHours()
-  const currentMinute = now.getMinutes()
-
-  // Calculate position for current time indicator (0-100%)
-  const getCurrentTimePosition = () => {
-    const startHour = 8 // 8 AM
-    const endHour = 20 // 8 PM
-    const totalMinutes = (endHour - startHour) * 60
-    const currentMinutes = (currentHour - startHour) * 60 + currentMinute
-
-    if (currentMinutes < 0) return 0
-    if (currentMinutes > totalMinutes) return 100
-
-    return (currentMinutes / totalMinutes) * 100
-  }
-
-  const formatCurrentTime = () => {
-    return new Intl.DateTimeFormat('es-CR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(now)
-  }
-
-  const isCurrentTimeVisible = currentHour >= 8 && currentHour < 20
-
   // Sort appointments by scheduled time
   const sortedAppointments = [...appointments].sort((a, b) => {
     return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
@@ -101,25 +77,6 @@ export function MiDiaTimeline({
         aria-hidden="true"
       />
 
-      {/* Current Time Indicator */}
-      {isCurrentTimeVisible && (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
-          className="absolute left-0 z-10 flex items-center gap-2"
-          style={{ top: `${getCurrentTimePosition()}%` }}
-          aria-live="polite"
-          aria-label={`Hora actual: ${formatCurrentTime()}`}
-        >
-          <div className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded-full shadow-lg">
-            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="text-xs font-semibold">{formatCurrentTime()}</span>
-          </div>
-          <div className="h-0.5 w-full bg-blue-500" aria-hidden="true" />
-        </motion.div>
-      )}
-
       {/* Appointments List */}
       <div className="space-y-4 pl-12 pr-4 py-4" role="list" aria-label="Lista de citas de hoy">
         <AnimatePresence mode="popLayout">
@@ -159,6 +116,7 @@ export function MiDiaTimeline({
                 onCheckIn={onCheckIn}
                 onComplete={onComplete}
                 onNoShow={onNoShow}
+                onFocusMode={onFocusMode}
                 isLoading={loadingAppointmentId === appointment.id}
                 acceptedPaymentMethods={acceptedPaymentMethods}
                 nextAppointment={

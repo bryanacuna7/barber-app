@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -10,6 +10,7 @@ import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { useAppointmentActions } from '@/hooks/use-appointment-actions'
 import { MiDiaHeader } from '@/components/barber/mi-dia-header'
 import { MiDiaTimeline } from '@/components/barber/mi-dia-timeline'
+import { FocusMode } from '@/components/barber/focus-mode'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
@@ -139,6 +140,7 @@ function MiDiaPageContent() {
   })
 
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [focusAppointmentId, setFocusAppointmentId] = useState<string | null>(null)
 
   const { checkIn, complete, noShow, loadingAppointmentId } = useAppointmentActions({
     barberId,
@@ -151,6 +153,12 @@ function MiDiaPageContent() {
       }
       toast.success(messages[action])
 
+      // Auto-enter focus mode after check-in
+      if (action === 'check-in') {
+        // The appointment ID was passed to checkIn — find it from loading state
+        // We'll set it in the wrapped checkIn below
+      }
+
       // Refetch will happen automatically via real-time hook
       // But we can force it for immediate feedback
       refetch()
@@ -160,6 +168,29 @@ function MiDiaPageContent() {
       toast.error(error.message)
     },
   })
+
+  // Wrapped checkIn that auto-enters focus mode on success
+  const handleCheckIn = useCallback(
+    (appointmentId: string) => {
+      checkIn(appointmentId)
+      // Optimistically enter focus mode — if checkIn fails, the appointment
+      // won't be confirmed and the auto-exit effect below will clear focus
+      setFocusAppointmentId(appointmentId)
+    },
+    [checkIn]
+  )
+
+  // Auto-exit focus mode when appointment is no longer in-progress
+  useEffect(() => {
+    if (!focusAppointmentId || !data?.appointments) return
+    const apt = data.appointments.find((a) => a.id === focusAppointmentId)
+    if (!apt || apt.status !== 'confirmed' || !apt.started_at) {
+      // Appointment completed, cancelled, or not found — exit focus
+      // Small delay to let the completion animation show
+      const timer = setTimeout(() => setFocusAppointmentId(null), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [focusAppointmentId, data?.appointments])
 
   // Pull-to-refresh handler
   const handleRefresh = async () => {
@@ -326,9 +357,10 @@ function MiDiaPageContent() {
         >
           <MiDiaTimeline
             appointments={data.appointments}
-            onCheckIn={checkIn}
+            onCheckIn={handleCheckIn}
             onComplete={complete}
             onNoShow={noShow}
+            onFocusMode={(id) => setFocusAppointmentId(id)}
             loadingAppointmentId={loadingAppointmentId}
             acceptedPaymentMethods={acceptedPaymentMethods ?? undefined}
             barberName={data.barber.name}
@@ -336,6 +368,26 @@ function MiDiaPageContent() {
           />
         </ComponentErrorBoundary>
       </main>
+
+      {/* Focus Mode Overlay */}
+      <AnimatePresence>
+        {focusAppointmentId &&
+          (() => {
+            const apt = data.appointments.find((a) => a.id === focusAppointmentId)
+            if (!apt || apt.status !== 'confirmed' || !apt.started_at) return null
+            return (
+              <FocusMode
+                key={apt.id}
+                appointment={apt}
+                onComplete={complete}
+                onNoShow={noShow}
+                onDismiss={() => setFocusAppointmentId(null)}
+                isLoading={loadingAppointmentId === apt.id}
+                acceptedPaymentMethods={acceptedPaymentMethods ?? undefined}
+              />
+            )
+          })()}
+      </AnimatePresence>
     </div>
   )
 }

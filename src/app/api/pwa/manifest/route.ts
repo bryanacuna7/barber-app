@@ -4,21 +4,43 @@ import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_NAME = 'BarberApp'
 const DEFAULT_SHORT_NAME = 'BarberApp'
+const FALLBACK_THEME_COLOR = '#10141b'
 
 function toShortName(name: string): string {
   if (name.length <= 12) return name
   return name.slice(0, 12)
 }
 
-export async function GET() {
+function normalizeName(raw: string | null): string | null {
+  const value = raw?.trim()
+  if (!value) return null
+  return value.slice(0, 60)
+}
+
+function normalizeSlug(raw: string | null): string | null {
+  const value = raw?.trim().toLowerCase()
+  if (!value) return null
+  return /^[a-z0-9-]+$/.test(value) ? value : null
+}
+
+function iconPath(size: number, businessSlug: string | null): string {
+  if (!businessSlug) return `/api/pwa/icon?size=${size}`
+  return `/api/pwa/icon?size=${size}&slug=${encodeURIComponent(businessSlug)}`
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const requestedName = normalizeName(searchParams.get('businessName'))
+  const requestedSlug = normalizeSlug(searchParams.get('businessSlug'))
+
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  let appName = DEFAULT_NAME
+  let appName = requestedName ?? DEFAULT_NAME
 
-  if (user) {
+  if (!requestedName && user) {
     const roleInfo = await detectUserRole(supabase, user.id)
 
     if (roleInfo?.businessId) {
@@ -43,30 +65,30 @@ export async function GET() {
     scope: '/',
     display: 'standalone',
     background_color: '#f6f7f9',
-    theme_color: '#10141b',
+    theme_color: FALLBACK_THEME_COLOR,
     orientation: 'portrait',
     categories: ['business', 'lifestyle'],
     icons: [
       {
-        src: '/api/pwa/icon?size=192',
+        src: iconPath(192, requestedSlug),
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/api/pwa/icon?size=192',
+        src: iconPath(192, requestedSlug),
         sizes: '192x192',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/api/pwa/icon?size=512',
+        src: iconPath(512, requestedSlug),
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/api/pwa/icon?size=512',
+        src: iconPath(512, requestedSlug),
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
@@ -77,19 +99,19 @@ export async function GET() {
         name: 'Nueva Cita',
         short_name: 'Cita',
         url: '/citas?intent=create',
-        icons: [{ src: '/api/pwa/icon?size=96', sizes: '96x96', type: 'image/png' }],
+        icons: [{ src: iconPath(96, requestedSlug), sizes: '96x96', type: 'image/png' }],
       },
       {
         name: 'Clientes',
         short_name: 'Clientes',
         url: '/clientes',
-        icons: [{ src: '/api/pwa/icon?size=96', sizes: '96x96', type: 'image/png' }],
+        icons: [{ src: iconPath(96, requestedSlug), sizes: '96x96', type: 'image/png' }],
       },
       {
         name: 'Servicios',
         short_name: 'Servicios',
         url: '/servicios',
-        icons: [{ src: '/api/pwa/icon?size=96', sizes: '96x96', type: 'image/png' }],
+        icons: [{ src: iconPath(96, requestedSlug), sizes: '96x96', type: 'image/png' }],
       },
     ],
   }

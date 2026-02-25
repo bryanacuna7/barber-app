@@ -78,14 +78,41 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
         return unauthorizedResponse('No autenticado')
       }
 
-      // Fetch business
-      const { data: business, error: businessError } = await supabase
+      // Fetch business — try owner first, then barber lookup
+      let business: { id: string; owner_id: string; name?: string } | null = null
+
+      // 1. Try as business owner (fast path)
+      const { data: ownerBusiness } = await supabase
         .from('businesses')
         .select('id, owner_id, name')
         .eq('owner_id', user.id)
         .single()
 
-      if (businessError || !business) {
+      if (ownerBusiness) {
+        business = ownerBusiness
+      } else {
+        // 2. Try as barber — look up business via barbers table
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('business_id')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .single()
+
+        if (barber) {
+          const { data: barberBusiness } = await supabase
+            .from('businesses')
+            .select('id, owner_id, name')
+            .eq('id', barber.business_id)
+            .single()
+
+          if (barberBusiness) {
+            business = barberBusiness
+          }
+        }
+      }
+
+      if (!business) {
         console.error('❌ Business not found for user:', user.id)
         return notFoundResponse('Negocio no encontrado')
       }

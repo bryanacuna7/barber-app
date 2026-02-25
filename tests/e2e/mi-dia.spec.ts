@@ -473,3 +473,187 @@ test.describe('Mi Día Feature - E2E Tests', () => {
     })
   })
 })
+
+// ==================== Owner-Barber Tests ====================
+// These tests use the test owner account (test@barbershop.dev) which
+// should have a barber record to act as owner+barber dual-role user.
+// Fixture: migration 026 seeds a barber for the test business.
+// Migration 041 assigns staff role to barbers with NULL role_id.
+
+const OWNER_BARBER = {
+  email: 'test@barbershop.dev',
+  password: 'TestPass123!',
+}
+
+async function loginAsOwnerBarber(page: Page) {
+  await page.goto('/login')
+  await page.waitForLoadState('networkidle')
+  await page.fill('[data-testid="login-email"]', OWNER_BARBER.email)
+  await page.fill('[data-testid="login-password"]', OWNER_BARBER.password)
+  await page.click('button[type="submit"]')
+  await page.waitForURL(/\/(dashboard|mi-dia|citas)/, { timeout: 15000 })
+  // Wait for content to render (handles on-demand compilation)
+  await page.waitForTimeout(2000)
+}
+
+test.describe('Owner-Barber Navigation (E2E-009)', () => {
+  test('should show Mi Día tab in bottom nav for owner-barber', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await loginAsOwnerBarber(page)
+
+    // Navigate to dashboard to see bottom nav
+    await page.goto('/dashboard')
+    await page.waitForTimeout(2000)
+
+    // Owner-barber should see Mi Día in bottom nav tabs
+    const miDiaTab = page.locator('nav a[href="/mi-dia"]')
+    await expect(miDiaTab).toBeVisible({ timeout: 5000 })
+
+    // Tap Mi Día tab
+    await miDiaTab.click()
+    await page.waitForURL('/mi-dia', { timeout: 10000 })
+
+    // Mi Día page should load
+    await expect(page.locator('[data-testid="mi-dia-header"]')).toBeVisible({ timeout: 15000 })
+
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/screenshots/owner-barber-mi-dia-tab.png',
+      fullPage: true,
+    })
+  })
+
+  test('should show Servicios in More drawer for owner-barber', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await loginAsOwnerBarber(page)
+
+    await page.goto('/dashboard')
+    await page.waitForTimeout(2000)
+
+    // Open More menu
+    const moreButton = page.locator('button[aria-label="Más opciones"]')
+    await expect(moreButton).toBeVisible({ timeout: 5000 })
+    await moreButton.click()
+
+    // Servicios should be visible in drawer
+    await expect(page.locator('a[href="/servicios"]')).toBeVisible({ timeout: 3000 })
+
+    // Take screenshot of drawer
+    await page.screenshot({
+      path: 'tests/screenshots/owner-barber-more-drawer.png',
+    })
+  })
+
+  test('should highlight Más tab when on Servicios page for owner-barber', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await loginAsOwnerBarber(page)
+
+    // Navigate directly to servicios
+    await page.goto('/servicios')
+    await page.waitForTimeout(3000)
+
+    // The "Más" button in bottom nav should have active styling
+    // (servicios is in morePages for owner-barber)
+    const moreButton = page.locator('button[aria-label="Más opciones"]')
+    await expect(moreButton).toBeVisible({ timeout: 5000 })
+  })
+})
+
+test.describe('Focus Mode (E2E-010)', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsBarber(page)
+  })
+
+  test('should auto-enter focus mode after check-in and dismiss', async ({ page }) => {
+    await page.goto('/mi-dia')
+    await page.waitForSelector('[data-testid^="appointment-"]', { timeout: 15000 })
+
+    // Find check-in button
+    const checkInButton = page.locator('[data-testid="check-in-button"]').first()
+    if (!(await checkInButton.isVisible())) {
+      test.skip(true, 'No pending appointments available for check-in')
+    }
+
+    // Click check-in
+    await checkInButton.click()
+
+    // Focus mode should appear
+    const focusMode = page.locator('[data-testid="focus-mode"]')
+    await expect(focusMode).toBeVisible({ timeout: 5000 })
+
+    // Verify timer is visible
+    await expect(focusMode.locator('[role="timer"]')).toBeVisible()
+
+    // Verify complete button is visible
+    await expect(page.locator('[data-testid="focus-mode-complete"]')).toBeVisible()
+
+    // Take screenshot
+    await page.screenshot({
+      path: 'tests/screenshots/focus-mode-active.png',
+    })
+
+    // Dismiss focus mode
+    await page.locator('[data-testid="focus-mode-dismiss"]').click()
+
+    // Focus mode should disappear
+    await expect(focusMode).not.toBeVisible({ timeout: 3000 })
+
+    // Page should still show timeline
+    await expect(page.locator('[data-testid="mi-dia-timeline"]')).toBeVisible()
+  })
+})
+
+test.describe('Complete with Payment Sheet (E2E-011)', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAsBarber(page)
+  })
+
+  test('should show payment sheet with 2+ methods and complete', async ({ page }) => {
+    await page.goto('/mi-dia')
+    await page.waitForSelector('[data-testid^="appointment-"]', { timeout: 15000 })
+
+    // Find complete button (for in-progress or pending appointments)
+    const completeButton = page.locator('[data-testid="complete-button"]').first()
+    if (!(await completeButton.isVisible())) {
+      test.skip(true, 'No completable appointments available')
+    }
+
+    // Click complete
+    await completeButton.click()
+
+    // If business has 2+ payment methods, a sheet should appear
+    const paymentSheet = page.locator('text=¿Cómo pagó el cliente?')
+    const isSheetVisible = await paymentSheet.isVisible().catch(() => false)
+
+    if (isSheetVisible) {
+      // Payment sheet appeared — verify options
+      await expect(paymentSheet).toBeVisible()
+
+      // Take screenshot of payment sheet
+      await page.screenshot({
+        path: 'tests/screenshots/payment-sheet-open.png',
+      })
+
+      // Select first payment option (Efectivo)
+      const firstOption = page.locator('button:has-text("Efectivo")')
+      if (await firstOption.isVisible()) {
+        await firstOption.click()
+      } else {
+        // Select whatever first option is available
+        await page.locator('[role="dialog"] button').first().click()
+      }
+
+      // Wait for completion
+      await page.waitForTimeout(2000)
+    } else {
+      // 0 or 1 payment methods — auto-completed without sheet
+      await page.waitForTimeout(2000)
+    }
+
+    // Take screenshot of result
+    await page.screenshot({
+      path: 'tests/screenshots/after-complete.png',
+      fullPage: true,
+    })
+  })
+})

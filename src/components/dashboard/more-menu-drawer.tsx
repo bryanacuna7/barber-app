@@ -152,6 +152,15 @@ const barberMenuItem: MenuItem = {
   bgColor: 'bg-teal-100 dark:bg-teal-900/30',
 }
 
+const serviciosMenuItem: MenuItem = {
+  name: 'Servicios',
+  href: '/servicios',
+  icon: Scissors,
+  description: 'Gestionar servicios y precios',
+  color: 'text-violet-600 dark:text-violet-400',
+  bgColor: 'bg-violet-100 dark:bg-violet-900/30',
+}
+
 const externalLinks = [
   {
     name: 'Documentación',
@@ -206,13 +215,15 @@ export function MoreMenuDrawer({
   }
 
   const isBarberRole = userRole === 'barber'
+  const isOwnerBarber = isBarber && userRole === 'owner'
 
   // Build filtered menu items based on role
   const filteredItems = (() => {
     if (!isBarberRole) {
       // Owner/admin: show all items except those already in bottom nav
       const ownerItems = menuItems.filter((item) => !item.barberMenuOnly)
-      const items = isBarber ? [barberMenuItem, ...ownerItems] : ownerItems
+      // Owner-barber: Mi Día is in tabs already, add Servicios to drawer instead
+      const items = isOwnerBarber ? [serviciosMenuItem, ...ownerItems] : ownerItems
       return dedupeMenuItemsByHref(items)
     }
 
@@ -437,7 +448,9 @@ export function MoreMenuDrawer({
           transition={{ delay: 0.3 }}
           className="pt-4 text-center"
         >
-          <p className="text-sm text-zinc-400 dark:text-zinc-600">BarberApp v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.9.8'}</p>
+          <p className="text-sm text-zinc-400 dark:text-zinc-600">
+            BarberApp v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.9.8'}
+          </p>
         </motion.div>
       </div>
     </Drawer>

@@ -65,6 +65,7 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
 
   // Try to read role from context (may fail if outside provider during SSR edge cases)
   let userRole: UserRole = 'owner'
+  let contextIsBarber = isBarber
   let staffPermissions = {
     nav_citas: true,
     nav_servicios: true,
@@ -78,12 +79,15 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
     const ctx = useBusiness()
     userRole = ctx.userRole
     staffPermissions = ctx.staffPermissions
+    contextIsBarber = ctx.isBarber
   } catch {
     // Fallback: use props
     userRole = isBarber ? 'barber' : isAdmin ? 'admin' : 'owner'
   }
 
   const isBarberRole = userRole === 'barber'
+  // Owner who is also a barber — gets Mi Día in tabs, Servicios moves to drawer
+  const isOwnerBarber = contextIsBarber && userRole === 'owner'
 
   // Build navigation based on role + permissions
   let navigation = ownerNavigation
@@ -95,19 +99,24 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
     if (staffPermissions.nav_citas) {
       barberTabs.push({ name: 'Citas', href: '/citas', icon: Calendar })
     }
-    // Servicios if enabled (right side of + button)
-    // We'll handle the split below
     navigation = barberTabs
   }
 
+  // Right side tabs (after + button)
   const rightNavItems = isBarberRole
     ? staffPermissions.nav_servicios
       ? [{ name: 'Servicios', href: '/servicios', icon: Scissors }]
       : []
-    : ownerNavigation.slice(2)
+    : isOwnerBarber
+      ? [{ name: 'Mi Día', href: '/mi-dia', icon: CalendarClock }]
+      : ownerNavigation.slice(2)
 
   // Determine which "more" pages for active indicator
-  const morePages = isBarberRole ? barberMorePages : ownerMorePages
+  const morePages = isBarberRole
+    ? barberMorePages
+    : isOwnerBarber
+      ? ownerMorePages.filter((p) => p !== '/mi-dia').concat('/servicios')
+      : ownerMorePages
 
   // Check if current page is in "More" menu
   const currentPath = pathname || ''

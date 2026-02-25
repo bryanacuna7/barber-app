@@ -8,16 +8,17 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.11
+## v0.9.12
 
-### Mejoras de navegacion y reservas
+### Modo Enfoque para barberos
 
-- El boton de reserva ahora se ve correctamente en modo oscuro
-- La pantalla de confirmacion de reserva tiene botones mas claros y uniformes
-- Todas las sub-paginas tienen boton para volver atras (perfil, notificaciones, desafios, logros, configuracion)
-- El onboarding permite saltar la configuracion e ir directo al panel
-- Nuevo banner para activar notificaciones push en la pantalla de inicio del cliente
+- Nueva pantalla de enfoque al atender un cliente: muestra nombre, servicio, timer grande y precio
+- Desliza para completar en mobile (gesto estilo iOS) — en desktop es boton normal
+- El timer cambia a amarillo cuando te pasas del tiempo estimado
+- Para entrar, toca el timer azul en la card de la cita en progreso
 
-### Corregido
+### Mejoras en Mi Dia
 
-- Las reservas de usuarios registrados ahora aparecen vinculadas a su perfil (antes se mostraban como si fueran de un cliente nuevo)
+- Botones de accion mas claros y sin texto cortado en pantallas pequenas
+- Si eres dueno y tambien barbero, Mi Dia aparece directamente en las tabs principales
+- Marcar "No Show" disponible tanto en la card como dentro del modo enfoque

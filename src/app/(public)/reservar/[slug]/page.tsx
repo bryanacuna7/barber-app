@@ -154,24 +154,6 @@ export default function BookingPage() {
     loadLoyaltyStatus()
   }, [business?.id])
 
-  // PWA: inject manifest link and register service worker
-  useEffect(() => {
-    // Dynamic manifest
-    const link = document.createElement('link')
-    link.rel = 'manifest'
-    link.href = `/api/public/${slug}/manifest`
-    document.head.appendChild(link)
-
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {})
-    }
-
-    return () => {
-      document.head.removeChild(link)
-    }
-  }, [slug])
-
   // Apply brand theme to :root (same logic as ThemeProvider)
   useEffect(() => {
     if (!business?.brand_primary_color) return

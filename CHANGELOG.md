@@ -4,6 +4,21 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.12] - 2026-02-25
+
+### Nuevo
+
+- Modo Enfoque para citas en progreso: pantalla completa con timer, nombre del cliente, precio y gesto deslizar para completar
+- Gesto "desliza para completar" estilo iOS en mobile (boton normal en desktop)
+- Deteccion de tiempo extra: el timer cambia a amarillo cuando se pasa del tiempo estimado
+- Boton de Enfoque integrado en el timer de la card (toca el timer para expandir)
+
+### Mejorado
+
+- Botones de accion en cards de citas mas claros y sin texto cortado en mobile
+- Navegacion de owner-barbero: Mi Dia aparece en las tabs principales, Servicios se mueve al menu Mas
+- Mejor separacion de contenido en el modo enfoque (mas espacio desde los bordes)
+
 ## [0.9.11] - 2026-02-24
 
 ### Mejorado
