@@ -38,32 +38,49 @@ export function useRealtimeServices({ businessId, enabled = true }: UseRealtimeS
     queryClientRef.current = queryClient
   }, [queryClient])
 
+  const pollServices = useCallback(() => {
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+      return
+    }
+    invalidateQueries.afterServiceChange(queryClientRef.current)
+  }, [])
+
   // Polling fallback (60s interval - less aggressive than appointments)
+  // Uses queueMicrotask for setState to avoid synchronous setState inside effect body
   const startPolling = useCallback(() => {
     if (pollingIntervalRef.current) return
-    setIsPolling(true)
+    queueMicrotask(() => setIsPolling(true))
 
     pollingIntervalRef.current = setInterval(() => {
-      invalidateQueries.afterServiceChange(queryClientRef.current)
+      pollServices()
     }, 60000)
+  }, [pollServices])
+
+  const stopPolling = useCallback(() => {
+    if (!pollingIntervalRef.current) return
+    clearInterval(pollingIntervalRef.current)
+    pollingIntervalRef.current = null
+    queueMicrotask(() => setIsPolling(false))
   }, [])
 
   useEffect(() => {
     if (!enabled || !businessId) return
 
     const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible' || !pollingIntervalRef.current) return
+      pollServices()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     // If realtime is disabled, use polling immediately
     if (!enableRealtime) {
-      pollingIntervalRef.current = setInterval(() => {
-        invalidateQueries.afterServiceChange(queryClientRef.current)
-      }, 60000)
+      startPolling()
 
       return () => {
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current)
-          pollingIntervalRef.current = null
-        }
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        stopPolling()
       }
     }
 
@@ -88,11 +105,7 @@ export function useRealtimeServices({ businessId, enabled = true }: UseRealtimeS
         setStatus(status as RealtimeStatus)
 
         if (status === 'SUBSCRIBED') {
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current)
-            pollingIntervalRef.current = null
-            setIsPolling(false)
-          }
+          stopPolling()
           reconnectCountRef.current = 0
         }
 
@@ -107,17 +120,14 @@ export function useRealtimeServices({ businessId, enabled = true }: UseRealtimeS
     channelRef.current = channel
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
       }
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
-        pollingIntervalRef.current = null
-        setIsPolling(false)
-      }
+      stopPolling()
     }
-  }, [businessId, enabled, startPolling])
+  }, [businessId, enabled, pollServices, startPolling, stopPolling])
 
   return {
     status,
