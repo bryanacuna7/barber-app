@@ -176,15 +176,18 @@ export function BookingSuccess({
               href={`https://wa.me/${business.whatsapp.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-500 px-5 py-4 text-[17px] font-semibold text-white ios-press"
             >
-              <MessageCircle className="h-5 w-5" />
-              Enviar mensaje por WhatsApp
+              <Button variant="success" className="w-full h-12 text-base gap-2.5">
+                <MessageCircle className="h-5 w-5" />
+                Enviar mensaje por WhatsApp
+              </Button>
             </a>
           )}
 
           {/* Share button for viral growth */}
-          <button
+          <Button
+            variant="secondary"
+            className="w-full h-12 text-base gap-2.5"
             onClick={() => {
               const url =
                 typeof window !== 'undefined'
@@ -208,11 +211,10 @@ export function BookingSuccess({
                 )
               }
             }}
-            className="flex items-center justify-center gap-2.5 rounded-2xl bg-zinc-200/80 px-5 py-4 text-[17px] font-semibold text-zinc-700 ios-press dark:bg-zinc-700 dark:text-zinc-200"
           >
             <Share2 className="h-5 w-5" />
             Recomendar a un amigo
-          </button>
+          </Button>
 
           {/* Advance Payment CTA */}
           <AnimatePresence>
@@ -270,17 +272,20 @@ export function BookingSuccess({
 
           {/* Manual loyalty CTA (prevents success screen interruption) */}
           {hasLoyaltyProgram && (
-            <button
+            <Button
+              variant="outline"
+              className="w-full h-12 text-base border-violet-500/30 text-violet-600 dark:text-violet-300"
               onClick={() => setShowLoyaltyModal(true)}
-              className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-5 py-4 text-[16px] font-semibold text-violet-600 ios-press dark:text-violet-300"
             >
               Activar beneficios de lealtad
-            </button>
+            </Button>
           )}
 
           {/* Post-booking navigation */}
           {date && time && service && (
-            <button
+            <Button
+              variant="secondary"
+              className="w-full h-12 text-base gap-2.5"
               onClick={() => {
                 const start = new Date(date)
                 const [h, m] = time.split(':').map(Number)
@@ -290,11 +295,10 @@ export function BookingSuccess({
                 const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.name + ' - ' + (business?.name || ''))}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent('Reserva en ' + (business?.name || ''))}`
                 window.open(url, '_blank')
               }}
-              className="flex items-center justify-center gap-2.5 rounded-2xl bg-zinc-200/80 px-5 py-4 text-[17px] font-semibold text-zinc-700 ios-press dark:bg-zinc-700 dark:text-zinc-200"
             >
               <CalendarPlus className="h-5 w-5" />
               Agregar al Calendario
-            </button>
+            </Button>
           )}
 
           <a

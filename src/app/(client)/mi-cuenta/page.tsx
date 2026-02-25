@@ -21,6 +21,7 @@ import { LiveQueueCard } from '@/components/client/live-queue-card'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { formatDate, formatCurrency } from '@/lib/utils/format'
 import { ClientNotificationBell } from '@/components/client/client-notification-bell'
+import { PushNudgeBanner } from '@/components/client/push-nudge-banner'
 
 // Status labels and colors
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
@@ -88,6 +89,11 @@ export default function ClientHomePage() {
       {/* PWA Install Prompt — only shows if not already installed */}
       <div className="mb-5">
         <InstallPrompt />
+      </div>
+
+      {/* Push notification nudge — dismiss re-appears after 7 days */}
+      <div className="mb-5">
+        <PushNudgeBanner variant="dashboard" />
       </div>
 
       {/* Next Appointment */}
