@@ -119,7 +119,10 @@ function useBarberQueue(barberId: string, businessId: string, enabled: boolean) 
       return res.json()
     },
     enabled,
-    refetchInterval: 30_000,
+    refetchInterval: () =>
+      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 30_000 : false,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
     staleTime: 10_000,
   })
 }

@@ -85,7 +85,10 @@ function usePublicQueue(token: string) {
       if (!res.ok) throw new Error('Queue fetch failed')
       return res.json()
     },
-    refetchInterval: 30_000,
+    refetchInterval: () =>
+      typeof document !== 'undefined' && document.visibilityState === 'visible' ? 30_000 : false,
+    refetchOnWindowFocus: true,
+    refetchIntervalInBackground: false,
     staleTime: 10_000,
     retry: (failureCount, error) => {
       if (error instanceof Error && error.message === 'NOT_FOUND') return false

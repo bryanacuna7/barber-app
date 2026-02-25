@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Clock } from 'lucide-react'
+import { Save, Clock, Timer } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
@@ -53,6 +53,7 @@ export default function HorarioSettingsPage() {
   const [formData, setFormData] = useState({
     booking_buffer_minutes: 15,
     advance_booking_days: 14,
+    slot_interval_minutes: 30,
     operating_hours: {
       mon: { ...DEFAULT_HOURS },
       tue: { ...DEFAULT_HOURS },
@@ -70,6 +71,7 @@ export default function HorarioSettingsPage() {
       setFormData({
         booking_buffer_minutes: business.bookingConfig?.bufferMinutes || 15,
         advance_booking_days: business.bookingConfig?.advanceBookingDays || 14,
+        slot_interval_minutes: business.bookingConfig?.slotIntervalMinutes ?? 30,
         operating_hours:
           (business.operatingHours as unknown as OperatingHours) || formData.operating_hours,
       })
@@ -135,6 +137,7 @@ export default function HorarioSettingsPage() {
           operating_hours: formData.operating_hours,
           booking_buffer_minutes: formData.booking_buffer_minutes,
           advance_booking_days: formData.advance_booking_days,
+          slot_interval_minutes: formData.slot_interval_minutes,
         },
       })
       toast.success('Horario guardado correctamente')
@@ -311,6 +314,44 @@ export default function HorarioSettingsPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Slot interval — only shown when smart duration is OFF */}
+                {!business.smartDurationEnabled && (
+                  <div id="slot-interval">
+                    <label className="mb-2 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-muted">
+                      <Timer className="h-4 w-4" />
+                      Intervalo de reservas
+                    </label>
+                    <select
+                      value={formData.slot_interval_minutes}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          slot_interval_minutes: Number(e.target.value),
+                        }))
+                      }
+                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                    >
+                      <option value={10}>10 minutos</option>
+                      <option value={15}>15 minutos</option>
+                      <option value={20}>20 minutos</option>
+                      <option value={25}>25 minutos</option>
+                      <option value={30}>30 minutos</option>
+                      <option value={45}>45 minutos</option>
+                      <option value={60}>60 minutos</option>
+                    </select>
+                    <p className="mt-2 text-[12px] text-muted">
+                      Cada cuánto se generan los horarios disponibles para clientes
+                    </p>
+                  </div>
+                )}
+                {business.smartDurationEnabled && (
+                  <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 p-3 border border-emerald-200/50 dark:border-emerald-800/30">
+                    <p className="text-[13px] text-emerald-700 dark:text-emerald-400">
+                      Los intervalos se calculan automáticamente con Duración Inteligente.
+                    </p>
+                  </div>
+                )}
               </div>
             </AdvancedSettingsSection>
           </FadeInUp>

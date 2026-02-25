@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { X, Check, UserX } from 'lucide-react'
+import { X, Check, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
 import { usePaymentFlow } from '@/hooks/use-payment-flow'
@@ -15,21 +15,75 @@ type PaymentMethod = 'cash' | 'sinpe' | 'card'
 interface FocusModeProps {
   appointment: TodayAppointment
   onComplete?: (appointmentId: string, paymentMethod?: PaymentMethod) => void
-  onNoShow?: (appointmentId: string) => void
   onDismiss: () => void
+  onWalkIn?: () => void
   isLoading?: boolean
   acceptedPaymentMethods?: PaymentMethod[]
 }
 
+/* ─── Progress Ring (Apple Watch style) ─── */
+function ProgressRing({
+  progress,
+  isOvertime,
+  size = 200,
+  strokeWidth = 8,
+}: {
+  progress: number
+  isOvertime: boolean
+  size?: number
+  strokeWidth?: number
+}) {
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const clampedProgress = Math.min(progress, 1)
+  const offset = circumference * (1 - clampedProgress)
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      className="absolute inset-0"
+      style={{ transform: 'rotate(-90deg)' }}
+    >
+      {/* Track */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        className="text-zinc-800/60"
+      />
+      {/* Progress arc */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        className={cn(
+          'transition-all duration-1000 ease-out',
+          isOvertime ? 'text-amber-400' : 'text-emerald-400'
+        )}
+      />
+    </svg>
+  )
+}
+
 /**
  * Full-screen focus overlay for an in-progress appointment.
- * Inspired by Apple Watch workout mode — shows client, service, timer, and complete action.
+ * Apple Watch Workout style — progress ring, timer, minimal actions.
  */
 export function FocusMode({
   appointment,
   onComplete,
-  onNoShow,
   onDismiss,
+  onWalkIn,
   isLoading = false,
   acceptedPaymentMethods,
 }: FocusModeProps) {
@@ -63,10 +117,13 @@ export function FocusMode({
     return () => clearInterval(interval)
   }, [appointment.started_at])
 
-  // Overtime detection: timer > expected duration
-  const isOvertime = useMemo(() => {
-    return elapsedMins >= (appointment.duration_minutes || 30)
+  // Progress for ring (0 to 1, then keeps going past 1 for overtime)
+  const progress = useMemo(() => {
+    const duration = appointment.duration_minutes || 30
+    return elapsedMins / duration
   }, [elapsedMins, appointment.duration_minutes])
+
+  const isOvertime = progress >= 1
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CR', {
@@ -76,6 +133,8 @@ export function FocusMode({
       maximumFractionDigits: 0,
     }).format(price)
   }
+
+  const ringSize = 200
 
   return (
     <motion.div
@@ -88,21 +147,11 @@ export function FocusMode({
       aria-label="Modo enfoque"
       data-testid="focus-mode"
     >
-      {/* Top bar: No Show (left) + Dismiss (right) — absolute so it never pushes content */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-8 py-5 pt-safe">
-        <button
-          onClick={() => onNoShow?.(appointment.id)}
-          disabled={isLoading}
-          className="flex items-center gap-2 px-5 h-12 rounded-full bg-zinc-800/80 text-zinc-400 hover:bg-amber-900/40 hover:text-amber-400 transition-colors disabled:opacity-50"
-          aria-label="Marcar como no asistió"
-          data-testid="focus-mode-no-show"
-        >
-          <UserX className="h-4 w-4" />
-          <span className="text-sm font-medium">No Show</span>
-        </button>
+      {/* Top bar: Dismiss only */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-end px-6 py-5 pt-safe">
         <button
           onClick={onDismiss}
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-zinc-800/80 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800/80 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors"
           aria-label="Salir del modo enfoque"
           data-testid="focus-mode-dismiss"
         >
@@ -110,47 +159,67 @@ export function FocusMode({
         </button>
       </div>
 
-      {/* Center content — fills viewport, vertically centered */}
+      {/* Center content */}
       <div className="h-full flex flex-col items-center justify-center px-8">
-        {/* Client name */}
-        <p className="text-2xl font-bold text-white mb-1">
-          {appointment.client?.name || 'Cliente'}
+        {/* Client + Service */}
+        <p className="text-xl font-semibold text-white mb-0.5">
+          {appointment.client?.name || 'Walk-in'}
         </p>
-
-        {/* Service name */}
         {appointment.service && (
-          <p className="text-base text-zinc-400 mb-8">{appointment.service.name}</p>
-        )}
-
-        {/* Timer */}
-        <div
-          role="timer"
-          aria-atomic="true"
-          aria-label={`Tiempo transcurrido: ${elapsed}`}
-          className={cn(
-            'tabular-nums font-mono text-6xl font-bold mb-4 transition-colors duration-700',
-            isOvertime ? 'text-amber-400' : 'text-white'
-          )}
-        >
-          {elapsed || '0:00'}
-        </div>
-
-        {/* Overtime label */}
-        {isOvertime && (
-          <p className="text-sm text-amber-500/80 mb-2">
-            +{elapsedMins - (appointment.duration_minutes || 30)} min sobre el tiempo
+          <p className="text-sm text-zinc-500 mb-8">
+            {appointment.service.name} · {formatPrice(appointment.price)}
           </p>
         )}
 
-        {/* Price */}
-        <p className="text-xl font-semibold text-zinc-300">{formatPrice(appointment.price)}</p>
+        {/* Ring + Timer */}
+        <div
+          className="relative flex items-center justify-center mb-6"
+          style={{ width: ringSize, height: ringSize }}
+        >
+          <ProgressRing
+            progress={progress}
+            isOvertime={isOvertime}
+            size={ringSize}
+            strokeWidth={8}
+          />
+          <div className="flex flex-col items-center">
+            <div
+              role="timer"
+              aria-atomic="true"
+              aria-label={`Tiempo transcurrido: ${elapsed}`}
+              className={cn(
+                'tabular-nums font-mono text-5xl font-bold transition-colors duration-700',
+                isOvertime ? 'text-amber-400' : 'text-white'
+              )}
+            >
+              {elapsed || '0:00'}
+            </div>
+            {isOvertime && (
+              <p className="text-xs text-amber-500/80 mt-1">
+                +{elapsedMins - (appointment.duration_minutes || 30)} min extra
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Bottom action — absolute so it's always visible above safe area */}
+      {/* Bottom actions */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-10 px-8 mx-auto w-full max-w-lg"
-        style={{ paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 1.5rem), 2rem)' }}
+        className="absolute bottom-0 left-0 right-0 z-10 px-6 mx-auto w-full max-w-lg"
+        style={{ paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 1.25rem), 1.75rem)' }}
       >
+        {/* Walk-in button */}
+        {onWalkIn && (
+          <button
+            onClick={onWalkIn}
+            className="flex items-center justify-center gap-2 w-full h-12 mb-3 rounded-2xl bg-zinc-800/80 text-zinc-300 hover:bg-zinc-700 transition-colors text-sm font-medium"
+            data-testid="focus-mode-walk-in"
+          >
+            <UserPlus className="h-4 w-4" />
+            Walk-in
+          </button>
+        )}
+
         {/* Mobile: Slide to Complete */}
         <div className="lg:hidden">
           <SlideToComplete

@@ -12,7 +12,7 @@
  * Created: Session 117 - Phase 0 Week 5-6
  */
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { TrendingUp, Calendar, DollarSign, Users, Scissors, ChevronDown } from 'lucide-react'
 import { cn, formatCurrencyCompactMillions } from '@/lib/utils'
@@ -31,8 +31,7 @@ import {
   type OverviewMetrics,
 } from '@/hooks/queries/useAnalytics'
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useBusiness } from '@/contexts/business-context'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 
 // Lazy load chart components (they're heavy with Recharts)
@@ -90,7 +89,7 @@ export default function AnaliticasPageV2() {
 }
 
 function AnalyticsContent() {
-  const router = useRouter()
+  const { businessId } = useBusiness()
   const [period, setPeriod] = usePreference<AnalyticsPeriod>('analytics_period', 'month', [
     'week',
     'month',
@@ -102,63 +101,6 @@ function AnalyticsContent() {
     'barbers',
   ])
   const [statsExpanded, setStatsExpanded] = useState(false)
-  const [businessId, setBusinessId] = useState<string | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
-  const [authError, setAuthError] = useState<string | null>(null)
-
-  // Authenticate and get business_id on mount
-  useEffect(() => {
-    async function authenticateUser() {
-      try {
-        const supabase = createClient()
-
-        // 1. Get authenticated user
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          setAuthError('No estás autenticado')
-          router.push('/login')
-          return
-        }
-
-        // 2. Get business from owner relationship
-        const { data: business, error: businessError } = await supabase
-          .from('businesses')
-          .select('id')
-          .eq('owner_id', user.id)
-          .single()
-
-        if (businessError || !business) {
-          // Try to get business from barber relationship
-          const { data: barber, error: barberError } = await supabase
-            .from('barbers')
-            .select('business_id')
-            .eq('user_id', user.id)
-            .single()
-
-          if (barberError || !barber) {
-            setAuthError('No se encontró tu negocio')
-            setAuthLoading(false)
-            return
-          }
-
-          setBusinessId(barber.business_id)
-        } else {
-          setBusinessId(business.id)
-        }
-      } catch (error) {
-        console.error('Error authenticating user:', error)
-        setAuthError('Error de autenticación')
-      } finally {
-        setAuthLoading(false)
-      }
-    }
-
-    authenticateUser()
-  }, [router])
 
   // React Query: Fetch analytics data
   const {
@@ -173,21 +115,14 @@ function AnalyticsContent() {
 
   // Real-time: Subscribe to appointment changes
   useRealtimeAppointments({
-    businessId: businessId || '',
+    businessId,
     enabled: !!businessId,
   })
 
-  // Loading states
-  if (authLoading) {
-    return <AnalyticsPageSkeleton />
-  }
-
-  if (authError || !businessId) {
+  if (!businessId) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted">
-          {authError || 'Necesitas estar autenticado para ver las analíticas'}
-        </p>
+        <p className="text-muted">No se encontró el contexto del negocio para ver analíticas.</p>
       </div>
     )
   }

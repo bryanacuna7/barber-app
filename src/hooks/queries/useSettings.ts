@@ -8,11 +8,14 @@ import { createClient } from '@/lib/supabase/client'
 import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptBusinessSettings, adaptTeamMembers } from '@/lib/adapters/settings'
 
+// MODERN: includes slot_interval_minutes (migration 042) which may not exist on all environments
+// NOTE: brand_logo_url/brand_favicon_url removed — columns were never created via migration
 const SETTINGS_QUERY_MODERN =
-  'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, brand_logo_url, brand_favicon_url, logo_url, is_active'
+  'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, slot_interval_minutes, smart_duration_enabled, brand_primary_color, logo_url, is_active'
 
+// LEGACY: safe baseline — smart_duration_enabled exists (migration 033, always applied)
 const SETTINGS_QUERY_LEGACY =
-  'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, brand_primary_color, logo_url, is_active'
+  'id, name, slug, phone, whatsapp, address, timezone, operating_hours, booking_buffer_minutes, advance_booking_days, smart_duration_enabled, brand_primary_color, logo_url, is_active'
 
 function isMissingColumnError(error: unknown): boolean {
   const message = (error as { message?: string } | null)?.message

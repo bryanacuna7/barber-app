@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
+const PUBLIC_CACHE_HEADERS = {
+  'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400',
+}
+
 export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
@@ -30,5 +34,5 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 })
   }
 
-  return NextResponse.json(services || [])
+  return NextResponse.json(services || [], { headers: PUBLIC_CACHE_HEADERS })
 }

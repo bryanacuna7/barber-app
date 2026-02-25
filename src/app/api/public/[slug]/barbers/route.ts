@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
+
+const PUBLIC_CACHE_HEADERS = {
+  'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400',
+}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const supabase = await createClient()
+  const supabase = await createServiceClient()
 
   // Get business by slug
   const { data: business } = await supabase
@@ -29,5 +33,5 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: 'Failed to fetch barbers' }, { status: 500 })
   }
 
-  return NextResponse.json(barbers || [])
+  return NextResponse.json(barbers || [], { headers: PUBLIC_CACHE_HEADERS })
 }

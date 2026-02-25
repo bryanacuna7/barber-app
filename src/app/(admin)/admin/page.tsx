@@ -80,7 +80,13 @@ export default function AdminDashboard() {
     )
   }
 
-  if (!stats) return null
+  if (!stats) {
+    return (
+      <div className="rounded-xl bg-zinc-100 p-4 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+        No se pudieron obtener estadísticas del panel. Intenta recargar.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">

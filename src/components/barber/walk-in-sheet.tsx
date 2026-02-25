@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, Clock, DollarSign, Loader2, Scissors, UserPlus } from 'lucide-react'
+import { ChevronLeft, Clock, Loader2, Scissors, UserPlus } from 'lucide-react'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useServices } from '@/hooks/queries/useServices'
 import { useCreateWalkIn } from '@/hooks/queries/useAppointments'
 import type { TodayAppointment } from '@/types/custom'
 import { toast } from 'sonner'
+import { formatCurrency } from '@/lib/utils'
 
 interface BarberOption {
   id: string
@@ -205,8 +206,7 @@ export function WalkInSheet({
                               {service.duration} min
                             </span>
                             <span className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
-                              <DollarSign className="h-3.5 w-3.5" />
-                              {service.price.toLocaleString()}
+                              {formatCurrency(Number(service.price))}
                             </span>
                           </div>
                         </div>

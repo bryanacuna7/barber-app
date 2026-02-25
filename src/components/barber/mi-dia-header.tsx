@@ -49,12 +49,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={cn(
-        'bg-white/95 dark:bg-zinc-900/85 backdrop-blur-sm',
-        'border-b border-zinc-200/80 dark:border-zinc-800/80',
-        'px-4 py-5 sm:px-6',
-        className
-      )}
+      className={cn('px-0 py-5 sm:px-0', className)}
       data-testid="mi-dia-header"
     >
       {/* Title Section */}

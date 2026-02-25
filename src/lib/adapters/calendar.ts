@@ -54,8 +54,15 @@ export function adaptToCalendarEvent(
   serviceName: string,
   barberName: string
 ): UICalendarEvent {
-  const start = new Date(row.scheduled_at)
-  const end = new Date(start.getTime() + row.duration_minutes * 60000)
+  // Use started_at (real check-in time) when available, otherwise scheduled_at
+  const start = row.started_at ? new Date(row.started_at) : new Date(row.scheduled_at)
+
+  // Use actual_duration for completed appointments with tracked duration
+  const effectiveDuration =
+    row.status === 'completed' && row.actual_duration_minutes > 0
+      ? row.actual_duration_minutes
+      : row.duration_minutes
+  const end = new Date(start.getTime() + effectiveDuration * 60000)
 
   return {
     id: row.id,

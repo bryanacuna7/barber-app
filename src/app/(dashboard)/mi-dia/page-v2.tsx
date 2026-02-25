@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RefreshCw, AlertCircle, UserPlus } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useBarberDayAppointments } from '@/hooks/queries/useAppointments'
@@ -18,6 +18,7 @@ import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentE
 import { QueryError } from '@/components/ui/query-error'
 import { OnboardingChecklist } from '@/components/barber/onboarding-checklist'
 import { getStaffPermissions, mergePermissions } from '@/lib/auth/roles'
+import { useBusiness } from '@/contexts/business-context'
 import type { TodayAppointment } from '@/types/custom'
 
 /**
@@ -33,14 +34,14 @@ import type { TodayAppointment } from '@/types/custom'
  */
 function MiDiaPageContent() {
   const router = useRouter()
-  const [barberId, setBarberId] = useState<string | null>(null)
-  const [businessId, setBusinessId] = useState<string | null>(null)
+  const { businessId, barberId: contextBarberId, isOwner } = useBusiness()
+  const barberId = contextBarberId ?? null
   const [acceptedPaymentMethods, setAcceptedPaymentMethods] = useState<
     ('cash' | 'sinpe' | 'card')[] | null
   >(null)
   const [businessName, setBusinessName] = useState('')
-  const [authLoading, setAuthLoading] = useState(true)
-  const [authError, setAuthError] = useState<string | null>(null)
+  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [barberName, setBarberName] = useState('')
   const [hasPhoto, setHasPhoto] = useState(false)
@@ -49,64 +50,40 @@ function MiDiaPageContent() {
 
   const toast = useToast()
 
-  // Authenticate and get barber ID on mount
+  // Load business + barber presentation data from dashboard context
   useEffect(() => {
-    async function authenticateBarber() {
+    async function loadMiDiaContextData() {
+      if (!businessId || !barberId) {
+        setProfileError('No se encontró el perfil de miembro del equipo')
+        setProfileLoading(false)
+        return
+      }
+
       try {
         const supabase = createClient()
 
-        // 1. Get authenticated user
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser()
+        const [{ data: barberData, error: barberError }, { data: bizData, error: bizError }] =
+          await Promise.all([
+            supabase
+              .from('barbers')
+              .select('id, name, photo_url, custom_permissions')
+              .eq('id', barberId)
+              .maybeSingle(),
+            supabase
+              .from('businesses')
+              .select('name, accepted_payment_methods, staff_permissions')
+              .eq('id', businessId)
+              .single(),
+          ])
 
-        if (authError || !user) {
-          setAuthError('No estás autenticado')
-          router.push('/login')
+        if (barberError || !barberData) {
+          setProfileError('No se encontró el perfil de miembro del equipo')
           return
         }
-
-        // 2. Get barber records for this user (supports multiple rows safely)
-        const { data: barberRows, error: barberError } = await supabase
-          .from('barbers')
-          .select('id, business_id, is_active, name, photo_url')
-          .eq('user_id', user.id)
-        if (barberError || !barberRows || barberRows.length === 0) {
-          setAuthError('No se encontró el perfil de miembro del equipo')
-          setAuthLoading(false)
-          return
-        }
-
-        const activeBarbers = barberRows.filter((row) => row.is_active !== false)
-        if (activeBarbers.length === 0) {
-          setAuthError('Tu cuenta de miembro del equipo está inactiva')
-          setAuthLoading(false)
-          return
-        }
-
-        // Prefer barber row for the owner's own business when available
-        const { data: ownedBusiness } = await supabase
-          .from('businesses')
-          .select('id')
-          .eq('owner_id', user.id)
-          .maybeSingle()
-
-        const barber =
-          (ownedBusiness
-            ? activeBarbers.find((row) => row.business_id === ownedBusiness.id)
-            : undefined) ?? activeBarbers[0]
-
-        // 4. Fetch business payment methods
-        const { data: bizData, error: bizError } = (await supabase
-          .from('businesses')
-          .select('name, accepted_payment_methods')
-          .eq('id', barber.business_id)
-          .single()) as { data: Record<string, unknown> | null; error: unknown }
 
         if (bizError || !bizData) {
           // Keep null → card falls back to showing all payment methods (safe default)
-          console.error('Error fetching payment methods:', bizError)
+          console.error('Error loading business data for Mi Día:', bizError)
         } else {
           if (typeof bizData.name === 'string') {
             setBusinessName(bizData.name)
@@ -118,45 +95,36 @@ function MiDiaPageContent() {
           }
         }
 
-        // 5. Fetch staff permissions for can_create_citas (P0)
-        const isOwnerBarber = ownedBusiness?.id === barber.business_id
-        if (!isOwnerBarber) {
-          // Only fetch permissions for non-owner barbers (owners always have all permissions)
+        // Resolve can_create_citas for current role
+        if (!isOwner) {
           const businessPerms = getStaffPermissions((bizData as any)?.staff_permissions)
-          const { data: barberPermsRow } = await supabase
-            .from('barbers')
-            .select('custom_permissions')
-            .eq('id', barber.id)
-            .single()
           const effectivePerms = mergePermissions(
             businessPerms,
-            (barberPermsRow as any)?.custom_permissions
+            (barberData as any)?.custom_permissions
           )
           setCanCreateCitas(effectivePerms.can_create_citas)
+        } else {
+          setCanCreateCitas(true)
         }
-        // Owners always have can_create_citas = true (default)
 
-        // 6. Set barber ID and business ID
-        setBarberId(barber.id)
-        setBusinessId(barber.business_id)
-        setBarberName((barber as any).name || '')
-        setHasPhoto(!!(barber as any).photo_url)
+        setBarberName((barberData as any).name || '')
+        setHasPhoto(!!(barberData as any).photo_url)
 
-        // 6. Detect first login — show onboarding if no photo
-        const dismissed = localStorage.getItem(`onboarding_dismissed_${barber.id}`)
-        if (!dismissed && !(barber as any).photo_url) {
+        // Detect first login — show onboarding if no photo
+        const dismissed = localStorage.getItem(`onboarding_dismissed_${barberData.id}`)
+        if (!dismissed && !(barberData as any).photo_url) {
           setShowOnboarding(true)
         }
       } catch (error) {
-        console.error('Error authenticating barber:', error)
-        setAuthError('Error al verificar la autenticación')
+        console.error('Error loading Mi Día context:', error)
+        setProfileError('Error al cargar la información de Mi Día')
       } finally {
-        setAuthLoading(false)
+        setProfileLoading(false)
       }
     }
 
-    authenticateBarber()
-  }, [router])
+    loadMiDiaContextData()
+  }, [businessId, barberId, isOwner])
 
   // React Query hook for appointments data
   const {
@@ -168,7 +136,7 @@ function MiDiaPageContent() {
 
   // Real-time WebSocket subscription (automatic cache invalidation)
   useRealtimeAppointments({
-    businessId: businessId || '',
+    businessId,
     enabled: !!businessId,
   })
 
@@ -232,13 +200,27 @@ function MiDiaPageContent() {
     setIsRefreshing(false)
   }
 
-  // Auth loading state
-  if (authLoading) {
+  const handleOwnerOnlyOnboardingStep = useCallback(
+    (path: string, featureLabel: string) => {
+      if (!isOwner) {
+        toast.info(
+          `Este paso (${featureLabel}) lo configura la persona dueña del negocio desde Configuración.`
+        )
+        return
+      }
+
+      router.push(path)
+    },
+    [isOwner, router, toast]
+  )
+
+  // Context/profile loading state
+  if (profileLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+      <div>
         <div className="animate-pulse">
           {/* Header Skeleton */}
-          <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-4 py-5">
+          <div className="py-5">
             <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-32 mb-3" />
             <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-48 mb-4" />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -262,10 +244,10 @@ function MiDiaPageContent() {
     )
   }
 
-  // Auth error state
-  if (authError) {
+  // Context/profile error state
+  if (profileError) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-4 min-h-[60vh]">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -274,13 +256,8 @@ function MiDiaPageContent() {
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/30 mx-auto mb-4">
             <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" aria-hidden="true" />
           </div>
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">
-            Error de Autenticación
-          </h2>
-          <p className="text-sm text-muted mb-6">{authError}</p>
-          <Button onClick={() => router.push('/login')} variant="primary" className="w-full">
-            Volver al Inicio de Sesión
-          </Button>
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Error de Perfil</h2>
+          <p className="text-sm text-muted">{profileError}</p>
         </motion.div>
       </div>
     )
@@ -289,10 +266,10 @@ function MiDiaPageContent() {
   // Loading skeleton (first load)
   if (isLoadingAppointments && !data) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+      <div>
         <div className="animate-pulse">
           {/* Header Skeleton */}
-          <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-4 py-5">
+          <div className="py-5">
             <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-32 mb-3" />
             <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-48 mb-4" />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -319,7 +296,7 @@ function MiDiaPageContent() {
   // Error state with retry (uses new QueryError component)
   if (fetchError && !data) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-4 min-h-[60vh]">
         <QueryError error={fetchError} onRetry={refetch} />
       </div>
     )
@@ -327,11 +304,34 @@ function MiDiaPageContent() {
 
   // No data (shouldn't happen, but handle it)
   if (!data) {
-    return null
+    return (
+      <div className="flex items-center justify-center p-4 min-h-[60vh]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-md w-full text-center"
+        >
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">
+            No se pudieron cargar las citas
+          </h2>
+          <p className="text-sm text-muted mb-5">
+            Intenta recargar para sincronizar los datos de Mi Día.
+          </p>
+          <Button onClick={() => refetch()} variant="primary" className="w-full">
+            Reintentar
+          </Button>
+        </motion.div>
+      </div>
+    )
   }
 
+  // Find the in-progress appointment (confirmed + started_at) for the focus pill
+  const inProgressAppointment = data.appointments.find(
+    (a) => a.status === 'confirmed' && a.started_at
+  )
+
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+    <div>
       {/* Header - Wrapped in error boundary */}
       <ComponentErrorBoundary
         fallbackTitle="Error en el encabezado"
@@ -354,6 +354,12 @@ function MiDiaPageContent() {
               barberName={barberName}
               hasPhoto={hasPhoto}
               hasPushSubscription={false}
+              onOpenPhotoSettings={() =>
+                handleOwnerOnlyOnboardingStep('/barberos', 'foto de perfil')
+              }
+              onOpenScheduleSettings={() =>
+                handleOwnerOnlyOnboardingStep('/configuracion/horario', 'horario')
+              }
               onDismiss={() => {
                 setShowOnboarding(false)
                 if (barberId) {
@@ -365,17 +371,33 @@ function MiDiaPageContent() {
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-2 mb-4">
+        <div className="mb-4 flex items-center justify-end gap-2">
+          {/* Focus Mode pill — only shows when there's an in-progress appointment */}
+          {inProgressAppointment && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setFocusAppointmentId(inProgressAppointment.id)}
+              className="h-11 min-w-[104px] justify-center gap-1.5 whitespace-nowrap px-4 leading-none"
+              aria-label="Entrar en modo enfoque"
+              data-testid="focus-pill-button"
+            >
+              <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              Enfoque
+            </Button>
+          )}
           {canCreateCitas && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsWalkInSheetOpen(true)}
-              className="gap-2"
+              className="h-11 min-w-[104px] justify-center whitespace-nowrap px-4 leading-none"
               aria-label="Agregar walk-in"
               data-testid="walk-in-button"
             >
-              <UserPlus className="h-4 w-4" aria-hidden="true" />
               Walk-in
             </Button>
           )}
@@ -384,14 +406,10 @@ function MiDiaPageContent() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="gap-2"
+            className="h-11 min-w-[104px] justify-center whitespace-nowrap px-4 leading-none"
             aria-label="Actualizar citas"
             data-testid="refresh-button"
           >
-            <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
-              aria-hidden="true"
-            />
             Actualizar
           </Button>
         </div>
@@ -442,8 +460,8 @@ function MiDiaPageContent() {
                 key={apt.id}
                 appointment={apt}
                 onComplete={complete}
-                onNoShow={noShow}
                 onDismiss={() => setFocusAppointmentId(null)}
+                onWalkIn={canCreateCitas ? () => setIsWalkInSheetOpen(true) : undefined}
                 isLoading={loadingAppointmentId === apt.id}
                 acceptedPaymentMethods={acceptedPaymentMethods ?? undefined}
               />

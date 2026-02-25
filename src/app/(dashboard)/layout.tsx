@@ -281,11 +281,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <main id="main-content" className={roleInfo.isOwner ? 'lg:pl-64' : ''}>
               <div
                 className={
-                  isCitasRoute
+                  isCitasRoute || isMiDiaRoute
                     ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                    : isMiDiaRoute
-                      ? 'bg-zinc-50 dark:bg-zinc-900 px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                      : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+                    : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
                 }
               >
                 {roleInfo.isOwner && <TrialBanner />}

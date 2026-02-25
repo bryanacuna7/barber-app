@@ -1,15 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Camera, Clock, Bell, CheckCircle, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Camera, Clock, Bell, CheckCircle, X, ChevronRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { usePushSubscription } from '@/hooks/use-push-subscription'
+import { useToast } from '@/components/ui/toast'
 
 interface OnboardingChecklistProps {
   barberName: string
   hasPhoto: boolean
   hasPushSubscription: boolean
   onDismiss: () => void
+  onOpenPhotoSettings?: () => void
+  onOpenScheduleSettings?: () => void
 }
 
 interface Step {
@@ -18,8 +21,8 @@ interface Step {
   description: string
   icon: typeof Camera
   completed: boolean
-  action?: string
-  actionUrl?: string
+  onClick?: () => void | Promise<void>
+  isLoading?: boolean
 }
 
 /**
@@ -31,7 +34,45 @@ export function OnboardingChecklist({
   hasPhoto,
   hasPushSubscription,
   onDismiss,
+  onOpenPhotoSettings,
+  onOpenScheduleSettings,
 }: OnboardingChecklistProps) {
+  const toast = useToast()
+  const {
+    isSupported,
+    permission,
+    isSubscribed,
+    subscribe,
+    loading: pushLoading,
+    error: pushError,
+  } = usePushSubscription()
+  const pushEnabled = hasPushSubscription || isSubscribed
+
+  const handlePushClick = async () => {
+    if (pushEnabled) {
+      toast.info('Las notificaciones push ya están activas en este dispositivo.')
+      return
+    }
+
+    if (!isSupported) {
+      toast.error('Este navegador no soporta notificaciones push.')
+      return
+    }
+
+    const ok = await subscribe()
+    if (ok) {
+      toast.success('Notificaciones push activadas.')
+      return
+    }
+
+    if (permission === 'denied') {
+      toast.error('Permiso de notificaciones bloqueado. Habilítalo en tu navegador.')
+      return
+    }
+
+    toast.error(pushError || 'No se pudieron activar las notificaciones.')
+  }
+
   const steps: Step[] = [
     {
       id: 'photo',
@@ -39,6 +80,7 @@ export function OnboardingChecklist({
       description: 'Tus clientes podrán reconocerte al reservar',
       icon: Camera,
       completed: hasPhoto,
+      onClick: onOpenPhotoSettings,
     },
     {
       id: 'schedule',
@@ -46,13 +88,16 @@ export function OnboardingChecklist({
       description: 'Verifica que tus horas de trabajo son correctas',
       icon: Clock,
       completed: true, // Always available once onboarded
+      onClick: onOpenScheduleSettings,
     },
     {
       id: 'push',
       label: 'Activa notificaciones',
       description: 'Recibe alertas cuando agenden una cita contigo',
       icon: Bell,
-      completed: hasPushSubscription,
+      completed: pushEnabled,
+      onClick: handlePushClick,
+      isLoading: pushLoading,
     },
   ]
 
@@ -97,10 +142,18 @@ export function OnboardingChecklist({
 
       <div className="space-y-2">
         {steps.map((step) => (
-          <div
+          <button
             key={step.id}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${
+            type="button"
+            onClick={() => {
+              if (!step.onClick || step.isLoading) return
+              void step.onClick()
+            }}
+            disabled={!step.onClick || step.isLoading}
+            className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
               step.completed ? 'bg-blue-100/50 dark:bg-blue-900/20' : 'bg-white dark:bg-zinc-800/50'
+            } ${step.onClick ? 'cursor-pointer hover:bg-blue-100/70 dark:hover:bg-blue-900/30' : 'cursor-default'} ${
+              step.isLoading ? 'opacity-60 cursor-wait' : ''
             }`}
           >
             <div
@@ -130,7 +183,15 @@ export function OnboardingChecklist({
                 <p className="text-[12px] text-muted mt-0.5">{step.description}</p>
               )}
             </div>
-          </div>
+            {step.onClick && (
+              <ChevronRight
+                className={`h-4 w-4 shrink-0 ${
+                  step.completed ? 'text-blue-500/70' : 'text-zinc-400 dark:text-zinc-500'
+                }`}
+                aria-hidden="true"
+              />
+            )}
+          </button>
         ))}
       </div>
 

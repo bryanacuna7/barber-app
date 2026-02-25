@@ -38,7 +38,11 @@ export interface UIBusinessSettings {
   bookingConfig: {
     bufferMinutes: number
     advanceBookingDays: number
+    slotIntervalMinutes: number
   }
+
+  // Smart duration feature flag
+  smartDurationEnabled: boolean
 
   // Branding
   branding: {
@@ -81,7 +85,9 @@ export function adaptBusinessSettings(row: SupabaseBusiness): UIBusinessSettings
     bookingConfig: {
       bufferMinutes: row.booking_buffer_minutes || 0,
       advanceBookingDays: row.advance_booking_days || 30,
+      slotIntervalMinutes: row.slot_interval_minutes ?? 30,
     },
+    smartDurationEnabled: row.smart_duration_enabled === true,
     branding: {
       primaryColor: row.brand_primary_color || '#27272A',
       logoUrl: row.brand_logo_url || row.logo_url || undefined,
