@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { processAppointmentLoyalty } from '@/lib/gamification/loyalty-calculator-server'
 import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
@@ -135,33 +135,89 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: 'Barber not found or inactive' }, { status: 404 })
   }
 
+  // Check if the booking is made by an authenticated user (optional — public endpoint)
+  let authUserId: string | null = null
+  try {
+    const authClient = await createClient()
+    const {
+      data: { user },
+    } = await authClient.auth.getUser()
+    if (user) authUserId = user.id
+  } catch {
+    // Not authenticated — continue as public booking
+  }
+
   // Find or create client
   let client
-  // claim_token/user_id not in generated types yet, cast with `as any`
-  const { data: existingClient } = (await supabase
-    .from('clients')
-    .select('id, user_id, claim_token')
-    .eq('business_id', business.id)
-    .eq('phone', client_phone)
-    .single()) as any
 
-  if (existingClient) {
-    client = existingClient
-    // Refresh claim token for unclaimed clients so they can create an account
-    if (!(existingClient as any).user_id) {
+  // 1. If authenticated, check if user already has a client record in this business
+  if (authUserId) {
+    const { data: userClient } = (await supabase
+      .from('clients')
+      .select('id, user_id, claim_token')
+      .eq('business_id', business.id)
+      .eq('user_id', authUserId)
+      .single()) as any
+
+    if (userClient) {
+      client = userClient
+      // Update name/phone/email if changed
       await supabase
         .from('clients')
         .update({
-          claim_token: crypto.randomUUID(),
-          claim_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          name: client_name,
+          phone: client_phone,
+          ...(client_email ? { email: client_email } : {}),
         } as any)
-        .eq('id', existingClient.id)
+        .eq('id', userClient.id)
+      logger.debug(
+        { clientId: client.id, businessId: business.id, authUserId },
+        'Authenticated user matched to existing client'
+      )
     }
-    logger.debug(
-      { clientId: client.id, businessId: business.id },
-      'Existing client found for booking'
-    )
-  } else {
+  }
+
+  // 2. If no match by user_id, look up by phone (existing behavior)
+  if (!client) {
+    // claim_token/user_id not in generated types yet, cast with `as any`
+    const { data: existingClient } = (await supabase
+      .from('clients')
+      .select('id, user_id, claim_token')
+      .eq('business_id', business.id)
+      .eq('phone', client_phone)
+      .single()) as any
+
+    if (existingClient) {
+      client = existingClient
+      // If authenticated and client is unclaimed, auto-claim it
+      if (authUserId && !(existingClient as any).user_id) {
+        await supabase
+          .from('clients')
+          .update({ user_id: authUserId } as any)
+          .eq('id', existingClient.id)
+        logger.debug(
+          { clientId: client.id, businessId: business.id, authUserId },
+          'Auto-claimed unclaimed client for authenticated user'
+        )
+      } else if (!(existingClient as any).user_id) {
+        // Refresh claim token for unclaimed clients so they can create an account
+        await supabase
+          .from('clients')
+          .update({
+            claim_token: crypto.randomUUID(),
+            claim_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          } as any)
+          .eq('id', existingClient.id)
+      }
+      logger.debug(
+        { clientId: client.id, businessId: business.id },
+        'Existing client found for booking'
+      )
+    }
+  }
+
+  // 3. Create new client if no match found
+  if (!client) {
     const { data: newClient, error: clientError } = await supabase
       .from('clients')
       .insert({
@@ -169,8 +225,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
         name: client_name,
         phone: client_phone,
         email: client_email || null,
-        claim_token: crypto.randomUUID(),
-        claim_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        ...(authUserId ? { user_id: authUserId } : {}),
+        claim_token: authUserId ? null : crypto.randomUUID(),
+        claim_token_expires_at: authUserId
+          ? null
+          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       } as any)
       .select('id, claim_token')
       .single()
@@ -181,7 +240,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
     }
     client = newClient
-    logBusiness('client_created', business.id, { clientId: client.id, clientPhone: client_phone })
+    logBusiness('client_created', business.id, {
+      clientId: client.id,
+      clientPhone: client_phone,
+      authUserId,
+    })
   }
 
   // Smart duration: predict if enabled, otherwise use fixed service duration
