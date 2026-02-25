@@ -4,6 +4,20 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.14] - 2026-02-25
+
+### Nuevo
+
+- Duracion inteligente por cliente: el sistema aprende cuanto tarda cada cliente y ajusta los horarios automaticamente
+- Algoritmo de espacios dinamicos: genera horarios disponibles basados en los huecos reales de la agenda
+- Indicador visual de tiempo estimado (~40 min) cuando la prediccion difiere del tiempo base del servicio
+
+### Mejorado
+
+- Los horarios disponibles se calculan con mayor precision usando el historial real de citas
+- Los toggles del panel usan el diseño nativo de iOS con el verde de Apple
+- Auto-refresco de horarios solo cuando es necesario (ahorra datos)
+
 ## [0.9.13] - 2026-02-25
 
 ### Nuevo

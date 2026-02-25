@@ -8,22 +8,21 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.13
+## v0.9.14
 
-### Atencion sin cita (Walk-in)
+### Duracion inteligente por cliente
 
-- Nuevo boton para crear citas rapidas desde Mi Dia cuando llega un cliente sin reserva
-- Selecciona barbero, servicio y decide si empieza ahora o va a la cola
-- Al completar la cita, elige el metodo de pago: efectivo, sinpe o tarjeta
+- El sistema aprende cuanto tarda cada cliente y ajusta los horarios automaticamente
+- Un cliente rapido ve intervalos de 20 min, uno detallista ve intervalos de 45 min
+- Se muestra el tiempo estimado con ~ cuando difiere del tiempo base (ej: ~40 min)
+- La prediccion mejora con cada cita completada
 
-### Pagina principal rediseñada
+### Horarios mas precisos
 
-- Landing page mas limpia y enfocada: hero, beneficios, testimonios y precios
-- Boton flotante de reserva en mobile para mejor conversion
-- Seccion final con llamada a la accion clara
+- Nuevo algoritmo que genera horarios basados en los huecos reales de la agenda
+- Mejor aprovechamiento del tiempo disponible entre citas existentes
+- Auto-refresco solo cuando es relevante para ahorrar datos
 
-### Mejoras en configuracion y navegacion
+### Mejoras visuales
 
-- Paginas de equipo, horario, pagos y promociones con mejor diseño
-- Sidebar y tabs del panel mas intuitivos
-- Card de citas muestra metodo de pago y enlace directo a WhatsApp del cliente
+- Toggles del panel con diseño nativo iOS (verde Apple)
