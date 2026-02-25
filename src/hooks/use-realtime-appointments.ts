@@ -48,28 +48,55 @@ export function useRealtimeAppointments({
   pollingInterval = 30000, // 30 seconds
   maxReconnectAttempts = 3,
 }: UseRealtimeAppointmentsOptions) {
+  const isDev = process.env.NODE_ENV === 'development'
   const queryClient = useQueryClient()
   const reconnectAttempts = useRef(0)
-  const pollingIntervalRef = useRef<NodeJS.Timeout>(undefined)
+  const pollingIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     if (!enabled || !businessId) return
 
     const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
+    const shouldPollNow = () =>
+      typeof document === 'undefined' || document.visibilityState === 'visible'
+    const pollAppointments = () => {
+      if (!shouldPollNow()) return
+      invalidateQueries.afterAppointmentChange(queryClient)
+    }
+    const startPolling = () => {
+      if (pollingIntervalRef.current) return
+      pollingIntervalRef.current = setInterval(() => {
+        if (isDev) {
+          console.log('🔄 Polling appointments')
+        }
+        pollAppointments()
+      }, pollingInterval)
+    }
+    const stopPolling = () => {
+      if (!pollingIntervalRef.current) return
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = undefined
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return
+      if (pollingIntervalRef.current) {
+        pollAppointments()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     // If realtime is disabled, use polling immediately
     if (!enableRealtime) {
-      console.log('🔄 Realtime disabled - using polling mode for appointments')
-      pollingIntervalRef.current = setInterval(() => {
-        console.log('🔄 Polling appointments (dev mode)')
-        invalidateQueries.afterAppointmentChange(queryClient)
-      }, pollingInterval)
+      if (isDev) {
+        console.log('🔄 Realtime disabled - using polling mode for appointments')
+      }
+      startPolling()
 
       return () => {
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current)
-        }
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        stopPolling()
       }
     }
 
@@ -87,11 +114,13 @@ export function useRealtimeAppointments({
         },
         (payload) => {
           // Real-time update received - invalidate React Query cache
-          console.log(
-            '📡 Appointment change detected:',
-            payload.eventType,
-            (payload.new as any)?.id
-          )
+          if (isDev) {
+            console.log(
+              '📡 Appointment change detected:',
+              payload.eventType,
+              (payload.new as any)?.id
+            )
+          }
 
           // Always invalidate appointments + calendar
           invalidateQueries.afterAppointmentChange(queryClient)
@@ -107,16 +136,17 @@ export function useRealtimeAppointments({
         }
       )
       .subscribe((status) => {
-        console.log('🔌 Realtime subscription status:', status)
+        if (isDev) {
+          console.log('🔌 Realtime subscription status:', status)
+        }
 
         if (status === 'SUBSCRIBED') {
           // Successfully connected - clear any polling fallback
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current)
-            pollingIntervalRef.current = undefined
-          }
+          stopPolling()
           reconnectAttempts.current = 0
-          console.log('✅ Real-time appointments active')
+          if (isDev) {
+            console.log('✅ Real-time appointments active')
+          }
         }
 
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
@@ -129,32 +159,28 @@ export function useRealtimeAppointments({
 
           // Fallback to polling after max attempts
           if (reconnectAttempts.current >= maxReconnectAttempts) {
-            console.warn(
-              `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
-            )
-
-            // Start polling fallback
-            pollingIntervalRef.current = setInterval(() => {
-              console.log('🔄 Polling appointments (WebSocket fallback)')
-              invalidateQueries.afterAppointmentChange(queryClient)
-            }, pollingInterval)
+            if (isDev) {
+              console.warn(
+                `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
+              )
+            }
+            startPolling()
           }
         }
 
-        if (status === 'CLOSED') {
+        if (status === 'CLOSED' && isDev) {
           console.log('🔌 Realtime subscription closed')
         }
       })
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('🧹 Cleaning up real-time appointments subscription')
-      supabase.removeChannel(channel)
-
-      // Clear polling if active
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
+      if (isDev) {
+        console.log('🧹 Cleaning up real-time appointments subscription')
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      supabase.removeChannel(channel)
+      stopPolling()
     }
-  }, [businessId, enabled, pollingInterval, maxReconnectAttempts, queryClient])
+  }, [businessId, enabled, pollingInterval, maxReconnectAttempts, queryClient, isDev])
 }

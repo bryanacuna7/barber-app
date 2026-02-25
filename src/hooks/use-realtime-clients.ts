@@ -48,32 +48,55 @@ export function useRealtimeClients({
   pollingInterval = 30000, // 30 seconds
   maxReconnectAttempts = 3,
 }: UseRealtimeClientsOptions) {
+  const isDev = process.env.NODE_ENV === 'development'
   const queryClient = useQueryClient()
   const reconnectAttempts = useRef(0)
-  const pollingIntervalRef = useRef<NodeJS.Timeout>(undefined)
+  const pollingIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     if (!enabled || !businessId) return
 
     const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
+    const shouldPollNow = () =>
+      typeof document === 'undefined' || document.visibilityState === 'visible'
+    const pollClients = () => {
+      if (!shouldPollNow()) return
+      invalidateQueries.afterClientChange(queryClient)
+    }
+    const startPolling = () => {
+      if (pollingIntervalRef.current) return
+      pollingIntervalRef.current = setInterval(() => {
+        if (isDev) {
+          console.log('🔄 Polling clients')
+        }
+        pollClients()
+      }, pollingInterval)
+    }
+    const stopPolling = () => {
+      if (!pollingIntervalRef.current) return
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = undefined
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return
+      if (pollingIntervalRef.current) {
+        pollClients()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     // If realtime is disabled, use polling immediately
     if (!enableRealtime) {
-      if (process.env.NODE_ENV === 'development') {
+      if (isDev) {
         console.log('🔄 Realtime disabled - using polling mode for clients')
       }
-      pollingIntervalRef.current = setInterval(() => {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🔄 Polling clients (dev mode)')
-        }
-        invalidateQueries.afterClientChange(queryClient)
-      }, pollingInterval)
+      startPolling()
 
       return () => {
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current)
-        }
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        stopPolling()
       }
     }
 
@@ -91,7 +114,7 @@ export function useRealtimeClients({
         },
         (payload) => {
           // Real-time update received - invalidate React Query cache
-          if (process.env.NODE_ENV === 'development') {
+          if (isDev) {
             console.log('📡 Client change detected:', payload.eventType, (payload.new as any)?.id)
           }
 
@@ -103,18 +126,15 @@ export function useRealtimeClients({
         }
       )
       .subscribe((status) => {
-        if (process.env.NODE_ENV === 'development') {
+        if (isDev) {
           console.log('🔌 Realtime subscription status (clients):', status)
         }
 
         if (status === 'SUBSCRIBED') {
           // Successfully connected - clear any polling fallback
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current)
-            pollingIntervalRef.current = undefined
-          }
+          stopPolling()
           reconnectAttempts.current = 0
-          if (process.env.NODE_ENV === 'development') {
+          if (isDev) {
             console.log('✅ Real-time clients active')
           }
         }
@@ -122,7 +142,7 @@ export function useRealtimeClients({
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           reconnectAttempts.current++
 
-          if (process.env.NODE_ENV === 'development') {
+          if (isDev) {
             console.error(
               `❌ Realtime error (clients, attempt ${reconnectAttempts.current}/${maxReconnectAttempts}):`,
               status
@@ -131,40 +151,28 @@ export function useRealtimeClients({
 
           // Fallback to polling after max attempts
           if (reconnectAttempts.current >= maxReconnectAttempts) {
-            if (process.env.NODE_ENV === 'development') {
+            if (isDev) {
               console.warn(
                 `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
               )
             }
-
-            // Start polling fallback
-            pollingIntervalRef.current = setInterval(() => {
-              if (process.env.NODE_ENV === 'development') {
-                console.log('🔄 Polling clients (WebSocket fallback)')
-              }
-              invalidateQueries.afterClientChange(queryClient)
-            }, pollingInterval)
+            startPolling()
           }
         }
 
-        if (status === 'CLOSED') {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('🔌 Realtime subscription closed (clients)')
-          }
+        if (status === 'CLOSED' && isDev) {
+          console.log('🔌 Realtime subscription closed (clients)')
         }
       })
 
     // Cleanup subscription on unmount
     return () => {
-      if (process.env.NODE_ENV === 'development') {
+      if (isDev) {
         console.log('🧹 Cleaning up real-time clients subscription')
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       supabase.removeChannel(channel)
-
-      // Clear polling if active
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
-      }
+      stopPolling()
     }
-  }, [businessId, enabled, pollingInterval, maxReconnectAttempts, queryClient])
+  }, [businessId, enabled, pollingInterval, maxReconnectAttempts, queryClient, isDev])
 }
