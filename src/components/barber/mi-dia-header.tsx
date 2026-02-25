@@ -50,7 +50,8 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        'bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800',
+        'bg-white/95 dark:bg-zinc-900/85 backdrop-blur-sm',
+        'border-b border-zinc-200/80 dark:border-zinc-800/80',
         'px-4 py-5 sm:px-6',
         className
       )}
@@ -83,7 +84,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5"
+          className="bg-zinc-50 dark:bg-zinc-800/60 rounded-xl px-3 py-2.5"
           data-testid="stat-total"
         >
           <p className="text-xs text-muted font-medium">Total</p>

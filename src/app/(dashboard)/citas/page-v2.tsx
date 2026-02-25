@@ -40,6 +40,7 @@ import {
   Zap,
   CheckCircle,
   X,
+  UserPlus,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -76,6 +77,7 @@ import {
   useCalendarAppointments,
   useCreateAppointment,
   useUpdateAppointmentStatus,
+  useCreateWalkIn,
 } from '@/hooks/queries/useAppointments'
 import { useClients } from '@/hooks/queries/useClients'
 import { useServices } from '@/hooks/queries/useServices'
@@ -96,6 +98,8 @@ import { useBusiness } from '@/contexts/business-context'
 import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
 // iOS Date Picker
 import { DatePickerTrigger } from '@/components/ui/ios-date-picker'
+// Walk-in Sheet
+import { WalkInSheet } from '@/components/barber/walk-in-sheet'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -230,6 +234,7 @@ function CitasCalendarFusionContent() {
   const intentHandled = useRef(false)
   const [isStatsOpen, setIsStatsOpen] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isWalkInOpen, setIsWalkInOpen] = useState(false)
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false)
   const [activePickerField, setActivePickerField] = useState<
     'client' | 'service' | 'barber' | null
@@ -727,6 +732,15 @@ function CitasCalendarFusionContent() {
                     <ChevronRight className="w-5 h-5 text-muted" />
                   </Button>
                   <Button
+                    onClick={() => setIsWalkInOpen(true)}
+                    data-testid="walk-in-btn-desktop"
+                    variant="ghost"
+                    className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                    aria-label="Agregar walk-in"
+                  >
+                    <UserPlus className="w-5 h-5 text-amber-500" />
+                  </Button>
+                  <Button
                     onClick={() => setIsCreateOpen(true)}
                     data-testid="create-appointment-btn-desktop"
                     variant="ghost"
@@ -776,6 +790,15 @@ function CitasCalendarFusionContent() {
                     </Button>
                   )}
 
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsWalkInOpen(true)}
+                    data-testid="walk-in-btn-mobile"
+                    className="min-w-[44px] min-h-[44px] h-10 w-10 rounded-xl p-0 flex-shrink-0"
+                    aria-label="Agregar walk-in"
+                  >
+                    <UserPlus className="h-5 w-5 text-amber-500" />
+                  </Button>
                   <Button
                     variant="gradient"
                     onClick={() => setIsCreateOpen(true)}
@@ -950,48 +973,105 @@ function CitasCalendarFusionContent() {
                         )}
 
                         <AnimatePresence mode="popLayout">
-                        {block.appointments.map((apt, aptIndex) => {
-                          const canConfirm = apt.status === 'pending'
-                          const canCancel = apt.status !== 'cancelled' && apt.status !== 'completed'
-                          const isLast = aptIndex === block.appointments.length - 1
+                          {block.appointments.map((apt, aptIndex) => {
+                            const canConfirm = apt.status === 'pending'
+                            const canCancel =
+                              apt.status !== 'cancelled' && apt.status !== 'completed'
+                            const isLast = aptIndex === block.appointments.length - 1
 
-                          const rightActions = []
-                          if (canConfirm) {
-                            rightActions.push({
-                              icon: <CheckCircle className="h-5 w-5" />,
-                              label: 'Confirmar',
-                              color: 'bg-emerald-500',
-                              onClick: () => handleAppointmentStatusChange(apt.id, 'confirmed'),
-                            })
-                          }
-                          if (canCancel) {
-                            rightActions.push({
-                              icon: <X className="h-5 w-5" />,
-                              label: 'Cancelar',
-                              color: 'bg-red-500',
-                              onClick: () => handleAppointmentStatusChange(apt.id, 'cancelled'),
-                            })
-                          }
+                            const rightActions = []
+                            if (canConfirm) {
+                              rightActions.push({
+                                icon: <CheckCircle className="h-5 w-5" />,
+                                label: 'Confirmar',
+                                color: 'bg-emerald-500',
+                                onClick: () => handleAppointmentStatusChange(apt.id, 'confirmed'),
+                              })
+                            }
+                            if (canCancel) {
+                              rightActions.push({
+                                icon: <X className="h-5 w-5" />,
+                                label: 'Cancelar',
+                                color: 'bg-red-500',
+                                onClick: () => handleAppointmentStatusChange(apt.id, 'cancelled'),
+                              })
+                            }
 
-                          return (
-                            <motion.div
-                              key={apt.id}
-                              layout
-                              exit={{ opacity: 0, x: -80, transition: { duration: 0.2 } }}
-                              transition={animations.spring.layout}
-                              className={
-                                isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/80'
-                              }
-                            >
-                              <div className="lg:hidden">
-                                <SwipeableRow
-                                  rightActions={rightActions}
-                                  showAffordance={false}
-                                  containerClassName="rounded-none"
+                            return (
+                              <motion.div
+                                key={apt.id}
+                                layout
+                                exit={{ opacity: 0, x: -80, transition: { duration: 0.2 } }}
+                                transition={animations.spring.layout}
+                                className={
+                                  isLast
+                                    ? ''
+                                    : 'border-b border-zinc-200/70 dark:border-zinc-800/80'
+                                }
+                              >
+                                <div className="lg:hidden">
+                                  <SwipeableRow
+                                    rightActions={rightActions}
+                                    showAffordance={false}
+                                    containerClassName="rounded-none"
+                                  >
+                                    <div
+                                      onClick={() => setSelectedId(apt.id)}
+                                      className="cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900"
+                                    >
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <div
+                                              className={`w-1.5 h-1.5 rounded-full ${
+                                                apt.status === 'completed'
+                                                  ? 'bg-emerald-500'
+                                                  : apt.status === 'confirmed'
+                                                    ? 'bg-blue-500'
+                                                    : 'bg-amber-500'
+                                              }`}
+                                            />
+                                            <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                              {apt.client?.name || 'Cliente'}
+                                            </span>
+                                          </div>
+                                          <div className="text-xs text-muted leading-tight">
+                                            {apt.service?.name || 'Servicio'}
+                                          </div>
+                                        </div>
+                                        <div className="text-right text-xs">
+                                          <div className="text-muted font-medium tabular-nums leading-tight">
+                                            {format(parseISO(apt.scheduled_at), 'h:mm a')}
+                                          </div>
+                                          <div className="mt-1 text-[13px] leading-tight font-semibold text-amber-500 dark:text-amber-500">
+                                            {formatCurrencyCompactMillions(apt.service?.price || 0)}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </SwipeableRow>
+                                </div>
+                                {/* Desktop: draggable version */}
+                                <motion.div
+                                  className="hidden lg:block"
+                                  drag
+                                  dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                                  dragElastic={0.05}
+                                  onDragStart={() => setDraggedId(apt.id)}
+                                  onDragEnd={() => {
+                                    setDraggedId(null)
+                                    toast.info('Rescheduling (demo)')
+                                  }}
+                                  whileTap={{ scale: 0.98 }}
+                                  whileDrag={{ scale: 1.05, zIndex: 50 }}
+                                  onClick={() => setSelectedId(apt.id)}
                                 >
                                   <div
-                                    onClick={() => setSelectedId(apt.id)}
-                                    className="cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900"
+                                    className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-all ${
+                                      draggedId === apt.id
+                                        ? 'opacity-50'
+                                        : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
+                                    }`}
                                   >
                                     <div className="flex items-start justify-between mb-2">
                                       <div className="flex-1">
@@ -1009,7 +1089,7 @@ function CitasCalendarFusionContent() {
                                             {apt.client?.name || 'Cliente'}
                                           </span>
                                         </div>
-                                        <div className="text-xs text-muted leading-tight">
+                                        <div className="text-xs text-muted">
                                           {apt.service?.name || 'Servicio'}
                                         </div>
                                       </div>
@@ -1023,64 +1103,10 @@ function CitasCalendarFusionContent() {
                                       </div>
                                     </div>
                                   </div>
-                                </SwipeableRow>
-                              </div>
-                              {/* Desktop: draggable version */}
-                              <motion.div
-                                className="hidden lg:block"
-                                drag
-                                dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                                dragElastic={0.05}
-                                onDragStart={() => setDraggedId(apt.id)}
-                                onDragEnd={() => {
-                                  setDraggedId(null)
-                                  toast.info('Rescheduling (demo)')
-                                }}
-                                whileTap={{ scale: 0.98 }}
-                                whileDrag={{ scale: 1.05, zIndex: 50 }}
-                                onClick={() => setSelectedId(apt.id)}
-                              >
-                                <div
-                                  className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-all ${
-                                    draggedId === apt.id
-                                      ? 'opacity-50'
-                                      : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
-                                  }`}
-                                >
-                                  <div className="flex items-start justify-between mb-2">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <div
-                                          className={`w-1.5 h-1.5 rounded-full ${
-                                            apt.status === 'completed'
-                                              ? 'bg-emerald-500'
-                                              : apt.status === 'confirmed'
-                                                ? 'bg-blue-500'
-                                                : 'bg-amber-500'
-                                          }`}
-                                        />
-                                        <span className="font-medium text-zinc-900 dark:text-white text-sm">
-                                          {apt.client?.name || 'Cliente'}
-                                        </span>
-                                      </div>
-                                      <div className="text-xs text-muted">
-                                        {apt.service?.name || 'Servicio'}
-                                      </div>
-                                    </div>
-                                    <div className="text-right text-xs">
-                                      <div className="text-muted font-medium tabular-nums leading-tight">
-                                        {format(parseISO(apt.scheduled_at), 'h:mm a')}
-                                      </div>
-                                      <div className="mt-1 text-[13px] leading-tight font-semibold text-amber-500 dark:text-amber-500">
-                                        {formatCurrencyCompactMillions(apt.service?.price || 0)}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+                                </motion.div>
                               </motion.div>
-                            </motion.div>
-                          )
-                        })}
+                            )
+                          })}
                         </AnimatePresence>
                       </div>
 
@@ -1809,6 +1835,22 @@ function CitasCalendarFusionContent() {
             )
           })()}
       </AnimatePresence>
+
+      {/* Walk-in Sheet (owner: barber selector → service; barber: service only) */}
+      <WalkInSheet
+        open={isWalkInOpen}
+        onOpenChange={setIsWalkInOpen}
+        barberId={isBarber && barberId ? barberId : undefined}
+        businessId={businessId}
+        barbers={
+          !isBarber
+            ? barbers
+                .filter((b) => b.isActive)
+                .map((b) => ({ id: b.id, name: b.name, photo_url: b.avatarUrl }))
+            : undefined
+        }
+        onCreated={() => refetch()}
+      />
 
       <style jsx global>{`
         @keyframes blob {

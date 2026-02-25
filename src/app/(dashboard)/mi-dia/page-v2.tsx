@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RefreshCw, AlertCircle } from 'lucide-react'
+import { RefreshCw, AlertCircle, UserPlus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useBarberDayAppointments } from '@/hooks/queries/useAppointments'
@@ -11,11 +11,14 @@ import { useAppointmentActions } from '@/hooks/use-appointment-actions'
 import { MiDiaHeader } from '@/components/barber/mi-dia-header'
 import { MiDiaTimeline } from '@/components/barber/mi-dia-timeline'
 import { FocusMode } from '@/components/barber/focus-mode'
+import { WalkInSheet } from '@/components/barber/walk-in-sheet'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { QueryError } from '@/components/ui/query-error'
 import { OnboardingChecklist } from '@/components/barber/onboarding-checklist'
+import { getStaffPermissions, mergePermissions } from '@/lib/auth/roles'
+import type { TodayAppointment } from '@/types/custom'
 
 /**
  * Mi Día - Staff View Page (Modernized with React Query + Real-time)
@@ -41,6 +44,8 @@ function MiDiaPageContent() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [barberName, setBarberName] = useState('')
   const [hasPhoto, setHasPhoto] = useState(false)
+  const [canCreateCitas, setCanCreateCitas] = useState(true) // default per DEFAULT_STAFF_PERMISSIONS
+  const [isWalkInSheetOpen, setIsWalkInSheetOpen] = useState(false)
 
   const toast = useToast()
 
@@ -62,25 +67,35 @@ function MiDiaPageContent() {
           return
         }
 
-        // 2. Get barber record for this user
-        const { data: barber, error: barberError } = await supabase
+        // 2. Get barber records for this user (supports multiple rows safely)
+        const { data: barberRows, error: barberError } = await supabase
           .from('barbers')
           .select('id, business_id, is_active, name, photo_url')
           .eq('user_id', user.id)
-          .single()
-
-        if (barberError || !barber) {
+        if (barberError || !barberRows || barberRows.length === 0) {
           setAuthError('No se encontró el perfil de miembro del equipo')
           setAuthLoading(false)
           return
         }
 
-        // 3. Verify barber is active
-        if (!barber.is_active) {
+        const activeBarbers = barberRows.filter((row) => row.is_active !== false)
+        if (activeBarbers.length === 0) {
           setAuthError('Tu cuenta de miembro del equipo está inactiva')
           setAuthLoading(false)
           return
         }
+
+        // Prefer barber row for the owner's own business when available
+        const { data: ownedBusiness } = await supabase
+          .from('businesses')
+          .select('id')
+          .eq('owner_id', user.id)
+          .maybeSingle()
+
+        const barber =
+          (ownedBusiness
+            ? activeBarbers.find((row) => row.business_id === ownedBusiness.id)
+            : undefined) ?? activeBarbers[0]
 
         // 4. Fetch business payment methods
         const { data: bizData, error: bizError } = (await supabase
@@ -103,7 +118,25 @@ function MiDiaPageContent() {
           }
         }
 
-        // 5. Set barber ID and business ID
+        // 5. Fetch staff permissions for can_create_citas (P0)
+        const isOwnerBarber = ownedBusiness?.id === barber.business_id
+        if (!isOwnerBarber) {
+          // Only fetch permissions for non-owner barbers (owners always have all permissions)
+          const businessPerms = getStaffPermissions((bizData as any)?.staff_permissions)
+          const { data: barberPermsRow } = await supabase
+            .from('barbers')
+            .select('custom_permissions')
+            .eq('id', barber.id)
+            .single()
+          const effectivePerms = mergePermissions(
+            businessPerms,
+            (barberPermsRow as any)?.custom_permissions
+          )
+          setCanCreateCitas(effectivePerms.can_create_citas)
+        }
+        // Owners always have can_create_citas = true (default)
+
+        // 6. Set barber ID and business ID
         setBarberId(barber.id)
         setBusinessId(barber.business_id)
         setBarberName((barber as any).name || '')
@@ -202,7 +235,7 @@ function MiDiaPageContent() {
   // Auth loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
         <div className="animate-pulse">
           {/* Header Skeleton */}
           <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-4 py-5">
@@ -232,7 +265,7 @@ function MiDiaPageContent() {
   // Auth error state
   if (authError) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -256,7 +289,7 @@ function MiDiaPageContent() {
   // Loading skeleton (first load)
   if (isLoadingAppointments && !data) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
         <div className="animate-pulse">
           {/* Header Skeleton */}
           <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-4 py-5">
@@ -286,7 +319,7 @@ function MiDiaPageContent() {
   // Error state with retry (uses new QueryError component)
   if (fetchError && !data) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4">
         <QueryError error={fetchError} onRetry={refetch} />
       </div>
     )
@@ -298,7 +331,7 @@ function MiDiaPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
       {/* Header - Wrapped in error boundary */}
       <ComponentErrorBoundary
         fallbackTitle="Error en el encabezado"
@@ -313,7 +346,7 @@ function MiDiaPageContent() {
       </ComponentErrorBoundary>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 max-w-4xl">
+      <main className="container mx-auto max-w-4xl px-3 sm:px-4 py-5 sm:py-6">
         {/* Onboarding Checklist */}
         {showOnboarding && barberId && (
           <div className="mb-5">
@@ -331,8 +364,21 @@ function MiDiaPageContent() {
           </div>
         )}
 
-        {/* Refresh Button */}
-        <div className="flex justify-end mb-4">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2 mb-4">
+          {canCreateCitas && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsWalkInSheetOpen(true)}
+              className="gap-2"
+              aria-label="Agregar walk-in"
+              data-testid="walk-in-button"
+            >
+              <UserPlus className="h-4 w-4" aria-hidden="true" />
+              Walk-in
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -368,6 +414,22 @@ function MiDiaPageContent() {
           />
         </ComponentErrorBoundary>
       </main>
+
+      {/* Walk-in Sheet */}
+      {barberId && businessId && (
+        <WalkInSheet
+          open={isWalkInSheetOpen}
+          onOpenChange={setIsWalkInSheetOpen}
+          barberId={barberId}
+          businessId={businessId}
+          onCreated={(appointment: TodayAppointment, mode: 'queue' | 'start_now') => {
+            if (mode === 'start_now') {
+              setFocusAppointmentId(appointment.id)
+            }
+            refetch()
+          }}
+        />
+      )}
 
       {/* Focus Mode Overlay */}
       <AnimatePresence>

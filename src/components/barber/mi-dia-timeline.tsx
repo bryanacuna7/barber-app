@@ -1,10 +1,46 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { BarberAppointmentCard } from './barber-appointment-card'
 import type { TodayAppointment } from '@/types/custom'
+
+/**
+ * Calculate rolling delay for each appointment.
+ *
+ * When an in-progress appointment exceeds its estimated duration,
+ * the overflow cascades as "estimated delay" to all subsequent
+ * non-finalized appointments.
+ */
+function computeDelays(sorted: TodayAppointment[]): Map<string, number> {
+  const delays = new Map<string, number>()
+  let cumulativeDelay = 0
+
+  for (const apt of sorted) {
+    const isFinalized =
+      apt.status === 'completed' || apt.status === 'cancelled' || apt.status === 'no_show'
+
+    if (isFinalized) continue
+
+    // If this appointment is in progress (confirmed + started), compute its overflow
+    if (apt.status === 'confirmed' && apt.started_at) {
+      const elapsed = (Date.now() - new Date(apt.started_at).getTime()) / 60_000
+      const overflow = Math.max(0, Math.round(elapsed - (apt.duration_minutes || 30)))
+      cumulativeDelay = Math.max(cumulativeDelay, overflow)
+      // The in-progress appointment itself doesn't show a delay chip
+      continue
+    }
+
+    // Pending/confirmed but not started: inherit cumulative delay
+    if (cumulativeDelay > 0) {
+      delays.set(apt.id, cumulativeDelay)
+    }
+  }
+
+  return delays
+}
 
 interface MiDiaTimelineProps {
   appointments: TodayAppointment[]
@@ -38,9 +74,16 @@ export function MiDiaTimeline({
   className,
 }: MiDiaTimelineProps) {
   // Sort appointments by scheduled time
-  const sortedAppointments = [...appointments].sort((a, b) => {
-    return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
-  })
+  const sortedAppointments = useMemo(
+    () =>
+      [...appointments].sort(
+        (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+      ),
+    [appointments]
+  )
+
+  // Rolling delay calculation (updates when appointments change)
+  const delayMap = useMemo(() => computeDelays(sortedAppointments), [sortedAppointments])
 
   // Empty state
   if (appointments.length === 0) {
@@ -71,14 +114,12 @@ export function MiDiaTimeline({
 
   return (
     <div className={cn('relative', className)} data-testid="mi-dia-timeline">
-      {/* Timeline Line */}
-      <div
-        className="absolute left-5 top-0 bottom-0 w-0.5 bg-zinc-200 dark:bg-zinc-800"
-        aria-hidden="true"
-      />
-
       {/* Appointments List */}
-      <div className="space-y-4 pl-12 pr-4 py-4" role="list" aria-label="Lista de citas de hoy">
+      <div
+        className="space-y-3.5 sm:space-y-4 py-2 sm:py-3"
+        role="list"
+        aria-label="Lista de citas de hoy"
+      >
         <AnimatePresence mode="popLayout">
           {sortedAppointments.map((appointment, index) => (
             <motion.div
@@ -95,22 +136,6 @@ export function MiDiaTimeline({
               role="listitem"
               data-testid={`appointment-${appointment.id}`}
             >
-              {/* Timeline Dot */}
-              <div
-                className={cn(
-                  'absolute left-3.5 w-3 h-3 rounded-full',
-                  'border-2 border-white dark:border-zinc-900',
-                  {
-                    'bg-violet-500': appointment.status === 'pending',
-                    'bg-blue-500': appointment.status === 'confirmed',
-                    'bg-emerald-500': appointment.status === 'completed',
-                    'bg-red-500': appointment.status === 'cancelled',
-                    'bg-amber-500': appointment.status === 'no_show',
-                  }
-                )}
-                aria-hidden="true"
-              />
-
               <BarberAppointmentCard
                 appointment={appointment}
                 onCheckIn={onCheckIn}
@@ -131,6 +156,7 @@ export function MiDiaTimeline({
                 }
                 barberName={barberName}
                 businessName={businessName}
+                estimatedDelay={delayMap.get(appointment.id)}
               />
             </motion.div>
           ))}

@@ -120,3 +120,39 @@ export function messageArriveEarly({
 export function buildArriveEarlyLink(phone: string, params: ArriveEarlyParams): string | null {
   return buildWhatsAppLink(phone, messageArriveEarly(params))
 }
+
+// ---------------------------------------------------------------------------
+// Delay Notification (v1.5)
+// ---------------------------------------------------------------------------
+
+interface DelayParams {
+  clientName: string
+  delayMinutes: number
+  barberName: string
+  businessName: string
+  trackingUrl?: string
+}
+
+export function messageDelay({
+  clientName,
+  delayMinutes,
+  barberName,
+  businessName,
+  trackingUrl,
+}: DelayParams): string {
+  let msg =
+    `Hola ${clientName}! ${barberName} tiene un retraso de ~${delayMinutes} min. ` +
+    `Disculpá la espera.\n\n`
+  if (trackingUrl) {
+    msg += `Seguí tu turno en vivo: ${trackingUrl}\n\n`
+  }
+  msg += `Gracias por tu paciencia! - ${businessName}`
+  return msg
+}
+
+/**
+ * Build a "Avisar Retraso" WhatsApp link for a delayed client
+ */
+export function buildDelayLink(phone: string, params: DelayParams): string | null {
+  return buildWhatsAppLink(phone, messageDelay(params))
+}

@@ -273,6 +273,8 @@ export interface TodayAppointment {
   advance_payment_status?: 'none' | 'pending' | 'verified' | 'rejected' | null
   /** Channel used to submit the payment proof */
   proof_channel?: 'whatsapp' | 'upload' | null
+  /** Booking origin: web_booking, walk_in, owner_created, barber_created */
+  source?: 'web_booking' | 'walk_in' | 'owner_created' | 'barber_created' | null
   /** Discount percentage applied at booking time */
   discount_pct_snapshot?: number | null
   /** Final price after discount */

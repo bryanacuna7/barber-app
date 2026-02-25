@@ -121,6 +121,38 @@ export function useCreateAppointment() {
 }
 
 /**
+ * Create a walk-in appointment via dedicated server endpoint.
+ * Uses POST /api/appointments/walk-in with RBAC validation.
+ */
+export function useCreateWalkIn() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (params: {
+      service_id: string
+      barber_id: string
+      mode: 'queue' | 'start_now'
+    }) => {
+      const res = await fetch('/api/appointments/walk-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.message || body.error || 'Error al crear walk-in')
+      }
+
+      return res.json()
+    },
+    onSuccess: () => {
+      invalidateQueries.afterAppointmentChange(queryClient)
+    },
+  })
+}
+
+/**
  * Fetch today's appointments for a specific barber
  * Used in Mi Día page for barber daily view
  *
@@ -156,6 +188,7 @@ export function useBarberDayAppointments(barberId: string | null) {
           payment_method,
           advance_payment_status,
           proof_channel,
+          source,
           base_price_snapshot,
           discount_pct_snapshot,
           final_price_snapshot,
@@ -203,6 +236,7 @@ export function useBarberDayAppointments(barberId: string | null) {
         payment_method: appt.payment_method ?? null,
         advance_payment_status: appt.advance_payment_status ?? null,
         proof_channel: appt.proof_channel ?? null,
+        source: appt.source ?? null,
         base_price_snapshot: appt.base_price_snapshot ?? null,
         discount_pct_snapshot: appt.discount_pct_snapshot ?? null,
         final_price_snapshot: appt.final_price_snapshot ?? null,

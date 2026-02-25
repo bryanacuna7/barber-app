@@ -2,21 +2,15 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { X, Check, UserX, Banknote, Smartphone, CreditCard } from 'lucide-react'
+import { X, Check, UserX } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { usePaymentFlow } from '@/hooks/use-payment-flow'
+import { PaymentMethodPickerSheet } from './payment-method-picker-sheet'
 import { SlideToComplete } from './slide-to-complete'
 import type { TodayAppointment } from '@/types/custom'
 
 type PaymentMethod = 'cash' | 'sinpe' | 'card'
-
-const PAYMENT_ICONS: Record<PaymentMethod, typeof Banknote> = {
-  cash: Banknote,
-  sinpe: Smartphone,
-  card: CreditCard,
-}
 
 interface FocusModeProps {
   appointment: TodayAppointment
@@ -178,37 +172,12 @@ export function FocusMode({
         </Button>
       </div>
 
-      {/* Payment Method Sheet (same as card) */}
-      <Sheet open={paymentSheetOpen} onOpenChange={setPaymentSheetOpen}>
-        <SheetContent
-          side="bottom"
-          className="pb-safe lg:left-1/2 lg:-translate-x-1/2 lg:w-full lg:max-w-lg lg:rounded-2xl lg:bottom-4 lg:border"
-        >
-          <SheetHeader>
-            <SheetTitle>¿Cómo pagó el cliente?</SheetTitle>
-          </SheetHeader>
-          <div
-            className="flex flex-col gap-3 py-4"
-            style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}
-          >
-            {activePaymentOptions.map(({ value, label }) => {
-              const Icon = PAYMENT_ICONS[value]
-              return (
-                <Button
-                  key={value}
-                  variant="outline"
-                  size="md"
-                  onClick={() => handlePaymentSelect(value)}
-                  className="min-h-[52px] justify-start gap-3 text-base font-medium"
-                >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  {label}
-                </Button>
-              )
-            })}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <PaymentMethodPickerSheet
+        open={paymentSheetOpen}
+        onOpenChange={setPaymentSheetOpen}
+        options={activePaymentOptions}
+        onSelect={handlePaymentSelect}
+      />
     </motion.div>
   )
 }

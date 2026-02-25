@@ -90,6 +90,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         service_id,
         price,
         started_at,
+        source,
         barber:barbers!appointments_barber_id_fkey(id, name)
       `
         )
@@ -134,6 +135,17 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
           {
             error: 'Estado invalido',
             message: `No se puede completar una cita con estado "${appointment.status}". Solo citas pendientes o confirmadas pueden completarse.`,
+          },
+          { status: 400 }
+        )
+      }
+
+      // 3b. Walk-in pending guard: must check-in (start) before completing
+      if (appointment.source === 'walk_in' && appointment.status === 'pending') {
+        return NextResponse.json(
+          {
+            error: 'Walk-in sin iniciar',
+            message: 'Un walk-in debe iniciarse antes de completarse.',
           },
           { status: 400 }
         )
