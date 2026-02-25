@@ -8,12 +8,16 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.10
+## v0.9.11
 
-### Mejoras de rendimiento
+### Mejoras de navegacion y reservas
 
-- La app abre mas rapido al entrar al panel principal
-- Animaciones de fondo mas suaves y con menor consumo de bateria
-- Las notificaciones solo se revisan cuando la app esta activa en pantalla, ahorrando datos
-- El calendario se actualiza de forma mas eficiente: solo recalcula cuando hay cambios importantes
-- Mejor manejo de datos guardados cuando no hay conexion a internet
+- El boton de reserva ahora se ve correctamente en modo oscuro
+- La pantalla de confirmacion de reserva tiene botones mas claros y uniformes
+- Todas las sub-paginas tienen boton para volver atras (perfil, notificaciones, desafios, logros, configuracion)
+- El onboarding permite saltar la configuracion e ir directo al panel
+- Nuevo banner para activar notificaciones push en la pantalla de inicio del cliente
+
+### Corregido
+
+- Las reservas de usuarios registrados ahora aparecen vinculadas a su perfil (antes se mostraban como si fueran de un cliente nuevo)

@@ -4,6 +4,20 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.11] - 2026-02-24
+
+### Mejorado
+
+- Boton principal de reserva ahora se ve correctamente en modo oscuro
+- Botones de la pantalla de confirmacion de reserva mas claros y consistentes
+- Todas las sub-paginas ahora tienen boton para volver atras (perfil, notificaciones, desafios, logros, configuracion)
+- El onboarding permite saltar la configuracion inicial e ir directo al panel
+- Banner de activacion de notificaciones push en el inicio del cliente
+
+### Corregido
+
+- Las reservas de usuarios registrados ahora se vinculan correctamente a su perfil de cliente (antes aparecian como anonimas)
+
 ## [0.9.10] - 2026-02-24
 
 ### Mejorado
