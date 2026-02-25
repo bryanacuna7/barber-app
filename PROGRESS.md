@@ -248,19 +248,27 @@
 
 ### Session 186: Smart Duration Per-Client + Gap-Based Slots (2026-02-25)
 
-**Status:** COMPLETE — All 8 steps implemented. Migration 043 pending execution.
+**Status:** COMPLETE — All 8 steps implemented + migration 043 executed + 22 tests passing.
+
+**What was done:**
+
+- **5-level cascade prediction**: Client+Barber+Service → Client+Service → Barber stats → Service stats → Default
+- **Gap-based slot algorithm**: Occupied windows → gaps → precise slots with tail + dedup + past guards
+- **Server-side client resolution**: Shared `resolveClientForBusiness()` in both availability + book routes
+- **Phone normalization**: CR 8-digit format with collision-safe gradual migration
+- **UI**: `~N min` estimate display with tilde prefix when prediction differs from default
+- **Auto-refresh**: Only when `meta.autoRefresh=true` AND today (timezone-safe)
+- **Test data**: 5 test clients with varying durations seeded for visual verification
+- **Tests**: 20 new gap-based unit tests (22 total, all passing)
 
 **Files created (3):** `src/lib/utils/phone.ts`, `src/lib/utils/resolve-client.ts`, `supabase/migrations/043_client_duration_index.sql`
 **Files modified (7):** `duration-predictor.ts` (5-level cascade), `availability.ts` (gap-based), `availability/route.ts` (server-side client + gapBased + predictedDuration meta), `book/route.ts` (phone normalization + predictorClientId split), `useBookingData.ts` (slotMeta export + reset), `DateTimeSelection.tsx` (~N min estimate), `page.tsx` (pass predictedDuration prop)
-**DATABASE_SCHEMA.md** updated with new index.
-
-**P3 adjustments applied:** Phone migration always uses collision guard, tail slot has dedup + past guards.
-
-**Pending:** Execute migration 043 in Supabase Dashboard, then commit + deploy.
+**Tests added:** `availability.test.ts` — 20 new tests across 6 describe blocks (gap basics, effective windows, buffers, tail slots, dedup, edge cases)
+**DATABASE_SCHEMA.md** updated with new index. Migration 043 executed.
 
 ---
 
 ### Next Steps
 
-1. Execute migration 043 in Supabase, commit, deploy
-2. **Button migration** (~30 remaining raw buttons across dashboard pages)
+1. **Button migration** (~30 remaining raw buttons across dashboard pages)
+2. Push 6 unpushed commits + deploy
