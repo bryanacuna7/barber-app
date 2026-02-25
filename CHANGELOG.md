@@ -4,6 +4,22 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.13] - 2026-02-25
+
+### Nuevo
+
+- Atencion sin cita (walk-in): crea citas rapidas desde Mi Dia para clientes que llegan sin reserva
+- Selector de metodo de pago al completar cita (efectivo, sinpe, tarjeta)
+- Enlace directo a WhatsApp del cliente desde la card de cita
+- Boton flotante de reserva en mobile en la pagina principal
+
+### Mejorado
+
+- Pagina principal rediseñada: mas limpia, rapida y enfocada en conversion
+- Paginas de configuracion (equipo, horario, pagos, promociones) con mejor diseño y usabilidad
+- Navegacion del panel mejorada: sidebar y tabs mas intuitivos
+- Cards de citas con indicador visual de metodo de pago
+
 ## [0.9.12] - 2026-02-25
 
 ### Nuevo

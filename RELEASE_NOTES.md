@@ -8,17 +8,22 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.12
+## v0.9.13
 
-### Modo Enfoque para barberos
+### Atencion sin cita (Walk-in)
 
-- Nueva pantalla de enfoque al atender un cliente: muestra nombre, servicio, timer grande y precio
-- Desliza para completar en mobile (gesto estilo iOS) — en desktop es boton normal
-- El timer cambia a amarillo cuando te pasas del tiempo estimado
-- Para entrar, toca el timer azul en la card de la cita en progreso
+- Nuevo boton para crear citas rapidas desde Mi Dia cuando llega un cliente sin reserva
+- Selecciona barbero, servicio y decide si empieza ahora o va a la cola
+- Al completar la cita, elige el metodo de pago: efectivo, sinpe o tarjeta
 
-### Mejoras en Mi Dia
+### Pagina principal rediseñada
 
-- Botones de accion mas claros y sin texto cortado en pantallas pequenas
-- Si eres dueno y tambien barbero, Mi Dia aparece directamente en las tabs principales
-- Marcar "No Show" disponible tanto en la card como dentro del modo enfoque
+- Landing page mas limpia y enfocada: hero, beneficios, testimonios y precios
+- Boton flotante de reserva en mobile para mejor conversion
+- Seccion final con llamada a la accion clara
+
+### Mejoras en configuracion y navegacion
+
+- Paginas de equipo, horario, pagos y promociones con mejor diseño
+- Sidebar y tabs del panel mas intuitivos
+- Card de citas muestra metodo de pago y enlace directo a WhatsApp del cliente
