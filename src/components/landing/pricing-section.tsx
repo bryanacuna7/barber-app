@@ -19,7 +19,7 @@ const plans = [
       { label: 'Equipo ilimitados', included: false },
       { label: 'Soporte prioritario', included: false },
     ],
-    cta: 'Comenzar gratis',
+    cta: 'Registrar mi barberia',
     popular: false,
   },
   {
@@ -36,7 +36,7 @@ const plans = [
       { label: 'Logo personalizado', included: true },
       { label: 'Soporte prioritario', included: true },
     ],
-    cta: 'Comenzar gratis',
+    cta: 'Registrar mi barberia',
     popular: true,
   },
 ]
@@ -66,7 +66,10 @@ const item = {
 
 export function PricingSection() {
   return (
-    <section className="bg-zinc-50 py-20 dark:bg-zinc-950">
+    <section
+      id="precios"
+      className="border-t border-zinc-200/60 bg-white py-20 dark:border-zinc-800/60 dark:bg-zinc-950"
+    >
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -101,13 +104,9 @@ export function PricingSection() {
               key={plan.name}
               variants={item}
               whileHover={{
-                y: -8,
-                scale: 1.03,
-                rotateY: 3,
-                rotateX: 3,
-                transition: { duration: 0.3 },
+                y: -4,
+                transition: { duration: 0.2 },
               }}
-              style={{ transformStyle: 'preserve-3d' }}
               className={`relative overflow-hidden rounded-3xl border p-8 shadow-xl transition-all ${
                 plan.popular
                   ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-sm dark:border-blue-500 dark:from-blue-950/20 dark:to-purple-950/20'

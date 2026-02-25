@@ -1,29 +1,26 @@
 import type { Metadata } from 'next'
 import { HeroSection } from '@/components/landing/hero-section'
-import { StatsSection } from '@/components/landing/stats-section'
 import { FeaturesSection } from '@/components/landing/features-section'
-import { RoleBenefitsSection } from '@/components/landing/role-benefits-section'
-// import { DemoSection } from '@/components/landing/demo-section' // Removed - product shown in Hero
 import { TestimonialsSection } from '@/components/landing/testimonials-section'
 import { PricingSection } from '@/components/landing/pricing-section'
-import { Footer } from '@/components/landing/footer'
-import { LandingNavbar } from '@/components/landing/landing-navbar'
+import { FinalCTA, Footer } from '@/components/landing/footer'
+import { LandingNavbar, MobileFloatingCTA } from '@/components/landing/landing-navbar'
 
 export const metadata: Metadata = {
-  title: 'BarberApp - Sistema de Gestión para Barberías | Agenda, Clientes y Pagos',
+  title: 'BarberApp - Sistema de Gestion para Barberias | Agenda, Clientes y Pagos',
   description:
-    'Gestiona tu barbería con el sistema más completo: agenda inteligente, clientes, reservas online, analíticas y más. 7 días de prueba gratis. Sin tarjeta de crédito.',
+    'Gestiona tu barberia con el sistema mas completo: agenda inteligente, clientes, reservas online, analiticas y mas. 7 dias de prueba gratis. Sin tarjeta de credito.',
   keywords: [
-    'barbería',
-    'agenda barbería',
+    'barberia',
+    'agenda barberia',
     'sistema de reservas',
-    'gestión de clientes',
+    'gestion de clientes',
     'barbershop software',
     'agenda online',
     'Costa Rica',
-    'barbería profesional',
+    'barberia profesional',
     'reservas online',
-    'software para barberías',
+    'software para barberias',
   ],
   authors: [{ name: 'BarberApp' }],
   creator: 'BarberApp',
@@ -35,9 +32,9 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL('https://barberapp.com'),
   openGraph: {
-    title: 'BarberApp - Sistema de Gestión para Barberías',
+    title: 'BarberApp - Sistema de Gestion para Barberias',
     description:
-      'Gestiona tu barbería profesionalmente: agenda inteligente, clientes, reservas online y analíticas. Prueba gratis por 7 días.',
+      'Gestiona tu barberia profesionalmente: agenda inteligente, clientes, reservas online y analiticas. Prueba gratis por 7 dias.',
     url: 'https://barberapp.com',
     siteName: 'BarberApp',
     images: [
@@ -45,7 +42,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'BarberApp - Sistema de Gestión para Barberías',
+        alt: 'BarberApp - Sistema de Gestion para Barberias',
       },
     ],
     locale: 'es_CR',
@@ -53,9 +50,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BarberApp - Sistema de Gestión para Barberías',
+    title: 'BarberApp - Sistema de Gestion para Barberias',
     description:
-      'Gestiona tu barbería profesionalmente. Agenda, clientes, reservas online. Prueba gratis 7 días.',
+      'Gestiona tu barberia profesionalmente. Agenda, clientes, reservas online. Prueba gratis 7 dias.',
     images: ['/og-image.png'],
     creator: '@barberapp',
   },
@@ -83,12 +80,12 @@ export default function Home() {
     <>
       <LandingNavbar />
       <HeroSection />
-      <StatsSection />
       <FeaturesSection />
-      <RoleBenefitsSection />
       <TestimonialsSection />
       <PricingSection />
+      <FinalCTA />
       <Footer />
+      <MobileFloatingCTA />
     </>
   )
 }

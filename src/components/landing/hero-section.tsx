@@ -1,373 +1,238 @@
 'use client'
 
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Clock, MousePointer2, Zap } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { ArrowRight, Check, Calendar, Users, BarChart3 } from 'lucide-react'
 
 export function HeroSection() {
-  // Parallax scroll effect
-  const [scrollY, setScrollY] = useState(0)
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Magnetic button effect
-  const [hoveredButton, setHoveredButton] = useState(false)
-  const buttonX = useMotionValue(0)
-  const buttonY = useMotionValue(0)
-  const buttonXSpring = useSpring(buttonX, { stiffness: 200, damping: 20 })
-  const buttonYSpring = useSpring(buttonY, { stiffness: 200, damping: 20 })
-
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-zinc-50 via-white to-blue-50/30 dark:from-zinc-950 dark:via-black dark:to-blue-950/20">
-      {/* Animated gradient orbs with parallax */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          style={{ y: scrollY * 0.3 }}
-          className="absolute -left-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-blue-400/10 blur-3xl dark:bg-blue-500/5"
-        />
-        <motion.div
-          style={{ y: scrollY * -0.2 }}
-          className="absolute -right-1/4 top-1/4 h-[600px] w-[600px] rounded-full bg-purple-400/10 blur-3xl dark:bg-purple-500/5"
-        />
-        <motion.div
-          style={{ y: scrollY * 0.15 }}
-          className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-violet-400/10 blur-3xl dark:bg-violet-500/5"
-        />
+    <section className="relative min-h-[90vh] overflow-hidden bg-gradient-to-b from-white via-white to-zinc-50/80 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/80">
+      {/* Subtle gradient orbs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -right-1/4 -top-1/4 h-[600px] w-[600px] rounded-full bg-blue-100/40 blur-3xl dark:bg-blue-900/10" />
+        <div className="absolute -left-1/4 bottom-0 h-[500px] w-[500px] rounded-full bg-purple-100/30 blur-3xl dark:bg-purple-900/10" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-28 lg:py-32">
-        {/* Top Badge - Modern Premium */}
+      <div className="relative mx-auto max-w-7xl px-6 pt-28 pb-16 sm:pt-32 lg:pt-36">
+        {/* Trust Badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600/90 to-purple-600/90 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm"
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-center lg:justify-start"
         >
-          <Zap className="h-4 w-4" />7 días gratis · Sin tarjeta
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300">
+            <Check className="h-3.5 w-3.5" />7 dias gratis · Sin tarjeta de credito
+          </div>
         </motion.div>
 
-        <div className="mt-12 grid items-center gap-12 lg:grid-cols-2">
-          {/* Left: Copy */}
-          <div className="flex flex-col justify-center">
+        <div className="mt-8 grid items-center gap-16 lg:grid-cols-2">
+          {/* Left: Copy + CTAs */}
+          <div className="text-center lg:text-left">
             <motion.h1
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.1,
-                duration: 0.8,
-                ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number], // Custom easing
-              }}
-              className="text-5xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-6xl lg:text-7xl"
+              transition={{ delay: 0.1, duration: 0.6 }}
+              className="text-4xl font-bold leading-[1.1] tracking-tight text-zinc-900 dark:text-white sm:text-5xl lg:text-6xl"
             >
-              El calendario más{' '}
-              <motion.span
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  delay: 0.4,
-                  duration: 0.6,
-                  ease: 'backOut',
-                }}
-                className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-violet-600 bg-clip-text text-transparent"
-              >
-                rápido e intuitivo
-              </motion.span>{' '}
-              para barberías
+              Tu barberia,{' '}
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                siempre llena
+              </span>
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-6 text-lg leading-8 text-zinc-600 dark:text-zinc-400 sm:text-xl"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="mx-auto mt-5 max-w-lg text-lg leading-relaxed text-zinc-600 dark:text-zinc-400 lg:mx-0"
             >
-              Gestiona tu agenda en{' '}
-              <span className="font-semibold text-zinc-900 dark:text-white">0.2 segundos</span> con
-              drag & drop. Sincronización en tiempo real. Cero errores.
+              Olvida el WhatsApp y las agendas de papel. BarberApp llena tu calendario con reservas
+              automaticas, recordatorios y pagos — todo en un solo lugar.
             </motion.p>
 
-            {/* Key Features - Clean badges */}
+            {/* Quick benefits */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.25 }}
-              className="mt-8 flex flex-wrap gap-3"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400 lg:justify-start"
             >
-              {[
-                { icon: MousePointer2, text: '0.2s drag & drop' },
-                { icon: Clock, text: 'Vista semanal clara' },
-                { icon: Calendar, text: 'Real-time sync' },
-              ].map((feature) => {
-                const Icon = feature.icon
-                return (
-                  <div
-                    key={feature.text}
-                    className="flex items-center gap-2 rounded-xl bg-white/60 px-4 py-2 shadow-sm backdrop-blur-sm dark:bg-zinc-900/60"
-                  >
-                    <Icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-zinc-900 dark:text-white">
-                      {feature.text}
-                    </span>
-                  </div>
+              {['Reservas en linea 24/7', 'Recordatorios automaticos', 'Cero doble-reservas'].map(
+                (benefit) => (
+                  <span key={benefit} className="flex items-center gap-1.5">
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    {benefit}
+                  </span>
                 )
-              })}
+              )}
             </motion.div>
 
-            {/* CTAs with magnetic effect */}
+            {/* CTAs - Very Clear */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="mt-10 flex flex-col gap-4 sm:flex-row"
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
             >
-              <motion.div
-                onHoverStart={() => setHoveredButton(true)}
-                onHoverEnd={() => {
-                  setHoveredButton(false)
-                  buttonX.set(0)
-                  buttonY.set(0)
-                }}
-                onMouseMove={(e) => {
-                  if (hoveredButton) {
-                    const rect = e.currentTarget.getBoundingClientRect()
-                    const centerX = rect.left + rect.width / 2
-                    const centerY = rect.top + rect.height / 2
-                    buttonX.set((e.clientX - centerX) * 0.3)
-                    buttonY.set((e.clientY - centerY) * 0.3)
-                  }
-                }}
-                style={{ x: buttonXSpring, y: buttonYSpring }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <Link
+                href="/register"
+                className="group inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/20 transition-all hover:shadow-2xl hover:shadow-blue-500/35 sm:w-auto"
               >
-                <Link
-                  href="/register"
-                  className="group inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-shadow hover:shadow-2xl hover:shadow-blue-500/40"
-                >
-                  Empezar gratis
-                  <motion.div animate={{ x: hoveredButton ? 4 : 0 }} transition={{ duration: 0.3 }}>
-                    <ArrowRight className="h-5 w-5" />
-                  </motion.div>
-                </Link>
-              </motion.div>
-
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="#features"
-                  className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-zinc-200 bg-white/80 px-8 py-4 text-base font-semibold text-zinc-900 backdrop-blur-sm transition-all hover:border-zinc-300 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-white dark:hover:border-zinc-600 dark:hover:bg-zinc-900"
-                >
-                  Ver cómo funciona
-                </Link>
-              </motion.div>
+                Registrar mi barberia
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-zinc-200 bg-white px-8 py-4 text-base font-semibold text-zinc-700 transition-all hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-600 sm:w-auto"
+              >
+                Ya tengo cuenta
+              </Link>
             </motion.div>
 
-            {/* Social Proof - Modern Premium */}
+            {/* Social Proof - Inline */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-12 flex flex-wrap items-center gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="mt-10 flex items-center justify-center gap-6 lg:justify-start"
             >
-              {[
-                { value: '150+', label: 'Barberías activas' },
-                { value: '500+', label: 'Citas diarias' },
-                { value: '0.2s', label: 'Tiempo de respuesta', highlight: true },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p
-                    className={`text-3xl font-bold ${
-                      stat.highlight
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'
-                        : 'text-zinc-900 dark:text-white'
-                    }`}
+              <div className="flex -space-x-2">
+                {['CR', 'AM', 'DC', 'LM'].map((initials, i) => (
+                  <div
+                    key={initials}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-purple-500 text-[10px] font-bold text-white dark:border-zinc-900"
+                    style={{ zIndex: 4 - i }}
                   >
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{stat.label}</p>
-                </div>
-              ))}
+                    {initials}
+                  </div>
+                ))}
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                <span className="font-semibold text-zinc-900 dark:text-white">150+</span> barberias
+                activas en Costa Rica
+              </div>
             </motion.div>
           </div>
 
-          {/* Right: Product Demo Visual - Glassmorphism with 3D Tilt */}
+          {/* Right: Product Preview - Simplified & Clean */}
           <motion.div
-            initial={{ opacity: 0, x: 40, rotateY: -15 }}
-            animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            transition={{
-              delay: 0.3,
-              duration: 0.8,
-              ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
-            }}
-            whileHover={{
-              scale: 1.02,
-              rotateY: 5,
-              rotateX: -2,
-              transition: { duration: 0.3 },
-            }}
-            style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
-            className="relative"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.7 }}
+            className="relative mx-auto w-full max-w-md lg:max-w-none"
           >
-            {/* Glow Effect with animation */}
-            <motion.div
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.4, 0.6, 0.4],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-blue-200/40 via-purple-200/30 to-pink-200/40 blur-3xl dark:from-blue-800/20 dark:via-purple-800/15 dark:to-pink-800/20"
-            />
+            {/* Glow */}
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-100/60 via-purple-100/40 to-pink-100/60 blur-2xl dark:from-blue-900/15 dark:via-purple-900/10 dark:to-pink-900/15" />
 
-            {/* Glass Calendar Frame */}
-            <div className="relative overflow-hidden rounded-3xl border border-zinc-200/50 bg-white/90 p-6 shadow-2xl backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
-              {/* Header */}
-              <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-zinc-50 to-zinc-100 p-4 dark:from-zinc-800 dark:to-zinc-900">
-                <div>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">Lunes 3 Feb</p>
-                  <p className="text-xs text-muted">Vista del día</p>
-                </div>
-                <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-                  <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                    En vivo
+            {/* App Preview Card */}
+            <div className="relative overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-800/70 dark:bg-zinc-900">
+              {/* App Header */}
+              <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3 dark:border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    Mi dia - Lunes 3 Feb
                   </span>
                 </div>
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  En vivo
+                </span>
               </div>
 
-              {/* Calendar Slots */}
-              <div className="mt-4 space-y-2">
+              {/* Stats Row */}
+              <div className="grid grid-cols-3 gap-px bg-zinc-100 dark:bg-zinc-800">
+                {[
+                  { icon: Calendar, label: 'Citas hoy', value: '8' },
+                  { icon: Users, label: 'Clientes', value: '245' },
+                  { icon: BarChart3, label: 'Ingresos', value: '₡85k' },
+                ].map((stat) => {
+                  const Icon = stat.icon
+                  return (
+                    <div key={stat.label} className="bg-white px-4 py-3 dark:bg-zinc-900">
+                      <div className="flex items-center gap-1.5">
+                        <Icon className="h-3.5 w-3.5 text-zinc-400" />
+                        <span className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                          {stat.label}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-lg font-bold text-zinc-900 dark:text-white">
+                        {stat.value}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Appointment Cards */}
+              <div className="space-y-2 p-4">
                 {[
                   {
                     time: '09:00',
                     client: 'Carlos M.',
                     service: 'Corte + Barba',
-                    color: 'from-blue-500 to-blue-600',
-                    delay: 0.4,
+                    status: 'confirmed',
+                    color: 'bg-blue-500',
                   },
                   {
                     time: '10:00',
-                    client: null,
-                    service: 'Disponible',
-                    color: 'dashed',
-                    delay: 0.5,
-                  },
-                  {
-                    time: '11:00',
                     client: 'Andrea R.',
                     service: 'Fade Premium',
-                    color: 'from-purple-500 to-purple-600',
-                    delay: 0.6,
+                    status: 'confirmed',
+                    color: 'bg-purple-500',
                   },
                   {
-                    time: '12:00',
-                    client: null,
-                    service: 'Disponible',
-                    color: 'dashed',
-                    delay: 0.7,
-                  },
-                  {
-                    time: '14:00',
+                    time: '11:30',
                     client: 'Luis P.',
-                    service: 'Color + Diseño',
-                    color: 'from-orange-500 to-red-500',
-                    delay: 0.8,
+                    service: 'Color + Diseno',
+                    status: 'pending',
+                    color: 'bg-amber-500',
                   },
-                ].map((slot) => (
+                ].map((appt, i) => (
                   <motion.div
-                    key={slot.time}
-                    initial={{ opacity: 0, x: -10 }}
+                    key={appt.time}
+                    initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: slot.delay }}
-                    className="flex gap-3"
+                    transition={{ delay: 0.6 + i * 0.1, duration: 0.4 }}
+                    className="flex items-center gap-3 rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/50"
                   >
-                    {/* Time */}
-                    <div className="flex w-16 items-center justify-center rounded-xl bg-zinc-100 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                      <span className="text-sm">{slot.time}</span>
+                    <div className={`h-10 w-1 rounded-full ${appt.color}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-zinc-900 dark:text-white">
+                          {appt.client}
+                        </span>
+                        <span className="text-xs text-zinc-500">{appt.time}</span>
+                      </div>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {appt.service}
+                      </span>
                     </div>
-
-                    {/* Appointment Card with advanced micro-interactions */}
-                    {slot.client ? (
-                      <motion.div
-                        whileHover={{
-                          scale: 1.03,
-                          y: -4,
-                          transition: { duration: 0.2, ease: 'easeOut' },
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`group flex-1 cursor-move rounded-xl bg-gradient-to-r ${slot.color} p-4 shadow-lg`}
-                      >
-                        <motion.p
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: slot.delay + 0.1 }}
-                          className="font-semibold text-white"
-                        >
-                          {slot.client}
-                        </motion.p>
-                        <motion.p
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: slot.delay + 0.15 }}
-                          className="mt-1 text-sm text-white/80"
-                        >
-                          {slot.service}
-                        </motion.p>
-                        {/* Hover indicator */}
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0 }}
-                          whileHover={{ opacity: 1, scale: 1 }}
-                          className="absolute right-2 top-2 h-2 w-2 rounded-full bg-white/40"
-                        />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        whileHover={{
-                          scale: 1.02,
-                          borderColor: 'rgba(100, 100, 100, 0.6)',
-                          transition: { duration: 0.2 },
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex-1 cursor-pointer rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50/50 p-4 transition-colors dark:border-zinc-700 dark:bg-zinc-800/30"
-                      >
-                        <p className="text-sm font-medium text-muted">{slot.service}</p>
-                      </motion.div>
-                    )}
+                    <div
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        appt.status === 'confirmed'
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                      }`}
+                    >
+                      {appt.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                    </div>
                   </motion.div>
                 ))}
+
+                {/* Empty slot */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1, duration: 0.4 }}
+                  className="flex items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 p-3 dark:border-zinc-700"
+                >
+                  <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                    12:00 — Disponible · Click para agendar
+                  </span>
+                </motion.div>
               </div>
-
-              {/* Action Hint */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 }}
-                className="mt-4 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 p-3 text-center dark:from-blue-950/30 dark:to-purple-950/30"
-              >
-                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                  ↑ Arrastra para reorganizar · Click para editar
-                </p>
-              </motion.div>
             </div>
-
-            {/* Floating Speed Badge - Modern Premium */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.2 }}
-              className="absolute -right-4 -top-4 rounded-2xl border border-red-200 bg-gradient-to-br from-red-500 to-red-600 px-5 py-3 shadow-2xl dark:border-red-800"
-            >
-              <p className="text-3xl font-bold text-white">0.2s</p>
-              <p className="text-xs font-semibold uppercase tracking-wide text-white/90">
-                Drag & Drop
-              </p>
-            </motion.div>
           </motion.div>
         </div>
       </div>
