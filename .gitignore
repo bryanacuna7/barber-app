@@ -46,6 +46,8 @@ next-env.d.ts
 # Claude/Playwright temp folders
 .agents/
 .claude/plans/
+.claude/baselines/
+__pycache__/
 .playwright-mcp/
 
 # Claude Code - Skills
