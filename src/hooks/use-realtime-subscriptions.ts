@@ -62,28 +62,55 @@ export function useRealtimeSubscriptions({
   maxReconnectAttempts = 3,
   onStatusChange,
 }: UseRealtimeSubscriptionsOptions) {
+  const isDev = process.env.NODE_ENV === 'development'
   const queryClient = useQueryClient()
   const reconnectAttempts = useRef(0)
-  const pollingIntervalRef = useRef<NodeJS.Timeout>(undefined)
+  const pollingIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     if (!enabled || !businessId) return
 
     const enableRealtime = process.env.NEXT_PUBLIC_ENABLE_REALTIME === 'true'
     const supabase = createClient()
+    const shouldPollNow = () =>
+      typeof document === 'undefined' || document.visibilityState === 'visible'
+    const pollSubscriptions = () => {
+      if (!shouldPollNow()) return
+      invalidateQueries.afterBusinessSettingsChange(queryClient)
+    }
+    const startPolling = () => {
+      if (pollingIntervalRef.current) return
+      pollingIntervalRef.current = setInterval(() => {
+        if (isDev) {
+          console.log('🔄 Polling subscriptions')
+        }
+        pollSubscriptions()
+      }, pollingInterval)
+    }
+    const stopPolling = () => {
+      if (!pollingIntervalRef.current) return
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = undefined
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return
+      if (pollingIntervalRef.current) {
+        pollSubscriptions()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     // If realtime is disabled, use polling immediately
     if (!enableRealtime) {
-      console.log('🔄 Realtime disabled - using polling mode for subscriptions')
-      pollingIntervalRef.current = setInterval(() => {
-        console.log('🔄 Polling subscriptions (dev mode)')
-        invalidateQueries.afterBusinessSettingsChange(queryClient)
-      }, pollingInterval)
+      if (isDev) {
+        console.log('🔄 Realtime disabled - using polling mode for subscriptions')
+      }
+      startPolling()
 
       return () => {
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current)
-        }
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        stopPolling()
       }
     }
 
@@ -101,11 +128,13 @@ export function useRealtimeSubscriptions({
         },
         (payload) => {
           // Real-time update received - invalidate React Query cache
-          console.log(
-            '📡 Subscription change detected:',
-            payload.eventType,
-            (payload.new as any)?.status || (payload.old as any)?.status
-          )
+          if (isDev) {
+            console.log(
+              '📡 Subscription change detected:',
+              payload.eventType,
+              (payload.new as any)?.status || (payload.old as any)?.status
+            )
+          }
 
           // Invalidate business settings queries (includes subscription)
           invalidateQueries.afterBusinessSettingsChange(queryClient)
@@ -116,7 +145,9 @@ export function useRealtimeSubscriptions({
             const newStatus = (payload.new as any).status
 
             if (oldStatus !== newStatus && onStatusChange) {
-              console.warn('⚠️  Subscription status changed:', oldStatus, '→', newStatus)
+              if (isDev) {
+                console.warn('⚠️  Subscription status changed:', oldStatus, '→', newStatus)
+              }
               onStatusChange(newStatus)
             }
           }
@@ -126,16 +157,17 @@ export function useRealtimeSubscriptions({
         }
       )
       .subscribe((status) => {
-        console.log('🔌 Realtime subscription status (business_subscriptions):', status)
+        if (isDev) {
+          console.log('🔌 Realtime subscription status (business_subscriptions):', status)
+        }
 
         if (status === 'SUBSCRIBED') {
           // Successfully connected - clear any polling fallback
-          if (pollingIntervalRef.current) {
-            clearInterval(pollingIntervalRef.current)
-            pollingIntervalRef.current = undefined
-          }
+          stopPolling()
           reconnectAttempts.current = 0
-          console.log('✅ Real-time subscriptions active')
+          if (isDev) {
+            console.log('✅ Real-time subscriptions active')
+          }
         }
 
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
@@ -148,32 +180,36 @@ export function useRealtimeSubscriptions({
 
           // Fallback to polling after max attempts
           if (reconnectAttempts.current >= maxReconnectAttempts) {
-            console.warn(
-              `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
-            )
-
-            // Start polling fallback
-            pollingIntervalRef.current = setInterval(() => {
-              console.log('🔄 Polling subscriptions (WebSocket fallback)')
-              invalidateQueries.afterBusinessSettingsChange(queryClient)
-            }, pollingInterval)
+            if (isDev) {
+              console.warn(
+                `⚠️  Falling back to polling every ${pollingInterval / 1000}s after ${maxReconnectAttempts} failed reconnection attempts`
+              )
+            }
+            startPolling()
           }
         }
 
-        if (status === 'CLOSED') {
+        if (status === 'CLOSED' && isDev) {
           console.log('🔌 Realtime subscription closed (business_subscriptions)')
         }
       })
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('🧹 Cleaning up real-time subscriptions subscription')
-      supabase.removeChannel(channel)
-
-      // Clear polling if active
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current)
+      if (isDev) {
+        console.log('🧹 Cleaning up real-time subscriptions subscription')
       }
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      supabase.removeChannel(channel)
+      stopPolling()
     }
-  }, [businessId, enabled, pollingInterval, maxReconnectAttempts, queryClient, onStatusChange])
+  }, [
+    businessId,
+    enabled,
+    pollingInterval,
+    maxReconnectAttempts,
+    queryClient,
+    onStatusChange,
+    isDev,
+  ])
 }
