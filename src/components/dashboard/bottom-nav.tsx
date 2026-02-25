@@ -86,8 +86,8 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
   }
 
   const isBarberRole = userRole === 'barber'
-  // Owner who is also a barber — gets Mi Día in tabs, Servicios moves to drawer
-  const isOwnerBarber = contextIsBarber && userRole === 'owner'
+  // Owners/admins who are also barbers — get Mi Día quick access in tabs
+  const isOwnerBarber = contextIsBarber && (userRole === 'owner' || userRole === 'admin')
 
   // Build navigation based on role + permissions
   let navigation = ownerNavigation

@@ -37,6 +37,13 @@ export function IOSToggle({
   label,
 }: IOSToggleProps) {
   const sizeConfig = sizes[size]
+  const trackStateClasses = checked
+    ? 'bg-[var(--brand-primary)] shadow-[0_0_0_1px_rgba(var(--brand-primary-rgb),0.45),0_6px_16px_rgba(var(--brand-primary-rgb),0.35)]'
+    : 'bg-[#D2D4DB] dark:bg-[#3A3D46] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]'
+
+  const thumbStateClasses = checked
+    ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.35)]'
+    : 'bg-[#F5F5F7] dark:bg-[#D0D3DB] shadow-[0_1px_5px_rgba(0,0,0,0.25)]'
 
   return (
     <label
@@ -53,7 +60,7 @@ export function IOSToggle({
           'transition-colors duration-200 ease-in-out',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2',
           sizeConfig.track,
-          checked ? 'bg-[var(--brand-primary)]' : 'bg-[#E9E9EB] dark:bg-[#39393D]'
+          trackStateClasses
         )}
       >
         <motion.span
@@ -64,9 +71,10 @@ export function IOSToggle({
             damping: 30,
           }}
           className={cn(
-            'pointer-events-none rounded-full bg-white shadow-md',
+            'pointer-events-none rounded-full',
             'ring-0',
-            sizeConfig.thumb
+            sizeConfig.thumb,
+            thumbStateClasses
           )}
           style={{
             x: checked ? sizeConfig.translate : 0,

@@ -96,14 +96,34 @@ export default function HorarioSettingsPage() {
     }))
   }
 
-  function toggleDay(day: keyof OperatingHours) {
+  async function toggleDay(day: keyof OperatingHours) {
+    if (!businessId || updateSettings.isPending) return
+
+    const previousOperatingHours = formData.operating_hours
+    const nextOperatingHours = {
+      ...previousOperatingHours,
+      [day]: previousOperatingHours[day] ? null : { ...DEFAULT_HOURS },
+    }
+
     setFormData((prev) => ({
       ...prev,
-      operating_hours: {
-        ...prev.operating_hours,
-        [day]: prev.operating_hours[day] ? null : { ...DEFAULT_HOURS },
-      },
+      operating_hours: nextOperatingHours,
     }))
+
+    try {
+      await updateSettings.mutateAsync({
+        id: businessId,
+        updates: {
+          operating_hours: nextOperatingHours,
+        },
+      })
+    } catch {
+      setFormData((prev) => ({
+        ...prev,
+        operating_hours: previousOperatingHours,
+      }))
+      toast.error('Error al actualizar el día')
+    }
   }
 
   async function handleSave() {
@@ -192,7 +212,12 @@ export default function HorarioSettingsPage() {
                               : 'bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200/50 dark:border-zinc-800/50'
                           }`}
                         >
-                          <IOSToggle checked={isOpen} onChange={() => toggleDay(key)} size="sm" />
+                          <IOSToggle
+                            checked={isOpen}
+                            onChange={() => toggleDay(key)}
+                            size="sm"
+                            disabled={updateSettings.isPending}
+                          />
                           <span
                             className={`text-[15px] font-medium w-20 sm:w-24 ${
                               isOpen

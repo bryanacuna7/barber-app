@@ -196,13 +196,16 @@ export async function detectUserRole(
 
   const isOwner = !!business
 
-  // 3. Check barber
-  const { data: barberRecord } = await supabase
+  // 3. Check barber (robust against multiple rows / legacy null is_active)
+  const { data: barberRows } = await supabase
     .from('barbers')
-    .select('id, business_id')
+    .select('id, business_id, is_active')
     .eq('user_id', userId)
-    .eq('is_active', true)
-    .maybeSingle()
+  const activeBarberRows = (barberRows ?? []).filter((row) => row.is_active !== false)
+  const barberRecord =
+    isOwner && business
+      ? (activeBarberRows.find((row) => row.business_id === business.id) ?? null)
+      : (activeBarberRows[0] ?? null)
 
   const isBarber = !!barberRecord
 

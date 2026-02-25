@@ -17,7 +17,6 @@ import {
   LayoutDashboard,
   History,
   Shield,
-  CalendarClock,
   Users,
   Trophy,
   Target,
@@ -143,15 +142,6 @@ const menuItems: MenuItem[] = [
   },
 ]
 
-const barberMenuItem: MenuItem = {
-  name: 'Mi Día',
-  href: '/mi-dia',
-  icon: CalendarClock,
-  description: 'Tu agenda de hoy',
-  color: 'text-teal-600 dark:text-teal-400',
-  bgColor: 'bg-teal-100 dark:bg-teal-900/30',
-}
-
 const serviciosMenuItem: MenuItem = {
   name: 'Servicios',
   href: '/servicios',
@@ -215,7 +205,7 @@ export function MoreMenuDrawer({
   }
 
   const isBarberRole = userRole === 'barber'
-  const isOwnerBarber = isBarber && userRole === 'owner'
+  const isOwnerBarber = isBarber && (userRole === 'owner' || userRole === 'admin')
 
   // Build filtered menu items based on role
   const filteredItems = (() => {

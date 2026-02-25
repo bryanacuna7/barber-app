@@ -102,9 +102,10 @@ interface RuleCardProps {
   onToggle: (id: string) => void
   onEdit: (rule: PromoRule) => void
   onDelete: (id: string) => void
+  disabled?: boolean
 }
 
-function RuleCard({ rule, onToggle, onEdit, onDelete }: RuleCardProps) {
+function RuleCard({ rule, onToggle, onEdit, onDelete, disabled = false }: RuleCardProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
 
   return (
@@ -119,7 +120,12 @@ function RuleCard({ rule, onToggle, onEdit, onDelete }: RuleCardProps) {
       {/* Main row */}
       <div className="flex items-center gap-3">
         {/* Toggle */}
-        <IOSToggle checked={rule.enabled} onChange={() => onToggle(rule.id)} size="sm" />
+        <IOSToggle
+          checked={rule.enabled}
+          onChange={() => onToggle(rule.id)}
+          size="sm"
+          disabled={disabled}
+        />
 
         {/* Label + summary */}
         <div className="flex-1 min-w-0">
@@ -421,6 +427,7 @@ export default function PromocionesSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [editingRule, setEditingRule] = useState<PromoRule | null>(null)
+  const [togglingRuleId, setTogglingRuleId] = useState<string | null>(null)
 
   // Heatmap data
   const { data: heatmapData, isLoading: heatmapLoading } = useHeatmapAnalytics()
@@ -449,9 +456,47 @@ export default function PromocionesSettingsPage() {
   // --------------------------------------------------
   // Rule mutations (local state only — marks dirty)
   // --------------------------------------------------
-  const handleToggle = (id: string) => {
-    setRules((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)))
-    setDirty(true)
+  const handleToggle = async (id: string) => {
+    if (saving || togglingRuleId) return
+
+    const previousRules = rules
+    const previousDirty = dirty
+    const nextRules = previousRules.map((rule) =>
+      rule.id === id ? { ...rule, enabled: !rule.enabled } : rule
+    )
+
+    const { valid, errors, warnings } = validatePromoRules(nextRules)
+    if (!valid) {
+      toast.error(errors[0])
+      return
+    }
+
+    setRules(nextRules)
+    setTogglingRuleId(id)
+
+    try {
+      const res = await fetch('/api/settings/promotional-slots', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rules: nextRules }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body?.error ?? 'Error al guardar la regla')
+      }
+
+      const body = await res.json()
+      const responseWarnings = Array.isArray(body?.warnings) ? body.warnings : warnings
+      responseWarnings.forEach((warning: string) => toast.warning(warning))
+      setDirty(false)
+    } catch (error) {
+      setRules(previousRules)
+      setDirty(previousDirty)
+      toast.error(error instanceof Error ? error.message : 'Error al guardar la regla')
+    } finally {
+      setTogglingRuleId(null)
+    }
   }
 
   const handleDelete = (id: string) => {
@@ -657,6 +702,7 @@ export default function PromocionesSettingsPage() {
                         onToggle={handleToggle}
                         onEdit={handleOpenEdit}
                         onDelete={handleDelete}
+                        disabled={Boolean(togglingRuleId)}
                       />
                     ))}
                   </div>

@@ -93,6 +93,36 @@ export function CancellationPolicySection({ businessId }: CancellationPolicySect
     }
   }, [policy, toast])
 
+  const handleToggleAndSave = useCallback(
+    async (field: 'enabled' | 'allow_reschedule', value: boolean) => {
+      if (saving) return
+
+      const previousPolicy = policy
+      const nextPolicy = { ...previousPolicy, [field]: value }
+
+      setPolicy(nextPolicy)
+      setSaving(true)
+
+      try {
+        const res = await fetch('/api/settings/cancellation-policy', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nextPolicy),
+        })
+
+        if (!res.ok) throw new Error('Failed to save cancellation policy')
+
+        setSaved(nextPolicy)
+      } catch {
+        setPolicy(previousPolicy)
+        toast.error('Error al guardar la política de cancelación')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [policy, saving, toast]
+  )
+
   // =====================================================
   // Loading skeleton
   // =====================================================
@@ -152,7 +182,8 @@ export function CancellationPolicySection({ businessId }: CancellationPolicySect
           </div>
           <IOSToggle
             checked={policy.enabled}
-            onChange={(val) => setPolicy((prev) => ({ ...prev, enabled: val }))}
+            onChange={(value) => handleToggleAndSave('enabled', value)}
+            disabled={saving}
           />
         </div>
 
@@ -209,7 +240,8 @@ export function CancellationPolicySection({ businessId }: CancellationPolicySect
                   </div>
                   <IOSToggle
                     checked={policy.allow_reschedule}
-                    onChange={(val) => setPolicy((prev) => ({ ...prev, allow_reschedule: val }))}
+                    onChange={(value) => handleToggleAndSave('allow_reschedule', value)}
+                    disabled={saving}
                   />
                 </div>
               </div>

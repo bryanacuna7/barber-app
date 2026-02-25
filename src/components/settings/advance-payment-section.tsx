@@ -97,6 +97,36 @@ export function AdvancePaymentSection({ businessId }: AdvancePaymentSectionProps
     }
   }, [config, toast])
 
+  const handleEnabledToggle = useCallback(
+    async (value: boolean) => {
+      if (saving) return
+
+      const previousConfig = config
+      const nextConfig = { ...previousConfig, enabled: value }
+
+      setConfig(nextConfig)
+      setSaving(true)
+
+      try {
+        const res = await fetch('/api/settings/advance-payment', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nextConfig),
+        })
+
+        if (!res.ok) throw new Error('Failed to save advance payment config')
+
+        setSaved(nextConfig)
+      } catch {
+        setConfig(previousConfig)
+        toast.error('Error al guardar la configuración de pago anticipado')
+      } finally {
+        setSaving(false)
+      }
+    },
+    [config, saving, toast]
+  )
+
   // =====================================================
   // Loading skeleton
   // =====================================================
@@ -154,10 +184,7 @@ export function AdvancePaymentSection({ businessId }: AdvancePaymentSectionProps
               </p>
             </div>
           </div>
-          <IOSToggle
-            checked={config.enabled}
-            onChange={(val) => setConfig((prev) => ({ ...prev, enabled: val }))}
-          />
+          <IOSToggle checked={config.enabled} onChange={handleEnabledToggle} disabled={saving} />
         </div>
 
         {/* Conditional fields: shown only when enabled */}

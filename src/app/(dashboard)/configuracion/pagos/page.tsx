@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Banknote, Smartphone, CreditCard, Info } from 'lucide-react'
+import { Banknote, Smartphone, CreditCard, Info } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
 import { IOSToggle } from '@/components/ui/ios-toggle'
 import { useToast } from '@/components/ui/toast'
 import { FadeInUp } from '@/components/ui/motion'
@@ -52,7 +51,7 @@ export default function PagosSettingsPage() {
 
   const [methods, setMethods] = useState<PaymentMethodKey[]>(['cash'])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [methodsSaving, setMethodsSaving] = useState(false)
   const [loadError, setLoadError] = useState(false)
 
   // Load current payment methods
@@ -79,25 +78,33 @@ export default function PagosSettingsPage() {
     load()
   }, [businessId, supabase, toast])
 
-  const handleToggle = (key: PaymentMethodKey) => {
-    setMethods((prev) => (prev.includes(key) ? prev.filter((m) => m !== key) : [...prev, key]))
-  }
+  const handleToggle = async (key: PaymentMethodKey) => {
+    if (methodsSaving) return
 
-  const handleSave = async () => {
-    setSaving(true)
-    const { error } = await supabase
-      .from('businesses')
-      .update({ accepted_payment_methods: methods } as Record<string, unknown>)
-      .eq('id', businessId)
+    const previousMethods = methods
+    const nextMethods = previousMethods.includes(key)
+      ? previousMethods.filter((method) => method !== key)
+      : [...previousMethods, key]
 
-    setSaving(false)
+    setMethods(nextMethods)
+    setMethodsSaving(true)
 
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from('businesses')
+        .update({ accepted_payment_methods: nextMethods } as Record<string, unknown>)
+        .eq('id', businessId)
+
+      if (error) {
+        setMethods(previousMethods)
+        toast.error('Error al guardar métodos de pago')
+      }
+    } catch {
+      setMethods(previousMethods)
       toast.error('Error al guardar métodos de pago')
-      return
+    } finally {
+      setMethodsSaving(false)
     }
-
-    toast.success('Métodos de pago actualizados')
   }
 
   const activeCount = methods.length
@@ -195,6 +202,7 @@ export default function PagosSettingsPage() {
                       <IOSToggle
                         checked={methods.includes(option.key)}
                         onChange={() => handleToggle(option.key)}
+                        disabled={methodsSaving}
                       />
                     </div>
                   )
@@ -211,7 +219,8 @@ export default function PagosSettingsPage() {
                   ? 'Sin métodos activos: al completar una cita no se preguntará el método de pago.'
                   : activeCount === 1
                     ? 'Con 1 método activo: se seleccionará automáticamente al completar (2 taps).'
-                    : `Con ${activeCount} métodos activos: el miembro del equipo elige al completar la cita.`}
+                    : `Con ${activeCount} métodos activos: el miembro del equipo elige al completar la cita.`}{' '}
+                Los switches se guardan automáticamente.
               </p>
             </div>
           </FadeInUp>
@@ -231,21 +240,6 @@ export default function PagosSettingsPage() {
           <FadeInUp delay={0.2}>
             <AdvancePaymentSection businessId={businessId} />
           </FadeInUp>
-        </div>
-
-        {/* Sticky Save Button */}
-        <div className="fixed bottom-20 lg:bottom-6 left-0 right-0 lg:left-64 px-4 lg:px-8 z-30">
-          <div className="max-w-3xl mx-auto">
-            <Button
-              type="button"
-              onClick={handleSave}
-              isLoading={saving}
-              className="w-full h-12 text-[15px] font-semibold shadow-lg"
-            >
-              <Save className="h-5 w-5 mr-2" />
-              Guardar Métodos de Pago
-            </Button>
-          </div>
         </div>
       </div>
     </ComponentErrorBoundary>

@@ -16,13 +16,14 @@ import {
   Share2,
   History,
   Search,
+  CalendarClock,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { useCommandPalette } from '@/components/dashboard/command-palette'
 
-const navigation = [
+const baseNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Citas', href: '/citas', icon: Calendar },
   { name: 'Servicios', href: '/servicios', icon: Scissors },
@@ -39,12 +40,14 @@ interface SidebarProps {
   businessName: string
   logoUrl?: string | null
   isAdmin?: boolean
+  isBarber?: boolean
 }
 
 interface SidebarContentProps {
   businessName: string
   logoUrl?: string | null
   isAdmin?: boolean
+  isBarber?: boolean
   pathname: string
   onLogout: () => void
   onLinkClick?: () => void
@@ -54,11 +57,20 @@ function SidebarContent({
   businessName,
   logoUrl,
   isAdmin,
+  isBarber = false,
   pathname,
   onLogout,
   onLinkClick,
 }: SidebarContentProps) {
   const { open: openCommandPalette } = useCommandPalette()
+  const navigation = isBarber
+    ? [
+        baseNavigation[0],
+        baseNavigation[1],
+        { name: 'Mi Día', href: '/mi-dia', icon: CalendarClock },
+        ...baseNavigation.slice(2),
+      ]
+    : baseNavigation
 
   return (
     <>
@@ -142,7 +154,7 @@ function SidebarContent({
   )
 }
 
-export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
+export function Sidebar({ businessName, logoUrl, isAdmin, isBarber = false }: SidebarProps) {
   const pathname = usePathname()
 
   const handleLogout = async () => {
@@ -162,6 +174,7 @@ export function Sidebar({ businessName, logoUrl, isAdmin }: SidebarProps) {
           businessName={businessName}
           logoUrl={logoUrl}
           isAdmin={isAdmin}
+          isBarber={isBarber}
           pathname={pathname}
           onLogout={handleLogout}
         />
