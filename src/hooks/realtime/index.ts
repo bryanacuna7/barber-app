@@ -8,4 +8,3 @@
 
 export { useRealtimeAppointments } from '../use-realtime-appointments'
 export { useRealtimeClients } from '../use-realtime-clients'
-export { useRealtimeSubscriptions } from '../use-realtime-subscriptions'

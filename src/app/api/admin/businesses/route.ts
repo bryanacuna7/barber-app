@@ -59,51 +59,72 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
-    // PERFORMANCE OPTIMIZATION: Batch queries to avoid N+1 problem
-    // Instead of N queries per business (3N queries), do 3 queries total
     const businessIds = (businesses || []).map((b) => b.id)
 
-    // Batch query all stats in parallel
-    const [barberStats, serviceStats, appointmentStats] = await Promise.all([
-      // Get all barbers for these businesses
-      serviceClient.from('barbers').select('business_id').in('business_id', businessIds),
+    // Try RPC first (migration 045 — single DB-side aggregation)
+    let businessesWithStats: any[]
+    const { data: rpcStats, error: rpcError } = await (serviceClient as any).rpc(
+      'get_business_stats_batch',
+      { p_business_ids: businessIds }
+    )
 
-      // Get all services for these businesses
-      serviceClient.from('services').select('business_id').in('business_id', businessIds),
+    if (!rpcError && rpcStats) {
+      // BIGINT → Number coercion (PostgREST may serialize BIGINT as string)
+      const statsMap = new Map(
+        (rpcStats as any[]).map((s: any) => [
+          s.business_id,
+          {
+            barbers: Number(s.barber_count ?? 0),
+            services: Number(s.service_count ?? 0),
+            appointments: Number(s.appointment_count ?? 0),
+          },
+        ])
+      )
 
-      // Get all appointments for these businesses
-      serviceClient.from('appointments').select('business_id').in('business_id', businessIds),
-    ])
+      businessesWithStats = (businesses || []).map((business) => ({
+        ...business,
+        stats: statsMap.get(business.id) || { barbers: 0, services: 0, appointments: 0 },
+      }))
+    } else {
+      // Fallback: original 3 batch queries (pre-migration safety)
+      if (rpcError) {
+        console.warn(
+          `[admin/businesses] RPC fallback active: ${rpcError.code} - ${rpcError.message}`
+        )
+      }
 
-    // Group stats by business_id in memory (O(n) complexity)
-    const barberCounts = new Map<string, number>()
-    const serviceCounts = new Map<string, number>()
-    const appointmentCounts = new Map<string, number>()
+      const [barberStats, serviceStats, appointmentStats] = await Promise.all([
+        serviceClient.from('barbers').select('business_id').in('business_id', businessIds),
+        serviceClient.from('services').select('business_id').in('business_id', businessIds),
+        serviceClient.from('appointments').select('business_id').in('business_id', businessIds),
+      ])
 
-    barberStats.data?.forEach((barber) => {
-      const count = barberCounts.get(barber.business_id) || 0
-      barberCounts.set(barber.business_id, count + 1)
-    })
+      const barberCounts = new Map<string, number>()
+      const serviceCounts = new Map<string, number>()
+      const appointmentCounts = new Map<string, number>()
 
-    serviceStats.data?.forEach((service) => {
-      const count = serviceCounts.get(service.business_id) || 0
-      serviceCounts.set(service.business_id, count + 1)
-    })
+      barberStats.data?.forEach((barber) => {
+        const count = barberCounts.get(barber.business_id) || 0
+        barberCounts.set(barber.business_id, count + 1)
+      })
+      serviceStats.data?.forEach((service) => {
+        const count = serviceCounts.get(service.business_id) || 0
+        serviceCounts.set(service.business_id, count + 1)
+      })
+      appointmentStats.data?.forEach((appointment) => {
+        const count = appointmentCounts.get(appointment.business_id) || 0
+        appointmentCounts.set(appointment.business_id, count + 1)
+      })
 
-    appointmentStats.data?.forEach((appointment) => {
-      const count = appointmentCounts.get(appointment.business_id) || 0
-      appointmentCounts.set(appointment.business_id, count + 1)
-    })
-
-    // Attach stats to businesses (O(n) complexity)
-    const businessesWithStats = (businesses || []).map((business) => ({
-      ...business,
-      stats: {
-        barbers: barberCounts.get(business.id) || 0,
-        services: serviceCounts.get(business.id) || 0,
-        appointments: appointmentCounts.get(business.id) || 0,
-      },
-    }))
+      businessesWithStats = (businesses || []).map((business) => ({
+        ...business,
+        stats: {
+          barbers: barberCounts.get(business.id) || 0,
+          services: serviceCounts.get(business.id) || 0,
+          appointments: appointmentCounts.get(business.id) || 0,
+        },
+      }))
+    }
 
     return NextResponse.json({
       businesses: businessesWithStats,

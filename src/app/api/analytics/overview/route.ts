@@ -33,10 +33,42 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
         break
     }
 
-    // Get appointments in period
+    // Try RPC first (migration 045 — DB-side aggregation, zero row egress)
+    const { data: rpcResult, error: rpcError } = await (supabase as any).rpc(
+      'get_appointment_overview',
+      { p_business_id: business.id, p_start_date: startDate.toISOString() }
+    )
+
+    if (!rpcError && rpcResult) {
+      const total = Number(rpcResult.total ?? 0)
+      const completed = Number(rpcResult.completed ?? 0)
+      const revenue = Number(rpcResult.total_revenue ?? 0)
+      const avg = completed > 0 ? Math.round(revenue / completed) : 0
+      const rate = total > 0 ? Math.round((completed / total) * 100) : 0
+
+      return NextResponse.json({
+        period,
+        dateRange: { start: startDate.toISOString(), end: now.toISOString() },
+        metrics: {
+          totalAppointments: total,
+          completedAppointments: completed,
+          totalRevenue: revenue,
+          avgPerAppointment: avg,
+          completionRate: rate,
+        },
+      })
+    }
+
+    // Fallback: original query (safe for pre-migration deploy)
+    if (rpcError) {
+      console.warn(
+        `[analytics/overview] RPC fallback active: ${rpcError.code} - ${rpcError.message}`
+      )
+    }
+
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
-      .select('id, status, price, scheduled_at')
+      .select('status, price')
       .eq('business_id', business.id)
       .gte('scheduled_at', startDate.toISOString())
 
@@ -45,27 +77,19 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
-    // Calculate metrics
     const totalAppointments = appointments?.length || 0
     const completedAppointments = appointments?.filter((a) => a.status === 'completed').length || 0
     const totalRevenue =
       appointments
         ?.filter((a) => a.status === 'completed')
         .reduce((sum, a) => sum + (a.price ?? 0), 0) ?? 0
-
-    // Calculate average per appointment
     const avgPerAppointment = completedAppointments > 0 ? totalRevenue / completedAppointments : 0
-
-    // Calculate completion rate
     const completionRate =
       totalAppointments > 0 ? (completedAppointments / totalAppointments) * 100 : 0
 
     return NextResponse.json({
       period,
-      dateRange: {
-        start: startDate.toISOString(),
-        end: now.toISOString(),
-      },
+      dateRange: { start: startDate.toISOString(), end: now.toISOString() },
       metrics: {
         totalAppointments,
         completedAppointments,

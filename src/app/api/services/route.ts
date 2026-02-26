@@ -14,7 +14,9 @@ const serviceSchema = z.object({
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   const { data: services, error } = await supabase
     .from('services')
-    .select('*')
+    .select(
+      'id, name, description, category, duration_minutes, price, display_order, is_active, business_id'
+    )
     .eq('business_id', business.id)
     .order('display_order', { ascending: true })
 

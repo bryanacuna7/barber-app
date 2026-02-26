@@ -48,7 +48,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     // Get appointments for barbers in period
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
-      .select('barber_id, price, status, client_id')
+      .select('barber_id, price, client_id')
       .eq('business_id', business.id)
       .eq('status', 'completed')
       .gte('scheduled_at', startDate.toISOString())

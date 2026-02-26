@@ -39,10 +39,20 @@ interface SmartNotificationStats {
   errors: number
 }
 
-const HISTORY_WEEKS = 12
+const HISTORY_WEEKS = 8
 const WINDOW_HOURS = 28
 const COOLDOWN_DAYS = 7
 const ATTR_TTL_DAYS = 7
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = []
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size))
+  }
+  return chunks
+}
+
+const IN_CHUNK_SIZE = 300
 
 export async function runSmartPromoNotifications(
   serviceClient: any,
@@ -132,31 +142,56 @@ export async function runSmartPromoNotifications(
       continue
     }
 
-    const { data: prefRows } = await (serviceClient as any)
-      .from('client_notification_preferences')
-      .select('client_id, user_id, smart_promos_enabled, smart_promos_paused_until')
-      .eq('business_id', businessId)
+    // Extract deduplicated candidate user IDs for targeted queries
+    const candidateUserIds = [...new Set([...clientMap.values()].map((c) => c.userId))]
+
+    if (candidateUserIds.length === 0) {
+      stats.skipped++
+      continue
+    }
+
+    // Fetch prefs only for candidates (chunked for .in() safety)
+    const prefRows: any[] = []
+    for (const chunk of chunkArray(candidateUserIds, IN_CHUNK_SIZE)) {
+      const { data } = await (serviceClient as any)
+        .from('client_notification_preferences')
+        .select('client_id, user_id, smart_promos_enabled, smart_promos_paused_until')
+        .eq('business_id', businessId)
+        .in('user_id', chunk)
+      if (data) prefRows.push(...data)
+    }
 
     const prefByUserId = new Map<string, { enabled: boolean; pausedUntil: Date | null }>()
-    for (const pref of (prefRows || []) as any[]) {
+    for (const pref of prefRows as any[]) {
       prefByUserId.set(pref.user_id, {
         enabled: pref.smart_promos_enabled !== false,
-        pausedUntil: pref.smart_promos_paused_until ? new Date(pref.smart_promos_paused_until) : null,
+        pausedUntil: pref.smart_promos_paused_until
+          ? new Date(pref.smart_promos_paused_until)
+          : null,
       })
     }
 
     const cooldownStart = new Date(now)
     cooldownStart.setDate(cooldownStart.getDate() - COOLDOWN_DAYS)
 
-    const { data: cooldownRows } = await (serviceClient as any)
-      .from('smart_notification_attribution')
-      .select('user_id')
-      .eq('business_id', businessId)
-      .gt('sent_at', cooldownStart.toISOString())
+    // Fetch cooldown only for candidates (chunked for .in() safety)
+    const cooldownUserIds: string[] = []
+    for (const chunk of chunkArray(candidateUserIds, IN_CHUNK_SIZE)) {
+      const { data } = await (serviceClient as any)
+        .from('smart_notification_attribution')
+        .select('user_id')
+        .eq('business_id', businessId)
+        .gt('sent_at', cooldownStart.toISOString())
+        .in('user_id', chunk)
+      if (data) cooldownUserIds.push(...data.map((r: any) => r.user_id))
+    }
 
-    const usersInCooldown = new Set<string>((cooldownRows || []).map((r: any) => r.user_id))
+    const usersInCooldown = new Set<string>(cooldownUserIds)
 
-    const servicesById = new Map<string, { id: string; name: string; price: number; is_active: boolean }>()
+    const servicesById = new Map<
+      string,
+      { id: string; name: string; price: number; is_active: boolean }
+    >()
     if (usedServiceIds.size > 0) {
       const { data: services } = await serviceClient
         .from('services')
@@ -292,7 +327,10 @@ export async function runSmartPromoNotifications(
 
         stats.sent++
       } else {
-        await (serviceClient as any).from('smart_notification_attribution').delete().eq('id', attribution.id)
+        await (serviceClient as any)
+          .from('smart_notification_attribution')
+          .delete()
+          .eq('id', attribution.id)
         stats.errors++
       }
     }
@@ -301,7 +339,10 @@ export async function runSmartPromoNotifications(
   return stats
 }
 
-function detectHabitBucket(appointments: Array<{ serviceId: string | null; scheduledAt: Date }>, tz: string) {
+function detectHabitBucket(
+  appointments: Array<{ serviceId: string | null; scheduledAt: Date }>,
+  tz: string
+) {
   if (!appointments.length) return null
 
   const buckets = new Map<
@@ -339,7 +380,10 @@ function detectHabitBucket(appointments: Array<{ serviceId: string | null; sched
       existing.lastSeen = apt.scheduledAt.getTime()
     }
     if (apt.serviceId) {
-      existing.serviceCounts.set(apt.serviceId, (existing.serviceCounts.get(apt.serviceId) || 0) + 1)
+      existing.serviceCounts.set(
+        apt.serviceId,
+        (existing.serviceCounts.get(apt.serviceId) || 0) + 1
+      )
     }
   }
 
@@ -392,7 +436,5 @@ function findBucketSlotInWindow(
 }
 
 function isUuid(value: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value
-  )
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
 }

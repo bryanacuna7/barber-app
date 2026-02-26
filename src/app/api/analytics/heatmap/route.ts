@@ -26,14 +26,8 @@ export interface HeatmapResponse {
 
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    // Fetch extra business fields not included in withAuth
-    const { data: businessExtra } = (await supabase
-      .from('businesses')
-      .select('timezone, operating_hours')
-      .eq('id', business.id)
-      .single()) as any
-
-    const timezone = businessExtra?.timezone || 'America/Costa_Rica'
+    // timezone and operating_hours are now included in withAuth context
+    const timezone = (business as any).timezone || 'America/Costa_Rica'
 
     // Last 90 days
     const startDate = new Date()
@@ -42,7 +36,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     // Query appointments grouped by day-of-week and hour in business timezone
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
-      .select('scheduled_at, status')
+      .select('scheduled_at')
       .eq('business_id', business.id)
       .in('status', ['confirmed', 'completed', 'no_show'])
       .gte('scheduled_at', startDate.toISOString())
@@ -98,7 +92,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       cells,
       maxCount,
       totalAppointments: appointments?.length || 0,
-      operatingHours: businessExtra?.operating_hours ?? null,
+      operatingHours: (business as any).operating_hours ?? null,
     })
   } catch {
     return errorResponse('Error interno del servidor')

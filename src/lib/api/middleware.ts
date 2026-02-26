@@ -13,6 +13,9 @@ export type AuthContext = {
     id: string
     owner_id: string
     name?: string
+    timezone?: string | null
+    operating_hours?: unknown
+    smart_duration_enabled?: boolean | null
   }
   /** 'owner' if user owns the business, 'barber' if linked via barbers table */
   role: 'owner' | 'barber'
@@ -20,6 +23,58 @@ export type AuthContext = {
   barberId?: string
   supabase: Awaited<ReturnType<typeof createClient>>
 }
+
+// --- Business Lookup LRU Cache ---
+const CACHE_TTL_MS = 20_000 // 20 seconds
+const CACHE_MAX_ENTRIES = 100
+
+type CachedBusinessLookup = {
+  business: AuthContext['business']
+  role: 'owner' | 'barber'
+  barberId?: string
+  timestamp: number
+  lastAccess: number
+}
+
+const businessCache = new Map<string, CachedBusinessLookup>()
+
+function getCachedBusiness(userId: string): CachedBusinessLookup | null {
+  const entry = businessCache.get(userId)
+  if (!entry) return null
+
+  const now = Date.now()
+  if (now - entry.timestamp > CACHE_TTL_MS) {
+    businessCache.delete(userId)
+    return null
+  }
+
+  entry.lastAccess = now
+  return entry
+}
+
+function setCachedBusiness(
+  userId: string,
+  data: Omit<CachedBusinessLookup, 'timestamp' | 'lastAccess'>
+) {
+  // LRU eviction: remove oldest entry if at capacity
+  if (businessCache.size >= CACHE_MAX_ENTRIES) {
+    let oldestKey: string | null = null
+    let oldestAccess = Infinity
+    for (const [key, entry] of businessCache) {
+      if (entry.lastAccess < oldestAccess) {
+        oldestAccess = entry.lastAccess
+        oldestKey = key
+      }
+    }
+    if (oldestKey) businessCache.delete(oldestKey)
+  }
+
+  const now = Date.now()
+  businessCache.set(userId, { ...data, timestamp: now, lastAccess: now })
+}
+
+// Extended business select — includes fields commonly needed by analytics routes
+const BUSINESS_SELECT = 'id, owner_id, name, timezone, operating_hours, smart_duration_enabled'
 
 export type AuthHandler<T = any> = (
   request: Request,
@@ -82,42 +137,55 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
         return unauthorizedResponse('No autenticado')
       }
 
-      // Fetch business — try owner first, then barber lookup
-      let business: { id: string; owner_id: string; name?: string } | null = null
+      // Fetch business — check cache first, then DB
+      let business: AuthContext['business'] | null = null
       let role: 'owner' | 'barber' = 'owner'
       let barberId: string | undefined
 
-      // 1. Try as business owner (fast path)
-      const { data: ownerBusiness } = await supabase
-        .from('businesses')
-        .select('id, owner_id, name')
-        .eq('owner_id', user.id)
-        .single()
-
-      if (ownerBusiness) {
-        business = ownerBusiness
-        role = 'owner'
+      // Check LRU cache (20s TTL)
+      const cached = getCachedBusiness(user.id)
+      if (cached) {
+        business = cached.business
+        role = cached.role
+        barberId = cached.barberId
       } else {
-        // 2. Try as barber — look up business via barbers table
-        const { data: barber } = await supabase
-          .from('barbers')
-          .select('id, business_id')
-          .eq('user_id', user.id)
-          .eq('is_active', true)
-          .single()
+        // 1. Try as business owner (fast path)
+        const { data: ownerBusiness } = (await supabase
+          .from('businesses')
+          .select(BUSINESS_SELECT)
+          .eq('owner_id', user.id)
+          .single()) as any
 
-        if (barber) {
-          const { data: barberBusiness } = await supabase
-            .from('businesses')
-            .select('id, owner_id, name')
-            .eq('id', barber.business_id)
+        if (ownerBusiness) {
+          business = ownerBusiness
+          role = 'owner'
+        } else {
+          // 2. Try as barber — look up business via barbers table
+          const { data: barber } = await supabase
+            .from('barbers')
+            .select('id, business_id')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
             .single()
 
-          if (barberBusiness) {
-            business = barberBusiness
-            role = 'barber'
-            barberId = barber.id
+          if (barber) {
+            const { data: barberBusiness } = (await supabase
+              .from('businesses')
+              .select(BUSINESS_SELECT)
+              .eq('id', barber.business_id)
+              .single()) as any
+
+            if (barberBusiness) {
+              business = barberBusiness
+              role = 'barber'
+              barberId = barber.id
+            }
           }
+        }
+
+        // Populate cache on successful lookup
+        if (business) {
+          setCachedBusiness(user.id, { business, role, barberId })
         }
       }
 

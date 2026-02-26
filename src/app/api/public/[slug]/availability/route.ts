@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
 
   // Try full schema first, then fall back to legacy schema if optional columns are not present.
   const baseBusinessSelect = 'id, operating_hours, booking_buffer_minutes'
-  const fullBusinessSelect = `${baseBusinessSelect}, smart_duration_enabled, promotional_slots, timezone`
+  const fullBusinessSelect = `${baseBusinessSelect}, smart_duration_enabled, promotional_slots, timezone, slot_interval_minutes`
 
   const fullBusinessResult = (await supabase
     .from('businesses')
@@ -89,20 +89,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     )
   }
 
-  // Read slot_interval_minutes separately to avoid breaking fullBusinessSelect fallback
-  let slotIntervalMinutes = 30
-  try {
-    const { data: intervalData } = (await supabase
-      .from('businesses')
-      .select('slot_interval_minutes')
-      .eq('id', business.id)
-      .single()) as any
-    if (intervalData?.slot_interval_minutes) {
-      slotIntervalMinutes = intervalData.slot_interval_minutes
-    }
-  } catch {
-    // Column may not exist yet in partially-migrated environments — safe default
-  }
+  // slot_interval_minutes is now included in fullBusinessSelect (defaults to 30 if column missing)
+  const slotIntervalMinutes = (business as any).slot_interval_minutes ?? 30
 
   // Get service duration + price (price needed for promo evaluation)
   const { data: service, error: serviceError } = await supabase

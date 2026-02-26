@@ -29,20 +29,23 @@ export async function GET() {
     // Use service client for admin queries
     const serviceClient = await createServiceClient()
 
-    // Get total referrals across all businesses
+    // Get referral stats (one row per business, inherently bounded)
     const { data: allReferrals } = await serviceClient
       .from('business_referrals')
       .select('total_referrals, successful_referrals, current_milestone')
 
-    // Get all conversions
-    const { data: allConversions } = await serviceClient
-      .from('referral_conversions')
-      .select('status, created_at')
-
-    // Get claimed rewards
-    const { data: claimedRewards } = await serviceClient
-      .from('referral_rewards_claimed')
-      .select('id')
+    // Count-only queries (zero row data transferred via head: true)
+    const [activeResult, pendingResult, rewardsResult] = await Promise.all([
+      serviceClient
+        .from('referral_conversions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active'),
+      serviceClient
+        .from('referral_conversions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending'),
+      serviceClient.from('referral_rewards_claimed').select('*', { count: 'exact', head: true }),
+    ])
 
     // Calculate stats
     const totalReferrals =
@@ -50,8 +53,8 @@ export async function GET() {
     const successfulReferrals =
       allReferrals?.reduce((sum, br) => sum + (br.successful_referrals || 0), 0) || 0
 
-    const activeConversions = allConversions?.filter((c) => c.status === 'active').length || 0
-    const pendingConversions = allConversions?.filter((c) => c.status === 'pending').length || 0
+    const activeConversions = activeResult.count || 0
+    const pendingConversions = pendingResult.count || 0
 
     const conversionRate =
       totalReferrals > 0 ? ((activeConversions / totalReferrals) * 100).toFixed(1) : '0.0'
@@ -72,7 +75,7 @@ export async function GET() {
       activeConversions,
       pendingConversions,
       conversionRate,
-      totalRewardsClaimed: claimedRewards?.length || 0,
+      totalRewardsClaimed: rewardsResult.count || 0,
       avgReferralsPerUser,
       topMilestoneReached,
       revenueImpact,

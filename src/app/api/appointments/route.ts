@@ -33,11 +33,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     let query = supabase
       .from('appointments')
       .select(
-        `
-        *,
-        client:clients(id, name, phone, email),
-        service:services(id, name, duration_minutes, price)
-      `,
+        'id, business_id, client_id, service_id, barber_id, scheduled_at, duration_minutes, price, status, payment_method, source, client_notes, started_at, actual_duration_minutes, advance_payment_status, advance_payment_proof_url, client:clients!appointments_client_id_fkey(id, name, phone, email), service:services!appointments_service_id_fkey(id, name, duration_minutes, price)',
         { count: 'exact' }
       )
       .eq('business_id', business.id)

@@ -99,22 +99,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
     }
 
-    // 3. Check expiration (also catches historical tokens without tracking_expires_at
+    // 3. Fetch business once (reused in expiration branch and main response)
+    const { data: business } = await serviceClient
+      .from('businesses')
+      .select('name, brand_primary_color, slug')
+      .eq('id', appointment.business_id)
+      .single()
+
+    // 4. Check expiration (also catches historical tokens without tracking_expires_at
     //    for completed appointments — they should show "completed" state, not queue)
     if (appointment.tracking_expires_at) {
       const expiresAt = new Date(appointment.tracking_expires_at)
       if (expiresAt < new Date()) {
-        // Fetch business slug for rebook CTA
-        const { data: biz } = await serviceClient
-          .from('businesses')
-          .select('slug')
-          .eq('id', appointment.business_id)
-          .single()
-
         return NextResponse.json(
           {
             expired: true,
-            businessSlug: biz?.slug ?? null,
+            businessSlug: business?.slug ?? null,
             error: 'Este link de seguimiento ha expirado',
           },
           { status: 410 }
@@ -122,21 +122,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 3. Fetch barber name
+    // 5. Fetch barber name
     const { data: barber } = await serviceClient
       .from('barbers')
       .select('name')
       .eq('id', appointment.barber_id)
       .single()
 
-    // 4. Fetch business info (for branding)
-    const { data: business } = await serviceClient
-      .from('businesses')
-      .select('name, brand_primary_color, slug')
-      .eq('id', appointment.business_id)
-      .single()
-
-    // 5. Fetch ALL appointments for this barber today (anonymized)
+    // 6. Fetch ALL appointments for this barber today (anonymized)
     const now = new Date()
     const startOfDay = new Date(now)
     startOfDay.setUTCHours(0, 0, 0, 0)
@@ -160,7 +153,7 @@ export async function GET(request: NextRequest) {
     const yourAppointmentId = appointment.id
     const yourScheduledAt = new Date(appointment.scheduled_at)
 
-    // 6. Build anonymized queue + calculate ETA (same logic as authenticated endpoint)
+    // 7. Build anonymized queue + calculate ETA (same logic as authenticated endpoint)
     let completed = 0
     let inProgress = 0
     let pending = 0

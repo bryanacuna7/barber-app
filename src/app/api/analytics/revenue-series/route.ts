@@ -42,7 +42,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     // Get completed appointments in period
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
-      .select('id, price, scheduled_at')
+      .select('price, scheduled_at')
       .eq('business_id', business.id)
       .eq('status', 'completed')
       .gte('scheduled_at', startDate.toISOString())

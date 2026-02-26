@@ -18,13 +18,7 @@ type ServiceDurationStats = {
 
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    // Fetch extra business fields not included in withAuth
-    // Note: smart_duration_enabled added in migration 033, using `as any` until types regenerated
-    const { data: businessExtra } = (await supabase
-      .from('businesses')
-      .select('smart_duration_enabled')
-      .eq('id', business.id)
-      .single()) as any
+    // smart_duration_enabled is now included in withAuth context
 
     // Get period from query params (default: month)
     const { searchParams } = new URL(request.url)
@@ -68,7 +62,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     if (!appointments || appointments.length === 0) {
       return NextResponse.json({
         period,
-        smartDurationEnabled: businessExtra?.smart_duration_enabled || false,
+        smartDurationEnabled: (business as any).smart_duration_enabled || false,
         overall: {
           completedWithDuration: 0,
           avgScheduledMinutes: 0,
@@ -152,7 +146,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     return NextResponse.json({
       period,
-      smartDurationEnabled: businessExtra?.smart_duration_enabled || false,
+      smartDurationEnabled: (business as any).smart_duration_enabled || false,
       overall: {
         completedWithDuration,
         avgScheduledMinutes,
