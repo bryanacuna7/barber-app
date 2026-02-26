@@ -62,86 +62,78 @@ function RegisterForm({
     validateForm(formData)
   }
 
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-  }
+  const [successMessage, setSuccessMessage] = useState('')
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    setSuccessMessage('')
 
     // Validate form before submitting
     const validation = validateForm(formData)
     if (!validation.success) {
       setError('Por favor corrige los errores en el formulario')
       setIsLoading(false)
-      // Mark all fields as touched to show errors
       Object.keys(formData).forEach((field) => markFieldTouched(field))
       return
     }
 
-    const supabase = createClient()
-
-    // 1. Create user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-    })
-
-    if (authError) {
-      setError(
-        authError.message === 'User already registered'
-          ? 'Este correo ya está registrado'
-          : 'Error al crear la cuenta. Intenta de nuevo.'
-      )
-      setIsLoading(false)
-      return
-    }
-
-    if (!authData.user) {
-      setError('Error al crear la cuenta')
-      setIsLoading(false)
-      return
-    }
-
-    // 2. Create business
-    const slug = generateSlug(formData.businessName)
-
-    const { data: businessData, error: businessError } = await supabase
-      .from('businesses')
-      .insert({
-        owner_id: authData.user.id,
-        name: formData.businessName,
-        slug: slug,
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          businessName: formData.businessName,
+        }),
       })
-      .select()
-      .single()
 
-    if (businessError || !businessData) {
-      setError('Error al crear el negocio. El nombre puede estar en uso.')
-      setIsLoading(false)
-      return
-    }
+      const data = await res.json()
 
-    // 3. Track referral conversion if exists
-    const referralCode = getReferralCode()
-    if (referralCode) {
-      const businessId = (businessData as { id: string }).id
-      const tracked = await trackReferralConversion(referralCode, businessId)
-      if (tracked) {
-        clearReferralCode() // Clear cookie after successful tracking
+      if (!res.ok) {
+        setError(data.error || 'Error al crear la cuenta. Intenta de nuevo.')
+        setIsLoading(false)
+        return
       }
-    }
 
-    clearErrors()
-    router.push('/dashboard')
-    router.refresh()
+      // Track referral conversion if exists
+      if (data.success) {
+        const referralCode = getReferralCode()
+        if (referralCode) {
+          await trackReferralConversion(referralCode, '').catch(() => {})
+          clearReferralCode()
+        }
+      }
+
+      // Auto sign-in after successful registration
+      if (data.canSignIn) {
+        const supabase = createClient()
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        })
+
+        if (signInError) {
+          setSuccessMessage('Cuenta creada. Inicia sesión con tu correo y contraseña.')
+          setIsLoading(false)
+          return
+        }
+
+        clearErrors()
+        router.push('/dashboard')
+        router.refresh()
+        return
+      }
+
+      clearErrors()
+      router.push('/dashboard')
+      router.refresh()
+    } catch {
+      setError('Error de conexión. Intenta de nuevo.')
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -170,6 +162,14 @@ function RegisterForm({
                 data-testid="register-error"
               >
                 {error}
+              </div>
+            )}
+            {successMessage && (
+              <div
+                className="rounded-lg bg-green-50 p-3 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                data-testid="register-success"
+              >
+                {successMessage}
               </div>
             )}
           </div>

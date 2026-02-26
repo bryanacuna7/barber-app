@@ -4,6 +4,13 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.16] - 2026-02-25
+
+### Corregido
+
+- El registro de nuevas barberias ahora funciona correctamente sin errores al crear el negocio
+- Los enlaces de confirmacion de correo ya no redirigen a una pagina invalida
+
 ## [0.9.15] - 2026-02-25
 
 ### Nuevo
