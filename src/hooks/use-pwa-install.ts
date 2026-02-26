@@ -50,8 +50,19 @@ function detectStandalone(): boolean {
  * - iOS: detects platform for manual instructions
  * - Respects visit threshold (show after N visits)
  * - Persists dismissal preference
+ *
+ * @param options.threshold - Visit count before showing prompt (default: 3)
+ * @param options.namespace - Prefix for preference keys to isolate state per context
  */
-export function usePWAInstall(): PWAInstallState {
+export function usePWAInstall(options?: {
+  threshold?: number
+  namespace?: string
+}): PWAInstallState {
+  const threshold = options?.threshold ?? VISIT_THRESHOLD
+  const prefix = options?.namespace ? `${options.namespace}_` : ''
+  const dismissedKey = `${prefix}${PREF_KEY_DISMISSED}`
+  const visitsKey = `${prefix}${PREF_KEY_VISITS}`
+
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
   const [hasNativePrompt, setHasNativePrompt] = useState(false)
   // Lazy initializers: hydration mismatch acceptable (component only renders when canPrompt=true)
@@ -62,20 +73,20 @@ export function usePWAInstall(): PWAInstallState {
   const [isIOS] = useState(() => detectIOS())
   const [isDismissed, setIsDismissed] = useState(() => {
     if (typeof window === 'undefined') return true
-    return getPreference(PREF_KEY_DISMISSED, 'no', ['yes', 'no']) === 'yes'
+    return getPreference(dismissedKey, 'no', ['yes', 'no']) === 'yes'
   })
   const [hasEnoughVisits] = useState(() => {
     if (typeof window === 'undefined') return false
-    const visits = getPreference(PREF_KEY_VISITS, 0)
+    const visits = getPreference(visitsKey, 0)
     const newVisits = (typeof visits === 'number' ? visits : 0) + 1
-    return newVisits >= VISIT_THRESHOLD
+    return newVisits >= threshold
   })
 
   useEffect(() => {
     // Persist visit count increment (side effect only, state already computed in lazy init)
-    const visits = getPreference(PREF_KEY_VISITS, 0)
+    const visits = getPreference(visitsKey, 0)
     const newVisits = (typeof visits === 'number' ? visits : 0) + 1
-    setPreference(PREF_KEY_VISITS, newVisits)
+    setPreference(visitsKey, newVisits)
 
     // Listen for beforeinstallprompt (Android/Chrome)
     const handleBeforeInstall = (e: Event) => {
@@ -98,6 +109,7 @@ export function usePWAInstall(): PWAInstallState {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
       window.removeEventListener('appinstalled', handleInstalled)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keys are stable (derived from options)
   }, [])
 
   const promptInstall = useCallback(() => {
@@ -114,9 +126,9 @@ export function usePWAInstall(): PWAInstallState {
   }, [])
 
   const dismiss = useCallback(() => {
-    setPreference(PREF_KEY_DISMISSED, 'yes')
+    setPreference(dismissedKey, 'yes')
     setIsDismissed(true)
-  }, [])
+  }, [dismissedKey])
 
   // canPrompt: not installed, not dismissed, enough visits, and either native prompt or iOS
   const canPrompt = !isInstalled && !isDismissed && hasEnoughVisits && (hasNativePrompt || isIOS)

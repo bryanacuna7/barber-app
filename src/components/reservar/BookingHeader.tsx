@@ -1,6 +1,6 @@
 'use client'
 
-import { Scissors, MapPin, Phone, MessageCircle, Share2 } from 'lucide-react'
+import { Scissors, MapPin, Phone, MessageCircle, Share2, User } from 'lucide-react'
 import type { Business } from '@/types'
 
 function ShareButton({ business }: { business: Business }) {
@@ -41,9 +41,10 @@ function ShareButton({ business }: { business: Business }) {
 
 interface BookingHeaderProps {
   business: Business
+  isClient?: boolean
 }
 
-export function BookingHeader({ business }: BookingHeaderProps) {
+export function BookingHeader({ business, isClient = false }: BookingHeaderProps) {
   return (
     <div
       data-testid="booking-header"
@@ -109,6 +110,15 @@ export function BookingHeader({ business }: BookingHeaderProps) {
             </a>
           )}
           <ShareButton business={business} />
+          {isClient && (
+            <a
+              href="/mi-cuenta"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-medium text-zinc-300 ios-press"
+            >
+              <User className="h-3.5 w-3.5" />
+              <span>Mi Cuenta</span>
+            </a>
+          )}
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Scissors, AlertCircle } from 'lucide-react'
+import { Scissors, AlertCircle, CalendarCheck, X } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useBookingData } from '@/hooks/useBookingData'
 import { BookingHeader } from '@/components/reservar/BookingHeader'
@@ -12,6 +12,7 @@ import { ServiceSelection } from '@/components/reservar/ServiceSelection'
 import { BarberSelection } from '@/components/reservar/BarberSelection'
 import { DateTimeSelection } from '@/components/reservar/DateTimeSelection'
 import { ClientInfoForm } from '@/components/reservar/ClientInfoForm'
+import { InstallAppCta } from '@/components/pwa/install-app-cta'
 import { ClientStatusCard, ClientStatusCardSkeleton } from '@/components/loyalty/client-status-card'
 import { LoyaltyUpsellBanner } from '@/components/loyalty/loyalty-upsell-banner'
 import { createClient } from '@/lib/supabase/client'
@@ -319,24 +320,30 @@ export default function BookingPage() {
 
         {/* Step 4: Client Info */}
         {step === 'info' && booking.service && booking.date && booking.time && (
-          <ClientInfoForm
-            service={booking.service}
-            date={booking.date}
-            time={booking.time.time}
-            clientName={booking.clientName}
-            clientPhone={booking.clientPhone}
-            clientEmail={booking.clientEmail}
-            notes={booking.notes}
-            submitting={submitting}
-            error={error}
-            discount={booking.time.discount}
-            onChangeName={(value) => setBooking((prev) => ({ ...prev, clientName: value }))}
-            onChangePhone={(value) => setBooking((prev) => ({ ...prev, clientPhone: value }))}
-            onChangeEmail={(value) => setBooking((prev) => ({ ...prev, clientEmail: value }))}
-            onChangeNotes={(value) => setBooking((prev) => ({ ...prev, notes: value }))}
-            onSubmit={handleSubmit}
-            onBack={() => setStep('datetime')}
-          />
+          <>
+            <ClientInfoForm
+              service={booking.service}
+              date={booking.date}
+              time={booking.time.time}
+              clientName={booking.clientName}
+              clientPhone={booking.clientPhone}
+              clientEmail={booking.clientEmail}
+              notes={booking.notes}
+              submitting={submitting}
+              error={error}
+              discount={booking.time.discount}
+              onChangeName={(value) => setBooking((prev) => ({ ...prev, clientName: value }))}
+              onChangePhone={(value) => setBooking((prev) => ({ ...prev, clientPhone: value }))}
+              onChangeEmail={(value) => setBooking((prev) => ({ ...prev, clientEmail: value }))}
+              onChangeNotes={(value) => setBooking((prev) => ({ ...prev, notes: value }))}
+              onSubmit={handleSubmit}
+              onBack={() => setStep('datetime')}
+            />
+            {/* Subtle PWA install CTA — only on info step to avoid distracting from booking flow */}
+            <div className="mt-4">
+              <InstallAppCta variant="subtle" businessName={business.name} />
+            </div>
+          </>
         )}
       </div>
     </div>

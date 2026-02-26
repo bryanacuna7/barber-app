@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useSyncExternalStore } from 'react'
 
 /**
  * Convert a base64 VAPID public key to Uint8Array for pushManager.subscribe()
@@ -42,11 +42,24 @@ function checkPushSupport(): boolean {
   )
 }
 
+function subscribeToPushSupport() {
+  return () => {}
+}
+
+function getPushSupportServerSnapshot(): boolean {
+  return false
+}
+
 export function usePushSubscription(): UsePushSubscriptionReturn {
-  const [isSupported] = useState(() => checkPushSupport())
-  const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>(() =>
-    checkPushSupport() ? Notification.permission : 'unsupported'
+  // useSyncExternalStore keeps SSR/client hydration snapshots consistent.
+  const isSupported = useSyncExternalStore(
+    subscribeToPushSupport,
+    checkPushSupport,
+    getPushSupportServerSnapshot
   )
+  const permission: NotificationPermission | 'unsupported' = isSupported
+    ? Notification.permission
+    : 'unsupported'
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,11 +68,22 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
   useEffect(() => {
     if (!isSupported) return
 
-    navigator.serviceWorker.ready.then((registration) => {
-      registration.pushManager.getSubscription().then((sub) => {
-        setIsSubscribed(!!sub)
+    let mounted = true
+
+    navigator.serviceWorker.ready
+      .then((registration) => registration.pushManager.getSubscription())
+      .then((sub) => {
+        if (mounted) {
+          setIsSubscribed(!!sub)
+        }
       })
-    })
+      .catch((err) => {
+        console.error('Push initialization error:', err)
+      })
+
+    return () => {
+      mounted = false
+    }
   }, [isSupported])
 
   const subscribe = useCallback(async (): Promise<boolean> => {
@@ -70,7 +94,6 @@ export function usePushSubscription(): UsePushSubscriptionReturn {
     try {
       // Step 1: Request notification permission
       const perm = await Notification.requestPermission()
-      setPermission(perm)
 
       if (perm !== 'granted') {
         setError(`Permiso denegado: ${perm}`)

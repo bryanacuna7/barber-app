@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ClientAccountModal } from '@/components/loyalty/client-account-modal'
 import { AdvancePaymentSubmit } from '@/components/reservar/advance-payment-submit'
 import { PushNudgeBanner } from '@/components/client/push-nudge-banner'
+import { InstallAppCta } from '@/components/pwa/install-app-cta'
 import { createClient } from '@/lib/supabase/client'
 
 interface BookingSuccessProps {
@@ -170,6 +171,9 @@ export function BookingSuccess({
           </div>
           {/* Push notification nudge — best moment to ask */}
           <PushNudgeBanner variant="booking" />
+
+          {/* PWA install CTA — post-booking is peak conversion moment */}
+          {business?.name && <InstallAppCta variant="post-booking" businessName={business.name} />}
 
           {business?.whatsapp && (
             <a
