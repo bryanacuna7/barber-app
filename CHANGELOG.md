@@ -4,6 +4,19 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.18] - 2026-02-26
+
+### Mejorado
+
+- La app carga mas rapido gracias a consultas optimizadas al servidor
+- Las paginas de analiticas y panel de administracion usan menos datos
+- La limpieza automatica de archivos ahora procesa en lotes para mayor estabilidad
+- La exportacion de clientes maneja negocios grandes de forma segura
+
+### Eliminado
+
+- Se removio codigo interno sin uso para reducir el tamano de la aplicacion
+
 ## [0.9.17] - 2026-02-25
 
 ### Nuevo
