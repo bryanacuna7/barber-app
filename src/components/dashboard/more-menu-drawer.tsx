@@ -169,7 +169,7 @@ const serviciosMenuItem: MenuItem = {
 const externalLinks = [
   {
     name: 'Soporte',
-    href: 'https://wa.me/50688888888',
+    href: 'https://wa.me/50687175866',
     icon: HelpCircle,
     external: true,
   },

@@ -257,7 +257,7 @@ export default function PreciosPage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a
-              href="https://wa.me/50688888888"
+              href="https://wa.me/50687175866"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-6 py-3 text-sm font-medium text-white hover:bg-zinc-800"

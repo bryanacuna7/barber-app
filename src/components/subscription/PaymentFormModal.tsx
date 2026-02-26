@@ -35,7 +35,7 @@ export function PaymentFormModal({
   const priceCRC = exchangeRate ? Math.round(plan.price_usd * exchangeRate.usd_to_crc) : null
 
   // Use configured WhatsApp number or fallback to default
-  const whatsappNumber = whatsappConfig?.number || '50688888888'
+  const whatsappNumber = whatsappConfig?.number || '50687175866'
   const whatsappMessage = encodeURIComponent(
     `Hola! Quiero reportar mi pago para el plan ${plan.display_name} ($${plan.price_usd}/mes${priceCRC ? ` / ₡${priceCRC.toLocaleString('es-CR')}` : ''}). Adjunto mi comprobante de ${paymentMethod === 'sinpe' ? 'SINPE Móvil' : 'transferencia en dólares'}.`
   )

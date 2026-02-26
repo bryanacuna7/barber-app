@@ -60,7 +60,7 @@ export function Footer() {
             {[
               { label: 'Funciones', href: '#features' },
               { label: 'Precios', href: '#precios' },
-              { label: 'Contacto', href: 'https://wa.me/50688888888', external: true },
+              { label: 'Contacto', href: 'https://wa.me/50687175866', external: true },
             ].map((link) => (
               <Link
                 key={link.label}
@@ -83,7 +83,7 @@ export function Footer() {
               <Mail className="h-4 w-4" />
             </a>
             <a
-              href="https://wa.me/50688888888"
+              href="https://wa.me/50687175866"
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 transition-all hover:border-zinc-300 hover:text-zinc-700 dark:border-zinc-800 dark:hover:border-zinc-700 dark:hover:text-zinc-300"
