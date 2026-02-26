@@ -141,7 +141,7 @@ function SidebarContent({
               className="rounded-2xl border border-zinc-200/70 bg-white/55 p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-zinc-800/70 dark:bg-white/[0.03] dark:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"
             >
               <div className="mb-1.5 border-b border-zinc-200/70 px-1.5 pb-1.5 dark:border-zinc-800/70">
-                <p className="whitespace-nowrap text-[12px] font-semibold leading-5 tracking-[0.05em] text-zinc-500 dark:text-zinc-400">
+                <p className="whitespace-nowrap text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                   {section.label}
                 </p>
               </div>
