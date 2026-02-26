@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   // Get services
   const { data: services, error } = await supabase
     .from('services')
-    .select('id, name, description, duration_minutes, price')
+    .select('id, name, description, category, duration_minutes, price')
     .eq('business_id', business.id)
     .eq('is_active', true)
     .order('display_order', { ascending: true })

@@ -17,6 +17,7 @@ export interface UIService {
   id: string
   name: string
   description: string
+  category: string
   duration: number // minutes
   price: number
   displayOrder: number
@@ -45,6 +46,7 @@ export function adaptService(
     id: row.id,
     name: row.name,
     description: row.description || '',
+    category: row.category || 'corte',
     duration: row.duration_minutes,
     price: Number(row.price),
     displayOrder: row.display_order || 0,

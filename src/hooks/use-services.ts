@@ -22,6 +22,7 @@ export function useCreateService() {
     mutationFn: async (data: {
       name: string
       description: string
+      category?: 'corte' | 'barba' | 'combo' | 'facial'
       duration_minutes: number
       price: number
     }) => {

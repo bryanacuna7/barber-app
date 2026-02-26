@@ -9,6 +9,7 @@ export interface Service {
   id: string
   name: string
   description: string
+  category: string
   duration: number // minutes
   price: number
   displayOrder: number

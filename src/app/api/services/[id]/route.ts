@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
-import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 
 const updateServiceSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').optional(),
   description: z.string().optional().nullable(),
+  category: z.enum(['corte', 'barba', 'combo', 'facial']).optional(),
   duration_minutes: z.number().min(5).max(480).optional(),
   price: z.number().min(0).optional(),
   is_active: z.boolean().optional(),

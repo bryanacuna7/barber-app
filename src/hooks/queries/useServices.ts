@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/client'
 import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptServices } from '@/lib/adapters/services'
 
+type ServiceCategory = 'corte' | 'barba' | 'combo' | 'facial'
+
 export function useServices(businessId: string) {
   return useQuery({
     queryKey: queryKeys.services.list(businessId),
@@ -16,7 +18,7 @@ export function useServices(businessId: string) {
       const { data, error } = await supabase
         .from('services')
         .select(
-          'id, name, description, duration_minutes, price, display_order, is_active, business_id'
+          'id, name, description, category, duration_minutes, price, display_order, is_active, business_id'
         )
         .eq('business_id', businessId)
         .order('display_order', { ascending: true })
@@ -37,6 +39,7 @@ export function useCreateService() {
       description: string
       duration: number
       price: number
+      category: ServiceCategory
       business_id: string
     }) => {
       const supabase = createClient()
@@ -44,6 +47,7 @@ export function useCreateService() {
       const dbService = {
         name: service.name,
         description: service.description,
+        category: service.category,
         duration_minutes: service.duration,
         price: service.price,
         business_id: service.business_id,
@@ -52,7 +56,7 @@ export function useCreateService() {
         .from('services')
         .insert(dbService)
         .select(
-          'id, name, description, duration_minutes, price, display_order, is_active, business_id'
+          'id, name, description, category, duration_minutes, price, display_order, is_active, business_id'
         )
         .single()
       if (error) throw error
@@ -76,6 +80,7 @@ export function useUpdateService() {
         description?: string
         duration?: number
         price?: number
+        category?: ServiceCategory
         business_id?: string
       }
     }) => {
@@ -86,6 +91,7 @@ export function useUpdateService() {
       if (updates.description !== undefined) dbUpdates.description = updates.description
       if (updates.duration !== undefined) dbUpdates.duration_minutes = updates.duration
       if (updates.price !== undefined) dbUpdates.price = updates.price
+      if (updates.category !== undefined) dbUpdates.category = updates.category
       if (updates.business_id !== undefined) dbUpdates.business_id = updates.business_id
 
       const { data, error } = await supabase
@@ -93,7 +99,7 @@ export function useUpdateService() {
         .update(dbUpdates)
         .eq('id', id)
         .select(
-          'id, name, description, duration_minutes, price, display_order, is_active, business_id'
+          'id, name, description, category, duration_minutes, price, display_order, is_active, business_id'
         )
         .single()
       if (error) throw error

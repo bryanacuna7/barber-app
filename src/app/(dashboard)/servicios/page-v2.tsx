@@ -64,7 +64,8 @@ import { useRealtimeServices } from '@/hooks/use-realtime-services'
 // ============================================================================
 
 type ServiceCategory = 'corte' | 'barba' | 'combo' | 'facial'
-type SortField = 'name' | 'category' | 'bookings' | 'price' | 'duration'
+type CategoryFilter = 'all' | ServiceCategory
+type SortField = 'name' | 'bookings' | 'price' | 'duration'
 type SortDirection = 'asc' | 'desc'
 
 interface MockService {
@@ -82,6 +83,7 @@ interface MockService {
   barber_names: string[]
   iconName: string // Lucide icon name
   color: string
+  is_active: boolean
 }
 
 const mockServices: MockService[] = [
@@ -100,6 +102,7 @@ const mockServices: MockService[] = [
     barber_names: ['Juan', 'Carlos', 'Roberto'],
     iconName: 'Scissors',
     color: 'blue',
+    is_active: true,
   },
   {
     id: '2',
@@ -116,6 +119,7 @@ const mockServices: MockService[] = [
     barber_names: ['Juan', 'Roberto'],
     iconName: 'Sparkles',
     color: 'purple',
+    is_active: true,
   },
   {
     id: '3',
@@ -132,6 +136,7 @@ const mockServices: MockService[] = [
     barber_names: ['Roberto', 'Carlos'],
     iconName: 'Zap',
     color: 'amber',
+    is_active: true,
   },
   {
     id: '4',
@@ -148,6 +153,7 @@ const mockServices: MockService[] = [
     barber_names: ['Carlos', 'Miguel'],
     iconName: 'Flame',
     color: 'red',
+    is_active: true,
   },
   {
     id: '5',
@@ -164,6 +170,7 @@ const mockServices: MockService[] = [
     barber_names: ['Carlos'],
     iconName: 'Waves',
     color: 'cyan',
+    is_active: true,
   },
   {
     id: '6',
@@ -180,6 +187,7 @@ const mockServices: MockService[] = [
     barber_names: ['Juan', 'Roberto'],
     iconName: 'Crown',
     color: 'gold',
+    is_active: true,
   },
   {
     id: '7',
@@ -196,6 +204,7 @@ const mockServices: MockService[] = [
     barber_names: ['Todos'],
     iconName: 'Gift',
     color: 'emerald',
+    is_active: true,
   },
   {
     id: '8',
@@ -212,6 +221,7 @@ const mockServices: MockService[] = [
     barber_names: ['Miguel'],
     iconName: 'Sparkle',
     color: 'green',
+    is_active: true,
   },
   {
     id: '9',
@@ -228,6 +238,7 @@ const mockServices: MockService[] = [
     barber_names: ['Juan', 'Miguel'],
     iconName: 'Users',
     color: 'blue',
+    is_active: true,
   },
   {
     id: '10',
@@ -244,6 +255,7 @@ const mockServices: MockService[] = [
     barber_names: ['Miguel', 'Carlos'],
     iconName: 'CircleDot',
     color: 'zinc',
+    is_active: true,
   },
 ]
 
@@ -262,6 +274,17 @@ const serviceIconMap: Record<MockService['iconName'], LucideIcon> = {
   Star,
 }
 
+const CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  corte: 'Corte',
+  barba: 'Barba',
+  combo: 'Combo',
+  facial: 'Facial',
+}
+
+function isServiceCategory(value: string | null | undefined): value is ServiceCategory {
+  return value === 'corte' || value === 'barba' || value === 'combo' || value === 'facial'
+}
+
 function ServiceIcon({
   iconName,
   className,
@@ -274,16 +297,6 @@ function ServiceIcon({
 }
 
 // Helper functions
-function getCategoryLabel(category: ServiceCategory): string {
-  const labels: Record<ServiceCategory, string> = {
-    corte: 'Corte',
-    barba: 'Barba',
-    combo: 'Combo',
-    facial: 'Facial',
-  }
-  return labels[category]
-}
-
 function getCategoryColor(category: ServiceCategory) {
   const colors: Record<
     ServiceCategory,
@@ -322,8 +335,42 @@ function calculateGrowth(current: number, previous: number): number {
   return Math.round(((current - previous) / previous) * 100)
 }
 
-function getActiveServices() {
-  return mockServices.filter((s) => s.bookings_this_month > 0)
+function inferCategory(name: string, description?: string): ServiceCategory {
+  const haystack = `${name} ${description ?? ''}`.toLowerCase()
+  if (haystack.includes('barba') || haystack.includes('afeitado')) return 'barba'
+  if (haystack.includes('combo') || haystack.includes('+')) return 'combo'
+  if (
+    haystack.includes('facial') ||
+    haystack.includes('ceja') ||
+    haystack.includes('piel') ||
+    haystack.includes('masaje')
+  ) {
+    return 'facial'
+  }
+  return 'corte'
+}
+
+function resolveCategory(
+  category: string | null | undefined,
+  name: string,
+  description?: string
+): ServiceCategory {
+  if (isServiceCategory(category)) return category
+  return inferCategory(name, description)
+}
+
+function iconNameForCategory(category: ServiceCategory): MockService['iconName'] {
+  if (category === 'barba') return 'Flame'
+  if (category === 'combo') return 'Gift'
+  if (category === 'facial') return 'Sparkle'
+  return 'Scissors'
+}
+
+function colorForCategory(category: ServiceCategory): string {
+  if (category === 'barba') return 'amber'
+  if (category === 'combo') return 'purple'
+  if (category === 'facial') return 'emerald'
+  return 'blue'
 }
 
 // ============================================================================
@@ -333,7 +380,7 @@ function getActiveServices() {
 function ServiciosContent() {
   const { businessId } = useBusiness()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | 'all'>('all')
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
   const [sortField, setSortField] = useState<SortField>('bookings')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [showForm, setShowForm] = useState(false)
@@ -345,6 +392,7 @@ function ServiciosContent() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    category: 'corte' as ServiceCategory,
     duration: 30,
     price: 0,
     business_id: businessId,
@@ -352,7 +400,6 @@ function ServiciosContent() {
 
   const searchParamsHook = useSearchParams()
   const intentHandled = useRef(false)
-  const categoryTabsRef = useRef<HTMLDivElement>(null)
   const hasMountedFilterTransition = useRef(false)
   const listTransitionControls = useAnimationControls()
   const prefersReducedMotion = useReducedMotion()
@@ -367,24 +414,6 @@ function ServiciosContent() {
   }, [searchParamsHook])
 
   useEffect(() => {
-    const container = categoryTabsRef.current
-    if (!container) return
-
-    const activeChip = container.querySelector<HTMLButtonElement>(
-      `[data-category-chip="${selectedCategory}"]`
-    )
-    if (!activeChip) return
-
-    requestAnimationFrame(() => {
-      activeChip.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center',
-      })
-    })
-  }, [selectedCategory])
-
-  useEffect(() => {
     if (prefersReducedMotion) return
     if (!hasMountedFilterTransition.current) {
       hasMountedFilterTransition.current = true
@@ -396,10 +425,16 @@ function ServiciosContent() {
       y: [2, 0],
       transition: { duration: 0.18, ease: 'easeOut' },
     })
-  }, [selectedCategory, searchQuery, prefersReducedMotion, listTransitionControls])
+  }, [searchQuery, selectedCategory, prefersReducedMotion, listTransitionControls])
 
   // React Query hooks
-  const { isLoading, isError, error: queryError, refetch } = useServices(businessId)
+  const {
+    data: servicesData = [],
+    isLoading,
+    isError,
+    error: queryError,
+    refetch,
+  } = useServices(businessId)
   const createService = useCreateService()
   const updateService = useUpdateService()
   const deleteServiceMutation = useDeleteService()
@@ -410,17 +445,47 @@ function ServiciosContent() {
     enabled: !!businessId,
   })
 
-  // Filter and sort services (using mock data for demo)
+  const isServicesDemoMode = process.env.NEXT_PUBLIC_SERVICES_DEMO === 'true'
+  const sourceServices = useMemo<MockService[]>(() => {
+    if (isServicesDemoMode) {
+      return mockServices
+    }
+
+    return servicesData.map((service) => {
+      const category = resolveCategory(service.category, service.name, service.description)
+      const bookings = service.bookings ?? 0
+      return {
+        id: service.id,
+        name: service.name,
+        description: service.description ?? '',
+        category,
+        duration_minutes: service.duration,
+        price: service.price,
+        bookings_this_month: bookings,
+        bookings_last_month: bookings,
+        revenue_this_month: service.revenue ?? 0,
+        avg_rating: service.avgRating ?? 0,
+        total_reviews: 0,
+        barber_names: [],
+        iconName: iconNameForCategory(category),
+        color: colorForCategory(category),
+        is_active: service.isActive,
+      }
+    })
+  }, [servicesData, isServicesDemoMode])
+
+  // Filter and sort services
   const filteredServices = useMemo(() => {
-    const byCategory =
-      selectedCategory === 'all'
-        ? mockServices
-        : mockServices.filter((s) => s.category === selectedCategory)
-
-    if (!searchQuery) return byCategory
-
-    return byCategory.filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  }, [selectedCategory, searchQuery])
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    return sourceServices.filter((service) => {
+      const matchesSearch =
+        normalizedQuery.length === 0 ||
+        service.name.toLowerCase().includes(normalizedQuery) ||
+        service.description.toLowerCase().includes(normalizedQuery)
+      const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory
+      return matchesSearch && matchesCategory
+    })
+  }, [searchQuery, selectedCategory, sourceServices])
 
   const sortedServices = useMemo(() => {
     return [...filteredServices].sort((a, b) => {
@@ -429,9 +494,6 @@ function ServiciosContent() {
       switch (sortField) {
         case 'name':
           comparison = a.name.localeCompare(b.name)
-          break
-        case 'category':
-          comparison = a.category.localeCompare(b.category)
           break
         case 'bookings':
           comparison = a.bookings_this_month - b.bookings_this_month
@@ -448,17 +510,17 @@ function ServiciosContent() {
     })
   }, [filteredServices, sortField, sortDirection])
 
-  const categories: (ServiceCategory | 'all')[] = ['all', 'corte', 'barba', 'combo', 'facial']
-
   // Calculate quick stats
-  const activeServices = getActiveServices()
-  const totalServices = activeServices.length
-  const topService = activeServices.reduce((top, s) =>
-    s.bookings_this_month > top.bookings_this_month ? s : top
-  )
+  const activeServices = useMemo(() => sourceServices.filter((s) => s.is_active), [sourceServices])
+  const totalServices = sourceServices.length
+  const topService = useMemo(() => {
+    const base = activeServices.length > 0 ? activeServices : sourceServices
+    if (base.length === 0) return null
+    return base.reduce((top, s) => (s.bookings_this_month > top.bookings_this_month ? s : top))
+  }, [activeServices, sourceServices])
 
   // Top 5 for mini chart
-  const top5Services = [...activeServices]
+  const top5Services = [...(activeServices.length > 0 ? activeServices : sourceServices)]
     .sort((a, b) => b.bookings_this_month - a.bookings_this_month)
     .slice(0, 5)
   const maxBookings = top5Services[0]?.bookings_this_month || 100
@@ -491,6 +553,7 @@ function ServiciosContent() {
     setFormData({
       name: '',
       description: '',
+      category: 'corte',
       duration: 30,
       price: 0,
       business_id: businessId,
@@ -504,6 +567,7 @@ function ServiciosContent() {
     setFormData({
       name: service.name,
       description: service.description,
+      category: service.category,
       duration: service.duration_minutes,
       price: service.price,
       business_id: businessId,
@@ -516,6 +580,7 @@ function ServiciosContent() {
     setFormData({
       name: '',
       description: '',
+      category: 'corte',
       duration: 30,
       price: 0,
       business_id: businessId,
@@ -549,8 +614,7 @@ function ServiciosContent() {
     if (!deleteService) return
 
     try {
-      // In real app, would delete using deleteServiceMutation
-      // For demo, just close modal
+      await deleteServiceMutation.mutateAsync(deleteService.id)
       setDeleteService(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar servicio')
@@ -697,6 +761,7 @@ function ServiciosContent() {
               title="La duración importa"
               description="La duración de cada servicio determina los slots disponibles para reservas online. Configurala lo más precisa posible."
               linkHref="/guia#servicios"
+              className="mb-4 sm:mb-5"
             />
           </motion.div>
 
@@ -723,40 +788,30 @@ function ServiciosContent() {
                     className="h-11 border border-zinc-200/70 dark:border-zinc-800/80 bg-white/65 dark:bg-white/[0.04] focus:ring-violet-400/45 focus:border-violet-400/45"
                   />
                 </div>
-
-                {/* Category Filter */}
-                <div className="relative w-full sm:w-auto rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.03] p-1.5">
-                  <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/90 dark:from-zinc-950 z-10 sm:hidden rounded-r-xl" />
-                  <div
-                    ref={categoryTabsRef}
-                    className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide"
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                  <Button
+                    variant={selectedCategory === 'all' ? 'primary' : 'ghost'}
+                    onClick={() => setSelectedCategory('all')}
+                    className="h-9 shrink-0 rounded-full px-3 text-xs"
                   >
-                    {categories.map((cat) => (
-                      <motion.button
-                        key={cat}
-                        layout
-                        onClick={(e) => {
-                          setSelectedCategory(cat)
-                          if (isMobileDevice()) haptics.selection()
-                          e.currentTarget.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'nearest',
-                            inline: 'center',
-                          })
-                        }}
-                        data-category-chip={cat}
-                        whileTap={{ scale: 0.98 }}
-                        transition={animations.spring.snappy}
-                        className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all ${
-                          selectedCategory === cat
-                            ? 'brand-tab-active'
-                            : 'text-muted border border-zinc-200/70 dark:border-zinc-800/80 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                    Todas
+                  </Button>
+                  {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => {
+                    const categoryColor = getCategoryColor(category)
+                    const isActive = selectedCategory === category
+                    return (
+                      <Button
+                        key={category}
+                        variant={isActive ? 'primary' : 'ghost'}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`h-9 shrink-0 rounded-full px-3 text-xs ${
+                          isActive ? '' : `${categoryColor.text} ${categoryColor.bg}`
                         }`}
                       >
-                        {cat === 'all' ? 'Todos' : getCategoryLabel(cat as ServiceCategory)}
-                      </motion.button>
-                    ))}
-                  </div>
+                        {CATEGORY_LABELS[category]}
+                      </Button>
+                    )
+                  })}
                 </div>
               </motion.div>
 
@@ -768,8 +823,6 @@ function ServiciosContent() {
               >
                 <AnimatePresence mode="popLayout">
                   {sortedServices.map((service) => {
-                    const categoryColor = getCategoryColor(service.category)
-
                     const rightActions = [
                       {
                         icon: <Pencil className="h-5 w-5" />,
@@ -808,13 +861,13 @@ function ServiciosContent() {
                                     {service.name}
                                   </p>
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span
-                                      className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
-                                    >
-                                      {getCategoryLabel(service.category)}
-                                    </span>
                                     <span className="text-xs text-muted">
                                       {service.duration_minutes} min
+                                    </span>
+                                    <span
+                                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${getCategoryColor(service.category).bg} ${getCategoryColor(service.category).text}`}
+                                    >
+                                      {CATEGORY_LABELS[service.category]}
                                     </span>
                                   </div>
                                 </div>
@@ -867,14 +920,9 @@ function ServiciosContent() {
 
                           {/* Category */}
                           <th className="px-4 py-3 text-left">
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleSort('category')}
-                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
-                            >
+                            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                               Categoría
-                              {getSortIcon('category')}
-                            </Button>
+                            </span>
                           </th>
 
                           {/* Bookings */}
@@ -934,7 +982,6 @@ function ServiciosContent() {
                         className="divide-y divide-zinc-200 dark:divide-zinc-800"
                       >
                         {sortedServices.map((service) => {
-                          const categoryColor = getCategoryColor(service.category)
                           const growth = calculateGrowth(
                             service.bookings_this_month,
                             service.bookings_last_month
@@ -968,9 +1015,9 @@ function ServiciosContent() {
                               {/* Category */}
                               <td className="px-4 py-3">
                                 <span
-                                  className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
+                                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getCategoryColor(service.category).bg} ${getCategoryColor(service.category).text}`}
                                 >
-                                  {getCategoryLabel(service.category)}
+                                  {CATEGORY_LABELS[service.category]}
                                 </span>
                               </td>
 
@@ -1062,7 +1109,7 @@ function ServiciosContent() {
                 transition={{ ...animations.spring.default, delay: 0.3 }}
                 className="mt-3 text-xs text-muted text-center"
               >
-                Mostrando {sortedServices.length} de {mockServices.length} servicios
+                Mostrando {sortedServices.length} de {sourceServices.length} servicios
               </motion.p>
             </div>
 
@@ -1096,34 +1143,36 @@ function ServiciosContent() {
                   </motion.div>
 
                   {/* Top Service */}
-                  <motion.div
-                    whileTap={{ scale: 0.98 }}
-                    transition={animations.spring.snappy}
-                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-muted">Más Popular</p>
-                        <div className="mt-1 flex items-center gap-2 min-w-0">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
-                            <ServiceIcon
-                              iconName={topService.iconName}
-                              className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
-                            />
-                          </span>
-                          <p className="text-base font-bold text-zinc-900 dark:text-white truncate">
-                            {topService.name}
+                  {topService && (
+                    <motion.div
+                      whileTap={{ scale: 0.98 }}
+                      transition={animations.spring.snappy}
+                      className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-muted">Más Popular</p>
+                          <div className="mt-1 flex items-center gap-2 min-w-0">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
+                              <ServiceIcon
+                                iconName={topService.iconName}
+                                className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
+                              />
+                            </span>
+                            <p className="text-base font-bold text-zinc-900 dark:text-white truncate">
+                              {topService.name}
+                            </p>
+                          </div>
+                          <p className="text-xs text-muted">
+                            {topService.bookings_this_month} reservas
                           </p>
                         </div>
-                        <p className="text-xs text-muted">
-                          {topService.bookings_this_month} reservas
-                        </p>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
+                          <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
                       </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-                        <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                      </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  )}
 
                   {/* Average Rating */}
                   <motion.div
@@ -1135,10 +1184,12 @@ function ServiciosContent() {
                       <div>
                         <p className="text-xs font-medium text-muted">Rating Promedio</p>
                         <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
-                          {(
-                            activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /
-                            activeServices.length
-                          ).toFixed(1)}
+                          {activeServices.length > 0
+                            ? (
+                                activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /
+                                activeServices.length
+                              ).toFixed(1)
+                            : '0.0'}
                         </p>
                         <p className="text-xs text-muted">
                           {activeServices.reduce((sum, s) => sum + s.total_reviews, 0)} reviews
@@ -1235,36 +1286,66 @@ function ServiciosContent() {
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Duración (minutos)"
-                type="number"
-                min={5}
-                max={480}
-                value={formData.duration}
+            <div>
+              <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
+                Categoría
+              </label>
+              <select
+                value={formData.category}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    duration: Number(e.target.value),
+                    category: e.target.value as ServiceCategory,
                   }))
                 }
-                required
-              />
+                className="flex h-11 w-full rounded-[14px] border border-zinc-200 bg-white px-3 text-sm text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              >
+                {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => (
+                  <option key={category} value={category}>
+                    {CATEGORY_LABELS[category]}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <Input
-                label="Precio (CRC)"
-                type="number"
-                min={0}
-                step={100}
-                value={formData.price || ''}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    price: e.target.value === '' ? 0 : Number(e.target.value),
-                  }))
-                }
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-2 block min-h-[2.75rem] text-sm font-semibold uppercase tracking-wide text-muted">
+                  Duración (min)
+                </label>
+                <Input
+                  type="number"
+                  min={5}
+                  max={480}
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duration: Number(e.target.value),
+                    }))
+                  }
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block min-h-[2.75rem] text-sm font-semibold uppercase tracking-wide text-muted">
+                  Precio (CRC)
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={100}
+                  value={formData.price || ''}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      price: e.target.value === '' ? 0 : Number(e.target.value),
+                    }))
+                  }
+                  required
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4">

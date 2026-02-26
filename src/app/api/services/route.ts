@@ -6,6 +6,7 @@ import { withAuth, errorResponse } from '@/lib/api/middleware'
 const serviceSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  category: z.enum(['corte', 'barba', 'combo', 'facial']).default('corte'),
   duration_minutes: z.number().min(5).max(480),
   price: z.number().min(0),
 })
@@ -61,6 +62,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       business_id: business.id,
       name: parsed.data.name,
       description: parsed.data.description || null,
+      category: parsed.data.category,
       duration_minutes: parsed.data.duration_minutes,
       price: parsed.data.price,
     })

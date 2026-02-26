@@ -1280,6 +1280,7 @@ export type Database = {
       services: {
         Row: {
           business_id: string
+          category: string
           created_at: string | null
           description: string | null
           display_order: number | null
@@ -1292,6 +1293,7 @@ export type Database = {
         }
         Insert: {
           business_id: string
+          category?: string
           created_at?: string | null
           description?: string | null
           display_order?: number | null
@@ -1304,6 +1306,7 @@ export type Database = {
         }
         Update: {
           business_id?: string
+          category?: string
           created_at?: string | null
           description?: string | null
           display_order?: number | null
