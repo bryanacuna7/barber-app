@@ -1,0 +1,11 @@
+{
+  "runId": "1772120373200",
+  "ownerUserId": "823e8a91-07d4-4c6f-b9fa-d75be33d0707",
+  "barberUserId": "6534e7b6-2b45-46e0-9c9c-b1ca07712699",
+  "clientUserId": "0a48e541-34bc-4a41-87a1-4db9958d393e",
+  "businessId": "6340233e-c590-4688-9b5f-f4ae2a22534a",
+  "businessSlug": "smoke-barberia-1772120373200",
+  "barberId": "0cfc8842-ffc3-4cf5-b15f-8892f99f0a88",
+  "clientId": "21eae56e-8302-4178-b215-d293e59214dc",
+  "serviceIds": ["0f2536ed-2695-4a5d-a9c4-1e6affaa5eb7", "ff303487-e5dc-4a2d-bff6-ed2122a85068"]
+}

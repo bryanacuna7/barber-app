@@ -39,6 +39,10 @@ playwright-report/
 explorations/
 *.zip
 
+# Smoke test ephemeral files
+tests/e2e/smoke/.smoke-state.json
+tests/e2e/smoke/.auth-*.json
+
 # Misc
 *.tsbuildinfo
 next-env.d.ts
