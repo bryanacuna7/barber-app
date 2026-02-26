@@ -22,6 +22,10 @@ import {
   Trash2,
   CheckCircle2,
   XCircle,
+  Copy,
+  Check,
+  MessageCircle,
+  Link2,
 } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
@@ -394,6 +398,11 @@ function InviteBarberModal({
   const [mode, setMode] = useState<'add' | 'invite'>('add')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [setupResult, setSetupResult] = useState<{
+    barberName: string
+    setupUrl: string
+  } | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -405,40 +414,112 @@ function InviteBarberModal({
           ? await addBarber.mutateAsync({ name: name.trim(), email: email.trim() })
           : await inviteBarber.mutateAsync({ name: name.trim(), email: email.trim() })
 
-      if (mode === 'add') {
-        if (result.email_sent) {
-          toast.success(`Miembro del equipo agregado y correo enviado a ${email}`)
-        } else {
-          toast.warning(
-            result.warning || 'Miembro del equipo agregado, pero no se pudo enviar el correo de acceso.'
-          )
-        }
+      if (result.setup_url) {
+        // Show the setup link so owner can share it
+        setSetupResult({ barberName: name.trim(), setupUrl: result.setup_url })
+        if (isMobileDevice()) haptics.success()
       } else {
-        toast.success(`Invitación enviada a ${email}`)
+        toast.success('Miembro del equipo agregado')
+        resetAndClose()
       }
-
-      setName('')
-      setEmail('')
-      setMode('add')
-      onOpenChange(false)
-      if (isMobileDevice()) haptics.success()
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al invitar miembro del equipo'
       toast.error(msg)
     }
   }
 
-  const handleClose = () => {
+  const handleCopy = async () => {
+    if (!setupResult) return
+    try {
+      await navigator.clipboard.writeText(setupResult.setupUrl)
+      setCopied(true)
+      toast.success('Link copiado')
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('No se pudo copiar')
+    }
+  }
+
+  const handleWhatsApp = () => {
+    if (!setupResult) return
+    const text = `¡Hola ${setupResult.barberName}! Te agregué al equipo. Usa este enlace para crear tu contraseña:\n${setupResult.setupUrl}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+  }
+
+  const resetAndClose = () => {
     setName('')
     setEmail('')
     setMode('add')
+    setSetupResult(null)
+    setCopied(false)
     onOpenChange(false)
   }
 
+  // ── Success state: show shareable link ──
+  if (setupResult) {
+    return (
+      <Modal
+        isOpen={open}
+        onClose={resetAndClose}
+        title="Miembro agregado"
+        description="Comparte este enlace para que establezca su contraseña."
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 p-3">
+            <CheckCircle2 className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">
+              <span className="font-medium">{setupResult.barberName}</span> ya tiene cuenta. Solo
+              falta que establezca su contraseña.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted">Enlace de acceso</label>
+            <div className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-2.5">
+              <Link2 className="size-4 shrink-0 text-subtle" />
+              <span className="flex-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
+                {setupResult.setupUrl}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="shrink-0 rounded-md p-1.5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              >
+                {copied ? (
+                  <Check className="size-4 text-emerald-500" />
+                ) : (
+                  <Copy className="size-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={handleWhatsApp} className="h-11 gap-2">
+              <MessageCircle className="size-4" />
+              WhatsApp
+            </Button>
+            <Button type="button" onClick={handleCopy} className="h-11 gap-2">
+              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+              {copied ? 'Copiado' : 'Copiar link'}
+            </Button>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <Button type="button" variant="ghost" onClick={resetAndClose} className="h-11">
+              Listo
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    )
+  }
+
+  // ── Form state ──
   return (
     <Modal
       isOpen={open}
-      onClose={handleClose}
+      onClose={resetAndClose}
       title={mode === 'add' ? 'Agregar Miembro del equipo' : 'Invitar Miembro del equipo'}
       description={
         mode === 'add'
@@ -491,7 +572,7 @@ function InviteBarberModal({
         />
 
         <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={handleClose} className="h-11">
+          <Button type="button" variant="outline" onClick={resetAndClose} className="h-11">
             Cancelar
           </Button>
           <Button

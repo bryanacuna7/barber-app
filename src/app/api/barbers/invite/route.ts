@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import crypto from 'crypto'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
-import { canAddBarber } from '@/lib/subscription'
+// canAddBarber uses getSubscriptionStatus which is heavy — use lightweight check instead
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { sendEmail } from '@/lib/email/sender'
 import BarberInviteEmail from '@/lib/email/templates/barber-invite'
@@ -32,19 +32,35 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
   const { name, mode } = parsed.data
   const email = parsed.data.email.trim().toLowerCase()
 
-  // Check subscription limits
-  const limitCheck = await canAddBarber(supabase, business.id)
-  if (!limitCheck.allowed) {
-    return NextResponse.json(
-      {
-        error: 'Límite de plan alcanzado',
-        message: limitCheck.reason,
-        current: limitCheck.current,
-        max: limitCheck.max,
-        upgrade_required: true,
-      },
-      { status: 403 }
-    )
+  // Lightweight subscription limit check (avoids slow getSubscriptionStatus)
+  const [subResult, barberCountResult] = await Promise.all([
+    supabase
+      .from('business_subscriptions')
+      .select('status, plan:subscription_plans(max_barbers, display_name)')
+      .eq('business_id', business.id)
+      .single(),
+    supabase
+      .from('barbers')
+      .select('id', { count: 'exact', head: true })
+      .eq('business_id', business.id),
+  ])
+
+  if (subResult.data) {
+    const plan = subResult.data.plan as any
+    const maxBarbers = plan?.max_barbers
+    const currentCount = barberCountResult.count || 0
+    if (maxBarbers !== null && currentCount >= maxBarbers) {
+      return NextResponse.json(
+        {
+          error: 'Límite de plan alcanzado',
+          message: `Has alcanzado el límite de ${maxBarbers} miembros del equipo en tu plan ${plan?.display_name || ''}. Actualiza a Pro para agregar más.`,
+          current: currentCount,
+          max: maxBarbers,
+          upgrade_required: true,
+        },
+        { status: 403 }
+      )
+    }
   }
 
   // Check if barber email already exists in this business (normalized)
@@ -76,19 +92,24 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
   })
 
   if (authError) {
-    // If user already exists, try to find their ID
+    // If user already exists, look up their ID via paginated search
     if (authError.message?.includes('already') || authError.message?.includes('exists')) {
-      // Use perPage: 1000 to avoid pagination issues (default is 50)
-      const { data: listData } = await serviceClient.auth.admin.listUsers({
-        page: 1,
-        perPage: 1000,
-      })
-      const existingUser = (listData?.users ?? []).find(
-        (u) => u.email?.toLowerCase() === email.toLowerCase()
-      )
+      let foundUserId: string | null = null
+      // Search through pages (50 users per page) until we find the match
+      for (let page = 1; page <= 10 && !foundUserId; page++) {
+        const { data: listData } = await serviceClient.auth.admin.listUsers({
+          page,
+          perPage: 50,
+        })
+        const match = (listData?.users ?? []).find(
+          (u) => u.email?.toLowerCase() === email.toLowerCase()
+        )
+        if (match) foundUserId = match.id
+        if (!listData?.users?.length || listData.users.length < 50) break
+      }
 
-      if (existingUser) {
-        authUserId = existingUser.id
+      if (foundUserId) {
+        authUserId = foundUserId
       } else {
         console.error('Auth user creation failed:', authError)
         return errorResponse('No se pudo crear la cuenta del miembro del equipo', 500)
@@ -118,25 +139,32 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
   if (barberError) {
     console.error('Barber record creation failed:', barberError)
     return NextResponse.json(
-      { error: 'No se pudo crear el registro del miembro del equipo', details: barberError.message },
+      {
+        error: 'No se pudo crear el registro del miembro del equipo',
+        details: barberError.message,
+      },
       { status: 500 }
     )
   }
 
-  // Generate password setup link (preferred over sending temp password)
+  // Generate password setup link using token_hash approach.
+  // admin.generateLink uses implicit flow, so instead of relying on
+  // Supabase redirect (requires URL allowlist config), we extract the
+  // hashed_token and build a direct URL to /reset-password.
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.barberapp.com'
-  const redirectTo = `${appUrl}/reset-password`
   const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
     type: 'recovery',
     email,
-    options: { redirectTo },
   })
 
   if (linkError) {
     console.error('Failed to generate password setup link:', linkError)
   }
 
-  const setPasswordUrl = linkData?.properties?.action_link
+  const tokenHash = linkData?.properties?.hashed_token
+  const setPasswordUrl = tokenHash
+    ? `${appUrl}/reset-password?token_hash=${encodeURIComponent(tokenHash)}`
+    : null
 
   // Keep invite mode available without making it the default flow.
   if (mode === 'invite') {
@@ -161,12 +189,12 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     }
   }
 
-  // Send onboarding email
+  // Send onboarding email (non-blocking — don't hold the response)
   const loginUrl = process.env.NEXT_PUBLIC_APP_URL
     ? `${process.env.NEXT_PUBLIC_APP_URL}/login`
     : 'https://app.barberapp.com/login'
 
-  const emailResult = await sendEmail({
+  sendEmail({
     to: email,
     subject:
       mode === 'add'
@@ -180,21 +208,11 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       loginUrl,
       mode,
     }),
-  })
-
-  if (!emailResult.success) {
-    return NextResponse.json({
-      barber,
-      mode,
-      email_sent: false,
-      warning:
-        'Miembro del equipo agregado, pero no pudimos enviar el correo. Pídele usar "Olvidé mi contraseña".',
-    })
-  }
+  }).catch((err) => console.error('Failed to send barber invite email:', err))
 
   return NextResponse.json({
     barber,
     mode,
-    email_sent: true,
+    setup_url: setPasswordUrl || null,
   })
 })

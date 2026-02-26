@@ -94,8 +94,7 @@ type OnboardResponse = {
     email: string
   }
   mode: OnboardMode
-  email_sent: boolean
-  warning?: string
+  setup_url?: string | null
 }
 
 function useOnboardBarber(mode: OnboardMode) {

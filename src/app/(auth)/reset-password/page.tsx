@@ -19,6 +19,7 @@ function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -29,24 +30,51 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    const exchangeSession = async () => {
-      if (!code) {
-        setIsSessionValid(false)
-        setError('El enlace no es válido o expiró. Solicita uno nuevo.')
-        return
-      }
+    const validateSession = async () => {
       const supabase = createClient()
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-      if (error) {
-        setIsSessionValid(false)
-        setError('El enlace no es válido o expiró. Solicita uno nuevo.')
+
+      // 1. Token hash from barber invite flow (admin.generateLink)
+      if (tokenHash) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        })
+        if (error) {
+          setIsSessionValid(false)
+          setError('El enlace no es válido o expiró. Solicita uno nuevo.')
+          return
+        }
+        setIsSessionValid(true)
         return
       }
-      setIsSessionValid(true)
+
+      // 2. PKCE code from forgot-password flow
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) {
+          setIsSessionValid(false)
+          setError('El enlace no es válido o expiró. Solicita uno nuevo.')
+          return
+        }
+        setIsSessionValid(true)
+        return
+      }
+
+      // 3. Check for existing session (e.g., user navigated here directly)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        setIsSessionValid(true)
+        return
+      }
+
+      setIsSessionValid(false)
+      setError('El enlace no es válido o expiró. Solicita uno nuevo.')
     }
 
-    exchangeSession()
-  }, [code])
+    validateSession()
+  }, [code, tokenHash])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

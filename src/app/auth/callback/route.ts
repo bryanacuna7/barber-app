@@ -49,6 +49,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Successful confirmation — redirect to dashboard
-  return NextResponse.redirect(new URL('/dashboard', appUrl))
+  // Redirect to custom destination if provided, otherwise dashboard
+  const next = searchParams.get('next')
+  const destination = next?.startsWith('/') ? next : '/dashboard'
+  return NextResponse.redirect(new URL(destination, appUrl))
 }
