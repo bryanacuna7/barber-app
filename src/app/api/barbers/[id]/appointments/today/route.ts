@@ -118,7 +118,9 @@ export const GET = withAuth<RouteParams>(
           businessId: business.id,
           endpoint: '/api/barbers/[id]/appointments/today',
         })
-        return unauthorizedResponse('No tienes permiso para ver las citas de este miembro del equipo')
+        return unauthorizedResponse(
+          'No tienes permiso para ver las citas de este miembro del equipo'
+        )
       }
 
       // 3. Get today's date range in business timezone (or UTC if not set)

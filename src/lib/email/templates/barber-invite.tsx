@@ -59,8 +59,8 @@ export default function BarberInviteEmail({
           </Text>
 
           <Text style={paragraph}>
-            Te agregaron como miembro del equipo en <strong>{businessName}</strong>. Usa este correo para
-            ingresar y configurar tu contraseña:
+            Te agregaron como miembro del equipo en <strong>{businessName}</strong>. Usa este correo
+            para ingresar y configurar tu contraseña:
           </Text>
 
           <Section style={detailsBox}>

@@ -71,11 +71,13 @@ npm run ci:lint
 ## CI Strategy
 
 ### Blocking Checks (Must Pass)
+
 - ✅ Prettier formatting
 - ✅ Unit tests
 - ✅ Production build
 
 ### Non-Blocking Checks (Warning Only)
+
 - ⚠️ ESLint (reports issues but doesn't block)
 - ⚠️ TypeScript (reports errors but doesn't block)
 
@@ -92,6 +94,7 @@ RESEND_API_KEY: placeholder-key
 ```
 
 To use real values, add them as GitHub Secrets:
+
 1. Go to repo Settings → Secrets and variables → Actions
 2. Add secrets with the same names
 
@@ -124,15 +127,18 @@ When ready to add auto-deploy to Vercel:
 ## Troubleshooting
 
 ### CI Failing Locally But Passing on GitHub
+
 - Check Node version: `node -v` (should be 20.x)
 - Clear caches: `rm -rf node_modules .next && npm install`
 - Check environment: `cat .env.local`
 
 ### Tests Timing Out
+
 - Increase timeout in `vitest.config.ts` or `playwright.config.ts`
 - Check for network-dependent tests
 
 ### Build Failing
+
 - Verify all environment variables are set
 - Check `build:skip-ts` works locally
 - Review build logs for specific errors

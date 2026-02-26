@@ -222,7 +222,11 @@ export function BarbersManagement() {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={!!deleteBarber} onClose={() => setDeleteBarber(null)} title="Eliminar Miembro del equipo">
+      <Modal
+        isOpen={!!deleteBarber}
+        onClose={() => setDeleteBarber(null)}
+        title="Eliminar Miembro del equipo"
+      >
         <div className="space-y-5">
           <div className="flex items-start gap-4">
             <motion.div
@@ -276,7 +280,8 @@ export function BarbersManagement() {
                 <CardTitle className="text-[17px] font-semibold">Equipo</CardTitle>
                 {!loading && filteredBarbers.length > 0 && (
                   <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[13px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                    {filteredBarbers.length} {filteredBarbers.length === 1 ? 'miembro del equipo' : 'miembros del equipo'}
+                    {filteredBarbers.length}{' '}
+                    {filteredBarbers.length === 1 ? 'miembro del equipo' : 'miembros del equipo'}
                   </span>
                 )}
               </div>

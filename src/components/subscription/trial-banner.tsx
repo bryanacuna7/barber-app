@@ -244,8 +244,8 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
           <div className="flex-1 pr-6">
             <h3 className="font-semibold text-zinc-900 dark:text-white">Estás en el plan Básico</h3>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Actualiza a Pro para desbloquear miembros del equipo y servicios ilimitados, personalización de
-              marca y más.
+              Actualiza a Pro para desbloquear miembros del equipo y servicios ilimitados,
+              personalización de marca y más.
             </p>
 
             <div className="mt-3">

@@ -104,7 +104,10 @@ export async function GET(request: Request, { params }: RouteParams) {
       .maybeSingle()
 
     if (!clientAppt) {
-      return NextResponse.json({ error: 'No tienes cita con este miembro del equipo hoy' }, { status: 403 })
+      return NextResponse.json(
+        { error: 'No tienes cita con este miembro del equipo hoy' },
+        { status: 403 }
+      )
     }
 
     // 3. Fetch barber name

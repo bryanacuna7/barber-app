@@ -89,16 +89,16 @@ export function PushNotificationToggle() {
               Notificaciones Push
             </p>
             <p className="text-[13px] text-muted">
-              {isSubscribed ? 'Recibes alertas instantáneas' : 'Recibe alertas de citas al instante'}
+              {isSubscribed
+                ? 'Recibes alertas instantáneas'
+                : 'Recibe alertas de citas al instante'}
             </p>
           </div>
         </div>
         <IOSToggle checked={isSubscribed} onChange={handleToggle} disabled={loading} />
       </div>
       {error && (
-        <p className="text-[12px] text-red-500 dark:text-red-400 px-1 mt-1 break-words">
-          {error}
-        </p>
+        <p className="text-[12px] text-red-500 dark:text-red-400 px-1 mt-1 break-words">{error}</p>
       )}
     </div>
   )

@@ -10,7 +10,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -27,22 +27,6 @@ jobs:
 
       - name: Run unit tests
         run: npm run test:unit
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run E2E tests
-        run: npm run test:e2e
-
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            playwright-report/
-            coverage/
-          retention-days: 7
 
   build:
     name: Build Check

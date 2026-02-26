@@ -14,7 +14,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: business, error } = await (supabase
+    const { data: business, error } = (await supabase
       .from('businesses')
       .select('id, smart_notifications_enabled')
       .eq('owner_id', user.id)
@@ -55,7 +55,7 @@ export async function PATCH(request: Request) {
       )
     }
 
-    const { data: business, error: businessError } = await (supabase
+    const { data: business, error: businessError } = (await supabase
       .from('businesses')
       .update({ smart_notifications_enabled: enabled } as any)
       .eq('owner_id', user.id)

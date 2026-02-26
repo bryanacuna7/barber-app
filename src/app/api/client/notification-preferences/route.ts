@@ -83,7 +83,11 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'smart_promos_enabled must be a boolean' }, { status: 400 })
     }
 
-    if (pausedUntil !== undefined && pausedUntil !== null && Number.isNaN(Date.parse(pausedUntil))) {
+    if (
+      pausedUntil !== undefined &&
+      pausedUntil !== null &&
+      Number.isNaN(Date.parse(pausedUntil))
+    ) {
       return NextResponse.json(
         { error: 'smart_promos_paused_until must be null or a valid ISO date' },
         { status: 400 }

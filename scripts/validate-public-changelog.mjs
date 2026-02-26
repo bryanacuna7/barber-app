@@ -99,7 +99,9 @@ async function main() {
     return
   }
 
-  console.error('❌ CHANGELOG.md tiene términos internos/técnicos en notas visibles para clientes:\n')
+  console.error(
+    '❌ CHANGELOG.md tiene términos internos/técnicos en notas visibles para clientes:\n'
+  )
 
   for (const violation of violations) {
     console.error(`- Línea ${violation.line} [${violation.label}]`)

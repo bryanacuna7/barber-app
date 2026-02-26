@@ -82,8 +82,8 @@ export function ChangePlanModal({
                   Upgrade a {newPlan.display_name}
                 </p>
                 <p className="text-sm text-green-700 dark:text-green-300">
-                  Obtendrás miembros del equipo, servicios y clientes ilimitados, más personalización de marca.
-                  El cambio se aplicará después de confirmar tu pago.
+                  Obtendrás miembros del equipo, servicios y clientes ilimitados, más
+                  personalización de marca. El cambio se aplicará después de confirmar tu pago.
                 </p>
               </div>
             </div>
@@ -95,8 +95,9 @@ export function ChangePlanModal({
                   Downgrade a {newPlan.display_name}
                 </p>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
-                  Tendrás límites de {newPlan.max_barbers} miembros del equipo, {newPlan.max_services}{' '}
-                  servicios y {newPlan.max_clients} clientes. El cambio se aplicará inmediatamente.
+                  Tendrás límites de {newPlan.max_barbers} miembros del equipo,{' '}
+                  {newPlan.max_services} servicios y {newPlan.max_clients} clientes. El cambio se
+                  aplicará inmediatamente.
                 </p>
               </div>
             </div>

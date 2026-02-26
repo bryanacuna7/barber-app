@@ -57,7 +57,9 @@ export function Barber({ onNext, onBack, initialBarber }: BarberProps) {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
           <User className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
-        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Tu Primer Miembro del equipo</h2>
+        <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">
+          Tu Primer Miembro del equipo
+        </h2>
         <p className="text-zinc-600 dark:text-zinc-400">Registra el primer miembro de tu equipo</p>
       </div>
 

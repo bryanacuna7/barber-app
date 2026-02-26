@@ -43,7 +43,9 @@ export function BarberSelection({
       </Card>
 
       <div>
-        <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Elige tu miembro del equipo</h2>
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+          Elige tu miembro del equipo
+        </h2>
         <p className="mt-1 text-zinc-500">Selecciona quién te atenderá</p>
       </div>
 

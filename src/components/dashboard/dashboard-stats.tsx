@@ -40,12 +40,7 @@ export function DashboardStats({
         icon={Banknote}
         description={`${monthAppointments} citas`}
       />
-      <StatsCard
-        title="Clientes"
-        value={totalClients}
-        icon={Users}
-        description="registrados"
-      />
+      <StatsCard title="Clientes" value={totalClients} icon={Users} description="registrados" />
     </div>
   )
 }

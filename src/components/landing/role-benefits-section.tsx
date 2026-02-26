@@ -95,8 +95,8 @@ export function RoleBenefitsSection() {
             Beneficios claros para cada perfil
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-            Lo que gana el dueño, lo que facilita al equipo y lo que mejora para el cliente final, en
-            un mismo sistema.
+            Lo que gana el dueño, lo que facilita al equipo y lo que mejora para el cliente final,
+            en un mismo sistema.
           </p>
         </motion.div>
 

@@ -390,7 +390,12 @@ function MiDiaPageContent() {
 
   // Error state - Not a barber
   if (!barberId) {
-    return <EmptyState title="No eres un miembro del equipo" description="Esta página es solo para miembros del equipo" />
+    return (
+      <EmptyState
+        title="No eres un miembro del equipo"
+        description="Esta página es solo para miembros del equipo"
+      />
+    )
   }
 
   // Success - Render with error boundaries

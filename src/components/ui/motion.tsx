@@ -1,6 +1,13 @@
 'use client'
 
-import { motion, AnimatePresence, type Variants, useReducedMotion, useSpring, useTransform } from 'framer-motion'
+import {
+  motion,
+  AnimatePresence,
+  type Variants,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from 'framer-motion'
 import { forwardRef, useEffect, type ReactNode, type ComponentProps } from 'react'
 import { cn } from '@/lib/utils'
 import { animations, reducedMotion } from '@/lib/design-system'
@@ -225,9 +232,7 @@ export function AnimatedNumber({
 }) {
   const prefersReducedMotion = useReducedMotion()
   const spring = useSpring(value, prefersReducedMotion ? { duration: 0 } : animations.spring.gentle)
-  const display = useTransform(spring, (v) =>
-    prefix + Math.round(v).toLocaleString(locale)
-  )
+  const display = useTransform(spring, (v) => prefix + Math.round(v).toLocaleString(locale))
 
   useEffect(() => {
     spring.set(value)
