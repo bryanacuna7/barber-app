@@ -142,12 +142,15 @@ export default function ConfiguracionPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
+        e.stopPropagation()
+        e.stopImmediatePropagation?.()
         setSearchModalOpen(true)
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    // Capture phase prevents global command palette listener from firing too.
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => document.removeEventListener('keydown', handleKeyDown, true)
   }, [])
 
   // Navigate from search modal to subroutes
@@ -204,6 +207,7 @@ export default function ConfiguracionPage() {
           title="Compartí tu enlace de reservas"
           description="Tus clientes pueden reservar 24/7 desde tu enlace único. Ponelo en tu Instagram, WhatsApp y redes sociales."
           linkHref="/guia#reservas-online"
+          className="mb-5"
         />
 
         {/* Navigation Cards Grid */}

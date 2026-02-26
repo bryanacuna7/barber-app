@@ -78,14 +78,40 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
     })
   }, [])
 
-  const skipTour = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      activeTourId: null,
-      currentStepIndex: 0,
-      isRunning: false,
-    }))
+  const persistTourCompletion = useCallback(async (tourId: string) => {
+    try {
+      await fetch('/api/tours', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tourId, completed: true }),
+      })
+    } catch (err) {
+      console.error('Failed to persist tour completion:', err)
+    }
   }, [])
+
+  const skipTour = useCallback(() => {
+    // Treat explicit dismiss (X / Saltar) as completed so auto-tour does not reopen.
+    let tourIdToSkip: string | null = null
+    setState((prev) => {
+      tourIdToSkip = prev.activeTourId
+      const newCompleted = new Set(prev.completedTours)
+      if (tourIdToSkip) {
+        newCompleted.add(tourIdToSkip)
+      }
+      return {
+        ...prev,
+        activeTourId: null,
+        currentStepIndex: 0,
+        isRunning: false,
+        completedTours: newCompleted,
+      }
+    })
+
+    if (tourIdToSkip) {
+      void persistTourCompletion(tourIdToSkip)
+    }
+  }, [persistTourCompletion])
 
   const completeTour = useCallback(async () => {
     // Read activeTourId from current state via functional update pattern
@@ -111,18 +137,9 @@ export function TourProvider({ children, businessId }: TourProviderProps) {
       })
     }
 
-    try {
-      await fetch('/api/tours', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tourId: tourIdToComplete, completed: true }),
-      })
-      markComplete()
-    } catch (err) {
-      console.error('Failed to complete tour:', err)
-      markComplete()
-    }
-  }, [])
+    markComplete()
+    await persistTourCompletion(tourIdToComplete)
+  }, [persistTourCompletion])
 
   const isTourCompleted = useCallback(
     (tourId: string) => {

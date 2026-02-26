@@ -68,8 +68,8 @@ export function useBookingData(slug: string) {
       try {
         const [businessRes, servicesRes, barbersRes] = await Promise.all([
           fetch(`/api/public/${slug}`, { cache: 'force-cache' }),
-          fetch(`/api/public/${slug}/services`, { cache: 'force-cache' }),
-          fetch(`/api/public/${slug}/barbers`, { cache: 'force-cache' }),
+          fetch(`/api/public/${slug}/services`, { cache: 'no-store' }),
+          fetch(`/api/public/${slug}/barbers`, { cache: 'no-store' }),
         ])
 
         if (!businessRes.ok) {

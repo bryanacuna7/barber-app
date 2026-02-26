@@ -57,16 +57,22 @@ const variants = {
 function compactCurrencyForMobile(value: string): string | null {
   const trimmed = value.trim()
   if (!trimmed.startsWith('₡')) return null
-  if (/[kKmM]|mil/.test(trimmed)) return null
+  if (/[kKmM]|mil/.test(trimmed)) return trimmed
 
   const numericPart = trimmed.replace(/[^\d-]/g, '')
   if (!numericPart) return null
 
   const amount = Number(numericPart)
   if (!Number.isFinite(amount)) return null
-  if (Math.abs(amount) < 1_000_000) return null
+  if (Math.abs(amount) < 1_000) return trimmed
 
-  return `₡${(amount / 1_000_000).toFixed(1)}M`
+  const compact = new Intl.NumberFormat('es-CR', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1,
+  }).format(amount)
+
+  return `₡${compact}`
 }
 
 export function StatsCard({
@@ -108,8 +114,8 @@ export function StatsCard({
         </>
       )}
 
-      <div className="relative flex items-start justify-between gap-2.5 sm:gap-3">
-        <div className="min-w-0 flex-1">
+      <div className="relative">
+        <div className="min-w-0 pr-11 sm:pr-14">
           <p
             className={cn(
               'text-[11px] sm:text-sm font-medium uppercase tracking-[0.08em] sm:tracking-wide leading-tight',
@@ -123,13 +129,13 @@ export function StatsCard({
             className={cn(
               'mt-1.5 font-bold tracking-tight leading-[1.05] whitespace-nowrap tabular-nums',
               hasVeryLongValue
-                ? 'text-[18px] sm:text-[28px]'
+                ? 'text-[16px] sm:text-[28px]'
                 : hasLongValue
                   ? isCurrencyValue
-                    ? 'text-[18px] sm:text-[30px]'
+                    ? 'text-[17px] sm:text-[30px]'
                     : 'text-[22px] sm:text-[30px]'
                   : isCurrencyValue
-                    ? 'text-[21px] sm:text-[32px]'
+                    ? 'text-[19px] sm:text-[32px]'
                     : 'text-[26px] sm:text-[32px]',
               isGradient ? 'text-white' : 'text-zinc-900 dark:text-white'
             )}
@@ -178,9 +184,9 @@ export function StatsCard({
 
         <div
           className={cn(
-            'mt-0.5 flex h-9 w-9 sm:mt-0 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl',
+            'absolute right-0 top-0 flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-xl',
             styles.iconBg,
-            isGradient && 'ring-4 ring-white/10'
+            isGradient && 'ring-2 ring-white/10 sm:ring-4'
           )}
         >
           <Icon className={cn('h-4 w-4 sm:h-6 sm:w-6', styles.iconColor)} />

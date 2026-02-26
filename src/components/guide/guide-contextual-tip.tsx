@@ -55,7 +55,7 @@ export function GuideContextualTip({
   return (
     <div
       className={cn(
-        'flex gap-3 rounded-xl px-4 py-3.5',
+        'flex items-start gap-3.5 rounded-2xl px-4 py-4 sm:px-5 sm:py-4.5',
         'bg-blue-50 dark:bg-blue-950/30',
         className
       )}
@@ -67,14 +67,16 @@ export function GuideContextualTip({
         aria-hidden="true"
       />
 
-      <div className="flex-1 min-w-0 space-y-1">
-        <p className="text-[14px] font-medium text-blue-900 dark:text-blue-100">{title}</p>
-        <p className="text-[13px] text-blue-700 dark:text-blue-300 leading-relaxed">
+      <div className="flex-1 min-w-0 space-y-2">
+        <p className="text-[15px] font-semibold leading-snug text-blue-900 dark:text-blue-100">
+          {title}
+        </p>
+        <p className="text-[14px] text-blue-700 dark:text-blue-300 leading-relaxed">
           {description}
         </p>
         <Link
           href={linkHref}
-          className="inline-block text-[13px] font-medium text-blue-600 dark:text-blue-400 hover:underline mt-0.5"
+          className="inline-block pt-0.5 text-[14px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
         >
           {linkText} →
         </Link>
@@ -85,7 +87,7 @@ export function GuideContextualTip({
         onClick={handleDismiss}
         aria-label="Cerrar consejo"
         className={cn(
-          'shrink-0 self-start p-1 rounded-md -mr-1 -mt-0.5',
+          'shrink-0 self-start grid place-items-center h-8 w-8 rounded-md -mr-1',
           'text-blue-400 dark:text-blue-500',
           'hover:text-blue-600 dark:hover:text-blue-300',
           'hover:bg-blue-100 dark:hover:bg-blue-900/40',

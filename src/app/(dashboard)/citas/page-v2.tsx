@@ -874,6 +874,7 @@ function CitasCalendarFusionContent() {
               title="Controlá la duración de cada cita"
               description="Usá el temporizador al iniciar una cita. La app aprende la duración promedio y ajusta los slots automáticamente."
               linkHref="/guia#citas"
+              className="mb-4 sm:mb-5"
             />
           </div>
 
