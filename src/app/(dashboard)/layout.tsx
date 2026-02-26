@@ -146,7 +146,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Fetch business data AND onboarding in parallel to reduce TTFB
   // staff_permissions from migration 027 — not in generated types yet, using `as any`
   const businessSelect =
-    'id, name, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
+    'id, name, slug, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
   const needsOnboarding = roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')
 
   const [businessResult, onboardingResult] = await Promise.all([
@@ -251,6 +251,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <BusinessProvider
       businessId={business.id}
+      slug={business.slug}
       userId={user.id}
       userEmail={user.email}
       userRole={roleInfo.role}
@@ -268,6 +269,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {roleInfo.isOwner && (
               <Sidebar
                 businessName={businessName}
+                businessSlug={business.slug}
                 logoUrl={logoUrl}
                 isAdmin={roleInfo.isAdmin}
                 isBarber={roleInfo.isBarber}

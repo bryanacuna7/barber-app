@@ -21,10 +21,13 @@ import {
   UsersRound,
   Wrench,
   BookOpen,
+  Link2,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useBusiness } from '@/contexts/business-context'
+import { useToast } from '@/components/ui/toast'
+import { bookingAbsoluteUrl } from '@/lib/utils/booking-url'
 import { canBarberAccessPath } from '@/lib/auth/roles'
 
 // --- Context for opening the palette from anywhere ---
@@ -289,16 +292,46 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
 
 function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter()
-  const { isBarber, staffPermissions } = useBusiness()
+  const { isBarber, staffPermissions, slug } = useBusiness()
+  const toast = useToast()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Dynamic commands that need context (slug, toast)
+  const dynamicCommands = useMemo((): Command[] => {
+    if (!slug) return []
+    return [
+      {
+        id: 'copy-booking-link',
+        label: 'Copiar Link de Reservas',
+        description: 'Copia tu enlace de reservas al portapapeles',
+        icon: Link2,
+        category: 'create',
+        keywords: ['link', 'enlace', 'reserva', 'compartir', 'copiar', 'booking', 'qr', 'url'],
+        path: '/dashboard',
+        action: () => {
+          const url = bookingAbsoluteUrl(slug)
+          navigator.clipboard
+            .writeText(url)
+            .then(() => {
+              toast.info('Enlace copiado al portapapeles')
+            })
+            .catch(() => {
+              toast.error('No se pudo copiar')
+            })
+        },
+      },
+    ]
+  }, [slug, toast])
+
+  const allCommands = useMemo(() => [...COMMANDS, ...dynamicCommands], [dynamicCommands])
+
   // Filter commands by role — barbers only see paths they have access to
   const allowedCommands = useMemo(() => {
-    if (!isBarber) return COMMANDS
-    return COMMANDS.filter((cmd) => canBarberAccessPath(cmd.path, staffPermissions))
-  }, [isBarber, staffPermissions])
+    if (!isBarber) return allCommands
+    return allCommands.filter((cmd) => canBarberAccessPath(cmd.path, staffPermissions))
+  }, [isBarber, staffPermissions, allCommands])
 
   // Focus input on open
   useEffect(() => {

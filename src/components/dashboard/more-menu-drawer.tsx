@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -20,11 +21,17 @@ import {
   Trophy,
   Target,
   BookOpen,
+  Link2,
+  Copy,
+  Check,
+  Share2,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import { useBusiness } from '@/contexts/business-context'
+import { useToast } from '@/components/ui/toast'
+import { bookingAbsoluteUrl } from '@/lib/utils/booking-url'
 import type { StaffPermissions, UserRole } from '@/lib/auth/roles'
 
 interface MoreMenuDrawerProps {
@@ -178,6 +185,88 @@ function dedupeMenuItemsByHref(items: MenuItem[]): MenuItem[] {
   })
 }
 
+function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClose: () => void }) {
+  const [copied, setCopied] = useState(false)
+  const toast = useToast()
+
+  let slug: string | undefined
+  try {
+    const ctx = useBusiness()
+    slug = ctx.slug
+  } catch {
+    slug = undefined
+  }
+
+  if (isBarberRole || !slug) return null
+
+  const handleCopy = () => {
+    const url = bookingAbsoluteUrl(slug!)
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true)
+        toast.info('Enlace copiado al portapapeles')
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch(() => {
+        toast.error('No se pudo copiar')
+      })
+  }
+
+  const handleShare = () => {
+    const url = bookingAbsoluteUrl(slug!)
+    if (navigator.share) {
+      navigator.share({ title: 'Link de Reservas', url }).catch(() => {})
+    } else {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(`Reserva tu cita 💈\n👉 ${url}`)}`,
+        '_blank'
+      )
+    }
+    onClose()
+  }
+
+  return (
+    <div className="mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/50"
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="rounded-xl bg-blue-100 dark:bg-blue-900/30 p-2.5">
+            <Link2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[15px] font-semibold text-zinc-900 dark:text-white">
+              Link de Reservas
+            </p>
+            <p className="text-[13px] text-muted">Comparte con tus clientes</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white text-[14px] font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+            {copied ? 'Copiado' : 'Copiar'}
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white text-[14px] font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+          >
+            <Share2 className="h-4 w-4" />
+            Compartir
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 export function MoreMenuDrawer({
   isOpen,
   onClose,
@@ -256,6 +345,7 @@ export function MoreMenuDrawer({
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="Más opciones" showCloseButton={false}>
+      <ShareLinkItem isBarberRole={isBarberRole} onClose={onClose} />
       <div className="space-y-6">
         {/* Main Pages */}
         {filteredItems.length > 0 && (

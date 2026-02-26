@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Building2, Globe, ExternalLink, Copy, Check } from 'lucide-react'
+import { Save, Building2, Globe } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,8 @@ import { useBusinessSettings, useUpdateBusinessSettings } from '@/hooks/queries/
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { QueryError } from '@/components/ui/query-error'
 import { SettingsSubrouteHeader } from '@/components/settings/settings-subroute-header'
+import { ShareBookingLink } from '@/components/share/share-booking-link'
+import { bookingPath } from '@/lib/utils/booking-url'
 
 export default function GeneralSettingsPage() {
   const router = useRouter()
@@ -22,8 +24,6 @@ export default function GeneralSettingsPage() {
 
   const { data: business, isLoading: loading, error, refetch } = useBusinessSettings(businessId)
   const updateSettings = useUpdateBusinessSettings()
-
-  const [copied, setCopied] = useState(false)
 
   const [formEdits, setFormEdits] = useState<Record<string, string>>({})
 
@@ -37,23 +37,6 @@ export default function GeneralSettingsPage() {
     }),
     [business, formEdits]
   )
-
-  const bookingUrl = useMemo(() => {
-    if (!business?.slug) return ''
-    return `${typeof window !== 'undefined' ? window.location.origin : ''}/reservar/${business.slug}`
-  }, [business])
-
-  async function copyBookingLink() {
-    if (!bookingUrl) return
-    try {
-      await navigator.clipboard.writeText(bookingUrl)
-      setCopied(true)
-      toast.info('Enlace copiado al portapapeles')
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      toast.error('No se pudo copiar el enlace')
-    }
-  }
 
   async function handleSave() {
     if (!businessId) return
@@ -123,32 +106,16 @@ export default function GeneralSettingsPage() {
                 <CardDescription>Comparte este enlace con tus clientes</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
-                  <div className="flex-1 min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-[15px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 truncate">
-                    {bookingUrl || 'Cargando...'}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="md"
-                      onClick={copyBookingLink}
-                      className="flex-1 sm:flex-initial"
-                    >
-                      {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                      <span className="sm:hidden">Copiar</span>
-                    </Button>
-                    <a
-                      href={bookingUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-12 min-w-[48px] flex-1 sm:flex-initial items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                    >
-                      <ExternalLink className="h-5 w-5" />
-                      <span className="text-[15px] font-medium sm:hidden">Abrir</span>
-                    </a>
-                  </div>
-                </div>
+                {business?.slug ? (
+                  <ShareBookingLink
+                    bookingPath={bookingPath(business.slug)}
+                    slug={business.slug}
+                    businessName={business.name || ''}
+                    variant="full"
+                  />
+                ) : (
+                  <div className="text-[15px] text-muted">Cargando...</div>
+                )}
               </CardContent>
             </Card>
           </FadeInUp>

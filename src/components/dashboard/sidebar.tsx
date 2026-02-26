@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import {
   LayoutDashboard,
   Calendar,
@@ -18,11 +19,15 @@ import {
   Search,
   CalendarClock,
   BookOpen,
+  Link2,
+  Check,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { useCommandPalette } from '@/components/dashboard/command-palette'
+import { useToast } from '@/components/ui/toast'
+import { bookingAbsoluteUrl } from '@/lib/utils/booking-url'
 
 interface NavItem {
   name: string
@@ -54,6 +59,7 @@ const sidebarSections = [
 
 interface SidebarProps {
   businessName: string
+  businessSlug?: string
   logoUrl?: string | null
   isAdmin?: boolean
   isBarber?: boolean
@@ -61,6 +67,7 @@ interface SidebarProps {
 
 interface SidebarContentProps {
   businessName: string
+  businessSlug?: string
   logoUrl?: string | null
   isAdmin?: boolean
   isBarber?: boolean
@@ -71,6 +78,7 @@ interface SidebarContentProps {
 
 function SidebarContent({
   businessName,
+  businessSlug,
   logoUrl,
   isAdmin,
   isBarber = false,
@@ -169,8 +177,9 @@ function SidebarContent({
         })}
       </nav>
 
-      {/* Admin Panel + Logout — separated */}
+      {/* Share + Admin + Logout — separated */}
       <div className="border-t border-zinc-200/50 px-3 py-3 dark:border-zinc-800/50 space-y-0.5">
+        {businessSlug && <ShareLinkButton slug={businessSlug} />}
         {isAdmin && (
           <Link
             href="/admin"
@@ -194,7 +203,47 @@ function SidebarContent({
   )
 }
 
-export function Sidebar({ businessName, logoUrl, isAdmin, isBarber = false }: SidebarProps) {
+function ShareLinkButton({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false)
+  const toast = useToast()
+
+  const handleCopy = () => {
+    const url = bookingAbsoluteUrl(slug)
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true)
+        toast.info('Enlace copiado al portapapeles')
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch(() => {
+        toast.error('No se pudo copiar')
+      })
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+    >
+      {copied ? (
+        <Check className="h-[18px] w-[18px] text-green-600" />
+      ) : (
+        <Link2 className="h-[18px] w-[18px] opacity-60" />
+      )}
+      {copied ? 'Enlace copiado' : 'Compartir Link'}
+    </button>
+  )
+}
+
+export function Sidebar({
+  businessName,
+  businessSlug,
+  logoUrl,
+  isAdmin,
+  isBarber = false,
+}: SidebarProps) {
   const pathname = usePathname()
 
   const handleLogout = async () => {
@@ -212,6 +261,7 @@ export function Sidebar({ businessName, logoUrl, isAdmin, isBarber = false }: Si
       >
         <SidebarContent
           businessName={businessName}
+          businessSlug={businessSlug}
           logoUrl={logoUrl}
           isAdmin={isAdmin}
           isBarber={isBarber}

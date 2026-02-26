@@ -1,15 +1,17 @@
 'use client'
 
-import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard } from 'lucide-react'
+import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard, Globe } from 'lucide-react'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { formatCurrencyCompactMillions, formatTime } from '@/lib/utils'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { DashboardTourWrapper } from '@/components/tours/dashboard-tour-wrapper'
 import { useDashboardStats } from '@/hooks/use-dashboard-stats'
 import { useDashboardAppointments } from '@/hooks/use-dashboard-appointments'
+import { ShareBookingLink } from '@/components/share/share-booking-link'
+import { bookingPath } from '@/lib/utils/booking-url'
 
 export function DashboardContent() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats()
@@ -66,14 +68,6 @@ export function DashboardContent() {
               </span>
             </p>
           </div>
-          <Link
-            href={`/reservar/${stats.business.slug}`}
-            target="_blank"
-            className="app-page-subtitle group inline-flex items-center gap-2 hover:text-zinc-900 dark:hover:text-white transition-all duration-200 hover:gap-3 focus-ring rounded-md"
-          >
-            Ver página pública
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
         </div>
 
         {/* Guide Tip */}
@@ -94,6 +88,28 @@ export function DashboardContent() {
             totalClients={stats.totalClients}
           />
         </div>
+
+        {/* Share Booking Link Card */}
+        {stats.business.slug && (
+          <Card variant="elevated" className="relative overflow-hidden" data-tour="dashboard-share">
+            <div className="absolute inset-x-0 top-0 h-1 bg-zinc-900 dark:bg-white" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[17px]">
+                <Globe className="h-5 w-5" />
+                Comparte tu Link de Reservas
+              </CardTitle>
+              <CardDescription>Tus clientes pueden reservar 24/7 desde este enlace</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ShareBookingLink
+                bookingPath={bookingPath(stats.business.slug)}
+                slug={stats.business.slug}
+                businessName={stats.business.name}
+                variant="full"
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Upcoming Appointments */}
         <Card variant="elevated" className="overflow-hidden" data-tour="dashboard-appointments">
