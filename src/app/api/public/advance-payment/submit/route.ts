@@ -17,6 +17,7 @@ import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit } from '@/lib/rate-limit'
 import { createNotification } from '@/lib/notifications'
 import { sendPushToBusinessOwner } from '@/lib/push/sender'
+import { validateImageFile } from '@/lib/file-validation'
 
 const SUBMIT_RATE_LIMIT = { interval: 60_000, maxRequests: 10 }
 
@@ -197,18 +198,17 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Validate file size
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json({ error: 'El archivo no puede superar 5MB' }, { status: 400 })
+      // Validate file using magic bytes (not just MIME type which is spoofable)
+      const validation = await validateImageFile(file, MAX_FILE_SIZE)
+      if (!validation.valid) {
+        return NextResponse.json(
+          { error: validation.error || 'Solo se permiten imágenes (PNG, JPG, WebP, GIF)' },
+          { status: 400 }
+        )
       }
 
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        return NextResponse.json({ error: 'Solo se permiten imágenes' }, { status: 400 })
-      }
-
-      // Determine extension from MIME type
-      const ext = file.type.split('/')[1] || 'jpg'
+      // Use detected type from magic bytes for extension
+      const ext = validation.detectedType === 'jpeg' ? 'jpg' : validation.detectedType
 
       // Generate storage path
       const filePath = `${appointment.business_id}/${appointment.id}/${crypto.randomUUID()}.${ext}`

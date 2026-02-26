@@ -1,36 +1,14 @@
 /**
  * API Route: Analytics Overview
  * Returns KPI summary for the current business
+ * Uses withAuth to support both owners and barbers
  */
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get business
-    const { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (businessError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-    }
-
     // Get period from query params (default: month)
     const { searchParams } = new URL(request.url)
     const period = searchParams.get('period') || 'month' // week, month, year
@@ -71,8 +49,9 @@ export async function GET(request: Request) {
     const totalAppointments = appointments?.length || 0
     const completedAppointments = appointments?.filter((a) => a.status === 'completed').length || 0
     const totalRevenue =
-      appointments?.filter((a) => a.status === 'completed').reduce((sum, a) => sum + a.price, 0) ||
-      0
+      appointments
+        ?.filter((a) => a.status === 'completed')
+        .reduce((sum, a) => sum + (a.price ?? 0), 0) ?? 0
 
     // Calculate average per appointment
     const avgPerAppointment = completedAppointments > 0 ? totalRevenue / completedAppointments : 0
@@ -97,9 +76,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Error in GET /api/analytics/overview:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
-      { status: 500 }
-    )
+    return errorResponse('Error interno del servidor')
   }
-}
+})

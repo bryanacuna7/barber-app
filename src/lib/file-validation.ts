@@ -193,7 +193,8 @@ export async function validateImageFile(
   file: File | Blob,
   maxSizeBytes: number = 2 * 1024 * 1024 // Default 2MB
 ): Promise<ValidationResult> {
-  return validateFile(file, ['png', 'jpeg', 'webp', 'gif', 'svg'], maxSizeBytes)
+  // SVG excluded: XML-based format that can contain embedded <script> tags (XSS vector)
+  return validateFile(file, ['png', 'jpeg', 'webp', 'gif'], maxSizeBytes)
 }
 
 /**

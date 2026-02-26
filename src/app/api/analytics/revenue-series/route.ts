@@ -1,38 +1,16 @@
 /**
  * API Route: Revenue Series
  * Returns time-series revenue data for charts
+ * Uses withAuth to support both owners and barbers
  */
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 import { format, startOfDay, addDays, addMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get business
-    const { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (businessError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-    }
-
     // Get period from query params (default: month)
     const { searchParams } = new URL(request.url)
     const period = searchParams.get('period') || 'month' // week, month, year
@@ -85,18 +63,15 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Error in GET /api/analytics/revenue-series:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
-      { status: 500 }
-    )
+    return errorResponse('Error interno del servidor')
   }
-}
+})
 
 /**
  * Group appointments by time period
  */
 function groupByPeriod(
-  appointments: Array<{ scheduled_at: string; price: number }>,
+  appointments: Array<{ scheduled_at: string; price: number | null }>,
   groupBy: 'day' | 'week' | 'month',
   startDate: Date,
   endDate: Date
@@ -147,7 +122,7 @@ function groupByPeriod(
 
     const existing = dataMap.get(key) || { revenue: 0, appointments: 0 }
     dataMap.set(key, {
-      revenue: existing.revenue + apt.price,
+      revenue: existing.revenue + (apt.price ?? 0),
       appointments: existing.appointments + 1,
     })
   }

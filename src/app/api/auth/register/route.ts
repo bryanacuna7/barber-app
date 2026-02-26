@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: prevent brute-force registration and email enumeration
+    const rl = await rateLimit(request, RateLimitPresets.strict)
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: 'Demasiados intentos. Espera 15 minutos.' },
+        { status: 429, headers: rl.headers }
+      )
+    }
+
     const { email, password, businessName } = await request.json()
 
     if (!email || !password || !businessName) {

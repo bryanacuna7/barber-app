@@ -5,10 +5,11 @@
  *
  * Statuses counted: confirmed, completed, no_show (real demand).
  * Excludes: pending, cancelled.
+ * Uses withAuth to support both owners and barbers
  */
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
 export interface HeatmapCell {
   day: number // 0=Sun...6=Sat
@@ -23,30 +24,16 @@ export interface HeatmapResponse {
   operatingHours: Record<string, { open: string; close: string; enabled: boolean }> | null
 }
 
-export async function GET() {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: business, error: businessError } = (await supabase
+    // Fetch extra business fields not included in withAuth
+    const { data: businessExtra } = (await supabase
       .from('businesses')
-      .select('id, timezone, operating_hours')
-      .eq('owner_id', user.id)
+      .select('timezone, operating_hours')
+      .eq('id', business.id)
       .single()) as any
 
-    if (businessError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-    }
-
-    const timezone = business.timezone || 'America/Costa_Rica'
+    const timezone = businessExtra?.timezone || 'America/Costa_Rica'
 
     // Last 90 days
     const startDate = new Date()
@@ -111,9 +98,9 @@ export async function GET() {
       cells,
       maxCount,
       totalAppointments: appointments?.length || 0,
-      operatingHours: business.operating_hours,
+      operatingHours: businessExtra?.operating_hours ?? null,
     })
   } catch {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})

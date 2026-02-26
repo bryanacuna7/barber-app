@@ -39,7 +39,33 @@ export async function POST(request: Request) {
 
   try {
     const supabase = await createClient()
+
+    // Require authentication — prevent anonymous conversion inflation
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      logSecurity('unauthenticated_conversion', 'medium', { endpoint: 'track_conversion' })
+      logResponse(request, 401, Date.now() - startTime)
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
     const { referralCode, referredBusinessId, status } = await request.json()
+
+    // Validate caller owns the referred business
+    const { data: callerBusiness } = await supabase
+      .from('businesses')
+      .select('id')
+      .eq('id', referredBusinessId)
+      .eq('owner_id', user.id)
+      .single()
+
+    if (!callerBusiness) {
+      logSecurity('unauthorized_conversion', 'high', { userId: user.id, referredBusinessId })
+      logResponse(request, 403, Date.now() - startTime)
+      return NextResponse.json({ error: 'Not authorized for this business' }, { status: 403 })
+    }
 
     // Validation
     if (!referralCode || !referredBusinessId) {

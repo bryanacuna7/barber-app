@@ -24,8 +24,10 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     const status = searchParams.get('status')
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
-    const limit = parseInt(searchParams.get('limit') || '50', 10)
-    const offset = parseInt(searchParams.get('offset') || '0', 10)
+    const rawLimit = parseInt(searchParams.get('limit') || '50', 10)
+    const rawOffset = parseInt(searchParams.get('offset') || '0', 10)
+    const limit = isNaN(rawLimit) || rawLimit < 1 ? 50 : Math.min(rawLimit, 500)
+    const offset = isNaN(rawOffset) || rawOffset < 0 ? 0 : rawOffset
 
     // Build query with pagination
     let query = supabase

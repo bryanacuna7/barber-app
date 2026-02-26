@@ -1,10 +1,11 @@
 /**
  * API Route: Analytics Duration
  * Returns smart duration insights for completed appointments
+ * Uses withAuth to support both owners and barbers
  */
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
 type ServiceDurationStats = {
   serviceId: string
@@ -15,31 +16,15 @@ type ServiceDurationStats = {
   recoveredMinutes: number
 }
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get business with timezone and smart duration flag
+    // Fetch extra business fields not included in withAuth
     // Note: smart_duration_enabled added in migration 033, using `as any` until types regenerated
-    const { data: business, error: businessError } = (await supabase
+    const { data: businessExtra } = (await supabase
       .from('businesses')
-      .select('id, timezone, smart_duration_enabled')
-      .eq('owner_id', user.id)
+      .select('smart_duration_enabled')
+      .eq('id', business.id)
       .single()) as any
-
-    if (businessError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-    }
 
     // Get period from query params (default: month)
     const { searchParams } = new URL(request.url)
@@ -83,7 +68,7 @@ export async function GET(request: Request) {
     if (!appointments || appointments.length === 0) {
       return NextResponse.json({
         period,
-        smartDurationEnabled: business.smart_duration_enabled || false,
+        smartDurationEnabled: businessExtra?.smart_duration_enabled || false,
         overall: {
           completedWithDuration: 0,
           avgScheduledMinutes: 0,
@@ -167,7 +152,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       period,
-      smartDurationEnabled: business.smart_duration_enabled || false,
+      smartDurationEnabled: businessExtra?.smart_duration_enabled || false,
       overall: {
         completedWithDuration,
         avgScheduledMinutes,
@@ -179,9 +164,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Error in GET /api/analytics/duration:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
-      { status: 500 }
-    )
+    return errorResponse('Error interno del servidor')
   }
-}
+})

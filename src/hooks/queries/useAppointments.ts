@@ -52,7 +52,10 @@ export function useDayStatistics(date: Date, businessId: string) {
 }
 
 /**
- * Update appointment status
+ * Update appointment status via API route (enforces RBAC + server-side guards)
+ *
+ * Routes through dedicated API endpoints that validate state transitions,
+ * update client stats, and fire push notifications — unlike direct Supabase writes.
  */
 export function useUpdateAppointmentStatus() {
   const queryClient = useQueryClient()
@@ -65,16 +68,36 @@ export function useUpdateAppointmentStatus() {
       appointmentId: string
       status: Appointment['status']
     }) => {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('appointments')
-        .update({ status })
-        .eq('id', appointmentId)
-        .select('id, status, updated_at')
-        .single()
+      // Route status changes through their dedicated API endpoints for RBAC + side effects
+      const statusEndpoints: Partial<Record<string, string>> = {
+        completed: `/api/appointments/${appointmentId}/complete`,
+        in_progress: `/api/appointments/${appointmentId}/check-in`,
+        no_show: `/api/appointments/${appointmentId}/no-show`,
+      }
 
-      if (error) throw error
-      return data
+      const endpoint = statusEndpoints[status]
+
+      if (endpoint) {
+        // Use dedicated endpoint with RBAC validation
+        const res = await fetch(endpoint, { method: 'POST' })
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          throw new Error(body.error || `Error updating status to ${status}`)
+        }
+        return res.json()
+      }
+
+      // For other statuses (confirmed, cancelled, pending), use PATCH
+      const res = await fetch(`/api/appointments/${appointmentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Error updating status to ${status}`)
+      }
+      return res.json()
     },
     onSuccess: (_data, variables) => {
       invalidateQueries.afterAppointmentChange(queryClient)

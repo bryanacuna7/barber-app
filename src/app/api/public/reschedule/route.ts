@@ -171,6 +171,23 @@ export async function POST(request: NextRequest) {
     }
 
     // 11. Determine barber_id: use new_barber_id if provided, otherwise keep original
+    if (new_barber_id) {
+      // Validate new_barber_id belongs to the same business
+      const { data: barberCheck } = await (serviceClient as any)
+        .from('barbers')
+        .select('id')
+        .eq('id', new_barber_id)
+        .eq('business_id', appointment.business_id)
+        .eq('is_active', true)
+        .single()
+
+      if (!barberCheck) {
+        return NextResponse.json(
+          { error: 'El barbero seleccionado no está disponible' },
+          { status: 400 }
+        )
+      }
+    }
     const barberId: string = new_barber_id ?? (appointment.barber_id as string)
 
     // 12. Check slot availability

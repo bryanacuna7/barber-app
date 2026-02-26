@@ -1,36 +1,14 @@
 /**
  * API Route: Service Performance Analytics
  * Returns top performing services by revenue and bookings
+ * Uses withAuth to support both owners and barbers
  */
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 
-export async function GET(request: Request) {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get business
-    const { data: business, error: businessError } = await supabase
-      .from('businesses')
-      .select('id')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (businessError || !business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-    }
-
     // Get period from query params
     const { searchParams } = new URL(request.url)
     const period = searchParams.get('period') || 'month'
@@ -96,7 +74,7 @@ export async function GET(request: Request) {
       const existing = serviceStats.get(apt.service_id)
       if (existing) {
         existing.bookings++
-        existing.revenue += apt.price
+        existing.revenue += apt.price ?? 0
       }
     }
 
@@ -115,9 +93,6 @@ export async function GET(request: Request) {
     })
   } catch (error) {
     console.error('Error in GET /api/analytics/services:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
-      { status: 500 }
-    )
+    return errorResponse('Error interno del servidor')
   }
-}
+})

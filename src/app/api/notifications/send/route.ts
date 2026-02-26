@@ -11,12 +11,18 @@ import TrialExpiringEmail from '@/lib/email/templates/trial-expiring'
 import PaymentApprovedEmail from '@/lib/email/templates/payment-approved'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 
-// Secret key for internal API calls
-const API_SECRET = process.env.NOTIFICATION_API_SECRET || 'your-secret-key-change-in-production'
+// Secret key for internal API calls — NO fallback, must be configured in environment
+const API_SECRET = process.env.NOTIFICATION_API_SECRET
+if (!API_SECRET) {
+  console.error('FATAL: NOTIFICATION_API_SECRET environment variable is not set')
+}
 
 export async function POST(request: Request) {
   try {
-    // Verify secret key
+    // Verify secret key — reject if not configured
+    if (!API_SECRET) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
+    }
     const authHeader = request.headers.get('authorization')
     if (!authHeader || authHeader !== `Bearer ${API_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
