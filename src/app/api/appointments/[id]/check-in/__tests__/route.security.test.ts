@@ -21,11 +21,29 @@ vi.mock('@/lib/api/middleware', async () => {
   }
 })
 
+// Mock RBAC
+vi.mock('@/lib/rbac', () => ({
+  canModifyBarberAppointments: vi.fn().mockResolvedValue(true),
+}))
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  logSecurity: vi.fn(),
+}))
+
+// Mock push sender
+vi.mock('@/lib/push/sender', () => ({
+  sendPushToBusinessOwner: vi.fn().mockResolvedValue(undefined),
+}))
+
+import { canModifyBarberAppointments } from '@/lib/rbac'
+
 // Type helper for test calls - allows calling with auth context
 type TestHandler = (
   request: any,
   context: any,
-  auth: { user: any; business: any; supabase: any }
+  auth: { user: any; business: any; supabase: any; role?: string; barberId?: string }
 ) => Promise<Response>
 
 describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
@@ -34,19 +52,26 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
 
   beforeEach(() => {
     mockSupabase = createMockSupabaseClient()
+    vi.clearAllMocks()
+    // Restore default: RBAC allows access (individual tests override when needed)
+    vi.mocked(canModifyBarberAppointments).mockResolvedValue(true)
   })
 
   describe('SEC-003: Status update IDOR protection', () => {
     it('should return 401 when barber tries to check-in appointment of different barber', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'owner-456',
         name: 'Test Business',
       }
 
-      // Request body includes barberId validation
+      const authenticatedUser = {
+        id: 'user-barber-a',
+        email: 'barber-a@test.com',
+      }
+
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
         method: 'PATCH',
-        body: JSON.stringify({ barberId: 'barber-a' }),
       })
 
       // Appointment belongs to barber-b, not barber-a
@@ -64,26 +89,34 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
+      // RBAC check fails: barber-a cannot modify barber-b's appointment
+      vi.mocked(canModifyBarberAppointments).mockResolvedValueOnce(false)
+
       const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       expect(response.status).toBe(401)
       const body = await response.json()
-      expect(body.error).toBe('Esta cita no pertenece a este miembro del equipo')
+      expect(body.error).toBe('No tienes permiso para hacer check-in de esta cita')
     })
 
     it('should NOT update appointment when barber ownership validation fails', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'owner-456',
         name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-barber-a',
+        email: 'barber-a@test.com',
       }
 
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
         method: 'PATCH',
-        body: JSON.stringify({ barberId: 'barber-a' }),
       })
 
       const mockUpdate = vi.fn().mockReturnThis()
@@ -102,29 +135,37 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         update: mockUpdate,
       })
 
+      // RBAC check fails: ownership mismatch simulated via RBAC
+      vi.mocked(canModifyBarberAppointments).mockResolvedValueOnce(false)
+
       await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       // Update should NOT be called due to early return on auth failure
       expect(mockUpdate).not.toHaveBeenCalled()
     })
 
-    it('should allow update when barberId is not provided (owner/admin access)', async () => {
+    it('should allow update when owner/admin has access (canModifyBarberAppointments returns true)', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-owner',
         name: 'Test Business',
       }
 
-      // No barberId in body - owner/admin mode
+      const authenticatedUser = {
+        id: 'user-owner',
+        email: 'owner@test.com',
+      }
+
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
         method: 'PATCH',
         body: JSON.stringify({}),
       })
 
-      mockSupabase.from.mockReturnValue({
+      mockSupabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({
@@ -136,25 +177,39 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
           },
           error: null,
         }),
-        update: vi.fn().mockReturnThis(),
-      })
+      } as any)
 
-      mockSupabase.from().update = vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        single: vi.fn().mockResolvedValue({
-          data: { id: 'apt-123', status: 'confirmed' },
-          error: null,
+      mockSupabase.from.mockReturnValueOnce({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'apt-123',
+              status: 'confirmed',
+              scheduled_at: '2026-02-04T10:00:00Z',
+              duration_minutes: 30,
+              price: 25,
+              client_notes: null,
+              internal_notes: null,
+              client: { id: 'client-123', name: 'Test Client', phone: null, email: null },
+              service: { id: 'service-123', name: 'Haircut', duration_minutes: 30, price: 25 },
+            },
+            error: null,
+          }),
         }),
-      })
+      } as any)
+
+      // RBAC check passes: owner can modify any appointment
+      vi.mocked(canModifyBarberAppointments).mockResolvedValueOnce(true)
 
       const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
-      // Should succeed without barberId validation
+      // Should succeed with RBAC allowing access
       expect(response.status).toBe(200)
     })
   })
@@ -163,15 +218,20 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
     it('should return 404 when trying to update appointment from different business', async () => {
       const authenticatedBusiness = {
         id: 'business-a',
+        owner_id: 'owner-a',
         name: 'Business A',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
         method: 'PATCH',
-        body: JSON.stringify({ barberId: 'barber-a' }),
       })
 
-      // Appointment belongs to business-b
+      // Appointment belongs to business-b — filtered out by RLS/business_id query
       mockSupabase.from.mockReturnValue({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
@@ -184,7 +244,7 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
       const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       expect(response.status).toBe(404)
@@ -195,7 +255,13 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
     it('should enforce business_id filter in both fetch and update queries', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
@@ -227,7 +293,17 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
           eq: mockEqUpdate,
           select: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({
-            data: { id: 'apt-123', status: 'confirmed' },
+            data: {
+              id: 'apt-123',
+              status: 'confirmed',
+              scheduled_at: '2026-02-04T10:00:00Z',
+              duration_minutes: 30,
+              price: 25,
+              client_notes: null,
+              internal_notes: null,
+              client: { id: 'client-123', name: 'Test Client', phone: null, email: null },
+              service: { id: 'service-123', name: 'Haircut', duration_minutes: 30, price: 25 },
+            },
             error: null,
           }),
         }),
@@ -236,7 +312,7 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
       await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       // Verify business_id filter in fetch
@@ -292,7 +368,13 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
     it('should reject check-in for non-pending appointments', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
@@ -317,7 +399,7 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
       const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       expect(response.status).toBe(400)
@@ -329,7 +411,13 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
     it('should prevent status manipulation bypassing business logic', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
@@ -357,7 +445,7 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
       await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       // Update should not be called
@@ -369,10 +457,16 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
     it('should handle malformed barberId gracefully', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'owner-456',
         name: 'Test Business',
       }
 
-      // Malicious barberId
+      const authenticatedUser = {
+        id: 'user-barber-a',
+        email: 'barber-a@test.com',
+      }
+
+      // Malicious barberId in body — route ignores body for RBAC, but request still valid
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
         method: 'PATCH',
         body: JSON.stringify({ barberId: "'; DROP TABLE appointments; --" }),
@@ -392,30 +486,39 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
         }),
       })
 
+      // RBAC check fails: barber mismatch simulated via RBAC (SQL injection string never used in DB query)
+      vi.mocked(canModifyBarberAppointments).mockResolvedValueOnce(false)
+
       const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
-      // Should return 401 due to barber mismatch (SQL injection safely handled as string comparison)
+      // Should return 401 due to RBAC rejection (SQL injection safely never reaches DB)
       expect(response.status).toBe(401)
     })
 
     it('should handle invalid JSON body', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
       }
 
-      // Invalid JSON
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
+      // Invalid JSON — route should gracefully handle parse error
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
         method: 'PATCH',
         body: 'invalid json{{{',
       })
 
-      // Should continue without barberId validation (owner mode)
-      mockSupabase.from.mockReturnValue({
+      // Mock fetch query
+      mockSupabase.from.mockReturnValueOnce({
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({
@@ -427,23 +530,37 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
           },
           error: null,
         }),
+      } as any)
+
+      // Mock update query
+      mockSupabase.from.mockReturnValueOnce({
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnThis(),
           select: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({
-            data: { id: 'apt-123', status: 'confirmed' },
+            data: {
+              id: 'apt-123',
+              status: 'confirmed',
+              scheduled_at: '2026-02-04T10:00:00Z',
+              duration_minutes: 30,
+              price: 25,
+              client_notes: null,
+              internal_notes: null,
+              client: { id: 'client-123', name: 'Test Client', phone: null, email: null },
+              service: { id: 'service-123', name: 'Haircut', duration_minutes: 30, price: 25 },
+            },
             error: null,
           }),
         }),
-      })
+      } as any)
 
       const response = await (PATCH as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'apt-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
-      // Should succeed (invalid JSON caught in try-catch, proceeds as owner)
+      // Should succeed: RBAC allows owner, route proceeds regardless of body parse failure
       expect(response.status).toBe(200)
     })
   })

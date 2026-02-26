@@ -26,11 +26,46 @@ vi.mock('@/lib/rbac', () => ({
   canModifyBarberAppointments: vi.fn().mockResolvedValue(true),
 }))
 
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  logSecurity: vi.fn(),
+}))
+
+// Mock push sender
+vi.mock('@/lib/push/sender', () => ({
+  sendPushToBusinessOwner: vi.fn().mockResolvedValue(undefined),
+  sendPushToUser: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock notifications orchestrator
+vi.mock('@/lib/notifications/orchestrator', () => ({
+  notify: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock service client
+vi.mock('@/lib/supabase/service-client', () => ({
+  createServiceClient: vi.fn().mockReturnValue({
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+  }),
+}))
+
 // Type helper for test calls
 type TestHandler = (
   request: any,
   context: any,
-  auth: { user: any; business: any; supabase: any }
+  auth: { user: any; business: any; supabase: any; role?: string; barberId?: string }
 ) => Promise<Response>
 
 describe('Race Condition Tests - Client Stats Updates', () => {

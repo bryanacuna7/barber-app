@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { PATCH } from '../route'
 import { NextRequest } from 'next/server'
 import { createMockSupabaseClient } from '@/test/test-utils'
+import { canModifyBarberAppointments } from '@/lib/rbac'
 
 // Mock the middleware to expose the inner handler for testing
 vi.mock('@/lib/api/middleware', async () => {
@@ -21,11 +22,51 @@ vi.mock('@/lib/api/middleware', async () => {
   }
 })
 
+// Mock RBAC
+vi.mock('@/lib/rbac', () => ({
+  canModifyBarberAppointments: vi.fn().mockResolvedValue(true),
+}))
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  logSecurity: vi.fn(),
+}))
+
+// Mock push sender
+vi.mock('@/lib/push/sender', () => ({
+  sendPushToBusinessOwner: vi.fn().mockResolvedValue(undefined),
+  sendPushToUser: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock notifications orchestrator
+vi.mock('@/lib/notifications/orchestrator', () => ({
+  notify: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock service client
+vi.mock('@/lib/supabase/service-client', () => ({
+  createServiceClient: vi.fn().mockReturnValue({
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+  }),
+}))
+
 // Type helper for test calls - allows calling with auth context
 type TestHandler = (
   request: any,
   context: any,
-  auth: { user: any; business: any; supabase: any }
+  auth: { user: any; business: any; supabase: any; role?: string; barberId?: string }
 ) => Promise<Response>
 
 describe('Security Tests - PATCH /api/appointments/[id]/complete', () => {
@@ -34,13 +75,14 @@ describe('Security Tests - PATCH /api/appointments/[id]/complete', () => {
 
   beforeEach(() => {
     mockSupabase = createMockSupabaseClient()
+    vi.mocked(canModifyBarberAppointments).mockResolvedValue(true)
   })
 
   describe('SEC-003: IDOR Protection in Complete Endpoint', () => {
     it('should return 401 when barber tries to complete appointment of different barber', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
-        owner_id: 'user-barber-a',
+        owner_id: 'owner-999',
         name: 'Test Business',
       }
 
@@ -52,6 +94,9 @@ describe('Security Tests - PATCH /api/appointments/[id]/complete', () => {
       mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/complete', {
         method: 'PATCH',
       })
+
+      // Override RBAC mock: barber-a is NOT allowed to modify barber-b's appointment
+      vi.mocked(canModifyBarberAppointments).mockResolvedValueOnce(false)
 
       // Appointment belongs to barber-b, not barber-a
       mockSupabase.from.mockReturnValue({
@@ -82,7 +127,7 @@ describe('Security Tests - PATCH /api/appointments/[id]/complete', () => {
 
       expect(response.status).toBe(401)
       const body = await response.json()
-      expect(body.error).toBe('Esta cita no pertenece a este miembro del equipo')
+      expect(body.error).toBe('No tienes permiso para completar esta cita')
     })
 
     it('should allow business owner to complete any appointment', async () => {

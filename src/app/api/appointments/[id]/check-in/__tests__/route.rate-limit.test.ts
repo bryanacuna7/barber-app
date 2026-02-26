@@ -17,23 +17,64 @@ vi.mock('@/lib/rate-limit', () => ({
   RateLimitConfig: {} as any,
 }))
 
-// Mock the middleware to expose the inner handler for testing
-vi.mock('@/lib/api/middleware', async () => {
-  const actual = await vi.importActual('@/lib/api/middleware')
-  return {
-    ...actual,
-    // Pass through the handler directly for testing (bypasses auth/rate-limit)
-    withAuthAndRateLimit: (handler: any) => handler,
-  }
-})
+// Mock RBAC
+vi.mock('@/lib/rbac', () => ({
+  canModifyBarberAppointments: vi.fn().mockResolvedValue(true),
+}))
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  logSecurity: vi.fn(),
+}))
+
+// Mock push sender
+vi.mock('@/lib/push/sender', () => ({
+  sendPushToBusinessOwner: vi.fn().mockResolvedValue(undefined),
+}))
 
 import { rateLimit } from '@/lib/rate-limit'
+import { canModifyBarberAppointments } from '@/lib/rbac'
+
+// Mock the middleware — withAuthAndRateLimit wires rate-limiting around the handler
+// while injecting auth context from the third argument (test-supplied auth object)
+vi.mock('@/lib/api/middleware', async () => {
+  const actual =
+    await vi.importActual<typeof import('@/lib/api/middleware')>('@/lib/api/middleware')
+  const { rateLimit: rl } = await import('@/lib/rate-limit')
+  return {
+    ...actual,
+    // Wraps handler with rate limiting but injects auth from third test argument
+    withAuthAndRateLimit: (handler: any, config: any) => {
+      return async (request: any, context: any, auth: any) => {
+        try {
+          const result = await rl(request, config)
+          if (!result.success) {
+            return actual.rateLimitResponse(result.headers)
+          }
+          const response = await handler(request, context, auth)
+          const headers = new Headers(response.headers)
+          Object.entries(result.headers).forEach(([key, value]) => {
+            headers.set(key, value as string)
+          })
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+          })
+        } catch (error) {
+          return actual.errorResponse('Error procesando la solicitud')
+        }
+      }
+    },
+  }
+})
 
 // Type helper for test calls - allows calling with auth context
 type TestHandler = (
   request: any,
   context: any,
-  auth: { user: any; business: any; supabase: any }
+  auth: { user: any; business: any; supabase: any; role?: string; barberId?: string }
 ) => Promise<Response>
 
 describe('Rate Limiting Tests - PATCH /api/appointments/[id]/check-in', () => {

@@ -7,9 +7,20 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { useBarberAppointments } from '../use-barber-appointments'
 import { createMockAppointmentsResponse, mockFetch, mockFetchError } from '@/test/test-utils'
+
+// Mock Supabase client to prevent real connections during hook tests
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: vi.fn(() => ({
+    channel: vi.fn(() => ({
+      on: vi.fn().mockReturnThis(),
+      subscribe: vi.fn().mockReturnThis(),
+    })),
+    removeChannel: vi.fn().mockResolvedValue(undefined),
+  })),
+}))
 
 describe('useBarberAppointments', () => {
   beforeEach(() => {
@@ -289,8 +300,8 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      // Wait for initial fetch
-      await vi.runAllTimersAsync()
+      // Flush microtasks so the initial fetch promise resolves
+      await act(async () => {})
       expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
@@ -317,7 +328,8 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await vi.runAllTimersAsync()
+      // Flush microtasks so the initial fetch promise resolves
+      await act(async () => {})
       expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
@@ -341,7 +353,8 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await vi.runAllTimersAsync()
+      // Flush microtasks so the initial fetch promise resolves
+      await act(async () => {})
       expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()
@@ -364,7 +377,8 @@ describe('useBarberAppointments', () => {
         })
       )
 
-      await vi.runAllTimersAsync()
+      // Flush microtasks so the initial fetch promise resolves
+      await act(async () => {})
       expect(global.fetch).toHaveBeenCalledTimes(1)
 
       vi.clearAllMocks()

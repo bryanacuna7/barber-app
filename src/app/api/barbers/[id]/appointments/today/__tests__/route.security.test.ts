@@ -130,7 +130,13 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
     it('should enforce business_id filter in database query', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       const mockEq = vi.fn().mockReturnThis()
@@ -146,7 +152,7 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
       await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       // Verify that business_id filter was applied
@@ -274,6 +280,7 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
     it('should filter appointments by business_id to prevent cross-business access', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
       }
 
@@ -302,10 +309,18 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         .mockReturnValueOnce(mockBarberQuery as any)
         .mockReturnValueOnce(mockAppointmentsQuery as any)
 
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
+      // Allow access so we reach the appointments query
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(true)
+
       await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       // Verify appointments query includes business_id filter
@@ -318,7 +333,13 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
     it('should only return necessary fields in response', async () => {
       const authenticatedBusiness = {
         id: 'business-123',
+        owner_id: 'user-123',
         name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
       }
 
       const mockBarberQuery = {
@@ -351,10 +372,13 @@ describe('Security Tests - GET /api/barbers/[id]/appointments/today', () => {
         .mockReturnValueOnce(mockBarberQuery as any)
         .mockReturnValueOnce(mockAppointmentsQuery as any)
 
+      // Allow access so we reach the response
+      vi.mocked(canAccessBarberAppointments).mockResolvedValue(true)
+
       const response = await (GET as unknown as TestHandler)(
         mockRequest,
         { params: Promise.resolve({ id: 'barber-123' }) },
-        { business: authenticatedBusiness, supabase: mockSupabase as any } as any
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
       )
 
       const body = await response.json()

@@ -49,6 +49,35 @@ vi.mock('@/lib/logger', () => ({
   logSecurity: vi.fn(),
 }))
 
+// Mock notification orchestrator (used by complete route - imports Resend at module load)
+vi.mock('@/lib/notifications/orchestrator', () => ({
+  notify: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock push sender (used by complete and no-show routes)
+vi.mock('@/lib/push/sender', () => ({
+  sendPushToBusinessOwner: vi.fn().mockResolvedValue(undefined),
+  sendPushToUser: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock Supabase service client (used by complete route)
+vi.mock('@/lib/supabase/service-client', () => ({
+  createServiceClient: vi.fn(() => ({
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+  })),
+}))
+
 // Import mocked functions for spy assertions
 import { canModifyBarberAppointments } from '@/lib/rbac'
 import { logSecurity } from '@/lib/logger'

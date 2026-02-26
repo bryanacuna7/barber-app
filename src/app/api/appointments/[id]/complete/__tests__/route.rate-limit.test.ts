@@ -17,15 +17,83 @@ vi.mock('@/lib/rate-limit', () => ({
   RateLimitConfig: {} as any,
 }))
 
-// Mock the middleware to expose the inner handler for testing
+// Mock the middleware to expose the inner handler while keeping rate-limit logic
 vi.mock('@/lib/api/middleware', async () => {
-  const actual = await vi.importActual('@/lib/api/middleware')
+  const actual =
+    await vi.importActual<typeof import('@/lib/api/middleware')>('@/lib/api/middleware')
   return {
     ...actual,
-    // Pass through the handler directly for testing (bypasses auth/rate-limit)
-    withAuthAndRateLimit: (handler: any) => handler,
+    // Wrap the handler so rateLimit is still called, but auth is bypassed.
+    // The returned function accepts (request, context, auth) so tests can
+    // supply the auth context directly.
+    withAuthAndRateLimit: (handler: any, config: any) => {
+      return async (request: any, context: any, auth: any) => {
+        const { rateLimit } = await import('@/lib/rate-limit')
+        let rateLimitResult: any
+        try {
+          rateLimitResult = await rateLimit(request, config)
+        } catch (err) {
+          return actual.errorResponse('Error procesando la solicitud')
+        }
+        if (!rateLimitResult.success) {
+          return actual.rateLimitResponse(rateLimitResult.headers)
+        }
+        // Call the inner handler with the auth context provided by tests
+        const response = await handler(request, context, auth)
+        // Attach rate limit headers to successful response
+        const headers = new Headers(response.headers)
+        Object.entries(rateLimitResult.headers as Record<string, string>).forEach(([k, v]) => {
+          headers.set(k, v)
+        })
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        })
+      }
+    },
   }
 })
+
+// Mock RBAC
+vi.mock('@/lib/rbac', () => ({
+  canModifyBarberAppointments: vi.fn().mockResolvedValue(true),
+}))
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
+  logSecurity: vi.fn(),
+}))
+
+// Mock push sender
+vi.mock('@/lib/push/sender', () => ({
+  sendPushToBusinessOwner: vi.fn().mockResolvedValue(undefined),
+  sendPushToUser: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock notifications orchestrator
+vi.mock('@/lib/notifications/orchestrator', () => ({
+  notify: vi.fn().mockResolvedValue(undefined),
+}))
+
+// Mock service client
+vi.mock('@/lib/supabase/service-client', () => ({
+  createServiceClient: vi.fn().mockReturnValue({
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      neq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+  }),
+}))
 
 import { rateLimit } from '@/lib/rate-limit'
 
@@ -33,7 +101,7 @@ import { rateLimit } from '@/lib/rate-limit'
 type TestHandler = (
   request: any,
   context: any,
-  auth: { user: any; business: any; supabase: any }
+  auth: { user: any; business: any; supabase: any; role?: string; barberId?: string }
 ) => Promise<Response>
 
 describe('Rate Limiting Tests - PATCH /api/appointments/[id]/complete', () => {
