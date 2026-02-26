@@ -16,6 +16,12 @@ interface ShareBookingLinkProps {
   slug: string
   businessName: string
   variant?: 'full' | 'compact'
+  /** Optional callback fired after successful copy */
+  onCopy?: () => void
+  /** Optional callback fired when WhatsApp share is triggered */
+  onWhatsAppClick?: () => void
+  /** Optional callback fired when native share is triggered */
+  onShareClick?: () => void
 }
 
 export function ShareBookingLink({
@@ -23,6 +29,9 @@ export function ShareBookingLink({
   slug,
   businessName,
   variant = 'full',
+  onCopy,
+  onWhatsAppClick,
+  onShareClick,
 }: ShareBookingLinkProps) {
   const toast = useToast()
   const [copied, setCopied] = useState(false)
@@ -39,15 +48,17 @@ export function ShareBookingLink({
         setCopied(true)
         toast.info('Enlace copiado al portapapeles')
         setTimeout(() => setCopied(false), 2000)
+        onCopy?.()
       })
       .catch(() => {
         toast.error('No se pudo copiar el enlace')
       })
-  }, [getAbsoluteUrl, toast])
+  }, [getAbsoluteUrl, toast, onCopy])
 
   const handleShare = useCallback(() => {
     const url = getAbsoluteUrl()
     const text = `Reserva tu cita en ${businessName}`
+    onShareClick?.()
 
     if (navigator.share) {
       navigator.share({ title: businessName, text, url }).catch(() => {
@@ -57,13 +68,14 @@ export function ShareBookingLink({
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n👉 ${url}`)}`, '_blank')
     }
-  }, [getAbsoluteUrl, businessName])
+  }, [getAbsoluteUrl, businessName, onShareClick])
 
   const handleWhatsApp = useCallback(() => {
     const url = getAbsoluteUrl()
     const message = `Reserva tu cita en ${businessName} 💈\n👉 ${url}`
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
-  }, [getAbsoluteUrl, businessName])
+    onWhatsAppClick?.()
+  }, [getAbsoluteUrl, businessName, onWhatsAppClick])
 
   const handleDownloadQR = useCallback(() => {
     const canvas = qrRef.current

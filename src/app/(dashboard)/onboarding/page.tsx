@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { ProgressBar } from '@/components/onboarding/progress-bar'
 import { Welcome } from '@/components/onboarding/steps/welcome'
-import { Hours, type OperatingHours } from '@/components/onboarding/steps/hours'
-import { Service, type ServiceData } from '@/components/onboarding/steps/service'
-import { Barber, type BarberData } from '@/components/onboarding/steps/barber'
-import { Branding, type BrandingData } from '@/components/onboarding/steps/branding'
-import { Success } from '@/components/onboarding/steps/success'
+import {
+  Setup,
+  DEFAULT_HOURS,
+  type OperatingHours,
+  type ServiceData,
+  type BarberData,
+} from '@/components/onboarding/steps/setup'
+import { ShareLink } from '@/components/onboarding/steps/share-link'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2 } from 'lucide-react'
 
@@ -17,7 +20,6 @@ interface OnboardingData {
   hours?: OperatingHours
   service?: ServiceData
   barber?: BarberData
-  branding?: BrandingData
 }
 
 export default function OnboardingPage() {
@@ -27,9 +29,8 @@ export default function OnboardingPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [businessName, setBusinessName] = useState('Mi Barbería')
   const [businessId, setBusinessId] = useState<string | null>(null)
+  const [businessSlug, setBusinessSlug] = useState('')
   const [data, setData] = useState<OnboardingData>({})
-
-  const totalSteps = 6
 
   // Check if onboarding is already completed
   useEffect(() => {
@@ -37,7 +38,6 @@ export default function OnboardingPage() {
       try {
         const supabase = createClient()
 
-        // Get business info
         const {
           data: { user },
         } = await supabase.auth.getUser()
@@ -48,7 +48,7 @@ export default function OnboardingPage() {
 
         const { data: business } = await supabase
           .from('businesses')
-          .select('id, name')
+          .select('id, name, slug')
           .eq('owner_id', user.id)
           .single()
 
@@ -59,6 +59,7 @@ export default function OnboardingPage() {
 
         setBusinessId(business.id)
         setBusinessName(business.name || 'Mi Barbería')
+        setBusinessSlug(business.slug || '')
 
         // Check onboarding status
         const { data: onboarding } = await supabase
@@ -68,7 +69,6 @@ export default function OnboardingPage() {
           .single()
 
         if (onboarding && (onboarding as { completed: boolean }).completed) {
-          // Already completed, redirect to dashboard
           router.push('/dashboard')
           return
         }
@@ -91,121 +91,119 @@ export default function OnboardingPage() {
     checkOnboarding()
   }, [router])
 
-  const updateOnboardingStep = async (step: number) => {
-    if (!businessId) return
-
+  const updateOnboardingStep = async (step: number, extra?: Record<string, unknown>) => {
     try {
       await fetch('/api/onboarding', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ current_step: step }),
+        body: JSON.stringify({ current_step: step, ...extra }),
       })
     } catch (error) {
       console.error('Error updating onboarding step:', error)
     }
   }
 
-  const handleNext = (stepData?: any) => {
-    // Save step data
-    const stepKey = ['', '', 'hours', 'service', 'barber', 'branding'][currentStep]
-    if (stepKey && stepData) {
-      setData((prev) => ({ ...prev, [stepKey]: stepData }))
-    }
+  // ─── Turbo Defaults: one-click apply ─────────────────
 
-    const nextStep = currentStep + 1
-    setCurrentStep(nextStep)
-    updateOnboardingStep(nextStep)
-  }
-
-  const handleBack = () => {
-    const prevStep = currentStep - 1
-    setCurrentStep(prevStep)
-    updateOnboardingStep(prevStep)
-  }
-
-  const handleSkipBranding = () => {
-    handleNext()
-  }
-
-  const handleComplete = async () => {
+  const handleApplyDefaults = async () => {
     if (!businessId) return
-
     setIsSaving(true)
 
     try {
       const supabase = createClient()
 
-      // Save operating hours
-      if (data.hours) {
-        await supabase
+      // Save defaults in parallel
+      await Promise.all([
+        supabase
           .from('businesses')
-          .update({ operating_hours: data.hours as any })
-          .eq('id', businessId)
-      }
-
-      // Save service
-      if (data.service) {
-        await supabase.from('services').insert({
+          .update({ operating_hours: DEFAULT_HOURS as any })
+          .eq('id', businessId),
+        supabase.from('services').insert({
           business_id: businessId,
-          name: data.service.name,
-          price: data.service.price,
-          duration_minutes: data.service.duration_minutes,
-        })
-      }
-
-      // Save barber
-      if (data.barber) {
-        await supabase.from('barbers').insert({
+          name: 'Corte Regular',
+          price: 5000,
+          duration_minutes: 30,
+        }),
+        supabase.from('barbers').insert({
           business_id: businessId,
-          name: data.barber.name,
-          phone: data.barber.phone || '',
-          email: data.barber.email || 'noreply@example.com',
-        } as any)
-      }
+          name: businessName,
+          phone: '',
+          email: 'noreply@example.com',
+        } as any),
+      ])
 
-      // Save branding
-      if (data.branding) {
-        const updates: any = {
-          brand_primary_color: data.branding.primaryColor,
-        }
+      // Mark step 3 + defaults_applied
+      await updateOnboardingStep(3, { defaults_applied: true })
 
-        // Upload logo if provided
-        if (data.branding.logo) {
-          const fileName = `${businessId}-${Date.now()}.${data.branding.logo.name.split('.').pop()}`
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('logos')
-            .upload(fileName, data.branding.logo, {
-              cacheControl: '3600',
-              upsert: false,
-            })
+      setIsSaving(false)
+      setCurrentStep(3) // Skip to share link
+    } catch (error) {
+      console.error('Error applying defaults:', error)
+      setIsSaving(false)
+    }
+  }
 
-          if (!uploadError && uploadData) {
-            const {
-              data: { publicUrl },
-            } = supabase.storage.from('logos').getPublicUrl(uploadData.path)
+  // ─── Customize path: save data from setup accordion ───
 
-            updates.logo_url = publicUrl
-          }
-        }
+  const handleSetupComplete = async (setupData: {
+    hours: OperatingHours
+    service: ServiceData
+    barber: BarberData
+  }) => {
+    if (!businessId) return
+    setIsSaving(true)
 
-        await supabase.from('businesses').update(updates).eq('id', businessId)
-      }
+    try {
+      const supabase = createClient()
 
-      // Mark onboarding as completed
+      await Promise.all([
+        supabase
+          .from('businesses')
+          .update({ operating_hours: setupData.hours as any })
+          .eq('id', businessId),
+        supabase.from('services').insert({
+          business_id: businessId,
+          name: setupData.service.name,
+          price: setupData.service.price,
+          duration_minutes: setupData.service.duration_minutes,
+        }),
+        supabase.from('barbers').insert({
+          business_id: businessId,
+          name: setupData.barber.name,
+          phone: setupData.barber.phone || '',
+          email: setupData.barber.email || 'noreply@example.com',
+        } as any),
+      ])
+
+      setData(setupData)
+      await updateOnboardingStep(3)
+
+      setIsSaving(false)
+      setCurrentStep(3)
+    } catch (error) {
+      console.error('Error saving setup:', error)
+      setIsSaving(false)
+    }
+  }
+
+  // ─── Complete: mark done and go to dashboard ──────────
+
+  const handleComplete = async () => {
+    try {
       await fetch('/api/onboarding', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed: true }),
       })
 
-      // Redirect to dashboard
       router.push('/dashboard')
       router.refresh()
     } catch (error) {
       console.error('Error completing onboarding:', error)
-      setIsSaving(false)
     }
   }
+
+  // ─── Loading states ───────────────────────────────────
 
   if (isLoading) {
     return (
@@ -229,13 +227,15 @@ export default function OnboardingPage() {
     )
   }
 
+  // ─── Render ───────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Progress bar */}
-        {currentStep > 1 && currentStep < totalSteps && (
+        {/* Progress bar — only on step 2 (customize path) */}
+        {currentStep === 2 && (
           <div className="mb-12">
-            <ProgressBar currentStep={currentStep - 1} totalSteps={totalSteps - 2} />
+            <ProgressBar currentStep={1} totalSteps={2} />
           </div>
         )}
 
@@ -244,46 +244,36 @@ export default function OnboardingPage() {
           {currentStep === 1 && (
             <Welcome
               key="welcome"
-              onNext={handleNext}
+              onApplyDefaults={handleApplyDefaults}
+              onCustomize={() => {
+                setCurrentStep(2)
+                updateOnboardingStep(2)
+              }}
               onSkip={() => router.push('/dashboard')}
               businessName={businessName}
             />
           )}
 
           {currentStep === 2 && (
-            <Hours key="hours" onNext={handleNext} onBack={handleBack} initialHours={data.hours} />
+            <Setup
+              key="setup"
+              onNext={handleSetupComplete}
+              onBack={() => {
+                setCurrentStep(1)
+                updateOnboardingStep(1)
+              }}
+              initialData={data}
+              businessName={businessName}
+            />
           )}
 
           {currentStep === 3 && (
-            <Service
-              key="service"
-              onNext={handleNext}
-              onBack={handleBack}
-              initialService={data.service}
+            <ShareLink
+              key="share-link"
+              onComplete={handleComplete}
+              businessName={businessName}
+              slug={businessSlug}
             />
-          )}
-
-          {currentStep === 4 && (
-            <Barber
-              key="barber"
-              onNext={handleNext}
-              onBack={handleBack}
-              initialBarber={data.barber}
-            />
-          )}
-
-          {currentStep === 5 && (
-            <Branding
-              key="branding"
-              onNext={handleNext}
-              onBack={handleBack}
-              onSkip={handleSkipBranding}
-              initialBranding={data.branding}
-            />
-          )}
-
-          {currentStep === 6 && (
-            <Success key="success" onComplete={handleComplete} businessName={businessName} />
           )}
         </AnimatePresence>
       </div>

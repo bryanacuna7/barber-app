@@ -390,6 +390,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     scheduledAt: scheduled_at,
   })
 
+  // Track first_booking_created analytics event (non-blocking)
+  ;(async () => {
+    try {
+      const analyticsClient = await createServiceClient()
+      const { count } = await analyticsClient
+        .from('appointments')
+        .select('id', { count: 'exact', head: true })
+        .eq('business_id', business.id)
+
+      if (count === 1) {
+        // analytics_events not in generated types yet — cast needed until `supabase gen types`
+        await (analyticsClient as any).from('analytics_events').insert({
+          business_id: business.id,
+          event_name: 'first_booking_created',
+          metadata: { appointment_id: appointment.id, source: 'web_booking' },
+        })
+      }
+    } catch (error) {
+      logger.warn({ businessId: business.id, error }, 'Failed to track first_booking_created')
+    }
+  })()
+
   // Consume smart attribution token when present (non-blocking, never blocks booking)
   if (smart_token) {
     consumeSmartAttributionToken({

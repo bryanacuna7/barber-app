@@ -65,7 +65,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json()
-    const { current_step, completed, skipped } = body
+    const { current_step, completed, skipped, defaults_applied } = body
 
     // Build update object
     const updates: any = {}
@@ -74,9 +74,12 @@ export async function PATCH(request: Request) {
       updates.completed = completed
       if (completed) {
         updates.completed_at = new Date().toISOString()
+      } else {
+        updates.completed_at = null
       }
     }
     if (skipped !== undefined) updates.skipped = skipped
+    if (defaults_applied !== undefined) updates.defaults_applied = defaults_applied
 
     // Update onboarding status
     const { data, error } = await supabase

@@ -512,17 +512,33 @@ Aggregated duration statistics for smart duration prediction. Each row represent
 
 ### `business_onboarding`
 
-**Created in:** `012_onboarding.sql`
+**Created in:** `012_onboarding.sql`, **Modified in:** `046_onboarding_redesign.sql`
+
+```sql
+- business_id           UUID PRIMARY KEY REFERENCES businesses(id) UNIQUE
+- completed             BOOLEAN DEFAULT false
+- current_step          INT CHECK (1-3)
+- completed_at          TIMESTAMPTZ
+- skipped               BOOLEAN DEFAULT false
+- defaults_applied      BOOLEAN DEFAULT false
+- created_at            TIMESTAMPTZ
+- updated_at            TIMESTAMPTZ
+```
+
+### `analytics_events`
+
+**Created in:** `046_onboarding_redesign.sql`
 
 ```sql
 - id                    UUID PRIMARY KEY
-- business_id           UUID REFERENCES businesses(id) UNIQUE
+- business_id           UUID REFERENCES businesses(id) ON DELETE CASCADE
+- event_name            TEXT NOT NULL
+- metadata              JSONB DEFAULT '{}'
 - created_at            TIMESTAMPTZ
-- updated_at            TIMESTAMPTZ
-- completed_at          TIMESTAMPTZ
-- current_step          INT
-- steps_completed       JSONB
 ```
+
+**Indexes:** business_id, event_name, created_at, (business_id, created_at)
+**RLS:** Owners SELECT own events. INSERT via service role only.
 
 ### `tour_progress`
 
