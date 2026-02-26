@@ -16,6 +16,7 @@ import { CommandPaletteProvider } from '@/components/dashboard/command-palette'
 import { AlertTriangle, Lock } from 'lucide-react'
 import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
+import { normalizeDisplayBusinessName } from '@/lib/branding'
 
 const manifestVersion =
   process.env.NEXT_PUBLIC_MANIFEST_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '1'
@@ -37,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
     .eq('id', roleInfo.businessId)
     .maybeSingle()
 
-  const businessName = business?.name?.trim()
+  const businessName = normalizeDisplayBusinessName(business?.name)
   if (!businessName) return {}
 
   const params = new URLSearchParams({
@@ -194,7 +195,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     )
   }
 
-  const businessName = business.name || 'Mi Barbería'
+  const businessName = normalizeDisplayBusinessName(business.name)
   const brandColor = business.brand_primary_color || '#27272A'
   const brandSecondary = business.brand_secondary_color || null
   const logoUrl = business.logo_url || null

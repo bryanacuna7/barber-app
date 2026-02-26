@@ -1,6 +1,7 @@
 import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { normalizeDisplayBusinessName } from '@/lib/branding'
 
 export async function GET() {
   try {
@@ -92,7 +93,7 @@ export async function GET() {
       totalClients: totalClients || 0,
       business: {
         id: business.id,
-        name: business.name,
+        name: normalizeDisplayBusinessName(business.name),
         slug: business.slug,
       },
     })
