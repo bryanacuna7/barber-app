@@ -6,7 +6,7 @@
  * Optimized for mobile-first touch interaction
  */
 
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import {
   BarChart,
   Bar,
@@ -22,6 +22,7 @@ import { type NameType, type ValueType } from 'recharts/types/component/DefaultT
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Scissors } from 'lucide-react'
 import { ChartTooltip } from '@/components/analytics/chart-tooltip'
+import { useChartColors } from '@/components/analytics/use-chart-colors'
 import { formatCurrencyCompactMillions } from '@/lib/utils'
 
 interface ServicesChartProps {
@@ -34,85 +35,6 @@ interface ServicesChartProps {
   }>
   period: 'week' | 'month' | 'year'
   height?: number
-}
-
-function toRgbChannels(color: string, fallback: string): string {
-  const hex = color.trim().match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i)
-  if (hex) {
-    return `${parseInt(hex[1], 16)}, ${parseInt(hex[2], 16)}, ${parseInt(hex[3], 16)}`
-  }
-
-  const rgb = color
-    .trim()
-    .match(/^rgba?\(\s*(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})(?:[\s,\/]+[\d.]+)?\s*\)$/i)
-  if (rgb) {
-    return `${rgb[1]}, ${rgb[2]}, ${rgb[3]}`
-  }
-
-  return fallback
-}
-
-function useChartColors() {
-  const [colors, setColors] = useState({
-    accent: '#6d7cff',
-    grid: '#e5e7eb',
-    axis: '#9ca3af',
-    winner: '#f59e0b',
-    winnerRgb: '245, 158, 11',
-    bars: [
-      'rgba(109, 124, 255, 0.72)',
-      'rgba(109, 124, 255, 0.56)',
-      'rgba(109, 124, 255, 0.42)',
-      'rgba(109, 124, 255, 0.32)',
-    ],
-    tooltipBg: 'rgba(18, 22, 30, 0.76)',
-    tooltipBorder: 'rgba(163, 175, 196, 0.16)',
-    tooltipText: '#f5f7fb',
-  })
-  useEffect(() => {
-    const update = () => {
-      const root = document.documentElement
-      const s = getComputedStyle(document.documentElement)
-      const isDarkTheme =
-        root.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches
-      const readableAccent = (
-        isDarkTheme
-          ? s.getPropertyValue('--brand-primary-on-dark')
-          : s.getPropertyValue('--brand-primary-on-light')
-      ).trim()
-      const brandRgb = s.getPropertyValue('--brand-primary-rgb').trim() || '109, 124, 255'
-      const winner = s.getPropertyValue('--color-warning').trim() || '#f59e0b'
-
-      setColors({
-        accent: readableAccent || s.getPropertyValue('--brand-primary').trim() || '#6d7cff',
-        grid: s.getPropertyValue('--chart-grid').trim() || '#e5e7eb',
-        axis: s.getPropertyValue('--chart-axis').trim() || '#9ca3af',
-        winner,
-        winnerRgb: toRgbChannels(winner, '245, 158, 11'),
-        bars: [
-          `rgba(${brandRgb}, 0.72)`,
-          `rgba(${brandRgb}, 0.56)`,
-          `rgba(${brandRgb}, 0.42)`,
-          `rgba(${brandRgb}, 0.32)`,
-        ],
-        tooltipBg: isDarkTheme ? 'rgba(18, 22, 30, 0.76)' : 'rgba(255, 255, 255, 0.9)',
-        tooltipBorder: isDarkTheme ? 'rgba(163, 175, 196, 0.16)' : 'rgba(15, 23, 42, 0.12)',
-        tooltipText: isDarkTheme ? '#f5f7fb' : '#0f172a',
-      })
-    }
-
-    update()
-    const root = document.documentElement
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const observer = new MutationObserver(update)
-    observer.observe(root, { attributes: true, attributeFilter: ['class', 'style'] })
-    mq.addEventListener('change', update)
-    return () => {
-      observer.disconnect()
-      mq.removeEventListener('change', update)
-    }
-  }, [])
-  return colors
 }
 
 function ServicesTooltip(
@@ -140,8 +62,8 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
   void period
   const chart = useChartColors()
 
-  // Show top 5 services
-  const topServices = data.slice(0, 5)
+  // Memoize top 5 slice — avoids new array reference on every render
+  const topServices = useMemo(() => data.slice(0, 5), [data])
 
   // Brand-derived rank colors (monochromatic, decreasing intensity)
   const barOpacities = [1, 0.75, 0.55, 0.4, 0.28]

@@ -33,7 +33,32 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - 90)
 
-    // Query appointments grouped by day-of-week and hour in business timezone
+    // Try RPC first (migration 047 — DB-side timezone-aware aggregation)
+    const { data: rpcResult, error: rpcError } = await (supabase as any).rpc('get_demand_heatmap', {
+      p_business_id: business.id,
+      p_start_date: startDate.toISOString(),
+      p_timezone: timezone,
+    })
+
+    if (!rpcError && rpcResult) {
+      const cells = ((rpcResult.cells as any[]) || []).map((c: any) => ({
+        day: Number(c.day),
+        hour: Number(c.hour),
+        count: Number(c.count),
+      }))
+      return NextResponse.json({
+        cells,
+        maxCount: Number(rpcResult.maxCount ?? 0),
+        totalAppointments: Number(rpcResult.totalAppointments ?? 0),
+        operatingHours: (business as any).operating_hours ?? null,
+      })
+    }
+
+    // Fallback: original JS aggregation (safe for pre-migration deploy)
+    if (rpcError) {
+      console.warn(`[analytics/heatmap] RPC fallback: ${rpcError.code} - ${rpcError.message}`)
+    }
+
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
       .select('scheduled_at')
@@ -45,43 +70,38 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
-    // Group by day+hour in business timezone (client-side aggregation to avoid raw SQL)
     const cellMap = new Map<string, number>()
     let maxCount = 0
 
+    const hourFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      hour12: false,
+      timeZone: timezone,
+    })
+    const dayFormatter = new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      timeZone: timezone,
+    })
+    const dayLookup: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    }
+
     for (const apt of appointments || []) {
       const date = new Date(apt.scheduled_at)
-      // Use Intl.DateTimeFormat for timezone-aware extraction (sufficient for aggregation)
-      const hourFormatter = new Intl.DateTimeFormat('en-US', {
-        hour: 'numeric',
-        hour12: false,
-        timeZone: timezone,
-      })
-      const dayFormatter = new Intl.DateTimeFormat('en-US', {
-        weekday: 'short',
-        timeZone: timezone,
-      })
-
       const hour = parseInt(hourFormatter.format(date), 10) % 24
-      const dayStr = dayFormatter.format(date)
-      const dayMap: Record<string, number> = {
-        Sun: 0,
-        Mon: 1,
-        Tue: 2,
-        Wed: 3,
-        Thu: 4,
-        Fri: 5,
-        Sat: 6,
-      }
-      const day = dayMap[dayStr] ?? 0
-
+      const day = dayLookup[dayFormatter.format(date)] ?? 0
       const key = `${day}-${hour}`
       const count = (cellMap.get(key) || 0) + 1
       cellMap.set(key, count)
       if (count > maxCount) maxCount = count
     }
 
-    // Convert map to array
     const cells: HeatmapCell[] = []
     for (const [key, count] of cellMap) {
       const [day, hour] = key.split('-').map(Number)

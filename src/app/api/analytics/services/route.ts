@@ -33,7 +33,29 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
         break
     }
 
-    // Get all services
+    // Try RPC first (migration 047 — DB-side LEFT JOIN aggregation, zero row egress)
+    const { data: rpcResult, error: rpcError } = await (supabase as any).rpc(
+      'get_service_analytics',
+      { p_business_id: business.id, p_start_date: startDate.toISOString() }
+    )
+
+    if (!rpcError && rpcResult) {
+      return NextResponse.json({
+        period,
+        services: (rpcResult as any[]).map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          bookings: Number(s.bookings ?? 0),
+          revenue: Number(s.revenue ?? 0),
+        })),
+      })
+    }
+
+    // Fallback: original JS aggregation (safe for pre-migration deploy)
+    if (rpcError) {
+      console.warn(`[analytics/services] RPC fallback: ${rpcError.code} - ${rpcError.message}`)
+    }
+
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select('id, name, price')
@@ -41,11 +63,9 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       .eq('is_active', true)
 
     if (servicesError) {
-      console.error('Error fetching services:', servicesError)
       return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 })
     }
 
-    // Get appointments for services in period
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
       .select('service_id, price')
@@ -55,21 +75,13 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       .not('service_id', 'is', null)
 
     if (appointmentsError) {
-      console.error('Error fetching appointments:', appointmentsError)
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
-    // Aggregate by service
     const serviceStats = new Map<string, { name: string; bookings: number; revenue: number }>()
-
     for (const service of services || []) {
-      serviceStats.set(service.id, {
-        name: service.name,
-        bookings: 0,
-        revenue: 0,
-      })
+      serviceStats.set(service.id, { name: service.name, bookings: 0, revenue: 0 })
     }
-
     for (const apt of appointments || []) {
       const existing = serviceStats.get(apt.service_id)
       if (existing) {
@@ -78,19 +90,12 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       }
     }
 
-    // Convert to array and sort by revenue
     const results = Array.from(serviceStats.entries())
-      .map(([id, stats]) => ({
-        id,
-        ...stats,
-      }))
+      .map(([id, stats]) => ({ id, ...stats }))
       .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10) // Top 10 services
+      .slice(0, 10)
 
-    return NextResponse.json({
-      period,
-      services: results,
-    })
+    return NextResponse.json({ period, services: results })
   } catch (error) {
     console.error('Error in GET /api/analytics/services:', error)
     return errorResponse('Error interno del servidor')

@@ -39,7 +39,33 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
         break
     }
 
-    // Get completed appointments in period
+    // Try RPC first (migration 047 — DB-side timezone-aware grouping)
+    const { data: rpcResult, error: rpcError } = await (supabase as any).rpc('get_revenue_series', {
+      p_business_id: business.id,
+      p_start_date: startDate.toISOString(),
+      p_group_by: groupBy,
+    })
+
+    if (!rpcError && rpcResult) {
+      // RPC returns pre-aggregated rows — fill empty date buckets in JS
+      const rpcMap = new Map<string, { revenue: number; appointments: number }>()
+      for (const row of rpcResult as any[]) {
+        rpcMap.set(row.date_key, {
+          revenue: Number(row.revenue ?? 0),
+          appointments: Number(row.appointments ?? 0),
+        })
+      }
+      const series = fillDateBuckets(rpcMap, groupBy, startDate, now)
+      return NextResponse.json({ period, groupBy, series })
+    }
+
+    // Fallback: original JS aggregation (safe for pre-migration deploy)
+    if (rpcError) {
+      console.warn(
+        `[analytics/revenue-series] RPC fallback: ${rpcError.code} - ${rpcError.message}`
+      )
+    }
+
     const { data: appointments, error: appointmentsError } = await supabase
       .from('appointments')
       .select('price, scheduled_at')
@@ -49,18 +75,12 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       .order('scheduled_at', { ascending: true })
 
     if (appointmentsError) {
-      console.error('Error fetching appointments:', appointmentsError)
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
-    // Group data by period
     const series = groupByPeriod(appointments || [], groupBy, startDate, now)
 
-    return NextResponse.json({
-      period,
-      groupBy,
-      series,
-    })
+    return NextResponse.json({ period, groupBy, series })
   } catch (error) {
     console.error('Error in GET /api/analytics/revenue-series:', error)
     return errorResponse('Error interno del servidor')
@@ -68,7 +88,52 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 })
 
 /**
- * Group appointments by time period
+ * Fill empty date buckets from pre-aggregated RPC data.
+ * Ensures chart shows 0-revenue days/months without gaps.
+ */
+function fillDateBuckets(
+  rpcMap: Map<string, { revenue: number; appointments: number }>,
+  groupBy: 'day' | 'week' | 'month',
+  startDate: Date,
+  endDate: Date
+): Array<{ date: string; revenue: number; appointments: number }> {
+  const dataMap = new Map<string, { revenue: number; appointments: number }>()
+
+  // Initialize all periods with 0
+  let current = startOfDay(startDate)
+  const end = startOfDay(endDate)
+
+  while (current <= end) {
+    let key: string
+    if (groupBy === 'day') {
+      key = format(current, 'yyyy-MM-dd')
+    } else if (groupBy === 'month') {
+      key = format(current, 'yyyy-MM')
+    } else {
+      key = format(current, 'yyyy-ww')
+    }
+    if (!dataMap.has(key)) {
+      dataMap.set(key, rpcMap.get(key) || { revenue: 0, appointments: 0 })
+    }
+    current =
+      groupBy === 'day'
+        ? addDays(current, 1)
+        : groupBy === 'month'
+          ? addMonths(current, 1)
+          : addDays(current, 7)
+  }
+
+  return Array.from(dataMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, data]) => ({
+      date: formatDateLabel(key, groupBy),
+      revenue: data.revenue,
+      appointments: data.appointments,
+    }))
+}
+
+/**
+ * Group appointments by time period (fallback — raw appointment rows)
  */
 function groupByPeriod(
   appointments: Array<{ scheduled_at: string; price: number | null }>,

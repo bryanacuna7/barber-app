@@ -24,20 +24,16 @@ interface BarbersLeaderboardProps {
   period: 'week' | 'month' | 'year'
 }
 
+// Module-level constant — no re-creation per render
+const RANK_BADGES: Record<number, string> = {
+  1: 'bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 ring-1 ring-amber-300/60 shadow-[0_10px_20px_rgba(251,191,36,0.24)]',
+  2: 'bg-gradient-to-br from-zinc-200 to-zinc-400 text-zinc-800 ring-1 ring-zinc-200/70 shadow-[0_10px_20px_rgba(161,161,170,0.2)]',
+  3: 'bg-gradient-to-br from-orange-300 to-orange-500 text-orange-950 ring-1 ring-orange-300/55 shadow-[0_10px_20px_rgba(249,115,22,0.2)]',
+}
+const DEFAULT_RANK_BADGE = 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
+
 export function BarbersLeaderboard({ data, period }: BarbersLeaderboardProps) {
   void period
-  const getRankBadge = (rank: number) => {
-    if (rank === 1) {
-      return 'bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 ring-1 ring-amber-300/60 shadow-[0_10px_20px_rgba(251,191,36,0.24)]'
-    }
-    if (rank === 2) {
-      return 'bg-gradient-to-br from-zinc-200 to-zinc-400 text-zinc-800 ring-1 ring-zinc-200/70 shadow-[0_10px_20px_rgba(161,161,170,0.2)]'
-    }
-    if (rank === 3) {
-      return 'bg-gradient-to-br from-orange-300 to-orange-500 text-orange-950 ring-1 ring-orange-300/55 shadow-[0_10px_20px_rgba(249,115,22,0.2)]'
-    }
-    return 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
-  }
 
   return (
     <Card className="border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 backdrop-blur-none">
@@ -63,7 +59,7 @@ export function BarbersLeaderboard({ data, period }: BarbersLeaderboardProps) {
                 {/* Rank */}
                 <div className="flex-shrink-0">
                   <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg ${getRankBadge(idx + 1)}`}
+                    className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg ${RANK_BADGES[idx + 1] || DEFAULT_RANK_BADGE}`}
                   >
                     {idx + 1}
                   </div>

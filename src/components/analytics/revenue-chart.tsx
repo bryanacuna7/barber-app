@@ -6,7 +6,7 @@
  * Optimized for mobile-first touch interaction
  */
 
-import { useState, useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 import {
   AreaChart,
   Area,
@@ -21,6 +21,7 @@ import { type NameType, type ValueType } from 'recharts/types/component/DefaultT
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { ChartTooltip } from '@/components/analytics/chart-tooltip'
+import { useChartColors } from '@/components/analytics/use-chart-colors'
 import { formatCurrencyCompactMillions } from '@/lib/utils'
 
 interface RevenueChartProps {
@@ -32,51 +33,6 @@ interface RevenueChartProps {
   }>
   period: 'week' | 'month' | 'year'
   height?: number
-}
-
-function useChartColors() {
-  const [colors, setColors] = useState({
-    accent: '#6d7cff',
-    grid: '#e5e7eb',
-    axis: '#9ca3af',
-    tooltipBg: 'rgba(18, 22, 30, 0.86)',
-    tooltipBorder: 'rgba(163, 175, 196, 0.16)',
-    tooltipText: '#f5f7fb',
-  })
-  useEffect(() => {
-    const update = () => {
-      const root = document.documentElement
-      const s = getComputedStyle(document.documentElement)
-      const isDarkTheme =
-        root.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches
-      const readableAccent = (
-        isDarkTheme
-          ? s.getPropertyValue('--brand-primary-on-dark')
-          : s.getPropertyValue('--brand-primary-on-light')
-      ).trim()
-
-      setColors({
-        accent: readableAccent || s.getPropertyValue('--brand-primary').trim() || '#6d7cff',
-        grid: s.getPropertyValue('--chart-grid').trim() || '#e5e7eb',
-        axis: s.getPropertyValue('--chart-axis').trim() || '#9ca3af',
-        tooltipBg: isDarkTheme ? 'rgba(18, 22, 30, 0.86)' : 'rgba(255, 255, 255, 0.96)',
-        tooltipBorder: isDarkTheme ? 'rgba(163, 175, 196, 0.16)' : 'rgba(15, 23, 42, 0.12)',
-        tooltipText: isDarkTheme ? '#f5f7fb' : '#0f172a',
-      })
-    }
-
-    update()
-    const root = document.documentElement
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const observer = new MutationObserver(update)
-    observer.observe(root, { attributes: true, attributeFilter: ['class', 'style'] })
-    mq.addEventListener('change', update)
-    return () => {
-      observer.disconnect()
-      mq.removeEventListener('change', update)
-    }
-  }, [])
-  return colors
 }
 
 function RevenueTooltip(
