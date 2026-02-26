@@ -71,9 +71,26 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone()
-    // Respect explicit redirect param (e.g., ?redirect=/mi-cuenta for client users)
     const redirectTo = request.nextUrl.searchParams.get('redirect')
-    url.pathname = redirectTo || '/dashboard'
+    // Validate: internal path, no protocol-relative, no auth loop
+    const isSafeRedirect =
+      redirectTo &&
+      redirectTo.startsWith('/') &&
+      !redirectTo.startsWith('//') &&
+      !redirectTo.startsWith('/login') &&
+      !redirectTo.startsWith('/register')
+    if (isSafeRedirect) {
+      url.pathname = redirectTo
+    } else {
+      // Smart redirect: clients → /mi-cuenta, others → /dashboard
+      try {
+        const { detectUserRole } = await import('@/lib/auth/roles')
+        const roleInfo = await detectUserRole(supabase, user.id)
+        url.pathname = roleInfo?.role === 'client' ? '/mi-cuenta' : '/dashboard'
+      } catch {
+        url.pathname = '/dashboard'
+      }
+    }
     url.searchParams.delete('redirect')
     return NextResponse.redirect(url)
   }

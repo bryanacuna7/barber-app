@@ -4,6 +4,21 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.17] - 2026-02-25
+
+### Nuevo
+
+- Los clientes registrados ahora ven un acceso directo a "Mi Cuenta" al reservar
+- Banner informativo que muestra citas programadas en la pagina de reservas
+- Al llegar al paso "Tus Datos", el nombre y telefono se llenan automaticamente si ya reservaste antes
+- Enlace "Ver todas mis citas" en la pagina de seguimiento de cita
+- Boton "Ver mis citas" prominente despues de completar una reserva
+
+### Mejorado
+
+- Al iniciar sesion, los clientes ahora van directo a "Mi Cuenta" en vez del panel de administracion
+- Los enlaces de reserva ya no muestran opciones de cliente a duenos o barberos
+
 ## [0.9.16] - 2026-02-25
 
 ### Corregido

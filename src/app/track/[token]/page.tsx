@@ -16,10 +16,20 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { Calendar, Scissors, User, Clock, Activity, AlertCircle, CalendarPlus } from 'lucide-react'
+import {
+  Calendar,
+  CalendarCheck,
+  Scissors,
+  User,
+  Clock,
+  Activity,
+  AlertCircle,
+  CalendarPlus,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { animations } from '@/lib/design-system'
 import { CancelRescheduleActions } from '@/components/track/cancel-reschedule-actions'
+import { createClient } from '@/lib/supabase/client'
 import type { CancellationPolicy } from '@/types'
 
 // =====================================================
@@ -160,6 +170,29 @@ export default function TrackingPage() {
   const token = params.token as string
   const { data, isLoading, error } = usePublicQueue(token)
   const [cancelPolicy, setCancelPolicy] = useState<CancellationPolicy | null>(null)
+  const [isClient, setIsClient] = useState(false)
+
+  // Check if authenticated user is a client (for "Mi Cuenta" link)
+  useEffect(() => {
+    async function checkRole() {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        setIsClient(false)
+        return
+      }
+      try {
+        const { detectUserRole } = await import('@/lib/auth/roles')
+        const roleInfo = await detectUserRole(supabase, user.id)
+        setIsClient(roleInfo?.role === 'client')
+      } catch {
+        setIsClient(false)
+      }
+    }
+    checkRole()
+  }, [])
 
   // Apply brand color as CSS variable
   useEffect(() => {
@@ -236,7 +269,16 @@ export default function TrackingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800 py-4 text-center">
+      <footer className="mt-auto border-t border-zinc-200 dark:border-zinc-800 py-4 text-center space-y-2">
+        {isClient && (
+          <a
+            href="/mi-cuenta"
+            className="inline-flex items-center justify-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400"
+          >
+            <CalendarCheck className="h-4 w-4" />
+            Ver todas mis citas
+          </a>
+        )}
         <p className="text-xs text-muted">Seguimiento en vivo por BarberApp</p>
       </footer>
     </div>

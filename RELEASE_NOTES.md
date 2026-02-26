@@ -8,9 +8,12 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.16
+## v0.9.17
 
-### Registro corregido
+### Tu cuenta, siempre a la mano
 
-- El registro de nuevas barberias ahora funciona sin errores
-- Los enlaces de confirmacion de correo ahora redirigen correctamente a la app
+- Al reservar, ahora ves un acceso directo a "Mi Cuenta" con tus citas programadas
+- Tus datos (nombre, telefono) se llenan automaticamente en el formulario de reserva
+- Despues de reservar, un boton "Ver mis citas" te lleva directo a tu historial
+- Al iniciar sesion, vas directo a "Mi Cuenta" sin pasos extra
+- Enlace "Ver todas mis citas" en la pagina de seguimiento de tu cita

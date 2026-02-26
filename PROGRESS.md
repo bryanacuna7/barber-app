@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-25 (Session 187 — In-App Guide + Dead Links Fix + Contextual Tips)
+- **Last Updated:** 2026-02-25 (Session 188 — Client Booking Bridge + Auto-Fill)
 - **Branch:** `main`
-- **Version:** `0.9.15`
+- **Version:** `0.9.17`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,25 @@
 ---
 
 ## Recent Sessions
+
+### Session 188: Client Booking Bridge + Auto-Fill (2026-02-25)
+
+**Status:** COMPLETE. Deployed as v0.9.17.
+
+**What was done:**
+
+- **Login Smart Redirect:** Clients go to `/mi-cuenta`, owners/barbers to `/dashboard` (login + middleware)
+- **Open Redirect Prevention:** Safe redirect validation blocks `//`, `/login`, `/register` loops
+- **BookingHeader Pill:** "Mi Cuenta" link visible only for authenticated clients (not owners/barbers)
+- **Booking Banner:** Dismissible "Tienes citas programadas" banner for clients
+- **BookingSuccess CTA:** "Ver mis citas" button after completing a booking (clients only)
+- **Track Page Link:** "Ver todas mis citas" in footer for authenticated clients
+- **Owner/Barber Exclusion:** isClient gate checks `businesses.owner_id` + `barbers.user_id` to exclude staff
+- **Form Auto-Fill:** Pre-fills name, phone, email from `clients` table for returning clients (step 4)
+- **Deterministic Query:** `.order('created_at', { ascending: false })` for duplicate-safe client lookup
+
+**Files modified (5):** `login/page.tsx`, `middleware.ts`, `reservar/[slug]/page.tsx`, `BookingSuccess.tsx`, `track/[token]/page.tsx`
+**Files unchanged but verified:** `BookingHeader.tsx` (already had local changes)
 
 ### Session 187: In-App Guide + Dead Links Fix + Contextual Tips (2026-02-25)
 
@@ -260,7 +279,7 @@
 
 ### Working
 
-- v0.9.15 (Session 187: In-App Guide + Dead Links Fix + Contextual Tips)
+- v0.9.17 (Session 188: Client Booking Bridge + Auto-Fill)
 - All UX polish gates complete (E + F + card hierarchy + header CTA)
 - In-app guide with 10 sections, search, TOC, contextual tips
 - Zero dead links in mobile drawer menu

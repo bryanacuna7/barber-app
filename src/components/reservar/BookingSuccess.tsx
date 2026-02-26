@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CalendarPlus, CheckCircle, MessageCircle, Share2, Smartphone } from 'lucide-react'
+import {
+  CalendarCheck,
+  CalendarPlus,
+  CheckCircle,
+  MessageCircle,
+  Share2,
+  Smartphone,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { AnimatePresence } from 'framer-motion'
@@ -25,6 +32,7 @@ interface BookingSuccessProps {
   trackingToken: string | null
   barberName?: string | null
   pricing?: BookingPricing | null
+  isClient?: boolean
 }
 
 export function BookingSuccess({
@@ -38,6 +46,7 @@ export function BookingSuccess({
   trackingToken,
   barberName,
   pricing,
+  isClient,
 }: BookingSuccessProps) {
   const [showLoyaltyModal, setShowLoyaltyModal] = useState(false)
   const [hasLoyaltyProgram, setHasLoyaltyProgram] = useState(false)
@@ -303,6 +312,16 @@ export function BookingSuccess({
               <CalendarPlus className="h-5 w-5" />
               Agregar al Calendario
             </Button>
+          )}
+
+          {/* Client dashboard CTA — most important post-booking action for clients */}
+          {isClient && (
+            <a href="/mi-cuenta">
+              <Button variant="primary" className="w-full h-12 text-base gap-2.5">
+                <CalendarCheck className="h-5 w-5" />
+                Ver mis citas
+              </Button>
+            </a>
           )}
 
           <a

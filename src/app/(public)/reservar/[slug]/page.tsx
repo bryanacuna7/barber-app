@@ -69,6 +69,8 @@ export default function BookingPage() {
   const [loyaltyProgram, setLoyaltyProgram] = useState<LoyaltyProgram | null>(null)
   const [loadingLoyalty, setLoadingLoyalty] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+  const [showDashboardBanner, setShowDashboardBanner] = useState(true)
 
   // Load loyalty status for authenticated user
   useEffect(() => {
@@ -84,6 +86,55 @@ export default function BookingPage() {
         } = await supabase.auth.getUser()
 
         setIsAuthenticated(!!user)
+
+        // Check if user is a client of THIS business (not owner/barber)
+        if (user) {
+          // First, exclude owners and barbers of this business
+          const { data: biz } = await supabase
+            .from('businesses')
+            .select('owner_id')
+            .eq('id', business.id)
+            .single()
+          const isOwner = biz?.owner_id === user.id
+
+          let isBarber = false
+          if (!isOwner) {
+            const { data: barberRows } = await supabase
+              .from('barbers')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('business_id', business.id)
+              .limit(1)
+            isBarber = !!barberRows && barberRows.length > 0
+          }
+
+          if (isOwner || isBarber) {
+            setIsClient(false)
+          } else {
+            const { data: clientRows, error: clientErr } = await supabase
+              .from('clients')
+              .select('id, name, phone, email')
+              .eq('user_id', user.id)
+              .eq('business_id', business.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+            const foundClient = !clientErr && !!clientRows && clientRows.length > 0
+            setIsClient(foundClient)
+
+            // Pre-fill booking form with client's saved data
+            if (foundClient && clientRows[0]) {
+              const c = clientRows[0]
+              setBooking((prev) => ({
+                ...prev,
+                clientName: prev.clientName || c.name || '',
+                clientPhone: prev.clientPhone || c.phone || '',
+                clientEmail: prev.clientEmail || c.email || '',
+              }))
+            }
+          }
+        } else {
+          setIsClient(false)
+        }
 
         // Always get loyalty program (regardless of auth status)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -216,6 +267,7 @@ export default function BookingPage() {
         trackingToken={trackingToken}
         barberName={booking.barber?.name ?? null}
         pricing={bookingPricing}
+        isClient={isClient}
       />
     )
   }
@@ -231,7 +283,35 @@ export default function BookingPage() {
       </div>
 
       {/* Header */}
-      {business && <BookingHeader business={business} />}
+      {business && <BookingHeader business={business} isClient={isClient} />}
+
+      {/* Client dashboard banner — dismissible, session-only */}
+      {isClient && showDashboardBanner && (
+        <div className="relative z-10 mx-auto max-w-2xl px-4 mt-3">
+          <div className="flex items-center gap-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 px-4 py-3 border border-blue-200 dark:border-blue-800">
+            <CalendarCheck className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Tienes citas programadas
+              </p>
+              <a
+                href="/mi-cuenta"
+                className="text-sm font-semibold text-blue-600 dark:text-blue-400"
+              >
+                Ver mi cuenta &rarr;
+              </a>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowDashboardBanner(false)}
+              className="shrink-0 rounded-lg p-1 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+              aria-label="Cerrar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Progress Steps */}
       <ProgressSteps currentStep={step} barberCount={barbers.length} />

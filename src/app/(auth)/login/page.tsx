@@ -20,7 +20,7 @@ import { loginSchema } from '@/lib/validations/auth'
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
+  const explicitRedirect = searchParams.get('redirect')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -65,7 +65,35 @@ function LoginForm() {
     }
 
     clearErrors()
-    router.push(redirect)
+
+    // Validate redirect: internal path, no protocol-relative, no auth loop
+    const safeRedirect =
+      explicitRedirect &&
+      explicitRedirect.startsWith('/') &&
+      !explicitRedirect.startsWith('//') &&
+      !explicitRedirect.startsWith('/login') &&
+      !explicitRedirect.startsWith('/register')
+        ? explicitRedirect
+        : null
+
+    if (safeRedirect) {
+      router.push(safeRedirect)
+    } else {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (user) {
+          const { detectUserRole } = await import('@/lib/auth/roles')
+          const roleInfo = await detectUserRole(supabase, user.id)
+          router.push(roleInfo?.role === 'client' ? '/mi-cuenta' : '/dashboard')
+        } else {
+          router.push('/dashboard')
+        }
+      } catch {
+        router.push('/dashboard')
+      }
+    }
     router.refresh()
   }
 
