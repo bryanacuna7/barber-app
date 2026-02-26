@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { SettingsSearchModal } from '@/components/settings/settings-search-modal'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
+import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 
 const SETTINGS_CARDS = [
   {
@@ -196,6 +197,14 @@ export default function ConfiguracionPage() {
             </kbd>
           </Button>
         </div>
+
+        {/* Guide Tip */}
+        <GuideContextualTip
+          tipId="config-booking-link"
+          title="Compartí tu enlace de reservas"
+          description="Tus clientes pueden reservar 24/7 desde tu enlace único. Ponelo en tu Instagram, WhatsApp y redes sociales."
+          linkHref="/guia#reservas-online"
+        />
 
         {/* Navigation Cards Grid */}
         <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">

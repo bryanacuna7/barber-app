@@ -81,6 +81,7 @@ import { Input } from '@/components/ui/input'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
 import { NotificationBell } from '@/components/notifications/notification-bell'
+import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
 import { format, startOfMonth, isAfter, subDays, isSameDay, getDaysInMonth } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -673,6 +674,20 @@ export default function ClientesPageV2() {
                   </Button>
                 </div>
               </div>
+
+              {/* Guide Tip */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={animations.spring.default}
+              >
+                <GuideContextualTip
+                  tipId="clientes-loyalty"
+                  title="Premiá a tus clientes frecuentes"
+                  description="Activá el programa de lealtad para que tus clientes acumulen puntos y vuelvan más seguido."
+                  linkHref="/guia#clientes"
+                />
+              </motion.div>
 
               <div className={`${statsExpanded ? '' : 'hidden lg:block'}`}>
                 <ComponentErrorBoundary

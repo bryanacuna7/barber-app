@@ -39,6 +39,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
+import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Input } from '@/components/ui/input'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
@@ -685,6 +686,20 @@ function ServiciosContent() {
             </div>
           </motion.div>
 
+          {/* Guide Tip */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ ...animations.spring.default, delay: 0.05 }}
+          >
+            <GuideContextualTip
+              tipId="servicios-duration"
+              title="La duración importa"
+              description="La duración de cada servicio determina los slots disponibles para reservas online. Configurala lo más precisa posible."
+              linkHref="/guia#servicios"
+            />
+          </motion.div>
+
           {/* Main Layout: Content + Sidebar */}
           <div className="flex gap-6">
             {/* Main Content Area (Left) */}
@@ -752,87 +767,85 @@ function ServiciosContent() {
                 className="lg:hidden space-y-3"
               >
                 <AnimatePresence mode="popLayout">
-                {sortedServices.map((service) => {
-                  const categoryColor = getCategoryColor(service.category)
+                  {sortedServices.map((service) => {
+                    const categoryColor = getCategoryColor(service.category)
 
-                  const rightActions = [
-                    {
-                      icon: <Pencil className="h-5 w-5" />,
-                      label: 'Editar',
-                      color: 'bg-blue-500',
-                      onClick: () => openEditServiceForm(service),
-                    },
-                    {
-                      icon: <Trash2 className="h-5 w-5" />,
-                      label: 'Eliminar',
-                      color: 'bg-red-500',
-                      onClick: () => setDeleteService(service),
-                    },
-                  ]
+                    const rightActions = [
+                      {
+                        icon: <Pencil className="h-5 w-5" />,
+                        label: 'Editar',
+                        color: 'bg-blue-500',
+                        onClick: () => openEditServiceForm(service),
+                      },
+                      {
+                        icon: <Trash2 className="h-5 w-5" />,
+                        label: 'Eliminar',
+                        color: 'bg-red-500',
+                        onClick: () => setDeleteService(service),
+                      },
+                    ]
 
-                  return (
-                    <motion.div
-                      key={service.id}
-                      layout
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={animations.spring.layout}
-                    >
-                    <SwipeableRow rightActions={rightActions}>
-                      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
-                        {/* Row 1: Icon + Name */}
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800/60 flex-shrink-0">
-                              <ServiceIcon
-                                iconName={service.iconName}
-                                className="h-4.5 w-4.5 text-zinc-700 dark:text-zinc-200"
-                              />
-                            </span>
-                            <div className="min-w-0">
-                              <p className="font-semibold text-zinc-900 dark:text-white truncate">
-                                {service.name}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span
-                                  className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
-                                >
-                                  {getCategoryLabel(service.category)}
+                    return (
+                      <motion.div
+                        key={service.id}
+                        layout
+                        exit={{ opacity: 0, x: -100 }}
+                        transition={animations.spring.layout}
+                      >
+                        <SwipeableRow rightActions={rightActions}>
+                          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
+                            {/* Row 1: Icon + Name */}
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800/60 flex-shrink-0">
+                                  <ServiceIcon
+                                    iconName={service.iconName}
+                                    className="h-4.5 w-4.5 text-zinc-700 dark:text-zinc-200"
+                                  />
                                 </span>
-                                <span className="text-xs text-muted">
-                                  {service.duration_minutes} min
-                                </span>
+                                <div className="min-w-0">
+                                  <p className="font-semibold text-zinc-900 dark:text-white truncate">
+                                    {service.name}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span
+                                      className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ${categoryColor.bg} ${categoryColor.text}`}
+                                    >
+                                      {getCategoryLabel(service.category)}
+                                    </span>
+                                    <span className="text-xs text-muted">
+                                      {service.duration_minutes} min
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Row 2: Price + Bookings + Rating */}
-                        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                          <span className="font-bold text-zinc-900 dark:text-white">
-                            {formatCurrency(service.price)}
-                          </span>
-                          <span className="text-sm text-muted">
-                            {service.bookings_this_month} reservas
-                          </span>
-                          <span className="flex items-center gap-1 text-sm">
-                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                            <span className="text-zinc-700 dark:text-zinc-300">
-                              {service.avg_rating?.toFixed(1) || 'N/A'}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </SwipeableRow>
-                    </motion.div>
-                  )
-                })}
+                            {/* Row 2: Price + Bookings + Rating */}
+                            <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                              <span className="font-bold text-zinc-900 dark:text-white">
+                                {formatCurrency(service.price)}
+                              </span>
+                              <span className="text-sm text-muted">
+                                {service.bookings_this_month} reservas
+                              </span>
+                              <span className="flex items-center gap-1 text-sm">
+                                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                                <span className="text-zinc-700 dark:text-zinc-300">
+                                  {service.avg_rating?.toFixed(1) || 'N/A'}
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+                        </SwipeableRow>
+                      </motion.div>
+                    )
+                  })}
                 </AnimatePresence>
               </motion.div>
 
               {/* Desktop Table View */}
-              <div
-                className="hidden lg:block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow"
-              >
+              <div className="hidden lg:block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow">
                 <div className="relative">
                   <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white dark:from-zinc-900 z-10 sm:hidden" />
                   <div className="overflow-x-auto scrollbar-hide">

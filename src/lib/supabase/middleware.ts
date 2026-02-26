@@ -51,6 +51,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/lealtad') ||
     request.nextUrl.pathname.startsWith('/suscripcion') ||
     request.nextUrl.pathname.startsWith('/changelog') ||
+    request.nextUrl.pathname.startsWith('/guia') ||
     request.nextUrl.pathname.startsWith('/admin') ||
     request.nextUrl.pathname.startsWith('/mi-cuenta')
 

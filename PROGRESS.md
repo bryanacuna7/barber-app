@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-25 (Session 186 — Smart Duration Per-Client + Gap-Based Slots)
+- **Last Updated:** 2026-02-25 (Session 187 — In-App Guide + Dead Links Fix + Contextual Tips)
 - **Branch:** `main`
-- **Version:** `0.9.13`
+- **Version:** `0.9.15`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,25 @@
 ---
 
 ## Recent Sessions
+
+### Session 187: In-App Guide + Dead Links Fix + Contextual Tips (2026-02-25)
+
+**Status:** COMPLETE. Deployed as v0.9.15.
+
+**What was done:**
+
+- **In-App Guide (`/guia`):** 10 comprehensive sections covering all app features, with search (Fuse.js), desktop TOC sidebar (IntersectionObserver), mobile floating "Índice" pill
+- **Dead Links Fixed:** "Documentación" → "Guía de Uso" (`/guia`), "Soporte" → WhatsApp (`wa.me/50688888888`)
+- **Contextual Tips:** Dismissible blue info boxes on 5 key pages (dashboard, citas, servicios, clientes, configuración) linking to relevant guide sections
+- **Route Protection:** Added `/guia` to barber-allowed paths, middleware, mobile-header topLevelRoutes, bottom-nav, command-palette, sidebar
+- **Anchor Navigation:** Hash-based scroll after React hydration for deep links like `/guia#citas`
+- **Content Fix:** Removed "Creá tu cuenta" from Primeros Pasos (owners already have accounts)
+
+**Files created (7):** `src/lib/guide/guide-content.ts`, `src/components/guide/guide-section.tsx`, `src/components/guide/guide-search.tsx`, `src/components/guide/guide-toc-sidebar.tsx`, `src/components/guide/guide-toc-sheet.tsx`, `src/components/guide/guide-contextual-tip.tsx`, `src/app/(dashboard)/guia/page.tsx`
+
+**Files modified (12):** `roles.ts`, `middleware.ts`, `mobile-header.tsx`, `sidebar.tsx`, `bottom-nav.tsx`, `command-palette.tsx`, `more-menu-drawer.tsx`, `dashboard-content.tsx`, `configuracion/page.tsx`, `servicios/page-v2.tsx`, `clientes/page-v2.tsx`, `citas/page-v2.tsx`
+
+---
 
 ### Session 185: UX Polish + Deploy v0.9.8 (2026-02-24)
 
@@ -241,8 +260,10 @@
 
 ### Working
 
-- v0.9.8 (Session 184+185: security, orchestrator, blocks, permissions, exports, UX polish)
+- v0.9.15 (Session 187: In-App Guide + Dead Links Fix + Contextual Tips)
 - All UX polish gates complete (E + F + card hierarchy + header CTA)
+- In-app guide with 10 sections, search, TOC, contextual tips
+- Zero dead links in mobile drawer menu
 - Brand tokens, `text-muted`, `<Button>` component migrated
 - Charts theme-aware, PWA native, gestures hardened
 
@@ -271,4 +292,5 @@
 ### Next Steps
 
 1. **Button migration** (~30 remaining raw buttons across dashboard pages)
-2. Push 6 unpushed commits + deploy
+2. Comprehensive testing before sharing with first real barber client
+3. Landing page review

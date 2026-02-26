@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useBarberDayAppointments } from '@/hooks/queries/useAppointments'
@@ -406,11 +406,13 @@ function MiDiaPageContent() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="h-11 min-w-[104px] justify-center whitespace-nowrap px-4 leading-none"
+            withRipple={false}
+            className="h-11 w-11 min-w-[44px] rounded-2xl justify-center px-0 leading-none"
             aria-label="Actualizar citas"
             data-testid="refresh-button"
           >
-            Actualizar
+            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="sr-only">Actualizar</span>
           </Button>
         </div>
 

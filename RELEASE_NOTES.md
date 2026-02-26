@@ -8,21 +8,23 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.14
+## v0.9.15
 
-### Duracion inteligente por cliente
+### Guia de Uso integrada
 
-- El sistema aprende cuanto tarda cada cliente y ajusta los horarios automaticamente
-- Un cliente rapido ve intervalos de 20 min, uno detallista ve intervalos de 45 min
-- Se muestra el tiempo estimado con ~ cuando difiere del tiempo base (ej: ~40 min)
-- La prediccion mejora con cada cita completada
+- Nueva seccion "Guia de Uso" disponible desde el menu, sidebar y barra inferior
+- 10 secciones con instrucciones paso a paso: primeros pasos, citas, servicios, equipo, clientes, reservas online, configuracion, analiticas, pagos y como instalar la app
+- Buscador integrado para encontrar cualquier tema al instante
+- Indice de navegacion: sidebar fijo en desktop, boton flotante "Indice" en mobile
+- Consejos profesionales en cada seccion con tips practicos
 
-### Horarios mas precisos
+### Tips contextuales
 
-- Nuevo algoritmo que genera horarios basados en los huecos reales de la agenda
-- Mejor aprovechamiento del tiempo disponible entre citas existentes
-- Auto-refresco solo cuando es relevante para ahorrar datos
+- En las paginas principales aparecen tips que enlazan a la seccion relevante de la guia
+- Los tips se pueden cerrar y no vuelven a aparecer (se recuerda por cuenta)
 
-### Mejoras visuales
+### Links arreglados
 
-- Toggles del panel con diseño nativo iOS (verde Apple)
+- "Documentacion" en el menu ahora lleva a la Guia de Uso
+- "Soporte" ahora abre WhatsApp directamente
+- Ya no hay enlaces que lleven a paginas vacias

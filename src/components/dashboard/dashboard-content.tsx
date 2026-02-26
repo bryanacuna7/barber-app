@@ -2,6 +2,7 @@
 
 import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard } from 'lucide-react'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
+import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { formatCurrencyCompactMillions, formatTime } from '@/lib/utils'
 import Link from 'next/link'
@@ -74,6 +75,14 @@ export function DashboardContent() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
+
+        {/* Guide Tip */}
+        <GuideContextualTip
+          tipId="dashboard-welcome"
+          title="Bienvenido a tu dashboard"
+          description="¿Primera vez usando la app? Revisá la guía completa para aprender a gestionar tu barbería como un profesional."
+          linkHref="/guia#primeros-pasos"
+        />
 
         {/* Stats Grid */}
         <div data-tour="dashboard-stats">

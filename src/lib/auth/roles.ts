@@ -150,6 +150,11 @@ export function canBarberAccessPath(
     return true
   }
 
+  // Guide is always allowed for all roles
+  if (pathname === '/guia' || pathname.startsWith('/guia/')) {
+    return true
+  }
+
   // Owner-only paths are never allowed for barbers
   if (OWNER_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     return false

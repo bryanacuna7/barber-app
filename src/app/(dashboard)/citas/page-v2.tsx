@@ -100,6 +100,7 @@ import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picke
 import { DatePickerTrigger } from '@/components/ui/ios-date-picker'
 // Walk-in Sheet
 import { WalkInSheet } from '@/components/barber/walk-in-sheet'
+import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -865,6 +866,16 @@ function CitasCalendarFusionContent() {
               </div>
             </div>
           </header>
+
+          {/* Guide Tip */}
+          <div className="px-0 lg:px-6 pt-4">
+            <GuideContextualTip
+              tipId="citas-timer"
+              title="Controlá la duración de cada cita"
+              description="Usá el temporizador al iniciar una cita. La app aprende la duración promedio y ajusta los slots automáticamente."
+              linkHref="/guia#citas"
+            />
+          </div>
 
           {/* View Content */}
           <div className="px-0 pb-4 lg:p-6">

@@ -51,6 +51,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
     '/changelog': 'Novedades',
     '/referencias': 'Referencias',
     '/lealtad/configuracion': 'Lealtad',
+    '/guia': 'Guía de Uso',
   }
 
   const topLevelRoutes = new Set([
@@ -66,6 +67,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
     '/referencias',
     '/mi-dia',
     '/lealtad/configuracion',
+    '/guia',
   ])
 
   const parentFallbackByPrefix: Array<[string, string]> = [

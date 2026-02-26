@@ -20,6 +20,7 @@ import {
   CreditCard,
   UsersRound,
   Wrench,
+  BookOpen,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -136,6 +137,15 @@ const COMMANDS: Command[] = [
     keywords: ['config', 'ajustes', 'preferencias'],
     path: '/configuracion',
     action: (r) => r.push('/configuracion'),
+  },
+  {
+    id: 'nav-guia',
+    label: 'Guía de Uso',
+    icon: BookOpen,
+    category: 'navigate',
+    keywords: ['guia', 'ayuda', 'help', 'documentacion', 'tutorial', 'manual'],
+    path: '/guia',
+    action: (r) => r.push('/guia'),
   },
   // Settings subroutes
   {

@@ -4,6 +4,21 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.15] - 2026-02-25
+
+### Nuevo
+
+- Guia de Uso completa dentro de la app con 10 secciones: desde primeros pasos hasta como instalar la app en el celular
+- Buscador integrado en la guia para encontrar cualquier tema rapidamente
+- Indice de navegacion lateral en desktop y boton flotante en mobile
+- Tips contextuales en las paginas principales que enlazan a secciones especificas de la guia
+- El enlace de Soporte en el menu ahora abre WhatsApp directamente
+
+### Corregido
+
+- Los enlaces de Documentacion y Soporte en el menu Mas ya no llevan a paginas vacias
+- La navegacion por anclas (#citas, #servicios, etc) funciona correctamente al abrir la guia desde un tip contextual
+
 ## [0.9.14] - 2026-02-25
 
 ### Nuevo

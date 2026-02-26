@@ -8,7 +8,6 @@ import {
   Scissors,
   CreditCard,
   Settings,
-  FileText,
   HelpCircle,
   ExternalLink,
   ChevronRight,
@@ -20,6 +19,7 @@ import {
   Users,
   Trophy,
   Target,
+  BookOpen,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
@@ -140,6 +140,14 @@ const menuItems: MenuItem[] = [
     bgColor: 'bg-zinc-100 dark:bg-zinc-800',
     ownerOnly: true,
   },
+  {
+    name: 'Guía de Uso',
+    href: '/guia',
+    icon: BookOpen,
+    description: 'Aprende a usar la app',
+    color: 'text-blue-600 dark:text-blue-400',
+    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+  },
 ]
 
 const serviciosMenuItem: MenuItem = {
@@ -153,14 +161,8 @@ const serviciosMenuItem: MenuItem = {
 
 const externalLinks = [
   {
-    name: 'Documentación',
-    href: '#',
-    icon: FileText,
-    external: true,
-  },
-  {
     name: 'Soporte',
-    href: '#',
+    href: 'https://wa.me/50688888888',
     icon: HelpCircle,
     external: true,
   },

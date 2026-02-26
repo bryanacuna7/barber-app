@@ -17,13 +17,20 @@ import {
   History,
   Search,
   CalendarClock,
+  BookOpen,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { useCommandPalette } from '@/components/dashboard/command-palette'
 
-const baseNavigation = [
+interface NavItem {
+  name: string
+  href: string
+  icon: typeof LayoutDashboard
+}
+
+const baseNavigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Citas', href: '/citas', icon: Calendar },
   { name: 'Servicios', href: '/servicios', icon: Scissors },
@@ -33,8 +40,17 @@ const baseNavigation = [
   { name: 'Suscripción', href: '/suscripcion', icon: CreditCard },
   { name: 'Referencias', href: '/referencias', icon: Share2 },
   { name: 'Novedades', href: '/changelog', icon: History },
+  { name: 'Guía', href: '/guia', icon: BookOpen },
   { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
+
+const sidebarSections = [
+  { id: 'operacion', label: 'Operación', items: ['/dashboard', '/citas', '/mi-dia', '/servicios'] },
+  { id: 'gestion', label: 'Gestión', items: ['/barberos', '/clientes'] },
+  { id: 'crecimiento', label: 'Crecimiento', items: ['/analiticas', '/referencias'] },
+  { id: 'ayuda', label: 'Ayuda', items: ['/changelog', '/guia'] },
+  { id: 'cuenta', label: 'Cuenta', items: ['/suscripcion', '/configuracion'] },
+] as const
 
 interface SidebarProps {
   businessName: string
@@ -71,6 +87,7 @@ function SidebarContent({
         ...baseNavigation.slice(2),
       ]
     : baseNavigation
+  const navigationByHref = new Map(navigation.map((item) => [item.href, item]))
 
   return (
     <>
@@ -102,29 +119,52 @@ function SidebarContent({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-3 py-3">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+      <nav className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
+        {sidebarSections.map((section) => {
+          const sectionItems = section.items
+            .map((href) => navigationByHref.get(href))
+            .filter((item): item is NavItem => Boolean(item))
+
+          if (sectionItems.length === 0) return null
+
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={onLinkClick}
-              className={cn(
-                'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all',
-                isActive
-                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
-                  : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
-              )}
+            <section
+              key={section.id}
+              className="rounded-2xl border border-zinc-200/70 bg-white/55 p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-zinc-800/70 dark:bg-white/[0.03] dark:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"
             >
-              <item.icon
-                className={cn(
-                  'h-[18px] w-[18px]',
-                  isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
-                )}
-              />
-              {item.name}
-            </Link>
+              <div className="mb-1.5 border-b border-zinc-200/70 px-1.5 pb-1.5 dark:border-zinc-800/70">
+                <p className="whitespace-nowrap text-[12px] font-semibold leading-5 tracking-[0.05em] text-zinc-500 dark:text-zinc-400">
+                  {section.label}
+                </p>
+              </div>
+
+              <div className="space-y-0.5">
+                {sectionItems.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={onLinkClick}
+                      className={cn(
+                        'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all',
+                        isActive
+                          ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
+                          : 'text-zinc-600 hover:bg-zinc-100/90 dark:text-zinc-400 dark:hover:bg-zinc-800/80'
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          'h-[18px] w-[18px]',
+                          isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
+                        )}
+                      />
+                      {item.name}
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
           )
         })}
       </nav>
