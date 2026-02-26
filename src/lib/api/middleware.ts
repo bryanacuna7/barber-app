@@ -74,7 +74,8 @@ function setCachedBusiness(
 }
 
 // Extended business select — includes fields commonly needed by analytics routes
-const BUSINESS_SELECT = 'id, owner_id, name, timezone, operating_hours, smart_duration_enabled'
+const BUSINESS_SELECT =
+  'id, owner_id, name, slug, timezone, operating_hours, smart_duration_enabled'
 
 export type AuthHandler<T = any> = (
   request: Request,

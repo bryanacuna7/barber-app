@@ -229,7 +229,7 @@ export function DashboardContent() {
         </Card>
 
         {/* Quick Actions */}
-        <Card variant="glass" data-tour="dashboard-quick-actions">
+        <Card variant="glass" className="hidden lg:block" data-tour="dashboard-quick-actions">
           <CardHeader>
             <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
           </CardHeader>
