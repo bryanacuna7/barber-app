@@ -1,30 +1,9 @@
-import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
+import { withAuth, errorResponse } from '@/lib/api/middleware'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
 
-export async function GET() {
+export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
-    const supabase = await createClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Get business
-    const { data: business } = await supabase
-      .from('businesses')
-      .select('id, name, slug')
-      .eq('owner_id', user.id)
-      .single()
-
-    if (!business) {
-      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
-    }
-
     // Get today's date range
     const today = new Date()
     const startOfDay = new Date(today.setHours(0, 0, 0, 0)).toISOString()
@@ -82,8 +61,10 @@ export async function GET() {
         .eq('business_id', business.id),
     ])
 
-    const todayRevenueTotal = todayRevenue?.reduce((sum, apt) => sum + Number(apt.price), 0) || 0
-    const monthRevenueTotal = monthRevenue?.reduce((sum, apt) => sum + Number(apt.price), 0) || 0
+    const todayRevenueTotal =
+      todayRevenue?.reduce((sum, apt) => sum + (Number(apt.price) || 0), 0) || 0
+    const monthRevenueTotal =
+      monthRevenue?.reduce((sum, apt) => sum + (Number(apt.price) || 0), 0) || 0
 
     return NextResponse.json({
       todayAppointments: todayAppointments || 0,
@@ -99,6 +80,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return errorResponse('Error interno del servidor')
   }
-}
+})

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useCallback, memo, useState } from 'react'
+import { useMemo, useCallback, memo, useState, useEffect } from 'react'
 import {
   format,
   startOfWeek,
@@ -350,9 +350,15 @@ export const WeekView = memo(function WeekView({
     [onTimeSlotClick, isDragging]
   )
 
+  // Current time state — updates every 60s for the red "now" indicator
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
   // Get current time indicator position (only for today)
   const currentTimePosition = useMemo(() => {
-    const now = new Date()
     if (!weekDays.some((day) => isToday(day))) return null
 
     const hours = now.getHours()
@@ -361,7 +367,7 @@ export const WeekView = memo(function WeekView({
     if (hours < businessHours.start || hours > businessHours.end) return null
 
     return (hours - businessHours.start) * 60 + minutes
-  }, [weekDays, businessHours])
+  }, [weekDays, businessHours, now])
 
   // Get mobile days (current day + 2 adjacent days)
   const mobileDays = useMemo(() => {

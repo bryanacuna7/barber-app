@@ -170,13 +170,15 @@ function MiDiaPageContent() {
     },
   })
 
-  // Wrapped checkIn that auto-enters focus mode on success
+  // Wrapped checkIn that enters focus mode only after successful API call
   const handleCheckIn = useCallback(
-    (appointmentId: string) => {
-      checkIn(appointmentId)
-      // Optimistically enter focus mode — if checkIn fails, the appointment
-      // won't be confirmed and the auto-exit effect below will clear focus
-      setFocusAppointmentId(appointmentId)
+    async (appointmentId: string) => {
+      try {
+        await checkIn(appointmentId)
+        setFocusAppointmentId(appointmentId)
+      } catch {
+        // Error already shown via onError toast — don't enter focus mode
+      }
     },
     [checkIn]
   )

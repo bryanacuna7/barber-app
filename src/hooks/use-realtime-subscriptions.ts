@@ -66,6 +66,11 @@ export function useRealtimeSubscriptions({
   const queryClient = useQueryClient()
   const reconnectAttempts = useRef(0)
   const pollingIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  // Stabilize callback ref so the useEffect doesn't re-subscribe on every render
+  const onStatusChangeRef = useRef(onStatusChange)
+  useEffect(() => {
+    onStatusChangeRef.current = onStatusChange
+  }, [onStatusChange])
 
   useEffect(() => {
     if (!enabled || !businessId) return
@@ -144,11 +149,11 @@ export function useRealtimeSubscriptions({
             const oldStatus = (payload.old as any).status
             const newStatus = (payload.new as any).status
 
-            if (oldStatus !== newStatus && onStatusChange) {
+            if (oldStatus !== newStatus && onStatusChangeRef.current) {
               if (isDev) {
                 console.warn('⚠️  Subscription status changed:', oldStatus, '→', newStatus)
               }
-              onStatusChange(newStatus)
+              onStatusChangeRef.current(newStatus)
             }
           }
 
@@ -203,13 +208,5 @@ export function useRealtimeSubscriptions({
       supabase.removeChannel(channel)
       stopPolling()
     }
-  }, [
-    businessId,
-    enabled,
-    pollingInterval,
-    maxReconnectAttempts,
-    queryClient,
-    onStatusChange,
-    isDev,
-  ])
+  }, [businessId, enabled, pollingInterval, maxReconnectAttempts, queryClient, isDev])
 }
