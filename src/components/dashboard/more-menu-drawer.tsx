@@ -120,7 +120,7 @@ const menuItems: MenuItem[] = [
     description: 'Versiones y cambios recientes',
     color: 'text-cyan-600 dark:text-cyan-400',
     bgColor: 'bg-cyan-100 dark:bg-cyan-900/30',
-    barberPermission: 'nav_changelog',
+    ownerOnly: true,
   },
   {
     name: 'Logros',

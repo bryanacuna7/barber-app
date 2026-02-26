@@ -8,173 +8,141 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ### Mejorado
 
-- La app carga mas rapido gracias a consultas optimizadas al servidor
-- Las paginas de analiticas y panel de administracion usan menos datos
-- La limpieza automatica de archivos ahora procesa en lotes para mayor estabilidad
-- La exportacion de clientes maneja negocios grandes de forma segura
-
-### Eliminado
-
-- Se removio codigo interno sin uso para reducir el tamano de la aplicacion
+- La app carga mas rapido en general
+- Correcciones menores y mejoras de estabilidad
 
 ## [0.9.17] - 2026-02-25
 
 ### Nuevo
 
-- Los clientes registrados ahora ven un acceso directo a "Mi Cuenta" al reservar
-- Banner informativo que muestra citas programadas en la pagina de reservas
-- Al llegar al paso "Tus Datos", el nombre y telefono se llenan automaticamente si ya reservaste antes
-- Enlace "Ver todas mis citas" en la pagina de seguimiento de cita
-- Boton "Ver mis citas" prominente despues de completar una reserva
+- Los clientes registrados ven un acceso directo a "Mi Cuenta" al reservar
+- Si un cliente ya reservo antes, su nombre y telefono se llenan automaticamente
+- Banner que muestra citas programadas en la pagina de reservas
 
 ### Mejorado
 
-- Al iniciar sesion, los clientes ahora van directo a "Mi Cuenta" en vez del panel de administracion
-- Los enlaces de reserva ya no muestran opciones de cliente a duenos o barberos
+- Al iniciar sesion, los clientes van directo a "Mi Cuenta" en vez del panel
 
 ## [0.9.16] - 2026-02-25
 
 ### Corregido
 
-- El registro de nuevas barberias ahora funciona correctamente sin errores al crear el negocio
+- El registro de nuevas barberias funciona correctamente
 - Los enlaces de confirmacion de correo ya no redirigen a una pagina invalida
 
 ## [0.9.15] - 2026-02-25
 
 ### Nuevo
 
-- Guia de Uso completa dentro de la app con 10 secciones: desde primeros pasos hasta como instalar la app en el celular
-- Buscador integrado en la guia para encontrar cualquier tema rapidamente
-- Indice de navegacion lateral en desktop y boton flotante en mobile
-- Tips contextuales en las paginas principales que enlazan a secciones especificas de la guia
-- El enlace de Soporte en el menu ahora abre WhatsApp directamente
+- Guia de Uso completa dentro de la app con 10 secciones
+- Buscador integrado en la guia para encontrar cualquier tema
+- Tips contextuales en las paginas principales que enlazan a la guia
+- El enlace de Soporte ahora abre WhatsApp directamente
 
 ### Corregido
 
-- Los enlaces de Documentacion y Soporte en el menu Mas ya no llevan a paginas vacias
-- La navegacion por anclas (#citas, #servicios, etc) funciona correctamente al abrir la guia desde un tip contextual
+- Los enlaces de Documentacion y Soporte ya no llevan a paginas vacias
 
 ## [0.9.14] - 2026-02-25
 
 ### Nuevo
 
-- Duracion inteligente por cliente: el sistema aprende cuanto tarda cada cliente y ajusta los horarios automaticamente
-- Algoritmo de espacios dinamicos: genera horarios disponibles basados en los huecos reales de la agenda
-- Indicador visual de tiempo estimado (~40 min) cuando la prediccion difiere del tiempo base del servicio
+- Duracion inteligente por cliente: el sistema aprende cuanto tarda cada cliente y ajusta los horarios
+- Indicador visual de tiempo estimado cuando difiere del tiempo base del servicio
 
 ### Mejorado
 
-- Los horarios disponibles se calculan con mayor precision usando el historial real de citas
-- Los toggles del panel usan el diseño nativo de iOS con el verde de Apple
-- Auto-refresco de horarios solo cuando es necesario (ahorra datos)
+- Los horarios disponibles se calculan con mayor precision usando el historial real
+- Los toggles del panel usan el diseño nativo de iOS
 
 ## [0.9.13] - 2026-02-25
 
 ### Nuevo
 
-- Atencion sin cita (walk-in): crea citas rapidas desde Mi Dia para clientes que llegan sin reserva
+- Atencion sin cita (walk-in): crea citas rapidas para clientes que llegan sin reserva
 - Selector de metodo de pago al completar cita (efectivo, sinpe, tarjeta)
 - Enlace directo a WhatsApp del cliente desde la card de cita
-- Boton flotante de reserva en mobile en la pagina principal
+- Boton flotante de reserva en mobile
 
 ### Mejorado
 
-- Pagina principal rediseñada: mas limpia, rapida y enfocada en conversion
-- Paginas de configuracion (equipo, horario, pagos, promociones) con mejor diseño y usabilidad
-- Navegacion del panel mejorada: sidebar y tabs mas intuitivos
+- Pagina principal rediseñada: mas limpia y enfocada en conversion
+- Paginas de configuracion con mejor diseño y usabilidad
 - Cards de citas con indicador visual de metodo de pago
 
 ## [0.9.12] - 2026-02-25
 
 ### Nuevo
 
-- Modo Enfoque para citas en progreso: pantalla completa con timer, nombre del cliente, precio y gesto deslizar para completar
-- Gesto "desliza para completar" estilo iOS en mobile (boton normal en desktop)
-- Deteccion de tiempo extra: el timer cambia a amarillo cuando se pasa del tiempo estimado
-- Boton de Enfoque integrado en el timer de la card (toca el timer para expandir)
+- Modo Enfoque para citas en progreso: pantalla completa con timer y gesto deslizar para completar
+- Deteccion de tiempo extra: el timer cambia a amarillo cuando se pasa del estimado
 
 ### Mejorado
 
-- Botones de accion en cards de citas mas claros y sin texto cortado en mobile
-- Navegacion de owner-barbero: Mi Dia aparece en las tabs principales, Servicios se mueve al menu Mas
-- Mejor separacion de contenido en el modo enfoque (mas espacio desde los bordes)
+- Botones de accion en cards de citas mas claros en mobile
+- Mi Dia aparece en las tabs principales para owner-barbero
 
 ## [0.9.11] - 2026-02-24
 
 ### Mejorado
 
-- Boton principal de reserva ahora se ve correctamente en modo oscuro
-- Botones de la pantalla de confirmacion de reserva mas claros y consistentes
-- Todas las sub-paginas ahora tienen boton para volver atras (perfil, notificaciones, desafios, logros, configuracion)
-- El onboarding permite saltar la configuracion inicial e ir directo al panel
-- Banner de activacion de notificaciones push en el inicio del cliente
+- Boton de reserva se ve correctamente en modo oscuro
+- Todas las sub-paginas tienen boton para volver atras
+- El onboarding permite saltar la configuracion e ir directo al panel
+- Banner de activacion de notificaciones push al inicio
 
 ### Corregido
 
-- Las reservas de usuarios registrados ahora se vinculan correctamente a su perfil de cliente (antes aparecian como anonimas)
+- Las reservas de clientes registrados se vinculan correctamente a su perfil
 
 ## [0.9.10] - 2026-02-24
 
 ### Mejorado
 
-- La app carga mas rapido al abrir el panel principal (consultas iniciales optimizadas)
-- Animaciones de fondo mas fluidas y con menor consumo de bateria
-- Las notificaciones solo se consultan cuando la app esta visible, reduciendo consumo de datos
-- El calendario se actualiza de forma mas inteligente: solo recarga estadisticas cuando hay cambios relevantes
-- Colores de la app y configuracion se guardan correctamente cuando no hay conexion
+- La app carga mas rapido al abrir el panel principal
+- Las notificaciones solo se consultan cuando la app esta visible, ahorrando datos
+- El calendario se actualiza de forma mas inteligente
+- Correcciones menores y mejoras de estabilidad
 
 ## [0.9.9] - 2026-02-24
 
 ### Nuevo
 
-- Notificaciones inteligentes para clientes: recordatorios de re-reserva y mensajes personalizados por frecuencia de visita
-- Navbar fijo en la pagina principal con navegacion y acceso directo a registro
+- Notificaciones inteligentes para clientes: recordatorios de re-reserva y mensajes personalizados
+- Navbar fijo en la pagina principal con acceso directo a registro
 
 ### Mejorado
 
-- "Barberos" renombrado a "Equipo" en toda la plataforma para reflejar equipos mas diversos
-- Confirmacion de reserva ahora muestra el nombre del profesional y el precio final (con descuento si aplica)
-- Tarjetas de servicio mas robustas en movil: textos largos ya no rompen el layout
-- Calendario corregido para mostrar siempre el dia correcto en zona horaria de Costa Rica
-- Notificaciones push con mensajes de error claros cuando algo falla al activarlas
-- Enlace directo a perfil desde la cuenta del cliente
-- Pie de pagina simplificado sin enlaces rotos
-- Cierre de sesion ahora redirige correctamente en todos los navegadores
+- "Barberos" renombrado a "Equipo" en toda la plataforma
+- Confirmacion de reserva muestra nombre del profesional y precio final
+- Tarjetas de servicio mas robustas en movil
+- Calendario corregido para zona horaria de Costa Rica
 
 ### Corregido
 
-- 7 problemas criticos de la auditoria E2E: rutas de autenticacion, pantalla post-reserva, indicadores de disponibilidad, datos fantasma y mas
-- Textos en espanol estandarizado (sin mezcla de vos/tu)
-- Version dinamica en el menu lateral (ya no dice "v1.0" fijo)
-- Corregido error de compilacion en configuracion de gestos
-- Precio fijo "Equipo ilimitado" (antes decia "ilimitados")
-- Colores de la app corregidos al instalarla en el celular
-
----
+- Varios problemas de navegacion, disponibilidad y datos corregidos
+- Textos en espanol estandarizado
+- Version dinamica en el menu lateral
 
 ## [0.9.8] - 2026-02-24
 
 ### Nuevo
 
-- Bloqueos de agenda: los barberos pueden marcar descansos, vacaciones y tiempo personal que se excluyen automaticamente de los horarios disponibles
-- Permisos por barbero: el dueno puede configurar que secciones del dashboard ve cada barbero de forma individual
-- Exportar CSV: descarga la lista de clientes o el historial de citas en formato CSV desde el dashboard
-- Checklist de bienvenida: los barberos nuevos ven una guia de 3 pasos (foto, horario, notificaciones) al entrar por primera vez
-- Registro de notificaciones: el dueno puede ver un historial de todas las notificaciones enviadas
+- Bloqueos de agenda: marca descansos, vacaciones y tiempo personal
+- Permisos por barbero: configura que secciones ve cada barbero
+- Exportar CSV de clientes y citas desde el dashboard
+- Checklist de bienvenida para barberos nuevos
+- Registro de notificaciones enviadas
 
 ### Mejorado
 
-- Encabezados del dashboard unificados con estilo consistente en todas las paginas
-- Graficas adaptadas a movil: altura responsive y tooltips tactiles
-- "Email" cambiado a "Correo" en formularios para mantener todo en espanol
-- Tarjetas de lealtad simplificadas: se elimino doble borde visual
-- Mapa de demanda con scroll horizontal en pantallas pequenas
+- Encabezados del dashboard con estilo consistente
+- Graficas adaptadas a movil con tooltips tactiles
+- "Email" cambiado a "Correo" en formularios
 
-### Seguridad
+### Corregido
 
-- Corregido un problema de seguridad importante en la creacion de cuentas de clientes: ahora usa un token seguro de un solo uso
-- Las notificaciones pasan por un orquestador central con deduplicacion y registro de auditoria
-- Permisos de barbero protegidos contra auto-escalacion: un barbero no puede darse permisos de owner
+- Mejoras de seguridad en creacion de cuentas y permisos
 
 ---
 
@@ -182,23 +150,16 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ### Nuevo
 
-- Pago anticipado SINPE: los clientes pueden pagar antes de la cita y recibir un descuento configurable (5-50%)
-- Dos formas de enviar comprobante: subir foto directamente o enviar por WhatsApp con mensaje prellenado
-- Verificacion de pagos: el dueno revisa el comprobante y aprueba o rechaza desde el dashboard
-- Configuracion completa en Configuracion > Pagos: numero SINPE, nombre del titular, porcentaje de descuento y plazo limite
-- Badges en citas del dashboard: "Pago pendiente" (amarillo) y "Pago verificado" (verde)
+- Pago anticipado SINPE: los clientes pagan antes y reciben descuento configurable
+- Dos formas de enviar comprobante: subir foto o enviar por WhatsApp
+- Verificacion de pagos desde el dashboard
+- Configuracion completa en Configuracion > Pagos
+- Badges de estado de pago en citas del dashboard
 
 ### Mejorado
 
-- La pantalla de confirmacion de reserva muestra un banner invitando a pagar por adelantado cuando el negocio lo tiene activo
-- Los precios se congelan al momento del pago anticipado para evitar inconsistencias
-- Limpieza automatica de comprobantes 30 dias despues de verificacion o rechazo
-
-### Seguridad
-
-- Comprobantes almacenados en bucket privado con URLs firmadas de 1 hora
-- Validacion de tipo de archivo (solo imagenes) y tamano maximo de 5MB
-- Solo el dueno y barberos del negocio pueden ver los comprobantes
+- La confirmacion de reserva invita a pagar por adelantado cuando esta activo
+- Limpieza automatica de comprobantes despues de 30 dias
 
 ---
 
@@ -206,20 +167,14 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ### Nuevo
 
-- Los clientes ahora pueden cancelar o reagendar sus citas desde el enlace de seguimiento, si el negocio lo permite
-- Configuracion de politica de cancelacion en Configuracion > Pagos: activar cancelaciones, definir horas de anticipacion y permitir reagendamiento
-- Al cancelar, el dueno recibe notificacion push, email e in-app automaticamente
-- Texto explicativo en Metodos de Pago para entender como funciona el registro de pagos
+- Los clientes pueden cancelar o reagendar citas desde su enlace de seguimiento
+- Configuracion de politica de cancelacion en Configuracion > Pagos
+- Notificacion automatica al dueno cuando un cliente cancela
 
 ### Mejorado
 
-- La pagina de seguimiento muestra los botones de cancelar y reagendar cuando la politica esta activa
-- Si el plazo para cancelar ya paso, los botones se deshabilitan con un mensaje claro
-- Descripciones de metodos de pago mas claras: ahora explican que el cobro es en persona
-
-### Seguridad
-
-- Politicas de acceso mas estrictas en la tabla de conversiones de referidos
+- Botones de cancelar y reagendar visibles cuando la politica esta activa
+- Descripciones de metodos de pago mas claras
 
 ---
 
@@ -227,108 +182,93 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ### Nuevo
 
-- Horarios inteligentes con descuento: configura reglas para ofrecer precios reducidos en horas de baja demanda
-- Mapa de calor de demanda en Analiticas: visualiza que dias y horas tienen mas citas de un vistazo
-- Pagina de configuracion de promociones en Configuracion > Promociones para crear y administrar reglas de descuento
-- Al reservar, los horarios con descuento muestran el precio original tachado y el precio con descuento
+- Horarios inteligentes con descuento: precios reducidos en horas de baja demanda
+- Mapa de calor de demanda en Analiticas
+- Pagina de configuracion de promociones
+- Los horarios con descuento muestran precio original tachado
 
 ### Mejorado
 
-- El sistema de reservas ahora muestra automaticamente los descuentos disponibles en cada horario
-- La confirmacion de cita incluye detalle del descuento aplicado cuando corresponde
+- La confirmacion de cita incluye detalle del descuento aplicado
 
 ## [0.9.4] - 2026-02-23
 
 ### Nuevo
 
-- Duracion inteligente: el sistema aprende cuanto tarda cada servicio por barbero y ajusta la disponibilidad automaticamente
+- Duracion inteligente: el sistema aprende cuanto tarda cada servicio por barbero
 - Toggle para activar/desactivar duracion inteligente en Configuracion > Avanzado
-- Tarjeta de insights de duracion en Analiticas con tiempo recuperado y promedios
-
-### Mejorado
-
-- Documentacion del proyecto optimizada y reorganizada (archivos de planes completados movidos a archivo)
+- Tarjeta de insights de duracion en Analiticas
 
 ### Corregido
 
-- Boton de volver en subrutas de Configuracion ya no recarga la pagina completa
-- "Clientes" ya no aparece duplicado en el menu "Mas" para owners
-- Las tarjetas de clientes ya no quedan cortadas detras de la barra de navegacion inferior
+- Boton de volver en Configuracion ya no recarga la pagina completa
+- "Clientes" ya no aparece duplicado en el menu "Mas"
+- Las tarjetas de clientes ya no quedan cortadas detras de la barra inferior
 
 ## [0.9.3] - 2026-02-10
 
 ### Nuevo
 
-- Seguimiento en vivo de tu cita: al reservar recibis un link para ver tu posicion en la fila en tiempo real
-- Recordatorios automaticos por email y notificacion push 24 horas y 1 hora antes de tu cita
-- Notificacion "Llega antes" cuando tu barbero termina antes de lo esperado
-- Portal de cliente: ahora podes ver tus citas y perfil desde /mi-cuenta sin necesitar acceso al dashboard
-- Experiencia desktop premium: sidebar colapsable, paleta de comandos (Ctrl+K), tablas con acciones hover
-- Invitacion de barberos por email con roles y permisos diferenciados
+- Seguimiento en vivo de citas: el cliente ve su posicion en la fila en tiempo real
+- Recordatorios automaticos 24 horas y 1 hora antes de la cita
+- Notificacion cuando el barbero termina antes de lo esperado
+- Portal de cliente en /mi-cuenta para ver citas y perfil
+- Invitacion de barberos por email con roles diferenciados
 
 ### Mejorado
 
-- Interfaz simplificada en todas las pantallas: menos ruido visual, mejor jerarquia de informacion
-- Animaciones mas suaves y consistentes con soporte para movimiento reducido
-- Skeletons de carga nativos en todas las pantallas principales
-- Gestos de swipe mejorados en listas de citas y clientes
-- Las paginas de datos (citas, clientes, servicios) ahora tienen vista de tabla en desktop y lista en movil
-- Configuracion reorganizada en subrutas mas claras (general, horario, branding, equipo, pagos)
-- Email de confirmacion de cita ahora incluye link de seguimiento en vivo
+- Interfaz simplificada con mejor jerarquia de informacion
+- Animaciones mas suaves con soporte para movimiento reducido
+- Vista de tabla en desktop y lista en movil para datos
+- Configuracion reorganizada en subrutas mas claras
+- Email de confirmacion incluye link de seguimiento
 
 ### Corregido
 
-- Tokens de seguimiento expirados ya no permiten acceso a datos de la fila
 - Citas canceladas ya no aparecen en el seguimiento publico
-- Recordatorios no se envian duplicados gracias a sistema de deduplicacion mejorado
-- Citas agendadas el mismo dia ahora reciben correctamente el recordatorio de 1 hora
+- Recordatorios no se envian duplicados
 
 ## [0.9.2] - 2026-02-07
 
-### Corregido
-
-- La app en iPhone ahora se actualiza sola sin tener que borrar y reinstalar
-- La navegacion en la pagina de citas ahora se siente mas fluida en iPhone
-- Se ajusto el espacio superior de la pantalla principal para una vista mas limpia
-
 ### Mejorado
 
-- El icono de la app ahora es mas grande y limpio (barber pole con forma de pastilla)
-- La app chequea actualizaciones cada vez que la abres (antes solo cada hora)
+- La app en iPhone se actualiza sola sin tener que borrar y reinstalar
+- Icono de la app mas grande y limpio
+- La app chequea actualizaciones cada vez que la abres
+
+### Corregido
+
+- Navegacion en citas mas fluida en iPhone
+- Espacio superior ajustado en la pantalla principal
 
 ## [0.9.1] - 2026-02-07
 
 ### Nuevo
 
-- Sistema de colores rediseñado con mejor legibilidad en todo el app
-- Graficas de analiticas rediseñadas con colores de la marca
-- Monitoreo interno mejorado para detectar y resolver incidencias mas rapido
+- Sistema de colores rediseñado con mejor legibilidad
+- Graficas de analiticas con colores de la marca
 
 ### Mejorado
 
 - Mejor visibilidad del texto en modo claro y oscuro
-- Numeros grandes en la pantalla principal ahora se muestran de forma compacta (ej: ₡1.3M)
-- Tarjetas de estadisticas se adaptan mejor a pantallas pequeñas
-- Icono de la app rediseñado con estilo minimalista (barber pole monocromatico)
+- Numeros grandes se muestran de forma compacta (ej: ₡1.3M)
+- Tarjetas de estadisticas se adaptan mejor a pantallas pequenas
+- Icono de la app rediseñado con estilo minimalista
 
 ### Corregido
 
-- Los colores de las graficas ahora se ven correctamente en todos los navegadores
+- Colores de las graficas se ven correctamente en todos los navegadores
 
 ## [0.9.0] - 2026-02-07
 
 ### Nuevo
 
-- Rediseño completo de la pantalla principal para uso mas comodo desde el celular
-- Interfaz visual unificada con mejor consistencia en tipografia, colores y movimientos
-- 5 paginas del dashboard modernizadas (Citas, Barberos, Clientes, Servicios, Analiticas)
-- Nuevo panel administrativo con herramientas avanzadas para la gestion del negocio
-- La app mantiene funciones clave con conexion inestable y conserva tu identidad de marca
+- Rediseño completo de la pantalla principal para uso desde el celular
+- 5 paginas del dashboard modernizadas
+- Nuevo panel administrativo
 
 ### Mejorado
 
-- App mas rapida al cargar datos clave en modulos como Citas y Analiticas
-- Seguridad reforzada para proteger mejor cuentas, sesiones y datos del negocio
-- Mayor estabilidad general con mejoras de monitoreo y control de errores
-- 11 mejoras criticas de experiencia movil para una navegacion mas clara y comoda
-- Optimizacion de infraestructura para reducir interrupciones y mantener mejor rendimiento
+- App mas rapida al cargar datos
+- Mayor estabilidad general
+- 11 mejoras de experiencia movil

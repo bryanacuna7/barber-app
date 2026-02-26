@@ -67,6 +67,7 @@ export const OWNER_ONLY_PATHS = [
   '/configuracion',
   '/lealtad',
   '/suscripcion',
+  '/changelog',
 ]
 
 /**

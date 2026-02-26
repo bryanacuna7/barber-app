@@ -45,7 +45,7 @@ const ownerMorePages = [
   '/configuracion',
 ]
 
-const barberMorePages = ['/clientes', '/analiticas', '/changelog', '/guia']
+const barberMorePages = ['/clientes', '/analiticas', '/guia']
 
 const ownerQuickActions = [
   { name: 'Nueva Cita', href: '/citas', icon: CalendarPlus, action: 'create-appointment' },
