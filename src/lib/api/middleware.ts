@@ -14,6 +14,10 @@ export type AuthContext = {
     owner_id: string
     name?: string
   }
+  /** 'owner' if user owns the business, 'barber' if linked via barbers table */
+  role: 'owner' | 'barber'
+  /** barber row ID (only set when role === 'barber') */
+  barberId?: string
   supabase: Awaited<ReturnType<typeof createClient>>
 }
 
@@ -80,6 +84,8 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
 
       // Fetch business — try owner first, then barber lookup
       let business: { id: string; owner_id: string; name?: string } | null = null
+      let role: 'owner' | 'barber' = 'owner'
+      let barberId: string | undefined
 
       // 1. Try as business owner (fast path)
       const { data: ownerBusiness } = await supabase
@@ -90,11 +96,12 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
 
       if (ownerBusiness) {
         business = ownerBusiness
+        role = 'owner'
       } else {
         // 2. Try as barber — look up business via barbers table
         const { data: barber } = await supabase
           .from('barbers')
-          .select('business_id')
+          .select('id, business_id')
           .eq('user_id', user.id)
           .eq('is_active', true)
           .single()
@@ -108,6 +115,8 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
 
           if (barberBusiness) {
             business = barberBusiness
+            role = 'barber'
+            barberId = barber.id
           }
         }
       }
@@ -121,6 +130,8 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
       return handler(request, context, {
         user: { id: user.id, email: user.email },
         business,
+        role,
+        barberId,
         supabase,
       })
     } catch (error) {
