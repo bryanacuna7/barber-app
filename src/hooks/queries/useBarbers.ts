@@ -9,7 +9,7 @@ import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptBarbers } from '@/lib/adapters/barbers'
 
 const BARBER_SELECT =
-  'id, name, email, user_id, business_id, is_active, bio, photo_url, display_order, created_at, updated_at'
+  'id, name, email, user_id, business_id, role, is_active, bio, photo_url, display_order, created_at, updated_at'
 
 export function useBarbers(businessId: string) {
   return useQuery({

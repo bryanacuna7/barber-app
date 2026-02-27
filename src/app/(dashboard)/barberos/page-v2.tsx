@@ -26,6 +26,7 @@ import {
   Check,
   MessageCircle,
   Link2,
+  Pencil,
 } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
@@ -604,6 +605,9 @@ function BarberDetailModal({
   const updateBarber = useUpdateBarber()
   const deleteBarber = useDeleteBarber()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(barber.name)
+  const [editEmail, setEditEmail] = useState(barber.email)
 
   const handleToggleActive = async () => {
     try {
@@ -616,6 +620,36 @@ function BarberDetailModal({
     } catch {
       toast.error('Error al actualizar estado')
     }
+  }
+
+  const handleSaveEdit = async () => {
+    const trimmedName = editName.trim()
+    const trimmedEmail = editEmail.trim()
+    if (!trimmedName) {
+      toast.error('El nombre no puede estar vacío')
+      return
+    }
+    try {
+      const updates: Record<string, string> = {}
+      if (trimmedName !== barber.name) updates.name = trimmedName
+      if (trimmedEmail !== barber.email) updates.email = trimmedEmail
+      if (Object.keys(updates).length === 0) {
+        setIsEditing(false)
+        return
+      }
+      await updateBarber.mutateAsync({ id: barber.id, updates })
+      toast.success('Perfil actualizado')
+      setIsEditing(false)
+      if (isMobileDevice()) haptics.success()
+    } catch {
+      toast.error('Error al actualizar perfil')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditName(barber.name)
+    setEditEmail(barber.email)
+    setIsEditing(false)
   }
 
   const handleDelete = async () => {
@@ -631,6 +665,9 @@ function BarberDetailModal({
 
   const handleClose = () => {
     setShowDeleteConfirm(false)
+    setIsEditing(false)
+    setEditName(barber.name)
+    setEditEmail(barber.email)
     onOpenChange(false)
   }
 
@@ -638,142 +675,193 @@ function BarberDetailModal({
     <Modal
       isOpen={open}
       onClose={handleClose}
-      title={barber.name}
-      description={barber.role === 'owner' ? 'Dueño' : 'Miembro del equipo'}
+      title={isEditing ? 'Editar perfil' : barber.name}
+      description={isEditing ? undefined : barber.role === 'owner' ? 'Dueño' : 'Miembro del equipo'}
     >
       <div className="space-y-5">
-        {/* Avatar + status */}
-        <div className="flex items-center gap-4">
-          <div
-            className={`h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
-              barber.isActive
-                ? 'bg-gradient-to-br from-teal-400 to-emerald-500'
-                : 'bg-zinc-300 dark:bg-zinc-700'
-            }`}
-          >
-            {barber.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={barber.avatarUrl}
-                alt=""
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              <UserRound className="h-7 w-7 text-white" />
-            )}
-          </div>
-          <div>
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                barber.isActive
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-              }`}
-            >
-              {barber.isActive ? (
-                <CheckCircle2 className="h-3 w-3" />
-              ) : (
-                <XCircle className="h-3 w-3" />
-              )}
-              {barber.isActive ? 'Activo' : 'Inactivo'}
-            </span>
-          </div>
-        </div>
-
-        {/* Info rows */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-            <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted">Email</div>
-              <div className="font-medium text-zinc-900 dark:text-white truncate">
-                {barber.email}
-              </div>
-            </div>
-          </div>
-
-          {barber.phone && (
-            <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-              <Phone className="h-5 w-5 text-violet-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="text-xs text-muted">Teléfono</div>
-                <div className="font-medium text-zinc-900 dark:text-white">{barber.phone}</div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-            <Shield className="h-5 w-5 text-amber-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted">Cuenta vinculada</div>
-              <div className="font-medium text-zinc-900 dark:text-white">
-                {barber.userId ? 'Sí — puede iniciar sesión' : 'No — sin acceso al sistema'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Active toggle */}
-        {barber.role !== 'owner' && (
-          <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-            <div>
-              <p className="text-sm font-semibold text-zinc-900 dark:text-white">Acceso activo</p>
-              <p className="text-xs text-muted mt-0.5">
-                {barber.isActive
-                  ? 'Puede iniciar sesión y ver sus citas'
-                  : 'No puede acceder al sistema'}
-              </p>
-            </div>
-            <IOSToggle
-              checked={barber.isActive}
-              onChange={handleToggleActive}
-              disabled={updateBarber.isPending}
+        {isEditing ? (
+          /* ── Edit mode ── */
+          <>
+            <Input
+              label="Nombre"
+              type="text"
+              placeholder="Ej: Juan Pérez"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              autoFocus
             />
-          </div>
-        )}
-
-        {/* Delete */}
-        {barber.role !== 'owner' && (
-          <AnimatePresence>
-            {!showDeleteConfirm ? (
-              <Button
-                variant="ghost"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="w-full h-11 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Eliminar miembro del equipo
+            <Input
+              label="Email"
+              type="email"
+              placeholder="juan@ejemplo.com"
+              value={editEmail}
+              onChange={(e) => setEditEmail(e.target.value)}
+            />
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={handleCancelEdit} className="h-11">
+                Cancelar
               </Button>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="space-y-3"
+              <Button
+                onClick={handleSaveEdit}
+                isLoading={updateBarber.isPending}
+                disabled={!editName.trim()}
+                className="h-11"
               >
-                <p className="text-sm text-center text-red-600 dark:text-red-400 font-medium">
-                  ¿Estás seguro? Esta acción no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowDeleteConfirm(false)}
-                    className="h-11"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={handleDelete}
-                    isLoading={deleteBarber.isPending}
-                    className="h-11"
-                  >
-                    Eliminar
-                  </Button>
+                Guardar
+              </Button>
+            </div>
+          </>
+        ) : (
+          /* ── View mode ── */
+          <>
+            {/* Avatar + status + edit button */}
+            <div className="flex items-center gap-4">
+              <div
+                className={`h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  barber.isActive
+                    ? 'bg-gradient-to-br from-teal-400 to-emerald-500'
+                    : 'bg-zinc-300 dark:bg-zinc-700'
+                }`}
+              >
+                {barber.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={barber.avatarUrl}
+                    alt=""
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <UserRound className="h-7 w-7 text-white" />
+                )}
+              </div>
+              <div className="flex-1">
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                    barber.isActive
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                  }`}
+                >
+                  {barber.isActive ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <XCircle className="h-3 w-3" />
+                  )}
+                  {barber.isActive ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditName(barber.name)
+                  setEditEmail(barber.email)
+                  setIsEditing(true)
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                aria-label="Editar perfil"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Info rows */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted">Email</div>
+                  <div className="font-medium text-zinc-900 dark:text-white truncate">
+                    {barber.email}
+                  </div>
                 </div>
-              </motion.div>
+              </div>
+
+              {barber.phone && (
+                <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                  <Phone className="h-5 w-5 text-violet-500 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted">Teléfono</div>
+                    <div className="font-medium text-zinc-900 dark:text-white">{barber.phone}</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                <Shield className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted">Cuenta vinculada</div>
+                  <div className="font-medium text-zinc-900 dark:text-white">
+                    {barber.userId ? 'Sí — puede iniciar sesión' : 'No — sin acceso al sistema'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Active toggle */}
+            {barber.role !== 'owner' && (
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    Acceso activo
+                  </p>
+                  <p className="text-xs text-muted mt-0.5">
+                    {barber.isActive
+                      ? 'Puede iniciar sesión y ver sus citas'
+                      : 'No puede acceder al sistema'}
+                  </p>
+                </div>
+                <IOSToggle
+                  checked={barber.isActive}
+                  onChange={handleToggleActive}
+                  disabled={updateBarber.isPending}
+                />
+              </div>
             )}
-          </AnimatePresence>
+
+            {/* Delete */}
+            {barber.role !== 'owner' && (
+              <AnimatePresence>
+                {!showDeleteConfirm ? (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="w-full h-11 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar miembro del equipo
+                  </Button>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-3"
+                  >
+                    <p className="text-sm text-center text-red-600 dark:text-red-400 font-medium">
+                      ¿Estás seguro? Esta acción no se puede deshacer.
+                    </p>
+                    <div className="flex justify-end gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="h-11"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={handleDelete}
+                        isLoading={deleteBarber.isPending}
+                        className="h-11"
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
+          </>
         )}
       </div>
     </Modal>
