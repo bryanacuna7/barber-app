@@ -349,6 +349,15 @@ function colorForCategory(category: ServiceCategory): string {
   return 'blue'
 }
 
+function parseDigits(value: string): number {
+  return Number((value || '').replace(/[^\d]/g, '') || '0')
+}
+
+function formatWithThousands(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return ''
+  return value.toLocaleString('en-US')
+}
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -364,6 +373,7 @@ function ServiciosContent() {
   const [editingService, setEditingService] = useState<{ id: string } | null>(null)
   const [deleteService, setDeleteService] = useState<MockService | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -374,6 +384,7 @@ function ServiciosContent() {
     price: 0,
     business_id: businessId,
   })
+  const SelectedFormIcon = SERVICE_ICON_MAP[formData.icon] || Scissors
 
   const searchParamsHook = useSearchParams()
   const intentHandled = useRef(false)
@@ -542,6 +553,7 @@ function ServiciosContent() {
       price: 0,
       business_id: businessId,
     })
+    setIsIconPickerOpen(false)
     setError('')
     setShowForm(true)
   }
@@ -557,6 +569,7 @@ function ServiciosContent() {
       price: service.price,
       business_id: businessId,
     })
+    setIsIconPickerOpen(false)
     setError('')
     setShowForm(true)
   }
@@ -572,6 +585,7 @@ function ServiciosContent() {
       business_id: businessId,
     })
     setEditingService(null)
+    setIsIconPickerOpen(false)
     setShowForm(false)
     setError('')
   }
@@ -579,6 +593,16 @@ function ServiciosContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    if (formData.duration < 5 || formData.duration > 480) {
+      setError('La duración debe estar entre 5 y 480 minutos')
+      return
+    }
+
+    if (formData.price < 0) {
+      setError('El precio no puede ser negativo')
+      return
+    }
 
     try {
       if (editingService) {
@@ -605,6 +629,17 @@ function ServiciosContent() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar servicio')
     }
+  }
+
+  function handleCategoryChange(nextCategory: ServiceCategory) {
+    setFormData((prev) => ({
+      ...prev,
+      category: nextCategory,
+      icon:
+        prev.icon === iconNameForCategory(prev.category)
+          ? iconNameForCategory(nextCategory)
+          : prev.icon,
+    }))
   }
 
   // Loading skeleton
@@ -1277,36 +1312,112 @@ function ServiciosContent() {
               <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
                 Categoría
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    category: e.target.value as ServiceCategory,
-                    icon:
-                      prev.icon === iconNameForCategory(prev.category)
-                        ? iconNameForCategory(e.target.value as ServiceCategory)
-                        : prev.icon,
-                  }))
-                }
-                className="flex h-11 w-full rounded-[14px] border border-zinc-200 bg-white px-3 text-sm text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              <div
+                role="radiogroup"
+                aria-label="Seleccionar categoría"
+                className="grid grid-cols-2 gap-2 sm:grid-cols-4"
               >
-                {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => (
-                  <option key={category} value={category}>
-                    {CATEGORY_LABELS[category]}
-                  </option>
-                ))}
-              </select>
+                {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => {
+                  const isSelected = formData.category === category
+                  const CategoryIcon =
+                    SERVICE_ICON_MAP[DEFAULT_ICON_BY_CATEGORY[category]] || Scissors
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleCategoryChange(category)}
+                      className={`flex h-12 items-center gap-2 rounded-xl border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
+                        isSelected
+                          ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300'
+                          : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      <CategoryIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span>{CATEGORY_LABELS[category]}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             <div>
               <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
                 Ícono
               </label>
+              <div className="sm:hidden space-y-2">
+                <button
+                  type="button"
+                  aria-expanded={isIconPickerOpen}
+                  aria-controls="mobile-icon-picker"
+                  onClick={() => setIsIconPickerOpen((prev) => !prev)}
+                  className="flex h-12 w-full items-center justify-between rounded-[14px] border border-zinc-200 bg-white px-3 text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
+                      <SelectedFormIcon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-medium">
+                      {SERVICE_ICON_LABELS[formData.icon]}
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${isIconPickerOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isIconPickerOpen && (
+                    <motion.div
+                      id="mobile-icon-picker"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={animations.spring.snappy}
+                      className="overflow-hidden rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900"
+                    >
+                      <div
+                        role="radiogroup"
+                        aria-label="Seleccionar ícono"
+                        className="grid grid-cols-4 gap-2"
+                      >
+                        {SERVICE_ICON_NAMES.map((iconName) => {
+                          const isSelected = formData.icon === iconName
+                          const Icon = SERVICE_ICON_MAP[iconName]
+                          return (
+                            <button
+                              key={iconName}
+                              type="button"
+                              role="radio"
+                              aria-checked={isSelected}
+                              aria-label={SERVICE_ICON_LABELS[iconName]}
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, icon: iconName }))
+                                setIsIconPickerOpen(false)
+                              }}
+                              className={`flex h-16 flex-col items-center justify-center gap-1 rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
+                                isSelected
+                                  ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300'
+                                  : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
+                              }`}
+                            >
+                              <Icon className="h-4 w-4" aria-hidden="true" />
+                              <span className="text-[10px] font-medium leading-none">
+                                {SERVICE_ICON_LABELS[iconName]}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <div
                 role="radiogroup"
                 aria-label="Seleccionar ícono"
-                className="grid grid-cols-4 gap-2"
+                className="hidden sm:grid grid-cols-4 gap-2"
               >
                 {SERVICE_ICON_NAMES.map((iconName) => {
                   const isSelected = formData.icon === iconName
@@ -1335,20 +1446,21 @@ function ServiciosContent() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block min-h-[2.75rem] text-sm font-semibold uppercase tracking-wide text-muted">
+                <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
                   Duración (min)
                 </label>
                 <Input
-                  type="number"
-                  min={5}
-                  max={480}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  enterKeyHint="next"
                   value={formData.duration}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      duration: Number(e.target.value),
+                      duration: Math.min(480, parseDigits(e.target.value)),
                     }))
                   }
                   required
@@ -1356,18 +1468,19 @@ function ServiciosContent() {
               </div>
 
               <div>
-                <label className="mb-2 block min-h-[2.75rem] text-sm font-semibold uppercase tracking-wide text-muted">
+                <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
                   Precio (CRC)
                 </label>
                 <Input
-                  type="number"
-                  min={0}
-                  step={100}
-                  value={formData.price || ''}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  enterKeyHint="done"
+                  value={formatWithThousands(formData.price)}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      price: e.target.value === '' ? 0 : Number(e.target.value),
+                      price: parseDigits(e.target.value),
                     }))
                   }
                   required
@@ -1375,17 +1488,27 @@ function ServiciosContent() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={resetForm} className="h-11">
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                isLoading={createService.isPending || updateService.isPending}
-                className="h-11"
-              >
-                {editingService ? 'Actualizar' : 'Crear'} Servicio
-              </Button>
+            <div className="sticky bottom-0 -mx-5 mt-2 border-t border-zinc-200/80 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-3 backdrop-blur-sm dark:border-zinc-800/80 dark:bg-zinc-900/95 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={resetForm}
+                  className="h-11 w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  isLoading={createService.isPending || updateService.isPending}
+                  className="h-11 w-full sm:w-auto"
+                >
+                  <span className="sm:hidden">{editingService ? 'Actualizar' : 'Crear'}</span>
+                  <span className="hidden sm:inline">
+                    {editingService ? 'Actualizar' : 'Crear'} Servicio
+                  </span>
+                </Button>
+              </div>
             </div>
           </form>
         </Modal>
