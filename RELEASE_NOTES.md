@@ -8,18 +8,19 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.19
+## v0.9.20
 
 ### Novedades
 
-- Ahora puedes cambiar tu contraseña desde tu perfil o configuracion, sin importar tu rol (dueno, barbero o cliente)
-- Al cambiar la contraseña se cierra tu sesion automaticamente para mayor seguridad
-- Un indicador visual te muestra que tan segura es tu nueva contraseña mientras la escribes
+- La seccion de Analiticas ahora tiene 3 pestanas: Negocio, Clientes y Equipo para encontrar todo mas facil
+- En la pestana de Clientes puedes ver de un vistazo cuantos son VIP, frecuentes, nuevos o inactivos, con acciones rapidas
+- Ahora puedes hacer check-in de citas que ya fueron confirmadas pero aun no han iniciado
 
 ### Mejoras
 
-- La pagina de recuperar contraseña ahora pide los mismos requisitos que al registrarte (8 caracteres, mayuscula, minuscula y numero)
+- Las estadisticas del dia en Citas ahora muestran "Agendadas" en lugar de separar pendientes y confirmadas
+- El menu de navegacion en movil tiene un diseno renovado mas limpio
 
 ### Correcciones
 
-- Corregido un error intermitente que aparecia en la consola del navegador durante el desarrollo
+- Limpieza general de codigo para mejor rendimiento en las paginas del dashboard

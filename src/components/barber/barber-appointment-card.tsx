@@ -138,7 +138,9 @@ export function BarberAppointmentCard({
 
   const now = new Date()
   const isPast = new Date(appointment.scheduled_at) < now
-  const canCheckIn = appointment.status === 'pending'
+  const canCheckIn =
+    appointment.status === 'pending' ||
+    (appointment.status === 'confirmed' && !appointment.started_at)
   const isInProgress = appointment.status === 'confirmed' && appointment.started_at
   const canComplete = appointment.status === 'pending' || appointment.status === 'confirmed'
   const canNoShow = appointment.status === 'pending' || appointment.status === 'confirmed'

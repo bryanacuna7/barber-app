@@ -79,7 +79,7 @@ export function useUpdateAppointmentStatus() {
 
       if (endpoint) {
         // Use dedicated endpoint with RBAC validation
-        const res = await fetch(endpoint, { method: 'POST' })
+        const res = await fetch(endpoint, { method: 'PATCH' })
         if (!res.ok) {
           const body = await res.json().catch(() => ({}))
           throw new Error(body.error || `Error updating status to ${status}`)

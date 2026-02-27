@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { canAddClient } from '@/lib/subscription'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { getStaffPermissions, mergePermissions } from '@/lib/auth/roles'
 
 // Validation schema for creating clients
 const clientSchema = z.object({
@@ -12,13 +13,30 @@ const clientSchema = z.object({
 })
 
 // GET - Fetch clients for the authenticated user's business
-export const GET = withAuth(async (request, context, { business, supabase }) => {
+export const GET = withAuth(async (request, context, { business, role, barberId, supabase }) => {
   try {
-    // Parse query params
+    // Permission check: barbers need nav_clientes permission
+    if (role === 'barber' && barberId) {
+      const [{ data: bizRow }, { data: barberRow }] = await Promise.all([
+        supabase.from('businesses').select('staff_permissions').eq('id', business.id).single(),
+        supabase.from('barbers').select('custom_permissions').eq('id', barberId).single(),
+      ])
+      const perms = mergePermissions(
+        getStaffPermissions((bizRow as any)?.staff_permissions),
+        (barberRow as any)?.custom_permissions
+      )
+      if (!perms.nav_clientes) {
+        return errorResponse('No tienes permiso para ver clientes', 403)
+      }
+    }
+
+    // Parse query params with input validation
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
-    const limit = parseInt(searchParams.get('limit') || '20', 10)
-    const offset = parseInt(searchParams.get('offset') || '0', 10)
+    const rawLimit = parseInt(searchParams.get('limit') || '20', 10)
+    const rawOffset = parseInt(searchParams.get('offset') || '0', 10)
+    const limit = Number.isNaN(rawLimit) ? 20 : Math.max(0, rawLimit)
+    const offset = Number.isNaN(rawOffset) ? 0 : Math.max(0, rawOffset)
 
     // Build query with pagination
     let query = supabase
@@ -29,7 +47,11 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       )
       .eq('business_id', business.id)
       .order('name', { ascending: true })
-      .range(offset, offset + limit - 1)
+
+    // limit=0 means "return all" (no range applied)
+    if (limit > 0) {
+      query = query.range(offset, offset + limit - 1)
+    }
 
     if (search) {
       query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%`)
@@ -48,7 +70,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
         total: count || 0,
         offset,
         limit,
-        hasMore: count ? offset + limit < count : false,
+        hasMore: limit === 0 ? false : count ? offset + limit < count : false,
       },
     })
   } catch (error) {

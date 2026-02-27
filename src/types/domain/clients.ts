@@ -44,7 +44,7 @@ export interface ClientActivityTimeline {
   amount?: number
 }
 
-export type ClientViewMode = 'dashboard' | 'cards' | 'table' | 'calendar'
+export type ClientViewMode = 'cards' | 'table' | 'calendar'
 
 export type ClientSortField =
   | 'name'

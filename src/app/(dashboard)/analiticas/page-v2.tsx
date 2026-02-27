@@ -3,18 +3,29 @@
 /**
  * Analytics Dashboard Page - Modernized (v2)
  *
+ * 3-tab structure: Negocio | Clientes | Equipo
+ * Designed as D-ready (tabs → sub-routes evolution).
+ *
  * Integrated with:
  * - React Query: useBusinessAnalytics hook
  * - Real-time: WebSocket updates via useRealtimeAppointments
  * - Error Boundaries: 3-level protection (page, stats, charts)
- * - Feature Flags: Instant rollback via NEXT_PUBLIC_FF_NEW_ANALYTICS
  *
  * Created: Session 117 - Phase 0 Week 5-6
+ * Updated: Analytics refactor — 3-tab system
  */
 
 import { useState, Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { TrendingUp, Calendar, DollarSign, Users, Scissors, ChevronDown } from 'lucide-react'
+import {
+  TrendingUp,
+  Calendar,
+  DollarSign,
+  Users,
+  ChevronDown,
+  Building2,
+  UserCheck,
+} from 'lucide-react'
 import { cn, formatCurrencyCompactMillions } from '@/lib/utils'
 import { usePreference } from '@/lib/preferences'
 import { Card, CardContent } from '@/components/ui/card'
@@ -22,7 +33,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { FadeInUp, StaggeredList, StaggeredItem } from '@/components/ui/motion'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
-import { AnalyticsErrorBoundary } from '@/components/error-boundaries/AnalyticsErrorBoundary'
 import { QueryError } from '@/components/ui/query-error'
 import {
   useBusinessAnalytics,
@@ -34,43 +44,27 @@ import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { useBusiness } from '@/contexts/business-context'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 
-// Lazy load chart components (they're heavy with Recharts)
-const RevenueChart = dynamic(
-  () =>
-    import('@/components/analytics/revenue-chart').then((mod) => ({ default: mod.RevenueChart })),
+// Lazy load tab components
+const NegocioTab = dynamic(
+  () => import('@/components/analytics/negocio-tab').then((mod) => ({ default: mod.NegocioTab })),
   {
-    loading: () => <ChartSkeleton />,
+    loading: () => <TabSkeleton />,
     ssr: false,
   }
 )
 
-const ServicesChart = dynamic(
-  () =>
-    import('@/components/analytics/services-chart').then((mod) => ({ default: mod.ServicesChart })),
+const ClientesTab = dynamic(
+  () => import('@/components/analytics/clientes-tab').then((mod) => ({ default: mod.ClientesTab })),
   {
-    loading: () => <ChartSkeleton />,
+    loading: () => <TabSkeleton />,
     ssr: false,
   }
 )
 
-const BarbersLeaderboard = dynamic(
-  () =>
-    import('@/components/analytics/barbers-leaderboard').then((mod) => ({
-      default: mod.BarbersLeaderboard,
-    })),
+const EquipoTab = dynamic(
+  () => import('@/components/analytics/equipo-tab').then((mod) => ({ default: mod.EquipoTab })),
   {
-    loading: () => <ChartSkeleton />,
-    ssr: false,
-  }
-)
-
-const DurationInsights = dynamic(
-  () =>
-    import('@/components/analytics/duration-insights').then((mod) => ({
-      default: mod.DurationInsights,
-    })),
-  {
-    loading: () => <ChartSkeleton />,
+    loading: () => <TabSkeleton />,
     ssr: false,
   }
 )
@@ -88,6 +82,8 @@ export default function AnaliticasPageV2() {
   )
 }
 
+type SectionTab = 'negocio' | 'clientes' | 'equipo'
+
 function AnalyticsContent() {
   const { businessId } = useBusiness()
   const [period, setPeriod] = usePreference<AnalyticsPeriod>('analytics_period', 'month', [
@@ -95,11 +91,11 @@ function AnalyticsContent() {
     'month',
     'year',
   ])
-  const [activeChartTab, setActiveChartTab] = usePreference<string>('analytics_chart', 'revenue', [
-    'revenue',
-    'services',
-    'barbers',
-  ])
+  const [activeSection, setActiveSection] = usePreference<SectionTab>(
+    'analytics_section',
+    'negocio',
+    ['negocio', 'clientes', 'equipo']
+  )
   const [statsExpanded, setStatsExpanded] = useState(false)
 
   // React Query: Fetch analytics data
@@ -189,7 +185,7 @@ function AnalyticsContent() {
         </div>
       </FadeInUp>
 
-      {/* KPI Cards - Wrapped in Error Boundary */}
+      {/* Business KPI Cards — always visible */}
       <ComponentErrorBoundary
         fallbackTitle="Error al cargar estadísticas"
         fallbackDescription="No pudimos cargar las métricas KPI."
@@ -269,74 +265,49 @@ function AnalyticsContent() {
         </StaggeredList>
       </ComponentErrorBoundary>
 
-      {/* Charts - Wrapped in Error Boundary */}
-      <AnalyticsErrorBoundary>
-        {/* Mobile: Tabbed Charts */}
-        <div className="md:hidden">
-          <Tabs value={activeChartTab} onValueChange={setActiveChartTab}>
-            <TabsList className="mb-4 flex w-full items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-              <TabsTrigger
-                value="revenue"
-                icon={<TrendingUp className="h-4 w-4" />}
-                className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
-              >
-                Ingresos
-              </TabsTrigger>
-              <TabsTrigger
-                value="services"
-                icon={<Scissors className="h-4 w-4" />}
-                className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
-              >
-                Servicios
-              </TabsTrigger>
-              <TabsTrigger
-                value="barbers"
-                icon={<Users className="h-4 w-4" />}
-                className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
-              >
-                Equipo
-              </TabsTrigger>
-            </TabsList>
+      {/* Section Tabs: Negocio | Clientes | Equipo */}
+      <Tabs value={activeSection} onValueChange={(v) => setActiveSection(v as SectionTab)}>
+        <TabsList className="flex w-full items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <TabsTrigger
+            value="negocio"
+            icon={<Building2 className="h-4 w-4" />}
+            className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
+          >
+            Negocio
+          </TabsTrigger>
+          <TabsTrigger
+            value="clientes"
+            icon={<Users className="h-4 w-4" />}
+            className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
+          >
+            Clientes
+          </TabsTrigger>
+          <TabsTrigger
+            value="equipo"
+            icon={<UserCheck className="h-4 w-4" />}
+            className="min-h-[44px] shrink-0 rounded-xl px-3 text-sm"
+          >
+            Equipo
+          </TabsTrigger>
+        </TabsList>
 
-            <TabsContent value="revenue">
-              <RevenueChart data={analytics.revenueSeries} period={period} height={200} />
-            </TabsContent>
+        <TabsContent value="negocio">
+          <NegocioTab
+            analytics={analytics}
+            durationData={durationData}
+            durationLoading={durationLoading}
+            period={period}
+          />
+        </TabsContent>
 
-            <TabsContent value="services">
-              <ServicesChart data={analytics.services} period={period} height={200} />
-            </TabsContent>
+        <TabsContent value="clientes">
+          <ClientesTab />
+        </TabsContent>
 
-            <TabsContent value="barbers">
-              <BarbersLeaderboard data={analytics.barbers} period={period} />
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Desktop: Original Layout */}
-        <div className="hidden md:block space-y-6">
-          <FadeInUp delay={0.2}>
-            <RevenueChart data={analytics.revenueSeries} period={period} height={300} />
-          </FadeInUp>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <FadeInUp delay={0.3}>
-              <ServicesChart data={analytics.services} period={period} height={300} />
-            </FadeInUp>
-            <FadeInUp delay={0.4}>
-              <BarbersLeaderboard data={analytics.barbers} period={period} />
-            </FadeInUp>
-          </div>
-        </div>
-      </AnalyticsErrorBoundary>
-
-      {/* Duration Insights */}
-      <ComponentErrorBoundary
-        fallbackTitle="Error al cargar duración"
-        fallbackDescription="No pudimos cargar los datos de duración."
-        showReset
-      >
-        <DurationInsights data={durationData ?? null} isLoading={durationLoading} />
-      </ComponentErrorBoundary>
+        <TabsContent value="equipo">
+          <EquipoTab barbers={analytics.barbers} period={period} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
@@ -438,12 +409,14 @@ function KPICard({
   )
 }
 
-// Chart Loading Skeleton
-function ChartSkeleton() {
+// Tab Loading Skeleton
+function TabSkeleton() {
   return (
-    <Card className="p-6 border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <Skeleton className="h-[300px]" />
-    </Card>
+    <div className="space-y-6 mt-4">
+      <Card className="p-6 border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <Skeleton className="h-[300px]" />
+      </Card>
+    </div>
   )
 }
 
@@ -471,12 +444,13 @@ function AnalyticsPageSkeleton() {
         ))}
       </div>
 
+      {/* Section Tabs Skeleton */}
+      <Skeleton className="h-12 w-full rounded-2xl" />
+
       {/* Charts Skeleton */}
-      <ChartSkeleton />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartSkeleton />
-        <ChartSkeleton />
-      </div>
+      <Card className="p-6">
+        <Skeleton className="h-[300px]" />
+      </Card>
     </div>
   )
 }

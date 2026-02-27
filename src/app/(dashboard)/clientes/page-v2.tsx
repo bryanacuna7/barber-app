@@ -45,9 +45,6 @@ import {
   LayoutGrid,
   Table as TableIcon,
   Calendar as CalendarIcon,
-  BarChart3,
-  AlertTriangle,
-  ArrowUpRight,
   Scissors,
   Heart,
   Clock,
@@ -56,25 +53,12 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronsUpDown,
-  PieChart as PieChartIcon,
   Edit,
   Check,
   ChevronDown,
   Filter,
   type LucideIcon,
 } from 'lucide-react'
-import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 // import { CardContent } from '@/components/ui/card'
@@ -83,7 +67,7 @@ import { SwipeableRow } from '@/components/ui/swipeable-row'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/utils'
-import { format, startOfMonth, isAfter, subDays, isSameDay, getDaysInMonth } from 'date-fns'
+import { format, subDays, isSameDay, getDaysInMonth } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { Client } from '@/types'
 import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
@@ -97,9 +81,13 @@ import { usePreference } from '@/lib/preferences'
 // import { SpendingTier } from '@/components/clients/spending-tier'
 import { ActivityItem } from '@/components/clients/activity-item'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
+import { getClientSegment, calculateLoyalty, getSpendingTier } from '@/lib/utils/client-segments'
+import { segmentConfig } from '@/components/clients/segment-config'
+import { buildWhatsAppLink } from '@/lib/whatsapp/deep-link'
 
-// NEW: Standardized React Query hooks
-import { useClients, useCreateClient } from '@/hooks/queries/useClients'
+// React Query hooks
+import { useClientMetrics } from '@/hooks/queries/useClientMetrics'
+import { useCreateClient } from '@/hooks/queries/useClients'
 
 // NEW: Real-time WebSocket integration
 import { useRealtimeClients } from '@/hooks/use-realtime-clients'
@@ -113,59 +101,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useBusiness } from '@/contexts/business-context'
 
 type ClientSegment = 'all' | 'vip' | 'frequent' | 'new' | 'inactive'
-type ViewMode = 'dashboard' | 'cards' | 'table' | 'calendar'
-type InsightType = 'churn' | 'winback' | 'upsell' | null
-
-function getClientSegment(client: Client): 'vip' | 'frequent' | 'new' | 'inactive' {
-  const visits = client.total_visits || 0
-  const spent = Number(client.total_spent || 0)
-  const lastVisit = client.last_visit_at ? new Date(client.last_visit_at) : null
-  const thirtyDaysAgo = subDays(new Date(), 30)
-
-  // VIP: 5+ visitas O +50,000 gastados
-  if (visits >= 5 || spent >= 50000) return 'vip'
-
-  // Inactivo: sin visitas en 30+ días
-  if (lastVisit && !isAfter(lastVisit, thirtyDaysAgo)) return 'inactive'
-
-  // Frecuente: 3-4 visitas
-  if (visits >= 3) return 'frequent'
-
-  // Nuevo: 0-2 visitas
-  return 'new'
-}
-
-// Calculate loyalty percentage based on visits and recency
-function calculateLoyalty(client: Client): number {
-  const visits = client.total_visits || 0
-  const lastVisit = client.last_visit_at ? new Date(client.last_visit_at) : null
-
-  if (!lastVisit) return 0
-
-  const daysSince = Math.floor((new Date().getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24))
-
-  // Base score from visits (max 60%)
-  const visitScore = Math.min(visits * 10, 60)
-
-  // Recency score (max 40%)
-  let recencyScore = 40
-  if (daysSince > 60) recencyScore = 0
-  else if (daysSince > 30) recencyScore = 10
-  else if (daysSince > 14) recencyScore = 20
-  else if (daysSince > 7) recencyScore = 30
-
-  return Math.min(visitScore + recencyScore, 100)
-}
-
-// Calculate spending tier
-function getSpendingTier(client: Client): 'bronze' | 'silver' | 'gold' | 'platinum' {
-  const spent = Number(client.total_spent || 0)
-
-  if (spent >= 100000) return 'platinum'
-  if (spent >= 50000) return 'gold'
-  if (spent >= 20000) return 'silver'
-  return 'bronze'
-}
+type ViewMode = 'cards' | 'table' | 'calendar'
 
 // Generate mock activities for timeline (replace with real data when available)
 function getMockActivities(client: Client) {
@@ -210,33 +146,6 @@ function getMockActivities(client: Client) {
   return activities
 }
 
-const segmentConfig = {
-  vip: {
-    label: 'VIP',
-    color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    icon: Crown,
-    description: '5+ visitas o ₡50,000+ gastados',
-  },
-  frequent: {
-    label: 'Frecuente',
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    icon: Star,
-    description: '3-4 visitas',
-  },
-  new: {
-    label: 'Nuevo',
-    color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-    icon: UserPlus,
-    description: '1-2 visitas',
-  },
-  inactive: {
-    label: 'Inactivo',
-    color: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
-    icon: User,
-    description: 'Sin visitas en 30+ días',
-  },
-}
-
 // Sort indicator component (defined outside to avoid re-creation on render)
 function SortIndicator({
   column,
@@ -263,9 +172,7 @@ export default function ClientesPageV2() {
   const [search, setSearch] = useState('')
   const [selectedSegment, setSelectedSegment] = useState<ClientSegment>('all')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [, setIsMobile] = useState(false)
   const [viewMode, setViewMode] = usePreference<ViewMode>('clientes_view', 'cards', [
-    'dashboard',
     'cards',
     'table',
     'calendar',
@@ -274,7 +181,6 @@ export default function ClientesPageV2() {
   const [viewDropdownOpen, setViewDropdownOpen] = useState(false)
   const [segmentSheetOpen, setSegmentSheetOpen] = useState(false)
   const [statsExpanded, setStatsExpanded] = useState(false)
-  const [selectedInsight, setSelectedInsight] = useState<InsightType>('churn')
   const [sortColumn, setSortColumn] = useState<'name' | 'segment' | 'spent' | 'visits' | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [selectedCardClient, setSelectedCardClient] = useState<Client | null>(null) // For master-detail cards view
@@ -324,77 +230,13 @@ export default function ClientesPageV2() {
     }
   }, [viewDropdownOpen])
 
-  // Detect mobile viewport
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 640)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  // NEW: React Query hooks (standardized pattern)
-  const { data: clientsData, isLoading, error: queryError, refetch } = useClients(businessId)
+  // React Query hooks — useClientMetrics provides metrics + full client list
+  const { metrics, clients, isLoading, error: queryError, refetch } = useClientMetrics(businessId)
 
   const createClient = useCreateClient()
 
-  // NEW: Real-time WebSocket updates
+  // Real-time WebSocket updates
   useRealtimeClients({ businessId, enabled: !!businessId })
-
-  // NEW: Extract clients from new response format
-  const clients = useMemo(() => clientsData?.clients || [], [clientsData?.clients])
-  const totalClients = clientsData?.total || 0
-
-  // Métricas calculadas con contexto temporal
-  const metrics = useMemo(() => {
-    const now = new Date()
-    const monthStart = startOfMonth(now)
-    const thirtyDaysAgo = subDays(now, 30)
-
-    // Clientes nuevos este mes (basado en created_at si existe, sino primera visita)
-    const newThisMonth = clients.filter((c) => {
-      const createdAt = c.created_at ? new Date(c.created_at) : null
-      return createdAt && isAfter(createdAt, monthStart)
-    }).length
-
-    // Ingresos de los últimos 30 días (aproximado basado en última visita)
-    const recentClients = clients.filter((c) => {
-      const lastVisit = c.last_visit_at ? new Date(c.last_visit_at) : null
-      return lastVisit && isAfter(lastVisit, thirtyDaysAgo)
-    })
-
-    // Segmentos
-    const segments = {
-      vip: clients.filter((c) => getClientSegment(c) === 'vip').length,
-      frequent: clients.filter((c) => getClientSegment(c) === 'frequent').length,
-      new: clients.filter((c) => getClientSegment(c) === 'new').length,
-      inactive: clients.filter((c) => getClientSegment(c) === 'inactive').length,
-    }
-
-    // Valor promedio por cliente
-    const avgValue =
-      clients.length > 0
-        ? clients.reduce((sum, c) => sum + Number(c.total_spent || 0), 0) / clients.length
-        : 0
-
-    // Total histórico
-    const totalRevenue = clients.reduce((sum, c) => sum + Number(c.total_spent || 0), 0)
-
-    // Cliente top
-    const topClient = clients.reduce(
-      (top, c) => (Number(c.total_spent || 0) > Number(top?.total_spent || 0) ? c : top),
-      clients[0]
-    )
-
-    return {
-      total: clients.length,
-      newThisMonth,
-      recentActive: recentClients.length,
-      segments,
-      avgValue,
-      totalRevenue,
-      topClient,
-    }
-  }, [clients])
 
   // Smart notifications (from demo - clients that need attention)
   // RELAXED CRITERIA to ensure banner always shows
@@ -421,69 +263,6 @@ export default function ClientesPageV2() {
       })
       .slice(0, 5)
   }, [clients])
-
-  // AI Insights (rule-based logic, not real AI)
-  const churnRiskClients = useMemo(() => {
-    return clients
-      .filter((c) => {
-        const segment = getClientSegment(c)
-        const lastVisit = c.last_visit_at ? new Date(c.last_visit_at) : null
-        if (!lastVisit) return true // No last visit = high risk
-
-        const daysSinceVisit = Math.floor(
-          (new Date().getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24)
-        )
-
-        // High churn risk: VIP/Frequent with 30+ days, or any with 60+ days
-        return (
-          ((segment === 'vip' || segment === 'frequent') && daysSinceVisit > 30) ||
-          daysSinceVisit > 60
-        )
-      })
-      .sort((a, b) => {
-        const aVisit = a.last_visit_at ? new Date(a.last_visit_at).getTime() : 0
-        const bVisit = b.last_visit_at ? new Date(b.last_visit_at).getTime() : 0
-        return aVisit - bVisit // Oldest first
-      })
-      .slice(0, 8)
-  }, [clients])
-
-  const winbackClients = useMemo(() => {
-    return clients
-      .filter((c) => getClientSegment(c) === 'inactive' && (c.total_visits || 0) >= 3)
-      .sort((a, b) => Number(b.total_spent || 0) - Number(a.total_spent || 0))
-      .slice(0, 12)
-  }, [clients])
-
-  const upsellCandidates = useMemo(() => {
-    return clients
-      .filter((c) => getClientSegment(c) === 'frequent' && (c.total_visits || 0) >= 3)
-      .sort((a, b) => (b.total_visits || 0) - (a.total_visits || 0))
-      .slice(0, 5)
-  }, [clients])
-
-  // Chart data (mock data for now - can be replaced with real aggregations)
-  const revenueChartData = useMemo(() => {
-    // Generate last 6 months data (simplified) with fixed values for deterministic rendering
-    const mockRevenues = [165000, 178000, 143000, 192000, 156000, 184000]
-    return Array.from({ length: 6 }, (_, i) => {
-      const month = subDays(new Date(), (5 - i) * 30)
-      const monthName = format(month, 'MMM', { locale: es })
-      return {
-        month: monthName,
-        revenue: mockRevenues[i],
-      }
-    })
-  }, [])
-
-  const segmentPieData = useMemo(() => {
-    return [
-      { name: 'VIP', value: metrics.segments.vip, color: 'var(--color-amber-500)' },
-      { name: 'Frecuente', value: metrics.segments.frequent, color: 'var(--color-blue-500)' },
-      { name: 'Nuevo', value: metrics.segments.new, color: 'var(--color-green-500)' },
-      { name: 'Inactivo', value: metrics.segments.inactive, color: 'var(--color-zinc-500)' },
-    ]
-  }, [metrics.segments])
 
   // Filtrar clientes
   const filteredClients = useMemo(() => {
@@ -543,6 +322,15 @@ export default function ClientesPageV2() {
     return result
   }, [clients, selectedSegment, search, sortColumn, sortDirection])
 
+  const DISPLAY_LIMIT = 50
+  const [showAll, setShowAll] = useState(false)
+
+  // Apply display limit for cards and table views (calendar has its own rendering logic)
+  const displayedClients = useMemo(() => {
+    if (showAll || viewMode === 'calendar') return filteredClients
+    return filteredClients.slice(0, DISPLAY_LIMIT)
+  }, [filteredClients, showAll, viewMode])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -563,10 +351,8 @@ export default function ClientesPageV2() {
   }
 
   function handleWhatsApp(phone: string) {
-    // Formatear número para Costa Rica
-    const cleanPhone = phone.replace(/\D/g, '')
-    const fullPhone = cleanPhone.length === 8 ? `506${cleanPhone}` : cleanPhone
-    window.open(`https://wa.me/${fullPhone}`, '_blank')
+    const link = buildWhatsAppLink(phone)
+    if (link) window.open(link, '_blank', 'noopener,noreferrer')
   }
 
   // Handle sort
@@ -582,7 +368,6 @@ export default function ClientesPageV2() {
   }
 
   const viewOptions: Array<{ mode: ViewMode; icon: LucideIcon; label: string }> = [
-    { mode: 'dashboard', icon: BarChart3, label: 'Tablero' },
     { mode: 'cards', icon: LayoutGrid, label: 'Lista' },
     { mode: 'table', icon: TableIcon, label: 'Tabla' },
     { mode: 'calendar', icon: CalendarIcon, label: 'Calendario' },
@@ -654,7 +439,7 @@ export default function ClientesPageV2() {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <h1 className="app-page-title brand-gradient-text">Clientes</h1>
-                  <p className="app-page-subtitle mt-1">{totalClients} registrados</p>
+                  <p className="app-page-subtitle mt-1">{metrics.total} registrados</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="lg:hidden">
@@ -863,7 +648,7 @@ export default function ClientesPageV2() {
               </AnimatePresence>
 
               {/* Toolbar: Search + Controls */}
-              <div className="space-y-3 sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-zinc-800/80 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] sm:dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)]">
+              <div className="space-y-3 sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-zinc-800/80 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] sm:dark:shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
                 {/* Search */}
                 <Input
                   type="text"
@@ -1061,8 +846,14 @@ export default function ClientesPageV2() {
                     <div
                       className={`space-y-2 ${selectedCardClient ? 'lg:col-span-2' : 'lg:col-span-1'}`}
                     >
-                      <div className="space-y-2 max-h-[calc(100vh-24rem)] overflow-y-auto lg:pr-2 scrollbar-thin">
-                        {filteredClients.map((client) => {
+                      <div
+                        className={`space-y-2 ${
+                          selectedCardClient
+                            ? 'lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-2'
+                            : ''
+                        }`}
+                      >
+                        {displayedClients.map((client) => {
                           const segment = getClientSegment(client)
                           const tier = getSpendingTier(client)
                           const loyalty = calculateLoyalty(client)
@@ -1520,329 +1311,6 @@ export default function ClientesPageV2() {
                   </motion.div>
                 )}
 
-                {/* DASHBOARD VIEW (from demo Fusion) */}
-                {viewMode === 'dashboard' && (
-                  <motion.div
-                    key="dashboard"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="space-y-6"
-                  >
-                    {/* Charts Row */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* Revenue Trend Line Chart */}
-                      <div className="lg:col-span-2 rounded-xl bg-white dark:bg-zinc-900 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800">
-                        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
-                          Tendencia de Ingresos
-                        </h3>
-                        <ResponsiveContainer width="100%" height={280}>
-                          <LineChart data={revenueChartData}>
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              stroke="var(--color-zinc-200)"
-                              className="dark:stroke-zinc-700"
-                            />
-                            <XAxis
-                              dataKey="month"
-                              stroke="var(--color-zinc-400)"
-                              style={{ fontSize: '12px' }}
-                            />
-                            <YAxis stroke="var(--color-zinc-400)" style={{ fontSize: '12px' }} />
-                            <Tooltip />
-                            <Line
-                              type="monotone"
-                              dataKey="revenue"
-                              stroke="var(--color-blue-500)"
-                              strokeWidth={3}
-                              dot={{ fill: 'var(--color-blue-500)', r: 4 }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-
-                      {/* Segment Distribution Donut Chart */}
-                      <div className="relative rounded-xl bg-white dark:bg-zinc-900/80 p-6 shadow-sm border border-zinc-200 dark:border-zinc-800 backdrop-blur-sm overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                          <PieChartIcon className="w-24 h-24" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-6 relative z-10">
-                          Distribución
-                        </h3>
-                        <div className="relative h-[220px]">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={segmentPieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={85}
-                                paddingAngle={4}
-                                cornerRadius={6}
-                                dataKey="value"
-                                stroke="none"
-                              >
-                                {segmentPieData.map((entry, index) => (
-                                  <Cell
-                                    key={`cell-${index}`}
-                                    fill={entry.color}
-                                    className="stroke-transparent outline-none focus:outline-none"
-                                  />
-                                ))}
-                              </Pie>
-                              <Tooltip
-                                content={({ active, payload }) => {
-                                  if (active && payload && payload.length) {
-                                    const data = payload[0].payload
-                                    return (
-                                      <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <div
-                                            className="h-2 w-2 rounded-full"
-                                            style={{ backgroundColor: data.color }}
-                                          />
-                                          <p className="text-xs font-medium text-muted">
-                                            {data.name}
-                                          </p>
-                                        </div>
-                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                          {data.value}
-                                          <span className="ml-1 text-xs font-normal text-zinc-500">
-                                            ({((data.value / metrics.total) * 100).toFixed(1)}%)
-                                          </span>
-                                        </p>
-                                      </div>
-                                    )
-                                  }
-                                  return null
-                                }}
-                              />
-                            </PieChart>
-                          </ResponsiveContainer>
-                          {/* Center Text */}
-                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-3xl font-bold text-zinc-900 dark:text-white">
-                              {metrics.total}
-                            </span>
-                            <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                              Total
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                          {segmentPieData.map((item) => (
-                            <div
-                              key={item.name}
-                              className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800/50"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="h-2 w-2 rounded-full ring-2 ring-white dark:ring-zinc-900"
-                                  style={{ backgroundColor: item.color }}
-                                />
-                                <span className="text-xs font-medium text-muted">{item.name}</span>
-                              </div>
-                              <span className="text-xs font-bold text-zinc-900 dark:text-white">
-                                {item.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* AI Insights Section */}
-                    <div className="rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 p-1">
-                      <div className="rounded-xl bg-white dark:bg-zinc-900 p-6">
-                        <div className="mb-6 flex items-center gap-3">
-                          <div className="rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 p-2">
-                            <Sparkles className="h-5 w-5 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
-                              Insights Inteligentes
-                            </h3>
-                            <p className="text-sm text-zinc-500">
-                              Análisis basado en patrones de visita
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                          <Button
-                            variant={selectedInsight === 'churn' ? 'secondary' : 'ghost'}
-                            onClick={() => setSelectedInsight('churn')}
-                            className={`h-auto p-4 text-left flex-col items-start justify-start ${
-                              selectedInsight === 'churn'
-                                ? 'bg-orange-50 dark:bg-orange-900/20 ring-2 ring-orange-500'
-                                : ''
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="h-5 w-5 text-orange-500" />
-                              <span className="font-semibold text-zinc-900 dark:text-white">
-                                Riesgo de Pérdida
-                              </span>
-                            </div>
-                            <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                              {churnRiskClients.length}
-                            </p>
-                            <p className="text-xs text-zinc-500">clientes en riesgo</p>
-                          </Button>
-
-                          <Button
-                            variant={selectedInsight === 'winback' ? 'secondary' : 'ghost'}
-                            onClick={() => setSelectedInsight('winback')}
-                            className={`h-auto p-4 text-left flex-col items-start justify-start ${
-                              selectedInsight === 'winback'
-                                ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-500'
-                                : ''
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <CalendarIcon className="h-5 w-5 text-blue-500" />
-                              <span className="font-semibold text-zinc-900 dark:text-white">
-                                Recuperación
-                              </span>
-                            </div>
-                            <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                              {winbackClients.length}
-                            </p>
-                            <p className="text-xs text-zinc-500">recuperables</p>
-                          </Button>
-
-                          <Button
-                            variant={selectedInsight === 'upsell' ? 'secondary' : 'ghost'}
-                            onClick={() => setSelectedInsight('upsell')}
-                            className={`h-auto p-4 text-left flex-col items-start justify-start ${
-                              selectedInsight === 'upsell'
-                                ? 'bg-green-50 dark:bg-green-900/20 ring-2 ring-green-500'
-                                : ''
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <ArrowUpRight className="h-5 w-5 text-green-500" />
-                              <span className="font-semibold text-zinc-900 dark:text-white">
-                                Upsell VIP
-                              </span>
-                            </div>
-                            <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                              {upsellCandidates.length}
-                            </p>
-                            <p className="text-xs text-zinc-500">candidatos</p>
-                          </Button>
-                        </div>
-
-                        {selectedInsight && (
-                          <div className="space-y-2">
-                            {selectedInsight === 'churn' &&
-                              churnRiskClients.slice(0, 4).map((client) => {
-                                const lastVisit = client.last_visit_at
-                                  ? new Date(client.last_visit_at)
-                                  : null
-                                const daysSince = lastVisit
-                                  ? Math.floor(
-                                      (new Date().getTime() - lastVisit.getTime()) /
-                                        (1000 * 60 * 60 * 24)
-                                    )
-                                  : 999
-
-                                return (
-                                  <div
-                                    key={client.id}
-                                    className="flex items-center justify-between rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 text-sm font-semibold text-orange-700 dark:text-orange-300">
-                                        {client.name.charAt(0)}
-                                      </div>
-                                      <div>
-                                        <p className="font-medium text-zinc-900 dark:text-white">
-                                          {client.name}
-                                        </p>
-                                        <p className="text-xs text-zinc-500">
-                                          {daysSince}d sin visita
-                                        </p>
-                                      </div>
-                                    </div>
-                                    <Button
-                                      variant="success"
-                                      size="sm"
-                                      onClick={() => handleWhatsApp(client.phone)}
-                                      className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
-                                    >
-                                      <MessageCircle className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                )
-                              })}
-                            {selectedInsight === 'winback' &&
-                              winbackClients.slice(0, 4).map((client) => (
-                                <div
-                                  key={client.id}
-                                  className="flex items-center justify-between rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 text-sm font-semibold text-blue-700 dark:text-blue-300">
-                                      {client.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                      <p className="font-medium text-zinc-900 dark:text-white text-sm">
-                                        {client.name}
-                                      </p>
-                                      <p className="text-xs text-zinc-500">
-                                        {formatCurrency(Number(client.total_spent || 0))}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="success"
-                                    size="sm"
-                                    onClick={() => handleWhatsApp(client.phone)}
-                                    className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
-                                  >
-                                    <MessageCircle className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            {selectedInsight === 'upsell' &&
-                              upsellCandidates.map((client) => (
-                                <div
-                                  key={client.id}
-                                  className="flex items-center justify-between rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 text-sm font-semibold text-green-700 dark:text-green-300">
-                                      {client.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                      <p className="font-medium text-zinc-900 dark:text-white">
-                                        {client.name}
-                                      </p>
-                                      <p className="text-xs text-zinc-500">
-                                        {client.total_visits} visitas
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="success"
-                                    size="sm"
-                                    onClick={() => setSelectedClient(client)}
-                                    className="shrink-0 h-11 w-11 min-h-0 rounded-full p-0"
-                                  >
-                                    <Crown className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
                 {/* TABLE VIEW (simplified version) */}
                 {viewMode === 'table' && (
                   <motion.div
@@ -1918,7 +1386,7 @@ export default function ClientesPageV2() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                          {filteredClients.slice(0, 20).map((client) => {
+                          {displayedClients.map((client) => {
                             const segment = getClientSegment(client)
                             const config = segmentConfig[segment]
                             const SegmentIcon = config.icon
@@ -2183,6 +1651,15 @@ export default function ClientesPageV2() {
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Show all button for progressive disclosure */}
+              {!showAll && viewMode !== 'calendar' && filteredClients.length > DISPLAY_LIMIT && (
+                <div className="flex justify-center pt-4">
+                  <Button variant="ghost" onClick={() => setShowAll(true)} className="text-sm">
+                    Mostrar todos ({filteredClients.length})
+                  </Button>
+                </div>
+              )}
 
               {/* Mobile Client Detail Sheet */}
               <Sheet open={isMobileDetailOpen} onOpenChange={setIsMobileDetailOpen}>

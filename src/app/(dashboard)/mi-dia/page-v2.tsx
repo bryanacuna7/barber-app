@@ -148,7 +148,7 @@ function MiDiaPageContent() {
     onSuccess: (action) => {
       // Show success message
       const messages = {
-        'check-in': 'Cita confirmada correctamente',
+        'check-in': 'Cita iniciada correctamente',
         complete: 'Cita completada correctamente',
         'no-show': 'Cita marcada como no asistió',
       }

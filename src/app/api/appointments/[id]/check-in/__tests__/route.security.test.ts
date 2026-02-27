@@ -405,7 +405,113 @@ describe('Security Tests - PATCH /api/appointments/[id]/check-in', () => {
       expect(response.status).toBe(400)
       const body = await response.json()
       expect(body.error).toBe('Estado invalido')
-      expect(body.message).toContain('Solo citas pendientes pueden hacer check-in')
+      expect(body.message).toContain(
+        'Solo citas pendientes o confirmadas sin iniciar pueden hacer check-in'
+      )
+    })
+
+    it('should allow check-in for confirmed appointment when not started yet', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'user-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
+      mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
+        method: 'PATCH',
+        body: JSON.stringify({}),
+      })
+
+      mockSupabase.from.mockReturnValueOnce({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'apt-123',
+            status: 'confirmed',
+            started_at: null,
+            barber_id: 'barber-123',
+            business_id: 'business-123',
+          },
+          error: null,
+        }),
+      } as any)
+
+      mockSupabase.from.mockReturnValueOnce({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'apt-123',
+              status: 'confirmed',
+              scheduled_at: '2026-02-04T10:00:00Z',
+              duration_minutes: 30,
+              price: 25,
+              client_notes: null,
+              internal_notes: null,
+              client: { id: 'client-123', name: 'Test Client', phone: null, email: null },
+              service: { id: 'service-123', name: 'Haircut', duration_minutes: 30, price: 25 },
+            },
+            error: null,
+          }),
+        }),
+      } as any)
+
+      const response = await (PATCH as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'apt-123' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should reject check-in for confirmed appointment already started', async () => {
+      const authenticatedBusiness = {
+        id: 'business-123',
+        owner_id: 'user-123',
+        name: 'Test Business',
+      }
+
+      const authenticatedUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+      }
+
+      mockRequest = new NextRequest('http://localhost:3000/api/appointments/apt-123/check-in', {
+        method: 'PATCH',
+      })
+
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
+          data: {
+            id: 'apt-123',
+            status: 'confirmed',
+            started_at: '2026-02-04T10:05:00Z',
+            barber_id: 'barber-123',
+            business_id: 'business-123',
+          },
+          error: null,
+        }),
+      })
+
+      const response = await (PATCH as unknown as TestHandler)(
+        mockRequest,
+        { params: Promise.resolve({ id: 'apt-123' }) },
+        { user: authenticatedUser, business: authenticatedBusiness, supabase: mockSupabase as any }
+      )
+
+      expect(response.status).toBe(400)
+      const body = await response.json()
+      expect(body.error).toBe('Cita ya iniciada')
     })
 
     it('should prevent status manipulation bypassing business logic', async () => {

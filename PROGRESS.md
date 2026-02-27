@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-26 (Session 189 — UX Polish + Booking Hardening)
+- **Last Updated:** 2026-02-27 (Session 190 — Analytics Refactor + Dashboard Polish)
 - **Branch:** `main`
-- **Version:** `0.9.18`
+- **Version:** `0.9.20`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,26 @@
 ---
 
 ## Recent Sessions
+
+### Session 190: Analytics Refactor + Dashboard Polish (2026-02-27)
+
+**Status:** COMPLETE. Ready to deploy.
+
+**What was done:**
+
+- **Analytics 3-Tab Refactor:** Split monolithic analytics page into Negocio | Clientes | Equipo tabs with lazy-loaded components
+- **Client Metrics Hook:** Extracted `useClientMetrics` + `useAllClients` for reusable KPIs (segment donut, churn/winback/upsell insights)
+- **Client Segments Extraction:** Pure business logic in `client-segments.ts` + visual config in `segment-config.ts` (shared between Clientes page + Analytics)
+- **Clientes Page Cleanup:** Removed inline Recharts, uses extracted segments/metrics hooks, WhatsApp deep links
+- **Citas Stats Simplified:** Merged pending+confirmed into single "Agendadas" stat
+- **Check-in Route Enhanced:** Now accepts `confirmed` appointments (without started_at) in addition to `pending`
+- **Check-in Security Tests:** Extended test suite for confirmed status + already-started guard
+- **More Menu iOS Redesign:** Section-grouped items with iOS-style colored icon squares
+- **Barber Appointment Card:** Minor fix (import cleanup)
+- **Realtime Subscriptions Hook:** New standalone hook for business subscription WebSocket changes
+
+**Files created (8):** `clientes-tab.tsx`, `equipo-tab.tsx`, `negocio-tab.tsx`, `segment-config.ts`, `useAllClients.ts`, `useClientMetrics.ts`, `use-realtime-subscriptions.ts`, `client-segments.ts`
+**Files modified (11):** `analiticas/page-v2.tsx`, `citas/page-v2.tsx`, `clientes/page-v2.tsx`, `mi-dia/page-v2.tsx`, `check-in/route.ts`, `check-in/route.security.test.ts`, `clients/route.ts`, `barber-appointment-card.tsx`, `more-menu-drawer.tsx`, `useAppointments.ts`, `clients.ts`
 
 ### Session 189: UX Polish + Booking Hardening (2026-02-26)
 
@@ -239,7 +259,7 @@
 
 ### Working
 
-- v0.9.18 (Session 189: UX Polish + Booking Hardening)
+- v0.9.20 (Session 190: Analytics Refactor + Dashboard Polish)
 - All UX polish gates complete (E + F + card hierarchy + header CTA)
 - In-app guide with 10 sections, search, TOC, contextual tips
 - Zero dead links in mobile drawer menu

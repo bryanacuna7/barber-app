@@ -37,7 +37,6 @@ import {
   Sun,
   Moon,
   Zap,
-  CheckCircle,
   X,
   UserPlus,
 } from 'lucide-react'
@@ -76,7 +75,6 @@ import {
   useCalendarAppointments,
   useCreateAppointment,
   useUpdateAppointmentStatus,
-  useCreateWalkIn,
 } from '@/hooks/queries/useAppointments'
 import { useClients } from '@/hooks/queries/useClients'
 import { useServices } from '@/hooks/queries/useServices'
@@ -111,8 +109,7 @@ interface StatsContentProps {
   appointments: any[] // TODO: Fix type after data transformation
   selectedDate: Date
   stats: {
-    pending: number
-    confirmed: number
+    scheduled: number
     completed: number
     totalRevenue: number
   }
@@ -187,16 +184,9 @@ function StatsContent({
         <div className="text-xs font-medium text-muted mb-3">ESTADÍSTICAS HOY</div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Pendiente</span>
-          <span className="text-sm font-bold text-amber-500 dark:text-amber-500">
-            {stats.pending}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Confirmada</span>
+          <span className="text-sm text-zinc-900 dark:text-white">Agendadas</span>
           <span className="text-sm font-bold text-blue-500 dark:text-blue-500">
-            {stats.confirmed}
+            {stats.scheduled}
           </span>
         </div>
 
@@ -480,15 +470,16 @@ function CitasCalendarFusionContent() {
 
   // Stats calculations
   const stats = useMemo(() => {
-    const pending = filteredAppointments.filter((apt) => apt.status === 'pending').length
-    const confirmed = filteredAppointments.filter((apt) => apt.status === 'confirmed').length
+    const scheduled = filteredAppointments.filter(
+      (apt) => apt.status === 'pending' || apt.status === 'confirmed'
+    ).length
     const completed = filteredAppointments.filter((apt) => apt.status === 'completed').length
     const totalRevenue = sortedAppointments.reduce((sum, apt) => sum + (apt.service?.price || 0), 0)
     const projectedRevenue = filteredAppointments.reduce(
       (sum, apt) => sum + (apt.service?.price || 0),
       0
     )
-    return { pending, confirmed, completed, totalRevenue, projectedRevenue }
+    return { scheduled, completed, totalRevenue, projectedRevenue }
   }, [filteredAppointments, sortedAppointments])
 
   const DAILY_GOAL = 200000
@@ -601,14 +592,12 @@ function CitasCalendarFusionContent() {
   }
 
   const handleAppointmentStatusChange = useCallback(
-    async (appointmentId: string, status: 'confirmed' | 'completed' | 'cancelled') => {
+    async (appointmentId: string, status: 'cancelled') => {
       try {
         await updateAppointmentStatus.mutateAsync({
           appointmentId,
           status,
         })
-        if (status === 'confirmed') toast.success('Cita confirmada')
-        if (status === 'completed') toast.success('Cita completada')
         if (status === 'cancelled') toast.success('Cita cancelada')
       } catch (error) {
         toast.error('No se pudo actualizar la cita')
@@ -617,30 +606,6 @@ function CitasCalendarFusionContent() {
     },
     [updateAppointmentStatus]
   )
-
-  const handleConfirmPendingAppointments = useCallback(async () => {
-    const pendingAppointments = filteredAppointments.filter((apt) => apt.status === 'pending')
-    if (pendingAppointments.length === 0) return
-
-    let updatedCount = 0
-    for (const appointment of pendingAppointments) {
-      try {
-        await updateAppointmentStatus.mutateAsync({
-          appointmentId: appointment.id,
-          status: 'confirmed',
-        })
-        updatedCount += 1
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    if (updatedCount > 0) {
-      toast.success(updatedCount === 1 ? '1 cita confirmada' : `${updatedCount} citas confirmadas`)
-    } else {
-      toast.error('No se pudieron confirmar las citas')
-    }
-  }, [filteredAppointments, updateAppointmentStatus])
 
   // Derive form date from selectedDate
   const formDate = format(selectedDate, 'yyyy-MM-dd')
@@ -985,20 +950,10 @@ function CitasCalendarFusionContent() {
 
                         <AnimatePresence mode="popLayout">
                           {block.appointments.map((apt, aptIndex) => {
-                            const canConfirm = apt.status === 'pending'
-                            const canCancel =
-                              apt.status !== 'cancelled' && apt.status !== 'completed'
+                            const canCancel = apt.status === 'pending' || apt.status === 'confirmed'
                             const isLast = aptIndex === block.appointments.length - 1
 
                             const rightActions = []
-                            if (canConfirm) {
-                              rightActions.push({
-                                icon: <CheckCircle className="h-5 w-5" />,
-                                label: 'Confirmar',
-                                color: 'bg-emerald-500',
-                                onClick: () => handleAppointmentStatusChange(apt.id, 'confirmed'),
-                              })
-                            }
                             if (canCancel) {
                               rightActions.push({
                                 icon: <X className="h-5 w-5" />,
@@ -1037,9 +992,7 @@ function CitasCalendarFusionContent() {
                                               className={`w-1.5 h-1.5 rounded-full ${
                                                 apt.status === 'completed'
                                                   ? 'bg-emerald-500'
-                                                  : apt.status === 'confirmed'
-                                                    ? 'bg-blue-500'
-                                                    : 'bg-amber-500'
+                                                  : 'bg-blue-500'
                                               }`}
                                             />
                                             <span className="font-medium text-zinc-900 dark:text-white text-sm">
@@ -1091,9 +1044,7 @@ function CitasCalendarFusionContent() {
                                             className={`w-1.5 h-1.5 rounded-full ${
                                               apt.status === 'completed'
                                                 ? 'bg-emerald-500'
-                                                : apt.status === 'confirmed'
-                                                  ? 'bg-blue-500'
-                                                  : 'bg-amber-500'
+                                                : 'bg-blue-500'
                                             }`}
                                           />
                                           <span className="font-medium text-zinc-900 dark:text-white text-sm">
@@ -1153,21 +1104,6 @@ function CitasCalendarFusionContent() {
                     </motion.div>
                   ))}
                 </div>
-
-                {/* Quick Actions — subtle inline bar */}
-                {stats.pending > 0 && (
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                    <span className="text-sm text-muted">{stats.pending} pendientes</span>
-                    <Button
-                      onClick={handleConfirmPendingAppointments}
-                      variant="outline"
-                      className="h-8 text-xs rounded-lg"
-                    >
-                      <Check className="w-3.5 h-3.5 mr-1.5" />
-                      Confirmar todas
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
 
@@ -1411,11 +1347,7 @@ function CitasCalendarFusionContent() {
                             <div
                               key={i}
                               className={`w-1.5 h-1.5 rounded-full ${
-                                apt.status === 'completed'
-                                  ? 'bg-emerald-500'
-                                  : apt.status === 'confirmed'
-                                    ? 'bg-blue-500'
-                                    : 'bg-amber-500'
+                                apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
                               }`}
                             />
                           ))}
@@ -1806,28 +1738,16 @@ function CitasCalendarFusionContent() {
                   </div>
 
                   <div className="flex gap-3">
-                    {apt.status === 'pending' && (
+                    {(apt.status === 'pending' || apt.status === 'confirmed') && (
                       <Button
-                        variant="primary"
+                        variant="danger"
                         onClick={async () => {
-                          await handleAppointmentStatusChange(apt.id, 'confirmed')
+                          await handleAppointmentStatusChange(apt.id, 'cancelled')
                           setSelectedId(null)
                         }}
-                        className="flex-1 bg-blue-500 hover:bg-blue-500/80"
+                        className="flex-1"
                       >
-                        Confirmar
-                      </Button>
-                    )}
-                    {apt.status === 'confirmed' && (
-                      <Button
-                        variant="success"
-                        onClick={async () => {
-                          await handleAppointmentStatusChange(apt.id, 'completed')
-                          setSelectedId(null)
-                        }}
-                        className="flex-1 bg-emerald-500 hover:bg-emerald-500/80"
-                      >
-                        Check-in
+                        Cancelar
                       </Button>
                     )}
                     <Button

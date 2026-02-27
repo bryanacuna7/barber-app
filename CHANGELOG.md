@@ -4,6 +4,24 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.20] - 2026-02-27
+
+### Nuevo
+
+- Seccion de Analiticas reorganizada en 3 pestanas: Negocio, Clientes y Equipo
+- Pestana de Clientes en Analiticas muestra segmentos, metricas y acciones rapidas (WhatsApp, ver perfil)
+- El check-in ahora acepta citas confirmadas que aun no han iniciado
+
+### Mejorado
+
+- Las estadisticas de citas del dia simplifican "Pendiente" y "Confirmada" en una sola categoria "Agendadas"
+- El menu de navegacion movil tiene un diseno mas limpio con iconos estilo iOS
+- Mejor organizacion del codigo de segmentos de clientes para reutilizacion
+
+### Corregido
+
+- Limpieza de imports no utilizados en varias paginas del dashboard
+
 ## [0.9.19] - 2026-02-26
 
 ### Nuevo

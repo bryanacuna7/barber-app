@@ -49,7 +49,7 @@ export interface AppointmentStatusUpdateResponse {
  * - MANDATORY: Validates barber ownership via authenticated user's email
  * - Business owners can check-in any appointment
  * - Barbers can ONLY check-in their own appointments
- * - Appointment must be in 'pending' status to check in
+ * - Appointment must be 'pending' or 'confirmed' (without started_at) to check in
  *
  * Rate Limiting:
  * - 10 requests per minute per user
@@ -67,6 +67,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
           `
         id,
         status,
+        started_at,
         barber_id,
         business_id,
         barber:barbers!appointments_barber_id_fkey(id, name)
@@ -107,12 +108,25 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         return unauthorizedResponse('No tienes permiso para hacer check-in de esta cita')
       }
 
-      // 3. Validate current status - only pending appointments can be checked in
-      if (appointment.status !== 'pending') {
+      // 3. Validate current status:
+      // - pending: valid
+      // - confirmed + started_at is null: valid (pre-confirmed but not started yet)
+      // - anything else: invalid
+      if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
         return NextResponse.json(
           {
             error: 'Estado invalido',
-            message: `No se puede hacer check-in de una cita con estado "${appointment.status}". Solo citas pendientes pueden hacer check-in.`,
+            message: `No se puede hacer check-in de una cita con estado "${appointment.status}". Solo citas pendientes o confirmadas sin iniciar pueden hacer check-in.`,
+          },
+          { status: 400 }
+        )
+      }
+
+      if (appointment.status === 'confirmed' && appointment.started_at) {
+        return NextResponse.json(
+          {
+            error: 'Cita ya iniciada',
+            message: 'Esta cita ya fue iniciada anteriormente.',
           },
           { status: 400 }
         )
