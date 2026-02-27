@@ -4,6 +4,13 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.21] - 2026-02-27
+
+### Mejorado
+
+- Los servicios ahora muestran un icono personalizable que el dueño puede elegir desde la pagina de Servicios
+- La logica de iconos de servicios esta unificada para que se vean iguales en el dashboard y en la pagina de reservas
+
 ## [0.9.20] - 2026-02-27
 
 ### Nuevo

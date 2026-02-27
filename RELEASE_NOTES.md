@@ -8,19 +8,9 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.20
-
-### Novedades
-
-- La seccion de Analiticas ahora tiene 3 pestanas: Negocio, Clientes y Equipo para encontrar todo mas facil
-- En la pestana de Clientes puedes ver de un vistazo cuantos son VIP, frecuentes, nuevos o inactivos, con acciones rapidas
-- Ahora puedes hacer check-in de citas que ya fueron confirmadas pero aun no han iniciado
+## v0.9.21
 
 ### Mejoras
 
-- Las estadisticas del dia en Citas ahora muestran "Agendadas" en lugar de separar pendientes y confirmadas
-- El menu de navegacion en movil tiene un diseno renovado mas limpio
-
-### Correcciones
-
-- Limpieza general de codigo para mejor rendimiento en las paginas del dashboard
+- Ahora puedes elegir un icono para cada servicio desde la pagina de Servicios — se muestra en el dashboard y en la pagina de reservas
+- Los iconos de servicios se ven consistentes en toda la aplicacion
