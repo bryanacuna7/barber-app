@@ -3,42 +3,42 @@ export const SERVICE_CATEGORIES = ['corte', 'barba', 'combo', 'facial'] as const
 export type ServiceCategory = (typeof SERVICE_CATEGORIES)[number]
 
 export const SERVICE_ICON_NAMES = [
-  'Zap',
-  'Flame',
-  'Crown',
-  'Sparkles',
-  'Waves',
-  'Wind',
-  'Users',
-  'CircleDot',
   'Scissors',
+  'SprayCan',
+  'Sparkles',
+  'Smile',
+  'Baby',
+  'Eye',
+  'PaintbrushVertical',
+  'Hand',
+  'Crown',
   'Gift',
-  'Star',
-  'Sparkle',
+  'Palette',
+  'Bath',
 ] as const
 
 export type ServiceIconName = (typeof SERVICE_ICON_NAMES)[number]
 
 export const SERVICE_ICON_LABELS: Record<ServiceIconName, string> = {
-  Zap: 'Rayo',
-  Flame: 'Fuego',
-  Crown: 'Corona',
-  Sparkles: 'Brillos',
-  Waves: 'Ondas',
-  Wind: 'Viento',
-  Users: 'Usuarios',
-  CircleDot: 'Punto',
   Scissors: 'Tijeras',
+  SprayCan: 'Afeitado',
+  Sparkles: 'Combo',
+  Smile: 'Facial',
+  Baby: 'Niños',
+  Eye: 'Cejas',
+  PaintbrushVertical: 'Diseño',
+  Hand: 'Masaje',
+  Crown: 'Premium',
   Gift: 'Regalo',
-  Star: 'Estrella',
-  Sparkle: 'Destello',
+  Palette: 'Color',
+  Bath: 'Toalla',
 }
 
 export const DEFAULT_ICON_BY_CATEGORY: Record<ServiceCategory, ServiceIconName> = {
-  corte: 'Zap',
-  barba: 'Flame',
-  combo: 'Crown',
-  facial: 'Sparkles',
+  corte: 'Scissors',
+  barba: 'SprayCan',
+  combo: 'Sparkles',
+  facial: 'Smile',
 }
 
 export function isServiceCategory(value: string | null | undefined): value is ServiceCategory {
@@ -64,20 +64,29 @@ export function resolveServiceIcon(
   if (isServiceIconName(icon)) return icon
 
   const haystack = `${name} ${description ?? ''}`.toLowerCase()
-  if (haystack.includes('barba') || haystack.includes('beard')) return 'Flame'
-  if (haystack.includes('afeitado') || haystack.includes('shave')) return 'Scissors'
-  if (haystack.includes('niño') || haystack.includes('kids')) return 'Users'
-  if (haystack.includes('diseño')) return 'Wind'
-  if (haystack.includes('ceja')) return 'CircleDot'
-  if (haystack.includes('masaje')) return 'Waves'
-  if (haystack.includes('premium')) return 'Star'
-  if (haystack.includes('combo') || haystack.includes('+') || haystack.includes('paquete')) {
-    return 'Crown'
-  }
-  if (haystack.includes('facial') || haystack.includes('skin') || haystack.includes('piel')) {
+  if (
+    haystack.includes('barba') ||
+    haystack.includes('beard') ||
+    haystack.includes('afeitado') ||
+    haystack.includes('shave')
+  )
+    return 'SprayCan'
+  if (haystack.includes('niño') || haystack.includes('kids') || haystack.includes('infantil'))
+    return 'Baby'
+  if (haystack.includes('ceja')) return 'Eye'
+  if (haystack.includes('diseño') || haystack.includes('styling')) return 'PaintbrushVertical'
+  if (haystack.includes('masaje') || haystack.includes('massage')) return 'Hand'
+  if (haystack.includes('premium') || haystack.includes('vip')) return 'Crown'
+  if (haystack.includes('combo') || haystack.includes('+') || haystack.includes('paquete'))
     return 'Sparkles'
-  }
-  if (haystack.includes('corte') || haystack.includes('haircut')) return 'Zap'
+  if (haystack.includes('facial') || haystack.includes('skin') || haystack.includes('piel'))
+    return 'Smile'
+  if (haystack.includes('tinte') || haystack.includes('color') || haystack.includes('dye'))
+    return 'Palette'
+  if (haystack.includes('toalla') || haystack.includes('towel') || haystack.includes('vapor'))
+    return 'Bath'
+  if (haystack.includes('regalo') || haystack.includes('gift')) return 'Gift'
+  if (haystack.includes('corte') || haystack.includes('haircut')) return 'Scissors'
 
   const resolved = isServiceCategory(category) ? category : 'corte'
   return DEFAULT_ICON_BY_CATEGORY[resolved]

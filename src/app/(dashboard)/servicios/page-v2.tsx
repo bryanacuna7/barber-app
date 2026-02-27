@@ -1298,33 +1298,39 @@ function ServiciosContent() {
               </select>
             </div>
 
-            <div className="grid grid-cols-[1fr_auto] items-end gap-3">
-              <div>
-                <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
-                  Ícono
-                </label>
-                <select
-                  value={formData.icon}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      icon: e.target.value as ServiceIconName,
-                    }))
-                  }
-                  className="flex h-11 w-full rounded-[14px] border border-zinc-200 bg-white px-3 text-sm text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-                >
-                  {SERVICE_ICON_NAMES.map((iconName) => (
-                    <option key={iconName} value={iconName}>
-                      {SERVICE_ICON_LABELS[iconName]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-                <ServiceIcon
-                  iconName={formData.icon}
-                  className="h-4 w-4 text-zinc-700 dark:text-zinc-200"
-                />
+            <div>
+              <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
+                Ícono
+              </label>
+              <div
+                role="radiogroup"
+                aria-label="Seleccionar ícono"
+                className="grid grid-cols-4 gap-2"
+              >
+                {SERVICE_ICON_NAMES.map((iconName) => {
+                  const isSelected = formData.icon === iconName
+                  const Icon = SERVICE_ICON_MAP[iconName]
+                  return (
+                    <button
+                      key={iconName}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={SERVICE_ICON_LABELS[iconName]}
+                      onClick={() => setFormData((prev) => ({ ...prev, icon: iconName }))}
+                      className={`flex flex-col items-center gap-1 rounded-xl border p-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
+                        isSelected
+                          ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300'
+                          : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                      <span className="text-[10px] font-medium leading-none">
+                        {SERVICE_ICON_LABELS[iconName]}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
