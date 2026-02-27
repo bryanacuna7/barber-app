@@ -7,7 +7,7 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-27 (Session 190 — Analytics Refactor + Dashboard Polish)
+- **Last Updated:** 2026-02-27 (Session 191 — Animation Audit Execution)
 - **Branch:** `main`
 - **Version:** `0.9.20`
 - **Phase:** Customer Discovery — solving real barber pains
@@ -72,6 +72,31 @@
 ---
 
 ## Recent Sessions
+
+### Session 191: Animation Audit Execution (2026-02-27)
+
+**Status:** COMPLETE. All 14 audit items resolved across 38+ files.
+
+**What was done:**
+
+- **P0 — dropdown.tsx complete rewrite:** AnimatePresence + exit animations, useReducedMotion, focus restore, design-system tokens (score 1.8→4.2)
+- **P1 — command-palette.tsx:** Added useReducedMotion, scroll lock, replaced 3 hardcoded values with design-system tokens
+- **P1 — drawer.tsx + sheet.tsx:** Added focus restore (previousFocusRef pattern) to both overlay components
+- **P2 — RevealOnScroll:** Reduced displacement y:50→y:20 for subtler Apple-like animations
+- **P2 — Dead code cleanup:** Removed duplicate StaggerContainer/StaggerItem from page-transition.tsx, deleted unused toast-refactored.tsx, updated index.ts exports
+- **Performance — transition-all migration:** Replaced ALL 55+ `transition-all` occurrences across 38+ files with explicit CSS transition properties (e.g., `transition-[border-color,box-shadow]`). Zero `transition-all` or `transition: all` remaining in codebase.
+- **CSS globals:** Fixed 4 `transition: all` patterns in globals.css (.interactive, .ios-segment-item, .ios-capsule, .touch-active)
+
+**Verification:**
+
+- `npx next build` — passed
+- `npx eslint` — clean on changed files
+- Visual smoke test on 6 pages (dashboard, citas, horario, clientes, reservar, configuracion, analiticas) — no regressions
+- Grep confirms 0 remaining `transition-all` and 0 `transition: all`
+
+**Files rewritten (1):** `src/components/ui/dropdown.tsx`
+**Files modified (40+):** command-palette, drawer, sheet, page-transition, index.ts, globals.css, progress, radio-group, ios-date-picker, ios-time-picker, color-picker, appointment-card, appointment-filters, appointment-form, + 30 additional component files via parallel agent
+**Files deleted (1):** `src/components/ui/toast-refactored.tsx`
 
 ### Session 190: Analytics Refactor + Dashboard Polish (2026-02-27)
 
