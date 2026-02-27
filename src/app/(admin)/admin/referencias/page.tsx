@@ -39,7 +39,7 @@ export default async function AdminReferralsPage() {
             Acceso Denegado
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-            Esta página es solo para super administradores. No tienes permisos para acceder.
+            Esta página es solo para administradores. No tienes permisos para acceder.
           </p>
           <a
             href="/dashboard"

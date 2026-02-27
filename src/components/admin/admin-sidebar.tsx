@@ -42,7 +42,7 @@ export function AdminSidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100">
             <Shield className="h-4 w-4 text-white dark:text-zinc-900" />
           </div>
-          <span className="font-semibold">Super Admin</span>
+          <span className="font-semibold">Admin</span>
         </Link>
       </div>
 

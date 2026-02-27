@@ -17,11 +17,16 @@ import {
   CheckCircle2,
   XCircle,
   ExternalLink,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { formatDistanceToNow, format } from 'date-fns'
+import { Modal, ModalFooter } from '@/components/ui/modal'
+import { Input } from '@/components/ui/input'
+import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { formatCurrency } from '@/lib/utils'
 
 interface BusinessDetail {
   business: {
@@ -67,6 +72,10 @@ export default function AdminBusinessDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [toggling, setToggling] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [confirmName, setConfirmName] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -85,7 +94,7 @@ export default function AdminBusinessDetailPage() {
   }, [businessId])
 
   const toggleActive = async () => {
-    if (!data) return
+    if (!data || deleting) return
 
     setToggling(true)
     try {
@@ -109,6 +118,37 @@ export default function AdminBusinessDetailPage() {
     }
   }
 
+  const deleteBusiness = async () => {
+    if (!data || toggling) return
+
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      const response = await fetch(`/api/admin/businesses/${businessId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmName }),
+      })
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.error || 'Error al eliminar negocio')
+      }
+
+      router.push('/admin/negocios')
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Error al eliminar negocio')
+      setDeleting(false)
+    }
+  }
+
+  const closeDeleteModal = () => {
+    if (deleting) return
+    setShowDeleteModal(false)
+    setConfirmName('')
+    setDeleteError(null)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -128,7 +168,7 @@ export default function AdminBusinessDetailPage() {
           Volver
         </Link>
         <div className="rounded-xl bg-red-50 p-4 text-red-600 dark:bg-red-900/20 dark:text-red-400">
-          {error || 'Business not found'}
+          {error || 'Negocio no encontrado'}
         </div>
       </div>
     )
@@ -187,11 +227,11 @@ export default function AdminBusinessDetailPage() {
             className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
           >
             <ExternalLink className="h-4 w-4" />
-            Ver booking page
+            Ver página de reservas
           </Link>
           <Button
             onClick={toggleActive}
-            disabled={toggling}
+            disabled={toggling || deleting}
             variant={business.is_active ? 'secondary' : 'primary'}
           >
             {toggling ? (
@@ -203,6 +243,16 @@ export default function AdminBusinessDetailPage() {
             )}
             {business.is_active ? 'Desactivar' : 'Activar'}
           </Button>
+          {!business.is_active && (
+            <Button
+              onClick={() => setShowDeleteModal(true)}
+              disabled={toggling || deleting}
+              variant="danger"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Eliminar
+            </Button>
+          )}
         </div>
       </div>
 
@@ -307,7 +357,7 @@ export default function AdminBusinessDetailPage() {
                 >
                   <p className="font-medium text-zinc-900 dark:text-white">{service.name}</p>
                   <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                    ${service.price}
+                    {formatCurrency(service.price)}
                   </span>
                 </div>
               ))}
@@ -315,6 +365,74 @@ export default function AdminBusinessDetailPage() {
           )}
         </Card>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={closeDeleteModal}
+        title="Eliminar negocio permanentemente"
+        size="md"
+        showCloseButton={!deleting}
+        closeOnOverlayClick={!deleting}
+      >
+        <div className="space-y-5">
+          <div className="flex items-start gap-3 rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+            <div className="text-sm text-red-700 dark:text-red-300">
+              <p className="font-semibold">Esta acción es irreversible.</p>
+              <p className="mt-1">Se eliminarán permanentemente todos los datos asociados:</p>
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                <li>{stats.totalAppointments} citas</li>
+                <li>{stats.totalClients} clientes</li>
+                <li>{stats.totalBarbers} miembros del equipo</li>
+                <li>{stats.totalServices} servicios</li>
+              </ul>
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="confirm-name"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            >
+              Escribe{' '}
+              <span className="font-bold text-zinc-900 dark:text-white">{business.name}</span> para
+              confirmar:
+            </label>
+            <Input
+              id="confirm-name"
+              type="text"
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              placeholder={business.name}
+              className="mt-2"
+              disabled={deleting}
+              autoComplete="off"
+            />
+          </div>
+
+          {deleteError && (
+            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              {deleteError}
+            </div>
+          )}
+
+          <ModalFooter>
+            <Button variant="secondary" onClick={closeDeleteModal} disabled={deleting}>
+              Cancelar
+            </Button>
+            <Button
+              variant="danger"
+              onClick={deleteBusiness}
+              disabled={confirmName !== business.name || deleting}
+              isLoading={deleting}
+            >
+              {!deleting && <Trash2 className="mr-2 h-4 w-4" />}
+              Eliminar permanentemente
+            </Button>
+          </ModalFooter>
+        </div>
+      </Modal>
     </div>
   )
 }
