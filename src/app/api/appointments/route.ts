@@ -55,6 +55,11 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       query = query.eq('status', status)
     }
 
+    const clientId = searchParams.get('client_id')
+    if (clientId) {
+      query = query.eq('client_id', clientId)
+    }
+
     const { data: appointments, error, count } = await query
 
     if (error) {

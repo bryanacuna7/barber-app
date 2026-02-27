@@ -1,6 +1,6 @@
 'use client'
 
-import { Clock, ArrowRight, Sparkles, Calendar, Users, CreditCard, Globe } from 'lucide-react'
+import { Clock, ArrowRight, Sparkles, Calendar, Users, Globe } from 'lucide-react'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
@@ -49,9 +49,6 @@ export function DashboardContent() {
     cancelled: 'Cancelada',
     no_show: 'No asistió',
   }
-
-  // TODO: Get subscription status (will be added later)
-  const showPaymentAction = false
 
   // Get greeting based on time
   const hour = new Date().getHours()
@@ -235,21 +232,7 @@ export function DashboardContent() {
             <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div
-              className={`grid gap-2 sm:gap-3 ${showPaymentAction ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3'}`}
-            >
-              {showPaymentAction && (
-                <Link href="/suscripcion" className="block">
-                  <div className="flex flex-col items-center gap-2 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-100 px-3 py-4 hover:from-amber-100 hover:to-amber-150 dark:from-amber-900/20 dark:to-amber-800/20 dark:hover:from-amber-900/30 dark:hover:to-amber-800/30 transition-colors ring-1 ring-amber-200 dark:ring-amber-700">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500 dark:bg-amber-600">
-                      <CreditCard className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-sm font-medium text-amber-900 dark:text-amber-100 text-center">
-                      Reportar Pago
-                    </span>
-                  </div>
-                </Link>
-              )}
+            <div className="grid gap-2 sm:gap-3 grid-cols-3">
               <Link href="/citas" className="block group focus-ring rounded-2xl">
                 <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-[border-color,box-shadow,transform] duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors shadow-sm group-hover:shadow-md">

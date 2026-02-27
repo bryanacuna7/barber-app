@@ -10,8 +10,6 @@ export { useAppointmentActions } from './use-appointment-actions'
 
 // Data fetching hooks
 export { useBarbers } from './use-barbers'
-export { useClients } from './use-clients'
-export { useServices } from './use-services'
 export { useDashboardAppointments } from './use-dashboard-appointments'
 export { useDashboardStats } from './use-dashboard-stats'
 

@@ -138,9 +138,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to claim reward' }, { status: 500 })
     }
 
-    // TODO: Apply actual discount/credit to subscription
-    // This would integrate with your payment provider (Stripe, etc.)
-    // For now, we just record the claim
+    // NOTE: Reward is recorded but credit is not yet auto-applied.
+    // Integration with payment provider planned for future release.
 
     // Create notification
     await supabase.from('notifications').insert({
@@ -160,7 +159,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       reward,
-      message: `¡Recompensa reclamada! ${milestone.reward_description}`,
+      message: `¡Recompensa registrada! ${milestone.reward_description}. El crédito se aplicará en tu próximo ciclo de facturación.`,
       milestone: {
         number: milestone.milestone_number,
         badge: milestone.badge_name,
