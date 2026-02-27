@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/referrals/generate-code
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     )
 
     if (codeError || !codeResult) {
-      console.error('Error generating referral code:', codeError)
+      logger.error({ err: codeError }, 'Error generating referral code')
       return NextResponse.json({ error: 'Failed to generate referral code' }, { status: 500 })
     }
 
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
       .single()
 
     if (insertError) {
-      console.error('Error saving referral:', insertError)
+      logger.error({ err: insertError }, 'Error saving referral')
       return NextResponse.json({ error: 'Failed to save referral code' }, { status: 500 })
     }
 
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
       isNew: true,
     })
   } catch (error) {
-    console.error('Error in generate-code:', error)
+    logger.error({ err: error }, 'Error in generate-code')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

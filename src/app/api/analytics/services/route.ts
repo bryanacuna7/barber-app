@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
@@ -53,7 +54,10 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     // Fallback: original JS aggregation (safe for pre-migration deploy)
     if (rpcError) {
-      console.warn(`[analytics/services] RPC fallback: ${rpcError.code} - ${rpcError.message}`)
+      logger.warn(
+        { code: rpcError.code, message: rpcError.message },
+        'analytics/services RPC fallback'
+      )
     }
 
     const { data: services, error: servicesError } = await supabase
@@ -97,7 +101,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     return NextResponse.json({ period, services: results })
   } catch (error) {
-    console.error('Error in GET /api/analytics/services:', error)
+    logger.error({ err: error }, 'Error in GET /api/analytics/services')
     return errorResponse('Error interno del servidor')
   }
 })

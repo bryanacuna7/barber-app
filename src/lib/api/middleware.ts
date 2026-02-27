@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/types/database'
 import { rateLimit, type RateLimitConfig } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 // Types
 export type AuthContext = {
@@ -22,55 +23,6 @@ export type AuthContext = {
   /** barber row ID (only set when role === 'barber') */
   barberId?: string
   supabase: Awaited<ReturnType<typeof createClient>>
-}
-
-// --- Business Lookup LRU Cache ---
-const CACHE_TTL_MS = 20_000 // 20 seconds
-const CACHE_MAX_ENTRIES = 100
-
-type CachedBusinessLookup = {
-  business: AuthContext['business']
-  role: 'owner' | 'barber'
-  barberId?: string
-  timestamp: number
-  lastAccess: number
-}
-
-const businessCache = new Map<string, CachedBusinessLookup>()
-
-function getCachedBusiness(userId: string): CachedBusinessLookup | null {
-  const entry = businessCache.get(userId)
-  if (!entry) return null
-
-  const now = Date.now()
-  if (now - entry.timestamp > CACHE_TTL_MS) {
-    businessCache.delete(userId)
-    return null
-  }
-
-  entry.lastAccess = now
-  return entry
-}
-
-function setCachedBusiness(
-  userId: string,
-  data: Omit<CachedBusinessLookup, 'timestamp' | 'lastAccess'>
-) {
-  // LRU eviction: remove oldest entry if at capacity
-  if (businessCache.size >= CACHE_MAX_ENTRIES) {
-    let oldestKey: string | null = null
-    let oldestAccess = Infinity
-    for (const [key, entry] of businessCache) {
-      if (entry.lastAccess < oldestAccess) {
-        oldestAccess = entry.lastAccess
-        oldestKey = key
-      }
-    }
-    if (oldestKey) businessCache.delete(oldestKey)
-  }
-
-  const now = Date.now()
-  businessCache.set(userId, { ...data, timestamp: now, lastAccess: now })
 }
 
 // Extended business select — includes fields commonly needed by analytics routes
@@ -134,64 +86,51 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
       } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        console.error('❌ Auth error:', authError?.message)
+        logger.error({ error: authError?.message }, 'Auth error')
         return unauthorizedResponse('No autenticado')
       }
 
-      // Fetch business — check cache first, then DB
+      // Fetch business for authenticated user
       let business: AuthContext['business'] | null = null
       let role: 'owner' | 'barber' = 'owner'
       let barberId: string | undefined
 
-      // Check LRU cache (20s TTL)
-      const cached = getCachedBusiness(user.id)
-      if (cached) {
-        business = cached.business
-        role = cached.role
-        barberId = cached.barberId
+      // 1. Try as business owner (fast path)
+      const { data: ownerBusiness } = (await supabase
+        .from('businesses')
+        .select(BUSINESS_SELECT)
+        .eq('owner_id', user.id)
+        .single()) as any
+
+      if (ownerBusiness) {
+        business = ownerBusiness
+        role = 'owner'
       } else {
-        // 1. Try as business owner (fast path)
-        const { data: ownerBusiness } = (await supabase
-          .from('businesses')
-          .select(BUSINESS_SELECT)
-          .eq('owner_id', user.id)
-          .single()) as any
+        // 2. Try as barber — look up business via barbers table
+        const { data: barber } = await supabase
+          .from('barbers')
+          .select('id, business_id')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .single()
 
-        if (ownerBusiness) {
-          business = ownerBusiness
-          role = 'owner'
-        } else {
-          // 2. Try as barber — look up business via barbers table
-          const { data: barber } = await supabase
-            .from('barbers')
-            .select('id, business_id')
-            .eq('user_id', user.id)
-            .eq('is_active', true)
-            .single()
+        if (barber) {
+          const { data: barberBusiness } = (await supabase
+            .from('businesses')
+            .select(BUSINESS_SELECT)
+            .eq('id', barber.business_id)
+            .single()) as any
 
-          if (barber) {
-            const { data: barberBusiness } = (await supabase
-              .from('businesses')
-              .select(BUSINESS_SELECT)
-              .eq('id', barber.business_id)
-              .single()) as any
-
-            if (barberBusiness) {
-              business = barberBusiness
-              role = 'barber'
-              barberId = barber.id
-            }
+          if (barberBusiness) {
+            business = barberBusiness
+            role = 'barber'
+            barberId = barber.id
           }
-        }
-
-        // Populate cache on successful lookup
-        if (business) {
-          setCachedBusiness(user.id, { business, role, barberId })
         }
       }
 
       if (!business) {
-        console.error('❌ Business not found for user:', user.id)
+        logger.error({ userId: user.id }, 'Business not found for user')
         return notFoundResponse('Negocio no encontrado')
       }
 
@@ -204,7 +143,7 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
         supabase,
       })
     } catch (error) {
-      console.error('❌ Middleware error:', error)
+      logger.error({ err: error }, 'Middleware error')
       return errorResponse('Error procesando la solicitud')
     }
   }
@@ -239,7 +178,7 @@ export function withAuthOnly<T = any>(
         supabase,
       })
     } catch (error) {
-      console.error('❌ Auth middleware error:', error)
+      logger.error({ err: error }, 'Auth middleware error')
       return errorResponse('Error procesando la solicitud')
     }
   }
@@ -279,8 +218,13 @@ export function withRateLimit<T = any>(
       const result = await rateLimit(request as NextRequest, config)
 
       if (!result.success) {
-        console.warn(
-          `Rate limit exceeded for ${request.url}. Remaining: ${result.remaining}, Reset: ${new Date(result.reset).toISOString()}`
+        logger.warn(
+          {
+            url: request.url,
+            remaining: result.remaining,
+            reset: new Date(result.reset).toISOString(),
+          },
+          'Rate limit exceeded'
         )
         return rateLimitResponse(result.headers)
       }
@@ -300,7 +244,7 @@ export function withRateLimit<T = any>(
         headers,
       })
     } catch (error) {
-      console.error('❌ Rate limit middleware error:', error)
+      logger.error({ err: error }, 'Rate limit middleware error')
       return errorResponse('Error procesando la solicitud')
     }
   }

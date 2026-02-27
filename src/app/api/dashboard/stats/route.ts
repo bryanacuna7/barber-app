@@ -1,6 +1,7 @@
 import { withAuth, errorResponse } from '@/lib/api/middleware'
 import { NextResponse } from 'next/server'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
+import { logger } from '@/lib/logger'
 
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
@@ -82,7 +83,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       },
     })
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error)
+    logger.error({ err: error }, 'Error fetching dashboard stats')
     return errorResponse('Error interno del servidor')
   }
 })

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -48,13 +49,13 @@ export async function GET() {
       .limit(5)
 
     if (error) {
-      console.error('Error fetching appointments:', error)
+      logger.error({ err: error }, 'Error fetching appointments')
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
     return NextResponse.json({ appointments: upcomingAppointments || [] })
   } catch (error) {
-    console.error('Error fetching dashboard appointments:', error)
+    logger.error({ err: error }, 'Error fetching dashboard appointments')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * POST /api/referrals/claim-reward
@@ -134,7 +135,7 @@ export async function POST(request: Request) {
       .single()
 
     if (claimError) {
-      console.error('Error claiming reward:', claimError)
+      logger.error({ err: claimError }, 'Error claiming reward')
       return NextResponse.json({ error: 'Failed to claim reward' }, { status: 500 })
     }
 
@@ -169,7 +170,7 @@ export async function POST(request: Request) {
       expiresAt,
     })
   } catch (error) {
-    console.error('Error claiming reward:', error)
+    logger.error({ err: error }, 'Error claiming reward')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

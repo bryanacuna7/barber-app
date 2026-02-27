@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: Request) {
   try {
@@ -46,13 +47,13 @@ export async function POST(request: Request) {
     )
 
     if (error) {
-      console.error('Error saving push subscription:', error)
+      logger.error({ err: error }, 'Error saving push subscription')
       return NextResponse.json({ error: 'Error al guardar la suscripción' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error in POST /api/push/subscribe:', error)
+    logger.error({ err: error }, 'Unexpected error in POST /api/push/subscribe')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
@@ -89,13 +90,13 @@ export async function DELETE(request: Request) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error removing push subscription:', error)
+      logger.error({ err: error }, 'Error removing push subscription')
       return NextResponse.json({ error: 'Error al eliminar la suscripción' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error in DELETE /api/push/subscribe:', error)
+    logger.error({ err: error }, 'Unexpected error in DELETE /api/push/subscribe')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

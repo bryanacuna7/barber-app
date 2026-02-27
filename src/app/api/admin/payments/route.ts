@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   // Use regular client for auth check (has user session)
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
   const { data: payments, error, count } = await query
 
   if (error) {
-    console.error('Error fetching payments:', error)
+    logger.error({ err: error }, 'Error fetching payments')
     return NextResponse.json({ error: 'Failed to fetch payments' }, { status: 500 })
   }
 

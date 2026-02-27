@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/gamification/barber/challenges
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ challenges })
   } catch (error) {
-    console.error('Error fetching barber challenges:', error)
+    logger.error({ err: error }, 'Error fetching barber challenges')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -161,7 +162,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ challenge }, { status: 201 })
   } catch (error) {
-    console.error('Error creating challenge:', error)
+    logger.error({ err: error }, 'Error creating challenge')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { sendNotificationEmail, type EmailNotificationType } from '@/lib/email/sender'
+import { logger } from '@/lib/logger'
 import TrialExpiringEmail from '@/lib/email/templates/trial-expiring'
 import PaymentApprovedEmail from '@/lib/email/templates/payment-approved'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
@@ -14,7 +15,7 @@ import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 // Secret key for internal API calls — NO fallback, must be configured in environment
 const API_SECRET = process.env.NOTIFICATION_API_SECRET
 if (!API_SECRET) {
-  console.error('FATAL: NOTIFICATION_API_SECRET environment variable is not set')
+  logger.error('FATAL: NOTIFICATION_API_SECRET environment variable is not set')
 }
 
 export async function POST(request: Request) {
@@ -151,7 +152,7 @@ export async function POST(request: Request) {
       inApp: inAppResult,
     })
   } catch (error) {
-    console.error('Error sending notification:', error)
+    logger.error({ err: error }, 'Error sending notification')
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }
@@ -187,13 +188,13 @@ async function createInAppNotification(
       .single()
 
     if (error) {
-      console.error('Error creating in-app notification:', error)
+      logger.error({ err: error }, 'Error creating in-app notification')
       return { success: false, error: error.message }
     }
 
     return { success: true, data }
   } catch (error) {
-    console.error('Error creating in-app notification:', error)
+    logger.error({ err: error }, 'Error creating in-app notification')
     return { success: false, error: String(error) }
   }
 }

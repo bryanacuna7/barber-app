@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
 import { getSubscriptionStats } from '@/lib/subscription'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -102,7 +103,7 @@ export async function GET() {
       recentBusinesses: recentBusinesses || [],
     })
   } catch (error) {
-    console.error('Admin stats error:', error)
+    logger.error({ err: error }, 'Admin stats error')
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })
   }
 }

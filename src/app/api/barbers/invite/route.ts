@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import crypto from 'crypto'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 // canAddBarber uses getSubscriptionStatus which is heavy — use lightweight check instead
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { sendEmail } from '@/lib/email/sender'
@@ -111,11 +112,11 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       if (foundUserId) {
         authUserId = foundUserId
       } else {
-        console.error('Auth user creation failed:', authError)
+        logger.error({ err: authError }, 'Auth user creation failed')
         return errorResponse('No se pudo crear la cuenta del miembro del equipo', 500)
       }
     } else {
-      console.error('Auth user creation failed:', authError)
+      logger.error({ err: authError }, 'Auth user creation failed')
       return errorResponse('No se pudo crear la cuenta del miembro del equipo', 500)
     }
   } else {
@@ -137,7 +138,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     .single()
 
   if (barberError) {
-    console.error('Barber record creation failed:', barberError)
+    logger.error({ err: barberError }, 'Barber record creation failed')
     return NextResponse.json(
       {
         error: 'No se pudo crear el registro del miembro del equipo',
@@ -158,7 +159,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
   })
 
   if (linkError) {
-    console.error('Failed to generate password setup link:', linkError)
+    logger.error({ err: linkError }, 'Failed to generate password setup link')
   }
 
   const tokenHash = linkData?.properties?.hashed_token
@@ -185,7 +186,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     )
 
     if (inviteError) {
-      console.error('Failed to upsert invitation record:', inviteError)
+      logger.error({ err: inviteError }, 'Failed to upsert invitation record')
     }
   }
 
@@ -208,7 +209,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       loginUrl,
       mode,
     }),
-  }).catch((err) => console.error('Failed to send barber invite email:', err))
+  }).catch((err) => logger.error({ err }, 'Failed to send barber invite email'))
 
   return NextResponse.json({
     barber,

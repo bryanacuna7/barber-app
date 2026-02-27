@@ -20,7 +20,7 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from '@/lib/api/middleware'
-import { logSecurity } from '@/lib/logger'
+import { logger, logSecurity } from '@/lib/logger'
 import { canModifyBarberAppointments } from '@/lib/rbac'
 
 interface RouteParams {
@@ -115,13 +115,13 @@ export const POST = withAuthAndRateLimit<RouteParams>(
         .eq('business_id', business.id)
 
       if (updateError) {
-        console.error('Verify payment update error:', updateError)
+        logger.error({ err: updateError }, 'Verify payment update error')
         return errorResponse('Error al actualizar el estado del pago')
       }
 
       return NextResponse.json({ success: true, action })
     } catch (error) {
-      console.error('Unexpected error in POST /api/appointments/[id]/verify-payment:', error)
+      logger.error({ err: error }, 'Unexpected error in POST /api/appointments/[id]/verify-payment')
       return errorResponse('Error interno del servidor')
     }
   },

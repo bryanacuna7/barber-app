@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getBarberIdFromUserId } from '@/lib/rbac'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   try {
@@ -118,7 +119,7 @@ export async function GET(request: Request) {
       earned: earnedAchievements?.length || 0,
     })
   } catch (error) {
-    console.error('Error fetching barber achievements:', error)
+    logger.error({ err: error }, 'Error fetching barber achievements')
     return NextResponse.json(
       {
         error: 'Internal server error',

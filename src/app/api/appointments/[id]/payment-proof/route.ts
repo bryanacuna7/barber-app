@@ -21,7 +21,7 @@ import {
   errorResponse,
   unauthorizedResponse,
 } from '@/lib/api/middleware'
-import { logSecurity } from '@/lib/logger'
+import { logger, logSecurity } from '@/lib/logger'
 import { canModifyBarberAppointments } from '@/lib/rbac'
 import { createServiceClient } from '@/lib/supabase/service-client'
 
@@ -81,13 +81,13 @@ export const GET = withAuthAndRateLimit<RouteParams>(
         .createSignedUrl(appointment.advance_payment_proof_url, 3600)
 
       if (signedError || !signedData?.signedUrl) {
-        console.error('Payment proof signed URL error:', signedError)
+        logger.error({ err: signedError }, 'Payment proof signed URL error')
         return errorResponse('Error al generar el enlace del comprobante')
       }
 
       return NextResponse.json({ url: signedData.signedUrl })
     } catch (error) {
-      console.error('Unexpected error in GET /api/appointments/[id]/payment-proof:', error)
+      logger.error({ err: error }, 'Unexpected error in GET /api/appointments/[id]/payment-proof')
       return errorResponse('Error interno del servidor')
     }
   },

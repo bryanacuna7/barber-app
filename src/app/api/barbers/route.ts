@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { canAddBarber } from '@/lib/subscription'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 const barberSchema = z.object({
   name: z.string().min(1),
@@ -73,7 +74,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
     .single()
 
   if (error) {
-    console.error('Supabase error creating barber:', error)
+    logger.error({ err: error }, 'Supabase error creating barber')
     return NextResponse.json(
       { error: 'Failed to create barber', details: error.message },
       { status: 500 }
@@ -87,7 +88,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
   })
 
   if (inviteError) {
-    console.error('Failed to create invitation:', inviteError)
+    logger.error({ err: inviteError }, 'Failed to create invitation')
     // We don't fail the whole request because the barber was created
   }
 

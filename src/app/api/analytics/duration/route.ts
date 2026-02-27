@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 type ServiceDurationStats = {
   serviceId: string
@@ -55,7 +56,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       .gte('scheduled_at', startDate.toISOString())) as any
 
     if (appointmentsError) {
-      console.error('Error fetching appointments:', appointmentsError)
+      logger.error({ err: appointmentsError }, 'Error fetching appointments')
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
@@ -157,7 +158,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       services,
     })
   } catch (error) {
-    console.error('Error in GET /api/analytics/duration:', error)
+    logger.error({ err: error }, 'Error in GET /api/analytics/duration')
     return errorResponse('Error interno del servidor')
   }
 })

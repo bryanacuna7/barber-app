@@ -1,8 +1,8 @@
 'use client'
 
-import { Clock, ArrowRight, Sparkles, Calendar, Users, Globe } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Clock, ArrowRight, Sparkles, Calendar, Users, Globe, Info, X } from 'lucide-react'
 import { DashboardStats } from '@/components/dashboard/dashboard-stats'
-import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { formatCurrencyCompactMillions, formatTime } from '@/lib/utils'
 import Link from 'next/link'
@@ -10,12 +10,36 @@ import { Button } from '@/components/ui/button'
 import { DashboardTourWrapper } from '@/components/tours/dashboard-tour-wrapper'
 import { useDashboardStats } from '@/hooks/use-dashboard-stats'
 import { useDashboardAppointments } from '@/hooks/use-dashboard-appointments'
+import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { ShareBookingLink } from '@/components/share/share-booking-link'
 import { bookingPath } from '@/lib/utils/booking-url'
+import { useBusiness } from '@/contexts/business-context'
+
+const TIP_ID = 'dashboard-welcome'
+
+function useDashboardTipDismiss() {
+  const { businessId, userId } = useBusiness()
+  const key = `guide-tip-${businessId}-${userId}-${TIP_ID}`
+  const [dismissed, setDismissed] = useState(() =>
+    typeof window === 'undefined' ? true : localStorage.getItem(key) === 'true'
+  )
+  const dismiss = useCallback(() => {
+    localStorage.setItem(key, 'true')
+    setDismissed(true)
+  }, [key])
+  return { dismissed, dismiss }
+}
 
 export function DashboardContent() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats()
   const { data: appointmentsData, isLoading: appointmentsLoading } = useDashboardAppointments()
+  const { dismissed: tipDismissed, dismiss: dismissTip } = useDashboardTipDismiss()
+
+  // Real-time: WebSocket invalidates dashboard queries when appointments change
+  useRealtimeAppointments({
+    businessId: stats?.business?.id || '',
+    enabled: !!stats?.business?.id,
+  })
 
   // Show loading state only for stats (appointments load lazily)
   if (statsLoading) {
@@ -56,7 +80,7 @@ export function DashboardContent() {
 
   return (
     <DashboardTourWrapper>
-      <div className="min-h-screen space-y-8">
+      <div className="min-h-screen space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -74,13 +98,35 @@ export function DashboardContent() {
           </div>
         </div>
 
-        {/* Guide Tip */}
-        <GuideContextualTip
-          tipId="dashboard-welcome"
-          title="Bienvenido a tu dashboard"
-          description="¿Primera vez usando la app? Revisá la guía completa para aprender a gestionar tu barbería como un profesional."
-          linkHref="/guia#primeros-pasos"
-        />
+        {/* Inline tip — compact, dashboard-only */}
+        {!tipDismissed && (
+          <div
+            className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 bg-blue-50 dark:bg-blue-950/30"
+            role="status"
+          >
+            <Info
+              className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0"
+              strokeWidth={1.75}
+            />
+            <p className="flex-1 text-[13px] sm:text-sm text-blue-700 dark:text-blue-300">
+              Primera vez?{' '}
+              <Link
+                href="/guia#primeros-pasos"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Ver la guía
+              </Link>
+            </p>
+            <button
+              type="button"
+              onClick={dismissTip}
+              aria-label="Cerrar consejo"
+              className="shrink-0 grid place-items-center h-7 w-7 rounded-md text-blue-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+            >
+              <X className="h-3.5 w-3.5" strokeWidth={2} />
+            </button>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div data-tour="dashboard-stats">
@@ -92,6 +138,11 @@ export function DashboardContent() {
             totalClients={stats.totalClients}
           />
         </div>
+
+        {/* Divider */}
+        {stats.business.slug && (
+          <div className="h-px bg-gradient-to-r from-blue-500/20 via-emerald-500/10 to-transparent" />
+        )}
 
         {/* Share Booking Link Card */}
         {stats.business.slug && (

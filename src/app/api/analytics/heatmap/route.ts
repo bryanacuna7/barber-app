@@ -10,6 +10,7 @@
 
 import { NextResponse } from 'next/server'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 export interface HeatmapCell {
   day: number // 0=Sun...6=Sat
@@ -56,7 +57,10 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     // Fallback: original JS aggregation (safe for pre-migration deploy)
     if (rpcError) {
-      console.warn(`[analytics/heatmap] RPC fallback: ${rpcError.code} - ${rpcError.message}`)
+      logger.warn(
+        { code: rpcError.code, message: rpcError.message },
+        'analytics/heatmap RPC fallback'
+      )
     }
 
     const { data: appointments, error: appointmentsError } = await supabase

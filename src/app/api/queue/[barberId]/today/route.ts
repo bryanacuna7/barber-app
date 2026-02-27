@@ -14,6 +14,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
+import { logger } from '@/lib/logger'
 
 interface RouteParams {
   params: Promise<{ barberId: string }>
@@ -133,7 +134,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       .order('scheduled_at', { ascending: true })
 
     if (fetchError) {
-      console.error('Queue fetch error:', fetchError)
+      logger.error({ err: fetchError }, 'Queue fetch error')
       return NextResponse.json({ error: 'Error al obtener la cola' }, { status: 500 })
     }
 
@@ -228,7 +229,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Queue API error:', error)
+    logger.error({ err: error }, 'Queue API error')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

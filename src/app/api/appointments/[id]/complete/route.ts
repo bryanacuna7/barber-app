@@ -211,7 +211,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         .single()) as any
 
       if (updateError) {
-        console.error('Error updating appointment status:', updateError)
+        logger.error({ err: updateError }, 'Error updating appointment status')
         return errorResponse('Error al actualizar el estado de la cita')
       }
 
@@ -228,9 +228,9 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         if (statsError) {
           // Log error but don't fail the appointment completion
           // Stats can be recalculated later if needed
-          console.error(
-            `Failed to update client stats for client ${appointment.client_id}:`,
-            statsError
+          logger.error(
+            { err: statsError, clientId: appointment.client_id },
+            'Failed to update client stats'
           )
           // Note: We don't return error response here because the appointment
           // was already marked as completed. Stats inconsistency is less critical
@@ -325,7 +325,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
 
       return NextResponse.json(updatedAppointment)
     } catch (error) {
-      console.error('Unexpected error in PATCH /api/appointments/[id]/complete:', error)
+      logger.error({ err: error }, 'Unexpected error in PATCH /api/appointments/[id]/complete')
       return errorResponse('Error interno del servidor')
     }
   },

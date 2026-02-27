@@ -162,7 +162,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         .single()) as any
 
       if (updateError) {
-        console.error('Error updating appointment status:', updateError)
+        logger.error({ err: updateError }, 'Error updating appointment status')
         return errorResponse('Error al actualizar el estado de la cita')
       }
 
@@ -178,7 +178,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
 
       return NextResponse.json(updatedAppointment)
     } catch (error) {
-      console.error('Unexpected error in PATCH /api/appointments/[id]/check-in:', error)
+      logger.error({ err: error }, 'Unexpected error in PATCH /api/appointments/[id]/check-in')
       return errorResponse('Error interno del servidor')
     }
   },

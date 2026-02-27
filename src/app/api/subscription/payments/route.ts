@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   const supabase = await createClient()
@@ -32,7 +33,7 @@ export async function GET() {
     .limit(20)
 
   if (error) {
-    console.error('Error fetching payments:', error)
+    logger.error({ err: error }, 'Error fetching payments')
     return NextResponse.json({ error: 'Failed to fetch payments' }, { status: 500 })
   }
 

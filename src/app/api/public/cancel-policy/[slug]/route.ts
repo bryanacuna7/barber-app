@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 import type { CancellationPolicy } from '@/types'
 
 const DEFAULT_POLICY: CancellationPolicy = {
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       allow_reschedule: policy.allow_reschedule ?? DEFAULT_POLICY.allow_reschedule,
     })
   } catch (error) {
-    console.error('Public cancel-policy API error:', error)
+    logger.error({ err: error }, 'Public cancel-policy API error')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

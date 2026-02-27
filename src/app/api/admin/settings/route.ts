@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 import type { ExchangeRateValue, UsdBankAccountValue } from '@/types/database'
 
 // Type for system_settings table (not in generated types yet)
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
     .order('key')) as { data: SystemSettingRow[] | null; error: unknown }
 
   if (error) {
-    console.error('Error fetching settings:', error)
+    logger.error({ err: error }, 'Error fetching settings')
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 })
   }
 
@@ -107,7 +108,7 @@ export async function PATCH(request: Request) {
     .single()
 
   if (error) {
-    console.error('Error updating setting:', error)
+    logger.error({ err: error }, 'Error updating setting')
     return NextResponse.json({ error: 'Failed to update setting' }, { status: 500 })
   }
 

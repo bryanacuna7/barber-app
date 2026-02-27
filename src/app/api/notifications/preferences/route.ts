@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { NotificationPreferences } from '@/types/database'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   try {
@@ -70,7 +71,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(preferences)
   } catch (error) {
-    console.error('Error in GET /api/notifications/preferences:', error)
+    logger.error({ err: error }, 'Error in GET /api/notifications/preferences')
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }
@@ -131,7 +132,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(updatedPreferences)
   } catch (error) {
-    console.error('Error in PATCH /api/notifications/preferences:', error)
+    logger.error({ err: error }, 'Error in PATCH /api/notifications/preferences')
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
       { status: 500 }

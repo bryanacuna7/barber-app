@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
 import { activateSubscription } from '@/lib/subscription'
+import { logger } from '@/lib/logger'
 
 interface PaymentReport {
   id: string
@@ -65,7 +66,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .eq('id', id)
 
   if (updateError) {
-    console.error('Error updating payment:', updateError)
+    logger.error({ err: updateError }, 'Error updating payment')
     return NextResponse.json({ error: 'Failed to update payment' }, { status: 500 })
   }
 
@@ -79,7 +80,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         30 // 30 days subscription
       )
     } catch (err) {
-      console.error('Error activating subscription:', err)
+      logger.error({ err }, 'Error activating subscription')
       // Don't fail the whole request, payment was approved
     }
   }

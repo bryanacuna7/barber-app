@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 import type { Business } from '@/types/database'
 
 interface RouteParams {
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     })
   } catch (error) {
-    console.error('Admin business detail error:', error)
+    logger.error({ err: error }, 'Admin business detail error')
     return NextResponse.json({ error: 'Failed to fetch business' }, { status: 500 })
   }
 }
@@ -125,7 +126,67 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       business,
     })
   } catch (error) {
-    console.error('Admin business update error:', error)
+    logger.error({ err: error }, 'Admin business update error')
     return NextResponse.json({ error: 'Failed to update business' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params
+    const supabase = await createClient()
+
+    // Verify admin
+    const adminUser = await verifyAdmin(supabase)
+    if (!adminUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Safe JSON parse
+    const body = await request.json().catch(() => null)
+    if (!body) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const { confirmName } = body
+    if (typeof confirmName !== 'string' || confirmName.length === 0) {
+      return NextResponse.json({ error: 'confirmName is required' }, { status: 400 })
+    }
+
+    const serviceClient = await createServiceClient()
+
+    // Fetch business — 404 if not found
+    const { data: business, error: fetchError } = await serviceClient
+      .from('businesses')
+      .select('id, name, is_active')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !business) {
+      return NextResponse.json({ error: 'Business not found' }, { status: 404 })
+    }
+
+    // Must be deactivated first
+    if (business.is_active) {
+      return NextResponse.json(
+        { error: 'Business must be deactivated before deletion' },
+        { status: 400 }
+      )
+    }
+
+    // Confirm name must match exactly
+    if (confirmName !== business.name) {
+      return NextResponse.json({ error: 'Business name does not match' }, { status: 400 })
+    }
+
+    // Delete — ON DELETE CASCADE handles all child tables
+    const { error: deleteError } = await serviceClient.from('businesses').delete().eq('id', id)
+
+    if (deleteError) throw deleteError
+
+    return NextResponse.json({ message: 'Business deleted permanently' })
+  } catch (error) {
+    logger.error({ err: error }, 'Admin business delete error')
+    return NextResponse.json({ error: 'Failed to delete business' }, { status: 500 })
   }
 }

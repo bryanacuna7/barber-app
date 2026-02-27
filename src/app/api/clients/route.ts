@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { canAddClient } from '@/lib/subscription'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 import { getStaffPermissions, mergePermissions } from '@/lib/auth/roles'
 
 // Validation schema for creating clients
@@ -60,7 +61,7 @@ export const GET = withAuth(async (request, context, { business, role, barberId,
     const { data: clients, error, count } = await query
 
     if (error) {
-      console.error('Error fetching clients:', error)
+      logger.error({ err: error }, 'Error fetching clients')
       return NextResponse.json({ error: 'Error al obtener clientes' }, { status: 500 })
     }
 
@@ -74,7 +75,7 @@ export const GET = withAuth(async (request, context, { business, role, barberId,
       },
     })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error({ err: error }, 'Unexpected error in GET /api/clients')
     return errorResponse('Error interno del servidor')
   }
 })
@@ -129,13 +130,13 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
           { status: 409 }
         )
       }
-      console.error('Error creating client:', error)
+      logger.error({ err: error }, 'Error creating client')
       return NextResponse.json({ error: 'Error al crear el cliente' }, { status: 500 })
     }
 
     return NextResponse.json(client, { status: 201 })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error({ err: error }, 'Unexpected error in POST /api/clients')
     return errorResponse('Error interno del servidor')
   }
 })

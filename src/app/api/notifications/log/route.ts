@@ -14,6 +14,7 @@
 
 import { NextResponse } from 'next/server'
 import { withAuthAndRateLimit, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 export const GET = withAuthAndRateLimit(
   async (request, _params, { business, supabase }) => {
@@ -48,7 +49,7 @@ export const GET = withAuthAndRateLimit(
       const { data, count, error } = await query
 
       if (error) {
-        console.error('Error fetching notification log:', error)
+        logger.error({ err: error }, 'Error fetching notification log')
         return errorResponse('Error al obtener registro de notificaciones')
       }
 
@@ -59,7 +60,7 @@ export const GET = withAuthAndRateLimit(
         offset,
       })
     } catch (error) {
-      console.error('Notification log API error:', error)
+      logger.error({ err: error }, 'Notification log API error')
       return errorResponse('Error interno')
     }
   },

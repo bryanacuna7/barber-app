@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/tours
@@ -35,13 +36,13 @@ export async function GET() {
       .order('created_at', { ascending: true })
 
     if (error) {
-      console.error('Error fetching tours:', error)
+      logger.error({ err: error }, 'Error fetching tours')
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ tours: tours || [] })
   } catch (error) {
-    console.error('Error in GET /api/tours:', error)
+    logger.error({ err: error }, 'Error in GET /api/tours')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -100,13 +101,13 @@ export async function PATCH(request: Request) {
       .single()
 
     if (error) {
-      console.error('Error updating tour progress:', error)
+      logger.error({ err: error }, 'Error updating tour progress')
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Error in PATCH /api/tours:', error)
+    logger.error({ err: error }, 'Error in PATCH /api/tours')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

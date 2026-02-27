@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 import { createNotification } from '@/lib/notifications'
 import { sendPushToBusinessOwner } from '@/lib/push/sender'
 import { validateImageFile } from '@/lib/file-validation'
@@ -223,7 +224,7 @@ export async function POST(request: NextRequest) {
         })
 
       if (uploadError) {
-        console.error('Proof upload error:', uploadError)
+        logger.error({ err: uploadError }, 'Proof upload error')
         return NextResponse.json({ error: 'Error al subir el comprobante' }, { status: 500 })
       }
 
@@ -251,7 +252,7 @@ export async function POST(request: NextRequest) {
       .eq('id', appointment.id)
 
     if (updateError) {
-      console.error('Proof submit update error:', updateError)
+      logger.error({ err: updateError }, 'Proof submit update error')
       return NextResponse.json({ error: 'Error al registrar el comprobante' }, { status: 500 })
     }
 
@@ -267,7 +268,7 @@ export async function POST(request: NextRequest) {
       reference_type: 'appointment',
       reference_id: appointment.id,
     }).catch((err) => {
-      console.error('Submit proof: createNotification error:', err)
+      logger.error({ err }, 'Submit proof: createNotification error')
     })
 
     sendPushToBusinessOwner(business.id, {
@@ -275,12 +276,12 @@ export async function POST(request: NextRequest) {
       body: `${clientName} envió su comprobante de SINPE`,
       url: '/citas',
     }).catch((err) => {
-      console.error('Submit proof: sendPushToBusinessOwner error:', err)
+      logger.error({ err }, 'Submit proof: sendPushToBusinessOwner error')
     })
 
     return NextResponse.json({ success: true, message: 'Comprobante enviado' })
   } catch (error) {
-    console.error('Public advance-payment submit API error:', error)
+    logger.error({ err: error }, 'Public advance-payment submit API error')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

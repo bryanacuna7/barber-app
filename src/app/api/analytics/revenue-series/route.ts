@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
 import { format, startOfDay, addDays, addMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { logger } from '@/lib/logger'
 
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
@@ -61,8 +62,9 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     // Fallback: original JS aggregation (safe for pre-migration deploy)
     if (rpcError) {
-      console.warn(
-        `[analytics/revenue-series] RPC fallback: ${rpcError.code} - ${rpcError.message}`
+      logger.warn(
+        { code: rpcError.code, message: rpcError.message },
+        'analytics/revenue-series RPC fallback'
       )
     }
 
@@ -82,7 +84,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     return NextResponse.json({ period, groupBy, series })
   } catch (error) {
-    console.error('Error in GET /api/analytics/revenue-series:', error)
+    logger.error({ err: error }, 'Error in GET /api/analytics/revenue-series')
     return errorResponse('Error interno del servidor')
   }
 })

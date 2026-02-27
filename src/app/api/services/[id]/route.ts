@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { logger } from '@/lib/logger'
 import { SERVICE_CATEGORIES, SERVICE_ICON_NAMES } from '@/lib/services/icons'
 
 const updateServiceSchema = z.object({
@@ -50,7 +51,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     return NextResponse.json(service)
   } catch (error) {
-    console.error('Error fetching service:', error)
+    logger.error({ err: error }, 'Error fetching service')
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }
@@ -98,7 +99,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       .single()
 
     if (error) {
-      console.error('Error updating service:', error)
+      logger.error({ err: error }, 'Error updating service')
       return NextResponse.json({ error: 'Error al actualizar el servicio' }, { status: 500 })
     }
 
@@ -108,7 +109,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     return NextResponse.json(service)
   } catch (error) {
-    console.error('Error updating service:', error)
+    logger.error({ err: error }, 'Unexpected error in PATCH /api/services/[id]')
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }
@@ -144,13 +145,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       .eq('business_id', business.id)
 
     if (error) {
-      console.error('Error deleting service:', error)
+      logger.error({ err: error }, 'Error deleting service')
       return NextResponse.json({ error: 'Error al eliminar el servicio' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting service:', error)
+    logger.error({ err: error }, 'Unexpected error in DELETE /api/services/[id]')
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
 }

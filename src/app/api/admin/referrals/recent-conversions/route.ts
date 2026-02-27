@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/admin/referrals/recent-conversions?limit=50&status=all
@@ -89,7 +90,7 @@ export async function GET(request: Request) {
       filter: statusFilter,
     })
   } catch (error) {
-    console.error('Error fetching recent conversions:', error)
+    logger.error({ err: error }, 'Error fetching recent conversions')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

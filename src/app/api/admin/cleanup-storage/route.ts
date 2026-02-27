@@ -9,6 +9,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { extractSafePathFromUrl } from '@/lib/path-security'
+import { logger } from '@/lib/logger'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
     const expectedAuth = `Bearer ${process.env.CRON_SECRET}`
 
     if (!authHeader || authHeader !== expectedAuth) {
-      console.error('Unauthorized cleanup-storage request')
+      logger.error('Unauthorized cleanup-storage request')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
       const { data: batch, error: fetchError } = await query
 
       if (fetchError) {
-        console.error('Error fetching expired payments:', fetchError)
+        logger.error({ err: fetchError }, 'Error fetching expired payments')
         break
       }
 
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
           const path = extractSafePathFromUrl(proofUrl, 'payment-proofs')
 
           if (!path) {
-            console.warn(`Could not extract safe path from URL: ${proofUrl}`)
+            logger.warn({ proofUrl }, 'Could not extract safe path from URL')
             errors.push({ id: paymentData.id, error: 'Invalid or unsafe URL format' })
             continue
           }
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
             .remove([path])
 
           if (deleteError) {
-            console.error(`Error deleting file ${path}:`, deleteError)
+            logger.error({ err: deleteError, path }, 'Error deleting file')
             errors.push({ id: paymentData.id, error: deleteError.message })
             continue
           }
@@ -86,14 +87,14 @@ export async function GET(request: Request) {
             .eq('id', paymentData.id)
 
           if (updateError) {
-            console.error(`Error updating payment ${paymentData.id}:`, updateError)
+            logger.error({ err: updateError, paymentId: paymentData.id }, 'Error updating payment')
             errors.push({ id: paymentData.id, error: updateError.message })
             continue
           }
 
           deletedCount++
         } catch (error) {
-          console.error(`Error processing payment ${paymentData.id}:`, error)
+          logger.error({ err: error, paymentId: paymentData.id }, 'Error processing payment')
           errors.push({ id: paymentData.id, error: String(error) })
         }
       }
@@ -151,7 +152,7 @@ export async function GET(request: Request) {
       errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {
-    console.error('Error in cleanup-storage cron:', error)
+    logger.error({ err: error }, 'Error in cleanup-storage cron')
     return NextResponse.json(
       {
         error: 'Internal server error',

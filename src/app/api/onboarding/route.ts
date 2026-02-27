@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -31,13 +32,13 @@ export async function GET() {
       .single()
 
     if (error) {
-      console.error('Error fetching onboarding:', error)
+      logger.error({ err: error }, 'Error fetching onboarding')
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(onboarding)
   } catch (error) {
-    console.error('Error in GET /api/onboarding:', error)
+    logger.error({ err: error }, 'Error in GET /api/onboarding')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -90,13 +91,13 @@ export async function PATCH(request: Request) {
       .single()
 
     if (error) {
-      console.error('Error updating onboarding:', error)
+      logger.error({ err: error }, 'Error updating onboarding')
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Error in PATCH /api/onboarding:', error)
+    logger.error({ err: error }, 'Error in PATCH /api/onboarding')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

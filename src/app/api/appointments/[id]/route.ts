@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withAuth, notFoundResponse, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 // Validation schemas
 const updateAppointmentSchema = z.object({
@@ -40,7 +41,7 @@ export const GET = withAuth(async (request, { params }, { business, supabase }) 
 
     return NextResponse.json(appointment)
   } catch (error) {
-    console.error('Error:', error)
+    logger.error({ err: error }, 'Error fetching appointment')
     return errorResponse('Error interno del servidor')
   }
 })
@@ -55,7 +56,7 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
     const result = updateAppointmentSchema.safeParse(body)
 
     if (!result.success) {
-      console.error('❌ API: Validation failed:', result.error.flatten())
+      logger.error({ details: result.error.flatten() }, 'API validation failed')
       return NextResponse.json(
         { error: 'Datos inválidos', details: result.error.flatten() },
         { status: 400 }
@@ -104,13 +105,10 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
       .single()
 
     if (error) {
-      console.error('❌ API: Error updating appointment:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        full: error,
-      })
+      logger.error(
+        { message: error.message, details: error.details, hint: error.hint, code: error.code },
+        'Error updating appointment'
+      )
       return NextResponse.json(
         {
           error: 'Error al actualizar la cita',
@@ -122,7 +120,7 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
     }
 
     if (!appointment) {
-      console.error('❌ API: Appointment not found after update')
+      logger.error('Appointment not found after update')
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
     }
 
@@ -131,7 +129,7 @@ export const PATCH = withAuth(async (request, { params }, { business, supabase }
 
     return NextResponse.json(appointment)
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error({ err: error }, 'Unexpected error updating appointment')
     return errorResponse('Error interno del servidor')
   }
 })
@@ -148,13 +146,13 @@ export const DELETE = withAuth(async (request, { params }, { business, supabase 
       .eq('business_id', business.id)
 
     if (error) {
-      console.error('Error deleting appointment:', error)
+      logger.error({ err: error }, 'Error deleting appointment')
       return errorResponse('Error al eliminar la cita')
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error({ err: error }, 'Unexpected error deleting appointment')
     return errorResponse('Error interno del servidor')
   }
 })

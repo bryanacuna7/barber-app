@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getNotifications, markAllAsRead } from '@/lib/notifications'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   try {
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ notifications, stats })
   } catch (error) {
-    console.error('Error in GET /api/notifications:', error)
+    logger.error({ err: error }, 'Error in GET /api/notifications')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -53,7 +54,7 @@ export async function PATCH() {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error in PATCH /api/notifications:', error)
+    logger.error({ err: error }, 'Error in PATCH /api/notifications')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

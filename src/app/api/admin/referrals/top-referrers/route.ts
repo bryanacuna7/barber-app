@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/admin/referrals/top-referrers?limit=10
@@ -81,7 +82,7 @@ export async function GET(request: Request) {
       count: formattedReferrers?.length || 0,
     })
   } catch (error) {
-    console.error('Error fetching top referrers:', error)
+    logger.error({ err: error }, 'Error fetching top referrers')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

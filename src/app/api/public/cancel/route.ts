@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 import { notify } from '@/lib/notifications/orchestrator'
 import { sendEmail } from '@/lib/email/sender'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
       .eq('id', appointment.id)
 
     if (updateError) {
-      console.error('Cancel appointment update error:', updateError)
+      logger.error({ err: updateError }, 'Cancel appointment update error')
       return NextResponse.json({ error: 'Error al cancelar la cita' }, { status: 500 })
     }
 
@@ -201,7 +202,7 @@ export async function POST(request: NextRequest) {
           }
         )
       } catch (err) {
-        console.error('Cancel: owner notification error:', err)
+        logger.error({ err }, 'Cancel: owner notification error')
       }
     })()
 
@@ -216,7 +217,7 @@ export async function POST(request: NextRequest) {
           appointmentDate: appointment.scheduled_at,
         }),
       }).catch((err) => {
-        console.error('Cancel: client email error:', err)
+        logger.error({ err }, 'Cancel: client email error')
       })
     }
 
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
       refund_eligible: false,
     })
   } catch (error) {
-    console.error('Public cancel API error:', error)
+    logger.error({ err: error }, 'Public cancel API error')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

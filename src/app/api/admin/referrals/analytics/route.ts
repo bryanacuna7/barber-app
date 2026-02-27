@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/admin/referrals/analytics?period=30
@@ -101,7 +102,7 @@ export async function GET(request: Request) {
       totalConversionsInPeriod: conversions?.length || 0,
     })
   } catch (error) {
-    console.error('Error fetching referral analytics:', error)
+    logger.error({ err: error }, 'Error fetching referral analytics')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

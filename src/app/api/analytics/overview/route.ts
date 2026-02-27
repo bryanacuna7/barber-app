@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 export const GET = withAuth(async (request, context, { business, supabase }) => {
   try {
@@ -61,8 +62,9 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
 
     // Fallback: original query (safe for pre-migration deploy)
     if (rpcError) {
-      console.warn(
-        `[analytics/overview] RPC fallback active: ${rpcError.code} - ${rpcError.message}`
+      logger.warn(
+        { code: rpcError.code, message: rpcError.message },
+        'analytics/overview RPC fallback active'
       )
     }
 
@@ -73,7 +75,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       .gte('scheduled_at', startDate.toISOString())
 
     if (appointmentsError) {
-      console.error('Error fetching appointments:', appointmentsError)
+      logger.error({ err: appointmentsError }, 'Error fetching appointments')
       return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
     }
 
@@ -99,7 +101,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       },
     })
   } catch (error) {
-    console.error('Error in GET /api/analytics/overview:', error)
+    logger.error({ err: error }, 'Error in GET /api/analytics/overview')
     return errorResponse('Error interno del servidor')
   }
 })

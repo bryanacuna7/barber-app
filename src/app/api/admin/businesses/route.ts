@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { verifyAdmin } from '@/lib/admin'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -88,8 +89,9 @@ export async function GET(request: NextRequest) {
     } else {
       // Fallback: original 3 batch queries (pre-migration safety)
       if (rpcError) {
-        console.warn(
-          `[admin/businesses] RPC fallback active: ${rpcError.code} - ${rpcError.message}`
+        logger.warn(
+          { code: rpcError.code, message: rpcError.message },
+          'RPC fallback active for admin businesses'
         )
       }
 
@@ -136,7 +138,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Admin businesses error:', error)
+    logger.error({ err: error }, 'Admin businesses error')
     return NextResponse.json({ error: 'Failed to fetch businesses' }, { status: 500 })
   }
 }

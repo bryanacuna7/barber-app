@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit, RateLimitPresets } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 interface QueueItem {
   id: string
@@ -247,7 +248,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Public queue API error:', error)
+    logger.error({ err: error }, 'Public queue API error')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

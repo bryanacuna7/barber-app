@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { withAuth, errorResponse, notFoundResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 // GET - Fetch business for authenticated user
 export async function GET() {
@@ -84,7 +85,7 @@ export async function PATCH(request: Request) {
     .single()
 
   if (error) {
-    console.error('Error updating business:', error)
+    logger.error({ err: error }, 'Error updating business')
     return NextResponse.json({ error: 'Error al actualizar' }, { status: 500 })
   }
 

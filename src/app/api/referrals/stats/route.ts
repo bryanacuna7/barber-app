@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/referrals/stats?businessId=xxx
@@ -149,7 +150,7 @@ export async function GET(request: Request) {
       businessName: business.name,
     })
   } catch (error) {
-    console.error('Error fetching referral stats:', error)
+    logger.error({ err: error }, 'Error fetching referral stats')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

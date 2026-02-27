@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { validateImageFile, getMimeType } from '@/lib/file-validation'
 import { sanitizeFilename, extractSafePathFromUrl } from '@/lib/path-security'
+import { logger } from '@/lib/logger'
 
 const MAX_SIZE = 2 * 1024 * 1024 // 2MB
 
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
   })
 
   if (uploadError) {
-    console.error('Logo upload error:', uploadError)
+    logger.error({ err: uploadError }, 'Logo upload error')
     return NextResponse.json({ error: 'Error al subir el logo' }, { status: 500 })
   }
 
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
     .eq('id', business.id)
 
   if (updateError) {
-    console.error('Logo URL update error:', updateError)
+    logger.error({ err: updateError }, 'Logo URL update error')
     return NextResponse.json({ error: 'Error al guardar' }, { status: 500 })
   }
 
@@ -105,7 +106,7 @@ export async function DELETE() {
     if (safePath) {
       await supabase.storage.from('logos').remove([safePath])
     } else {
-      console.warn('Could not extract safe path from logo URL:', business.logo_url)
+      logger.warn({ logoUrl: business.logo_url }, 'Could not extract safe path from logo URL')
     }
   }
 

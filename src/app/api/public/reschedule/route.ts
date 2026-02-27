@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service-client'
 import { rateLimit } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 import { notify } from '@/lib/notifications/orchestrator'
 import { sendEmail } from '@/lib/email/sender'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
       .eq('id', appointment.id)
 
     if (cancelError) {
-      console.error('Reschedule: cancel original appointment error:', cancelError)
+      logger.error({ err: cancelError }, 'Reschedule: cancel original appointment error')
       return NextResponse.json({ error: 'Error al reagendar la cita' }, { status: 500 })
     }
 
@@ -286,7 +287,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (insertError || !newAppointment) {
-      console.error('Reschedule: create new appointment error:', insertError)
+      logger.error({ err: insertError }, 'Reschedule: create new appointment error')
       return NextResponse.json({ error: 'Error al crear la nueva cita' }, { status: 500 })
     }
 
@@ -360,7 +361,7 @@ export async function POST(request: NextRequest) {
           }
         )
       } catch (err) {
-        console.error('Reschedule: owner notification error:', err)
+        logger.error({ err }, 'Reschedule: owner notification error')
       }
     })()
 
@@ -379,7 +380,7 @@ export async function POST(request: NextRequest) {
           trackingUrl,
         }),
       }).catch((err: unknown) => {
-        console.error('Reschedule: client email error:', err)
+        logger.error({ err }, 'Reschedule: client email error')
       })
     }
 
@@ -394,7 +395,7 @@ export async function POST(request: NextRequest) {
       discount: promoEval ?? null,
     })
   } catch (error) {
-    console.error('Public reschedule API error:', error)
+    logger.error({ err: error }, 'Public reschedule API error')
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }

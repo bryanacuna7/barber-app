@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { logger } from '@/lib/logger'
 
 // Validation schema for creating/updating appointments
 const appointmentSchema = z.object({
@@ -63,7 +64,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     const { data: appointments, error, count } = await query
 
     if (error) {
-      console.error('Error fetching appointments:', error)
+      logger.error({ err: error }, 'Error fetching appointments')
       return NextResponse.json({ error: 'Error al obtener citas' }, { status: 500 })
     }
 
@@ -83,7 +84,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
     // Backward compatible: return array directly for existing consumers
     return NextResponse.json(appointments)
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error({ err: error }, 'Unexpected error in GET /api/appointments')
     return errorResponse('Error interno del servidor')
   }
 })
@@ -139,13 +140,13 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       .single()
 
     if (error) {
-      console.error('Error creating appointment:', error)
+      logger.error({ err: error }, 'Error creating appointment')
       return NextResponse.json({ error: 'Error al crear la cita' }, { status: 500 })
     }
 
     return NextResponse.json(appointment, { status: 201 })
   } catch (error) {
-    console.error('Unexpected error:', error)
+    logger.error({ err: error }, 'Unexpected error in POST /api/appointments')
     return errorResponse('Error interno del servidor')
   }
 })

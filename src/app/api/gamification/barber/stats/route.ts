@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { BarberStats } from '@/lib/gamification/barber-gamification'
 import { getBarberIdFromUserId } from '@/lib/rbac'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/gamification/barber/stats
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ stats })
   } catch (error) {
-    console.error('Error fetching barber stats:', error)
+    logger.error({ err: error }, 'Error fetching barber stats')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

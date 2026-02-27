@@ -39,9 +39,7 @@ export function useDashboardStats() {
         throw error
       }
     },
-    // Refetch every 30 seconds for fresh stats
-    refetchInterval: 30000,
-    // Keep previous data while refetching
+    // Keep previous data while refetching (realtime WebSocket handles invalidation)
     placeholderData: (previousData) => previousData,
     // Retry only once
     retry: 1,

@@ -172,7 +172,7 @@ export async function GET(request: Request) {
         console.log(`Cleaned up ${paths.length} old payment proofs`)
       }
     } catch (err) {
-      console.error('Payment proof cleanup error:', err)
+      logger.error({ err }, 'Payment proof cleanup error')
     }
 
     return NextResponse.json({

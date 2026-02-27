@@ -27,9 +27,7 @@ export function useDashboardAppointments() {
       }
       return response.json() as Promise<DashboardAppointmentsResponse>
     },
-    // Refetch every 60 seconds
-    refetchInterval: 60000,
-    // Keep previous data while refetching
+    // Keep previous data while refetching (realtime WebSocket handles invalidation)
     placeholderData: (previousData) => previousData,
   })
 }
