@@ -155,6 +155,15 @@ const menuItems: MenuItem[] = [
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-100 dark:bg-blue-900/30',
   },
+  {
+    name: 'Cuenta y seguridad',
+    href: '/mi-dia/cuenta',
+    icon: Shield,
+    description: 'Cambiar contraseña',
+    color: 'text-teal-600 dark:text-teal-400',
+    bgColor: 'bg-teal-100 dark:bg-teal-900/30',
+    barberMenuOnly: true,
+  },
 ]
 
 const serviciosMenuItem: MenuItem = {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { BellRing, Clock, Gift, LogOut, ArrowRight } from 'lucide-react'
+import { BellRing, Clock, Gift, LogOut, ArrowRight, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { FadeInUp } from '@/components/ui/motion'
@@ -19,8 +19,7 @@ export default function AvanzadoPage() {
   async function handleLogout() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
+    window.location.href = '/login'
   }
 
   return (
@@ -129,9 +128,21 @@ export default function AvanzadoPage() {
                   <LogOut className="h-5 w-5" />
                   Sesión
                 </CardTitle>
-                <CardDescription>Cierra sesión en este dispositivo</CardDescription>
+                <CardDescription>Seguridad y cierre de sesión</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-between"
+                  onClick={() => router.push('/configuracion/avanzado/cambiar-contrasena')}
+                >
+                  <span className="flex items-center gap-2">
+                    <KeyRound className="h-4 w-4" />
+                    Cambiar contraseña
+                  </span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
                 <Button type="button" variant="outline" className="w-full" onClick={handleLogout}>
                   Cerrar sesión
                 </Button>

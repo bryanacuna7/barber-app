@@ -31,8 +31,11 @@ export interface ClientInfo {
 
 interface ClientContextValue {
   userId: string
+  /** Supabase Auth email (user.email) — used for re-authentication. Distinct from clientEmail. */
+  userAuthEmail: string | null
   clientId: string
   clientName: string
+  /** Email from clients table — may differ from userAuthEmail */
   clientEmail: string | null
   clientPhone: string | null
   businessId: string
@@ -50,6 +53,7 @@ const STORAGE_KEY = 'client-selected-business'
 interface ClientProviderProps {
   children: React.ReactNode
   userId: string
+  userAuthEmail?: string | null
   clients: ClientInfo[]
   businesses: ClientBusiness[]
   initialBusinessId?: string
@@ -58,6 +62,7 @@ interface ClientProviderProps {
 export function ClientProvider({
   children,
   userId,
+  userAuthEmail,
   clients,
   businesses,
   initialBusinessId,
@@ -94,6 +99,7 @@ export function ClientProvider({
 
   const value: ClientContextValue = {
     userId,
+    userAuthEmail: userAuthEmail ?? null,
     clientId: activeClient?.id ?? '',
     clientName: activeClient?.name ?? '',
     clientEmail: activeClient?.email ?? null,

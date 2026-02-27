@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -21,12 +21,21 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const explicitRedirect = searchParams.get('redirect')
+  const passwordUpdated = searchParams.get('passwordUpdated')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showPwBanner, setShowPwBanner] = useState(Boolean(passwordUpdated))
+
+  // Clean URL once without triggering navigation
+  useEffect(() => {
+    if (passwordUpdated) {
+      window.history.replaceState({}, '', '/login')
+    }
+  }, [passwordUpdated])
 
   const { getFieldError, markFieldTouched, validateForm, clearErrors } =
     useFormValidation(loginSchema)
@@ -106,6 +115,12 @@ function LoginForm() {
 
       <form onSubmit={handleLogin} data-testid="login-form">
         <CardContent className="space-y-4">
+          {showPwBanner && (
+            <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
+              Contraseña actualizada. Inicia sesión nuevamente.
+            </div>
+          )}
+
           {error && (
             <div
               className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400"
@@ -124,6 +139,7 @@ function LoginForm() {
             onChange={(e) => {
               setEmail(e.target.value)
               if (error) setError('')
+              if (showPwBanner) setShowPwBanner(false)
             }}
             onBlur={() => handleBlur('email')}
             error={getFieldError('email')}
@@ -142,6 +158,7 @@ function LoginForm() {
             onChange={(e) => {
               setPassword(e.target.value)
               if (error) setError('')
+              if (showPwBanner) setShowPwBanner(false)
             }}
             onBlur={() => handleBlur('password')}
             error={getFieldError('password')}

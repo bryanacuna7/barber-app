@@ -8,11 +8,16 @@ export function ServiceWorkerRegister() {
     if (process.env.NODE_ENV !== 'production') {
       // Unregister any existing service workers in development
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          registrations.forEach((registration) => {
-            registration.unregister()
-          })
-        })
+        navigator.serviceWorker.getRegistrations().then(
+          (registrations) => {
+            registrations.forEach((registration) => {
+              registration.unregister()
+            })
+          },
+          () => {
+            // Ignore InvalidStateError during Turbopack HMR
+          }
+        )
       }
       return
     }

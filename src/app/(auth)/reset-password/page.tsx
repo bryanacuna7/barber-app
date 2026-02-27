@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordStrength } from '@/components/ui/password-strength'
+import { strongPasswordSchema } from '@/lib/validations/auth'
 import {
   Card,
   CardHeader,
@@ -85,8 +87,9 @@ function ResetPasswordForm() {
       setError('Necesitas un enlace válido para cambiar la contraseña.')
       return
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
+    const pwResult = strongPasswordSchema.safeParse(password)
+    if (!pwResult.success) {
+      setError(pwResult.error.issues[0]?.message ?? 'Contraseña no cumple los requisitos.')
       return
     }
     if (password !== confirmPassword) {
@@ -150,7 +153,7 @@ function ResetPasswordForm() {
             label="Nueva contraseña"
             type={showPasswords ? 'text' : 'password'}
             name="password"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -158,6 +161,7 @@ function ResetPasswordForm() {
             disabled={isSessionValid !== true}
             data-testid="reset-password-new-password"
           />
+          <PasswordStrength password={password} />
 
           <Input
             label="Confirmar contraseña"

@@ -100,7 +100,12 @@ export default async function ClientLayout({ children }: { children: React.React
   }
 
   return (
-    <ClientProvider userId={user.id} clients={clients} businesses={businesses}>
+    <ClientProvider
+      userId={user.id}
+      userAuthEmail={user.email ?? null}
+      clients={clients}
+      businesses={businesses}
+    >
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pb-24">{children}</div>
       <ClientBottomNav />
     </ClientProvider>

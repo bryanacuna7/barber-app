@@ -8,21 +8,18 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.18
+## v0.9.19
 
 ### Novedades
 
-- Edita el nombre y correo de tus barberos directamente desde su perfil
-- Pantalla de carga mejorada al abrir reservas, con boton de reintentar si algo falla
+- Ahora puedes cambiar tu contraseña desde tu perfil o configuracion, sin importar tu rol (dueno, barbero o cliente)
+- Al cambiar la contraseña se cierra tu sesion automaticamente para mayor seguridad
+- Un indicador visual te muestra que tan segura es tu nueva contraseña mientras la escribes
 
 ### Mejoras
 
-- Botones y controles mas faciles de tocar en celulares
-- La pagina de reservas se ve mejor al compartir en redes sociales (WhatsApp, Instagram, etc.)
-- Icono y pantalla de inicio de la app mas profesionales
-- Horarios disponibles ahora respetan la zona horaria correcta del negocio
+- La pagina de recuperar contraseña ahora pide los mismos requisitos que al registrarte (8 caracteres, mayuscula, minuscula y numero)
 
 ### Correcciones
 
-- El boton de cerrar sesion ahora funciona correctamente
-- "Revenue" traducido a "Ingresos" en el panel de citas
+- Corregido un error intermitente que aparecia en la consola del navegador durante el desarrollo

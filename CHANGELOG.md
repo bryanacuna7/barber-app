@@ -4,6 +4,23 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.19] - 2026-02-26
+
+### Nuevo
+
+- Cambiar contraseña disponible para duenos, barberos y clientes desde sus respectivos paneles
+- Indicador de seguridad de contraseña al crear o cambiar tu contraseña
+- Al cambiar la contraseña, se cierra la sesion automaticamente y se muestra un aviso al volver a entrar
+
+### Mejorado
+
+- La pagina de recuperar contraseña ahora exige los mismos requisitos de seguridad que el registro
+- El encabezado de subpaginas en Configuracion ahora muestra la ruta correcta para volver
+
+### Corregido
+
+- Error intermitente del service worker durante el desarrollo ya no aparece en consola
+
 ## [0.9.18] - 2026-02-26
 
 ### Nuevo

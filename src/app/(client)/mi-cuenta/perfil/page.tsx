@@ -19,6 +19,8 @@ import {
   Building2,
   Bell,
   ChevronLeft,
+  Shield,
+  ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -276,6 +278,22 @@ export default function ClientProfilePage() {
             disabled={prefLoading}
           />
         </div>
+      </section>
+
+      {/* Seguridad */}
+      <section className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 mb-6">
+        <h2 className="font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+          <Shield className="h-5 w-5" />
+          Seguridad
+        </h2>
+        <Button
+          variant="outline"
+          className="w-full h-11 justify-between"
+          onClick={() => router.push('/mi-cuenta/perfil/cambiar-contrasena')}
+        >
+          <span>Cambiar contraseña</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </section>
 
       {/* Business Switcher */}
