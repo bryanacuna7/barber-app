@@ -61,6 +61,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Modal } from '@/components/ui/modal'
 // import { CardContent } from '@/components/ui/card'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
@@ -430,6 +431,7 @@ export default function ClientesPageV2() {
           onRefresh={async () => {
             await refetch()
           }}
+          disabled={showModal || !!selectedClient || isMobileDetailOpen || segmentSheetOpen}
         >
           <div className="relative overflow-x-hidden pb-4">
             {/* Mesh background removed for desktop premium — cleaner, less noise */}
@@ -1731,116 +1733,86 @@ export default function ClientesPageV2() {
               </Sheet>
 
               {/* Modal Nuevo Cliente - Wrapped in error boundary */}
-              {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div
-                    className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                    onClick={() => setShowModal(false)}
-                  />
-                  <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-                        Nuevo Cliente
-                      </h2>
-                      <Button
-                        variant="ghost"
-                        onClick={() => setShowModal(false)}
-                        className="rounded-lg p-2 text-muted hover:bg-zinc-100 dark:hover:bg-zinc-800 h-auto"
-                      >
-                        <X className="h-5 w-5" />
-                      </Button>
+              <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nuevo Cliente">
+                <ComponentErrorBoundary
+                  fallbackTitle="Error en formulario"
+                  fallbackDescription="No se pudo cargar el formulario de nuevo cliente"
+                  onReset={() => setShowModal(false)}
+                >
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {error && (
+                      <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+                        {error}
+                      </div>
+                    )}
+
+                    <Input
+                      label="Nombre completo"
+                      type="text"
+                      placeholder="Juan Pérez"
+                      value={formData.name}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                      required
+                    />
+
+                    <Input
+                      label="Teléfono"
+                      type="tel"
+                      placeholder="87175866"
+                      value={formData.phone}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                      required
+                    />
+
+                    <Input
+                      label="Email (opcional)"
+                      type="email"
+                      placeholder="cliente@email.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                    />
+
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        Notas (opcional)
+                      </label>
+                      <textarea
+                        placeholder="Preferencias, alergias, etc..."
+                        value={formData.notes}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, notes: e.target.value }))
+                        }
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white resize-none"
+                        rows={3}
+                      />
                     </div>
 
-                    <ComponentErrorBoundary
-                      fallbackTitle="Error en formulario"
-                      fallbackDescription="No se pudo cargar el formulario de nuevo cliente"
-                      onReset={() => setShowModal(false)}
-                    >
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && (
-                          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-                            {error}
-                          </div>
-                        )}
-
-                        <Input
-                          label="Nombre completo"
-                          type="text"
-                          placeholder="Juan Pérez"
-                          value={formData.name}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, name: e.target.value }))
-                          }
-                          required
-                        />
-
-                        <Input
-                          label="Teléfono"
-                          type="tel"
-                          placeholder="87175866"
-                          value={formData.phone}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, phone: e.target.value }))
-                          }
-                          required
-                        />
-
-                        <Input
-                          label="Email (opcional)"
-                          type="email"
-                          placeholder="cliente@email.com"
-                          value={formData.email}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, email: e.target.value }))
-                          }
-                        />
-
-                        <div>
-                          <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                            Notas (opcional)
-                          </label>
-                          <textarea
-                            placeholder="Preferencias, alergias, etc..."
-                            value={formData.notes}
-                            onChange={(e) =>
-                              setFormData((prev) => ({ ...prev, notes: e.target.value }))
-                            }
-                            className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white resize-none"
-                            rows={3}
-                          />
-                        </div>
-
-                        <div className="flex gap-3 pt-2">
-                          <Button
-                            type="submit"
-                            isLoading={createClient.isPending}
-                            className="flex-1"
-                          >
-                            Guardar
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowModal(false)}
-                            className="flex-1"
-                          >
-                            Cancelar
-                          </Button>
-                        </div>
-                      </form>
-                    </ComponentErrorBoundary>
-                  </div>
-                </div>
-              )}
+                    <div className="flex gap-3 pt-2">
+                      <Button type="submit" isLoading={createClient.isPending} className="flex-1">
+                        Guardar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowModal(false)}
+                        className="flex-1"
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </form>
+                </ComponentErrorBoundary>
+              </Modal>
 
               {/* Modal Detalle Cliente - Uses specialized ClientProfileErrorBoundary */}
-              {selectedClient && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                  <div
-                    className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                    onClick={() => setSelectedClient(null)}
-                  />
-                  <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
+              <Modal
+                isOpen={!!selectedClient}
+                onClose={() => setSelectedClient(null)}
+                size="lg"
+                showCloseButton={false}
+              >
+                {selectedClient && (
+                  <div className="relative">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center gap-4">
                         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 text-2xl font-bold text-zinc-600 dark:from-zinc-700 dark:to-zinc-800 dark:text-zinc-300">
@@ -1953,8 +1925,8 @@ export default function ClientesPageV2() {
                       </div>
                     </ClientProfileErrorBoundary>
                   </div>
-                </div>
-              )}
+                )}
+              </Modal>
             </div>
           </div>
         </PullToRefresh>

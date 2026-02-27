@@ -127,7 +127,7 @@ export function Modal({
             className={cn(
               'relative w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl',
               'border border-zinc-200 dark:border-zinc-800',
-              'max-h-[90vh] overflow-hidden flex flex-col',
+              'max-h-[90vh] overflow-hidden flex flex-col min-h-0',
               'focus-visible:!outline-none',
               sizeClasses[size],
               className
@@ -166,7 +166,9 @@ export function Modal({
             )}
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-5 sm:p-6">{children}</div>
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 touch-pan-y [-webkit-overflow-scrolling:touch]">
+              {children}
+            </div>
           </motion.div>
         </div>
       )}
