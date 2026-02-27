@@ -65,7 +65,7 @@ export function AppointmentFilters({
               onClick={() => onStatusFilterChange(option.value)}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shrink-0',
-                'transition-all active:scale-95 border',
+                'transition-[background-color,border-color,color,transform] active:scale-95 border',
                 statusFilter === option.value
                   ? 'bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-900 dark:border-white'
                   : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800/60 dark:text-zinc-400 dark:border-zinc-700/40 dark:hover:bg-zinc-700/60'

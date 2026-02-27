@@ -81,7 +81,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={reset}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-95 transition-all duration-200"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-95 transition-[background-color,transform] duration-200"
             >
               <RefreshCw className="w-4 h-4" />
               Reintentar
@@ -89,7 +89,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
 
             <Link
               href="/dashboard"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all duration-200"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-[background-color,transform] duration-200"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver al Dashboard

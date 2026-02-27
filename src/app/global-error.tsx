@@ -65,7 +65,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             {/* Reset Button */}
             <button
               onClick={reset}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-95 transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-95 transition-[box-shadow,transform] duration-200"
             >
               <RefreshCw className="w-5 h-5" />
               Reintentar

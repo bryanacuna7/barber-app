@@ -96,7 +96,7 @@ export default function GeneralSettingsPage() {
         <div className="max-w-3xl mx-auto space-y-6">
           {/* Public Booking Link */}
           <FadeInUp delay={0.05}>
-            <Card id="booking-link" className="overflow-hidden transition-all">
+            <Card id="booking-link" className="overflow-hidden transition-shadow">
               <div className="absolute inset-x-0 top-0 h-1 bg-zinc-900 dark:bg-white" />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[17px]">
@@ -122,7 +122,7 @@ export default function GeneralSettingsPage() {
 
           {/* Business Info */}
           <FadeInUp delay={0.1}>
-            <Card id="business-name" className="transition-all">
+            <Card id="business-name" className="transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[17px]">
                   <Building2 className="h-5 w-5" />

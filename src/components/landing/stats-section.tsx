@@ -97,7 +97,7 @@ export function StatsSection() {
                   scale: 1.03,
                   transition: { duration: 0.3 },
                 }}
-                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white/60 p-8 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/60"
+                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white/60 p-8 shadow-lg backdrop-blur-sm transition-shadow hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/60"
               >
                 {/* Gradient Background on Hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-purple-50/50 to-pink-50/50 opacity-0 transition-opacity group-hover:opacity-100 dark:from-blue-950/20 dark:via-purple-950/20 dark:to-pink-950/20" />

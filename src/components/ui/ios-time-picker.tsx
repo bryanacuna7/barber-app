@@ -134,7 +134,7 @@ function WheelColumn({
             <div
               key={item}
               className={cn(
-                'flex h-[44px] items-center justify-center snap-center transition-all duration-150',
+                'flex h-[44px] items-center justify-center snap-center transition-[color,transform] duration-150',
                 isSelected
                   ? 'text-[22px] font-semibold text-zinc-900 dark:text-white scale-105'
                   : 'text-[20px] font-normal text-zinc-400 dark:text-zinc-500'
@@ -456,7 +456,7 @@ export function TimePickerTrigger({ value, onClick, className }: TimePickerTrigg
         'flex h-10 min-w-[72px] items-center justify-center rounded-xl px-3',
         'bg-zinc-100/80 dark:bg-zinc-800/80',
         'text-[15px] font-medium text-zinc-900 dark:text-white',
-        'active:scale-95 transition-all duration-150',
+        'active:scale-95 transition-[transform,background-color] duration-150',
         'hover:bg-zinc-100 dark:hover:bg-zinc-800',
         'focus:outline-none focus:ring-2 focus:ring-[#007AFF]/50',
         className

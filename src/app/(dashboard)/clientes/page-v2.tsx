@@ -901,7 +901,7 @@ export default function ClientesPageV2() {
                                   }}
                                   whileTap={{ scale: 0.98 }}
                                   transition={animations.spring.snappy}
-                                  className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-all border-2 ${
+                                  className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-[background-color,border-color,box-shadow] border-2 ${
                                     isSelected
                                       ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-950 dark:border-blue-500 dark:shadow-lg'
                                       : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-900 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
@@ -944,7 +944,7 @@ export default function ClientesPageV2() {
                                           strokeWidth="3"
                                           fill="none"
                                           strokeLinecap="round"
-                                          className={`transition-all duration-700 ${
+                                          className={`transition-[stroke-dashoffset] duration-700 ${
                                             loyalty >= 80
                                               ? 'text-green-500'
                                               : loyalty >= 50
@@ -1055,7 +1055,7 @@ export default function ClientesPageV2() {
                                 }}
                                 whileTap={{ scale: 0.98 }}
                                 transition={animations.spring.snappy}
-                                className={`group/card relative w-full text-left rounded-xl p-3 transition-all border hidden lg:flex items-center gap-3 ${
+                                className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border hidden lg:flex items-center gap-3 ${
                                   isSelected
                                     ? 'bg-zinc-100 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-600'
                                     : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
@@ -1550,7 +1550,7 @@ export default function ClientesPageV2() {
                           days.push(
                             <motion.div
                               key={day}
-                              className={`aspect-square rounded-lg ${getIntensityColor(visitsOnDay)} relative cursor-pointer transition-all hover:brightness-110 ${
+                              className={`aspect-square rounded-lg ${getIntensityColor(visitsOnDay)} relative cursor-pointer transition-[filter] hover:brightness-110 ${
                                 isToday ? 'ring-2 ring-inset ring-purple-500' : ''
                               }`}
                               title={`${day} ${format(currentMonth, 'MMMM', { locale: es })} - ${visitsOnDay} visitas`}
@@ -1625,7 +1625,7 @@ export default function ClientesPageV2() {
                                 onClick={() => setSelectedClient(client)}
                                 whileTap={{ scale: 0.98 }}
                                 transition={animations.spring.snappy}
-                                className="flex items-center gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                                className="flex items-center gap-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-700"
                               >
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-700 dark:to-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300 shrink-0">
                                   {client.name.charAt(0).toUpperCase()}

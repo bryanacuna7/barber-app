@@ -44,7 +44,7 @@ export function UsageCard({
       {!isUnlimited && (
         <div className="mt-2 h-1.5 w-full rounded-full bg-zinc-200 dark:bg-zinc-700">
           <div
-            className={`h-1.5 rounded-full transition-all ${
+            className={`h-1.5 rounded-full transition-[width] ${
               isAtLimit ? 'bg-red-500' : 'bg-blue-500'
             }`}
             style={{ width: `${percentage}%` }}

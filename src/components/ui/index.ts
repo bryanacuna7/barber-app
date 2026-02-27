@@ -47,4 +47,5 @@ export {
 export { Skeleton, SkeletonCard, SkeletonList, SkeletonStats } from './skeleton'
 
 // Animation Components
-export { PageTransition, StaggerContainer, StaggerItem, RevealOnScroll } from './page-transition'
+export { PageTransition, RevealOnScroll } from './page-transition'
+export { StaggeredList, StaggeredItem } from './motion'

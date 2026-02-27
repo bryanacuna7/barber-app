@@ -63,62 +63,6 @@ export function PageTransition({ children, variant = 'fade' }: PageTransitionPro
   )
 }
 
-// Stagger animation for lists/grids
-interface StaggerContainerProps {
-  children: ReactNode
-  className?: string
-  delay?: number
-}
-
-export function StaggerContainer({ children, className, delay = 0.05 }: StaggerContainerProps) {
-  const prefersReducedMotion = useReducedMotion()
-
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>
-  }
-
-  return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      animate="visible"
-      variants={{
-        visible: {
-          transition: {
-            staggerChildren: delay,
-          },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
-  const prefersReducedMotion = useReducedMotion()
-
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>
-  }
-
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: animations.spring.snappy,
-        },
-      }}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
 // Reveal animation on scroll
 interface RevealOnScrollProps {
   children: ReactNode
@@ -136,7 +80,7 @@ export function RevealOnScroll({ children, className, delay = 0 }: RevealOnScrol
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
       transition={{ ...animations.spring.snappy, delay }}

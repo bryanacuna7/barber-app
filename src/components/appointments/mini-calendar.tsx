@@ -107,7 +107,7 @@ export function MiniCalendar({
               disabled={!isCurrentMonth}
               className={cn(
                 'relative h-10 w-full flex items-center justify-center rounded-lg',
-                'text-sm font-medium transition-all duration-200',
+                'text-sm font-medium transition-colors duration-200',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
                 !isCurrentMonth && 'text-zinc-300 dark:text-zinc-700 cursor-not-allowed',
                 isCurrentMonth &&

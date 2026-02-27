@@ -110,7 +110,7 @@ export function DaySchedule({
                       'border-2 border-dashed border-transparent',
                       'opacity-0 group-hover:opacity-100 group-hover:border-zinc-300 dark:group-hover:border-zinc-700',
                       'flex items-center justify-center',
-                      'transition-all duration-200',
+                      'transition-[opacity,border-color,background-color] duration-200',
                       'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                     )}
                   >

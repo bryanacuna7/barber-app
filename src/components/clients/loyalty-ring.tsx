@@ -48,7 +48,7 @@ export function LoyaltyRing({
           r={radius}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
-          className={`${getColor()} fill-none transition-all duration-700 ease-out`}
+          className={`${getColor()} fill-none transition-[stroke-dashoffset] duration-700 ease-out`}
           style={{
             strokeDasharray: circumference,
             strokeDashoffset: offset,

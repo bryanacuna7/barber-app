@@ -36,6 +36,7 @@ export function Drawer({
 }: DrawerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
   const prefersReducedMotion = useReducedMotion()
   const [isDragging, setIsDragging] = useState(false)
   const y = useMotionValue(0)
@@ -64,10 +65,14 @@ export function Drawer({
     }
   }, [isOpen])
 
-  // Focus trap
+  // Focus management: capture previous focus on open, restore on close
   useEffect(() => {
-    if (isOpen && drawerRef.current) {
-      drawerRef.current.focus()
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null
+      drawerRef.current?.focus()
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus()
+      previousFocusRef.current = null
     }
   }, [isOpen])
 

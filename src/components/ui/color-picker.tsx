@@ -56,7 +56,7 @@ export function ColorPicker({ value, onChange, label }: ColorPickerProps) {
               onClick={() => onChange(color.hex)}
               title={color.name}
               className={cn(
-                'relative flex h-10 w-10 items-center justify-center rounded-full transition-all',
+                'relative flex h-10 w-10 items-center justify-center rounded-full transition-[transform,box-shadow] duration-200',
                 isSelected
                   ? 'ring-2 ring-offset-2 ring-zinc-900 dark:ring-white dark:ring-offset-zinc-900 scale-110'
                   : 'hover:scale-110'

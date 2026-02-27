@@ -220,7 +220,7 @@ export function AppointmentCard({
   return (
     <Card
       className={cn(
-        'transition-all duration-300',
+        'transition-[box-shadow,transform] duration-300',
         'hover:shadow-lg hover:-translate-y-0.5',
         'border-l-4',
         statusColors[appointment.status as AppointmentStatus],

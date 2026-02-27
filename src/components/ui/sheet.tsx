@@ -45,11 +45,18 @@ const useSheetContext = () => {
 }
 
 export function Sheet({ open, onOpenChange, children }: SheetProps) {
+  const previousFocusRef = React.useRef<HTMLElement | null>(null)
+
   React.useEffect(() => {
     if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus()
+        previousFocusRef.current = null
+      }
     }
     return () => {
       document.body.style.overflow = ''

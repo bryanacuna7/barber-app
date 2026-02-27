@@ -110,7 +110,7 @@ export function MilestoneProgress({
                 transition={{ delay: 0.4 + index * 0.1 }}
               >
                 <Card
-                  className={`p-4 text-center transition-all hover:scale-105 ${
+                  className={`p-4 text-center transition-transform hover:scale-105 ${
                     isUnlocked
                       ? `${getTierColor(milestone.tier)} border-2 shadow-lg`
                       : 'bg-zinc-50 dark:bg-zinc-800 opacity-50 border border-zinc-200 dark:border-zinc-700'

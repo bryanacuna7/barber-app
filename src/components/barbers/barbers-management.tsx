@@ -368,7 +368,7 @@ export function BarbersManagement() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 ${
+                            className={`group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white p-5 transition-[opacity,box-shadow,filter] duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 ${
                               isActive ? '' : 'opacity-75 grayscale-[10%]'
                             }`}
                           >

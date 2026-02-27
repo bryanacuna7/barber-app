@@ -40,7 +40,7 @@ export function AchievementCard({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative rounded-xl border p-4 transition-all ${
+      className={`relative rounded-xl border p-4 transition-colors ${
         isEarned
           ? 'border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-900/30 dark:from-amber-950/20 dark:to-orange-950/20'
           : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/50'

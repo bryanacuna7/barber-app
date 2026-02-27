@@ -83,7 +83,7 @@ export default function AdminError({ error, reset }: AdminErrorProps) {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={reset}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-95 transition-all duration-200"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-red-500/25 active:scale-95 transition-[box-shadow,transform] duration-200"
             >
               <RefreshCw className="w-4 h-4" />
               Reintentar
@@ -91,7 +91,7 @@ export default function AdminError({ error, reset }: AdminErrorProps) {
 
             <Link
               href="/admin"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all duration-200"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-[background-color,transform] duration-200"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver al Panel

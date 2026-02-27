@@ -171,7 +171,7 @@ function AnalyticsContent() {
                     setPeriod(option.value)
                     if (isMobileDevice()) haptics.selection()
                   }}
-                  className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-all ${
+                  className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-colors ${
                     isActive
                       ? 'brand-tab-active'
                       : 'text-muted border-zinc-200/70 dark:border-zinc-800/80 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'

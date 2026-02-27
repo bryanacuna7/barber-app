@@ -107,7 +107,7 @@ export function PricingSection() {
                 y: -4,
                 transition: { duration: 0.2 },
               }}
-              className={`relative overflow-hidden rounded-3xl border p-8 shadow-xl transition-all ${
+              className={`relative overflow-hidden rounded-3xl border p-8 shadow-xl transition-colors ${
                 plan.popular
                   ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-sm dark:border-blue-500 dark:from-blue-950/20 dark:to-purple-950/20'
                   : 'border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80'
@@ -180,7 +180,7 @@ export function PricingSection() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/register"
-                  className={`group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all ${
+                  className={`group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-[background-color,box-shadow] ${
                     plan.popular
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40'
                       : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100'

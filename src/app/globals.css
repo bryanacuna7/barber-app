@@ -638,7 +638,9 @@ a:focus-visible:not(.focus-ring),
 
 /* Interactive states */
 .interactive {
-  transition: all 150ms ease;
+  transition:
+    transform 150ms ease,
+    opacity 150ms ease;
 }
 
 .interactive:hover {
@@ -783,7 +785,9 @@ a:focus-visible:not(.focus-ring),
   border-radius: 25px;
   background: var(--brand-primary);
   color: var(--brand-primary-contrast);
-  transition: all 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -827,7 +831,10 @@ a:focus-visible:not(.focus-ring),
   text-align: center;
   border-radius: 7px;
   color: #666;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .ios-segment-item.active {
@@ -1158,7 +1165,9 @@ select,
 .touch-active:active {
   opacity: 0.7;
   transform: scale(0.98);
-  transition: all 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    opacity 0.1s ease;
 }
 
 /* iOS-style bouncy button */

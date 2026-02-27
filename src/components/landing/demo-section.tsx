@@ -74,7 +74,7 @@ export function DemoSection() {
                 onClick={() => setActiveTab(tab.id)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`flex items-center gap-2 rounded-xl px-6 py-3 font-medium transition-all ${
+                className={`flex items-center gap-2 rounded-xl px-6 py-3 font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'bg-white text-zinc-900 shadow-lg'
                     : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white'
@@ -141,7 +141,7 @@ export function DemoSection() {
             <div className="mt-8 text-center">
               <a
                 href="/register"
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all hover:shadow-2xl hover:shadow-blue-500/40"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-shadow hover:shadow-2xl hover:shadow-blue-500/40"
               >
                 Prueba gratis por 7 días
               </a>

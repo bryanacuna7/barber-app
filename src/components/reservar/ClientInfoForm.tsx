@@ -195,7 +195,7 @@ export function ClientInfoForm({
             placeholder="Alguna petición especial o preferencia..."
             value={notes}
             onChange={(e) => onChangeNotes(e.target.value)}
-            className="w-full rounded-2xl border-0 bg-zinc-100/80 px-4 py-4 text-[17px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:bg-zinc-100 dark:bg-zinc-800/80 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-white/20 dark:focus:bg-zinc-800 transition-all duration-200 resize-none"
+            className="w-full rounded-2xl border-0 bg-zinc-100/80 px-4 py-4 text-[17px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/20 focus:bg-zinc-100 dark:bg-zinc-800/80 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-white/20 dark:focus:bg-zinc-800 transition-[background-color,box-shadow] duration-200 resize-none"
             rows={3}
           />
         </div>

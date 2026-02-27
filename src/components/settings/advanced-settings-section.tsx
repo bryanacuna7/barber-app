@@ -23,7 +23,7 @@ export function AdvancedSettingsSection({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   return (
-    <div className="border-2 border-zinc-200 dark:border-zinc-700 rounded-2xl overflow-hidden transition-all">
+    <div className="border-2 border-zinc-200 dark:border-zinc-700 rounded-2xl overflow-hidden transition-colors">
       {/* Header - Clickable */}
       <button
         type="button"

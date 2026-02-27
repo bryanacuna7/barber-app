@@ -162,7 +162,7 @@ function StatsContent({
                   setViewMode('day')
                   setIsStatsOpen(false) // Close drawer on date select
                 }}
-                className={`aspect-square flex items-center justify-center text-xs rounded-full transition-all ${
+                className={`aspect-square flex items-center justify-center text-xs rounded-full transition-colors ${
                   isSameDay(day, today)
                     ? 'bg-red-500 dark:bg-red-500 text-white font-bold'
                     : isSameDay(day, selectedDate)
@@ -1031,7 +1031,7 @@ function CitasCalendarFusionContent() {
                                   onClick={() => setSelectedId(apt.id)}
                                 >
                                   <div
-                                    className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-all ${
+                                    className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-[opacity,background-color] ${
                                       draggedId === apt.id
                                         ? 'opacity-50'
                                         : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
@@ -1085,7 +1085,7 @@ function CitasCalendarFusionContent() {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               whileTap={{ scale: 0.98 }}
-                              className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 p-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all"
+                              className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 p-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                               onClick={() => toast.info('Sugerir clientes para gap')}
                             >
                               <div className="flex items-center gap-2">

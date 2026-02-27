@@ -112,7 +112,7 @@ export function DateTimeSelection({
                   data-testid="date-cell"
                   data-date={format(date, 'yyyy-MM-dd')}
                   className={cn(
-                    'relative flex min-w-[68px] flex-col items-center rounded-2xl px-3 py-3 transition-all ios-press flex-shrink-0 snap-start',
+                    'relative flex min-w-[68px] flex-col items-center rounded-2xl px-3 py-3 transition-colors ios-press flex-shrink-0 snap-start',
                     isSelected
                       ? 'bg-zinc-900 text-white ring-1 ring-zinc-900/10 shadow-sm shadow-zinc-900/15 dark:bg-white dark:text-zinc-900 dark:ring-white/15 dark:shadow-white/20'
                       : 'bg-white dark:bg-zinc-800/80 hover:bg-zinc-50 dark:hover:bg-zinc-700/80',
@@ -182,7 +182,7 @@ export function DateTimeSelection({
                     disabled={!slot.available}
                     data-testid="time-slot"
                     className={cn(
-                      'relative rounded-2xl py-4 text-[15px] font-semibold transition-all',
+                      'relative rounded-2xl py-4 text-[15px] font-semibold transition-colors',
                       !slot.available
                         ? 'cursor-not-allowed bg-zinc-100 text-zinc-400 line-through dark:bg-zinc-800/50 dark:text-zinc-600'
                         : isSelected

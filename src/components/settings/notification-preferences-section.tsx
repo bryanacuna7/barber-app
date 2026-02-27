@@ -243,7 +243,7 @@ function ChannelCard({
     <button
       onClick={onClick}
       className={`
-        relative p-4 rounded-lg border-2 transition-all text-left
+        relative p-4 rounded-lg border-2 transition-colors text-left
         ${
           active
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'

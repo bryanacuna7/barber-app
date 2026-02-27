@@ -106,7 +106,7 @@ export function AchievementsView({ businessId, barberId }: AchievementsViewProps
           {/* Progress Bar */}
           <div className="mt-4 h-3 w-full rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-[width] duration-500"
               style={{ width: `${totalCount > 0 ? (earnedCount / totalCount) * 100 : 0}%` }}
             />
           </div>

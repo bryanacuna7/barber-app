@@ -35,7 +35,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
                   data-active={isCurrent ? 'true' : undefined}
                   data-completed={isCompleted ? 'true' : undefined}
                   className={cn(
-                    'flex items-center gap-2 rounded-full px-3 py-2 transition-all duration-300',
+                    'flex items-center gap-2 rounded-full px-3 py-2 transition-colors duration-300',
                     isCurrent &&
                       'bg-zinc-100 ring-1 ring-zinc-200/80 dark:bg-white/10 dark:ring-white/15',
                     isCompleted && 'bg-emerald-50 dark:bg-emerald-500/20',
@@ -45,7 +45,7 @@ export function ProgressSteps({ currentStep, barberCount }: ProgressStepsProps) 
                   <div
                     data-testid={`step-indicator-${stepKeys[i]}`}
                     className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all',
+                      'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
                       isCurrent && 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900',
                       isCompleted && 'bg-emerald-500 text-white',
                       !isCompleted &&

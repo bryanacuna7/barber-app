@@ -83,7 +83,7 @@ export function FeaturesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ delay: index * 0.08, duration: 0.45 }}
-                className="group rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-6 transition-all hover:border-zinc-300 hover:bg-white hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
+                className="group rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-6 transition-[border-color,background-color,box-shadow] hover:border-zinc-300 hover:bg-white hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:border-zinc-700 dark:hover:bg-zinc-900"
               >
                 <div className={`inline-flex rounded-xl p-2.5 ${feature.colorClasses.icon}`}>
                   <Icon className="h-5 w-5" />

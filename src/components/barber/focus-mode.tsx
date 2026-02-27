@@ -67,7 +67,7 @@ function ProgressRing({
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         className={cn(
-          'transition-all duration-1000 ease-out',
+          'transition-[stroke-dashoffset,color] duration-1000 ease-out',
           isOvertime ? 'text-amber-400' : 'text-emerald-400'
         )}
       />

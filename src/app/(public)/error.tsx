@@ -62,7 +62,7 @@ export default function PublicError({ error, reset }: PublicErrorProps) {
             <div className="flex flex-col gap-3 pt-4">
               <button
                 onClick={reset}
-                className="inline-flex items-center justify-center gap-2 px-4 h-[44px] bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[15px] font-semibold rounded-[14px] hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 px-4 h-[44px] bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[15px] font-semibold rounded-[14px] hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98] transition-[background-color,transform] duration-200"
               >
                 <RefreshCw className="w-[18px] h-[18px]" />
                 Intentar de nuevo
@@ -70,7 +70,7 @@ export default function PublicError({ error, reset }: PublicErrorProps) {
 
               <button
                 onClick={() => (window.location.href = '/')}
-                className="inline-flex items-center justify-center gap-2 px-4 h-[44px] bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white text-[15px] font-medium rounded-[14px] hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 px-4 h-[44px] bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white text-[15px] font-medium rounded-[14px] hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-[background-color,transform] duration-200"
               >
                 <Home className="w-[18px] h-[18px]" />
                 Ir al inicio

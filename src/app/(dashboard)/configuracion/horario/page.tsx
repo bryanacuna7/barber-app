@@ -277,7 +277,7 @@ export default function HorarioSettingsPage() {
                           booking_buffer_minutes: Number(e.target.value),
                         }))
                       }
-                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-[box-shadow]"
                     >
                       <option value={0}>Sin tiempo extra</option>
                       <option value={5}>5 minutos</option>
@@ -301,7 +301,7 @@ export default function HorarioSettingsPage() {
                           advance_booking_days: Number(e.target.value),
                         }))
                       }
-                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-[box-shadow]"
                     >
                       <option value={7}>1 semana</option>
                       <option value={14}>2 semanas</option>
@@ -330,7 +330,7 @@ export default function HorarioSettingsPage() {
                           slot_interval_minutes: Number(e.target.value),
                         }))
                       }
-                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-all"
+                      className="w-full h-12 rounded-xl border-0 bg-zinc-100/80 px-4 text-[15px] text-zinc-900 dark:bg-zinc-800/80 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900/20 dark:focus:ring-white/20 transition-[box-shadow]"
                     >
                       <option value={10}>10 minutos</option>
                       <option value={15}>15 minutos</option>

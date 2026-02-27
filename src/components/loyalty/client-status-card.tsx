@@ -178,7 +178,7 @@ export function ClientStatusCard({ status, program, businessName }: Props) {
             </div>
             <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-background/50 sm:h-2.5">
               <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
+                className="h-full rounded-full bg-primary transition-[width] duration-500"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -211,7 +211,7 @@ export function ClientStatusCard({ status, program, businessName }: Props) {
               </div>
               <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-background/50 sm:h-2.5">
                 <div
-                  className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                  className="h-full rounded-full bg-emerald-500 transition-[width] duration-500"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>

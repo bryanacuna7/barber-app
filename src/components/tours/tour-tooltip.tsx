@@ -254,14 +254,14 @@ export function TourTooltip() {
               {currentStep.isLastStep ? (
                 <button
                   onClick={completeTour}
-                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-all shadow-lg shadow-blue-500/25 touch-manipulation"
+                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/25 touch-manipulation"
                 >
                   Finalizar
                 </button>
               ) : (
                 <button
                   onClick={nextStep}
-                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-all shadow-lg shadow-blue-500/25 touch-manipulation"
+                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors shadow-lg shadow-blue-500/25 touch-manipulation"
                 >
                   Siguiente
                   <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

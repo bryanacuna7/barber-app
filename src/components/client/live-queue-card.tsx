@@ -483,7 +483,7 @@ function YourTurnPhase({ appointment }: { appointment: ClientUpcomingAppointment
         <div className="rounded-xl border border-zinc-200/80 bg-zinc-50/85 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-950/40">
           <div className="h-2.5 rounded-full bg-zinc-200/80 dark:bg-zinc-800 overflow-hidden">
             <div
-              className="h-full rounded-full bg-sky-500 transition-all duration-1000 ease-linear"
+              className="h-full rounded-full bg-sky-500 transition-[width] duration-1000 ease-linear"
               style={{ width: `${progress * 100}%` }}
             />
           </div>

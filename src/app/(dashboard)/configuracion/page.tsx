@@ -219,7 +219,7 @@ export default function ConfiguracionPage() {
             return (
               <Link key={card.href} href={card.href} className="block">
                 <div
-                  className={`w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 ${colors.hoverBorder} transition-all shadow-sm hover:shadow-md active:scale-[0.98] text-left group`}
+                  className={`w-full p-6 rounded-2xl bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 ${colors.hoverBorder} transition-[border-color,box-shadow,transform] shadow-sm hover:shadow-md active:scale-[0.98] text-left group`}
                 >
                   <div className="flex items-start gap-4">
                     <div

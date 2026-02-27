@@ -51,7 +51,7 @@ export function RadioGroupItem({ value, id, className = '', children }: RadioGro
       aria-checked={isSelected}
       id={itemId}
       onClick={() => context.onValueChange(value)}
-      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all min-h-[56px] ${
+      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-[border-color,background-color,box-shadow] duration-200 min-h-[56px] ${
         isSelected
           ? 'border-violet-400/40 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_8px_20px_rgba(0,0,0,0.24)] ring-1 ring-violet-400/25 dark:border-violet-400/35 dark:bg-zinc-900/80 dark:ring-violet-400/20'
           : 'border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-white/[0.04] hover:bg-zinc-100/80 dark:hover:bg-white/10'

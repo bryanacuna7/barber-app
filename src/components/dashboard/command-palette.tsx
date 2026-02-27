@@ -24,8 +24,9 @@ import {
   Link2,
 } from 'lucide-react'
 import Fuse from 'fuse.js'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { animations, reducedMotion as reducedMotionTokens } from '@/lib/design-system'
 import { useBusiness } from '@/contexts/business-context'
 import { useToast } from '@/components/ui/toast'
 import { bookingAbsoluteUrl } from '@/lib/utils/booking-url'
@@ -302,6 +303,7 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   // Dynamic commands that need context (slug, toast)
   const dynamicCommands = useMemo((): Command[] => {
@@ -354,13 +356,17 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
     [allowedCommands]
   )
 
-  // Focus input on open
+  // Focus input + scroll lock on open
   useEffect(() => {
     if (isOpen) {
       setQuery('')
       setSelectedIndex(0)
+      document.body.style.overflow = 'hidden'
       const t = setTimeout(() => inputRef.current?.focus(), 50)
-      return () => clearTimeout(t)
+      return () => {
+        clearTimeout(t)
+        document.body.style.overflow = ''
+      }
     }
   }, [isOpen])
 
@@ -427,7 +433,11 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: reducedMotionTokens.spring.default.duration }
+                : { duration: animations.duration.normal }
+            }
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
             onClick={onClose}
           />
@@ -435,10 +445,14 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           {/* Palette */}
           <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[12vh] px-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: -20 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -20 }}
+              animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+              exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -20 }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: reducedMotionTokens.spring.default.duration }
+                  : animations.spring.snappy
+              }
               className="w-full max-w-2xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] border border-zinc-200/60 dark:border-zinc-700/60 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
@@ -510,7 +524,11 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                                 <motion.div
                                   layoutId="cmd-palette-indicator"
                                   className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-zinc-900 dark:bg-white"
-                                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                                  transition={
+                                    prefersReducedMotion
+                                      ? { duration: 0 }
+                                      : animations.spring.indicator
+                                  }
                                 />
                               )}
                               <div

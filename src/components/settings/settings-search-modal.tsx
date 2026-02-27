@@ -308,7 +308,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                 />
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[background-color,transform] duration-200 hover:scale-105 active:scale-95"
                   aria-label="Cerrar búsqueda"
                 >
                   <X className="h-4 w-4 text-muted" strokeWidth={2.5} />
@@ -339,7 +339,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                             ease: 'easeOut',
                           }}
                           className={cn(
-                            'group w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 cursor-pointer text-left relative overflow-hidden',
+                            'group w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-colors duration-200 cursor-pointer text-left relative overflow-hidden',
                             isSelected
                               ? 'bg-gradient-to-r from-blue-50 to-blue-50/50 dark:from-blue-950/40 dark:to-blue-950/20 shadow-lg shadow-blue-100/50 dark:shadow-blue-900/20'
                               : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
@@ -348,7 +348,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                           {/* Icon with gradient background */}
                           <div
                             className={cn(
-                              'flex-shrink-0 p-2.5 rounded-xl transition-all duration-200',
+                              'flex-shrink-0 p-2.5 rounded-xl transition-colors duration-200',
                               isSelected
                                 ? 'bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 shadow-lg shadow-blue-500/30'
                                 : 'bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700'
@@ -391,7 +391,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                           <div className="flex items-center gap-3">
                             <span
                               className={cn(
-                                'text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-lg border transition-all duration-200',
+                                'text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-lg border transition-colors duration-200',
                                 categoryColors.bg,
                                 categoryColors.text,
                                 isSelected ? categoryColors.border : 'border-transparent'
@@ -401,7 +401,7 @@ export function SettingsSearchModal({ isOpen, onClose, onNavigate }: SettingsSea
                             </span>
                             <ArrowRight
                               className={cn(
-                                'h-4 w-4 transition-all duration-200',
+                                'h-4 w-4 transition-[color,transform] duration-200',
                                 isSelected
                                   ? 'text-blue-600 dark:text-blue-400 translate-x-1'
                                   : 'text-zinc-400 dark:text-zinc-600'

@@ -261,7 +261,7 @@ export function AppointmentForm({
                 'text-zinc-900 dark:text-zinc-100',
                 'placeholder:text-zinc-400',
                 'focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent',
-                'transition-all duration-200'
+                'transition-[border-color,box-shadow] duration-200'
               )}
             />
           </div>
@@ -283,7 +283,7 @@ export function AppointmentForm({
                 'text-zinc-900 dark:text-zinc-100',
                 'placeholder:text-zinc-400',
                 'focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:border-transparent',
-                'transition-all duration-200'
+                'transition-[border-color,box-shadow] duration-200'
               )}
             />
           </div>
