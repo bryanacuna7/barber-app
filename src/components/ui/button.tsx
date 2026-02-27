@@ -64,7 +64,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     // iOS-style base with better animations
     const baseStyles =
-      'relative overflow-hidden inline-flex items-center justify-center font-semibold rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed -webkit-tap-highlight-color-transparent transition-colors duration-200'
+      'relative overflow-hidden inline-flex max-w-full items-center justify-center overflow-hidden text-center text-ellipsis whitespace-nowrap font-semibold rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed -webkit-tap-highlight-color-transparent transition-colors duration-200'
 
     const variants = {
       primary:

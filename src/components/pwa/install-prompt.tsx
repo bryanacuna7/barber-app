@@ -96,17 +96,22 @@ export function InstallPrompt() {
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="grid grid-cols-1 gap-3 pt-4 sm:grid-cols-2">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => {
                 setShowIOSModal(false)
                 dismiss()
               }}
+              className="w-full whitespace-nowrap"
             >
               No mostrar de nuevo
             </Button>
-            <Button variant="primary" onClick={() => setShowIOSModal(false)}>
+            <Button
+              variant="primary"
+              onClick={() => setShowIOSModal(false)}
+              className="w-full whitespace-nowrap"
+            >
               Entendido
             </Button>
           </div>

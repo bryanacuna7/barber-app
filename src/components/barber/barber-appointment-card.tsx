@@ -539,7 +539,7 @@ export function BarberAppointmentCard({
 
           {/* Action Buttons (not in progress) */}
           {!isFinalized && !isInProgress && (
-            <div className="grid grid-cols-2 gap-2.5 mt-4">
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               {canCheckIn && (
                 <Button
                   variant="outline"
@@ -576,7 +576,7 @@ export function BarberAppointmentCard({
                 size="md"
                 onClick={() => onNoShow?.(appointment.id)}
                 disabled={!canNoShow || isLoading}
-                className="min-h-[48px] text-sm text-amber-700 hover:text-amber-800 dark:text-amber-400"
+                className="min-h-[48px] text-sm text-amber-700 hover:text-amber-800 dark:text-amber-400 sm:col-span-2"
                 aria-label="Marcar como no asistió"
                 data-testid="no-show-button"
               >

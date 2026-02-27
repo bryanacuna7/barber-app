@@ -122,7 +122,7 @@ export function Modal({
               <button
                 onClick={onClose}
                 className={cn(
-                  'p-2 rounded-xl transition-all duration-200',
+                  'inline-flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200',
                   'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
                   'hover:bg-zinc-100 dark:hover:bg-zinc-800',
                   'focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2',

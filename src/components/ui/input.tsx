@@ -130,7 +130,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

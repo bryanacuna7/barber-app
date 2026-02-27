@@ -116,7 +116,7 @@ export function AppointmentCard({
             </span>
             <Dropdown
               trigger={
-                <button className="p-1 rounded-lg transition-colors hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+                <button className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600 dark:hover:bg-zinc-700/60 dark:hover:text-zinc-300">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               }
@@ -282,7 +282,7 @@ export function AppointmentCard({
             )}
             <Dropdown
               trigger={
-                <button className="p-1.5 rounded-lg transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300">
+                <button className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               }

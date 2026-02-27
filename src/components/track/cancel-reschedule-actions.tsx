@@ -143,11 +143,16 @@ export function CancelRescheduleActions({
         <p className="text-sm font-semibold text-zinc-900 dark:text-white">Opciones</p>
 
         {/* Action buttons */}
-        <div className="flex gap-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {policy.allow_reschedule && (
             <Button
               variant="outline"
-              className="h-11 flex-1 gap-2"
+              size="sm"
+              className={`h-11 w-full gap-2 whitespace-nowrap ${
+                isPastDeadline
+                  ? 'disabled:opacity-100 disabled:border-zinc-700/70 disabled:bg-zinc-900/30 disabled:text-zinc-500'
+                  : ''
+              }`}
               disabled={isPastDeadline}
               onClick={handleReschedule}
               aria-label="Reagendar cita"
@@ -159,7 +164,14 @@ export function CancelRescheduleActions({
 
           <Button
             variant="danger"
-            className={`h-11 gap-2 ${policy.allow_reschedule ? 'flex-1' : 'w-full'}`}
+            size="sm"
+            className={`h-11 w-full gap-2 whitespace-nowrap ${
+              policy.allow_reschedule ? '' : 'sm:col-span-2'
+            } ${
+              isPastDeadline
+                ? 'disabled:opacity-100 disabled:border disabled:border-zinc-700/70 disabled:bg-zinc-900/30 disabled:text-zinc-500 disabled:shadow-none'
+                : ''
+            }`}
             disabled={isPastDeadline}
             onClick={handleOpenCancelModal}
             aria-label="Cancelar cita"

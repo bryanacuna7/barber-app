@@ -58,7 +58,7 @@ export function InstallAppCta({ businessName, variant = 'subtle' }: InstallAppCt
             <button
               type="button"
               onClick={dismiss}
-              className="shrink-0 rounded-lg p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+              className="shrink-0 inline-flex h-11 w-11 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
               aria-label="Cerrar"
             >
               <X className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function InstallAppCta({ businessName, variant = 'subtle' }: InstallAppCt
           <button
             type="button"
             onClick={dismiss}
-            className="shrink-0 rounded-lg p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+            className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
             aria-label="Cerrar"
           >
             <X className="h-3.5 w-3.5" />
