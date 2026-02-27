@@ -42,6 +42,23 @@ The dev server must be running on `http://localhost:3000` before running tests.
 
 ## Running E2E Tests
 
+### Auth Lifecycle Audit
+
+```bash
+npx playwright test tests/e2e/auth-lifecycle-audit.spec.ts --project=chromium
+```
+
+Optional role-based checks (owner/barber/client) require env vars:
+
+```env
+E2E_OWNER_EMAIL=owner@example.com
+E2E_OWNER_PASSWORD=...
+E2E_BARBER_EMAIL=barber@example.com
+E2E_BARBER_PASSWORD=...
+E2E_CLIENT_EMAIL=client@example.com
+E2E_CLIENT_PASSWORD=...
+```
+
 ### Run All Tests
 
 ```bash
