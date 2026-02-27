@@ -10,10 +10,19 @@
 
 ## v0.9.18
 
-### Rendimiento y estabilidad
+### Novedades
 
-- La app carga mas rapido gracias a consultas optimizadas al servidor
-- Las paginas de analiticas y panel de administracion usan menos datos
-- La limpieza automatica de archivos ahora procesa en lotes para mayor estabilidad
-- La exportacion de clientes maneja negocios grandes de forma segura
-- Se removio codigo interno sin uso para reducir el tamano de la aplicacion
+- Edita el nombre y correo de tus barberos directamente desde su perfil
+- Pantalla de carga mejorada al abrir reservas, con boton de reintentar si algo falla
+
+### Mejoras
+
+- Botones y controles mas faciles de tocar en celulares
+- La pagina de reservas se ve mejor al compartir en redes sociales (WhatsApp, Instagram, etc.)
+- Icono y pantalla de inicio de la app mas profesionales
+- Horarios disponibles ahora respetan la zona horaria correcta del negocio
+
+### Correcciones
+
+- El boton de cerrar sesion ahora funciona correctamente
+- "Revenue" traducido a "Ingresos" en el panel de citas

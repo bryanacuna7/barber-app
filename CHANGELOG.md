@@ -6,10 +6,24 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ## [0.9.18] - 2026-02-26
 
+### Nuevo
+
+- Ahora puedes editar el nombre y correo de tus barberos directamente desde su perfil
+- Boton de "Reintentar" cuando la pagina de reservas no carga correctamente
+- Mejor experiencia de carga con una pantalla de espera animada al abrir reservas
+
 ### Mejorado
 
-- La app carga mas rapido en general
-- Correcciones menores y mejoras de estabilidad
+- Los botones y controles son mas faciles de tocar en pantallas pequenas
+- La pagina de reservas se ve mejor cuando se comparte en redes sociales
+- Al instalar la app, el icono y la pantalla de inicio se ven mas profesionales
+- El enlace para compartir reservas ahora muestra el nombre correcto del negocio
+- Los horarios disponibles ahora se calculan correctamente segun la zona horaria del negocio
+
+### Corregido
+
+- El boton de cerrar sesion ahora cierra la sesion correctamente en vez de solo redirigir
+- Etiqueta "Revenue" traducida a "Ingresos" en el panel de citas
 
 ## [0.9.17] - 2026-02-25
 

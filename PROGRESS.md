@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-25 (Session 188 — Client Booking Bridge + Auto-Fill)
+- **Last Updated:** 2026-02-26 (Session 189 — UX Polish + Booking Hardening)
 - **Branch:** `main`
-- **Version:** `0.9.17`
+- **Version:** `0.9.18`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,26 @@
 ---
 
 ## Recent Sessions
+
+### Session 189: UX Polish + Booking Hardening (2026-02-26)
+
+**Status:** COMPLETE. 4 commits ready to deploy.
+
+**What was done:**
+
+- **Touch Targets (a11y):** Enforced 44x44px minimum on all icon buttons (modal/sheet close, dropdowns, password toggle, dismiss)
+- **Mobile Responsive:** Switched action button grids to single-column on mobile (barber cards, install prompt, cancel/reschedule)
+- **Button Overflow:** Added `text-ellipsis` + `whitespace-nowrap` to `<Button>` base styles
+- **Booking Loading:** New skeleton component (`BookingLoadingState`) matching real layout + Next.js `loading.tsx` route
+- **Booking Retry:** Error screen now shows contextual message + "Reintentar" button; slow-loading hint after 8s
+- **Timezone Fix:** Availability slot filtering now uses `toZonedTime()` with business timezone (was using server local time)
+- **SEO/PWA:** OpenGraph + Twitter card metadata on booking pages; manifest gains maskable icons, orientation, scope, branded splash bg
+- **Barber Edit:** Inline name/email editing in barber detail modal (pencil button → edit mode → save/cancel)
+- **Proper Logout:** Replaced `<Link href="/login">` with `<LogoutButton>` that calls `supabase.auth.signOut()` before redirect
+- **Share Name:** Stats API returns both `name` (display-normalized) and `shareName` (original) for booking links
+- **i18n:** "Revenue" → "Ingresos" in citas stats panel
+
+**Commits:** `c99e684` (touch targets), `b0c8fd1` (booking), `4629b6e` (barberos edit), `9acfc05` (dashboard fixes)
 
 ### Session 188: Client Booking Bridge + Auto-Fill (2026-02-25)
 
@@ -211,67 +231,7 @@
 
 **Not fixed:** P2-BAR-01 (calendar timezone) — uses `new Date()` directly, not actionable without repro
 
-### Session 182: Feature 3 Part 2 — SINPE Advance Payment (2026-02-23)
-
-**Status:** COMPLETE. Deployed as v0.9.7.
-
-**What was built:**
-
-- **Advance Payment Config** — 5 business columns (enabled, discount %, deadline hours, SINPE phone, holder name)
-- **Settings API** (`/api/settings/advance-payment`) — GET/PUT for owner config with validation
-- **Public Info API** (`/api/public/advance-payment/[slug]`) — SINPE details + discount calculation for clients
-- **Proof Submit API** (`/api/public/advance-payment/submit`) — Handles both file upload (Supabase Storage) and WhatsApp channel
-- **Verify/Reject API** (`/api/appointments/[id]/verify-payment`) — Owner approves or rejects with audit trail
-- **Payment Proof API** (`/api/appointments/[id]/payment-proof`) — Signed URL (1h expiry) for viewing proofs
-- **Config UI** (`AdvancePaymentSection`) — Toggle + 4 fields in Configuracion > Pagos
-- **Booking Success Banner** — Post-booking CTA with discount amount when business has advance payment enabled
-- **Submit Component** (`advance-payment-submit.tsx`) — SINPE copy, WhatsApp deep link, file upload, 4-state flow
-- **Owner Badge + Verification** — Amber "Pago pendiente" / Green "Pago verificado" badges on appointment cards + verification modal
-- **Email Template** (`advance-payment-verified.tsx`) — Dual variant (verified/rejected)
-- **Storage Cleanup** — 30-day auto-cleanup of verified/rejected proofs in cron
-- **Migration 037** — 10 appointment columns + 5 business columns + CHECK constraints + partial index
-- **Storage Bucket** — `deposit-proofs` (private, 5MB, images only)
-
-### Session 181: Feature 3 Part 1 — Client Cancel/Reschedule (2026-02-23)
-
-**Status:** COMPLETE. Deployed as v0.9.6.
-
-**What was built:**
-
-- **Cancellation Policy** — JSONB config on businesses table (`enabled`, `deadline_hours`, `allow_reschedule`)
-- **Cancel API** (`/api/public/cancel`) — Token-auth, deadline enforcement, DB update, owner notification (push + email + in-app)
-- **Reschedule API** (`/api/public/reschedule`) — Creates new appointment linked via `rescheduled_from`, cancels original, notifies owner
-- **Cancel Policy API** (`/api/public/cancel-policy/[slug]`) — Public endpoint for tracking page to check policy
-- **Settings API** (`/api/settings/cancellation-policy`) — GET/PUT for owner config
-- **Track Page UI** — Cancel/reschedule buttons with deadline guard, confirmation modal, success states
-- **Config UI** (`CancellationPolicySection`) — Toggle + deadline hours + allow reschedule in Configuracion > Pagos
-- **Email Template** (`appointment-cancelled.tsx`) — React Email template for cancellation notifications
-- **In-app Payment Docs** — "Como funciona?" info box explaining payment methods are for record-keeping
-- **Migration 035** — Tighter RLS on referral_conversions
-- **Migration 036** — cancellation_policy JSONB + appointment cancel metadata columns
-
-**Bugs fixed during development:**
-
-1. Status guard used non-existent `scheduled` — changed to `pending`/`confirmed`
-2. Cancel/reschedule APIs selected non-existent `client_name/phone/email` columns — fixed with Supabase join `client:clients(name, phone, email)`
-3. Reschedule insert used non-existent columns — fixed to use `client_id`
-
-**Files created:** `src/app/api/public/cancel/route.ts`, `src/app/api/public/reschedule/route.ts`, `src/app/api/public/cancel-policy/[slug]/route.ts`, `src/app/api/settings/cancellation-policy/route.ts`, `src/components/settings/cancellation-policy-section.tsx`, `src/components/track/cancel-reschedule-actions.tsx`, `src/lib/email/templates/appointment-cancelled.tsx`, `supabase/migrations/035_*.sql`, `supabase/migrations/036_*.sql`
-
-### Session 180: Feature 2 — Smart Slots + Descuentos (2026-02-23)
-
-**Status:** COMPLETE. Deployed as v0.9.5.
-
-- Promo Engine, Demand Heatmap, Promo Config Page, Booking discounts
-- Migration 034 executed
-
-### Session 179: Bug Fixes from User Feedback (2026-02-23)
-
-**Status:** 3 fixes applied (config back nav, clientes duplicate, cards cut off)
-
-### Session 178: P1 Smart Duration Committed (2026-02-10)
-
-**Status:** COMMITTED. Migrations 032+033 executed + backfill.
+### Sessions 178–182 (archived)
 
 ---
 
@@ -279,7 +239,7 @@
 
 ### Working
 
-- v0.9.17 (Session 188: Client Booking Bridge + Auto-Fill)
+- v0.9.18 (Session 189: UX Polish + Booking Hardening)
 - All UX polish gates complete (E + F + card hierarchy + header CTA)
 - In-app guide with 10 sections, search, TOC, contextual tips
 - Zero dead links in mobile drawer menu
