@@ -10,6 +10,7 @@ import { evaluatePromo } from '@/lib/promo-engine'
 import { normalizePhone, isValidCRPhone } from '@/lib/utils/phone'
 import { resolveClientForBusiness } from '@/lib/utils/resolve-client'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
+import BookingConfirmationClientEmail from '@/lib/email/templates/booking-confirmation-client'
 import type { PromoRule } from '@/types/promo'
 import type { BookingPricing } from '@/types/api'
 
@@ -518,7 +519,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.barberapp.com'
     const trackingUrl = trackingToken ? `${appUrl}/track/${trackingToken}` : undefined
     const claimToken = (client as any).claim_token
-    const claimUrl = claimToken ? `${appUrl}/mi-cuenta?claim=${claimToken}` : undefined
+    const claimUrl = claimToken ? `${appUrl}/activar-cuenta?claim=${claimToken}` : undefined
 
     const formattedPrice = new Intl.NumberFormat('es-CR', {
       style: 'currency',
@@ -529,7 +530,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     sendEmail({
       to: client_email,
       subject: `Cita confirmada — ${business.name}`,
-      react: NewAppointmentEmail({
+      react: BookingConfirmationClientEmail({
         businessName: business.name,
         clientName: client_name,
         serviceName: service.name,
@@ -540,6 +541,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
         logoUrl: business.logo_url || undefined,
         brandColor: business.brand_primary_color || undefined,
         trackingUrl,
+        claimUrl,
       }),
     }).catch((error) => {
       logger.error({ appointmentId: appointment.id, error }, 'Client confirmation email error')

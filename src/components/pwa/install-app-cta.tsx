@@ -170,11 +170,11 @@ function IOSInstructionsModal({
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="ghost" onClick={onDismiss}>
+        <div className="grid grid-cols-1 gap-3 pt-4 sm:grid-cols-2">
+          <Button variant="outline" onClick={onDismiss} className="w-full whitespace-nowrap">
             No mostrar de nuevo
           </Button>
-          <Button variant="primary" onClick={onClose}>
+          <Button variant="primary" onClick={onClose} className="w-full whitespace-nowrap">
             Entendido
           </Button>
         </div>

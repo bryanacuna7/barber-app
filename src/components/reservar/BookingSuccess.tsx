@@ -17,6 +17,7 @@ import type { BookingPricing } from '@/types/api'
 import { Button } from '@/components/ui/button'
 import { ClientAccountModal } from '@/components/loyalty/client-account-modal'
 import { AdvancePaymentSubmit } from '@/components/reservar/advance-payment-submit'
+import { InlineRegistrationCard } from '@/components/reservar/inline-registration-card'
 import { PushNudgeBanner } from '@/components/client/push-nudge-banner'
 import { InstallAppCta } from '@/components/pwa/install-app-cta'
 import { createClient } from '@/lib/supabase/client'
@@ -25,6 +26,7 @@ interface BookingSuccessProps {
   service: Service | null
   date: Date | null
   time: string | null
+  appointmentDateTime: string | null
   business: Business | null
   clientId: string | null
   claimToken: string | null
@@ -39,6 +41,7 @@ export function BookingSuccess({
   service,
   date,
   time,
+  appointmentDateTime,
   business,
   clientId,
   claimToken,
@@ -53,6 +56,12 @@ export function BookingSuccess({
   const [advancePaymentInfo, setAdvancePaymentInfo] = useState<AdvancePaymentInfo | null>(null)
   const [showAdvancePayment, setShowAdvancePayment] = useState(false)
   const [advancePaymentSubmitted, setAdvancePaymentSubmitted] = useState(false)
+  const [accountCreated, setAccountCreated] = useState(false)
+
+  // Visibility flags for post-registration gating
+  const showRegistrationCard = !!claimToken && !isClient && !accountCreated
+  const showClientDashboardCta = isClient || accountCreated
+  const showPwaInstallCta = isClient || accountCreated
 
   // Haptic feedback on success — Apple-style celebration tap
   useEffect(() => {
@@ -181,8 +190,21 @@ export function BookingSuccess({
           {/* Push notification nudge — best moment to ask */}
           <PushNudgeBanner variant="booking" />
 
-          {/* PWA install CTA — post-booking is peak conversion moment */}
-          {business?.name && <InstallAppCta variant="post-booking" businessName={business.name} />}
+          {/* Inline registration card — post-booking account creation */}
+          {showRegistrationCard && business && (
+            <InlineRegistrationCard
+              claimToken={claimToken!}
+              prefillEmail={clientEmail}
+              businessName={business.name}
+              businessId={business.id}
+              onAccountCreated={() => setAccountCreated(true)}
+            />
+          )}
+
+          {/* PWA install CTA — only after account created or if already a client */}
+          {showPwaInstallCta && business?.name && (
+            <InstallAppCta variant="post-booking" businessName={business.name} />
+          )}
 
           {business?.whatsapp && (
             <a
@@ -283,8 +305,8 @@ export function BookingSuccess({
             </div>
           )}
 
-          {/* Manual loyalty CTA (prevents success screen interruption) */}
-          {hasLoyaltyProgram && (
+          {/* Manual loyalty CTA — hidden when registration card is visible to avoid competing CTAs */}
+          {hasLoyaltyProgram && !showRegistrationCard && (
             <Button
               variant="outline"
               className="w-full h-12 text-base border-violet-500/30 text-violet-600 dark:text-violet-300"
@@ -300,13 +322,40 @@ export function BookingSuccess({
               variant="secondary"
               className="w-full h-12 text-base gap-2.5"
               onClick={() => {
-                const start = new Date(date)
-                const [h, m] = time.split(':').map(Number)
-                start.setHours(h, m, 0)
+                let start: Date | null = null
+
+                if (appointmentDateTime) {
+                  const parsedDateTime = new Date(appointmentDateTime)
+                  if (!Number.isNaN(parsedDateTime.getTime())) {
+                    start = parsedDateTime
+                  }
+                }
+
+                if (!start) {
+                  const timeMatch = time.match(/^(\d{1,2}):(\d{2})\s*([AP]M)?$/i)
+                  if (!timeMatch) return
+
+                  let hours = Number(timeMatch[1])
+                  const minutes = Number(timeMatch[2])
+                  const meridiem = timeMatch[3]?.toUpperCase()
+
+                  if (Number.isNaN(hours) || Number.isNaN(minutes)) return
+                  if (meridiem === 'PM' && hours < 12) hours += 12
+                  if (meridiem === 'AM' && hours === 12) hours = 0
+
+                  const fallbackStart = new Date(date)
+                  fallbackStart.setHours(hours, minutes, 0, 0)
+                  if (Number.isNaN(fallbackStart.getTime())) return
+                  start = fallbackStart
+                }
+
                 const end = new Date(start.getTime() + (service.duration_minutes || 30) * 60000)
                 const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
                 const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(service.name + ' - ' + (business?.name || ''))}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent('Reserva en ' + (business?.name || ''))}`
-                window.open(url, '_blank')
+                const popup = window.open(url, '_blank', 'noopener,noreferrer')
+                if (!popup) {
+                  window.location.href = url
+                }
               }}
             >
               <CalendarPlus className="h-5 w-5" />
@@ -314,8 +363,8 @@ export function BookingSuccess({
             </Button>
           )}
 
-          {/* Client dashboard CTA — most important post-booking action for clients */}
-          {isClient && (
+          {/* Client dashboard CTA — shown after account creation or if already a client */}
+          {showClientDashboardCta && (
             <a href="/mi-cuenta">
               <Button variant="primary" className="w-full h-12 text-base gap-2.5">
                 <CalendarCheck className="h-5 w-5" />
