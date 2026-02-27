@@ -4,40 +4,40 @@ export type ServiceCategory = (typeof SERVICE_CATEGORIES)[number]
 
 export const SERVICE_ICON_NAMES = [
   'Scissors',
-  'SprayCan',
-  'Sparkles',
+  'Slice',
+  'Layers',
   'Smile',
   'Baby',
   'Eye',
-  'PaintbrushVertical',
+  'WandSparkles',
   'Hand',
   'Crown',
   'Gift',
   'Palette',
-  'Bath',
+  'Droplets',
 ] as const
 
 export type ServiceIconName = (typeof SERVICE_ICON_NAMES)[number]
 
 export const SERVICE_ICON_LABELS: Record<ServiceIconName, string> = {
   Scissors: 'Tijeras',
-  SprayCan: 'Afeitado',
-  Sparkles: 'Combo',
+  Slice: 'Afeitado',
+  Layers: 'Combo',
   Smile: 'Facial',
   Baby: 'Niños',
   Eye: 'Cejas',
-  PaintbrushVertical: 'Diseño',
+  WandSparkles: 'Diseño',
   Hand: 'Masaje',
   Crown: 'Premium',
   Gift: 'Regalo',
   Palette: 'Color',
-  Bath: 'Toalla',
+  Droplets: 'Toalla',
 }
 
 export const DEFAULT_ICON_BY_CATEGORY: Record<ServiceCategory, ServiceIconName> = {
   corte: 'Scissors',
-  barba: 'SprayCan',
-  combo: 'Sparkles',
+  barba: 'Slice',
+  combo: 'Layers',
   facial: 'Smile',
 }
 
@@ -70,21 +70,21 @@ export function resolveServiceIcon(
     haystack.includes('afeitado') ||
     haystack.includes('shave')
   )
-    return 'SprayCan'
+    return 'Slice'
   if (haystack.includes('niño') || haystack.includes('kids') || haystack.includes('infantil'))
     return 'Baby'
   if (haystack.includes('ceja')) return 'Eye'
-  if (haystack.includes('diseño') || haystack.includes('styling')) return 'PaintbrushVertical'
+  if (haystack.includes('diseño') || haystack.includes('styling')) return 'WandSparkles'
   if (haystack.includes('masaje') || haystack.includes('massage')) return 'Hand'
   if (haystack.includes('premium') || haystack.includes('vip')) return 'Crown'
   if (haystack.includes('combo') || haystack.includes('+') || haystack.includes('paquete'))
-    return 'Sparkles'
+    return 'Layers'
   if (haystack.includes('facial') || haystack.includes('skin') || haystack.includes('piel'))
     return 'Smile'
   if (haystack.includes('tinte') || haystack.includes('color') || haystack.includes('dye'))
     return 'Palette'
   if (haystack.includes('toalla') || haystack.includes('towel') || haystack.includes('vapor'))
-    return 'Bath'
+    return 'Droplets'
   if (haystack.includes('regalo') || haystack.includes('gift')) return 'Gift'
   if (haystack.includes('corte') || haystack.includes('haircut')) return 'Scissors'
 

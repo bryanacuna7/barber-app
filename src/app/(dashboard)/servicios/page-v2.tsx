@@ -115,7 +115,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.9,
     total_reviews: 156,
     barber_names: ['Juan', 'Roberto'],
-    iconName: 'Sparkles',
+    iconName: 'Layers',
     color: 'purple',
     is_active: true,
   },
@@ -132,7 +132,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.7,
     total_reviews: 189,
     barber_names: ['Roberto', 'Carlos'],
-    iconName: 'Zap',
+    iconName: 'Scissors',
     color: 'amber',
     is_active: true,
   },
@@ -149,7 +149,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.6,
     total_reviews: 145,
     barber_names: ['Carlos', 'Miguel'],
-    iconName: 'Flame',
+    iconName: 'Slice',
     color: 'red',
     is_active: true,
   },
@@ -166,7 +166,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.9,
     total_reviews: 98,
     barber_names: ['Carlos'],
-    iconName: 'Waves',
+    iconName: 'Slice',
     color: 'cyan',
     is_active: true,
   },
@@ -217,7 +217,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.8,
     total_reviews: 54,
     barber_names: ['Miguel'],
-    iconName: 'Sparkle',
+    iconName: 'Smile',
     color: 'green',
     is_active: true,
   },
@@ -234,7 +234,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.5,
     total_reviews: 178,
     barber_names: ['Juan', 'Miguel'],
-    iconName: 'Users',
+    iconName: 'Baby',
     color: 'blue',
     is_active: true,
   },
@@ -251,7 +251,7 @@ const mockServices: MockService[] = [
     avg_rating: 4.4,
     total_reviews: 89,
     barber_names: ['Miguel', 'Carlos'],
-    iconName: 'CircleDot',
+    iconName: 'Eye',
     color: 'zinc',
     is_active: true,
   },
@@ -688,6 +688,7 @@ function ServiciosContent() {
         onRefresh={async () => {
           await refetch()
         }}
+        disabled={showForm || !!deleteService}
       >
         <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 relative z-10">
           {/* Header */}
@@ -1050,22 +1051,22 @@ function ServiciosContent() {
 
                               {/* Actions — visible on row hover */}
                               <td className="px-4 py-3">
-                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                                <div className="flex items-center justify-end gap-1">
                                   <Button
                                     variant="ghost"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+                                    className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                                     title="Editar"
                                     onClick={() => openEditServiceForm(service)}
                                   >
-                                    <Pencil className="h-3.5 w-3.5" />
+                                    <Pencil className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                                    className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                                     title="Eliminar"
                                     onClick={() => setDeleteService(service)}
                                   >
-                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </td>
