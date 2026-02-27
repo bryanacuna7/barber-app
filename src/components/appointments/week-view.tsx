@@ -142,7 +142,7 @@ export const WeekView = memo(function WeekView({
   const appointmentPositions = useMemo(() => {
     const positions = new Map<string, { columnIndex: number; totalColumns: number }>()
 
-    appointmentsByDay.forEach((dayAppointments, dayKey) => {
+    appointmentsByDay.forEach((dayAppointments) => {
       // Sort appointments by start time
       const sorted = [...dayAppointments].sort((a, b) => {
         return new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
@@ -382,7 +382,7 @@ export const WeekView = memo(function WeekView({
   // Status color mapping
   const statusColors = {
     pending:
-      'bg-amber-100 border-amber-300 text-amber-900 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-200',
+      'bg-blue-100 border-blue-300 text-blue-900 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-200',
     confirmed:
       'bg-blue-100 border-blue-300 text-blue-900 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-200',
     completed:

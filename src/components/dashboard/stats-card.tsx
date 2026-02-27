@@ -96,7 +96,7 @@ export function StatsCard({
     <div
       className={cn(
         'relative overflow-hidden rounded-2xl p-3.5 sm:p-5',
-        'transition-all duration-300',
+        'transition-shadow duration-300',
         styles.bg,
         styles.shadow,
         !isGradient && 'border border-zinc-200 dark:border-zinc-800'

@@ -499,7 +499,7 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                               onClick={() => handleSelect(cmd)}
                               onMouseEnter={() => setSelectedIndex(idx)}
                               className={cn(
-                                'relative flex w-full items-center gap-4 px-3 py-3 rounded-xl text-sm transition-all duration-150 text-left',
+                                'relative flex w-full items-center gap-4 px-3 py-3 rounded-xl text-sm transition-colors duration-150 text-left',
                                 isSelected
                                   ? 'bg-zinc-100 dark:bg-zinc-800'
                                   : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
@@ -556,7 +556,7 @@ function CommandPaletteModal({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                               )}
                               <ArrowRight
                                 className={cn(
-                                  'h-4 w-4 shrink-0 transition-all duration-150',
+                                  'h-4 w-4 shrink-0 transition-colors duration-150',
                                   isSelected
                                     ? 'text-zinc-500 dark:text-zinc-400 translate-x-0.5'
                                     : 'text-zinc-300 dark:text-zinc-600'

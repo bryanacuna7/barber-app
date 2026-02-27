@@ -26,11 +26,11 @@ import { PushNudgeBanner } from '@/components/client/push-nudge-banner'
 // Status labels and colors
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pending: {
-    label: 'Pendiente',
-    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    label: 'Agendada',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   },
   confirmed: {
-    label: 'Confirmada',
+    label: 'Agendada',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   },
   completed: {

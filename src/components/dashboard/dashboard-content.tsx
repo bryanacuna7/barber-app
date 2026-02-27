@@ -42,6 +42,13 @@ export function DashboardContent() {
   }
 
   const upcomingAppointments = appointmentsData?.appointments || []
+  const dashboardStatusLabel: Record<string, string> = {
+    pending: 'Agendada',
+    confirmed: 'Agendada',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
+    no_show: 'No asistió',
+  }
 
   // TODO: Get subscription status (will be added later)
   const showPaymentAction = false
@@ -169,7 +176,7 @@ export function DashboardContent() {
                 </div>
 
                 <p className="mt-4 text-lg font-medium text-zinc-900 dark:text-white relative">
-                  Sin citas pendientes
+                  Sin citas agendadas
                 </p>
                 <p className="mt-1 text-base text-zinc-500 text-center relative">
                   No hay más citas programadas para hoy
@@ -184,7 +191,7 @@ export function DashboardContent() {
                   return (
                     <div
                       key={apt.id}
-                      className="group relative overflow-hidden flex items-center justify-between p-4 transition-all duration-300 hover:scale-[1.005] hover:translate-x-1"
+                      className="group relative overflow-hidden flex items-center justify-between p-4 transition-[transform,opacity] duration-300 hover:scale-[1.005] hover:translate-x-1"
                       style={{
                         animationDelay: `${index * 50}ms`,
                       }}
@@ -210,14 +217,8 @@ export function DashboardContent() {
                         <p className="text-lg font-bold text-zinc-900 dark:text-white">
                           {formatTime(apt.scheduled_at)}
                         </p>
-                        <p
-                          className={`text-[12px] font-medium uppercase tracking-wide ${
-                            apt.status === 'confirmed'
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-amber-600 dark:text-amber-400'
-                          }`}
-                        >
-                          {apt.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                        <p className="text-[12px] font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                          {dashboardStatusLabel[apt.status] || 'Agendada'}
                         </p>
                       </div>
                     </div>
@@ -250,7 +251,7 @@ export function DashboardContent() {
                 </Link>
               )}
               <Link href="/citas" className="block group focus-ring rounded-2xl">
-                <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-all duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
+                <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-[border-color,box-shadow,transform] duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400 transition-transform group-hover:scale-110" />
                   </div>
@@ -260,7 +261,7 @@ export function DashboardContent() {
                 </div>
               </Link>
               <Link href="/servicios" className="block group focus-ring rounded-2xl">
-                <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-all duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
+                <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-[border-color,box-shadow,transform] duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30 group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400 transition-transform group-hover:scale-110" />
                   </div>
@@ -270,7 +271,7 @@ export function DashboardContent() {
                 </div>
               </Link>
               <Link href="/clientes" className="block group focus-ring rounded-2xl">
-                <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-all duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
+                <div className="flex flex-col items-center gap-2 rounded-2xl bg-zinc-50 px-3 py-4 dark:bg-zinc-800/50 transition-[border-color,box-shadow,transform] duration-200 border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-98">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50 transition-colors shadow-sm group-hover:shadow-md">
                     <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400 transition-transform group-hover:scale-110" />
                   </div>

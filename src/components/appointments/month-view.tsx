@@ -10,7 +10,6 @@ import {
   eachDayOfInterval,
   isSameMonth,
   isToday,
-  isSameDay,
   addMonths,
   subMonths,
 } from 'date-fns'
@@ -262,8 +261,7 @@ export const MonthView = memo(function MonthView({
 
                       // Status color mapping (simplified for pills)
                       const statusColors = {
-                        pending:
-                          'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                        pending: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
                         confirmed:
                           'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
                         completed:

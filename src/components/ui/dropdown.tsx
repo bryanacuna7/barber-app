@@ -162,7 +162,7 @@ export function SelectDropdown({
           'bg-white dark:bg-zinc-900 rounded-xl',
           'border border-zinc-200 dark:border-zinc-800',
           'text-sm text-left',
-          'transition-all duration-200',
+          'transition-[border-color,box-shadow] duration-200',
           'hover:border-zinc-300 dark:hover:border-zinc-700',
           'focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2',
           isOpen && 'ring-2 ring-zinc-500 ring-offset-2'

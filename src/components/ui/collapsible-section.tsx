@@ -2,7 +2,9 @@
 
 import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { animations, reducedMotion } from '@/lib/design-system'
 
 interface CollapsibleSectionProps {
   title: string
@@ -16,7 +18,7 @@ interface CollapsibleSectionProps {
 /**
  * Mobile-only collapsible section (Ola 3 pattern).
  * On desktop (above breakpoint), content is always visible and toggle is hidden.
- * On mobile, content is collapsed by default with a ChevronDown toggle.
+ * On mobile, content is collapsed by default with animated height transition.
  */
 export function CollapsibleSection({
   title,
@@ -26,6 +28,7 @@ export function CollapsibleSection({
   className,
 }: CollapsibleSectionProps) {
   const [expanded, setExpanded] = useState(false)
+  const prefersReducedMotion = useReducedMotion()
   const baseId = useId().replace(/:/g, '')
   const buttonId = `collapsible-trigger-${baseId}`
   const contentId = `collapsible-content-${baseId}`
@@ -62,12 +65,37 @@ export function CollapsibleSection({
           )}
         />
       </button>
-      <div
-        id={contentId}
-        role="region"
-        aria-labelledby={buttonId}
-        className={cn(expanded ? '' : `hidden ${blockClass}`)}
-      >
+
+      {/* Mobile: animated collapse/expand */}
+      {/* ⚠️ dual-render: safe only for static children (no effects/state/form IDs) */}
+      <div className={hiddenClass}>
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              id={contentId}
+              role="region"
+              aria-labelledby={buttonId}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: reducedMotion.spring.default.duration }
+                  : {
+                      duration: animations.duration.normal,
+                      ease: animations.easing.easeInOut as [number, number, number, number],
+                    }
+              }
+              style={{ overflow: 'hidden' }}
+            >
+              {children}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Desktop: always visible, no animation */}
+      <div className={cn('hidden', blockClass)} role="region" aria-labelledby={buttonId}>
         {children}
       </div>
     </div>

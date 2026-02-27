@@ -58,7 +58,7 @@ export function Badge({
     <span
       className={cn(
         'inline-flex items-center gap-1.5 font-medium rounded-full',
-        'transition-all duration-200',
+        'transition-colors duration-200',
         variantClasses[variant] || variantClasses.default,
         sizeClasses[size],
         className
@@ -94,8 +94,8 @@ const statusConfig: Record<
   AppointmentStatus,
   { label: string; variant: BadgeVariant; dot: boolean; pulse: boolean }
 > = {
-  pending: { label: 'Pendiente', variant: 'pending', dot: true, pulse: true },
-  confirmed: { label: 'Confirmada', variant: 'info', dot: true, pulse: false },
+  pending: { label: 'Agendada', variant: 'info', dot: true, pulse: false },
+  confirmed: { label: 'Agendada', variant: 'info', dot: true, pulse: false },
   completed: { label: 'Completada', variant: 'success', dot: true, pulse: false },
   cancelled: { label: 'Cancelada', variant: 'danger', dot: false, pulse: false },
   no_show: { label: 'No asistió', variant: 'warning', dot: false, pulse: false },

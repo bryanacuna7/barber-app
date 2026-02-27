@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useState, MouseEvent } from 'react'
+import { forwardRef, type MouseEvent } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
@@ -11,13 +11,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient' | 'success'
   size?: 'sm' | 'md' | 'lg'
   isLoading?: boolean
+  /** @deprecated No-op — ripple effect removed in favor of iOS-style whileTap scale */
   withRipple?: boolean
-}
-
-interface RippleType {
-  x: number
-  y: number
-  id: number
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -27,7 +22,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'md',
       isLoading,
-      withRipple = true,
+      withRipple: _withRipple,
       children,
       disabled,
       onClick,
@@ -35,9 +30,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const [ripples, setRipples] = useState<RippleType[]>([])
-
-    // Ripple effect on click
     const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
       // Haptic feedback for primary actions on mobile
       if (
@@ -47,24 +39,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         haptics.tap()
       }
 
-      if (withRipple && !disabled && !isLoading) {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-        const id = Date.now()
-
-        setRipples((prev) => [...prev, { x, y, id }])
-        setTimeout(() => {
-          setRipples((prev) => prev.filter((ripple) => ripple.id !== id))
-        }, 600)
-      }
-
       onClick?.(e)
     }
 
-    // iOS-style base with better animations
+    // iOS-style base
     const baseStyles =
-      'relative overflow-hidden inline-flex max-w-full items-center justify-center overflow-hidden text-center text-ellipsis whitespace-nowrap font-semibold rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed -webkit-tap-highlight-color-transparent transition-colors duration-200'
+      'relative overflow-hidden inline-flex max-w-full items-center justify-center text-center text-ellipsis whitespace-nowrap font-semibold rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed -webkit-tap-highlight-color-transparent transition-colors duration-200'
 
     const variants = {
       primary:
@@ -99,20 +79,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         transition={animations.spring.snappy}
         {...props}
       >
-        {/* Ripple effect */}
-        {ripples.map((ripple) => (
-          <span
-            key={ripple.id}
-            className="absolute rounded-full bg-white/30 animate-ripple pointer-events-none"
-            style={{
-              left: ripple.x,
-              top: ripple.y,
-              width: 0,
-              height: 0,
-            }}
-          />
-        ))}
-
         {isLoading ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />

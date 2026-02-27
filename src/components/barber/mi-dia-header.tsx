@@ -93,7 +93,7 @@ export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }:
           className="bg-blue-50 dark:bg-blue-950/30 rounded-xl px-3 py-2.5"
           data-testid="stat-pending"
         >
-          <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">Pendientes</p>
+          <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">Agendadas</p>
           <p className="text-2xl font-bold text-blue-900 dark:text-blue-300 mt-0.5">
             {activeAppointments}
           </p>

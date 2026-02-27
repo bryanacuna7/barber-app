@@ -47,6 +47,10 @@ interface BarberAppointmentCardProps {
   className?: string
 }
 
+type AppointmentWithTrackingToken = TodayAppointment & {
+  tracking_token?: string | null
+}
+
 /**
  * Live timer that shows elapsed time since started_at
  */
@@ -173,7 +177,7 @@ export function BarberAppointmentCard({
     if (minutesUntilNext <= 0 || minutesUntilNext > 60) return null
 
     // Build tracking URL if token available
-    const trackingToken = (nextAppointment as any).tracking_token
+    const trackingToken = (nextAppointment as AppointmentWithTrackingToken).tracking_token
     const trackingUrl = trackingToken
       ? `${typeof window !== 'undefined' ? window.location.origin : ''}/track/${trackingToken}`
       : undefined
@@ -192,7 +196,7 @@ export function BarberAppointmentCard({
     if (isFinalized || isInProgress) return null
     if (!appointment.client?.phone) return null
 
-    const trackingToken = (appointment as any).tracking_token
+    const trackingToken = (appointment as AppointmentWithTrackingToken).tracking_token
     const trackingUrl = trackingToken
       ? `${typeof window !== 'undefined' ? window.location.origin : ''}/track/${trackingToken}`
       : undefined
@@ -207,7 +211,7 @@ export function BarberAppointmentCard({
   })()
 
   const borderColor = {
-    pending: 'border-l-violet-500',
+    pending: 'border-l-blue-500',
     confirmed: 'border-l-blue-500',
     completed: 'border-l-emerald-500',
     cancelled: 'border-l-red-500',

@@ -47,7 +47,7 @@ export function AppointmentCard({
   const endTime = new Date(scheduledTime.getTime() + appointment.duration_minutes * 60000)
 
   const statusColors: Record<AppointmentStatus, string> = {
-    pending: 'border-l-violet-500',
+    pending: 'border-l-blue-500',
     confirmed: 'border-l-blue-500',
     completed: 'border-l-emerald-500',
     cancelled: 'border-l-red-500',
@@ -179,7 +179,7 @@ export function AppointmentCard({
               : appointment.status === 'confirmed'
                 ? 'bg-blue-500'
                 : appointment.status === 'pending'
-                  ? 'bg-violet-500'
+                  ? 'bg-blue-500'
                   : appointment.status === 'cancelled'
                     ? 'bg-red-500'
                     : 'bg-amber-500'

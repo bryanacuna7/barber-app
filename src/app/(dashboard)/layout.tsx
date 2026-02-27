@@ -18,6 +18,7 @@ import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
 import { LogoutButton } from '@/components/dashboard/logout-button'
+import { PageTransition } from '@/components/dashboard/page-transition'
 
 const manifestVersion =
   process.env.NEXT_PUBLIC_MANIFEST_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '1'
@@ -282,7 +283,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 }
               >
                 {roleInfo.isOwner && <TrialBanner />}
-                {isBarberDenied ? <AccessDenied /> : children}
+                <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
               </div>
             </main>
 

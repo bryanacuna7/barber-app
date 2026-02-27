@@ -155,7 +155,7 @@ function SidebarContent({
                       href={item.href}
                       onClick={onLinkClick}
                       className={cn(
-                        'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all',
+                        'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                         isActive
                           ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
                           : 'text-zinc-600 hover:bg-zinc-100/90 dark:text-zinc-400 dark:hover:bg-zinc-800/80'

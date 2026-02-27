@@ -426,7 +426,7 @@ export function MoreMenuDrawer({
   const sections = groupBySection(filteredItems)
 
   const handleLinkClick = () => {
-    setTimeout(() => onClose(), 200)
+    onClose()
   }
 
   const handleLogout = async () => {

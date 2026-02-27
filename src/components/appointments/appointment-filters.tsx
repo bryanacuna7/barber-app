@@ -14,7 +14,7 @@ interface AppointmentFiltersProps {
 
 const statusOptions: { value: AppointmentStatus | 'all'; label: string; color: string }[] = [
   { value: 'all', label: 'Todas', color: 'bg-zinc-500' },
-  { value: 'pending', label: 'Pendientes', color: 'bg-amber-500' },
+  { value: 'pending', label: 'Pendientes', color: 'bg-blue-500' },
   { value: 'confirmed', label: 'Confirmadas', color: 'bg-blue-500' },
   { value: 'completed', label: 'Listas', color: 'bg-green-500' },
   { value: 'cancelled', label: 'Canceladas', color: 'bg-red-500' },

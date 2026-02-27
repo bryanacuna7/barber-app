@@ -14,7 +14,6 @@ interface FABProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
 export function FAB({ icon, label, isLoading, className, ...props }: FABProps) {
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={cn(
         'fixed bottom-20 right-4 z-50',
@@ -23,7 +22,7 @@ export function FAB({ icon, label, isLoading, className, ...props }: FABProps) {
         'text-white dark:text-zinc-900',
         'shadow-lg shadow-zinc-900/20 dark:shadow-white/20',
         'font-semibold text-base',
-        'transition-all duration-200',
+        'transition-shadow duration-200',
         'hover:shadow-xl hover:shadow-zinc-900/30 dark:hover:shadow-white/30',
         isLoading && 'opacity-70 pointer-events-none',
         'lg:hidden', // Hide on desktop

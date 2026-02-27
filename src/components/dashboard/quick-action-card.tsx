@@ -22,7 +22,7 @@ export function QuickActionCard({
       <div
         className={cn(
           'flex flex-col items-center gap-2 rounded-2xl px-3 py-4 border-2',
-          'transition-all duration-200',
+          'transition-[background-color,border-color,box-shadow,transform] duration-200',
           'active:scale-[0.96]',
           'lg:hover:-translate-y-0.5 lg:hover:shadow-md',
           isWarning
@@ -32,7 +32,7 @@ export function QuickActionCard({
       >
         <div
           className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-xl transition-all',
+            'flex h-12 w-12 items-center justify-center rounded-xl transition-[background-color,box-shadow]',
             isWarning
               ? 'bg-amber-500 dark:bg-amber-600 group-hover:bg-amber-600 dark:group-hover:bg-amber-500'
               : 'lg:group-hover:shadow-md'

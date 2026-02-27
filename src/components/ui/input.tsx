@@ -39,7 +39,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputType = isPassword && showPassword ? 'text' : type
 
     const baseStyles =
-      'w-full px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:placeholder:text-zinc-500 transition-all duration-200 focus:outline-none shadow-sm'
+      'w-full px-4 py-3.5 text-base text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white dark:placeholder:text-zinc-500 transition-[background-color,box-shadow] duration-200 focus:outline-none shadow-sm'
 
     const variantStyles = {
       default:
