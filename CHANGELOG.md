@@ -4,6 +4,14 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.22] - 2026-02-27
+
+### Mejorado
+
+- Los iconos de servicios fueron reemplazados por alternativas mas representativas para barberia (afeitado, combo, diseno, toalla)
+- El formulario de nuevo cliente ahora se abre en un modal consistente con el resto de la app
+- El contenido de los modales se desplaza correctamente en dispositivos moviles
+
 ## [0.9.21] - 2026-02-27
 
 ### Mejorado

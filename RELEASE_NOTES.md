@@ -8,9 +8,10 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.21
+## v0.9.22
 
 ### Mejoras
 
-- Ahora puedes elegir un icono para cada servicio desde la pagina de Servicios — se muestra en el dashboard y en la pagina de reservas
-- Los iconos de servicios se ven consistentes en toda la aplicacion
+- Iconos de servicios mejorados — ahora representan mejor cada tipo de servicio (afeitado, combos, diseno, toalla caliente)
+- El formulario de nuevo cliente se abre de forma mas limpia y consistente
+- Los modales se desplazan correctamente en celulares
