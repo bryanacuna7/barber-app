@@ -26,6 +26,7 @@ interface BookingData {
 export function useBookingData(slug: string) {
   const searchParams = useSearchParams()
   const smartToken = searchParams.get('sn')
+  const [reloadKey, setReloadKey] = useState(0)
   const [business, setBusiness] = useState<Business | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [barbers, setBarbers] = useState<Barber[]>([])
@@ -65,6 +66,9 @@ export function useBookingData(slug: string) {
   // Fetch business, services, and barbers
   useEffect(() => {
     async function fetchData() {
+      setLoading(true)
+      setError('')
+
       try {
         const [businessRes, servicesRes, barbersRes] = await Promise.all([
           fetch(`/api/public/${slug}`, { cache: 'force-cache' }),
@@ -73,9 +77,15 @@ export function useBookingData(slug: string) {
         ])
 
         if (!businessRes.ok) {
+          setBusiness(null)
+          setServices([])
+          setBarbers([])
           setError('Negocio no encontrado')
-          setLoading(false)
           return
+        }
+
+        if (!servicesRes.ok || !barbersRes.ok) {
+          throw new Error('Error al cargar servicios o equipo')
         }
 
         const businessData = await businessRes.json()
@@ -86,14 +96,21 @@ export function useBookingData(slug: string) {
         setServices(Array.isArray(servicesData) ? servicesData : [])
         setBarbers(Array.isArray(barbersData) ? barbersData : [])
       } catch {
-        setError('Error al cargar la información')
+        setBusiness(null)
+        setServices([])
+        setBarbers([])
+        setError('Error al cargar la información. Intenta de nuevo.')
       } finally {
         setLoading(false)
       }
     }
 
     fetchData()
-  }, [slug])
+  }, [slug, reloadKey])
+
+  const retryInitialData = useCallback(() => {
+    setReloadKey((prev) => prev + 1)
+  }, [])
 
   // Extracted fetchSlots for reuse by initial load + auto-refresh
   const fetchSlots = useCallback(
@@ -319,6 +336,7 @@ export function useBookingData(slug: string) {
     setStep,
     setBooking,
     setError,
+    retryInitialData,
     // Handlers
     handleServiceSelect,
     handleBarberSelect,

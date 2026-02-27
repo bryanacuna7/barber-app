@@ -196,6 +196,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const operatingHours = business.operating_hours
     ? (business.operating_hours as unknown as OperatingHours)
     : ({} as OperatingHours)
+  const tz = business.timezone || 'America/Costa_Rica'
 
   const slots = calculateAvailableSlots({
     date,
@@ -205,12 +206,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     bufferMinutes: business.booking_buffer_minutes ?? 0,
     slotInterval,
     gapBased: !!business.smart_duration_enabled,
+    timezone: tz,
   })
 
   // Enrich slots with promotional discount info
   const promoRules: PromoRule[] = (business.promotional_slots as PromoRule[]) || []
   const servicePrice = service.price ?? 0
-  const tz = business.timezone || 'America/Costa_Rica'
 
   const enrichedSlots: EnrichedTimeSlot[] = slots.map((slot) => {
     if (!slot.available || promoRules.length === 0) {

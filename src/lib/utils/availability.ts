@@ -1,4 +1,5 @@
 import { addDays, format, setHours, setMinutes, isAfter, isBefore, startOfDay } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
 import type { OperatingHours } from '@/types'
 
 export interface TimeSlot {
@@ -30,6 +31,8 @@ interface AvailabilityParams {
   slotInterval?: number
   /** When true, use gap-based algorithm instead of fixed-interval. */
   gapBased?: boolean
+  /** Business timezone (e.g. 'America/Costa_Rica'). Required for correct past-slot filtering on server. */
+  timezone?: string
 }
 
 const dayMap: Record<number, keyof OperatingHours> = {
@@ -111,7 +114,8 @@ export function calculateAvailableSlots(params: AvailabilityParams): TimeSlot[] 
  * marks each as available/unavailable based on conflict detection.
  */
 function calculateIntervalBasedSlots(params: AvailabilityParams): TimeSlot[] {
-  const { date, operatingHours, existingAppointments, serviceDuration, bufferMinutes } = params
+  const { date, operatingHours, existingAppointments, serviceDuration, bufferMinutes, timezone } =
+    params
   const slotInterval = params.slotInterval ?? 30
 
   const dayOfWeek = date.getDay()
@@ -130,7 +134,9 @@ function calculateIntervalBasedSlots(params: AvailabilityParams): TimeSlot[] {
   const closeTime = parseTime(hours.close, dayStart)
 
   let currentTime = openTime
-  const now = new Date()
+  // Slot times are constructed in "wall-clock local" representation via parseTime.
+  // Convert real UTC now to the same representation so the past-check is correct.
+  const now = timezone ? toZonedTime(new Date(), timezone) : new Date()
 
   while (true) {
     const slotEnd = new Date(currentTime.getTime() + serviceDuration * 60000)
@@ -182,7 +188,8 @@ function calculateIntervalBasedSlots(params: AvailabilityParams): TimeSlot[] {
  * 5. Tail slot: captures remaining capacity at gap end that fixed-step would skip
  */
 function calculateGapBasedSlots(params: AvailabilityParams): TimeSlot[] {
-  const { date, operatingHours, existingAppointments, serviceDuration, bufferMinutes } = params
+  const { date, operatingHours, existingAppointments, serviceDuration, bufferMinutes, timezone } =
+    params
 
   const dayOfWeek = date.getDay()
   const dayKey = dayMap[dayOfWeek]
@@ -195,7 +202,8 @@ function calculateGapBasedSlots(params: AvailabilityParams): TimeSlot[] {
   const dayStart = startOfDay(date)
   const openTime = parseTime(hours.open, dayStart)
   const closeTime = parseTime(hours.close, dayStart)
-  const now = new Date()
+  // Slot times are in wall-clock local representation; align `now` to match.
+  const now = timezone ? toZonedTime(new Date(), timezone) : new Date()
 
   // 1. Build occupied windows with per-appointment buffer
   const occupied: { start: number; end: number }[] = []

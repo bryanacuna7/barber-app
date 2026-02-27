@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Scissors, AlertCircle, CalendarCheck, X } from 'lucide-react'
+import { AlertCircle, CalendarCheck, RotateCcw, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useBookingData } from '@/hooks/useBookingData'
 import { BookingHeader } from '@/components/reservar/BookingHeader'
@@ -12,6 +13,7 @@ import { ServiceSelection } from '@/components/reservar/ServiceSelection'
 import { BarberSelection } from '@/components/reservar/BarberSelection'
 import { DateTimeSelection } from '@/components/reservar/DateTimeSelection'
 import { ClientInfoForm } from '@/components/reservar/ClientInfoForm'
+import { BookingLoadingState } from '@/components/reservar/booking-loading-state'
 import { InstallAppCta } from '@/components/pwa/install-app-cta'
 import { ClientStatusCard, ClientStatusCardSkeleton } from '@/components/loyalty/client-status-card'
 import { LoyaltyUpsellBanner } from '@/components/loyalty/loyalty-upsell-banner'
@@ -21,8 +23,6 @@ import {
   hexToRgbValues,
   lightenColor,
   darkenColor,
-  getLuminance,
-  getContrastRatio,
   getContrastingTextColor,
   getReadableBrandColor,
 } from '@/lib/utils/color'
@@ -56,7 +56,7 @@ export default function BookingPage() {
     slotMeta,
     setStep,
     setBooking,
-    setError,
+    retryInitialData,
     handleServiceSelect,
     handleBarberSelect,
     handleDateSelect,
@@ -71,6 +71,7 @@ export default function BookingPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [showDashboardBanner, setShowDashboardBanner] = useState(true)
+  const [showSlowLoadingHint, setShowSlowLoadingHint] = useState(false)
 
   // Load loyalty status for authenticated user
   useEffect(() => {
@@ -205,7 +206,7 @@ export default function BookingPage() {
     }
 
     loadLoyaltyStatus()
-  }, [business?.id])
+  }, [business?.id, setBooking])
 
   // Apply brand theme to :root (same logic as ThemeProvider)
   useEffect(() => {
@@ -225,20 +226,26 @@ export default function BookingPage() {
     root.style.setProperty('--brand-primary-on-dark', getReadableBrandColor(primaryColor, true))
   }, [business?.brand_primary_color, business?.brand_secondary_color])
 
+  useEffect(() => {
+    if (!loading) {
+      setShowSlowLoadingHint(false)
+      return
+    }
+
+    setShowSlowLoadingHint(false)
+    const timer = window.setTimeout(() => {
+      setShowSlowLoadingHint(true)
+    }, 8000)
+
+    return () => window.clearTimeout(timer)
+  }, [loading])
+
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-[#0B0D14]">
-        <div className="text-center ios-spring-in">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-[22px] bg-gradient-to-br from-zinc-800 to-zinc-900 shadow-2xl dark:from-zinc-100 dark:to-zinc-200">
-            <Scissors className="h-10 w-10 text-white dark:text-zinc-900 animate-pulse" />
-          </div>
-          <p className="mt-5 text-[15px] font-medium text-muted">Cargando...</p>
-        </div>
-      </div>
-    )
+    return <BookingLoadingState showSlowHint={showSlowLoadingHint} />
   }
 
   if (error && !business) {
+    const isNotFound = error === 'Negocio no encontrado'
     return (
       <div className="flex min-h-screen items-center justify-center p-4 bg-zinc-50 dark:bg-[#0B0D14]">
         <Card className="w-full max-w-md text-center">
@@ -247,7 +254,17 @@ export default function BookingPage() {
               <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
             <h2 className="mt-4 text-xl font-bold text-zinc-900 dark:text-white">{error}</h2>
-            <p className="mt-2 text-zinc-500">Verifica la dirección e intenta de nuevo.</p>
+            <p className="mt-2 text-zinc-500">
+              {isNotFound
+                ? 'Verifica la dirección del enlace e intenta de nuevo.'
+                : 'Revisa tu conexión e intenta de nuevo.'}
+            </p>
+            <div className="mt-5 flex justify-center">
+              <Button type="button" variant="outline" onClick={retryInitialData} className="gap-2">
+                <RotateCcw className="h-4 w-4" />
+                Reintentar
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -260,6 +277,7 @@ export default function BookingPage() {
         service={booking.service}
         date={booking.date}
         time={booking.time?.time || null}
+        appointmentDateTime={booking.time?.datetime || null}
         business={business}
         clientId={createdClientId}
         claimToken={claimToken}

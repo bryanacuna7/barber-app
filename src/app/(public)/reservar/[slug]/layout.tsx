@@ -24,13 +24,35 @@ export async function generateMetadata({ params }: BookingSlugLayoutProps): Prom
     return {}
   }
 
+  const businessName = business.name.trim()
+  if (!businessName) {
+    return {}
+  }
+  const bookingDescription = `Reserva tu cita en ${businessName}`
+
   return {
-    applicationName: business.name,
+    title: {
+      absolute: businessName,
+    },
+    description: bookingDescription,
+    applicationName: businessName,
     manifest: `/api/public/${encodeURIComponent(business.slug)}/manifest?v=${manifestVersion}`,
     appleWebApp: {
       capable: true,
       statusBarStyle: 'black-translucent',
-      title: business.name,
+      title: businessName,
+    },
+    openGraph: {
+      title: businessName,
+      description: bookingDescription,
+      type: 'website',
+      locale: 'es_CR',
+      url: `/reservar/${business.slug}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: businessName,
+      description: bookingDescription,
     },
   }
 }
