@@ -4,6 +4,18 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.23] - 2026-02-27
+
+### Nuevo
+
+- Los administradores pueden eliminar un negocio inactivo de forma permanente, con confirmacion por nombre para evitar errores
+- Panel de admin renombrado a "Admin" para mayor claridad
+
+### Mejorado
+
+- El dashboard ahora muestra citas e ingresos del dia juntos en una tarjeta destacada, con ingresos del mes y clientes al lado
+- Los precios de servicios en el panel admin se muestran en formato de moneda (₡)
+
 ## [0.9.22] - 2026-02-27
 
 ### Mejorado

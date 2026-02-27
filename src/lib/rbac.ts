@@ -90,7 +90,6 @@ export async function hasPermission(
   permission: Permission
 ): Promise<boolean> {
   try {
-    // @ts-expect-error - user_has_permission is a new RPC function not yet in generated types
     const { data, error } = await supabase.rpc('user_has_permission', {
       p_user_id: userId,
       p_permission_name: permission,
@@ -198,7 +197,6 @@ export async function getUserPermissions(
   userId: string
 ): Promise<PermissionWithMetadata[]> {
   try {
-    // @ts-expect-error - get_user_permissions is a new RPC function not yet in generated types
     const { data, error } = await supabase.rpc('get_user_permissions', {
       p_user_id: userId,
     })
@@ -235,7 +233,6 @@ export async function getUserRole(
   userId: string
 ): Promise<Role | null> {
   try {
-    // @ts-expect-error - get_user_role is a new RPC function not yet in generated types
     const { data, error } = await supabase.rpc('get_user_role', {
       p_user_id: userId,
     })

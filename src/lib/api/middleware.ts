@@ -14,6 +14,7 @@ export type AuthContext = {
     id: string
     owner_id: string
     name?: string
+    slug?: string | null
     timezone?: string | null
     operating_hours?: unknown
     smart_duration_enabled?: boolean | null

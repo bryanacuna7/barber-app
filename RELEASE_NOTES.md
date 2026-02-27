@@ -8,10 +8,14 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.22
+## v0.9.23
+
+### Nuevo
+
+- Los administradores pueden eliminar un negocio inactivo de forma permanente, con confirmacion por nombre para evitar errores
+- Panel de admin renombrado para mayor claridad
 
 ### Mejoras
 
-- Iconos de servicios mejorados — ahora representan mejor cada tipo de servicio (afeitado, combos, diseno, toalla caliente)
-- El formulario de nuevo cliente se abre de forma mas limpia y consistente
-- Los modales se desplazan correctamente en celulares
+- El dashboard ahora muestra citas e ingresos del dia juntos en una tarjeta destacada
+- Los precios de servicios en el panel admin se muestran en formato de moneda (₡)
