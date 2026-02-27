@@ -2,6 +2,7 @@
 
 import { type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { compactCurrencyForMobile } from '@/lib/utils/format'
 import { AnimatedNumber } from '@/components/ui/motion'
 
 interface StatsCardProps {
@@ -14,6 +15,10 @@ interface StatsCardProps {
     isPositive: boolean
   }
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'info'
+  /** Override font classes for the value display */
+  valueClassName?: string
+  /** Override font classes for the title label */
+  titleClassName?: string
 }
 
 const variants = {
@@ -54,27 +59,6 @@ const variants = {
   },
 }
 
-function compactCurrencyForMobile(value: string): string | null {
-  const trimmed = value.trim()
-  if (!trimmed.startsWith('₡')) return null
-  if (/[kKmM]|mil/.test(trimmed)) return trimmed
-
-  const numericPart = trimmed.replace(/[^\d-]/g, '')
-  if (!numericPart) return null
-
-  const amount = Number(numericPart)
-  if (!Number.isFinite(amount)) return null
-  if (Math.abs(amount) < 1_000) return trimmed
-
-  const compact = new Intl.NumberFormat('es-CR', {
-    notation: 'compact',
-    compactDisplay: 'short',
-    maximumFractionDigits: 1,
-  }).format(amount)
-
-  return `₡${compact}`
-}
-
 export function StatsCard({
   title,
   value,
@@ -82,6 +66,8 @@ export function StatsCard({
   description,
   trend,
   variant = 'default',
+  valueClassName,
+  titleClassName,
 }: StatsCardProps) {
   const styles = variants[variant]
   const isGradient = styles.gradient
@@ -119,7 +105,8 @@ export function StatsCard({
           <p
             className={cn(
               'text-[11px] sm:text-sm font-medium uppercase tracking-[0.08em] sm:tracking-wide leading-tight',
-              isGradient ? 'text-white/80' : 'text-muted'
+              isGradient ? 'text-white/80' : 'text-muted',
+              titleClassName
             )}
           >
             {title}
@@ -128,15 +115,16 @@ export function StatsCard({
           <p
             className={cn(
               'mt-1.5 font-bold tracking-tight leading-[1.05] whitespace-nowrap tabular-nums',
-              hasVeryLongValue
-                ? 'text-[16px] sm:text-[28px]'
-                : hasLongValue
-                  ? isCurrencyValue
-                    ? 'text-[17px] sm:text-[30px]'
-                    : 'text-[22px] sm:text-[30px]'
-                  : isCurrencyValue
-                    ? 'text-[19px] sm:text-[32px]'
-                    : 'text-[26px] sm:text-[32px]',
+              valueClassName ??
+                (hasVeryLongValue
+                  ? 'text-[16px] sm:text-[28px]'
+                  : hasLongValue
+                    ? isCurrencyValue
+                      ? 'text-[17px] sm:text-[30px]'
+                      : 'text-[22px] sm:text-[30px]'
+                    : isCurrencyValue
+                      ? 'text-[19px] sm:text-[32px]'
+                      : 'text-[26px] sm:text-[32px]'),
               isGradient ? 'text-white' : 'text-zinc-900 dark:text-white'
             )}
           >

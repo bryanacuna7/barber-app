@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberApp 2026 — Dashboard Bento</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    background: #0d0b09;
+    color: #f5efe8;
+    min-height: 100vh;
+    padding: 16px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* Tokens */
+  :root {
+    --bg: #0d0b09;
+    --s0: #13100d;
+    --s1: #1a1613;
+    --s2: #231e19;
+    --b-sub: rgba(201,160,110,0.08);
+    --b-med: rgba(201,160,110,0.14);
+    --t1: #f5efe8;
+    --t2: #b0a294;
+    --t3: #7a6e62;
+    --copper: #C87941;
+    --copper-soft: rgba(200,121,65,0.12);
+    --gold: #D4A853;
+    --cream: #F5E6D3;
+    --success: #4ade80;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .header { padding: 12px 0 24px; }
+  .header-row { display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 15px; font-weight: 700; color: var(--copper); letter-spacing: -0.3px; }
+  .greeting { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-top: 20px; }
+  .greeting-sub { font-size: 14px; color: var(--t3); margin-top: 2px; }
+  .notif-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--s1); border: 1px solid var(--b-sub);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--t2); font-size: 18px;
+  }
+
+  /* Bento Grid */
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .bento-card {
+    background: var(--s1);
+    border: 1px solid var(--b-sub);
+    border-radius: 18px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .bento-card:hover { border-color: var(--b-med); }
+
+  /* Hero card spans full width */
+  .bento-hero {
+    grid-column: 1 / -1;
+    background: var(--s1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+  }
+  .bento-hero .metric {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    font-feature-settings: 'tnum';
+  }
+  .bento-hero .label {
+    font-size: 13px;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .bento-hero .sub {
+    font-size: 14px;
+    color: var(--t2);
+    margin-top: 4px;
+  }
+  .bento-hero .right-metric {
+    text-align: right;
+  }
+  .bento-hero .right-metric .metric {
+    font-size: 56px;
+    color: var(--gold);
+  }
+
+  /* Small cards */
+  .bento-sm .label {
+    font-size: 11px;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  .bento-sm .metric {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    font-feature-settings: 'tnum';
+  }
+  .bento-sm .sub {
+    font-size: 13px;
+    color: var(--t3);
+    margin-top: 6px;
+  }
+
+  /* Copper glow accent on money card */
+  .glow-copper::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(200,121,65,0.15), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Barber stripe signature */
+  .barber-stripe {
+    height: 3px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--copper) 0px, var(--copper) 8px,
+      transparent 8px, transparent 12px,
+      var(--t1) 12px, var(--t1) 20px,
+      transparent 20px, transparent 24px,
+      #3b82f6 24px, #3b82f6 32px,
+      transparent 32px, transparent 36px
+    );
+    border-radius: 2px;
+    opacity: 0.6;
+    margin: 20px 0;
+  }
+
+  /* Share link section */
+  .share-section {
+    background: var(--s1);
+    border: 1px solid var(--b-sub);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .share-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .share-sub { font-size: 13px; color: var(--t3); margin-bottom: 14px; }
+  .share-url {
+    background: var(--s0);
+    border: 1px solid var(--b-sub);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--t2);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .share-actions { display: flex; gap: 8px; }
+  .btn-outline {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: 1px solid var(--b-med);
+    background: transparent;
+    color: var(--t1);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn-copper {
+    flex: 1;
+    padding: 11px;
+    border-radius: 12px;
+    border: none;
+    background: var(--copper);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  /* Inline hint (replaces blue banner) */
+  .inline-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--copper-soft);
+    border: 1px solid rgba(200,121,65,0.12);
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+  .hint-icon {
+    width: 20px; height: 20px;
+    color: var(--copper);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .hint-text { font-size: 13px; color: var(--t2); line-height: 1.5; }
+  .hint-text a { color: var(--copper); text-decoration: none; font-weight: 500; }
+  .hint-dismiss {
+    color: var(--t3); background: none; border: none;
+    font-size: 16px; cursor: pointer; margin-left: auto; flex-shrink: 0;
+  }
+
+  /* Appointments preview */
+  .appt-section { margin-bottom: 20px; }
+  .appt-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .appt-title { font-size: 17px; font-weight: 700; }
+  .appt-link { font-size: 13px; color: var(--copper); text-decoration: none; }
+  .appt-card {
+    background: var(--s1);
+    border: 1px solid var(--b-sub);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .appt-card:hover { border-color: var(--b-med); }
+  .appt-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--copper);
+    min-width: 52px;
+  }
+  .appt-info { flex: 1; }
+  .appt-name { font-size: 15px; font-weight: 600; }
+  .appt-service { font-size: 13px; color: var(--t3); }
+  .appt-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    font-feature-settings: 'tnum';
+  }
+  .appt-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 420px;
+    background: rgba(13,11,9,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--b-sub);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 28px;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 10px; color: var(--t3);
+    padding: 4px 12px;
+  }
+  .nav-item.active { color: var(--copper); }
+  .nav-icon { font-size: 22px; }
+  .nav-plus {
+    width: 44px; height: 44px;
+    background: var(--copper);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #fff; font-weight: 300;
+    margin-top: -12px;
+    box-shadow: 0 4px 16px rgba(200,121,65,0.35);
+  }
+
+  /* Label for mockup */
+  .mockup-label {
+    position: fixed; top: 12px; right: 12px;
+    background: var(--copper);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 10000;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-label">MOCKUP</div>
+
+<div class="header">
+  <div class="header-row">
+    <span class="logo">✂ BarberApp</span>
+    <div class="notif-btn">🔔</div>
+  </div>
+  <h1 class="greeting">Buenas tardes</h1>
+  <p class="greeting-sub">Bienvenido a BarberApp</p>
+</div>
+
+<!-- Inline hint (replacing blue banner) -->
+<div class="inline-hint">
+  <span class="hint-icon">💡</span>
+  <span class="hint-text">Primera vez? <a href="#">Revisa la guia</a> para configurar tu barberia.</span>
+  <button class="hint-dismiss">×</button>
+</div>
+
+<!-- Bento Grid Stats -->
+<div class="bento">
+  <!-- Hero: Citas + Ingresos -->
+  <div class="bento-card bento-hero">
+    <div>
+      <p class="label">Citas hoy</p>
+      <p class="metric">20</p>
+      <p class="sub">programadas</p>
+    </div>
+    <div class="right-metric">
+      <p class="label">Ingresos hoy</p>
+      <p class="metric">₡0</p>
+      <p class="sub">generados</p>
+    </div>
+  </div>
+
+  <!-- Small: Ingresos Mes -->
+  <div class="bento-card bento-sm glow-copper">
+    <p class="label">Ingresos mes</p>
+    <p class="metric" style="color: var(--gold);">₡496k</p>
+    <p class="sub">272 citas</p>
+  </div>
+
+  <!-- Small: Clientes -->
+  <div class="bento-card bento-sm">
+    <p class="label">Clientes</p>
+    <p class="metric">62</p>
+    <p class="sub">registrados</p>
+  </div>
+</div>
+
+<!-- Barber stripe signature -->
+<div class="barber-stripe"></div>
+
+<!-- Share Link -->
+<div class="share-section">
+  <p class="share-title">Comparte tu Link de Reservas</p>
+  <p class="share-sub">Tus clientes pueden reservar 24/7</p>
+  <div class="share-url">
+    <span>/reservar/barbershop-pro...</span>
+    <span style="color: var(--copper);">📋</span>
+  </div>
+  <div class="share-actions">
+    <button class="btn-outline">Copiar</button>
+    <button class="btn-copper">WhatsApp</button>
+  </div>
+</div>
+
+<!-- Appointments Preview -->
+<div class="appt-section">
+  <div class="appt-header">
+    <span class="appt-title">Proximas Citas</span>
+    <a href="#" class="appt-link">Ver todo →</a>
+  </div>
+  <div class="appt-card">
+    <div class="appt-dot"></div>
+    <span class="appt-time">7:25 AM</span>
+    <div class="appt-info">
+      <p class="appt-name">Pablo</p>
+      <p class="appt-service">mohak</p>
+    </div>
+    <span class="appt-price">₡50,000</span>
+  </div>
+  <div class="appt-card">
+    <div class="appt-dot"></div>
+    <span class="appt-time">9:00 AM</span>
+    <div class="appt-info">
+      <p class="appt-name">Maria Lopez</p>
+      <p class="appt-service">Corte + Barba</p>
+    </div>
+    <span class="appt-price">₡7,000</span>
+  </div>
+  <div class="appt-card">
+    <div class="appt-dot"></div>
+    <span class="appt-time">10:20 AM</span>
+    <div class="appt-info">
+      <p class="appt-name">Carlos R.</p>
+      <p class="appt-service">Corte Clasico</p>
+    </div>
+    <span class="appt-price">₡5,000</span>
+  </div>
+</div>
+
+<div style="height: 100px;"></div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item active">
+    <span class="nav-icon">📊</span>
+    <span>Dashboard</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">👥</span>
+    <span>Clientes</span>
+  </div>
+  <div class="nav-item">
+    <div class="nav-plus">+</div>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">📅</span>
+    <span>Mi Dia</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">⋯</span>
+    <span>Mas</span>
+  </div>
+</div>
+
+</body>
+</html>

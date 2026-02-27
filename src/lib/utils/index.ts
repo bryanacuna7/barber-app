@@ -7,5 +7,6 @@ export {
   formatCurrency,
   formatCurrencyCompactMillions,
   formatCurrencyCompact,
+  compactCurrencyForMobile,
   formatPhone,
 } from './format'

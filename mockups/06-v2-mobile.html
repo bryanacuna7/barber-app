@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberApp V2 — Mobile Compare</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#111;color:#fff;padding:20px}
+.compare{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.side{width:375px;flex-shrink:0}
+.tag{text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:2px;padding:8px;margin-bottom:12px;border-radius:8px}
+.tag-cur{background:#7f1d1d;color:#fca5a5}
+.tag-new{background:#14532d;color:#86efac}
+.phone{background:#0a0a0a;border-radius:20px;border:1px solid #222;overflow:hidden;padding-bottom:20px}
+
+/* Shared */
+.hdr{padding:16px 20px 0}
+.logo{font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.logo .bell{width:36px;height:36px;background:#18181b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#71717a}
+.greet{font-size:26px;font-weight:800;margin-top:16px;letter-spacing:-0.3px}
+.greet-sub{font-size:14px;color:#71717a;margin-top:2px}
+
+/* Current banner */
+.banner{margin:14px 20px;padding:14px 16px;background:#172554;border:1px solid #1e3a5f;border-radius:14px;font-size:13px;color:#93c5fd;line-height:1.5}
+.banner b{color:#bfdbfe;display:block;margin-bottom:4px;font-size:14px}
+.banner a{color:#60a5fa}
+
+/* Current 4-grid stats */
+.stats4{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 12px}
+.s4{border-radius:16px;padding:16px;position:relative;overflow:hidden}
+.s4 .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.7);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.s4 .lbl .ico{width:28px;height:28px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.s4 .num{font-size:28px;font-weight:800}
+.s4 .sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.grad1{background:linear-gradient(135deg,#065f46,#0d9488);color:#fff}
+.grad2{background:linear-gradient(135deg,#064e3b,#059669);color:#fff}
+.flat{background:#18181b;border:1px solid #27272a}
+.flat .lbl{color:#52525b}
+.flat .num{color:#e4e4e7}
+.flat .sub{color:#52525b}
+
+/* NEW: Bento with SAME gradients */
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 12px}
+.bc{border-radius:18px;padding:20px;position:relative;overflow:hidden}
+.bc .lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.65);margin-bottom:10px}
+.bc .num{font-weight:800;line-height:1;font-feature-settings:'tnum';letter-spacing:-1.5px}
+.bc .sub{font-size:13px;color:rgba(255,255,255,.5);margin-top:5px}
+.hero{grid-column:1/-1;display:flex;justify-content:space-between;align-items:flex-end;background:linear-gradient(135deg,#065f46,#0d9488);padding:24px}
+.hero .num{font-size:52px}
+.hero .right{text-align:right}
+.sm-grad{background:linear-gradient(135deg,#064e3b,#059669)}
+.sm-grad .num{font-size:34px}
+.sm-flat{background:#18181b;border:1px solid #27272a}
+.sm-flat .lbl{color:#52525b}
+.sm-flat .num{font-size:34px;color:#e4e4e7}
+.sm-flat .sub{color:#52525b}
+
+/* Inline hint (new) */
+.hint{margin:14px 20px;padding:12px 16px;background:rgba(109,124,255,.07);border:1px solid rgba(109,124,255,.1);border-radius:12px;font-size:13px;color:#a1a1aa;display:flex;align-items:center;gap:10px}
+.hint a{color:#818cf8;text-decoration:none;font-weight:500}
+.hint .x{margin-left:auto;color:#52525b;cursor:pointer}
+
+/* Divider */
+.divider{height:1px;margin:4px 20px 14px;background:linear-gradient(90deg,rgba(109,124,255,.25),transparent 50%)}
+
+/* Share */
+.share{margin:0 20px 14px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:18px}
+.share-t{font-size:15px;font-weight:600;margin-bottom:3px}
+.share-s{font-size:13px;color:#52525b;margin-bottom:12px}
+.share-url{background:#0f0f11;border:1px solid #27272a;border-radius:10px;padding:10px 12px;font-size:13px;color:#71717a;margin-bottom:10px}
+.share-btns{display:flex;gap:8px}
+.btn-o{flex:1;padding:10px;border-radius:10px;border:1px solid #333;background:transparent;color:#e4e4e7;font-size:13px;text-align:center}
+.btn-g{flex:1;padding:10px;border-radius:10px;border:none;background:#22c55e;color:#fff;font-size:13px;font-weight:600;text-align:center}
+
+/* Appts */
+.appts{padding:0 20px}
+.appts-hdr{display:flex;justify-content:space-between;margin-bottom:10px}
+.appts-t{font-size:17px;font-weight:700}
+.appts-l{font-size:13px;color:#818cf8}
+.apt{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.apt-name{font-size:15px;font-weight:600}
+.apt-svc{font-size:13px;color:#52525b}
+.apt-price{margin-left:auto;font-size:15px;font-weight:700;color:#4ade80;font-feature-settings:'tnum'}
+
+h1{text-align:center;font-size:20px;margin-bottom:4px}
+.psub{text-align:center;font-size:13px;color:#71717a;margin-bottom:24px}
+
+/* Status bar for new appt cards */
+.sbar{width:3px;height:32px;border-radius:2px;background:#818cf8;flex-shrink:0}
+.apt-time{font-size:13px;font-weight:600;color:#818cf8;min-width:52px}
+</style>
+</head>
+<body>
+<h1>Dashboard Mobile — V2 Compare</h1>
+<p class="psub">Mismos colores y gradientes. Nuevo layout bento + tipografia.</p>
+<div class="compare">
+
+<!-- CURRENT -->
+<div class="side">
+<div class="tag tag-cur">CURRENT</div>
+<div class="phone">
+<div class="hdr">
+<div class="logo"><span>✂ BarberApp</span><div class="bell">🔔</div></div>
+<h2 class="greet">Buenas tardes</h2>
+<p class="greet-sub">Bienvenido a BarberApp</p>
+</div>
+<div class="banner"><b>Bienvenido a tu dashboard</b>Primera vez usando la app? Revisa la guia completa para gestionar tu barberia.<br><a href="#">Ver en la guia →</a></div>
+<div class="stats4">
+<div class="s4 grad1"><div class="lbl">Citas hoy <span class="ico">📅</span></div><div class="num">20</div><div class="sub">programadas</div></div>
+<div class="s4 grad2"><div class="lbl">Ingresos hoy <span class="ico">💰</span></div><div class="num">₡0</div><div class="sub">generados</div></div>
+<div class="s4 flat"><div class="lbl">Ingresos mes</div><div class="num">₡496k</div><div class="sub">272 citas</div></div>
+<div class="s4 flat"><div class="lbl">Clientes</div><div class="num">62</div><div class="sub">registrados</div></div>
+</div>
+<div class="appts">
+<div class="apt"><div class="dot"></div><div><div class="apt-name">Pablo</div><div class="apt-svc">mohak</div></div><div class="apt-price">₡50,000</div></div>
+<div class="apt"><div class="dot"></div><div><div class="apt-name">Maria Lopez</div><div class="apt-svc">Corte + Barba</div></div><div class="apt-price">₡7,000</div></div>
+</div>
+</div>
+</div>
+
+<!-- PROPOSED V2 -->
+<div class="side">
+<div class="tag tag-new">PROPOSED V2</div>
+<div class="phone">
+<div class="hdr">
+<div class="logo"><span>✂ BarberApp</span><div class="bell">🔔</div></div>
+<h2 class="greet">Buenas tardes</h2>
+<p class="greet-sub">Bienvenido a BarberApp</p>
+</div>
+<div class="hint">💡 Primera vez? <a href="#">Ver guia</a><span class="x">×</span></div>
+<div class="bento">
+<div class="bc hero">
+<div><div class="lbl">Citas hoy</div><div class="num">20</div><div class="sub">programadas</div></div>
+<div class="right"><div class="lbl">Ingresos hoy</div><div class="num">₡0</div><div class="sub">generados</div></div>
+</div>
+<div class="bc sm-grad">
+<div class="lbl">Ingresos mes</div><div class="num">₡496k</div><div class="sub">272 citas</div>
+</div>
+<div class="bc sm-flat">
+<div class="lbl">Clientes</div><div class="num">62</div><div class="sub">registrados</div>
+</div>
+</div>
+<div class="divider"></div>
+<div style="padding:0 20px">
+<div class="appts-hdr"><span class="appts-t">Proximas Citas</span><span class="appts-l">Ver todo →</span></div>
+</div>
+<div style="padding:0 20px">
+<div class="apt"><div class="sbar"></div><span class="apt-time">7:25 AM</span><div><div class="apt-name">Pablo</div><div class="apt-svc">mohak</div></div><div class="apt-price">₡50,000</div></div>
+<div class="apt"><div class="sbar"></div><span class="apt-time">9:00 AM</span><div><div class="apt-name">Maria Lopez</div><div class="apt-svc">Corte + Barba</div></div><div class="apt-price">₡7,000</div></div>
+</div>
+</div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberApp — Current vs 2026 (Desktop)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #111; color: #fff; padding: 20px; }
+  .compare { display: flex; gap: 24px; justify-content: center; }
+  .side { width: 720px; flex-shrink: 0; }
+  .side-label {
+    text-align: center; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 2px; padding: 8px; margin-bottom: 12px; border-radius: 8px;
+  }
+  .label-current { background: #7f1d1d; color: #fca5a5; }
+  .label-new { background: #14532d; color: #86efac; }
+
+  /* CURRENT DESKTOP */
+  .cur-desk {
+    background: #0a0a0a; border-radius: 16px; border: 1px solid #222;
+    display: flex; overflow: hidden; height: 520px;
+  }
+  .cur-sidebar {
+    width: 180px; background: #09090b; border-right: 1px solid #1a1a1a;
+    padding: 16px 12px; flex-shrink: 0;
+  }
+  .cur-sidebar .nav-item {
+    padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #71717a;
+    margin-bottom: 2px; display: flex; align-items: center; gap: 8px;
+  }
+  .cur-sidebar .nav-item.active { background: #18181b; color: #fff; }
+  .cur-sidebar .nav-group { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #3f3f46; margin: 12px 12px 6px; }
+  .cur-main { flex: 1; padding: 24px; overflow: hidden; }
+  .cur-main h2 { font-size: 24px; font-weight: 800; }
+  .cur-main .sub { font-size: 14px; color: #71717a; margin-bottom: 16px; }
+  .cur-desk-banner {
+    padding: 14px 18px; background: #172554; border: 1px solid #1e3a5f;
+    border-radius: 12px; font-size: 13px; color: #93c5fd; margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .cur-desk-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .cds { border-radius: 14px; padding: 16px; }
+  .cds-grad1 { background: linear-gradient(135deg, #065f46, #0d9488); color: #fff; }
+  .cds-grad2 { background: linear-gradient(135deg, #064e3b, #059669); color: #fff; }
+  .cds-flat { background: #18181b; border: 1px solid #27272a; }
+  .cds .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
+  .cds-flat .lbl { color: #52525b; }
+  .cds .num { font-size: 24px; font-weight: 800; }
+  .cds-flat .num { color: #e4e4e7; }
+
+  /* NEW DESKTOP */
+  .new-desk {
+    background: #0a0a0a; border-radius: 16px; border: 1px solid #222;
+    display: flex; overflow: hidden; height: 520px;
+  }
+  .new-sidebar {
+    width: 200px; background: #09090b; border-right: 1px solid rgba(255,255,255,0.04);
+    padding: 16px 12px; flex-shrink: 0;
+  }
+  .new-sidebar .nav-item {
+    padding: 9px 12px; border-radius: 10px; font-size: 13px; color: #71717a;
+    margin-bottom: 2px; display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s;
+  }
+  .new-sidebar .nav-item.active { background: rgba(109,124,255,0.1); color: #fff; }
+  .new-sidebar .nav-item .icon { width: 18px; text-align: center; font-size: 14px; }
+  .new-sidebar .nav-group {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #3f3f46; margin: 16px 12px 8px;
+  }
+  .new-main { flex: 1; padding: 28px 32px; overflow: hidden; }
+  .new-main h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .new-main .sub { font-size: 14px; color: #52525b; margin-bottom: 20px; }
+
+  /* Inline hint */
+  .desk-hint {
+    padding: 10px 16px; background: rgba(109,124,255,0.06);
+    border: 1px solid rgba(109,124,255,0.1); border-radius: 10px;
+    font-size: 13px; color: #a1a1aa; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .desk-hint a { color: #6d7cff; text-decoration: none; }
+  .desk-hint .x { margin-left: auto; color: #3f3f46; cursor: pointer; }
+
+  /* Bento desktop */
+  .desk-bento {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 12px; margin-bottom: 16px;
+  }
+  .db-card {
+    background: #111113; border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px; padding: 20px 22px;
+  }
+  .db-card .lbl {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #52525b; margin-bottom: 8px;
+  }
+  .db-card .num {
+    font-size: 40px; font-weight: 800; letter-spacing: -1.5px;
+    line-height: 1; font-feature-settings: 'tnum';
+  }
+  .db-card .sub { font-size: 13px; color: #3f3f46; margin-top: 4px; }
+  .db-hero {
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .db-hero .num { font-size: 48px; }
+  .num-green { color: #4ade80; }
+
+  /* Divider */
+  .desk-divider {
+    height: 1px; background: linear-gradient(90deg, #6d7cff, transparent 40%);
+    opacity: 0.2; margin-bottom: 16px;
+  }
+
+  /* Appt list desktop */
+  .desk-appt-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .desk-appt-title { font-size: 16px; font-weight: 700; }
+  .desk-appt-link { font-size: 13px; color: #6d7cff; }
+  .desk-appt-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; background: #111113;
+    border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;
+    margin-bottom: 6px;
+  }
+  .dar-status { width: 3px; height: 28px; border-radius: 2px; background: #6d7cff; }
+  .dar-time { font-size: 13px; font-weight: 600; color: #6d7cff; min-width: 60px; }
+  .dar-info { flex: 1; }
+  .dar-name { font-size: 14px; font-weight: 600; }
+  .dar-svc { font-size: 12px; color: #52525b; }
+  .dar-price { font-size: 14px; font-weight: 700; color: #4ade80; }
+
+  h1 { text-align: center; font-size: 20px; margin-bottom: 4px; }
+  .page-sub { text-align: center; font-size: 13px; color: #71717a; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<h1>Dashboard — Desktop Compare</h1>
+<p class="page-sub">Mismo esquema de colores. Nuevo layout, tipografia, y estructura.</p>
+
+<div class="compare">
+
+<!-- CURRENT DESKTOP -->
+<div class="side">
+  <div class="side-label label-current">CURRENT</div>
+  <div class="cur-desk">
+    <div class="cur-sidebar">
+      <div style="font-size:14px;font-weight:700;padding:8px 12px;margin-bottom:8px;">✂ BarberApp</div>
+      <div class="nav-group">Operacion</div>
+      <div class="nav-item active">📊 Dashboard</div>
+      <div class="nav-item">📅 Citas</div>
+      <div class="nav-item">☀️ Mi Dia</div>
+      <div class="nav-item">💇 Servicios</div>
+      <div class="nav-group">Gestion</div>
+      <div class="nav-item">👥 Equipo</div>
+      <div class="nav-item">🧑‍🤝‍🧑 Clientes</div>
+      <div class="nav-group">Crecimiento</div>
+      <div class="nav-item">📈 Analiticas</div>
+    </div>
+    <div class="cur-main">
+      <h2>Buenas tardes</h2>
+      <div class="sub">Bienvenido a BarberApp</div>
+      <div class="cur-desk-banner">
+        <b style="color:#bfdbfe;margin-bottom:4px;display:block;">Bienvenido a tu dashboard</b>
+        Primera vez usando la app? Revisa la guia completa para aprender a gestionar tu barberia.
+        <span style="color:#60a5fa;"> Ver en la guia →</span>
+      </div>
+      <div class="cur-desk-stats">
+        <div class="cds cds-grad1"><div class="lbl">Citas hoy</div><div class="num">20</div></div>
+        <div class="cds cds-grad2"><div class="lbl">Ingresos hoy</div><div class="num">₡0</div></div>
+        <div class="cds cds-flat"><div class="lbl">Ingresos mes</div><div class="num">₡496k</div></div>
+        <div class="cds cds-flat"><div class="lbl">Clientes</div><div class="num">62</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW DESKTOP -->
+<div class="side">
+  <div class="side-label label-new">PROPOSED 2026</div>
+  <div class="new-desk">
+    <div class="new-sidebar">
+      <div style="font-size:14px;font-weight:700;padding:8px 12px;margin-bottom:12px;color:#e4e4e7;">✂ BarberApp</div>
+      <div class="nav-group">Operacion</div>
+      <div class="nav-item active"><span class="icon">◉</span> Dashboard</div>
+      <div class="nav-item"><span class="icon">◎</span> Citas</div>
+      <div class="nav-item"><span class="icon">◎</span> Mi Dia</div>
+      <div class="nav-item"><span class="icon">◎</span> Servicios</div>
+      <div class="nav-group">Gestion</div>
+      <div class="nav-item"><span class="icon">◎</span> Equipo</div>
+      <div class="nav-item"><span class="icon">◎</span> Clientes</div>
+      <div class="nav-group">Crecimiento</div>
+      <div class="nav-item"><span class="icon">◎</span> Analiticas</div>
+    </div>
+    <div class="new-main">
+      <h2>Buenas tardes</h2>
+      <div class="sub">Bienvenido a BarberApp</div>
+
+      <div class="desk-hint">
+        <span style="color:#6d7cff;">💡</span>
+        Primera vez? <a href="#">Ver guia para configurar tu barberia</a>
+        <span class="x">×</span>
+      </div>
+
+      <div class="desk-bento">
+        <div class="db-card db-hero">
+          <div><div class="lbl">Citas hoy</div><div class="num">20</div><div class="sub">programadas</div></div>
+          <div style="text-align:right;"><div class="lbl">Ingresos hoy</div><div class="num num-green">₡0</div><div class="sub">generados</div></div>
+        </div>
+        <div class="db-card"><div class="lbl">Ingresos mes</div><div class="num num-green">₡496k</div><div class="sub">272 citas</div></div>
+        <div class="db-card"><div class="lbl">Clientes</div><div class="num">62</div><div class="sub">registrados</div></div>
+      </div>
+
+      <div class="desk-divider"></div>
+
+      <div class="desk-appt-header">
+        <span class="desk-appt-title">Proximas Citas Hoy</span>
+        <span class="desk-appt-link">Ver todo →</span>
+      </div>
+      <div class="desk-appt-row"><div class="dar-status"></div><span class="dar-time">7:25 AM</span><div class="dar-info"><div class="dar-name">Pablo</div><div class="dar-svc">mohak</div></div><span class="dar-price">₡50,000</span></div>
+      <div class="desk-appt-row"><div class="dar-status"></div><span class="dar-time">9:00 AM</span><div class="dar-info"><div class="dar-name">Maria Lopez</div><div class="dar-svc">Corte + Barba</div></div><span class="dar-price">₡7,000</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

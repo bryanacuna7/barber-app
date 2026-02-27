@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberApp — Current vs 2026 (Mobile)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, system-ui, sans-serif; background: #111; color: #fff; padding: 20px; }
+  .compare { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  .side { width: 375px; flex-shrink: 0; }
+  .side-label {
+    text-align: center; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 2px; padding: 8px; margin-bottom: 12px;
+    border-radius: 8px;
+  }
+  .label-current { background: #7f1d1d; color: #fca5a5; }
+  .label-new { background: #14532d; color: #86efac; }
+
+  /* === CURRENT SIDE === */
+  .cur { background: #0a0a0a; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
+  .cur-header { padding: 16px 20px 0; }
+  .cur-logo { font-size: 15px; font-weight: 700; color: #ededed; display: flex; align-items: center; justify-content: space-between; }
+  .cur-greeting { font-size: 26px; font-weight: 800; margin-top: 16px; }
+  .cur-sub { font-size: 14px; color: #71717a; margin-top: 2px; }
+  .cur-banner {
+    margin: 16px 20px; padding: 16px; background: #172554; border: 1px solid #1e3a5f;
+    border-radius: 14px; font-size: 13px; color: #93c5fd; line-height: 1.5;
+  }
+  .cur-banner b { color: #bfdbfe; display: block; margin-bottom: 4px; font-size: 14px; }
+  .cur-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 12px; }
+  .cur-stat {
+    border-radius: 16px; padding: 16px;
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .cur-stat-big { background: linear-gradient(135deg, #065f46, #0d9488); }
+  .cur-stat-big2 { background: linear-gradient(135deg, #064e3b, #059669); }
+  .cur-stat-sm { background: #18181b; border: 1px solid #27272a; }
+  .cur-stat .num { font-size: 28px; font-weight: 800; }
+  .cur-stat .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .cur-stat-sm .lbl { color: #71717a; }
+  .cur-stat-sm .num { color: #e4e4e7; }
+  .cur-appt { padding: 16px 20px; }
+  .cur-appt-card {
+    background: #18181b; border: 1px solid #27272a; border-radius: 12px;
+    padding: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  }
+  .cur-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+  .cur-appt-name { font-size: 14px; font-weight: 600; }
+  .cur-appt-svc { font-size: 12px; color: #71717a; }
+  .cur-appt-price { margin-left: auto; font-size: 14px; font-weight: 700; color: #4ade80; }
+
+  /* === NEW SIDE === */
+  .new { background: #0a0a0a; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
+  .new-header { padding: 16px 20px 0; }
+  .new-logo { font-size: 15px; font-weight: 700; color: #ededed; display: flex; align-items: center; justify-content: space-between; }
+  .new-greeting { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-top: 16px; }
+  .new-sub { font-size: 14px; color: #71717a; margin-top: 2px; }
+
+  /* Inline hint replaces banner */
+  .new-hint {
+    margin: 14px 20px; padding: 12px 16px;
+    background: rgba(109,124,255,0.08); border: 1px solid rgba(109,124,255,0.12);
+    border-radius: 12px; font-size: 13px; color: #a1a1aa;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .new-hint a { color: #6d7cff; text-decoration: none; font-weight: 500; }
+  .new-hint .dismiss { margin-left: auto; color: #52525b; cursor: pointer; }
+
+  /* Bento grid */
+  .new-bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 10px; }
+  .new-card {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px; padding: 20px; transition: border-color 0.2s;
+  }
+  .new-hero {
+    grid-column: 1 / -1;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .new-card .lbl {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+    color: #52525b; margin-bottom: 10px;
+  }
+  .new-card .num {
+    font-size: 48px; font-weight: 800; letter-spacing: -2px;
+    line-height: 1; font-feature-settings: 'tnum';
+  }
+  .new-card .sub { font-size: 13px; color: #52525b; margin-top: 4px; }
+  .new-card .num-money { color: #4ade80; }
+  .new-hero .right { text-align: right; }
+  .new-sm .num { font-size: 32px; letter-spacing: -1px; }
+
+  /* Copper fade divider */
+  .new-divider {
+    height: 1px; margin: 10px 20px;
+    background: linear-gradient(90deg, #6d7cff, transparent 60%);
+    opacity: 0.3;
+  }
+
+  /* Share section */
+  .new-share {
+    margin: 10px 20px; background: #111113;
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px;
+  }
+  .new-share-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .new-share-sub { font-size: 13px; color: #52525b; margin-bottom: 12px; }
+  .new-share-url {
+    background: #0a0a0a; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #71717a;
+    margin-bottom: 10px;
+  }
+  .new-share-btns { display: flex; gap: 8px; }
+  .btn-ghost {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1); background: transparent;
+    color: #e4e4e7; font-size: 13px; text-align: center;
+  }
+  .btn-green {
+    flex: 1; padding: 10px; border-radius: 10px; border: none;
+    background: #22c55e; color: #fff; font-size: 13px; font-weight: 600; text-align: center;
+  }
+
+  /* Appointments */
+  .new-appt { padding: 14px 20px; }
+  .new-appt-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+  .new-appt-title { font-size: 17px; font-weight: 700; }
+  .new-appt-link { font-size: 13px; color: #6d7cff; }
+  .new-appt-card {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .new-status { width: 3px; height: 32px; border-radius: 2px; background: #6d7cff; }
+  .new-time { font-size: 13px; font-weight: 600; color: #6d7cff; min-width: 52px; }
+  .new-info { flex: 1; }
+  .new-name { font-size: 15px; font-weight: 600; }
+  .new-svc { font-size: 13px; color: #52525b; }
+  .new-price { font-size: 15px; font-weight: 700; color: #4ade80; font-feature-settings: 'tnum'; }
+
+  h1 { text-align: center; font-size: 20px; margin-bottom: 4px; }
+  .page-sub { text-align: center; font-size: 13px; color: #71717a; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<h1>Dashboard — Mobile Compare</h1>
+<p class="page-sub">Mismos colores, nuevo layout + tipografia</p>
+
+<div class="compare">
+
+<!-- CURRENT -->
+<div class="side">
+  <div class="side-label label-current">CURRENT</div>
+  <div class="cur">
+    <div class="cur-header">
+      <div class="cur-logo"><span>✂ BarberApp</span><span>🔔</span></div>
+      <h2 class="cur-greeting">Buenas tardes</h2>
+      <p class="cur-sub">Bienvenido a BarberApp</p>
+    </div>
+    <div class="cur-banner">
+      <b>Bienvenido a tu dashboard</b>
+      Primera vez usando la app? Revisa la guia completa para aprender a gestionar tu barberia como un profesional.<br>
+      <span style="color:#60a5fa;">Ver en la guia →</span>
+    </div>
+    <div class="cur-stats">
+      <div class="cur-stat cur-stat-big"><div class="lbl">Citas hoy</div><div class="num">20</div><div style="font-size:12px;color:rgba(255,255,255,0.6);">programadas</div></div>
+      <div class="cur-stat cur-stat-big2"><div class="lbl">Ingresos hoy</div><div class="num">₡0</div><div style="font-size:12px;color:rgba(255,255,255,0.6);">generados</div></div>
+      <div class="cur-stat cur-stat-sm"><div class="lbl">Ingresos mes</div><div class="num">₡496k</div><div style="font-size:12px;color:#71717a;">272 citas</div></div>
+      <div class="cur-stat cur-stat-sm"><div class="lbl">Clientes</div><div class="num">62</div><div style="font-size:12px;color:#71717a;">registrados</div></div>
+    </div>
+    <div class="cur-appt">
+      <div class="cur-appt-card"><div class="cur-dot"></div><div><div class="cur-appt-name">Pablo</div><div class="cur-appt-svc">mohak</div></div><div class="cur-appt-price">₡50,000</div></div>
+      <div class="cur-appt-card"><div class="cur-dot"></div><div><div class="cur-appt-name">Maria Lopez</div><div class="cur-appt-svc">Corte + Barba</div></div><div class="cur-appt-price">₡7,000</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW 2026 -->
+<div class="side">
+  <div class="side-label label-new">PROPOSED 2026</div>
+  <div class="new">
+    <div class="new-header">
+      <div class="new-logo"><span>✂ BarberApp</span><span style="color:#52525b;">🔔</span></div>
+      <h2 class="new-greeting">Buenas tardes</h2>
+      <p class="new-sub">Bienvenido a BarberApp</p>
+    </div>
+
+    <div class="new-hint">
+      <span style="color:#6d7cff;">💡</span>
+      <span>Primera vez? <a href="#">Ver guia</a></span>
+      <span class="dismiss">×</span>
+    </div>
+
+    <div class="new-bento">
+      <div class="new-card new-hero">
+        <div><div class="lbl">Citas hoy</div><div class="num">20</div><div class="sub">programadas</div></div>
+        <div class="right"><div class="lbl">Ingresos hoy</div><div class="num num-money">₡0</div><div class="sub">generados</div></div>
+      </div>
+      <div class="new-card new-sm">
+        <div class="lbl">Ingresos mes</div>
+        <div class="num num-money">₡496k</div>
+        <div class="sub">272 citas</div>
+      </div>
+      <div class="new-card new-sm">
+        <div class="lbl">Clientes</div>
+        <div class="num">62</div>
+        <div class="sub">registrados</div>
+      </div>
+    </div>
+
+    <div class="new-divider"></div>
+
+    <div class="new-share">
+      <div class="new-share-title">Comparte tu Link de Reservas</div>
+      <div class="new-share-sub">Tus clientes pueden reservar 24/7</div>
+      <div class="new-share-url">/reservar/barbershop-pro...</div>
+      <div class="new-share-btns">
+        <div class="btn-ghost">Copiar</div>
+        <div class="btn-green">WhatsApp</div>
+      </div>
+    </div>
+
+    <div class="new-appt">
+      <div class="new-appt-header">
+        <span class="new-appt-title">Proximas Citas</span>
+        <span class="new-appt-link">Ver todo →</span>
+      </div>
+      <div class="new-appt-card"><div class="new-status"></div><span class="new-time">7:25 AM</span><div class="new-info"><div class="new-name">Pablo</div><div class="new-svc">mohak</div></div><span class="new-price">₡50,000</span></div>
+      <div class="new-appt-card"><div class="new-status"></div><span class="new-time">9:00 AM</span><div class="new-info"><div class="new-name">Maria Lopez</div><div class="new-svc">Corte + Barba</div></div><span class="new-price">₡7,000</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

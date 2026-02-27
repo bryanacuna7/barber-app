@@ -38,6 +38,31 @@ export function formatCurrencyCompact(amount: number): string {
   return formatCurrencyCompactMillions(amount)
 }
 
+/**
+ * Compact currency for mobile displays (e.g., "₡45,000" → "₡45 mil").
+ * Returns null if the value is not a ₡ currency string or doesn't need compacting.
+ */
+export function compactCurrencyForMobile(value: string): string | null {
+  const trimmed = value.trim()
+  if (!trimmed.startsWith('₡')) return null
+  if (/[kKmM]|mil/.test(trimmed)) return trimmed
+
+  const numericPart = trimmed.replace(/[^\d-]/g, '')
+  if (!numericPart) return null
+
+  const amount = Number(numericPart)
+  if (!Number.isFinite(amount)) return null
+  if (Math.abs(amount) < 1_000) return trimmed
+
+  const compact = new Intl.NumberFormat('es-CR', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1,
+  }).format(amount)
+
+  return `₡${compact}`
+}
+
 export function formatPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, '')
   if (cleaned.length === 8) {
