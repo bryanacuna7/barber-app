@@ -9,6 +9,7 @@ interface DashboardStats {
   business: {
     id: string
     name: string
+    shareName: string
     slug: string
   }
 }

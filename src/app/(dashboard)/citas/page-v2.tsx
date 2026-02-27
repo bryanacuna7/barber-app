@@ -26,7 +26,6 @@ import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Clock,
-  DollarSign,
   Phone,
   ChevronLeft,
   ChevronRight,
@@ -209,7 +208,7 @@ function StatsContent({
         </div>
 
         <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-500/10 to-red-500/10 dark:from-amber-500/20 dark:to-red-500/20 rounded-lg border border-amber-500/20 dark:border-amber-500/30">
-          <span className="text-sm font-bold text-zinc-900 dark:text-white">Revenue</span>
+          <span className="text-sm font-bold text-zinc-900 dark:text-white">Ingresos</span>
           <span className="text-lg font-bold text-amber-500 dark:text-amber-500">
             {formatCurrencyCompactMillions(stats.totalRevenue)}
           </span>
@@ -1789,13 +1788,10 @@ function CitasCalendarFusionContent() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 p-4 bg-amber-500/10 rounded-xl border border-amber-500/30">
-                      <DollarSign className="w-5 h-5 text-amber-500 dark:text-amber-500" />
-                      <div>
-                        <div className="text-xs text-muted">Precio</div>
-                        <div className="text-2xl font-bold text-amber-500 dark:text-amber-500">
-                          ₡{apt.service?.price || 0}
-                        </div>
+                    <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/30">
+                      <div className="text-xs text-muted">Precio</div>
+                      <div className="text-2xl font-bold text-amber-500 dark:text-amber-500">
+                        ₡{apt.service?.price || 0}
                       </div>
                     </div>
 

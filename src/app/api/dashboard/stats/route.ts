@@ -65,6 +65,8 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       todayRevenue?.reduce((sum, apt) => sum + (Number(apt.price) || 0), 0) || 0
     const monthRevenueTotal =
       monthRevenue?.reduce((sum, apt) => sum + (Number(apt.price) || 0), 0) || 0
+    const displayName = normalizeDisplayBusinessName(business.name)
+    const shareName = business.name?.trim() || displayName
 
     return NextResponse.json({
       todayAppointments: todayAppointments || 0,
@@ -74,7 +76,8 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       totalClients: totalClients || 0,
       business: {
         id: business.id,
-        name: normalizeDisplayBusinessName(business.name),
+        name: displayName,
+        shareName,
         slug: business.slug,
       },
     })

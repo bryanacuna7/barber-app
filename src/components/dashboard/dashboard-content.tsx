@@ -104,7 +104,7 @@ export function DashboardContent() {
               <ShareBookingLink
                 bookingPath={bookingPath(stats.business.slug)}
                 slug={stats.business.slug}
-                businessName={stats.business.name}
+                businessName={stats.business.shareName || stats.business.name}
                 variant="full"
               />
             </CardContent>

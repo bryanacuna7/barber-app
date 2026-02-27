@@ -17,6 +17,7 @@ import { AlertTriangle, Lock } from 'lucide-react'
 import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
+import { LogoutButton } from '@/components/dashboard/logout-button'
 
 const manifestVersion =
   process.env.NEXT_PUBLIC_MANIFEST_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '1'
@@ -98,12 +99,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             No tienes un negocio asociado a tu cuenta. Por favor contacta a soporte.
           </p>
           <div className="mt-6 flex gap-3 justify-center">
-            <Link
-              href="/login"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
+            <LogoutButton className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
               Cerrar Sesión
-            </Link>
+            </LogoutButton>
           </div>
         </div>
       </div>
@@ -183,12 +181,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             No tienes un negocio asociado a tu cuenta. Por favor contacta a soporte.
           </p>
           <div className="mt-6 flex gap-3 justify-center">
-            <Link
-              href="/login"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
+            <LogoutButton className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
               Cerrar Sesión
-            </Link>
+            </LogoutButton>
           </div>
         </div>
       </div>
@@ -228,12 +223,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
             Tu negocio ha sido suspendido. Por favor contacta a soporte para más información.
           </p>
           <div className="mt-6 flex gap-3 justify-center">
-            <Link
-              href="/login"
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
+            <LogoutButton className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
               Cerrar Sesión
-            </Link>
+            </LogoutButton>
           </div>
         </div>
       </div>
