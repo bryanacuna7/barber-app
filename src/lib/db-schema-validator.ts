@@ -49,6 +49,7 @@ export const VERIFIED_SCHEMA = {
       'name',
       'description',
       'category',
+      'icon',
       'duration_minutes',
       'price',
       'display_order',

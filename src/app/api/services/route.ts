@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { canAddService } from '@/lib/subscription'
 import { withAuth, errorResponse } from '@/lib/api/middleware'
+import { SERVICE_CATEGORIES, SERVICE_ICON_NAMES } from '@/lib/services/icons'
 
 const serviceSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  category: z.enum(['corte', 'barba', 'combo', 'facial']).default('corte'),
+  category: z.enum(SERVICE_CATEGORIES).default('corte'),
+  icon: z.enum(SERVICE_ICON_NAMES).optional().nullable(),
   duration_minutes: z.number().min(5).max(480),
   price: z.number().min(0),
 })
@@ -15,7 +17,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
   const { data: services, error } = await supabase
     .from('services')
     .select(
-      'id, name, description, category, duration_minutes, price, display_order, is_active, business_id'
+      'id, name, description, category, icon, duration_minutes, price, display_order, is_active, business_id'
     )
     .eq('business_id', business.id)
     .order('display_order', { ascending: true })
@@ -65,6 +67,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       name: parsed.data.name,
       description: parsed.data.description || null,
       category: parsed.data.category,
+      icon: parsed.data.icon ?? null,
       duration_minutes: parsed.data.duration_minutes,
       price: parsed.data.price,
     })

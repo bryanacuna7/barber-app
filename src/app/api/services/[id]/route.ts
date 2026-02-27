@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { SERVICE_CATEGORIES, SERVICE_ICON_NAMES } from '@/lib/services/icons'
 
 const updateServiceSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').optional(),
   description: z.string().optional().nullable(),
-  category: z.enum(['corte', 'barba', 'combo', 'facial']).optional(),
+  category: z.enum(SERVICE_CATEGORIES).optional(),
+  icon: z.enum(SERVICE_ICON_NAMES).optional().nullable(),
   duration_minutes: z.number().min(5).max(480).optional(),
   price: z.number().min(0).optional(),
   is_active: z.boolean().optional(),

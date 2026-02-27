@@ -5,6 +5,8 @@
  * Module: Servicios (Simplified Hybrid + Sidebar)
  */
 
+import type { ServiceIconName } from '@/lib/services/icons'
+
 export interface Service {
   id: string
   name: string
@@ -14,7 +16,7 @@ export interface Service {
   price: number
   displayOrder: number
   isActive: boolean
-  icon?: string // Lucide icon name
+  icon?: ServiceIconName
   // Business metrics
   bookings?: number
   revenue?: number

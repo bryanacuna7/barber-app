@@ -1286,6 +1286,7 @@ export type Database = {
           display_order: number | null
           duration_minutes: number
           id: string
+          icon: string | null
           is_active: boolean | null
           name: string
           price: number
@@ -1299,6 +1300,7 @@ export type Database = {
           display_order?: number | null
           duration_minutes?: number
           id?: string
+          icon?: string | null
           is_active?: boolean | null
           name: string
           price: number
@@ -1312,6 +1314,7 @@ export type Database = {
           display_order?: number | null
           duration_minutes?: number
           id?: string
+          icon?: string | null
           is_active?: boolean | null
           name?: string
           price?: number

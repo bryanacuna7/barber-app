@@ -8,9 +8,26 @@
  * Demo: preview-d
  */
 
-// Supabase types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SupabaseService = any
+import { resolveServiceIcon, type ServiceIconName } from '@/lib/services/icons'
+
+type SupabaseService = {
+  id: string
+  name: string
+  description: string | null
+  category: string | null
+  icon: string | null
+  duration_minutes: number
+  price: number | string
+  display_order: number | null
+  is_active: boolean
+}
+
+type ServiceMetricsMapValue = {
+  bookings: number
+  revenue: number
+  avgRating: number
+  popularityRank: number
+}
 
 // UI types for demo
 export interface UIService {
@@ -22,7 +39,7 @@ export interface UIService {
   price: number
   displayOrder: number
   isActive: boolean
-  icon?: string // Lucide icon name for demo
+  icon?: ServiceIconName // Lucide icon name for demo
   // Business metrics (calculated from appointments)
   bookings?: number
   revenue?: number
@@ -33,15 +50,9 @@ export interface UIService {
 /**
  * Adapt single service from Supabase to UI format
  */
-export function adaptService(
-  row: SupabaseService,
-  metrics?: {
-    bookings: number
-    revenue: number
-    avgRating: number
-    popularityRank: number
-  }
-): UIService {
+export function adaptService(row: SupabaseService, metrics?: ServiceMetricsMapValue): UIService {
+  const icon = resolveServiceIcon(row.icon, row.category, row.name, row.description)
+
   return {
     id: row.id,
     name: row.name,
@@ -51,8 +62,7 @@ export function adaptService(
     price: Number(row.price),
     displayOrder: row.display_order || 0,
     isActive: row.is_active,
-    // Icon mapping (optional, for demo visual system)
-    icon: getServiceIcon(row.name),
+    icon,
     // Business metrics
     bookings: metrics?.bookings,
     revenue: metrics?.revenue,
@@ -64,27 +74,11 @@ export function adaptService(
 /**
  * Adapt multiple services
  */
-export function adaptServices(rows: SupabaseService[], metricsMap?: Map<string, any>): UIService[] {
+export function adaptServices(
+  rows: SupabaseService[],
+  metricsMap?: Map<string, ServiceMetricsMapValue>
+): UIService[] {
   return rows.map((row) => adaptService(row, metricsMap?.get(row.id)))
-}
-
-/**
- * Map service name to Lucide icon (for demo UI)
- */
-function getServiceIcon(serviceName: string): string {
-  const name = serviceName.toLowerCase()
-
-  if (name.includes('corte') || name.includes('haircut')) return 'scissors'
-  if (name.includes('barba') || name.includes('beard')) return 'sparkles'
-  if (name.includes('afeitado') || name.includes('shave')) return 'flame'
-  if (name.includes('niño') || name.includes('kids')) return 'users'
-  if (name.includes('diseño')) return 'zap'
-  if (name.includes('cejas')) return 'wind'
-  if (name.includes('masaje')) return 'waves'
-  if (name.includes('premium')) return 'crown'
-  if (name.includes('básico')) return 'circle-dot'
-
-  return 'star' // default
 }
 
 /**

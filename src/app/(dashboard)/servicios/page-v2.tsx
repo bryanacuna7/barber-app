@@ -23,19 +23,8 @@ import {
   ChevronUp,
   ChevronsUpDown,
   Scissors,
-  Sparkles,
-  Zap,
-  Users,
-  Wind,
-  Waves,
-  Flame,
-  Gift,
-  Crown,
-  CircleDot,
-  Sparkle,
   AlertTriangle,
   BarChart3,
-  type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
@@ -58,12 +47,21 @@ import { ComponentErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRealtimeServices } from '@/hooks/use-realtime-services'
+import {
+  DEFAULT_ICON_BY_CATEGORY,
+  SERVICE_ICON_LABELS,
+  SERVICE_ICON_NAMES,
+  isServiceCategory,
+  resolveServiceIcon,
+  type ServiceCategory,
+  type ServiceIconName,
+} from '@/lib/services/icons'
+import { SERVICE_ICON_MAP } from '@/lib/services/icon-components'
 
 // ============================================================================
 // MOCK DATA (Demo D - For UI exploration)
 // ============================================================================
 
-type ServiceCategory = 'corte' | 'barba' | 'combo' | 'facial'
 type CategoryFilter = 'all' | ServiceCategory
 type SortField = 'name' | 'bookings' | 'price' | 'duration'
 type SortDirection = 'asc' | 'desc'
@@ -81,7 +79,7 @@ interface MockService {
   avg_rating: number
   total_reviews: number
   barber_names: string[]
-  iconName: string // Lucide icon name
+  iconName: ServiceIconName
   color: string
   is_active: boolean
 }
@@ -259,30 +257,11 @@ const mockServices: MockService[] = [
   },
 ]
 
-const serviceIconMap: Record<MockService['iconName'], LucideIcon> = {
-  Scissors,
-  Sparkles,
-  Zap,
-  Users,
-  Wind,
-  Waves,
-  Flame,
-  Gift,
-  Crown,
-  CircleDot,
-  Sparkle,
-  Star,
-}
-
 const CATEGORY_LABELS: Record<ServiceCategory, string> = {
   corte: 'Corte',
   barba: 'Barba',
   combo: 'Combo',
   facial: 'Facial',
-}
-
-function isServiceCategory(value: string | null | undefined): value is ServiceCategory {
-  return value === 'corte' || value === 'barba' || value === 'combo' || value === 'facial'
 }
 
 function ServiceIcon({
@@ -292,7 +271,7 @@ function ServiceIcon({
   iconName: MockService['iconName']
   className: string
 }) {
-  const Icon = serviceIconMap[iconName] || Scissors
+  const Icon = SERVICE_ICON_MAP[iconName] || Scissors
   return <Icon className={className} aria-hidden="true" />
 }
 
@@ -359,11 +338,8 @@ function resolveCategory(
   return inferCategory(name, description)
 }
 
-function iconNameForCategory(category: ServiceCategory): MockService['iconName'] {
-  if (category === 'barba') return 'Flame'
-  if (category === 'combo') return 'Gift'
-  if (category === 'facial') return 'Sparkle'
-  return 'Scissors'
+function iconNameForCategory(category: ServiceCategory): ServiceIconName {
+  return DEFAULT_ICON_BY_CATEGORY[category]
 }
 
 function colorForCategory(category: ServiceCategory): string {
@@ -393,6 +369,7 @@ function ServiciosContent() {
     name: '',
     description: '',
     category: 'corte' as ServiceCategory,
+    icon: iconNameForCategory('corte') as ServiceIconName,
     duration: 30,
     price: 0,
     business_id: businessId,
@@ -453,6 +430,12 @@ function ServiciosContent() {
 
     return servicesData.map((service) => {
       const category = resolveCategory(service.category, service.name, service.description)
+      const iconName = resolveServiceIcon(
+        service.icon,
+        service.category,
+        service.name,
+        service.description
+      )
       const bookings = service.bookings ?? 0
       return {
         id: service.id,
@@ -467,7 +450,7 @@ function ServiciosContent() {
         avg_rating: service.avgRating ?? 0,
         total_reviews: 0,
         barber_names: [],
-        iconName: iconNameForCategory(category),
+        iconName,
         color: colorForCategory(category),
         is_active: service.isActive,
       }
@@ -554,6 +537,7 @@ function ServiciosContent() {
       name: '',
       description: '',
       category: 'corte',
+      icon: iconNameForCategory('corte'),
       duration: 30,
       price: 0,
       business_id: businessId,
@@ -568,6 +552,7 @@ function ServiciosContent() {
       name: service.name,
       description: service.description,
       category: service.category,
+      icon: service.iconName,
       duration: service.duration_minutes,
       price: service.price,
       business_id: businessId,
@@ -581,6 +566,7 @@ function ServiciosContent() {
       name: '',
       description: '',
       category: 'corte',
+      icon: iconNameForCategory('corte'),
       duration: 30,
       price: 0,
       business_id: businessId,
@@ -1296,6 +1282,10 @@ function ServiciosContent() {
                   setFormData((prev) => ({
                     ...prev,
                     category: e.target.value as ServiceCategory,
+                    icon:
+                      prev.icon === iconNameForCategory(prev.category)
+                        ? iconNameForCategory(e.target.value as ServiceCategory)
+                        : prev.icon,
                   }))
                 }
                 className="flex h-11 w-full rounded-[14px] border border-zinc-200 bg-white px-3 text-sm text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
@@ -1306,6 +1296,36 @@ function ServiciosContent() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="grid grid-cols-[1fr_auto] items-end gap-3">
+              <div>
+                <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
+                  Ícono
+                </label>
+                <select
+                  value={formData.icon}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      icon: e.target.value as ServiceIconName,
+                    }))
+                  }
+                  className="flex h-11 w-full rounded-[14px] border border-zinc-200 bg-white px-3 text-sm text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                >
+                  {SERVICE_ICON_NAMES.map((iconName) => (
+                    <option key={iconName} value={iconName}>
+                      {SERVICE_ICON_LABELS[iconName]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+                <ServiceIcon
+                  iconName={formData.icon}
+                  className="h-4 w-4 text-zinc-700 dark:text-zinc-200"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

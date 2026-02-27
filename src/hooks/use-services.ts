@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Service } from '@/types'
+import type { ServiceIconName } from '@/lib/services/icons'
 
 export function useServices() {
   return useQuery({
@@ -23,6 +24,7 @@ export function useCreateService() {
       name: string
       description: string
       category?: 'corte' | 'barba' | 'combo' | 'facial'
+      icon?: ServiceIconName | null
       duration_minutes: number
       price: number
     }) => {

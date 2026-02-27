@@ -1,5 +1,7 @@
-import { Scissors, Clock, ChevronRight } from 'lucide-react'
+import { Clock, ChevronRight, CircleDot } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
+import { resolveServiceIcon } from '@/lib/services/icons'
+import { SERVICE_ICON_MAP } from '@/lib/services/icon-components'
 import type { Service } from '@/types'
 
 // Service color palette
@@ -36,7 +38,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
       {services.length === 0 ? (
         <div className="ios-card p-8 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-            <Scissors className="h-8 w-8 text-zinc-400" />
+            <CircleDot className="h-8 w-8 text-zinc-400" />
           </div>
           <p className="mt-4 text-[15px] text-zinc-500">No hay servicios disponibles.</p>
         </div>
@@ -44,6 +46,13 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
         <div className="space-y-3">
           {services.map((service, index) => {
             const colorClass = SERVICE_COLORS[index % SERVICE_COLORS.length]
+            const iconName = resolveServiceIcon(
+              service.icon,
+              service.category,
+              service.name,
+              service.description
+            )
+            const Icon = SERVICE_ICON_MAP[iconName]
             return (
               <button
                 key={service.id}
@@ -61,7 +70,7 @@ export function ServiceSelection({ services, noBarbers, onSelectService }: Servi
                     colorClass
                   )}
                 >
-                  <Scissors className="h-6 w-6" />
+                  <Icon className="h-6 w-6" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p
