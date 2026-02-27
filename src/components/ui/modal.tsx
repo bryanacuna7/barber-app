@@ -93,7 +93,7 @@ export function Modal({
         <div
           ref={overlayRef}
           onClick={handleOverlayClick}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[80] flex items-center justify-center px-4 py-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby={title ? 'modal-title' : undefined}
@@ -127,7 +127,7 @@ export function Modal({
             className={cn(
               'relative w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl',
               'border border-zinc-200 dark:border-zinc-800',
-              'max-h-[90vh] overflow-hidden flex flex-col min-h-0',
+              'max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] sm:max-h-[90vh] overflow-hidden flex flex-col min-h-0',
               'focus-visible:!outline-none',
               sizeClasses[size],
               className
@@ -166,7 +166,7 @@ export function Modal({
             )}
 
             {/* Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6 touch-pan-y [-webkit-overflow-scrolling:touch]">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:p-6 touch-pan-y [-webkit-overflow-scrolling:touch]">
               {children}
             </div>
           </motion.div>
