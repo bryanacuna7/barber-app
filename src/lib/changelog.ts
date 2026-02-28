@@ -12,6 +12,8 @@ export interface ChangelogRelease {
   sections: ChangelogSection[]
 }
 
+type ChangelogAudience = 'public' | 'internal'
+
 interface SectionBoundary {
   title: string
   start: number
@@ -27,6 +29,15 @@ interface ReleaseBoundary {
 
 const CHANGELOG_FILE_PATH = path.join(process.cwd(), 'CHANGELOG.md')
 const PACKAGE_FILE_PATH = path.join(process.cwd(), 'package.json')
+const INTERNAL_AUDIENCE_TAG_REGEX =
+  /\[(?:admin|internal|interno|solo-admin|staff-only|owner-only)\]/i
+const INTERNAL_AUDIENCE_ITEM_PATTERNS = [
+  /\bpanel\s+admin\b/i,
+  /\badmin\b/i,
+  /\badministradores?\b/i,
+  /\bbackoffice\b/i,
+  /\bsolo\s+admin\b/i,
+]
 
 function parseBulletItems(block: string): string[] {
   const lines = block.split('\n')
@@ -95,6 +106,39 @@ function parseReleaseSections(content: string): ChangelogSection[] {
     .filter((section) => section.items.length > 0)
 }
 
+function isPublicFacingItem(item: string): boolean {
+  if (INTERNAL_AUDIENCE_TAG_REGEX.test(item)) {
+    return false
+  }
+
+  return !INTERNAL_AUDIENCE_ITEM_PATTERNS.some((pattern) => pattern.test(item))
+}
+
+export function filterPublicChangelogReleases(releases: ChangelogRelease[]): ChangelogRelease[] {
+  return releases
+    .map((release) => ({
+      ...release,
+      sections: release.sections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter(isPublicFacingItem),
+        }))
+        .filter((section) => section.items.length > 0),
+    }))
+    .filter((release) => release.sections.length > 0)
+}
+
+function filterReleasesByAudience(
+  releases: ChangelogRelease[],
+  audience: ChangelogAudience
+): ChangelogRelease[] {
+  if (audience === 'internal') {
+    return releases
+  }
+
+  return filterPublicChangelogReleases(releases)
+}
+
 export function parseChangelogMarkdown(markdown: string): ChangelogRelease[] {
   const normalized = markdown.replace(/\r\n/g, '\n')
   const releaseHeaderRegex = /^## \[([^\]]+)\](?: - (\d{4}-\d{2}-\d{2}))?$/gm
@@ -127,9 +171,11 @@ export function parseChangelogMarkdown(markdown: string): ChangelogRelease[] {
 }
 
 export async function getChangelogReleases(limit = 10): Promise<ChangelogRelease[]> {
+  const audience: ChangelogAudience = 'public'
+
   try {
     const markdown = await readFile(CHANGELOG_FILE_PATH, 'utf8')
-    const releases = parseChangelogMarkdown(markdown)
+    const releases = filterReleasesByAudience(parseChangelogMarkdown(markdown), audience)
     return releases.slice(0, limit)
   } catch {
     return []

@@ -42,6 +42,12 @@ const forbiddenPatterns = [
     recommendation: 'No menciones tooling interno en notas para clientes.',
   },
   {
+    label: 'Admin interno',
+    regex: /\bpanel\s+admin\b|\badmin\b|\badministradores?\b|\bbackoffice\b/i,
+    recommendation:
+      'No expongas cambios internos de administracion en el changelog para clientes.',
+  },
+  {
     label: 'Migración técnica',
     regex: /\bmigraci[oó]n(?:es)?\b/i,
     recommendation: 'Cambia a beneficio final (estabilidad, velocidad, seguridad).',

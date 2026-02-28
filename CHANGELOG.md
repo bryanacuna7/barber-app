@@ -6,15 +6,10 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ## [0.9.23] - 2026-02-27
 
-### Nuevo
-
-- Los administradores pueden eliminar un negocio inactivo de forma permanente, con confirmacion por nombre para evitar errores
-- Panel de admin renombrado a "Admin" para mayor claridad
-
 ### Mejorado
 
 - El dashboard ahora muestra citas e ingresos del dia juntos en una tarjeta destacada, con ingresos del mes y clientes al lado
-- Los precios de servicios en el panel admin se muestran en formato de moneda (₡)
+- Los precios de servicios ahora se muestran en formato de moneda (₡) en las vistas de gestion
 
 ## [0.9.22] - 2026-02-27
 
