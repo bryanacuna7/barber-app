@@ -59,8 +59,11 @@ export async function GET(request: Request) {
     // Format response
     const formattedReferrers = topReferrers?.map((referrer) => {
       const conversionRate =
-        referrer.total_referrals > 0
-          ? ((referrer.successful_referrals / referrer.total_referrals) * 100).toFixed(1)
+        (referrer.total_referrals ?? 0) > 0
+          ? (
+              ((referrer.successful_referrals ?? 0) / (referrer.total_referrals ?? 1)) *
+              100
+            ).toFixed(1)
           : '0.0'
 
       return {

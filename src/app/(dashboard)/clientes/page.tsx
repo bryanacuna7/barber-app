@@ -126,7 +126,7 @@ function SortIndicator({
   sortDirection,
 }: {
   column: string
-  sortColumn: string
+  sortColumn: string | null
   sortDirection: 'asc' | 'desc'
 }) {
   if (sortColumn !== column) {

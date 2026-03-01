@@ -18,7 +18,7 @@ import type { ChallengeType } from '@/types/database'
 
 interface ChallengeParticipant {
   id: string
-  current_value: number
+  current_value: number | null
   target_value: number
   rank: number | null
   barber?: {
@@ -37,7 +37,7 @@ interface ChallengeCardProps {
   rewardAmount: number | null
   endsAt: string
   participants: ChallengeParticipant[]
-  currentBarberId?: string
+  currentBarberId?: string | null
 }
 
 export function ChallengeCard({
@@ -55,7 +55,9 @@ export function ChallengeCard({
   const timeRemaining = getChallengeTimeRemaining({ ends_at: endsAt } as any)
 
   // Sort participants by current_value descending
-  const sortedParticipants = [...participants].sort((a, b) => b.current_value - a.current_value)
+  const sortedParticipants = [...participants].sort(
+    (a, b) => (b.current_value ?? 0) - (a.current_value ?? 0)
+  )
   const topParticipants = sortedParticipants.slice(0, 5)
   const currentParticipant = currentBarberId
     ? sortedParticipants.find((p) => p.barber?.id === currentBarberId)
@@ -133,15 +135,15 @@ export function ChallengeCard({
               </span>
               <span className="text-[15px] font-bold text-blue-800 dark:text-blue-300">
                 {challengeType === 'revenue'
-                  ? formatCurrency(currentParticipant.current_value)
-                  : currentParticipant.current_value.toLocaleString()}
+                  ? formatCurrency(currentParticipant.current_value ?? 0)
+                  : (currentParticipant.current_value ?? 0).toLocaleString()}
               </span>
             </div>
             <div className="h-2 w-full rounded-full bg-blue-200 dark:bg-blue-900 overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{
-                  width: `${Math.min((currentParticipant.current_value / targetValue) * 100, 100)}%`,
+                  width: `${Math.min(((currentParticipant.current_value ?? 0) / targetValue) * 100, 100)}%`,
                 }}
                 transition={{ duration: 0.5 }}
                 className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
@@ -207,8 +209,8 @@ export function ChallengeCard({
                   {/* Value */}
                   <span className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100">
                     {challengeType === 'revenue'
-                      ? formatCurrency(participant.current_value)
-                      : participant.current_value.toLocaleString()}
+                      ? formatCurrency(participant.current_value ?? 0)
+                      : (participant.current_value ?? 0).toLocaleString()}
                   </span>
                 </div>
               ))}

@@ -10,7 +10,7 @@ interface Conversion {
   id: string
   referralCode: string
   status: 'pending' | 'active' | 'expired'
-  createdAt: string
+  createdAt: string | null
   convertedAt: string | null
   referrerBusiness: {
     id: string
@@ -127,10 +127,12 @@ export function ConversionsTimeline({ conversions }: ConversionsTimelineProps) {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-muted">
-                    {formatDistanceToNow(new Date(conversion.createdAt), {
-                      addSuffix: true,
-                      locale: es,
-                    })}
+                    {conversion.createdAt
+                      ? formatDistanceToNow(new Date(conversion.createdAt), {
+                          addSuffix: true,
+                          locale: es,
+                        })
+                      : '—'}
                   </p>
                   {conversion.convertedAt && (
                     <p className="text-xs text-green-600 dark:text-green-400 mt-1">

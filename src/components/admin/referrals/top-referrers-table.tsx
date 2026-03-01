@@ -10,11 +10,11 @@ interface TopReferrer {
   businessName: string
   businessSlug: string
   referralCode: string
-  totalReferrals: number
-  successfulReferrals: number
-  currentMilestone: number
+  totalReferrals: number | null
+  successfulReferrals: number | null
+  currentMilestone: number | null
   conversionRate: string
-  pointsBalance: number
+  pointsBalance: number | null
 }
 
 interface TopReferrersTableProps {
@@ -153,7 +153,7 @@ export function TopReferrersTable({ referrers }: TopReferrersTableProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
-                  {getMilestoneBadge(referrer.currentMilestone)}
+                  {getMilestoneBadge(referrer.currentMilestone ?? 0)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center font-medium text-zinc-700 dark:text-zinc-300">
                   {referrer.pointsBalance}

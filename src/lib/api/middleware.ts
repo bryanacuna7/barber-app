@@ -28,7 +28,7 @@ export type AuthContext = {
 
 // Extended business select — includes fields commonly needed by analytics routes
 const BUSINESS_SELECT =
-  'id, owner_id, name, slug, timezone, operating_hours, smart_duration_enabled'
+  'id, owner_id, name, slug, timezone, operating_hours, smart_duration_enabled' as const
 
 export type AuthHandler<T = any> = (
   request: Request,
@@ -97,11 +97,11 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
       let barberId: string | undefined
 
       // 1. Try as business owner (fast path)
-      const { data: ownerBusiness } = (await supabase
+      const { data: ownerBusiness } = await supabase
         .from('businesses')
         .select(BUSINESS_SELECT)
         .eq('owner_id', user.id)
-        .single()) as any
+        .single()
 
       if (ownerBusiness) {
         business = ownerBusiness
@@ -116,11 +116,11 @@ export function withAuth<T = any>(handler: AuthHandler<T>) {
           .single()
 
         if (barber) {
-          const { data: barberBusiness } = (await supabase
+          const { data: barberBusiness } = await supabase
             .from('businesses')
             .select(BUSINESS_SELECT)
             .eq('id', barber.business_id)
-            .single()) as any
+            .single()
 
           if (barberBusiness) {
             business = barberBusiness
@@ -158,7 +158,7 @@ export function withAuthOnly<T = any>(
   handler: (
     request: Request,
     context: T,
-    auth: Omit<AuthContext, 'business'>
+    auth: Pick<AuthContext, 'user' | 'supabase'>
   ) => Promise<Response> | Response
 ) {
   return async (request: Request, context: T) => {

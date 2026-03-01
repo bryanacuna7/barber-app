@@ -48,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
     v: manifestVersion,
   })
 
-  if (business.slug) {
+  if (business?.slug) {
     params.set('businessSlug', business.slug)
   }
 
@@ -144,19 +144,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   // Fetch business data AND onboarding in parallel to reduce TTFB
-  // staff_permissions from migration 027 — not in generated types yet, using `as any`
   const businessSelect =
-    'id, name, slug, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions' as any
+    'id, name, slug, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions'
   const needsOnboarding = roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')
 
   const [businessResult, onboardingResult] = await Promise.all([
-    (roleInfo.isOwner
+    roleInfo.isOwner
       ? supabase.from('businesses').select(businessSelect).eq('owner_id', user.id).single()
-      : supabase
-          .from('businesses')
-          .select(businessSelect)
-          .eq('id', roleInfo.businessId)
-          .single()) as unknown as Promise<{ data: any }>,
+      : supabase.from('businesses').select(businessSelect).eq('id', roleInfo.businessId).single(),
     needsOnboarding && roleInfo.businessId
       ? supabase
           .from('business_onboarding')

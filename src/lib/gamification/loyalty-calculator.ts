@@ -28,25 +28,25 @@ export type TransactionType =
 export interface LoyaltyProgram {
   id: string
   businessId: string
-  enabled: boolean
+  enabled: boolean | null
   programType: ProgramType
 
   // Points-based config
-  pointsPerCurrencyUnit?: number
-  pointsExpiryDays?: number
+  pointsPerCurrencyUnit?: number | null
+  pointsExpiryDays?: number | null
 
   // Visit-based config
-  freeServiceAfterVisits?: number
-  discountAfterVisits?: number
-  discountPercentage?: number
+  freeServiceAfterVisits?: number | null
+  discountAfterVisits?: number | null
+  discountPercentage?: number | null
 
   // Referral config
   referralRewardType?: ReferralRewardType
-  referralRewardAmount?: number
-  refereeRewardAmount?: number
+  referralRewardAmount?: number | null
+  refereeRewardAmount?: number | null
 
-  createdAt: string
-  updatedAt: string
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface ClientLoyaltyStatus {

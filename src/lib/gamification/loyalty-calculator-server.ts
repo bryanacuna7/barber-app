@@ -7,59 +7,23 @@
  * - Referral processing
  * - Analytics
  *
- * NOTE: This file uses tables from migration 014_loyalty_system.sql
- * that don't have generated TypeScript types yet.
- * Run `npx supabase gen types` to generate types when ready.
+ * NOTE: This file uses tables from migration 014_loyalty_system.sql.
+ * Types are generated from Supabase via `src/types/database.ts`.
  *
  * IMPORTANT: Only import this file in Server Components, API Routes, or Server Actions.
  * For client components, use loyalty-calculator.ts instead.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { createClient } from '@/lib/supabase/server'
-import type { RewardEligibility, TransactionType, ReferralRewardType } from './loyalty-calculator'
+import type { Tables } from '@/types/database'
+import type { RewardEligibility } from './loyalty-calculator'
 
 // ===========================================
-// DATABASE ROW TYPES (pending Supabase type generation)
+// CONVENIENCE TYPE ALIASES
 // ===========================================
 
-interface LoyaltyProgramRow {
-  id: string
-  business_id: string
-  enabled: boolean
-  program_type: string
-  points_per_currency_unit?: number
-  points_expiry_days?: number
-  free_service_after_visits?: number
-  discount_after_visits?: number
-  discount_percentage?: number
-  referral_reward_type?: string
-  referral_reward_amount?: number
-  referee_reward_amount?: number
-  created_at: string
-  updated_at: string
-}
-
-interface ClientLoyaltyStatusRow {
-  id: string
-  client_id: string
-  business_id: string
-  user_id: string
-  points_balance: number
-  lifetime_points: number
-  visit_count: number
-  current_tier: string
-  last_points_earned_at?: string
-  last_reward_redeemed_at?: string
-  referred_by_client_id?: string
-  referral_code: string
-  created_at: string
-  updated_at: string
-}
-
-// Helper to get untyped Supabase client for new tables
-const getUntypedClient = async () => (await createClient()) as any
+type LoyaltyProgram = Tables<'loyalty_programs'>
+type ClientLoyaltyStatus = Tables<'client_loyalty_status'>
 
 // ===========================================
 // REWARD ELIGIBILITY
@@ -75,14 +39,12 @@ export async function checkRewardEligibility(
   const supabase = await createClient()
 
   // Get loyalty program config
-  const { data: programData } = await (supabase as any)
+  const { data: program } = await supabase
     .from('loyalty_programs')
     .select('*')
     .eq('business_id', businessId)
     .eq('enabled', true)
     .single()
-
-  const program = programData as LoyaltyProgramRow | null
 
   if (!program) {
     return {
@@ -95,13 +57,11 @@ export async function checkRewardEligibility(
   }
 
   // Get client loyalty status
-  const { data: statusData } = await (supabase as any)
+  const { data: status } = await supabase
     .from('client_loyalty_status')
     .select('*')
     .eq('client_id', clientId)
     .single()
-
-  const status = statusData as ClientLoyaltyStatusRow | null
 
   if (!status) {
     return {
@@ -116,30 +76,32 @@ export async function checkRewardEligibility(
   // Check points-based rewards
   if (program.program_type === 'points' || program.program_type === 'hybrid') {
     const requiredPoints = 500 // Default threshold for discount
-    const isEligible = status.points_balance >= requiredPoints
+    const pointsBalance = status.points_balance ?? 0
+    const isEligible = pointsBalance >= requiredPoints
 
     return {
       eligible: isEligible,
       rewardType: 'discount',
-      rewardValue: program.discount_percentage || 20,
+      rewardValue: program.discount_percentage ?? 20,
       requiredPoints,
-      currentProgress: status.points_balance,
-      progressPercentage: Math.min((status.points_balance / requiredPoints) * 100, 100),
+      currentProgress: pointsBalance,
+      progressPercentage: Math.min((pointsBalance / requiredPoints) * 100, 100),
     }
   }
 
   // Check visit-based rewards
   if (program.program_type === 'visits' || program.program_type === 'hybrid') {
-    const requiredVisits = program.free_service_after_visits || 10
-    const isEligible = status.visit_count >= requiredVisits
+    const requiredVisits = program.free_service_after_visits ?? 10
+    const visitCount = status.visit_count ?? 0
+    const isEligible = visitCount >= requiredVisits
 
     return {
       eligible: isEligible,
       rewardType: 'free_service',
       rewardValue: 1, // 1 free service
       requiredVisits,
-      currentProgress: status.visit_count,
-      progressPercentage: Math.min((status.visit_count / requiredVisits) * 100, 100),
+      currentProgress: visitCount,
+      progressPercentage: Math.min((visitCount / requiredVisits) * 100, 100),
     }
   }
 
@@ -178,26 +140,22 @@ export async function redeemReward(
   }
 
   // Get current status
-  const { data: statusData, error: statusError } = await (supabase as any)
+  const { data: status, error: statusError } = await supabase
     .from('client_loyalty_status')
     .select('*')
     .eq('client_id', clientId)
     .single()
-
-  const status = statusData as ClientLoyaltyStatusRow | null
 
   if (statusError || !status) {
     return { success: false, error: 'Failed to fetch loyalty status' }
   }
 
   // Get program config
-  const { data: programData } = await (supabase as any)
+  const { data: program } = await supabase
     .from('loyalty_programs')
     .select('*')
     .eq('business_id', businessId)
     .single()
-
-  const program = programData as LoyaltyProgramRow | null
 
   if (!program) {
     return { success: false, error: 'Loyalty program not found' }
@@ -208,7 +166,7 @@ export async function redeemReward(
 
   if (rewardType === 'discount') {
     pointsToDeduct = 500 // Default points cost for discount
-    notes = `Redeemed ${program.discount_percentage || 20}% discount (${pointsToDeduct} points)`
+    notes = `Redeemed ${program.discount_percentage ?? 20}% discount (${pointsToDeduct} points)`
   } else if (rewardType === 'free_service') {
     // For visit-based, we don't deduct points
     // Instead, we track in transaction log
@@ -216,10 +174,10 @@ export async function redeemReward(
   }
 
   // Update points balance
-  const { error: updateError } = await (supabase as any)
+  const { error: updateError } = await supabase
     .from('client_loyalty_status')
     .update({
-      points_balance: Math.max(0, status.points_balance - pointsToDeduct),
+      points_balance: Math.max(0, (status.points_balance ?? 0) - pointsToDeduct),
       last_reward_redeemed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
@@ -230,7 +188,7 @@ export async function redeemReward(
   }
 
   // Log transaction
-  const { error: txError } = await (supabase as any).from('loyalty_transactions').insert({
+  const { error: txError } = await supabase.from('loyalty_transactions').insert({
     client_id: clientId,
     business_id: businessId,
     transaction_type: rewardType === 'discount' ? 'redeemed_discount' : 'redeemed_free_service',
@@ -245,13 +203,13 @@ export async function redeemReward(
   }
 
   // Create notification
-  const { error: notifError } = await (supabase as any).from('notifications').insert({
+  const { error: notifError } = await supabase.from('notifications').insert({
     user_id: status.user_id,
     type: 'loyalty_reward_redeemed',
     title: '¡Recompensa canjeada! 🎁',
     message:
       rewardType === 'discount'
-        ? `Has canjeado ${program.discount_percentage || 20}% de descuento`
+        ? `Has canjeado ${program.discount_percentage ?? 20}% de descuento`
         : 'Has canjeado 1 servicio gratis',
     metadata: {
       business_id: businessId,
@@ -279,17 +237,15 @@ export async function processReferralReward(
   referredClientId: string,
   businessId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = (await createClient()) as any
+  const supabase = await createClient()
 
   // Get program config
-  const { data: programData } = await supabase
+  const { data: program } = await supabase
     .from('loyalty_programs')
     .select('*')
     .eq('business_id', businessId)
     .eq('enabled', true)
     .single()
-
-  const program = programData as LoyaltyProgramRow | null
 
   if (!program || !program.referral_reward_amount) {
     return { success: false, error: 'Referral rewards not configured' }
@@ -363,11 +319,25 @@ export async function processReferralReward(
 // ANALYTICS
 // ===========================================
 
+// Shape of the joined clients relation in the top-referrers query
+interface ReferralWithClient {
+  referrer_client_id: string
+  clients: { name: string; phone: string } | null
+}
+
+// Accumulated entry for the referrer counts map
+interface ReferrerEntry {
+  clientId: string
+  name: string
+  phone: string
+  referralCount: number
+}
+
 /**
  * Get loyalty program statistics
  */
 export async function getLoyaltyStats(businessId: string) {
-  const supabase = (await createClient()) as any
+  const supabase = await createClient()
 
   // Total enrolled clients (with user accounts)
   const { count: enrolledCount } = await supabase
@@ -382,10 +352,10 @@ export async function getLoyaltyStats(businessId: string) {
     .eq('business_id', businessId)
 
   const totalPoints =
-    (totalPointsData as { lifetime_points: number }[] | null)?.reduce(
-      (sum, row) => sum + (row.lifetime_points || 0),
+    (totalPointsData as Pick<ClientLoyaltyStatus, 'lifetime_points'>[] | null)?.reduce(
+      (sum, row) => sum + (row.lifetime_points ?? 0),
       0
-    ) || 0
+    ) ?? 0
 
   // Total rewards redeemed
   const { count: rewardsCount } = await supabase
@@ -407,31 +377,30 @@ export async function getLoyaltyStats(businessId: string) {
     .eq('status', 'completed')
 
   // Group by referrer and count
-  const referrerCounts = topReferrers?.reduce(
-    (acc, row) => {
-      const id = row.referrer_client_id
-      if (!acc[id]) {
-        acc[id] = {
-          clientId: id,
-          name: (row.clients as any)?.name || 'Unknown',
-          phone: (row.clients as any)?.phone || '',
-          referralCount: 0,
-        }
+  const referrerCounts = (topReferrers as ReferralWithClient[] | null)?.reduce<
+    Record<string, ReferrerEntry>
+  >((acc, row) => {
+    const id = row.referrer_client_id
+    if (!acc[id]) {
+      acc[id] = {
+        clientId: id,
+        name: row.clients?.name ?? 'Unknown',
+        phone: row.clients?.phone ?? '',
+        referralCount: 0,
       }
-      acc[id].referralCount++
-      return acc
-    },
-    {} as Record<string, any>
-  )
+    }
+    acc[id].referralCount++
+    return acc
+  }, {})
 
-  const topReferrersList = Object.values(referrerCounts || {})
-    .sort((a: any, b: any) => b.referralCount - a.referralCount)
+  const topReferrersList = Object.values(referrerCounts ?? {})
+    .sort((a, b) => b.referralCount - a.referralCount)
     .slice(0, 10)
 
   return {
-    enrolledClients: enrolledCount || 0,
+    enrolledClients: enrolledCount ?? 0,
     totalPointsAwarded: totalPoints,
-    totalRewardsRedeemed: rewardsCount || 0,
+    totalRewardsRedeemed: rewardsCount ?? 0,
     topReferrers: topReferrersList,
   }
 }
@@ -454,7 +423,7 @@ export async function getClientLoyaltyHistory(clientId: string, limit: number = 
     return []
   }
 
-  return data || []
+  return data ?? []
 }
 
 // ===========================================
@@ -471,18 +440,16 @@ export async function processAppointmentLoyalty(
   businessId: string,
   appointmentPrice: number
 ): Promise<{ success: boolean; error?: string; pointsEarned?: number }> {
-  const supabase = (await createClient()) as any
+  const supabase = await createClient()
 
   try {
     // 1. Get loyalty program config
-    const { data: programData, error: programError } = await supabase
+    const { data: program, error: programError } = await supabase
       .from('loyalty_programs')
       .select('*')
       .eq('business_id', businessId)
       .eq('enabled', true)
       .single()
-
-    const program = programData as LoyaltyProgramRow | null
 
     // If no active loyalty program, skip
     if (programError || !program) {
@@ -512,7 +479,7 @@ export async function processAppointmentLoyalty(
       .eq('client_id', clientId)
       .single()
 
-    let status = statusData as ClientLoyaltyStatusRow | null
+    let status: ClientLoyaltyStatus | null = statusData ?? null
 
     // If no status exists, create it
     if (statusError || !status) {
@@ -538,7 +505,7 @@ export async function processAppointmentLoyalty(
         return { success: false, error: 'Failed to create loyalty status' }
       }
 
-      status = newStatus as ClientLoyaltyStatusRow
+      status = newStatus
     }
 
     // 4. Calculate points earned (only for points or hybrid programs)
@@ -551,12 +518,12 @@ export async function processAppointmentLoyalty(
     }
 
     // 5. Update loyalty status
-    const newLifetimePoints = status.lifetime_points + pointsEarned
-    const newPointsBalance = status.points_balance + pointsEarned
-    const newVisitCount = status.visit_count + 1
+    const newLifetimePoints = (status.lifetime_points ?? 0) + pointsEarned
+    const newPointsBalance = (status.points_balance ?? 0) + pointsEarned
+    const newVisitCount = (status.visit_count ?? 0) + 1
 
     // Calculate new tier based on lifetime points
-    let newTier: string = status.current_tier
+    let newTier: string = status.current_tier ?? 'bronze'
     if (newLifetimePoints >= 5000) newTier = 'platinum'
     else if (newLifetimePoints >= 2000) newTier = 'gold'
     else if (newLifetimePoints >= 500) newTier = 'silver'

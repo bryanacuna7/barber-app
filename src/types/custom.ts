@@ -44,12 +44,12 @@ export interface SubscriptionStatusResponse {
   trial_days_left: number | null
   has_access: boolean
   days_remaining: number | null
-  usage?: {
-    clients: { current: number; max: number }
-    barbers: { current: number; max: number }
-    services: { current: number; max: number }
+  usage: {
+    clients: { current: number; max: number | null }
+    barbers: { current: number; max: number | null }
+    services: { current: number; max: number | null }
   }
-  can_use_branding?: boolean
+  can_use_branding: boolean
 }
 
 // =============================================================================
@@ -101,6 +101,9 @@ export interface NotificationPreferences {
   email_subscription_expiring: boolean
   email_payment_status: boolean
   email_new_appointment: boolean
+  email_appointment_reminder: boolean
+  email_new_business: boolean
+  email_payment_pending: boolean
 }
 
 // =============================================================================

@@ -25,35 +25,15 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import type { CancellationPolicy } from '@/types'
 import type { PromoRule } from '@/types/promo'
+import type { Database } from '@/types/database'
+
+type AppointmentsRow = Database['public']['Tables']['appointments']['Row']
+type AppointmentsInsert = Database['public']['Tables']['appointments']['Insert']
 
 // Custom rate limit: 5 requests/min (same as cancel — reschedules should be rare)
 const RESCHEDULE_RATE_LIMIT = { interval: 60_000, maxRequests: 5 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-interface AppointmentRow {
-  id: string
-  status: string
-  scheduled_at: string
-  service_id: string | null
-  barber_id: string | null
-  business_id: string
-  client_id: string | null
-  notes: string | null
-  reschedule_count: number | null
-  duration_minutes: number | null
-  client: { name: string | null; phone: string | null; email: string | null } | null
-}
-
-interface BusinessRow {
-  id: string
-  name: string
-  owner_id: string
-  slug: string
-  cancellation_policy: CancellationPolicy | null
-  promotional_slots: unknown
-  timezone: string | null
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -104,13 +84,13 @@ export async function POST(request: NextRequest) {
     const serviceClient = createServiceClient()
 
     // 5. Lookup appointment by tracking_token
-    const { data: appointment, error: apptError } = (await (serviceClient as any)
+    const { data: appointment, error: apptError } = await serviceClient
       .from('appointments')
       .select(
-        'id, status, scheduled_at, service_id, barber_id, business_id, client_id, notes, reschedule_count, duration_minutes, client:clients(name, phone, email)'
+        'id, status, scheduled_at, service_id, barber_id, business_id, client_id, client_notes, reschedule_count, duration_minutes, client:clients(name, phone, email)'
       )
       .eq('tracking_token', token)
-      .single()) as { data: AppointmentRow | null; error: unknown }
+      .single()
 
     if (apptError || !appointment) {
       return NextResponse.json({ error: 'Cita no encontrada' }, { status: 404 })
@@ -122,27 +102,28 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Guard: max 2 reschedules
-    const currentRescheduleCount = (appointment as any).reschedule_count ?? 0
+    const currentRescheduleCount = appointment.reschedule_count ?? 0
     if (currentRescheduleCount >= 2) {
       return NextResponse.json({ error: 'Máximo 2 reagendamientos por cita' }, { status: 400 })
     }
 
     // 8. Lookup business
-    const { data: business, error: bizError } = (await (serviceClient as any)
+    const { data: business, error: bizError } = await serviceClient
       .from('businesses')
       .select('id, cancellation_policy, name, owner_id, slug, promotional_slots, timezone')
       .eq('id', appointment.business_id)
-      .single()) as { data: BusinessRow | null; error: unknown }
+      .single()
 
     if (bizError || !business) {
       return NextResponse.json({ error: 'Negocio no encontrado' }, { status: 404 })
     }
 
-    const policy: CancellationPolicy = (business.cancellation_policy as CancellationPolicy) ?? {
-      enabled: false,
-      deadline_hours: 24,
-      allow_reschedule: false,
-    }
+    const policy: CancellationPolicy =
+      (business.cancellation_policy as unknown as CancellationPolicy) ?? {
+        enabled: false,
+        deadline_hours: 24,
+        allow_reschedule: false,
+      }
 
     // 9. Guard: policy must be enabled and allow_reschedule must be true
     if (!policy.enabled) {
@@ -232,7 +213,7 @@ export async function POST(request: NextRequest) {
     ).toISOString()
 
     // 15. Evaluate promo for new slot (optional)
-    const promoRules: PromoRule[] = (business.promotional_slots as PromoRule[]) || []
+    const promoRules: PromoRule[] = (business.promotional_slots as unknown as PromoRule[]) || []
     let promoEval = null
     let finalPrice: number | null = null
 
@@ -266,7 +247,7 @@ export async function POST(request: NextRequest) {
       duration_minutes: durationMin,
       status: 'pending',
       client_id: appointment.client_id,
-      notes: appointment.notes,
+      notes: appointment.client_notes,
       rescheduled_from: appointment.id,
       reschedule_count: currentRescheduleCount + 1,
       tracking_expires_at: trackingExpiresAt,

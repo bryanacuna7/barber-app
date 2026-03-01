@@ -10,9 +10,34 @@ import { canModifyBarberAppointments } from '@/lib/rbac'
 import { sendPushToUser } from '@/lib/push/sender'
 import { notify } from '@/lib/notifications/orchestrator'
 import { createServiceClient } from '@/lib/supabase/service-client'
+import type { TablesUpdate } from '@/types/database'
 
 interface RouteParams {
   params: Promise<{ id: string }>
+}
+
+/** Shape returned by the initial appointment fetch (includes barber join) */
+interface AppointmentWithBarber {
+  id: string
+  status: string | null
+  barber_id: string | null
+  business_id: string
+  client_id: string | null
+  service_id: string | null
+  price: number
+  started_at: string | null
+  source: string | null
+  barber: { id: string; name: string } | { id: string; name: string }[] | null
+}
+
+/** Shape returned by the next-appointment lookup (includes service join) */
+interface NextAppointmentResult {
+  id: string
+  client_id: string | null
+  scheduled_at: string
+  tracking_token: string | null
+  barber_id: string | null
+  service: { name: string } | { name: string }[] | null
 }
 
 /**
@@ -96,7 +121,10 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         )
         .eq('id', appointmentId)
         .eq('business_id', business.id)
-        .single()) as any
+        .single()) as unknown as {
+        data: AppointmentWithBarber | null
+        error: { message: string } | null
+      }
 
       if (fetchError || !appointment) {
         return notFoundResponse('Cita no encontrada')
@@ -110,17 +138,20 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       const canModify = await canModifyBarberAppointments(
         supabase,
         user.id,
-        appointment.barber_id,
+        appointment.barber_id ?? '',
         business.id,
         business.owner_id
       )
 
       if (!canModify) {
+        const barberObj = Array.isArray(appointment.barber)
+          ? appointment.barber[0]
+          : appointment.barber
         logSecurity('unauthorized', 'high', {
           userId: user.id,
           userEmail: user.email,
           requestedBarberId: appointment.barber_id,
-          barberName: (appointment.barber as any)?.name,
+          barberName: barberObj?.name,
           appointmentId,
           businessId: business.id,
           endpoint: '/api/appointments/[id]/complete',
@@ -164,32 +195,32 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       }
 
       // 5. Update status to completed with payment + duration data
-      const updateData: Record<string, unknown> = { status: 'completed' }
+      const updateData: TablesUpdate<'appointments'> = { status: 'completed' }
       if (paymentMethod) updateData.payment_method = paymentMethod
       if (actualDurationMinutes !== null) updateData.actual_duration_minutes = actualDurationMinutes
 
       // Update duration stats for smart scheduling (async, non-blocking)
-      if (actualDurationMinutes !== null && appointment.service_id) {
+      if (actualDurationMinutes !== null && appointment.service_id && appointment.barber_id) {
         const serviceClient = createServiceClient()
-        ;(serviceClient.rpc as any)('update_duration_stats', {
-          p_business_id: business.id,
-          p_service_id: appointment.service_id,
-          p_barber_id: appointment.barber_id,
-          p_actual_duration: actualDurationMinutes,
-        })
+        Promise.resolve(
+          serviceClient.rpc('update_duration_stats', {
+            p_business_id: business.id,
+            p_service_id: appointment.service_id,
+            p_barber_id: appointment.barber_id,
+            p_actual_duration: actualDurationMinutes,
+          })
+        )
           .then(() =>
             logger.info({ appointmentId, actualDurationMinutes }, 'Duration stats updated')
           )
-          .catch((err) =>
+          .catch((err: unknown) =>
             logger.error({ err, appointmentId }, 'Duration stats update failed (non-critical)')
           )
       }
 
-      // Note: started_at, actual_duration_minutes, payment_method columns exist after migration 025
-      // Using `as any` until Supabase types are regenerated
-      const { data: updatedAppointment, error: updateError } = (await supabase
+      const { data: updatedAppointment, error: updateError } = await supabase
         .from('appointments')
-        .update(updateData as any)
+        .update(updateData)
         .eq('id', appointmentId)
         .eq('business_id', business.id)
         .select(
@@ -208,7 +239,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         service:services(id, name, duration_minutes, price)
       `
         )
-        .single()) as any
+        .single()
 
       if (updateError) {
         logger.error({ err: updateError }, 'Error updating appointment status')
@@ -245,7 +276,12 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       logger.info({ appointmentId, status: 'completed' }, 'Appointment status changed to completed')
 
       // Push to business owner via orchestrator (async, non-blocking)
-      const clientName = (updatedAppointment as any).client?.name || 'Cliente'
+      const clientRow = updatedAppointment
+        ? Array.isArray(updatedAppointment.client)
+          ? updatedAppointment.client[0]
+          : updatedAppointment.client
+        : null
+      const clientName = clientRow?.name || 'Cliente'
       const durationStr = actualDurationMinutes ? `${actualDurationMinutes}min` : ''
       const paymentLabels: Record<string, string> = {
         cash: 'Efectivo',
@@ -289,7 +325,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         .select(
           'id, client_id, scheduled_at, tracking_token, barber_id, service:services!appointments_service_id_fkey(name)'
         )
-        .eq('barber_id', appointment.barber_id)
+        .eq('barber_id', appointment.barber_id ?? '')
         .eq('business_id', business.id)
         .in('status', ['pending', 'confirmed'])
         .neq('id', appointmentId)
@@ -297,7 +333,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         .lte('scheduled_at', sixtyMinFromNow.toISOString())
         .order('scheduled_at', { ascending: true })
         .limit(1)
-        .single()) as any
+        .single()) as unknown as { data: NextAppointmentResult | null; error: unknown }
 
       if (nextAppt?.client_id) {
         const { data: nextClient } = await serviceClient
@@ -307,7 +343,10 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
           .single()
 
         if (nextClient?.user_id) {
-          const barberName = (appointment.barber as any)?.name || 'Tu miembro del equipo'
+          const barberEntry = Array.isArray(appointment.barber)
+            ? appointment.barber[0]
+            : appointment.barber
+          const barberName = barberEntry?.name || 'Tu miembro del equipo'
           const trackingPath = nextAppt.tracking_token
             ? `/track/${nextAppt.tracking_token}`
             : '/mi-cuenta'

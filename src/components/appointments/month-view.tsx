@@ -260,7 +260,13 @@ export const MonthView = memo(function MonthView({
                       const aptTime = format(new Date(apt.scheduled_at), 'HH:mm')
 
                       // Status color mapping (simplified for pills)
-                      const statusColors = {
+                      type AppointmentStatusKey =
+                        | 'pending'
+                        | 'confirmed'
+                        | 'completed'
+                        | 'cancelled'
+                        | 'no_show'
+                      const statusColors: Record<AppointmentStatusKey, string> = {
                         pending: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
                         confirmed:
                           'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -276,7 +282,7 @@ export const MonthView = memo(function MonthView({
                           key={apt.id}
                           className={cn(
                             'text-[9px] md:text-[10px] font-medium px-1 md:px-1.5 py-0.5 rounded truncate',
-                            statusColors[apt.status]
+                            statusColors[(apt.status ?? 'pending') as AppointmentStatusKey]
                           )}
                           title={`${aptTime} - ${apt.client?.name || 'Sin cliente'}`}
                         >

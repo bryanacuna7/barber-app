@@ -87,16 +87,16 @@ export async function GET(request: Request) {
       if (stats) {
         switch (unlockConditions.type) {
           case 'revenue':
-            current = stats.total_revenue
+            current = stats.total_revenue ?? 0
             break
           case 'appointments':
-            current = stats.total_appointments
+            current = stats.total_appointments ?? 0
             break
           case 'clients':
-            current = stats.total_clients
+            current = stats.total_clients ?? 0
             break
           case 'streak':
-            current = stats.current_streak_days
+            current = stats.current_streak_days ?? 0
             break
         }
         progress = threshold > 0 ? Math.min((current / threshold) * 100, 100) : 0

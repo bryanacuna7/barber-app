@@ -89,7 +89,7 @@ function PulseSpinner({ size, className }: Pick<SpinnerProps, 'size' | 'classNam
     <div
       className={cn(
         'relative inline-flex items-center justify-center',
-        sizeClasses[size],
+        sizeClasses[size ?? 'md'],
         className
       )}
     >

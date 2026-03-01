@@ -6,11 +6,11 @@ import { motion } from 'framer-motion'
 
 interface EarnedBadge {
   id: string
-  claimed_at: string
+  claimed_at: string | null
   milestone: {
-    badge_icon: string
+    badge_icon: string | null
     badge_name: string
-  }
+  } | null
 }
 
 interface BadgesShowcaseProps {
@@ -43,16 +43,18 @@ export function BadgesShowcase({ earnedBadges }: BadgesShowcaseProps) {
               className="text-center"
             >
               <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-900 rounded-lg p-6 mb-2 shadow-lg hover:shadow-xl transition-shadow">
-                <div className="text-5xl mb-2">{badge.milestone.badge_icon}</div>
+                <div className="text-5xl mb-2">{badge.milestone?.badge_icon}</div>
                 <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  {badge.milestone.badge_name}
+                  {badge.milestone?.badge_name}
                 </div>
               </div>
               <Badge variant="default" className="text-xs">
-                {new Date(badge.claimed_at).toLocaleDateString('es-ES', {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                {badge.claimed_at
+                  ? new Date(badge.claimed_at).toLocaleDateString('es-ES', {
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  : '—'}
               </Badge>
             </motion.div>
           ))}

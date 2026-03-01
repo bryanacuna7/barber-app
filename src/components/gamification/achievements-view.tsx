@@ -14,7 +14,7 @@ import type { AchievementCategory, AchievementWithProgress } from '@/types'
 
 interface AchievementsViewProps {
   businessId: string
-  barberId?: string
+  barberId?: string | null
 }
 
 const categoryIcons: Record<AchievementCategory, React.ReactNode> = {

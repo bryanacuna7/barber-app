@@ -177,7 +177,7 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm lg:text-base">
-                    {formatCurrency(service.revenue, false)}
+                    {formatCurrency(service.revenue ?? 0, false)}
                   </p>
                 </div>
               </div>

@@ -240,7 +240,14 @@ export function logCron(
  * Log Security Event
  */
 export function logSecurity(
-  event: 'rate_limit' | 'invalid_file' | 'path_traversal' | 'unauthorized' | 'forbidden',
+  event:
+    | 'rate_limit'
+    | 'invalid_file'
+    | 'path_traversal'
+    | 'unauthorized'
+    | 'forbidden'
+    | 'unauthenticated_conversion'
+    | 'unauthorized_conversion',
   severity: 'low' | 'medium' | 'high' | 'critical',
   extra?: Record<string, unknown>
 ) {

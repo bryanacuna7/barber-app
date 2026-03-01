@@ -217,9 +217,9 @@ export default async function ReferenciasPage() {
 
       {/* Referral Code Card — always visible (primary action) */}
       <ReferralCodeCard
-        referralCode={data.referralCode}
-        signupUrl={data.signupUrl}
-        qrCodeUrl={data.qrCodeUrl}
+        referralCode={data.referralCode ?? ''}
+        signupUrl={data.signupUrl ?? ''}
+        qrCodeUrl={data.qrCodeUrl ?? undefined}
       />
 
       {/* Milestone Progress — collapsible on mobile */}

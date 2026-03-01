@@ -380,7 +380,8 @@ export const WeekView = memo(function WeekView({
   }, [weekDays])
 
   // Status color mapping
-  const statusColors = {
+  type AppointmentStatusKey = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+  const statusColors: Record<AppointmentStatusKey, string> = {
     pending:
       'bg-blue-100 border-blue-300 text-blue-900 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-200',
     confirmed:
@@ -576,7 +577,7 @@ export const WeekView = memo(function WeekView({
               'rounded-md border-l-4 p-1 md:p-2 shadow-lg',
               'text-left text-[10px] md:text-xs overflow-hidden',
               'transform scale-105 opacity-90',
-              statusColors[activeAppointment.status]
+              statusColors[(activeAppointment.status ?? 'pending') as AppointmentStatusKey]
             )}
             style={{
               width: '140px',

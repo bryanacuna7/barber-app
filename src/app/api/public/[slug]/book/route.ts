@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { processAppointmentLoyalty } from '@/lib/gamification/loyalty-calculator-server'
@@ -30,7 +30,10 @@ const bookingSchema = z.object({
   smart_token: z.string().regex(uuidPattern, 'Invalid UUID').optional(),
 })
 
-export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   const startTime = Date.now()
   const { slug } = await params
 
@@ -38,7 +41,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   logRequest(request, { slug, endpoint: 'public_booking' })
 
   // Rate limiting - prevent booking spam/abuse (30 requests per minute)
-  const rateLimitResult = await rateLimit(request as any, RateLimitPresets.moderate)
+  const rateLimitResult = await rateLimit(request, RateLimitPresets.moderate)
   if (!rateLimitResult.success) {
     logSecurity('rate_limit', 'medium', { slug, endpoint: 'public_booking' })
     logResponse(request, 429, Date.now() - startTime)
@@ -94,15 +97,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   const supabase = await createServiceClient()
 
   // Get business
-  // Note: smart_duration_enabled/promotional_slots added in migrations 033/034, using `as any`
-  const { data: business, error: businessError } = (await supabase
+  const { data: business, error: businessError } = await supabase
     .from('businesses')
     .select(
       'id, name, logo_url, brand_primary_color, owner_id, smart_duration_enabled, promotional_slots, timezone, advance_payment_enabled'
     )
     .eq('slug', slug)
     .eq('is_active', true)
-    .single()) as any
+    .single()
 
   if (businessError || !business) {
     logger.warn({ slug, error: businessError }, 'Business not found for booking')
@@ -167,12 +169,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
   // 1. If authenticated, check if user already has a client record in this business
   if (authUserId) {
-    const { data: userClient } = (await supabase
+    const { data: userClient } = await supabase
       .from('clients')
       .select('id, user_id, claim_token')
       .eq('business_id', business.id)
       .eq('user_id', authUserId)
-      .single()) as any
+      .single()
 
     if (userClient) {
       client = userClient
@@ -183,7 +185,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
           name: client_name,
           phone: client_phone,
           ...(client_email ? { email: client_email } : {}),
-        } as any)
+        })
         .eq('id', userClient.id)
       logger.debug(
         { clientId: client.id, businessId: business.id, authUserId },
@@ -195,21 +197,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   // 2. If no match by user_id, look up by phone with dual lookup (normalized → raw fallback)
   if (!client) {
     // Try normalized phone first
-    let { data: existingClient } = (await supabase
+    let { data: existingClient } = await supabase
       .from('clients')
       .select('id, user_id, claim_token')
       .eq('business_id', business.id)
       .eq('phone', normalizedPhone)
-      .single()) as any
+      .single()
 
     // Fallback: try raw format for legacy records (e.g., "8888-1234")
     if (!existingClient && normalizedPhone !== client_phone) {
-      const { data: legacyClient } = (await supabase
+      const { data: legacyClient } = await supabase
         .from('clients')
         .select('id, user_id, claim_token')
         .eq('business_id', business.id)
         .eq('phone', client_phone)
-        .single()) as any
+        .single()
 
       if (legacyClient) {
         existingClient = legacyClient
@@ -223,7 +225,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
         if (!collision?.[0]) {
           await supabase
             .from('clients')
-            .update({ phone: normalizedPhone } as any)
+            .update({ phone: normalizedPhone })
             .eq('id', legacyClient.id)
           logger.debug(
             {
@@ -313,7 +315,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   }
 
   // Evaluate promotional discount (shared engine — same as availability API)
-  const promoRules: PromoRule[] = (business.promotional_slots as PromoRule[]) || []
+  const promoRules: PromoRule[] = (business.promotional_slots as unknown as PromoRule[]) || []
   const tz = business.timezone || 'America/Costa_Rica'
   const promoEval = evaluatePromo(
     promoRules,

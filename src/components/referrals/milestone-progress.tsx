@@ -11,8 +11,8 @@ interface Milestone {
   milestone_number: number
   referrals_required: number
   reward_description: string
-  badge_name: string
-  badge_icon: string
+  badge_name: string | null
+  badge_icon: string | null
   tier: string
 }
 

@@ -87,7 +87,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       serviceStats.set(service.id, { name: service.name, bookings: 0, revenue: 0 })
     }
     for (const apt of appointments || []) {
-      const existing = serviceStats.get(apt.service_id)
+      const existing = serviceStats.get(apt.service_id ?? '')
       if (existing) {
         existing.bookings++
         existing.revenue += apt.price ?? 0

@@ -190,13 +190,13 @@ export default function EquipoSettingsPage() {
             user_id: ownerUserId,
             email: ownerEmail,
             name: ownerBarberName,
-          } as Record<string, unknown>)
+          })
           .eq('id', ownerBarberId)
           .eq('business_id', businessId)
 
         if (error) throw error
       } else if (nextActive) {
-        const { data: inserted, error } = await (supabase
+        const { data: inserted, error } = await supabase
           .from('barbers')
           .insert({
             business_id: businessId,
@@ -205,9 +205,9 @@ export default function EquipoSettingsPage() {
             name: ownerBarberName,
             is_active: true,
             role: 'owner',
-          } as Record<string, unknown>)
+          })
           .select('id')
-          .single() as unknown as Promise<{ data: { id: string } | null; error: unknown }>)
+          .single()
 
         if (error || !inserted) throw error
         setOwnerBarberId(inserted.id)

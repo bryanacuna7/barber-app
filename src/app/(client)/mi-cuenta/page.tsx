@@ -161,13 +161,13 @@ function LoyaltyCard({
   loyalty,
 }: {
   loyalty: {
-    points_balance: number
-    current_tier: string
-    lifetime_points: number
-    visit_count: number
+    points_balance: number | null
+    current_tier: string | null
+    lifetime_points: number | null
+    visit_count: number | null
   }
 }) {
-  const tier = TIER_CONFIG[loyalty.current_tier] ?? TIER_CONFIG.bronze
+  const tier = TIER_CONFIG[loyalty.current_tier ?? ''] ?? TIER_CONFIG.bronze
   const TierIcon = tier.icon
 
   return (
@@ -177,18 +177,18 @@ function LoyaltyCard({
           <TierIcon className={`h-5 w-5 ${tier.color}`} />
           <span className={`font-semibold ${tier.color}`}>{tier.label}</span>
         </div>
-        <span className="text-xs text-muted">{loyalty.visit_count} visitas</span>
+        <span className="text-xs text-muted">{loyalty.visit_count ?? 0} visitas</span>
       </div>
 
       <div className="flex items-baseline gap-1 mb-1">
         <span className="text-3xl font-bold text-zinc-900 dark:text-white">
-          {loyalty.points_balance.toLocaleString()}
+          {(loyalty.points_balance ?? 0).toLocaleString()}
         </span>
         <span className="text-sm text-muted">puntos</span>
       </div>
 
       <p className="text-xs text-subtle">
-        {loyalty.lifetime_points.toLocaleString()} puntos acumulados en total
+        {(loyalty.lifetime_points ?? 0).toLocaleString()} puntos acumulados en total
       </p>
     </div>
   )

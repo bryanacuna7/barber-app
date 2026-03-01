@@ -224,14 +224,14 @@ export default function ClientProfilePage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-muted mb-1">Nivel</p>
-              <p className={cn('font-semibold', TIER_CONFIG[loyalty.current_tier]?.color)}>
-                {TIER_CONFIG[loyalty.current_tier]?.label ?? loyalty.current_tier}
+              <p className={cn('font-semibold', TIER_CONFIG[loyalty.current_tier ?? '']?.color)}>
+                {TIER_CONFIG[loyalty.current_tier ?? '']?.label ?? loyalty.current_tier}
               </p>
             </div>
             <div>
               <p className="text-xs text-muted mb-1">Puntos</p>
               <p className="font-semibold text-zinc-900 dark:text-white">
-                {loyalty.points_balance.toLocaleString()}
+                {(loyalty.points_balance ?? 0).toLocaleString()}
               </p>
             </div>
             <div>
@@ -241,7 +241,7 @@ export default function ClientProfilePage() {
             <div>
               <p className="text-xs text-muted mb-1">Puntos Totales</p>
               <p className="font-semibold text-zinc-900 dark:text-white">
-                {loyalty.lifetime_points.toLocaleString()}
+                {(loyalty.lifetime_points ?? 0).toLocaleString()}
               </p>
             </div>
           </div>

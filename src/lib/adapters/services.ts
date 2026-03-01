@@ -19,7 +19,8 @@ type SupabaseService = {
   duration_minutes: number
   price: number | string
   display_order: number | null
-  is_active: boolean
+  is_active: boolean | null
+  business_id?: string
 }
 
 type ServiceMetricsMapValue = {
@@ -61,7 +62,7 @@ export function adaptService(row: SupabaseService, metrics?: ServiceMetricsMapVa
     duration: row.duration_minutes,
     price: Number(row.price),
     displayOrder: row.display_order || 0,
-    isActive: row.is_active,
+    isActive: row.is_active ?? true,
     icon,
     // Business metrics
     bookings: metrics?.bookings,

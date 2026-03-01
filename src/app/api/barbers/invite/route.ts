@@ -102,9 +102,8 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
           page,
           perPage: 50,
         })
-        const match = (listData?.users ?? []).find(
-          (u) => u.email?.toLowerCase() === email.toLowerCase()
-        )
+        const users: { email?: string; id: string }[] = listData?.users ?? []
+        const match = users.find((u) => u.email?.toLowerCase() === email.toLowerCase())
         if (match) foundUserId = match.id
         if (!listData?.users?.length || listData.users.length < 50) break
       }
@@ -205,7 +204,7 @@ export const POST = withAuth(async (request, context, { business, supabase }) =>
       businessName: business.name || 'Tu Barbería',
       barberName: name,
       email,
-      setPasswordUrl,
+      setPasswordUrl: setPasswordUrl ?? undefined,
       loginUrl,
       mode,
     }),

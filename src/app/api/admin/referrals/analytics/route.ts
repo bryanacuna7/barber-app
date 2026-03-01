@@ -47,6 +47,7 @@ export async function GET(request: Request) {
     // Conversions by month
     const conversionsByMonth: { [key: string]: number } = {}
     conversions?.forEach((conv) => {
+      if (!conv.created_at) return
       const date = new Date(conv.created_at)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       conversionsByMonth[monthKey] = (conversionsByMonth[monthKey] || 0) + 1
@@ -83,8 +84,10 @@ export async function GET(request: Request) {
     const midPoint = new Date(periodStart)
     midPoint.setDate(midPoint.getDate() + period / 2)
 
-    const firstHalf = conversions?.filter((c) => new Date(c.created_at) < midPoint).length || 0
-    const secondHalf = conversions?.filter((c) => new Date(c.created_at) >= midPoint).length || 0
+    const firstHalf =
+      conversions?.filter((c) => c.created_at && new Date(c.created_at) < midPoint).length || 0
+    const secondHalf =
+      conversions?.filter((c) => c.created_at && new Date(c.created_at) >= midPoint).length || 0
 
     const growthRate =
       firstHalf > 0

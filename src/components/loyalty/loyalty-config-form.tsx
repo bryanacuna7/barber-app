@@ -83,16 +83,18 @@ export function LoyaltyConfigForm({ businessId, initialProgram }: Props) {
             businessId,
             enabled,
             programType: programType as LoyaltyProgram['programType'],
-            pointsPerCurrencyUnit: parseFloat(pointsPerCurrency) || null,
-            pointsExpiryDays: pointsExpiry ? parseInt(pointsExpiry) : null,
+            pointsPerCurrencyUnit: parseFloat(pointsPerCurrency) || undefined,
+            pointsExpiryDays: pointsExpiry ? parseInt(pointsExpiry) : undefined,
             freeServiceAfterVisits: freeServiceAfterVisits
               ? parseInt(freeServiceAfterVisits)
-              : null,
-            discountAfterVisits: discountAfterVisits ? parseInt(discountAfterVisits) : null,
-            discountPercentage: discountPercentage ? parseFloat(discountPercentage) : null,
+              : undefined,
+            discountAfterVisits: discountAfterVisits ? parseInt(discountAfterVisits) : undefined,
+            discountPercentage: discountPercentage ? parseFloat(discountPercentage) : undefined,
             referralRewardType: referralRewardType as LoyaltyProgram['referralRewardType'],
-            referralRewardAmount: referralRewardAmount ? parseFloat(referralRewardAmount) : null,
-            refereeRewardAmount: refereeRewardAmount ? parseFloat(refereeRewardAmount) : null,
+            referralRewardAmount: referralRewardAmount
+              ? parseFloat(referralRewardAmount)
+              : undefined,
+            refereeRewardAmount: refereeRewardAmount ? parseFloat(refereeRewardAmount) : undefined,
             createdAt: initialProgram?.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }

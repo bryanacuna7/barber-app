@@ -361,7 +361,7 @@ export default function BookingPage() {
               businessName={business.name}
               estimatedPoints={
                 booking.service
-                  ? Math.floor(booking.service.price * loyaltyProgram.pointsPerCurrencyUnit)
+                  ? Math.floor(booking.service.price * (loyaltyProgram.pointsPerCurrencyUnit ?? 1))
                   : 0
               }
               onCreateAccount={() => {
@@ -439,7 +439,7 @@ export default function BookingPage() {
             />
             {/* Subtle PWA install CTA — only on info step to avoid distracting from booking flow */}
             <div className="mt-4">
-              <InstallAppCta variant="subtle" businessName={business.name} />
+              <InstallAppCta variant="subtle" businessName={business?.name ?? ''} />
             </div>
           </>
         )}

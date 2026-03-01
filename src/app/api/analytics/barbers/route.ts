@@ -105,7 +105,7 @@ export const GET = withAuth(async (request, context, { business, supabase }) => 
       })
     }
     for (const apt of appointments || []) {
-      const existing = barberStats.get(apt.barber_id)
+      const existing = barberStats.get(apt.barber_id ?? '')
       if (existing) {
         existing.appointments++
         existing.revenue += apt.price ?? 0

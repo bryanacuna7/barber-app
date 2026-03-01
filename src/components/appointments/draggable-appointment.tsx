@@ -97,7 +97,7 @@ export const DraggableAppointment = memo(function DraggableAppointment({
         'rounded-md border-l-4 pointer-events-auto',
         'text-left overflow-hidden',
         'transition-[opacity,box-shadow,transform] duration-150',
-        statusColors[appointment.status],
+        statusColors[(appointment.status ?? 'pending') as keyof StatusColorMap],
         isDragEnabled && 'cursor-grab hover:shadow-md hover:scale-[1.02]',
         isDragging && 'opacity-50 shadow-lg scale-105 cursor-grabbing',
         isBeingDragged && !isDragging && 'opacity-30',

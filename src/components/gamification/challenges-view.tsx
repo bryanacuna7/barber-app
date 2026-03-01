@@ -27,7 +27,7 @@ interface ChallengeWithParticipants extends BarberChallenge {
 
 interface ChallengesViewProps {
   businessId: string
-  barberId?: string
+  barberId?: string | null
 }
 
 export function ChallengesView({ businessId, barberId }: ChallengesViewProps) {

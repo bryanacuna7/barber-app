@@ -88,7 +88,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
       const canModify = await canModifyBarberAppointments(
         supabase,
         user.id,
-        appointment.barber_id,
+        appointment.barber_id ?? '',
         business.id,
         business.owner_id
       )

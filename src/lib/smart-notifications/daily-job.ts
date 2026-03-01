@@ -312,7 +312,8 @@ export async function runSmartPromoNotifications(
       ])
 
       const pushSent =
-        pushResult.status === 'fulfilled' && (pushResult.value?.sent as number | undefined) > 0
+        pushResult.status === 'fulfilled' &&
+        ((pushResult.value?.sent as number | undefined) ?? 0) > 0
       const inAppId = inAppResult.status === 'fulfilled' ? inAppResult.value : null
       const inAppSent = Boolean(inAppId)
 

@@ -110,8 +110,11 @@ export default async function AdminReferralsPage() {
         successfulReferrals: referrer.successful_referrals,
         currentMilestone: referrer.current_milestone,
         conversionRate:
-          referrer.total_referrals > 0
-            ? ((referrer.successful_referrals / referrer.total_referrals) * 100).toFixed(1)
+          (referrer.total_referrals ?? 0) > 0
+            ? (
+                ((referrer.successful_referrals ?? 0) / (referrer.total_referrals ?? 1)) *
+                100
+              ).toFixed(1)
             : '0.0',
         pointsBalance: referrer.points_balance,
         createdAt: referrer.created_at,
@@ -167,6 +170,7 @@ export default async function AdminReferralsPage() {
     // Process analytics data
     const conversionsByMonth: { [key: string]: number } = {}
     periodConversions?.forEach((conv) => {
+      if (!conv.created_at) return
       const date = new Date(conv.created_at)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       conversionsByMonth[monthKey] = (conversionsByMonth[monthKey] || 0) + 1
@@ -187,9 +191,11 @@ export default async function AdminReferralsPage() {
     const midPoint = new Date(periodStart)
     midPoint.setDate(midPoint.getDate() + period / 2)
     const firstHalf =
-      periodConversions?.filter((c) => new Date(c.created_at) < midPoint).length || 0
+      periodConversions?.filter((c) => c.created_at && new Date(c.created_at) < midPoint).length ||
+      0
     const secondHalf =
-      periodConversions?.filter((c) => new Date(c.created_at) >= midPoint).length || 0
+      periodConversions?.filter((c) => c.created_at && new Date(c.created_at) >= midPoint).length ||
+      0
     const growthRate =
       firstHalf > 0
         ? (((secondHalf - firstHalf) / firstHalf) * 100).toFixed(1)

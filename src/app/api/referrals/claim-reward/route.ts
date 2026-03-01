@@ -77,13 +77,14 @@ export async function POST(request: Request) {
     }
 
     // Verify milestone has been reached
-    if (referralStats.successful_referrals < milestone.referrals_required) {
+    const successfulReferrals = referralStats.successful_referrals ?? 0
+    if (successfulReferrals < milestone.referrals_required) {
       return NextResponse.json(
         {
           error: 'Milestone not reached',
           required: milestone.referrals_required,
-          current: referralStats.successful_referrals,
-          remaining: milestone.referrals_required - referralStats.successful_referrals,
+          current: successfulReferrals,
+          remaining: milestone.referrals_required - successfulReferrals,
         },
         { status: 400 }
       )

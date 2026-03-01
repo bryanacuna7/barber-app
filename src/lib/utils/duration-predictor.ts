@@ -101,8 +101,8 @@ async function getPredictionWithMeta(
 
   // Level 1: Client+Barber+Service (per-client, per-barber)
   if (clientId && barberId) {
-    const { data: clientBarberData } = (await supabase
-      .from('appointments' as any)
+    const { data: clientBarberData } = await supabase
+      .from('appointments')
       .select('actual_duration_minutes')
       .eq('business_id', businessId)
       .eq('client_id', clientId)
@@ -111,11 +111,11 @@ async function getPredictionWithMeta(
       .eq('status', 'completed')
       .gt('actual_duration_minutes', 0)
       .order('scheduled_at', { ascending: false })
-      .limit(20)) as any
+      .limit(20)
 
-    const durations: number[] = (clientBarberData || [])
-      .map((r: any) => Number(r.actual_duration_minutes))
-      .filter((n: number) => n > 0)
+    const durations: number[] = (clientBarberData ?? [])
+      .map((r) => Number(r.actual_duration_minutes ?? 0))
+      .filter((n) => n > 0)
 
     if (durations.length >= MIN_CLIENT_SAMPLES) {
       return {
@@ -128,8 +128,8 @@ async function getPredictionWithMeta(
 
   // Level 2: Client+Service (per-client, any barber)
   if (clientId) {
-    const { data: clientData } = (await supabase
-      .from('appointments' as any)
+    const { data: clientData } = await supabase
+      .from('appointments')
       .select('actual_duration_minutes')
       .eq('business_id', businessId)
       .eq('client_id', clientId)
@@ -137,11 +137,11 @@ async function getPredictionWithMeta(
       .eq('status', 'completed')
       .gt('actual_duration_minutes', 0)
       .order('scheduled_at', { ascending: false })
-      .limit(20)) as any
+      .limit(20)
 
-    const durations: number[] = (clientData || [])
-      .map((r: any) => Number(r.actual_duration_minutes))
-      .filter((n: number) => n > 0)
+    const durations: number[] = (clientData ?? [])
+      .map((r) => Number(r.actual_duration_minutes ?? 0))
+      .filter((n) => n > 0)
 
     if (durations.length >= MIN_CLIENT_SAMPLES) {
       return {
@@ -153,19 +153,18 @@ async function getPredictionWithMeta(
   }
 
   // Level 3: Barber+Service specific (from stats table)
-  // Note: service_duration_stats table added in migration 032, using `as any` until types regenerated
   if (barberId) {
-    const { data: barberStats } = (await supabase
-      .from('service_duration_stats' as any)
+    const { data: barberStats } = await supabase
+      .from('service_duration_stats')
       .select('avg_duration_minutes, sample_count')
       .eq('business_id', businessId)
       .eq('service_id', serviceId)
       .eq('barber_id', barberId)
-      .single()) as any
+      .single()
 
     if (barberStats && barberStats.sample_count >= MIN_BARBER_SAMPLES) {
       return {
-        duration: Math.round(Number(barberStats.avg_duration_minutes)),
+        duration: Math.round(barberStats.avg_duration_minutes),
         cascadeLevel: 'barber',
         sampleCount: barberStats.sample_count,
       }
@@ -173,17 +172,17 @@ async function getPredictionWithMeta(
   }
 
   // Level 4: Service-wide average (barber_id IS NULL)
-  const { data: serviceStats } = (await supabase
-    .from('service_duration_stats' as any)
+  const { data: serviceStats } = await supabase
+    .from('service_duration_stats')
     .select('avg_duration_minutes, sample_count')
     .eq('business_id', businessId)
     .eq('service_id', serviceId)
     .is('barber_id', null)
-    .single()) as any
+    .single()
 
   if (serviceStats && serviceStats.sample_count >= MIN_SERVICE_SAMPLES) {
     return {
-      duration: Math.round(Number(serviceStats.avg_duration_minutes)),
+      duration: Math.round(serviceStats.avg_duration_minutes),
       cascadeLevel: 'service',
       sampleCount: serviceStats.sample_count,
     }
@@ -203,13 +202,13 @@ async function getPredictionWithMeta(
 export async function isSmartDurationEnabled(businessId: string): Promise<boolean> {
   try {
     const supabase = createServiceClient()
-    const { data } = (await supabase
+    const { data } = await supabase
       .from('businesses')
       .select('smart_duration_enabled')
       .eq('id', businessId)
-      .single()) as any
+      .single()
 
-    return (data as any)?.smart_duration_enabled === true
+    return data?.smart_duration_enabled === true
   } catch {
     return false
   }

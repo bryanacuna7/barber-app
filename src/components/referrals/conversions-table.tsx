@@ -9,7 +9,7 @@ interface Conversion {
     name: string
   } | null
   status: 'pending' | 'trial' | 'active' | 'churned'
-  created_at: string
+  created_at: string | null
   converted_at: string | null
 }
 
@@ -107,7 +107,9 @@ export function ConversionsTable({ conversions }: ConversionsTableProps) {
                   </td>
                   <td className="py-3 px-4 text-sm">{getStatusBadge(conversion.status)}</td>
                   <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400">
-                    {new Date(conversion.created_at).toLocaleDateString('es-ES')}
+                    {conversion.created_at
+                      ? new Date(conversion.created_at).toLocaleDateString('es-ES')
+                      : '—'}
                   </td>
                   <td className="py-3 px-4 text-sm text-zinc-600 dark:text-zinc-400">
                     {conversion.converted_at
