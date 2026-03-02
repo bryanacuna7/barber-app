@@ -216,6 +216,14 @@ function MiDiaPageContent() {
     [isOwner, router, toast]
   )
 
+  const handlePhotoOnboardingStep = useCallback(() => {
+    if (isOwner) {
+      router.push('/barberos')
+      return
+    }
+    router.push('/mi-dia/cuenta')
+  }, [isOwner, router])
+
   // Context/profile loading state
   if (profileLoading) {
     return (
@@ -356,9 +364,7 @@ function MiDiaPageContent() {
               barberName={barberName}
               hasPhoto={hasPhoto}
               hasPushSubscription={false}
-              onOpenPhotoSettings={() =>
-                handleOwnerOnlyOnboardingStep('/barberos', 'foto de perfil')
-              }
+              onOpenPhotoSettings={handlePhotoOnboardingStep}
               onOpenScheduleSettings={() =>
                 handleOwnerOnlyOnboardingStep('/configuracion/horario', 'horario')
               }

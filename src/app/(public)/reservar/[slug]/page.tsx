@@ -430,6 +430,14 @@ export default function BookingPage() {
               submitting={submitting}
               error={error}
               discount={booking.time.discount}
+              slug={slug}
+              isAuthenticated={isAuthenticated}
+              bookingState={{
+                serviceId: booking.service?.id,
+                barberId: booking.barber?.id,
+                date: booking.date?.toISOString(),
+                time: booking.time?.time,
+              }}
               onChangeName={(value) => setBooking((prev) => ({ ...prev, clientName: value }))}
               onChangePhone={(value) => setBooking((prev) => ({ ...prev, clientPhone: value }))}
               onChangeEmail={(value) => setBooking((prev) => ({ ...prev, clientEmail: value }))}

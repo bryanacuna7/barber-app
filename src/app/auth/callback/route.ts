@@ -49,8 +49,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect to custom destination if provided, otherwise dashboard
+  // Redirect to custom destination if provided
   const next = searchParams.get('next')
-  const destination = next?.startsWith('/') ? next : '/dashboard'
-  return NextResponse.redirect(new URL(destination, appUrl))
+  if (next?.startsWith('/') && !next.startsWith('//')) {
+    return NextResponse.redirect(new URL(next, appUrl))
+  }
+
+  // Smart redirect based on user role
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) {
+    const { detectUserRole } = await import('@/lib/auth/roles')
+    const roleInfo = await detectUserRole(supabase, user.id)
+    const destination = roleInfo?.role === 'client' ? '/mi-cuenta' : '/dashboard'
+    return NextResponse.redirect(new URL(destination, appUrl))
+  }
+
+  return NextResponse.redirect(new URL('/dashboard', appUrl))
 }
