@@ -1,18 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import {
-  DollarSign,
-  Save,
-  Loader2,
-  Building2,
-  AlertCircle,
-  CheckCircle2,
-  MessageCircle,
-  Phone,
-} from 'lucide-react'
+import { DollarSign, Save, Loader2, Building2, MessageCircle, Phone } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/toast'
 import type {
   ExchangeRateValue,
   UsdBankAccountValue,
@@ -27,18 +19,33 @@ interface SystemSetting {
   updated_at: string
 }
 
+function formatWhatsappDisplayNumber(value: string): string {
+  const digits = value.replace(/\D/g, '')
+  if (!digits) return ''
+
+  const localNumber = digits.length > 8 ? digits.slice(-8) : digits
+  if (localNumber.length <= 4) return localNumber
+
+  return `${localNumber.slice(0, 4)}-${localNumber.slice(4)}`
+}
+
 export default function AdminConfiguracion() {
+  const toast = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
 
   // Exchange rate state
-  const [exchangeRate, setExchangeRate] = useState<ExchangeRateValue>({
+  const defaultExchangeRate: ExchangeRateValue = {
     usd_to_crc: 510,
     last_updated: new Date().toISOString().split('T')[0],
     notes: '',
+  }
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRateValue>({
+    ...defaultExchangeRate,
   })
+  const [exchangeRateInput, setExchangeRateInput] = useState<string>(
+    defaultExchangeRate.usd_to_crc.toString()
+  )
 
   // USD bank account state
   const [bankAccount, setBankAccount] = useState<UsdBankAccountValue>({
@@ -76,17 +83,24 @@ export default function AdminConfiguracion() {
       // Parse settings
       data.settings?.forEach((setting: SystemSetting) => {
         if (setting.key === 'exchange_rate') {
-          setExchangeRate(setting.value as ExchangeRateValue)
+          const value = setting.value as ExchangeRateValue
+          setExchangeRate(value)
+          setExchangeRateInput(value.usd_to_crc.toString())
         } else if (setting.key === 'usd_bank_account') {
           setBankAccount(setting.value as UsdBankAccountValue)
         } else if (setting.key === 'support_whatsapp') {
-          setWhatsapp(setting.value as SupportWhatsAppValue)
+          const value = setting.value as SupportWhatsAppValue
+          setWhatsapp({
+            ...value,
+            display_number: formatWhatsappDisplayNumber(value.number),
+          })
         } else if (setting.key === 'sinpe_details') {
           setSinpe(setting.value as SinpeDetailsValue)
         }
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading settings')
+      const message = err instanceof Error ? err.message : 'Error loading settings'
+      toast.error(`No se pudo cargar configuración: ${message}`)
     } finally {
       setLoading(false)
     }
@@ -94,8 +108,18 @@ export default function AdminConfiguracion() {
 
   async function saveExchangeRate() {
     setSaving('exchange_rate')
-    setError(null)
-    setSuccess(null)
+
+    const parsedRate = Number(exchangeRateInput)
+    if (!exchangeRateInput || !Number.isFinite(parsedRate) || parsedRate <= 0) {
+      toast.error('Ingresa un tipo de cambio válido mayor a 0')
+      setSaving(null)
+      return
+    }
+
+    const exchangeRateToSave: ExchangeRateValue = {
+      ...exchangeRate,
+      usd_to_crc: parsedRate,
+    }
 
     try {
       const response = await fetch('/api/admin/settings', {
@@ -103,7 +127,7 @@ export default function AdminConfiguracion() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           key: 'exchange_rate',
-          value: exchangeRate,
+          value: exchangeRateToSave,
         }),
       })
 
@@ -114,10 +138,11 @@ export default function AdminConfiguracion() {
 
       const updated = await response.json()
       setExchangeRate(updated.value as ExchangeRateValue)
-      setSuccess('Tipo de cambio actualizado correctamente')
-      setTimeout(() => setSuccess(null), 3000)
+      setExchangeRateInput((updated.value as ExchangeRateValue).usd_to_crc.toString())
+      toast.success('Tipo de cambio actualizado correctamente')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error saving')
+      const message = err instanceof Error ? err.message : 'Error saving'
+      toast.error(`Error al guardar tipo de cambio: ${message}`)
     } finally {
       setSaving(null)
     }
@@ -125,8 +150,6 @@ export default function AdminConfiguracion() {
 
   async function saveBankAccount() {
     setSaving('usd_bank_account')
-    setError(null)
-    setSuccess(null)
 
     try {
       const response = await fetch('/api/admin/settings', {
@@ -145,10 +168,10 @@ export default function AdminConfiguracion() {
 
       const updated = await response.json()
       setBankAccount(updated.value as UsdBankAccountValue)
-      setSuccess('Cuenta bancaria actualizada correctamente')
-      setTimeout(() => setSuccess(null), 3000)
+      toast.success('Cuenta bancaria actualizada correctamente')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error saving')
+      const message = err instanceof Error ? err.message : 'Error saving'
+      toast.error(`Error al guardar cuenta bancaria: ${message}`)
     } finally {
       setSaving(null)
     }
@@ -156,8 +179,19 @@ export default function AdminConfiguracion() {
 
   async function saveWhatsApp() {
     setSaving('support_whatsapp')
-    setError(null)
-    setSuccess(null)
+
+    const sanitizedNumber = whatsapp.number.replace(/\D/g, '')
+    if (sanitizedNumber.length < 8) {
+      toast.error('Ingresa un número válido con código de país')
+      setSaving(null)
+      return
+    }
+
+    const whatsappToSave: SupportWhatsAppValue = {
+      ...whatsapp,
+      number: sanitizedNumber,
+      display_number: formatWhatsappDisplayNumber(sanitizedNumber),
+    }
 
     try {
       const response = await fetch('/api/admin/settings', {
@@ -165,7 +199,7 @@ export default function AdminConfiguracion() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           key: 'support_whatsapp',
-          value: whatsapp,
+          value: whatsappToSave,
         }),
       })
 
@@ -175,11 +209,15 @@ export default function AdminConfiguracion() {
       }
 
       const updated = await response.json()
-      setWhatsapp(updated.value as SupportWhatsAppValue)
-      setSuccess('WhatsApp actualizado correctamente')
-      setTimeout(() => setSuccess(null), 3000)
+      const updatedWhatsapp = updated.value as SupportWhatsAppValue
+      setWhatsapp({
+        ...updatedWhatsapp,
+        display_number: formatWhatsappDisplayNumber(updatedWhatsapp.number),
+      })
+      toast.success('WhatsApp actualizado correctamente')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error saving')
+      const message = err instanceof Error ? err.message : 'Error saving'
+      toast.error(`Error al guardar WhatsApp: ${message}`)
     } finally {
       setSaving(null)
     }
@@ -187,8 +225,6 @@ export default function AdminConfiguracion() {
 
   async function saveSinpe() {
     setSaving('sinpe_details')
-    setError(null)
-    setSuccess(null)
 
     try {
       const response = await fetch('/api/admin/settings', {
@@ -207,10 +243,10 @@ export default function AdminConfiguracion() {
 
       const updated = await response.json()
       setSinpe(updated.value as SinpeDetailsValue)
-      setSuccess('SINPE Móvil actualizado correctamente')
-      setTimeout(() => setSuccess(null), 3000)
+      toast.success('SINPE Móvil actualizado correctamente')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error saving')
+      const message = err instanceof Error ? err.message : 'Error saving'
+      toast.error(`Error al guardar SINPE Móvil: ${message}`)
     } finally {
       setSaving(null)
     }
@@ -231,21 +267,6 @@ export default function AdminConfiguracion() {
         <h1 className="app-page-title">Configuración</h1>
         <p className="app-page-subtitle mt-1 lg:hidden">Configuración global de la plataforma</p>
       </div>
-
-      {/* Alerts */}
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-          <AlertCircle className="h-5 w-5 shrink-0" />
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 p-4 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
-          <CheckCircle2 className="h-5 w-5 shrink-0" />
-          {success}
-        </div>
-      )}
 
       {/* Exchange Rate Card */}
       <Card>
@@ -274,13 +295,20 @@ export default function AdminConfiguracion() {
                   type="number"
                   min="1"
                   step="0.01"
-                  value={exchangeRate.usd_to_crc}
-                  onChange={(e) =>
-                    setExchangeRate({
-                      ...exchangeRate,
-                      usd_to_crc: parseFloat(e.target.value) || 0,
-                    })
-                  }
+                  value={exchangeRateInput}
+                  onChange={(e) => {
+                    const nextValue = e.target.value
+                    setExchangeRateInput(nextValue)
+                    if (nextValue === '') return
+
+                    const parsed = Number(nextValue)
+                    if (!Number.isFinite(parsed) || parsed <= 0) return
+
+                    setExchangeRate((prev) => ({
+                      ...prev,
+                      usd_to_crc: parsed,
+                    }))
+                  }}
                   className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-lg font-semibold dark:border-zinc-700 dark:bg-zinc-800"
                 />
               </div>
@@ -504,17 +532,14 @@ export default function AdminConfiguracion() {
               </label>
               <input
                 type="text"
-                value={whatsapp.display_number}
-                onChange={(e) =>
-                  setWhatsapp({
-                    ...whatsapp,
-                    display_number: e.target.value,
-                  })
-                }
+                value={formatWhatsappDisplayNumber(whatsapp.number)}
+                readOnly
                 placeholder="Ej: 8888-8888"
-                className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800"
+                className="mt-1 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-300"
               />
-              <p className="mt-1 text-xs text-zinc-500">Formato legible para mostrar a usuarios</p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Se genera automáticamente desde el número completo
+              </p>
             </div>
           </div>
 
