@@ -9,6 +9,7 @@ import { notify } from '@/lib/notifications/orchestrator'
 import { evaluatePromo } from '@/lib/promo-engine'
 import { normalizePhone, isValidCRPhone } from '@/lib/utils/phone'
 import { resolveClientForBusiness } from '@/lib/utils/resolve-client'
+import { getSubscriptionStatus } from '@/lib/subscription'
 import NewAppointmentEmail from '@/lib/email/templates/new-appointment'
 import BookingConfirmationClientEmail from '@/lib/email/templates/booking-confirmation-client'
 import type { PromoRule } from '@/types/promo'
@@ -110,6 +111,21 @@ export async function POST(
     logger.warn({ slug, error: businessError }, 'Business not found for booking')
     logResponse(request, 404, Date.now() - startTime)
     return NextResponse.json({ error: 'Business not found' }, { status: 404 })
+  }
+
+  // Block online booking when subscription is inactive (expired/canceled/past_due).
+  const subscription = await getSubscriptionStatus(supabase, business.id)
+  if (!subscription || !subscription.has_access) {
+    logResponse(request, 403, Date.now() - startTime)
+    return NextResponse.json(
+      {
+        error: 'Reservas no disponibles',
+        message:
+          'Esta barbería tiene reservas en línea temporalmente desactivadas. Contacta directamente para asistencia.',
+        code: 'SUBSCRIPTION_INACTIVE',
+      },
+      { status: 403 }
+    )
   }
 
   // Get service

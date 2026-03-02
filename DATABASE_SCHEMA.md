@@ -10,8 +10,8 @@
 > - Creating indexes
 > - Making any assumptions about database structure
 >
-> **Last Updated:** 2026-02-25 (Session 186 - Per-client duration index)
-> **Last Verified Against:** All migrations 001-043
+> **Last Updated:** 2026-03-02 (Session 194 - Dashboard stats range RPC)
+> **Last Verified Against:** All migrations 001-051
 
 ---
 
@@ -813,6 +813,39 @@ SELECT increment_client_stats(
 ```
 
 **Security:** SECURITY DEFINER (bypasses RLS for atomic updates)
+
+#### `get_appointment_overview_range(p_business_id, p_start_date, p_end_date)`
+
+**Created in:** `051_dashboard_stats_range_rpc.sql`
+**Purpose:** Range-based appointment overview for dashboard KPI cards. The dashboard needs explicit `[start, end]` windows (today and current month).
+
+**Parameters:**
+
+- `p_business_id UUID` - Business to query
+- `p_start_date TIMESTAMPTZ` - Range start (inclusive)
+- `p_end_date TIMESTAMPTZ` - Range end (inclusive)
+
+**Returns:** JSON object:
+
+```json
+{
+  "total": 42, // COUNT of pending + confirmed + completed
+  "completed": 15, // COUNT of completed only
+  "total_revenue": 750.0 // SUM(price) of completed
+}
+```
+
+**Usage:**
+
+```sql
+SELECT get_appointment_overview_range(
+  '66bf2172-...'::uuid,
+  '2026-03-02T00:00:00-06:00'::timestamptz,
+  '2026-03-02T23:59:59-06:00'::timestamptz
+);
+```
+
+**Security:** SECURITY INVOKER (respects RLS). Granted to `authenticated`, revoked from `anon`.
 
 ---
 
