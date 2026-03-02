@@ -8,14 +8,21 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.23
+## v0.9.24
 
 ### Nuevo
 
-- Los administradores pueden eliminar un negocio inactivo de forma permanente, con confirmacion por nombre para evitar errores
-- Panel de admin renombrado para mayor claridad
+- Atajos de teclado para navegar entre secciones (1-5), crear cita (N), y abrir busqueda rapida (Cmd+K)
+- Busqueda rapida mejorada con favoritos, recientes, y acciones ancladas
+- Filtros guardados en Clientes y Citas: guarda tus combinaciones de filtros favoritas
+- Seleccion multiple para acciones en lote (exportar, eliminar)
+- Panel lateral de detalle sin salir de la lista
+- Menu contextual con clic derecho en escritorio
+- Notificaciones automaticas cuando el periodo de prueba esta por vencer
 
 ### Mejoras
 
-- El dashboard ahora muestra citas e ingresos del dia juntos en una tarjeta destacada
-- Los precios de servicios en el panel admin se muestran en formato de moneda (₡)
+- Navegacion entre paginas del dashboard mas rapida
+- Estadisticas del dashboard con mayor precision
+- Notificaciones se marcan como leidas de forma instantanea
+- Estados vacios mas claros y utiles en cada seccion

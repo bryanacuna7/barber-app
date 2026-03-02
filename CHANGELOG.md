@@ -4,6 +4,26 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.24] - 2026-03-02
+
+### Nuevo
+
+- Atajos de teclado para navegar entre secciones (1-5), crear cita (N), y abrir busqueda rapida (Cmd+K)
+- Busqueda rapida mejorada con favoritos, recientes, y acciones ancladas
+- Filtros guardados en Clientes y Citas: guarda tus combinaciones de filtros favoritas con un clic
+- Seleccion multiple de clientes y citas para acciones en lote (exportar, eliminar)
+- Panel lateral de detalle de cliente y cita sin salir de la lista
+- Menu contextual con clic derecho en clientes y citas (escritorio)
+- Notificaciones automaticas cuando el periodo de prueba esta por vencer
+- El contador de dias restantes del periodo de prueba se actualiza en tiempo real
+
+### Mejorado
+
+- La navegacion entre paginas del dashboard es mas rapida (menos consultas repetidas al servidor)
+- Las estadisticas del dashboard ahora se calculan con mayor precision por rango de fechas
+- El panel de notificaciones marca todo como leido de forma instantanea
+- Los estados vacios de cada seccion ahora son mas claros y guian mejor al usuario
+
 ## [0.9.23] - 2026-02-27
 
 ### Mejorado
