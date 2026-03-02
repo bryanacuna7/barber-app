@@ -434,10 +434,10 @@ a:focus-visible:not(.focus-ring),
 
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
+    transform: translateX(-100%);
   }
   100% {
-    background-position: 200% 0;
+    transform: translateX(100%);
   }
 }
 
@@ -556,20 +556,55 @@ a:focus-visible:not(.focus-ring),
   animation-duration: 500ms;
 }
 
-/* Skeleton loading animation */
+/* Skeleton loading animation — GPU-composited via transform */
 .skeleton {
-  background: linear-gradient(90deg, #e4e4e7 0%, #f4f4f5 50%, #e4e4e7 100%);
-  background-size: 200% 100%;
+  position: relative;
+  overflow: hidden;
+  background: #e4e4e7;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #f4f4f5 50%, transparent 100%);
   animation: shimmer 1.5s infinite;
+  will-change: transform;
 }
 
 .dark .skeleton {
-  background: linear-gradient(90deg, #27272a 0%, #3f3f46 50%, #27272a 100%);
-  background-size: 200% 100%;
+  background: #27272a;
+}
+
+.dark .skeleton::after {
+  background: linear-gradient(90deg, transparent 0%, #3f3f46 50%, transparent 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* Page enter transition — GPU composited, no JS layout measurement */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.18s ease-out both;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
     animation: none;
   }
 }

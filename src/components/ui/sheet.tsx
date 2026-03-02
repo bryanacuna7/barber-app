@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import {
   motion,
@@ -45,7 +46,12 @@ const useSheetContext = () => {
 }
 
 export function Sheet({ open, onOpenChange, children }: SheetProps) {
+  const [mounted, setMounted] = React.useState(false)
   const previousFocusRef = React.useRef<HTMLElement | null>(null)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   React.useEffect(() => {
     if (open) {
@@ -74,23 +80,27 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [open, onOpenChange])
 
+  const overlay = (
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => onOpenChange(false)}
+            className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm"
+          />
+          {children}
+        </>
+      )}
+    </AnimatePresence>
+  )
+
   return (
     <SheetContext.Provider value={{ onOpenChange }}>
-      <AnimatePresence>
-        {open && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm"
-            />
-            {children}
-          </>
-        )}
-      </AnimatePresence>
+      {mounted ? createPortal(overlay, document.body) : null}
     </SheetContext.Provider>
   )
 }

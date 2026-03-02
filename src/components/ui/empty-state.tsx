@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils/cn'
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Users, Calendar, Search, Database } from 'lucide-react'
+import { Users, Calendar, Search, Database, Scissors, BarChart3, Share2 } from 'lucide-react'
 import { animations } from '@/lib/design-system'
 
 export interface EmptyStateProps {
@@ -12,6 +12,7 @@ export interface EmptyStateProps {
   title: string
   description?: string
   action?: ReactNode
+  secondaryAction?: ReactNode
   variant?: 'default' | 'minimal' | 'illustrated'
   className?: string
 }
@@ -21,6 +22,7 @@ export function EmptyState({
   title,
   description,
   action,
+  secondaryAction,
   variant = 'default',
   className,
 }: EmptyStateProps) {
@@ -107,7 +109,12 @@ export function EmptyState({
 
         <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mb-2">{title}</h3>
         {description && <p className="text-sm text-muted max-w-sm mb-6">{description}</p>}
-        {action}
+        {(action || secondaryAction) && (
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {action}
+            {secondaryAction}
+          </div>
+        )}
       </motion.div>
     )
   }
@@ -131,7 +138,12 @@ export function EmptyState({
       )}
       <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{title}</h3>
       {description && <p className="text-sm text-muted max-w-sm mb-6">{description}</p>}
-      {action}
+      {(action || secondaryAction) && (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {action}
+          {secondaryAction}
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -152,8 +164,30 @@ function EmptyStateCTA({ onClick, label }: { onClick: () => void; label: string 
   )
 }
 
+function EmptyStateSecondaryCTA({ onClick, label }: { onClick: () => void; label: string }) {
+  const prefersReducedMotion = useReducedMotion()
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      className="px-4 py-3 text-sm font-semibold rounded-2xl border border-zinc-200 bg-white text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+      whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
+      whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+    >
+      {label}
+    </motion.button>
+  )
+}
+
 // Predefined empty states for common scenarios
-export function EmptyAppointments({ onCreateNew }: { onCreateNew?: () => void }) {
+export function EmptyAppointments({
+  onCreateNew,
+  onViewGuide,
+}: {
+  onCreateNew?: () => void
+  onViewGuide?: () => void
+}) {
   return (
     <EmptyState
       variant="illustrated"
@@ -161,11 +195,20 @@ export function EmptyAppointments({ onCreateNew }: { onCreateNew?: () => void })
       title="No hay citas programadas"
       description="Comienza creando tu primera cita para gestionar tu agenda."
       action={onCreateNew ? <EmptyStateCTA onClick={onCreateNew} label="Crear Cita" /> : undefined}
+      secondaryAction={
+        onViewGuide ? <EmptyStateSecondaryCTA onClick={onViewGuide} label="Ver Guía" /> : undefined
+      }
     />
   )
 }
 
-export function EmptyClients({ onAddClient }: { onAddClient?: () => void }) {
+export function EmptyClients({
+  onAddClient,
+  onViewGuide,
+}: {
+  onAddClient?: () => void
+  onViewGuide?: () => void
+}) {
   return (
     <EmptyState
       variant="illustrated"
@@ -174,6 +217,76 @@ export function EmptyClients({ onAddClient }: { onAddClient?: () => void }) {
       description="Agrega tu primer cliente para empezar a gestionar tu base de datos."
       action={
         onAddClient ? <EmptyStateCTA onClick={onAddClient} label="Agregar Cliente" /> : undefined
+      }
+      secondaryAction={
+        onViewGuide ? <EmptyStateSecondaryCTA onClick={onViewGuide} label="Ver Guía" /> : undefined
+      }
+    />
+  )
+}
+
+export function EmptyServices({
+  onCreateService,
+  onViewGuide,
+}: {
+  onCreateService?: () => void
+  onViewGuide?: () => void
+}) {
+  return (
+    <EmptyState
+      variant="illustrated"
+      icon={Scissors}
+      title="No hay servicios registrados"
+      description="Crea tu primer servicio para empezar a recibir reservas."
+      action={
+        onCreateService ? (
+          <EmptyStateCTA onClick={onCreateService} label="Crear Servicio" />
+        ) : undefined
+      }
+      secondaryAction={
+        onViewGuide ? <EmptyStateSecondaryCTA onClick={onViewGuide} label="Ver Guía" /> : undefined
+      }
+    />
+  )
+}
+
+export function EmptyAnalytics({
+  onRefresh,
+  onViewGuide,
+}: {
+  onRefresh?: () => void
+  onViewGuide?: () => void
+}) {
+  return (
+    <EmptyState
+      variant="default"
+      icon={BarChart3}
+      title="Aún no hay datos suficientes"
+      description="Cuando registres citas y ventas, aquí verás métricas y tendencias."
+      action={onRefresh ? <EmptyStateCTA onClick={onRefresh} label="Actualizar" /> : undefined}
+      secondaryAction={
+        onViewGuide ? <EmptyStateSecondaryCTA onClick={onViewGuide} label="Ver Guía" /> : undefined
+      }
+    />
+  )
+}
+
+export function EmptyReferences({
+  onShare,
+  onViewGuide,
+}: {
+  onShare?: () => void
+  onViewGuide?: () => void
+}) {
+  return (
+    <EmptyState
+      variant="default"
+      icon={Share2}
+      title="Aún no hay referencias"
+      description="Comparte tu enlace para comenzar a recibir referidos."
+      action={onShare ? <EmptyStateCTA onClick={onShare} label="Compartir Enlace" /> : undefined}
+      secondaryAction={
+        onViewGuide ? <EmptyStateSecondaryCTA onClick={onViewGuide} label="Ver Guía" /> : undefined
       }
     />
   )

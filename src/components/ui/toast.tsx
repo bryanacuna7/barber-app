@@ -8,30 +8,37 @@ import {
   useMemo,
   type ReactNode,
   useEffect,
+  useRef,
 } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { animations } from '@/lib/design-system'
 
-// Types
 type ToastType = 'success' | 'error' | 'warning' | 'info'
+
+interface ToastAction {
+  label: string
+  onClick: () => void
+}
 
 interface Toast {
   id: string
   message: string
   type: ToastType
   duration?: number
+  action?: ToastAction
 }
 
 interface ToastContextValue {
   toasts: Toast[]
-  addToast: (message: string, type?: ToastType, duration?: number) => void
+  addToast: (message: string, type?: ToastType, duration?: number, action?: ToastAction) => void
   removeToast: (id: string) => void
   success: (message: string) => void
   error: (message: string) => void
   warning: (message: string) => void
   info: (message: string) => void
+  undoable: (message: string, onUndo: () => void, duration?: number) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -44,12 +51,12 @@ const serverToastFallback: ToastContextValue = {
   error: noop,
   warning: noop,
   info: noop,
+  undoable: noop,
 }
 
 export function useToast() {
   const context = useContext(ToastContext)
   if (!context) {
-    // In RSC/SSR pre-render, client context can be unavailable; avoid crashing and hydrate on client.
     if (typeof window === 'undefined') {
       return serverToastFallback
     }
@@ -58,7 +65,6 @@ export function useToast() {
   return context
 }
 
-// Provider
 interface ToastProviderProps {
   children: ReactNode
 }
@@ -71,27 +77,28 @@ export function ToastProvider({ children }: ToastProviderProps) {
   }, [])
 
   const addToast = useCallback(
-    (message: string, type: ToastType = 'info', duration: number = 4000) => {
+    (message: string, type: ToastType = 'info', duration: number = 4000, action?: ToastAction) => {
       const id = Math.random().toString(36).slice(2)
-      const toast: Toast = { id, message, type, duration }
-
+      const toast: Toast = { id, message, type, duration, action }
       setToasts((prev) => [...prev, toast])
-
-      if (duration > 0) {
-        setTimeout(() => removeToast(id), duration)
-      }
     },
-    [removeToast]
+    []
   )
 
   const success = useCallback((message: string) => addToast(message, 'success'), [addToast])
   const error = useCallback((message: string) => addToast(message, 'error', 6000), [addToast])
   const warning = useCallback((message: string) => addToast(message, 'warning'), [addToast])
   const info = useCallback((message: string) => addToast(message, 'info'), [addToast])
+  const undoable = useCallback(
+    (message: string, onUndo: () => void, duration: number = 5000) => {
+      addToast(message, 'info', duration, { label: 'Deshacer', onClick: onUndo })
+    },
+    [addToast]
+  )
 
   const value = useMemo(
-    () => ({ toasts, addToast, removeToast, success, error, warning, info }),
-    [toasts, addToast, removeToast, success, error, warning, info]
+    () => ({ toasts, addToast, removeToast, success, error, warning, info, undoable }),
+    [toasts, addToast, removeToast, success, error, warning, info, undoable]
   )
 
   return (
@@ -102,7 +109,6 @@ export function ToastProvider({ children }: ToastProviderProps) {
   )
 }
 
-// Toast Container
 interface ToastContainerProps {
   toasts: Toast[]
   onRemove: (id: string) => void
@@ -110,7 +116,7 @@ interface ToastContainerProps {
 
 function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed bottom-4 right-4 z-[100] flex w-full max-w-sm flex-col gap-2 pointer-events-none">
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
@@ -120,7 +126,6 @@ function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   )
 }
 
-// Individual Toast
 interface ToastItemProps {
   toast: Toast
   onRemove: (id: string) => void
@@ -153,26 +158,64 @@ const iconStyles = {
 function ToastItem({ toast, onRemove }: ToastItemProps) {
   const Icon = icons[toast.type]
   const [progress, setProgress] = useState(100)
+  const remainingRef = useRef(Math.max(0, toast.duration ?? 0))
+  const lastTickRef = useRef(0)
+  const pausedRef = useRef(false)
+  const intervalRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!toast.duration || toast.duration <= 0) return
+    const durationMs = toast.duration
+    if (!durationMs || durationMs <= 0) return
 
-    const duration = toast.duration
-    const startTime = Date.now()
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - startTime
-      const remaining = Math.max(0, 100 - (elapsed / duration) * 100)
-      setProgress(remaining)
+    remainingRef.current = durationMs
+    lastTickRef.current = Date.now()
 
-      if (remaining === 0) {
-        clearInterval(timer)
+    const clearTicker = () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current)
+        intervalRef.current = null
       }
-    }, 50)
+    }
 
-    return () => clearInterval(timer)
-  }, [toast.duration])
+    const tick = () => {
+      if (pausedRef.current) {
+        lastTickRef.current = Date.now()
+        return
+      }
 
-  const handleDragEnd = (_: any, info: PanInfo) => {
+      const now = Date.now()
+      const delta = now - lastTickRef.current
+      lastTickRef.current = now
+
+      remainingRef.current = Math.max(0, remainingRef.current - delta)
+      setProgress((remainingRef.current / durationMs) * 100)
+
+      if (remainingRef.current <= 0) {
+        clearTicker()
+        onRemove(toast.id)
+      }
+    }
+
+    intervalRef.current = window.setInterval(tick, 50)
+
+    return clearTicker
+  }, [toast.duration, toast.id, onRemove])
+
+  const pause = () => {
+    pausedRef.current = true
+  }
+
+  const resume = () => {
+    pausedRef.current = false
+    lastTickRef.current = Date.now()
+  }
+
+  const handleActionClick = () => {
+    toast.action?.onClick()
+    onRemove(toast.id)
+  }
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.x > 100 || info.offset.x < -100) {
       onRemove(toast.id)
     }
@@ -190,6 +233,8 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       onDragEnd={handleDragEnd}
       whileDrag={{ scale: 1.05, rotate: 5 }}
       transition={animations.spring.snappy}
+      onMouseEnter={pause}
+      onMouseLeave={resume}
       className={cn(
         'pointer-events-auto relative overflow-hidden',
         'flex items-start gap-3 p-4 rounded-xl border shadow-lg',
@@ -198,7 +243,6 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       )}
       role="alert"
     >
-      {/* Progress bar */}
       {toast.duration && toast.duration > 0 && (
         <motion.div
           className="absolute bottom-0 left-0 h-1 bg-current opacity-30 rounded-full"
@@ -209,7 +253,20 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       )}
 
       <Icon className={cn('w-5 h-5 flex-shrink-0 mt-0.5', iconStyles[toast.type])} />
-      <p className="flex-1 text-sm font-medium">{toast.message}</p>
+
+      <div className="flex flex-1 items-center gap-2 min-w-0">
+        <p className="text-sm font-medium min-w-0">{toast.message}</p>
+        {toast.action && (
+          <button
+            type="button"
+            onClick={handleActionClick}
+            className="shrink-0 text-xs font-semibold underline underline-offset-4 hover:opacity-80 transition-opacity"
+          >
+            {toast.action.label}
+          </button>
+        )}
+      </div>
+
       <button
         onClick={() => onRemove(toast.id)}
         className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
