@@ -1,39 +1,16 @@
-/**
- * Servicios Page V2 - Demo D: Simplified Hybrid
- *
- * Pattern: React Query + Real-time + Error Boundaries
- * Design: Table view + insights sidebar (320px) + CRUD-first
- * Feature flag: NEXT_PUBLIC_FF_NEW_SERVICIOS=true
- */
-
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { motion, AnimatePresence, useAnimationControls, useReducedMotion } from 'framer-motion'
-import {
-  Plus,
-  Search,
-  Pencil,
-  Trash2,
-  Star,
-  Award,
-  Package,
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-  Scissors,
-  AlertTriangle,
-  BarChart3,
-} from 'lucide-react'
+import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
+import { Plus, Search, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Input } from '@/components/ui/input'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { SwipeableRow } from '@/components/ui/swipeable-row'
 import { NotificationBell } from '@/components/notifications/notification-bell'
-import { formatCurrency } from '@/lib/utils'
+import { AlertTriangle } from 'lucide-react'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import {
@@ -47,320 +24,27 @@ import { ComponentErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRealtimeServices } from '@/hooks/use-realtime-services'
+import { resolveServiceIcon, type ServiceCategory } from '@/lib/services/icons'
+
+// Shared types + helpers
 import {
-  DEFAULT_ICON_BY_CATEGORY,
-  SERVICE_ICON_LABELS,
-  SERVICE_ICON_NAMES,
-  isServiceCategory,
-  resolveServiceIcon,
-  type ServiceCategory,
-  type ServiceIconName,
-} from '@/lib/services/icons'
-import { SERVICE_ICON_MAP } from '@/lib/services/icon-components'
+  type MockService,
+  type CategoryFilter,
+  type SortField,
+  type SortDirection,
+  mockServices,
+  CATEGORY_LABELS,
+  getCategoryColor,
+  resolveCategory,
+  iconNameForCategory,
+  colorForCategory,
+} from '@/components/services/service-types'
 
-// ============================================================================
-// MOCK DATA (Demo D - For UI exploration)
-// ============================================================================
-
-type CategoryFilter = 'all' | ServiceCategory
-type SortField = 'name' | 'bookings' | 'price' | 'duration'
-type SortDirection = 'asc' | 'desc'
-
-interface MockService {
-  id: string
-  name: string
-  description: string
-  category: ServiceCategory
-  duration_minutes: number
-  price: number
-  bookings_this_month: number
-  bookings_last_month: number
-  revenue_this_month: number
-  avg_rating: number
-  total_reviews: number
-  barber_names: string[]
-  iconName: ServiceIconName
-  color: string
-  is_active: boolean
-}
-
-const mockServices: MockService[] = [
-  {
-    id: '1',
-    name: 'Corte Clásico',
-    description: 'Corte tradicional con máquina y tijera',
-    category: 'corte',
-    duration_minutes: 30,
-    price: 8000,
-    bookings_this_month: 87,
-    bookings_last_month: 79,
-    revenue_this_month: 696000,
-    avg_rating: 4.8,
-    total_reviews: 234,
-    barber_names: ['Juan', 'Carlos', 'Roberto'],
-    iconName: 'Scissors',
-    color: 'blue',
-    is_active: true,
-  },
-  {
-    id: '2',
-    name: 'Corte Premium',
-    description: 'Corte personalizado con asesoría de estilo',
-    category: 'corte',
-    duration_minutes: 45,
-    price: 12000,
-    bookings_this_month: 52,
-    bookings_last_month: 48,
-    revenue_this_month: 624000,
-    avg_rating: 4.9,
-    total_reviews: 156,
-    barber_names: ['Juan', 'Roberto'],
-    iconName: 'Layers',
-    color: 'purple',
-    is_active: true,
-  },
-  {
-    id: '3',
-    name: 'Fade Moderno',
-    description: 'Degradado profesional con línea definida',
-    category: 'corte',
-    duration_minutes: 40,
-    price: 10000,
-    bookings_this_month: 64,
-    bookings_last_month: 58,
-    revenue_this_month: 640000,
-    avg_rating: 4.7,
-    total_reviews: 189,
-    barber_names: ['Roberto', 'Carlos'],
-    iconName: 'Scissors',
-    color: 'amber',
-    is_active: true,
-  },
-  {
-    id: '4',
-    name: 'Barba Completa',
-    description: 'Perfilado y arreglo de barba profesional',
-    category: 'barba',
-    duration_minutes: 25,
-    price: 6000,
-    bookings_this_month: 45,
-    bookings_last_month: 42,
-    revenue_this_month: 270000,
-    avg_rating: 4.6,
-    total_reviews: 145,
-    barber_names: ['Carlos', 'Miguel'],
-    iconName: 'Slice',
-    color: 'red',
-    is_active: true,
-  },
-  {
-    id: '5',
-    name: 'Afeitado Clásico',
-    description: 'Afeitado con navaja y toalla caliente',
-    category: 'barba',
-    duration_minutes: 30,
-    price: 8000,
-    bookings_this_month: 38,
-    bookings_last_month: 35,
-    revenue_this_month: 304000,
-    avg_rating: 4.9,
-    total_reviews: 98,
-    barber_names: ['Carlos'],
-    iconName: 'Slice',
-    color: 'cyan',
-    is_active: true,
-  },
-  {
-    id: '6',
-    name: 'Combo VIP',
-    description: 'Corte + Barba + Tratamiento capilar',
-    category: 'combo',
-    duration_minutes: 60,
-    price: 18000,
-    bookings_this_month: 29,
-    bookings_last_month: 25,
-    revenue_this_month: 522000,
-    avg_rating: 5.0,
-    total_reviews: 67,
-    barber_names: ['Juan', 'Roberto'],
-    iconName: 'Crown',
-    color: 'gold',
-    is_active: true,
-  },
-  {
-    id: '7',
-    name: 'Combo Rápido',
-    description: 'Corte + Barba express',
-    category: 'combo',
-    duration_minutes: 45,
-    price: 14000,
-    bookings_this_month: 41,
-    bookings_last_month: 38,
-    revenue_this_month: 574000,
-    avg_rating: 4.7,
-    total_reviews: 112,
-    barber_names: ['Todos'],
-    iconName: 'Gift',
-    color: 'emerald',
-    is_active: true,
-  },
-  {
-    id: '8',
-    name: 'Facial Hidratante',
-    description: 'Limpieza facial + hidratación profunda',
-    category: 'facial',
-    duration_minutes: 50,
-    price: 15000,
-    bookings_this_month: 22,
-    bookings_last_month: 19,
-    revenue_this_month: 330000,
-    avg_rating: 4.8,
-    total_reviews: 54,
-    barber_names: ['Miguel'],
-    iconName: 'Smile',
-    color: 'green',
-    is_active: true,
-  },
-  {
-    id: '9',
-    name: 'Corte Niño',
-    description: 'Corte especial para niños menores de 12 años',
-    category: 'corte',
-    duration_minutes: 20,
-    price: 6000,
-    bookings_this_month: 56,
-    bookings_last_month: 52,
-    revenue_this_month: 336000,
-    avg_rating: 4.5,
-    total_reviews: 178,
-    barber_names: ['Juan', 'Miguel'],
-    iconName: 'Baby',
-    color: 'blue',
-    is_active: true,
-  },
-  {
-    id: '10',
-    name: 'Cejas',
-    description: 'Perfilado y arreglo de cejas',
-    category: 'facial',
-    duration_minutes: 15,
-    price: 3000,
-    bookings_this_month: 34,
-    bookings_last_month: 31,
-    revenue_this_month: 102000,
-    avg_rating: 4.4,
-    total_reviews: 89,
-    barber_names: ['Miguel', 'Carlos'],
-    iconName: 'Eye',
-    color: 'zinc',
-    is_active: true,
-  },
-]
-
-const CATEGORY_LABELS: Record<ServiceCategory, string> = {
-  corte: 'Corte',
-  barba: 'Barba',
-  combo: 'Combo',
-  facial: 'Facial',
-}
-
-function ServiceIcon({
-  iconName,
-  className,
-}: {
-  iconName: MockService['iconName']
-  className: string
-}) {
-  const Icon = SERVICE_ICON_MAP[iconName] || Scissors
-  return <Icon className={className} aria-hidden="true" />
-}
-
-// Helper functions
-function getCategoryColor(category: ServiceCategory) {
-  const colors: Record<
-    ServiceCategory,
-    { bg: string; text: string; ring: string; gradient: string }
-  > = {
-    corte: {
-      bg: 'bg-blue-100 dark:bg-blue-900/30',
-      text: 'text-blue-700 dark:text-blue-400',
-      ring: 'ring-blue-500',
-      gradient: 'from-blue-500 to-cyan-600',
-    },
-    barba: {
-      bg: 'bg-amber-100 dark:bg-amber-900/30',
-      text: 'text-amber-700 dark:text-amber-400',
-      ring: 'ring-amber-500',
-      gradient: 'from-amber-500 to-orange-600',
-    },
-    combo: {
-      bg: 'bg-purple-100 dark:bg-purple-900/30',
-      text: 'text-purple-700 dark:text-purple-400',
-      ring: 'ring-purple-500',
-      gradient: 'from-purple-500 to-pink-600',
-    },
-    facial: {
-      bg: 'bg-emerald-100 dark:bg-emerald-900/30',
-      text: 'text-emerald-700 dark:text-emerald-400',
-      ring: 'ring-emerald-500',
-      gradient: 'from-emerald-500 to-teal-600',
-    },
-  }
-  return colors[category]
-}
-
-function calculateGrowth(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0
-  return Math.round(((current - previous) / previous) * 100)
-}
-
-function inferCategory(name: string, description?: string): ServiceCategory {
-  const haystack = `${name} ${description ?? ''}`.toLowerCase()
-  if (haystack.includes('barba') || haystack.includes('afeitado')) return 'barba'
-  if (haystack.includes('combo') || haystack.includes('+')) return 'combo'
-  if (
-    haystack.includes('facial') ||
-    haystack.includes('ceja') ||
-    haystack.includes('piel') ||
-    haystack.includes('masaje')
-  ) {
-    return 'facial'
-  }
-  return 'corte'
-}
-
-function resolveCategory(
-  category: string | null | undefined,
-  name: string,
-  description?: string
-): ServiceCategory {
-  if (isServiceCategory(category)) return category
-  return inferCategory(name, description)
-}
-
-function iconNameForCategory(category: ServiceCategory): ServiceIconName {
-  return DEFAULT_ICON_BY_CATEGORY[category]
-}
-
-function colorForCategory(category: ServiceCategory): string {
-  if (category === 'barba') return 'amber'
-  if (category === 'combo') return 'purple'
-  if (category === 'facial') return 'emerald'
-  return 'blue'
-}
-
-function parseDigits(value: string): number {
-  return Number((value || '').replace(/[^\d]/g, '') || '0')
-}
-
-function formatWithThousands(value: number): string {
-  if (!Number.isFinite(value) || value <= 0) return ''
-  return value.toLocaleString('en-US')
-}
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+// Extracted sub-components
+import { ServiceMobileCardList } from '@/components/services/service-mobile-card-list'
+import { ServiceDesktopTable } from '@/components/services/service-desktop-table'
+import { ServiceInsightsSidebar } from '@/components/services/service-insights-sidebar'
+import { ServiceFormModal, type ServiceFormData } from '@/components/services/service-form-modal'
 
 function ServiciosContent() {
   const { businessId } = useBusiness()
@@ -373,18 +57,16 @@ function ServiciosContent() {
   const [editingService, setEditingService] = useState<{ id: string } | null>(null)
   const [deleteService, setDeleteService] = useState<MockService | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isIconPickerOpen, setIsIconPickerOpen] = useState(false)
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ServiceFormData>({
     name: '',
     description: '',
-    category: 'corte' as ServiceCategory,
-    icon: iconNameForCategory('corte') as ServiceIconName,
+    category: 'corte',
+    icon: iconNameForCategory('corte'),
     duration: 30,
     price: 0,
     business_id: businessId,
   })
-  const SelectedFormIcon = SERVICE_ICON_MAP[formData.icon] || Scissors
 
   const searchParamsHook = useSearchParams()
   const intentHandled = useRef(false)
@@ -407,7 +89,6 @@ function ServiciosContent() {
       hasMountedFilterTransition.current = true
       return
     }
-
     listTransitionControls.start({
       opacity: [0.93, 1],
       y: [2, 0],
@@ -427,18 +108,11 @@ function ServiciosContent() {
   const updateService = useUpdateService()
   const deleteServiceMutation = useDeleteService()
 
-  // Real-time WebSocket subscription
-  useRealtimeServices({
-    businessId,
-    enabled: !!businessId,
-  })
+  useRealtimeServices({ businessId, enabled: !!businessId })
 
   const isServicesDemoMode = process.env.NEXT_PUBLIC_SERVICES_DEMO === 'true'
   const sourceServices = useMemo<MockService[]>(() => {
-    if (isServicesDemoMode) {
-      return mockServices
-    }
-
+    if (isServicesDemoMode) return mockServices
     return servicesData.map((service) => {
       const category = resolveCategory(service.category, service.name, service.description)
       const iconName = resolveServiceIcon(
@@ -468,7 +142,7 @@ function ServiciosContent() {
     })
   }, [servicesData, isServicesDemoMode])
 
-  // Filter and sort services
+  // Filter and sort
   const filteredServices = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
     return sourceServices.filter((service) => {
@@ -484,7 +158,6 @@ function ServiciosContent() {
   const sortedServices = useMemo(() => {
     return [...filteredServices].sort((a, b) => {
       let comparison = 0
-
       switch (sortField) {
         case 'name':
           comparison = a.name.localeCompare(b.name)
@@ -499,12 +172,11 @@ function ServiciosContent() {
           comparison = a.duration_minutes - b.duration_minutes
           break
       }
-
       return sortDirection === 'asc' ? comparison : -comparison
     })
   }, [filteredServices, sortField, sortDirection])
 
-  // Calculate quick stats
+  // Quick stats
   const activeServices = useMemo(() => sourceServices.filter((s) => s.is_active), [sourceServices])
   const totalServices = sourceServices.length
   const topService = useMemo(() => {
@@ -512,14 +184,12 @@ function ServiciosContent() {
     if (base.length === 0) return null
     return base.reduce((top, s) => (s.bookings_this_month > top.bookings_this_month ? s : top))
   }, [activeServices, sourceServices])
-
-  // Top 5 for mini chart
   const top5Services = [...(activeServices.length > 0 ? activeServices : sourceServices)]
     .sort((a, b) => b.bookings_this_month - a.bookings_this_month)
     .slice(0, 5)
   const maxBookings = top5Services[0]?.bookings_this_month || 100
 
-  // Handle sort
+  // Handlers
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
@@ -529,19 +199,6 @@ function ServiciosContent() {
     }
   }
 
-  // Get sort icon
-  const getSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-400" />
-    }
-    return sortDirection === 'asc' ? (
-      <ChevronUp className="h-3.5 w-3.5 text-violet-600" />
-    ) : (
-      <ChevronDown className="h-3.5 w-3.5 text-violet-600" />
-    )
-  }
-
-  // Form handlers
   function openCreateServiceForm() {
     setEditingService(null)
     setFormData({
@@ -553,7 +210,6 @@ function ServiciosContent() {
       price: 0,
       business_id: businessId,
     })
-    setIsIconPickerOpen(false)
     setError('')
     setShowForm(true)
   }
@@ -569,7 +225,6 @@ function ServiciosContent() {
       price: service.price,
       business_id: businessId,
     })
-    setIsIconPickerOpen(false)
     setError('')
     setShowForm(true)
   }
@@ -585,7 +240,6 @@ function ServiciosContent() {
       business_id: businessId,
     })
     setEditingService(null)
-    setIsIconPickerOpen(false)
     setShowForm(false)
     setError('')
   }
@@ -593,27 +247,23 @@ function ServiciosContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-
     if (formData.duration < 5 || formData.duration > 480) {
       setError('La duración debe estar entre 5 y 480 minutos')
       return
     }
-
     if (formData.price < 0) {
       setError('El precio no puede ser negativo')
       return
     }
-
     try {
       if (editingService) {
         await updateService.mutateAsync({
           id: editingService.id,
-          updates: formData,
+          updates: { ...formData, business_id: formData.business_id ?? undefined },
         })
       } else {
-        await createService.mutateAsync(formData)
+        await createService.mutateAsync({ ...formData, business_id: formData.business_id ?? '' })
       }
-
       resetForm()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar servicio')
@@ -622,7 +272,6 @@ function ServiciosContent() {
 
   async function handleDeleteConfirm() {
     if (!deleteService) return
-
     try {
       await deleteServiceMutation.mutateAsync(deleteService.id)
       setDeleteService(null)
@@ -646,7 +295,6 @@ function ServiciosContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen lg:pb-6 space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-2">
             <Skeleton className="h-8 w-36" />
@@ -654,15 +302,12 @@ function ServiciosContent() {
           </div>
           <Skeleton className="h-11 w-40 rounded-xl" />
         </div>
-        {/* Search bar */}
         <Skeleton className="h-11 w-full rounded-xl" />
-        {/* Mobile cards */}
         <div className="lg:hidden space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-[88px] rounded-2xl" />
           ))}
         </div>
-        {/* Desktop table */}
         <div className="hidden lg:block rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
           <Skeleton className="h-12 rounded-none" />
           {Array.from({ length: 6 }).map((_, i) => (
@@ -676,7 +321,6 @@ function ServiciosContent() {
     )
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -687,33 +331,17 @@ function ServiciosContent() {
 
   return (
     <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
-      {/* Subtle Mesh Gradients (15% opacity) — disabled for reduced motion */}
+      {/* Subtle Mesh Gradients */}
       {!prefersReducedMotion && (
         <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
           <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 100, 0],
-              y: [0, -50, 0],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            animate={{ scale: [1, 1.2, 1], x: [0, 100, 0], y: [0, -50, 0] }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 brand-mesh-1 rounded-full blur-3xl"
           />
           <motion.div
-            animate={{
-              scale: [1, 1.3, 1],
-              x: [0, -100, 0],
-              y: [0, 100, 0],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            animate={{ scale: [1, 1.3, 1], x: [0, -100, 0], y: [0, 100, 0] }}
+            transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 brand-mesh-2 rounded-full blur-3xl"
           />
         </div>
@@ -789,7 +417,6 @@ function ServiciosContent() {
 
           {/* Main Layout: Content + Sidebar */}
           <div className="flex gap-6">
-            {/* Main Content Area (Left) */}
             <div className="flex-1 min-w-0">
               {/* Toolbar */}
               <motion.div
@@ -799,7 +426,6 @@ function ServiciosContent() {
                 className="relative overflow-hidden mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-zinc-800/80 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] sm:dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)]"
               >
                 <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent lg:block" />
-                {/* Search */}
                 <div className="w-full sm:flex-1 sm:max-w-md">
                   <Input
                     type="text"
@@ -838,680 +464,51 @@ function ServiciosContent() {
               </motion.div>
 
               {/* Mobile Card View */}
-              <motion.div
-                initial={false}
-                animate={listTransitionControls}
-                className="lg:hidden space-y-3"
-              >
-                <AnimatePresence mode="popLayout">
-                  {sortedServices.map((service) => {
-                    const rightActions = [
-                      {
-                        icon: <Pencil className="h-5 w-5" />,
-                        label: 'Editar',
-                        color: 'bg-blue-500',
-                        onClick: () => openEditServiceForm(service),
-                      },
-                      {
-                        icon: <Trash2 className="h-5 w-5" />,
-                        label: 'Eliminar',
-                        color: 'bg-red-500',
-                        onClick: () => setDeleteService(service),
-                      },
-                    ]
-
-                    return (
-                      <motion.div
-                        key={service.id}
-                        layout
-                        exit={{ opacity: 0, x: -100 }}
-                        transition={animations.spring.layout}
-                      >
-                        <SwipeableRow rightActions={rightActions}>
-                          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 p-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.3)]">
-                            {/* Row 1: Icon + Name */}
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800/60 flex-shrink-0">
-                                  <ServiceIcon
-                                    iconName={service.iconName}
-                                    className="h-4.5 w-4.5 text-zinc-700 dark:text-zinc-200"
-                                  />
-                                </span>
-                                <div className="min-w-0">
-                                  <p className="font-semibold text-zinc-900 dark:text-white truncate">
-                                    {service.name}
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-xs text-muted">
-                                      {service.duration_minutes} min
-                                    </span>
-                                    <span
-                                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${getCategoryColor(service.category).bg} ${getCategoryColor(service.category).text}`}
-                                    >
-                                      {CATEGORY_LABELS[service.category]}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Row 2: Price + Bookings + Rating */}
-                            <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                              <span className="font-bold text-zinc-900 dark:text-white">
-                                {formatCurrency(service.price)}
-                              </span>
-                              <span className="text-sm text-muted">
-                                {service.bookings_this_month} reservas
-                              </span>
-                              <span className="flex items-center gap-1 text-sm">
-                                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                                <span className="text-zinc-700 dark:text-zinc-300">
-                                  {service.avg_rating?.toFixed(1) || 'N/A'}
-                                </span>
-                              </span>
-                            </div>
-                          </div>
-                        </SwipeableRow>
-                      </motion.div>
-                    )
-                  })}
-                </AnimatePresence>
-              </motion.div>
+              <ServiceMobileCardList
+                services={sortedServices}
+                listTransitionControls={listTransitionControls}
+                onEdit={openEditServiceForm}
+                onDelete={setDeleteService}
+              />
 
               {/* Desktop Table View */}
-              <div className="hidden lg:block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-shadow">
-                <div className="relative">
-                  <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white dark:from-zinc-900 z-10 sm:hidden" />
-                  <div className="overflow-x-auto scrollbar-hide">
-                    <table className="w-full">
-                      {/* Header */}
-                      <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
-                        <tr>
-                          {/* Service Name */}
-                          <th className="px-4 py-3 text-left">
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleSort('name')}
-                              className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
-                            >
-                              Servicio
-                              {getSortIcon('name')}
-                            </Button>
-                          </th>
-
-                          {/* Category */}
-                          <th className="px-4 py-3 text-left">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-                              Categoría
-                            </span>
-                          </th>
-
-                          {/* Bookings */}
-                          <th className="px-4 py-3 text-right">
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleSort('bookings')}
-                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
-                            >
-                              Reservas
-                              {getSortIcon('bookings')}
-                            </Button>
-                          </th>
-
-                          {/* Duration */}
-                          <th className="px-4 py-3 text-right">
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleSort('duration')}
-                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
-                            >
-                              Duración
-                              {getSortIcon('duration')}
-                            </Button>
-                          </th>
-
-                          {/* Price */}
-                          <th className="px-4 py-3 text-right">
-                            <Button
-                              variant="ghost"
-                              onClick={() => handleSort('price')}
-                              className="ml-auto flex items-center gap-1 text-xs font-semibold uppercase tracking-wide h-auto p-0 text-muted hover:text-zinc-900 dark:hover:text-white"
-                            >
-                              Precio
-                              {getSortIcon('price')}
-                            </Button>
-                          </th>
-
-                          {/* Rating */}
-                          <th className="px-4 py-3 text-right">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-                              Rating
-                            </span>
-                          </th>
-
-                          {/* Actions */}
-                          <th className="w-24 px-4 py-3 text-right">
-                            <span className="sr-only">Acciones</span>
-                          </th>
-                        </tr>
-                      </thead>
-
-                      {/* Body */}
-                      <motion.tbody
-                        initial={false}
-                        animate={listTransitionControls}
-                        className="divide-y divide-zinc-200 dark:divide-zinc-800"
-                      >
-                        {sortedServices.map((service) => {
-                          const growth = calculateGrowth(
-                            service.bookings_this_month,
-                            service.bookings_last_month
-                          )
-
-                          return (
-                            <tr
-                              key={service.id}
-                              className="group transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30"
-                            >
-                              {/* Service Name */}
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
-                                    <ServiceIcon
-                                      iconName={service.iconName}
-                                      className="h-4 w-4 text-zinc-700 dark:text-zinc-200"
-                                    />
-                                  </span>
-                                  <div>
-                                    <p className="font-medium text-zinc-900 dark:text-white">
-                                      {service.name}
-                                    </p>
-                                    <p className="text-xs text-muted line-clamp-1">
-                                      {service.barber_names.length} miembros del equipo
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-
-                              {/* Category */}
-                              <td className="px-4 py-3">
-                                <span
-                                  className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getCategoryColor(service.category).bg} ${getCategoryColor(service.category).text}`}
-                                >
-                                  {CATEGORY_LABELS[service.category]}
-                                </span>
-                              </td>
-
-                              {/* Bookings */}
-                              <td className="px-4 py-3 text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <span className="font-semibold text-zinc-900 dark:text-white">
-                                    {service.bookings_this_month}
-                                  </span>
-                                  {growth !== 0 && (
-                                    <span
-                                      className={`text-xs ${growth > 0 ? 'text-green-600' : 'text-red-600'}`}
-                                    >
-                                      ({growth > 0 ? '+' : ''}
-                                      {growth}%)
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-
-                              {/* Duration */}
-                              <td className="px-4 py-3 text-right">
-                                <span className="text-sm text-muted">
-                                  {service.duration_minutes} min
-                                </span>
-                              </td>
-
-                              {/* Price */}
-                              <td className="px-4 py-3 text-right">
-                                <span className="font-semibold text-zinc-900 dark:text-white">
-                                  {formatCurrency(service.price)}
-                                </span>
-                              </td>
-
-                              {/* Rating */}
-                              <td className="px-4 py-3 text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                                  <span className="text-sm font-medium text-zinc-900 dark:text-white">
-                                    {service.avg_rating}
-                                  </span>
-                                </div>
-                              </td>
-
-                              {/* Actions — visible on row hover */}
-                              <td className="px-4 py-3">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
-                                    title="Editar"
-                                    onClick={() => openEditServiceForm(service)}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-                                    title="Eliminar"
-                                    onClick={() => setDeleteService(service)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </motion.tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Empty State */}
-                {sortedServices.length === 0 && (
-                  <div className="py-12 text-center">
-                    <Search className="mx-auto h-10 w-10 text-zinc-400" />
-                    <p className="mt-3 text-sm font-medium text-zinc-900 dark:text-white">
-                      No se encontraron servicios
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Results count */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ ...animations.spring.default, delay: 0.3 }}
-                className="mt-3 text-xs text-muted text-center"
-              >
-                Mostrando {sortedServices.length} de {sourceServices.length} servicios
-              </motion.p>
+              <ServiceDesktopTable
+                services={sortedServices}
+                sourceServicesCount={sourceServices.length}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                listTransitionControls={listTransitionControls}
+                onSort={handleSort}
+                onEdit={openEditServiceForm}
+                onDelete={setDeleteService}
+              />
             </div>
 
-            {/* Sidebar (Right) - Insights (collapsible) */}
-            {sidebarOpen && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ ...animations.spring.default, delay: 0.1 }}
-                className="hidden lg:block w-[320px] shrink-0 space-y-4"
-              >
-                {/* Quick Stats */}
-                <div className="space-y-3">
-                  {/* Total Services */}
-                  <motion.div
-                    whileTap={{ scale: 0.98 }}
-                    transition={animations.spring.snappy}
-                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted">Servicios Activos</p>
-                        <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
-                          {totalServices}
-                        </p>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-violet-100 to-blue-100 dark:from-violet-900/30 dark:to-blue-900/30">
-                        <Package className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Top Service */}
-                  {topService && (
-                    <motion.div
-                      whileTap={{ scale: 0.98 }}
-                      transition={animations.spring.snappy}
-                      className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-muted">Más Popular</p>
-                          <div className="mt-1 flex items-center gap-2 min-w-0">
-                            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
-                              <ServiceIcon
-                                iconName={topService.iconName}
-                                className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
-                              />
-                            </span>
-                            <p className="text-base font-bold text-zinc-900 dark:text-white truncate">
-                              {topService.name}
-                            </p>
-                          </div>
-                          <p className="text-xs text-muted">
-                            {topService.bookings_this_month} reservas
-                          </p>
-                        </div>
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-                          <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Average Rating */}
-                  <motion.div
-                    whileTap={{ scale: 0.98 }}
-                    transition={animations.spring.snappy}
-                    className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-medium text-muted">Rating Promedio</p>
-                        <p className="mt-1 text-2xl font-bold text-zinc-900 dark:text-white">
-                          {activeServices.length > 0
-                            ? (
-                                activeServices.reduce((sum, s) => sum + s.avg_rating, 0) /
-                                activeServices.length
-                              ).toFixed(1)
-                            : '0.0'}
-                        </p>
-                        <p className="text-xs text-muted">
-                          {activeServices.reduce((sum, s) => sum + s.total_reviews, 0)} reviews
-                        </p>
-                      </div>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30">
-                        <Star className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Mini Chart */}
-                <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  transition={animations.spring.snappy}
-                  className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">
-                    Top 5 Servicios
-                  </h3>
-                  <div className="space-y-3">
-                    {top5Services.map((service, idx) => {
-                      const percentage = (service.bookings_this_month / maxBookings) * 100
-                      const categoryColor = getCategoryColor(service.category)
-
-                      return (
-                        <div key={service.id}>
-                          <div className="mb-1 flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/60 shrink-0">
-                                <ServiceIcon
-                                  iconName={service.iconName}
-                                  className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-200"
-                                />
-                              </span>
-                              <span className="font-medium text-zinc-900 dark:text-white truncate">
-                                {service.name}
-                              </span>
-                            </div>
-                            <span className="ml-2 shrink-0 text-xs text-muted">
-                              {service.bookings_this_month}
-                            </span>
-                          </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ duration: 0.8, delay: 0.4 + idx * 0.1 }}
-                              className={`h-full rounded-full ${categoryColor.bg}`}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
+            {/* Insights Sidebar */}
+            <ServiceInsightsSidebar
+              isOpen={sidebarOpen}
+              totalServices={totalServices}
+              topService={topService}
+              activeServices={activeServices}
+              top5Services={top5Services}
+              maxBookings={maxBookings}
+            />
           </div>
         </div>
 
         {/* Form Modal */}
-        <Modal
+        <ServiceFormModal
           isOpen={showForm}
           onClose={resetForm}
           title={editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
-        >
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl bg-red-50 p-4 text-base text-red-600 dark:bg-red-900/20 dark:text-red-400"
-              >
-                {error}
-              </motion.div>
-            )}
-
-            <Input
-              label="Nombre del servicio"
-              type="text"
-              placeholder="Ej: Corte de cabello"
-              value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              required
-            />
-
-            <Input
-              label="Descripción (opcional)"
-              type="text"
-              placeholder="Ej: Incluye lavado y peinado"
-              value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-            />
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
-                Categoría
-              </label>
-              <div
-                role="radiogroup"
-                aria-label="Seleccionar categoría"
-                className="grid grid-cols-2 gap-2 sm:grid-cols-4"
-              >
-                {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => {
-                  const isSelected = formData.category === category
-                  const CategoryIcon =
-                    SERVICE_ICON_MAP[DEFAULT_ICON_BY_CATEGORY[category]] || Scissors
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      role="radio"
-                      aria-checked={isSelected}
-                      onClick={() => handleCategoryChange(category)}
-                      className={`flex h-12 items-center gap-2 rounded-xl border px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
-                        isSelected
-                          ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300'
-                          : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
-                      }`}
-                    >
-                      <CategoryIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                      <span>{CATEGORY_LABELS[category]}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
-                Ícono
-              </label>
-              <div className="sm:hidden space-y-2">
-                <button
-                  type="button"
-                  aria-expanded={isIconPickerOpen}
-                  aria-controls="mobile-icon-picker"
-                  onClick={() => setIsIconPickerOpen((prev) => !prev)}
-                  className="flex h-12 w-full items-center justify-between rounded-[14px] border border-zinc-200 bg-white px-3 text-zinc-900 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
-                      <SelectedFormIcon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <span className="text-sm font-medium">
-                      {SERVICE_ICON_LABELS[formData.icon]}
-                    </span>
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${isIconPickerOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isIconPickerOpen && (
-                    <motion.div
-                      id="mobile-icon-picker"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={animations.spring.snappy}
-                      className="overflow-hidden rounded-xl border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900"
-                    >
-                      <div
-                        role="radiogroup"
-                        aria-label="Seleccionar ícono"
-                        className="grid grid-cols-4 gap-2"
-                      >
-                        {SERVICE_ICON_NAMES.map((iconName) => {
-                          const isSelected = formData.icon === iconName
-                          const Icon = SERVICE_ICON_MAP[iconName]
-                          return (
-                            <button
-                              key={iconName}
-                              type="button"
-                              role="radio"
-                              aria-checked={isSelected}
-                              aria-label={SERVICE_ICON_LABELS[iconName]}
-                              onClick={() => {
-                                setFormData((prev) => ({ ...prev, icon: iconName }))
-                                setIsIconPickerOpen(false)
-                              }}
-                              className={`flex h-16 flex-col items-center justify-center gap-1 rounded-xl border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
-                                isSelected
-                                  ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300'
-                                  : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
-                              }`}
-                            >
-                              <Icon className="h-4 w-4" aria-hidden="true" />
-                              <span className="text-[10px] font-medium leading-none">
-                                {SERVICE_ICON_LABELS[iconName]}
-                              </span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              <div
-                role="radiogroup"
-                aria-label="Seleccionar ícono"
-                className="hidden sm:grid grid-cols-4 gap-2"
-              >
-                {SERVICE_ICON_NAMES.map((iconName) => {
-                  const isSelected = formData.icon === iconName
-                  const Icon = SERVICE_ICON_MAP[iconName]
-                  return (
-                    <button
-                      key={iconName}
-                      type="button"
-                      role="radio"
-                      aria-checked={isSelected}
-                      aria-label={SERVICE_ICON_LABELS[iconName]}
-                      onClick={() => setFormData((prev) => ({ ...prev, icon: iconName }))}
-                      className={`flex flex-col items-center gap-1 rounded-xl border p-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
-                        isSelected
-                          ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-950/40 dark:text-violet-300'
-                          : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800'
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                      <span className="text-[10px] font-medium leading-none">
-                        {SERVICE_ICON_LABELS[iconName]}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
-                  Duración (min)
-                </label>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  enterKeyHint="next"
-                  value={formData.duration}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      duration: Math.min(480, parseDigits(e.target.value)),
-                    }))
-                  }
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-muted">
-                  Precio (CRC)
-                </label>
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  enterKeyHint="done"
-                  value={formatWithThousands(formData.price)}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      price: parseDigits(e.target.value),
-                    }))
-                  }
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="sticky bottom-0 -mx-5 mt-2 border-t border-zinc-200/80 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-3 backdrop-blur-sm dark:border-zinc-800/80 dark:bg-zinc-900/95 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
-              <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={resetForm}
-                  className="h-11 w-full sm:w-auto"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  isLoading={createService.isPending || updateService.isPending}
-                  className="h-11 w-full sm:w-auto"
-                >
-                  <span className="sm:hidden">{editingService ? 'Actualizar' : 'Crear'}</span>
-                  <span className="hidden sm:inline">
-                    {editingService ? 'Actualizar' : 'Crear'} Servicio
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </form>
-        </Modal>
+          formData={formData}
+          setFormData={setFormData}
+          error={error}
+          onSubmit={handleSubmit}
+          isPending={createService.isPending || updateService.isPending}
+          isEditing={!!editingService}
+          onCategoryChange={handleCategoryChange}
+        />
 
         {/* Delete Confirmation Modal */}
         <Modal
@@ -1559,7 +556,7 @@ function ServiciosContent() {
   )
 }
 
-export default function ServiciosPageV2() {
+export default function ServiciosPage() {
   return (
     <ComponentErrorBoundary>
       <ServiciosContent />
