@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:skip-ts": "SKIP_TYPE_CHECK=true next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
@@ -49,7 +48,7 @@
     "docs:features": "node scripts/generate-feature-documentation.mjs",
     "docs:features:check": "node scripts/generate-feature-documentation.mjs --check",
     "validate:changelog": "node scripts/validate-public-changelog.mjs",
-    "ci": "npm run validate:changelog && npm run docs:features:check && npm run format:check && npm run test:unit && npm run build:skip-ts",
+    "ci": "npm run validate:changelog && npm run docs:features:check && npm run format:check && npm run test:unit && npm run build",
     "ci:full": "npm run ci && npm run test:e2e",
     "ci:lint": "npm run lint",
     "ci:security": "npm run test:security"

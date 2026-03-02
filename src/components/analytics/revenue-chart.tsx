@@ -6,7 +6,7 @@
  * Optimized for mobile-first touch interaction
  */
 
-import { useMemo } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import {
   AreaChart,
   Area,
@@ -188,7 +188,7 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
                   />
                 }
                 labelFormatter={(
-                  label: string,
+                  label: ReactNode,
                   payload: readonly { payload?: { desktopLabel?: string } }[]
                 ) => {
                   const datum = payload?.[0]?.payload

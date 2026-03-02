@@ -299,7 +299,7 @@ async function runSeed() {
   const summary = insertedAppointments.reduce(
     (acc, appointment) => {
       acc.total += 1
-      acc[appointment.status] += 1
+      acc[appointment.status as keyof typeof acc] += 1
       return acc
     },
     { total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0 }
