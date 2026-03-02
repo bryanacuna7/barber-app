@@ -8,6 +8,46 @@
 
 ## Decisions
 
+### Action Registry Pattern for Centralized Permissions
+
+**Date:** 2026-03-02
+**Status:** Active
+
+**Context:**
+Actions (confirm, cancel, delete, navigate, etc.) were duplicated across 3+ places: command palette's COMMANDS array, sidebar nav, bottom-nav quickActions. Adding context menus and bulk toolbar would mean 5 consumers each maintaining their own action lists and permission checks.
+
+**Decision:**
+Create a singleton `actionRegistry` (Map-based, idempotent) with namespaced IDs (`entity.verb` format). All consumers call `getVisibleActions(context)` for permission-filtered actions. No consumer filters independently.
+
+**Rationale:**
+Single source of truth for actions + permissions. Adding a new action means one registration, not editing 5 files. Namespaced IDs (`appointment.confirm`, `client.whatsapp`) prevent collisions and enable legacy ID migration from v2 command palette.
+
+**Files:** `src/lib/actions/registry.ts`, `src/lib/actions/types.ts`, `src/lib/actions/definitions/`
+
+---
+
+### Execution Models: Delayed-Commit vs Immediate-Compensate
+
+**Date:** 2026-03-02
+**Status:** Active
+
+**Context:**
+Some actions need instant UI feedback with server rollback on error (completing an appointment triggers stats). Others benefit from an undo window before any server call (deleting a client is fully reversible for 5 seconds).
+
+**Decision:**
+Each action declares exactly ONE `executionModel`:
+
+- `delayed-commit`: Preview UI change → show undo toast (5s) → commit to server only if timer expires. Cancel restores React Query cache snapshot.
+- `immediate-compensate`: Standard React Query optimistic update. Execute immediately, rollback on error via `onMutate`/`onError`/`onSettled`.
+- `immediate`: Default. Execute, show result toast, no undo.
+
+**Rationale:**
+Clearer mental model — never mix two patterns on the same action. `delayed-commit` eliminates "are you sure?" dialogs. `immediate-compensate` gives perceived speed on slow connections. Mutually exclusive per action prevents confusing UX.
+
+**Files:** `src/hooks/useUndoableAction.ts` (delayed-commit), `src/hooks/useOptimisticMutation.ts` (immediate-compensate)
+
+---
+
 ### PWA Auto-Update Strategy: No Precache for HTML
 
 **Date:** 2026-02-07
@@ -144,12 +184,14 @@ PostgreSQL RLS evaluates policies for every row access, including rows accessed 
 
 ## Architecture Decisions Records (ADRs)
 
-| ADR | Title                                | Status | Date       |
-| --- | ------------------------------------ | ------ | ---------- |
-| 001 | App Router only, no Pages Router     | Active | 2025-12-01 |
-| 002 | Apple HIG for mobile design          | Active | 2026-01-20 |
-| 003 | Dual render strategy for responsive  | Active | 2026-01-15 |
-| 004 | CSS custom property brand tokens     | Active | 2026-02-07 |
-| 005 | No HTML precache in Service Worker   | Active | 2026-02-07 |
-| 006 | Supabase free tier egress management | Active | 2026-02-05 |
-| 007 | RLS self-reference prevention        | Active | 2026-02-05 |
+| ADR | Title                                          | Status | Date       |
+| --- | ---------------------------------------------- | ------ | ---------- |
+| 001 | App Router only, no Pages Router               | Active | 2025-12-01 |
+| 002 | Apple HIG for mobile design                    | Active | 2026-01-20 |
+| 003 | Dual render strategy for responsive            | Active | 2026-01-15 |
+| 004 | CSS custom property brand tokens               | Active | 2026-02-07 |
+| 005 | No HTML precache in Service Worker             | Active | 2026-02-07 |
+| 006 | Supabase free tier egress management           | Active | 2026-02-05 |
+| 007 | RLS self-reference prevention                  | Active | 2026-02-05 |
+| 008 | Action registry for centralized permissions    | Active | 2026-03-02 |
+| 009 | Execution models (delayed-commit vs immediate) | Active | 2026-03-02 |
