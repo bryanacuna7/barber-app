@@ -4,6 +4,13 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.25] - 2026-03-02
+
+### Nuevo
+
+- Dominio personalizado nexocr.pro con subdominios por barberia (ej: mi-barberia.nexocr.pro)
+- Dashboard accesible desde barberapp.nexocr.pro
+
 ## [0.9.24] - 2026-03-02
 
 ### Nuevo
