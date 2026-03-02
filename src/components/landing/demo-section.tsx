@@ -141,7 +141,7 @@ export function DemoSection() {
             <div className="mt-8 text-center">
               <a
                 href="/register"
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-shadow hover:shadow-2xl hover:shadow-blue-500/40"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-[box-shadow,filter] hover:from-blue-500 hover:to-purple-500 hover:shadow-2xl hover:shadow-blue-500/40"
               >
                 Prueba gratis por 7 días
               </a>

@@ -216,13 +216,15 @@ export function ClientTableView({
                       className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleWhatsApp(client.phone)}
                         aria-label={`WhatsApp ${client.name}`}
-                        className="rounded-lg p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                        className="p-1.5 h-auto min-h-0 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
                       >
                         <MessageCircle className="h-4 w-4" />
-                      </button>
+                      </Button>
                       <Button
                         variant="ghost"
                         onClick={() => onSelectClient(client)}

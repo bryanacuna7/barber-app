@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { format, isSameDay, getDaysInMonth } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { getClientSegment } from '@/lib/utils/client-segments'
@@ -111,21 +112,27 @@ export function ClientCalendarView({
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-2xl font-bold text-foreground">Calendario de Actividad</h3>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={goToPrevMonth}
-            className="rounded-lg p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Mes anterior"
+            className="p-2 h-auto min-h-0"
           >
             <ChevronRight className="h-5 w-5 rotate-180 text-muted" />
-          </button>
+          </Button>
           <span className="text-lg font-semibold text-foreground px-4">
             {format(currentMonth, 'MMMM yyyy', { locale: es })}
           </span>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={goToNextMonth}
-            className="rounded-lg p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Mes siguiente"
+            className="p-2 h-auto min-h-0"
           >
             <ChevronRight className="h-5 w-5 text-muted" />
-          </button>
+          </Button>
         </div>
       </div>
 

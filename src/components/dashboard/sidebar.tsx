@@ -2,32 +2,21 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 import {
   LayoutDashboard,
   Calendar,
   Scissors,
   Users,
-  CreditCard,
-  Settings,
-  LogOut,
   UserRound,
-  Shield,
   TrendingUp,
   Share2,
   History,
-  Search,
   CalendarClock,
   BookOpen,
-  Link2,
-  Check,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { NotificationBell } from '@/components/notifications/notification-bell'
-import { useCommandPalette } from '@/components/dashboard/command-palette'
-import { useToast } from '@/components/ui/toast'
-import { bookingAbsoluteUrl } from '@/lib/utils/booking-url'
+import { useSidebarState, SIDEBAR_WIDTH_EXPANDED, SIDEBAR_WIDTH_COLLAPSED } from './sidebar-state'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface NavItem {
   name: string
@@ -42,11 +31,9 @@ const baseNavigation: NavItem[] = [
   { name: 'Equipo', href: '/barberos', icon: UserRound },
   { name: 'Clientes', href: '/clientes', icon: Users },
   { name: 'Analíticas', href: '/analiticas', icon: TrendingUp },
-  { name: 'Suscripción', href: '/suscripcion', icon: CreditCard },
   { name: 'Referencias', href: '/referencias', icon: Share2 },
   { name: 'Novedades', href: '/changelog', icon: History },
   { name: 'Guía', href: '/guia', icon: BookOpen },
-  { name: 'Configuración', href: '/configuracion', icon: Settings },
 ]
 
 const sidebarSections = [
@@ -54,39 +41,106 @@ const sidebarSections = [
   { id: 'gestion', label: 'Gestión', items: ['/barberos', '/clientes'] },
   { id: 'crecimiento', label: 'Crecimiento', items: ['/analiticas', '/referencias'] },
   { id: 'ayuda', label: 'Ayuda', items: ['/changelog', '/guia'] },
-  { id: 'cuenta', label: 'Cuenta', items: ['/suscripcion', '/configuracion'] },
 ] as const
 
+const SIDEBAR_TRANSITION_MS = 220
+const SIDEBAR_TRANSITION_EASE = 'cubic-bezier(0.2, 0, 0, 1)'
+const LABEL_STAGGER_MS = 25
+const BASE_TRANSITION_STYLE = {
+  transitionDuration: `${SIDEBAR_TRANSITION_MS}ms`,
+  transitionTimingFunction: SIDEBAR_TRANSITION_EASE,
+}
+
 interface SidebarProps {
-  businessName: string
-  businessSlug?: string
-  logoUrl?: string | null
-  isAdmin?: boolean
   isBarber?: boolean
 }
 
 interface SidebarContentProps {
-  businessName: string
-  businessSlug?: string
-  logoUrl?: string | null
-  isAdmin?: boolean
   isBarber?: boolean
+  collapsed: boolean
   pathname: string
-  onLogout: () => void
   onLinkClick?: () => void
 }
 
+function NavItemEntry({
+  item,
+  isActive,
+  collapsed,
+  itemIndex,
+  sectionLength,
+  onLinkClick,
+}: {
+  item: NavItem
+  isActive: boolean
+  collapsed: boolean
+  itemIndex: number
+  sectionLength: number
+  onLinkClick?: () => void
+}) {
+  const labelDelay = collapsed
+    ? Math.min(sectionLength - itemIndex - 1, 4) * 20
+    : Math.min(itemIndex, 4) * LABEL_STAGGER_MS
+
+  const content = (
+    <Link
+      href={item.href}
+      onClick={onLinkClick}
+      aria-label={collapsed ? item.name : undefined}
+      className={cn(
+        'group relative flex items-center rounded-xl text-sm font-medium transition-[background-color,color,padding,gap,width,height]',
+        collapsed ? 'mx-auto h-8 w-8 justify-center p-0 rounded-lg' : 'w-full gap-3 px-3 py-2',
+        isActive
+          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+          : collapsed
+            ? 'text-zinc-600 hover:bg-zinc-100/90 dark:text-zinc-500 dark:hover:bg-zinc-800/80'
+            : 'text-zinc-600 hover:bg-zinc-100/90 dark:text-zinc-500 dark:hover:bg-zinc-800/80'
+      )}
+      style={BASE_TRANSITION_STYLE}
+    >
+      <item.icon
+        className={cn(
+          'h-4 w-4 shrink-0 transition-opacity',
+          isActive
+            ? 'opacity-100'
+            : collapsed
+              ? 'opacity-85 group-hover:opacity-100'
+              : 'opacity-70 group-hover:opacity-100'
+        )}
+        style={BASE_TRANSITION_STYLE}
+      />
+      <span
+        className={cn(
+          'overflow-hidden whitespace-nowrap transition-[max-width,opacity]',
+          collapsed ? 'max-w-0 opacity-0' : 'max-w-[140px] opacity-100'
+        )}
+        style={{
+          ...BASE_TRANSITION_STYLE,
+          transitionDelay: `${labelDelay}ms`,
+        }}
+      >
+        {item.name}
+      </span>
+    </Link>
+  )
+
+  if (!collapsed) return content
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <TooltipContent>{item.name}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+// ── Sidebar content ──
+
 function SidebarContent({
-  businessName,
-  businessSlug,
-  logoUrl,
-  isAdmin,
   isBarber = false,
+  collapsed,
   pathname,
-  onLogout,
   onLinkClick,
 }: SidebarContentProps) {
-  const { open: openCommandPalette } = useCommandPalette()
   const navigation = isBarber
     ? [
         baseNavigation[0],
@@ -96,179 +150,92 @@ function SidebarContent({
       ]
     : baseNavigation
   const navigationByHref = new Map(navigation.map((item) => [item.href, item]))
+  const visibleSections = sidebarSections.flatMap((section) => {
+    const sectionItems = section.items
+      .map((href) => navigationByHref.get(href))
+      .filter((item): item is NavItem => Boolean(item))
+
+    if (sectionItems.length === 0) return []
+    return [{ ...section, items: sectionItems }]
+  })
 
   return (
     <>
-      {/* Logo and notifications */}
-      <div className="flex h-14 items-center justify-between border-b border-zinc-200/50 px-4 dark:border-zinc-800/50">
-        <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onLinkClick}>
-          {logoUrl ? (
-            <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
-          ) : (
-            <Scissors className="h-5 w-5 text-zinc-900 dark:text-white" />
-          )}
-          <span className="font-semibold text-sm truncate max-w-[130px]">{businessName}</span>
-        </Link>
-        <NotificationBell />
-      </div>
-
-      {/* Quick search trigger */}
-      <div className="px-3 pt-3 pb-1">
-        <button
-          onClick={openCommandPalette}
-          className="flex w-full items-center gap-2.5 rounded-lg border border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/[0.06] transition-colors"
-        >
-          <Search className="h-3.5 w-3.5" />
-          <span className="flex-1 text-left">Buscar...</span>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-zinc-200/70 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-900/70 px-1.5 py-0.5 font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </button>
-      </div>
-
       {/* Navigation */}
-      <nav className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
-        {sidebarSections.map((section) => {
-          const sectionItems = section.items
-            .map((href) => navigationByHref.get(href))
-            .filter((item): item is NavItem => Boolean(item))
-
-          if (sectionItems.length === 0) return null
-
-          return (
+      <nav
+        className={cn(
+          'scrollbar-hide flex-1 overflow-y-auto py-3 transition-[padding]',
+          collapsed ? 'space-y-0 px-0' : 'space-y-3 px-0'
+        )}
+        style={BASE_TRANSITION_STYLE}
+      >
+        {visibleSections.map((section, sectionIndex) => (
+          <div key={section.id}>
+            {collapsed && sectionIndex > 0 && (
+              <div className="mx-2 my-2.5 h-px bg-zinc-300/75 dark:bg-white/15" />
+            )}
             <section
-              key={section.id}
-              className="rounded-2xl border border-zinc-200/70 bg-white/55 p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-zinc-800/70 dark:bg-white/[0.03] dark:shadow-[0_10px_24px_rgba(0,0,0,0.24)]"
+              className={cn(
+                'overflow-hidden transition-[padding,border-radius,margin] duration-200',
+                collapsed
+                  ? 'mx-2 rounded-none bg-transparent p-0'
+                  : 'mx-3 rounded-2xl border border-zinc-200/70 bg-white/55 p-2.5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] dark:border-zinc-800/70 dark:bg-white/[0.03] dark:shadow-[0_10px_24px_rgba(0,0,0,0.24)]'
+              )}
+              style={BASE_TRANSITION_STYLE}
             >
-              <div className="mb-1.5 border-b border-zinc-200/70 px-1.5 pb-1.5 dark:border-zinc-800/70">
+              <div
+                className={cn(
+                  'overflow-hidden border-b border-zinc-200/70 px-1.5 dark:border-zinc-800/70 transition-[max-height,opacity,margin,padding]',
+                  collapsed ? 'mb-0 max-h-0 pb-0 opacity-0' : 'mb-1.5 max-h-8 pb-1.5 opacity-100'
+                )}
+                style={BASE_TRANSITION_STYLE}
+              >
                 <p className="whitespace-nowrap text-[11px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                   {section.label}
                 </p>
               </div>
 
-              <div className="space-y-0.5">
-                {sectionItems.map((item) => {
+              <div className={cn(collapsed ? 'space-y-1.5 py-0.5' : 'space-y-0.5')}>
+                {section.items.map((item, itemIndex) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
                   return (
-                    <Link
+                    <NavItemEntry
                       key={item.name}
-                      href={item.href}
-                      onClick={onLinkClick}
-                      className={cn(
-                        'group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-zinc-900 text-white shadow-sm dark:bg-white dark:text-zinc-900'
-                          : 'text-zinc-600 hover:bg-zinc-100/90 dark:text-zinc-400 dark:hover:bg-zinc-800/80'
-                      )}
-                    >
-                      <item.icon
-                        className={cn(
-                          'h-[18px] w-[18px]',
-                          isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
-                        )}
-                      />
-                      {item.name}
-                    </Link>
+                      item={item}
+                      isActive={isActive}
+                      collapsed={collapsed}
+                      itemIndex={itemIndex}
+                      sectionLength={section.items.length}
+                      onLinkClick={onLinkClick}
+                    />
                   )
                 })}
               </div>
             </section>
-          )
-        })}
+          </div>
+        ))}
       </nav>
-
-      {/* Share + Admin + Logout — separated */}
-      <div className="border-t border-zinc-200/50 px-3 py-3 dark:border-zinc-800/50 space-y-0.5">
-        {businessSlug && <ShareLinkButton slug={businessSlug} />}
-        {isAdmin && (
-          <Link
-            href="/admin"
-            onClick={onLinkClick}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-          >
-            <Shield className="h-[18px] w-[18px] opacity-60" />
-            Admin Panel
-          </Link>
-        )}
-        <button
-          onClick={onLogout}
-          data-testid="logout-button"
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-        >
-          <LogOut className="h-[18px] w-[18px] opacity-60" />
-          Cerrar Sesión
-        </button>
-      </div>
     </>
   )
 }
 
-function ShareLinkButton({ slug }: { slug: string }) {
-  const [copied, setCopied] = useState(false)
-  const toast = useToast()
+// ── Main Sidebar component ──
 
-  const handleCopy = () => {
-    const url = bookingAbsoluteUrl(slug)
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        setCopied(true)
-        toast.info('Enlace copiado al portapapeles')
-        setTimeout(() => setCopied(false), 2000)
-      })
-      .catch(() => {
-        toast.error('No se pudo copiar')
-      })
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-    >
-      {copied ? (
-        <Check className="h-[18px] w-[18px] text-green-600" />
-      ) : (
-        <Link2 className="h-[18px] w-[18px] opacity-60" />
-      )}
-      {copied ? 'Enlace copiado' : 'Compartir Link'}
-    </button>
-  )
-}
-
-export function Sidebar({
-  businessName,
-  businessSlug,
-  logoUrl,
-  isAdmin,
-  isBarber = false,
-}: SidebarProps) {
+export function Sidebar({ isBarber = false }: SidebarProps) {
   const pathname = usePathname()
-
-  const handleLogout = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    window.location.href = '/login'
-  }
+  const { collapsed } = useSidebarState()
 
   return (
-    <>
-      {/* Desktop sidebar only - mobile uses bottom nav */}
-      <aside
-        data-tour="sidebar"
-        className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-zinc-200/50 dark:lg:border-zinc-800/50 bg-gradient-to-b from-white/30 via-white/70 to-white/90 dark:from-zinc-900/30 dark:via-zinc-900/70 dark:to-zinc-900/90 backdrop-blur-md transition-colors duration-300"
-      >
-        <SidebarContent
-          businessName={businessName}
-          businessSlug={businessSlug}
-          logoUrl={logoUrl}
-          isAdmin={isAdmin}
-          isBarber={isBarber}
-          pathname={pathname}
-          onLogout={handleLogout}
-        />
-      </aside>
-    </>
+    <aside
+      id="dashboard-sidebar"
+      data-tour="sidebar"
+      className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:flex-col lg:overflow-hidden lg:after:content-[''] lg:after:absolute lg:after:inset-y-0 lg:after:right-0 lg:after:w-px lg:after:bg-zinc-200/50 dark:lg:after:bg-zinc-800/50 bg-gradient-to-b from-white/30 via-white/70 to-white/90 dark:from-zinc-900/30 dark:via-zinc-900/70 dark:to-zinc-900/90 backdrop-blur-md transition-[width]"
+      style={{
+        width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED,
+        ...BASE_TRANSITION_STYLE,
+      }}
+    >
+      <SidebarContent isBarber={isBarber} collapsed={collapsed} pathname={pathname} />
+    </aside>
   )
 }

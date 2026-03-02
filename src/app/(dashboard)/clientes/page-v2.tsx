@@ -661,13 +661,13 @@ export default function ClientesPageV2() {
                     <NotificationBell />
                   </div>
                   <Button
-                    variant="gradient"
+                    variant="cta"
                     data-tour="clients-add-button"
                     onClick={() => {
                       setShowModal(true)
                       if (isMobileDevice()) haptics.tap()
                     }}
-                    className="min-w-[44px] min-h-[44px] h-10 border-0"
+                    className="min-w-[44px] min-h-[44px] h-10"
                   >
                     <Plus className="h-5 w-5 sm:mr-2" />
                     <span className="hidden sm:inline">Nuevo Cliente</span>

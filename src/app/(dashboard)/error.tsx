@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 interface DashboardErrorProps {
   error: Error & { digest?: string }
@@ -79,13 +80,10 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={reset}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-95 transition-[background-color,transform] duration-200"
-            >
+            <Button onClick={reset} className="flex-1">
               <RefreshCw className="w-4 h-4" />
               Reintentar
-            </button>
+            </Button>
 
             <Link
               href="/dashboard"

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { detectUserRole, getStaffPermissions, canBarberAccessPath } from '@/lib/auth/roles'
-import { Sidebar } from '@/components/dashboard/sidebar'
+import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { MobileHeader } from '@/components/dashboard/mobile-header'
 import { BottomNav } from '@/components/dashboard/bottom-nav'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -243,6 +243,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
       slug={business.slug}
       userId={user.id}
       userEmail={user.email}
+      userName={
+        (user.user_metadata?.full_name as string) ||
+        (user.user_metadata?.name as string) ||
+        undefined
+      }
+      userAvatarUrl={
+        (user.user_metadata?.avatar_url as string) ||
+        (user.user_metadata?.picture as string) ||
+        undefined
+      }
       userRole={roleInfo.role}
       isOwner={roleInfo.isOwner}
       isBarber={roleInfo.isBarber}
@@ -255,32 +265,41 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="min-h-screen">
             <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
             <OfflineBanner />
-            {roleInfo.isOwner && (
-              <Sidebar
-                businessName={businessName}
-                businessSlug={business.slug}
-                logoUrl={logoUrl}
-                isAdmin={roleInfo.isAdmin}
-                isBarber={roleInfo.isBarber}
-              />
-            )}
 
             {/* Mobile header with notification bell (self-managed by pathname on client) */}
             <MobileHeader businessName={businessName} logoUrl={logoUrl} />
 
-            {/* Main content */}
-            <main id="main-content" className={roleInfo.isOwner ? 'lg:pl-64' : ''}>
-              <div
-                className={
-                  isCitasRoute || isMiDiaRoute
-                    ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                    : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                }
+            {roleInfo.isOwner ? (
+              <DashboardShell
+                businessName={businessName}
+                businessSlug={business.slug}
+                logoUrl={logoUrl}
+                isBarber={roleInfo.isBarber}
               >
-                {roleInfo.isOwner && <TrialBanner />}
-                <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
-              </div>
-            </main>
+                <div
+                  className={
+                    isCitasRoute || isMiDiaRoute
+                      ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+                      : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+                  }
+                >
+                  <TrialBanner />
+                  <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
+                </div>
+              </DashboardShell>
+            ) : (
+              <main id="main-content">
+                <div
+                  className={
+                    isCitasRoute || isMiDiaRoute
+                      ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+                      : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+                  }
+                >
+                  <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
+                </div>
+              </main>
+            )}
 
             {/* Mobile bottom navigation */}
             <BottomNav isAdmin={roleInfo.isAdmin} isBarber={roleInfo.isBarber} />

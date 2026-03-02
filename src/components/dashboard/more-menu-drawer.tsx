@@ -42,7 +42,7 @@ interface MoreMenuDrawerProps {
 }
 
 // ── Section keys for grouping after permission filtering ──
-type SectionKey = 'nav' | 'business' | 'activity' | 'support' | 'account'
+type SectionKey = 'operacion' | 'gestion' | 'crecimiento' | 'actividad' | 'ayuda' | 'cuenta'
 
 interface MenuItem {
   name: string
@@ -58,13 +58,14 @@ interface MenuItem {
   barberMenuOnly?: boolean
 }
 
-const sectionLabels: Record<SectionKey, string | null> = {
-  nav: null, // no header for primary nav
-  business: null,
-  activity: null,
-  support: null,
-  account: null,
-}
+const SECTION_ORDER: SectionKey[] = [
+  'operacion',
+  'gestion',
+  'crecimiento',
+  'actividad',
+  'ayuda',
+  'cuenta',
+]
 
 const menuItems: MenuItem[] = [
   {
@@ -73,7 +74,7 @@ const menuItems: MenuItem[] = [
     icon: LayoutDashboard,
     description: 'Resumen del negocio',
     iconBg: 'bg-indigo-500',
-    section: 'nav',
+    section: 'operacion',
     ownerOnly: true,
   },
   {
@@ -82,7 +83,7 @@ const menuItems: MenuItem[] = [
     icon: BarChart3,
     description: 'Reportes y estadísticas',
     iconBg: 'bg-blue-500',
-    section: 'nav',
+    section: 'crecimiento',
     barberPermission: 'nav_analiticas',
   },
   {
@@ -91,7 +92,7 @@ const menuItems: MenuItem[] = [
     icon: Gift,
     description: 'Programa de recompensas',
     iconBg: 'bg-amber-500',
-    section: 'nav',
+    section: 'crecimiento',
     ownerOnly: true,
   },
   {
@@ -100,7 +101,7 @@ const menuItems: MenuItem[] = [
     icon: Scissors,
     description: 'Gestionar equipo',
     iconBg: 'bg-violet-500',
-    section: 'nav',
+    section: 'gestion',
     ownerOnly: true,
   },
   {
@@ -109,7 +110,7 @@ const menuItems: MenuItem[] = [
     icon: Users,
     description: 'Lista de clientes',
     iconBg: 'bg-rose-500',
-    section: 'nav',
+    section: 'gestion',
     barberPermission: 'nav_clientes',
     barberMenuOnly: true,
   },
@@ -119,7 +120,7 @@ const menuItems: MenuItem[] = [
     icon: CreditCard,
     description: 'Plan y facturación',
     iconBg: 'bg-emerald-500',
-    section: 'business',
+    section: 'cuenta',
     ownerOnly: true,
   },
   {
@@ -128,7 +129,7 @@ const menuItems: MenuItem[] = [
     icon: Settings,
     description: 'Ajustes del negocio',
     iconBg: 'bg-zinc-500',
-    section: 'business',
+    section: 'cuenta',
     ownerOnly: true,
   },
   {
@@ -137,7 +138,7 @@ const menuItems: MenuItem[] = [
     icon: Trophy,
     description: 'Logros del equipo',
     iconBg: 'bg-yellow-500',
-    section: 'activity',
+    section: 'actividad',
   },
   {
     name: 'Desafíos',
@@ -145,7 +146,7 @@ const menuItems: MenuItem[] = [
     icon: Target,
     description: 'Competencias y retos',
     iconBg: 'bg-orange-500',
-    section: 'activity',
+    section: 'actividad',
   },
   {
     name: 'Novedades',
@@ -153,7 +154,7 @@ const menuItems: MenuItem[] = [
     icon: History,
     description: 'Versiones y cambios',
     iconBg: 'bg-cyan-500',
-    section: 'activity',
+    section: 'ayuda',
     ownerOnly: true,
   },
   {
@@ -162,7 +163,7 @@ const menuItems: MenuItem[] = [
     icon: BookOpen,
     description: 'Aprende a usar la app',
     iconBg: 'bg-blue-500',
-    section: 'support',
+    section: 'ayuda',
   },
   {
     name: 'Cuenta y seguridad',
@@ -170,7 +171,7 @@ const menuItems: MenuItem[] = [
     icon: Shield,
     description: 'Cambiar contraseña',
     iconBg: 'bg-teal-500',
-    section: 'account',
+    section: 'cuenta',
     barberMenuOnly: true,
   },
 ]
@@ -181,7 +182,7 @@ const serviciosMenuItem: MenuItem = {
   icon: Scissors,
   description: 'Gestionar servicios y precios',
   iconBg: 'bg-violet-500',
-  section: 'nav',
+  section: 'operacion',
 }
 
 const externalLinks = [
@@ -202,16 +203,64 @@ function dedupeMenuItemsByHref(items: MenuItem[]): MenuItem[] {
   })
 }
 
-/** Group filtered items by section, preserving order */
-function groupBySection(items: MenuItem[]): { key: SectionKey; items: MenuItem[] }[] {
-  const order: SectionKey[] = ['nav', 'business', 'activity', 'support', 'account']
-  const map = new Map<SectionKey, MenuItem[]>()
-  for (const item of items) {
-    const list = map.get(item.section) ?? []
-    list.push(item)
-    map.set(item.section, list)
+function chunkIntoCards(items: MenuItem[]): MenuItem[][] {
+  if (items.length === 0) return []
+
+  const cards: MenuItem[][] = []
+  for (let i = 0; i < items.length; i += 3) {
+    cards.push(items.slice(i, i + 3))
   }
-  return order.filter((k) => map.has(k)).map((k) => ({ key: k, items: map.get(k)! }))
+
+  // Avoid tiny trailing cards (e.g. 1-2 items) by merging into previous card.
+  if (cards.length > 1 && cards[cards.length - 1].length < 3) {
+    const trailing = cards.pop()
+    if (trailing) {
+      cards[cards.length - 1] = [...cards[cards.length - 1], ...trailing]
+    }
+  }
+
+  return cards
+}
+
+/**
+ * Build visual cards without section titles.
+ * Keep growth metrics/actions together in one card when available:
+ * Analíticas + Lealtad + Logros + Desafíos.
+ */
+function buildMenuCards(items: MenuItem[]): MenuItem[][] {
+  const orderedItems = SECTION_ORDER.flatMap((section) =>
+    items.filter((item) => item.section === section)
+  )
+
+  const growthClusterHrefs = [
+    '/analiticas',
+    '/lealtad/configuracion',
+    '/barberos/logros',
+    '/barberos/desafios',
+  ]
+  const growthClusterSet = new Set(growthClusterHrefs)
+  const growthClusterItems = growthClusterHrefs
+    .map((href) => orderedItems.find((item) => item.href === href))
+    .filter((item): item is MenuItem => Boolean(item))
+
+  if (growthClusterItems.length < 3) {
+    return chunkIntoCards(orderedItems)
+  }
+
+  const firstClusterIndex = orderedItems.findIndex((item) => growthClusterSet.has(item.href))
+  if (firstClusterIndex < 0) {
+    return chunkIntoCards(orderedItems)
+  }
+
+  const remainingItems = orderedItems.filter((item) => !growthClusterSet.has(item.href))
+  const remainingBeforeCount = orderedItems
+    .slice(0, firstClusterIndex)
+    .filter((item) => !growthClusterSet.has(item.href)).length
+
+  const beforeCluster = remainingItems.slice(0, remainingBeforeCount)
+  const afterCluster = remainingItems.slice(remainingBeforeCount)
+
+  return [...chunkIntoCards(beforeCluster), growthClusterItems, ...chunkIntoCards(afterCluster)]
 }
 
 // ── iOS-style row ──
@@ -238,8 +287,9 @@ function IOSRow({
       href={href}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors active:bg-white/5',
-        isActive && 'bg-white/5'
+        'flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors',
+        'active:bg-zinc-100 dark:active:bg-white/5',
+        isActive && 'bg-zinc-100 dark:bg-white/5'
       )}
     >
       {/* iOS colored square icon */}
@@ -256,15 +306,21 @@ function IOSRow({
       <div
         className={cn(
           'flex flex-1 items-center justify-between min-h-[44px] pr-1',
-          !isLast && 'border-b border-zinc-700/50'
+          !isLast && 'border-b border-zinc-200 dark:border-zinc-700/50'
         )}
       >
         <span
-          className={cn('text-[17px] leading-tight', isActive ? 'text-white' : 'text-zinc-100')}
+          className={cn(
+            'text-[17px] leading-tight',
+            isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-800 dark:text-zinc-100'
+          )}
         >
           {label}
         </span>
-        <ChevronRight className="h-[18px] w-[18px] text-zinc-500 flex-shrink-0" strokeWidth={2.5} />
+        <ChevronRight
+          className="h-[18px] w-[18px] text-zinc-400 dark:text-zinc-500 flex-shrink-0"
+          strokeWidth={2.5}
+        />
       </div>
     </Link>
   )
@@ -315,21 +371,23 @@ function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClo
 
   return (
     <div className="mb-5">
-      <div className="rounded-xl bg-zinc-800/80 overflow-hidden">
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden dark:border-zinc-700 dark:bg-zinc-800/80">
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="flex-shrink-0 w-[29px] h-[29px] rounded-[7px] bg-blue-500 flex items-center justify-center">
             <Link2 className="h-[17px] w-[17px] text-white" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[17px] text-zinc-100">Link de Reservas</p>
-            <p className="text-[13px] text-zinc-400">Comparte con tus clientes</p>
+            <p className="text-[17px] text-zinc-900 dark:text-zinc-100">Link de Reservas</p>
+            <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
+              Comparte con tus clientes
+            </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-px bg-zinc-700/50 mx-4 mb-3 rounded-lg overflow-hidden">
+        <div className="grid grid-cols-2 gap-px bg-zinc-200 dark:bg-zinc-700/50 mx-4 mb-3 rounded-lg overflow-hidden">
           <button
             type="button"
             onClick={handleCopy}
-            className="flex h-[38px] items-center justify-center gap-1.5 bg-zinc-700/80 text-[14px] font-medium text-zinc-200 transition-colors active:bg-zinc-600"
+            className="flex h-[38px] items-center justify-center gap-1.5 bg-white text-[14px] font-medium text-zinc-700 transition-colors active:bg-zinc-100 dark:bg-zinc-700/80 dark:text-zinc-200 dark:active:bg-zinc-600"
           >
             {copied ? (
               <Check className="h-4 w-4 text-green-400" />
@@ -341,7 +399,7 @@ function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClo
           <button
             type="button"
             onClick={handleShare}
-            className="flex h-[38px] items-center justify-center gap-1.5 bg-zinc-700/80 text-[14px] font-medium text-zinc-200 transition-colors active:bg-zinc-600"
+            className="flex h-[38px] items-center justify-center gap-1.5 bg-white text-[14px] font-medium text-zinc-700 transition-colors active:bg-zinc-100 dark:bg-zinc-700/80 dark:text-zinc-200 dark:active:bg-zinc-600"
           >
             <Share2 className="h-3.5 w-3.5" />
             Compartir
@@ -354,15 +412,55 @@ function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClo
 
 // ── iOS Settings-style card group ──
 
-function SettingsGroup({ children, label }: { children: React.ReactNode; label?: string | null }) {
+function SettingsGroup({ children }: { children: React.ReactNode }) {
   return (
     <div>
-      {label && (
-        <p className="text-[13px] font-medium uppercase tracking-wide text-zinc-400 px-4 pb-1.5">
-          {label}
-        </p>
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden dark:border-zinc-700 dark:bg-zinc-800/80">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// ── User profile header ──
+
+function UserProfileHeader() {
+  let userEmail: string | undefined
+  let userName: string | undefined
+  let userAvatarUrl: string | undefined
+  try {
+    const ctx = useBusiness()
+    userEmail = ctx.userEmail
+    userName = ctx.userName
+    userAvatarUrl = ctx.userAvatarUrl
+  } catch {
+    return null
+  }
+
+  const displayName = userName || userEmail?.split('@')[0] || 'Usuario'
+
+  return (
+    <div className="flex items-center gap-3 px-1 pb-1">
+      {userAvatarUrl ? (
+        <img
+          src={userAvatarUrl}
+          alt=""
+          className="h-10 w-10 rounded-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
+          <Users className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
+        </div>
       )}
-      <div className="rounded-xl bg-zinc-800/80 overflow-hidden">{children}</div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[17px] font-semibold text-zinc-900 dark:text-white">
+          {displayName}
+        </p>
+        {userEmail && (
+          <p className="truncate text-[13px] text-zinc-500 dark:text-zinc-400">{userEmail}</p>
+        )}
+      </div>
     </div>
   )
 }
@@ -422,8 +520,8 @@ export function MoreMenuDrawer({
     return dedupeMenuItemsByHref(items)
   })()
 
-  // ── THEN group by section (P1: filter → group) ──
-  const sections = groupBySection(filteredItems)
+  // ── Build visual cards (no card titles + min 3 items per card when possible) ──
+  const menuCards = buildMenuCards(filteredItems)
 
   const handleLinkClick = () => {
     onClose()
@@ -438,12 +536,15 @@ export function MoreMenuDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="Más opciones" showCloseButton={false}>
       <div className="space-y-5 pb-2">
+        {/* User profile */}
+        <UserProfileHeader />
+
         {/* Share Link block (P1: preserved with full behavior) */}
         <ShareLinkItem isBarberRole={isBarberRole} onClose={onClose} />
 
-        {/* iOS-style grouped sections */}
-        {sections.map(({ key, items }) => (
-          <SettingsGroup key={key} label={sectionLabels[key]}>
+        {/* iOS-style grouped cards */}
+        {menuCards.map((items, cardIndex) => (
+          <SettingsGroup key={`menu-card-${cardIndex}`}>
             {items.map((item, i) => (
               <IOSRow
                 key={item.href}
@@ -459,35 +560,10 @@ export function MoreMenuDrawer({
           </SettingsGroup>
         ))}
 
-        {/* Panel Admin (P2: preserved for admins) */}
-        {isAdmin && (
+        {/* Soporte */}
+        {!isBarberRole && (
           <SettingsGroup>
-            <Link
-              href="/admin"
-              onClick={handleLinkClick}
-              className={cn(
-                'flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors active:bg-white/5',
-                pathname === '/admin' && 'bg-white/5'
-              )}
-            >
-              <div className="flex-shrink-0 w-[29px] h-[29px] rounded-[7px] bg-purple-500 flex items-center justify-center">
-                <Shield className="h-[17px] w-[17px] text-white" strokeWidth={2} />
-              </div>
-              <div className="flex flex-1 items-center justify-between min-h-[44px] pr-1">
-                <span className="text-[17px] text-zinc-100">Panel Admin</span>
-                <ChevronRight
-                  className="h-[18px] w-[18px] text-zinc-500 flex-shrink-0"
-                  strokeWidth={2.5}
-                />
-              </div>
-            </Link>
-          </SettingsGroup>
-        )}
-
-        {/* Support (external links) + Logout in one group */}
-        <SettingsGroup>
-          {!isBarberRole &&
-            externalLinks.map((item) => {
+            {externalLinks.map((item) => {
               const Icon = item.icon
               return (
                 <a
@@ -495,25 +571,53 @@ export function MoreMenuDrawer({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors active:bg-white/5"
+                  className="flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors active:bg-zinc-100 dark:active:bg-white/5"
                 >
                   <div className="flex-shrink-0 w-[29px] h-[29px] rounded-[7px] bg-zinc-500 flex items-center justify-center">
                     <Icon className="h-[17px] w-[17px] text-white" strokeWidth={2} />
                   </div>
-                  <div className="flex flex-1 items-center justify-between min-h-[44px] pr-1 border-b border-zinc-700/50">
-                    <span className="text-[17px] text-zinc-100">{item.name}</span>
-                    <ExternalLink className="h-[15px] w-[15px] text-zinc-500 flex-shrink-0" />
+                  <div className="flex flex-1 items-center justify-between min-h-[44px] pr-1">
+                    <span className="text-[17px] text-zinc-800 dark:text-zinc-100">
+                      {item.name}
+                    </span>
+                    <ExternalLink className="h-[15px] w-[15px] text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
                   </div>
                 </a>
               )
             })}
+          </SettingsGroup>
+        )}
 
-          {/* Logout */}
+        {/* Sesión */}
+        <SettingsGroup>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={handleLinkClick}
+              className={cn(
+                'flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors',
+                'active:bg-zinc-100 dark:active:bg-white/5',
+                pathname === '/admin' && 'bg-zinc-100 dark:bg-white/5'
+              )}
+            >
+              <div className="flex-shrink-0 w-[29px] h-[29px] rounded-[7px] bg-purple-500 flex items-center justify-center">
+                <Shield className="h-[17px] w-[17px] text-white" strokeWidth={2} />
+              </div>
+              <div className="flex flex-1 items-center justify-between min-h-[44px] pr-1 border-b border-zinc-200 dark:border-zinc-700/50">
+                <span className="text-[17px] text-zinc-800 dark:text-zinc-100">Panel Admin</span>
+                <ChevronRight
+                  className="h-[18px] w-[18px] text-zinc-400 dark:text-zinc-500 flex-shrink-0"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </Link>
+          )}
+
           <button
             type="button"
             onClick={handleLogout}
             data-testid="logout-button"
-            className="flex w-full items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors active:bg-white/5"
+            className="flex w-full items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors active:bg-zinc-100 dark:active:bg-white/5"
           >
             <div className="flex-shrink-0 w-[29px] h-[29px] rounded-[7px] bg-red-500 flex items-center justify-center">
               <LogOut className="h-[17px] w-[17px] text-white" strokeWidth={2} />

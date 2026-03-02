@@ -15,6 +15,8 @@ interface BusinessContextValue {
   slug?: string
   userId: string
   userEmail?: string
+  userName?: string
+  userAvatarUrl?: string
   userRole: UserRole
   isOwner: boolean
   isBarber: boolean
@@ -31,6 +33,8 @@ interface BusinessProviderProps {
   slug?: string
   userId: string
   userEmail?: string
+  userName?: string
+  userAvatarUrl?: string
   userRole: UserRole
   isOwner: boolean
   isBarber: boolean
@@ -45,6 +49,8 @@ export function BusinessProvider({
   slug,
   userId,
   userEmail,
+  userName,
+  userAvatarUrl,
   userRole,
   isOwner,
   isBarber,
@@ -57,6 +63,8 @@ export function BusinessProvider({
     slug,
     userId,
     userEmail,
+    userName,
+    userAvatarUrl,
     userRole,
     isOwner,
     isBarber,

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
@@ -75,8 +76,32 @@
   --shadow-red-hover: 0 10px 15px -3px rgb(239 68 68 / 0.3), 0 4px 6px -4px rgb(239 68 68 / 0.15);
 }
 
+:root.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --brand-primary: #6d7cff;
+  --brand-primary-rgb: 109, 124, 255;
+  --brand-primary-light: #1c2440;
+
+  /* Premium Color Tokens (Audit 2026) */
+  --surface-0: #080a0e;
+  --surface-1: #10141b;
+  --surface-2: #151b24;
+  --text-1: #f3f6fb;
+  --text-2: #a6b0be;
+  --text-3: #828d9d;
+  --accent-soft: #1c2440;
+
+  /* Chart tokens (dark) */
+  --chart-grid: #27272a;
+  --chart-axis: #71717a;
+  --chart-tooltip-bg: rgba(24, 24, 27, 0.95);
+  --chart-tooltip-border: #3f3f46;
+  --chart-tooltip-text: #f3f6fb;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light):not(.dark) {
     --background: #0a0a0a;
     --foreground: #ededed;
     --brand-primary: #6d7cff;
@@ -120,18 +145,16 @@ body {
     0 0 0 1px rgba(var(--brand-primary-rgb), 0.4);
 }
 
-@media (prefers-color-scheme: dark) {
-  .nav-indicator {
-    background: linear-gradient(
-      to bottom,
-      rgba(var(--brand-primary-rgb), 0.42),
-      rgba(var(--brand-primary-rgb), 0.62)
-    );
-    box-shadow:
-      0 0 26px rgba(var(--brand-primary-rgb), 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 0 0 1px rgba(var(--brand-primary-rgb), 0.52);
-  }
+.dark .nav-indicator {
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--brand-primary-rgb), 0.42),
+    rgba(var(--brand-primary-rgb), 0.62)
+  );
+  box-shadow:
+    0 0 26px rgba(var(--brand-primary-rgb), 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(var(--brand-primary-rgb), 0.52);
 }
 
 @layer components {
@@ -166,34 +189,17 @@ body {
   background-clip: text;
 }
 
-@media (prefers-color-scheme: dark) {
-  .brand-gradient-text {
-    background: linear-gradient(
-      to right,
-      color-mix(in srgb, var(--brand-primary), white 20%),
-      var(--brand-primary)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-  }
+.dark .brand-gradient-text {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--brand-primary), white 20%),
+    var(--brand-primary)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* Improve contrast for page titles on desktop dark backgrounds */
-@media (min-width: 1024px) and (prefers-color-scheme: dark) {
-  .app-page-title.brand-gradient-text {
-    background-image: linear-gradient(
-      to right,
-      color-mix(in srgb, white 88%, var(--brand-primary) 12%),
-      color-mix(in srgb, white 72%, var(--brand-primary) 28%)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    text-shadow: 0 1px 10px rgba(255, 255, 255, 0.08);
-  }
-}
-
 @media (min-width: 1024px) {
   .dark .app-page-title.brand-gradient-text {
     background-image: linear-gradient(
@@ -273,14 +279,12 @@ a:focus-visible:not(.focus-ring),
     background: #a1a1aa;
   }
 
-  @media (prefers-color-scheme: dark) {
-    ::-webkit-scrollbar-thumb {
-      background: #3f3f46;
-    }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+  }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: #52525b;
-    }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
   }
 }
 
@@ -559,11 +563,9 @@ a:focus-visible:not(.focus-ring),
   animation: shimmer 1.5s infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  .skeleton {
-    background: linear-gradient(90deg, #27272a 0%, #3f3f46 50%, #27272a 100%);
-    background-size: 200% 100%;
-  }
+.dark .skeleton {
+  background: linear-gradient(90deg, #27272a 0%, #3f3f46 50%, #27272a 100%);
+  background-size: 200% 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -579,10 +581,8 @@ a:focus-visible:not(.focus-ring),
   -webkit-backdrop-filter: blur(10px);
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass {
-    background: rgba(24, 24, 27, 0.8);
-  }
+.dark .glass {
+  background: rgba(24, 24, 27, 0.8);
 }
 
 /* Gradient button — dark mode fix for low-luminance brand colors */
@@ -592,14 +592,39 @@ a:focus-visible:not(.focus-ring),
   color: var(--brand-primary-contrast, #fff);
 }
 
-@media (prefers-color-scheme: dark) {
-  .btn-gradient-bg {
-    background: color-mix(in srgb, var(--brand-primary) 60%, white);
-    box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 4px 14px rgba(var(--brand-primary-rgb, 0, 0, 0), 0.3);
-    color: #fff;
-  }
+/* CTA button for dashboard headers (Equipo/Clientes/Citas) */
+.btn-cta {
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast, #fff);
+  border: 1px solid rgba(var(--brand-primary-rgb), 0.48);
+  box-shadow: 0 8px 20px rgba(var(--brand-primary-rgb), 0.3);
+}
+
+.btn-cta:hover {
+  background: color-mix(in srgb, var(--brand-primary), white 10%);
+  border-color: rgba(var(--brand-primary-rgb), 0.62);
+  box-shadow: 0 10px 24px rgba(var(--brand-primary-rgb), 0.38);
+}
+
+.dark .btn-gradient-bg {
+  background: color-mix(in srgb, var(--brand-primary) 60%, white);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 4px 14px rgba(var(--brand-primary-rgb, 0, 0, 0), 0.3);
+  color: #fff;
+}
+
+.dark .btn-cta {
+  background: color-mix(in srgb, var(--brand-primary) 78%, white);
+  border: 1px solid rgba(var(--brand-primary-rgb), 0.64);
+  box-shadow: 0 10px 24px rgba(var(--brand-primary-rgb), 0.42);
+  color: #fff;
+}
+
+.dark .btn-cta:hover {
+  background: color-mix(in srgb, var(--brand-primary) 70%, white);
+  border-color: rgba(var(--brand-primary-rgb), 0.72);
+  box-shadow: 0 12px 28px rgba(var(--brand-primary-rgb), 0.48);
 }
 
 /* Premium card hover effect */
@@ -614,10 +639,8 @@ a:focus-visible:not(.focus-ring),
   box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
 }
 
-@media (prefers-color-scheme: dark) {
-  .card-hover:hover {
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.4);
-  }
+.dark .card-hover:hover {
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.4);
 }
 
 /* Gradient text */
@@ -628,12 +651,10 @@ a:focus-visible:not(.focus-ring),
   background-clip: text;
 }
 
-@media (prefers-color-scheme: dark) {
-  .gradient-text {
-    background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-  }
+.dark .gradient-text {
+  background: linear-gradient(135deg, #fafafa 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* Interactive states */
@@ -708,10 +729,8 @@ a:focus-visible:not(.focus-ring),
   background: rgba(18, 18, 22, 0.72);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-glass {
-    background: rgba(30, 30, 32, 0.72);
-  }
+.dark .ios-glass {
+  background: rgba(30, 30, 32, 0.72);
 }
 
 /* iOS Floating Card - Elevated with soft shadow */
@@ -738,14 +757,12 @@ a:focus-visible:not(.focus-ring),
     0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-card {
-    background: rgba(38, 38, 42, 0.85);
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.06),
-      0 4px 16px rgba(0, 0, 0, 0.25),
-      0 8px 32px rgba(0, 0, 0, 0.15);
-  }
+.dark .ios-card {
+  background: rgba(38, 38, 42, 0.85);
+  box-shadow:
+    0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .ios-card:active {
@@ -802,11 +819,9 @@ a:focus-visible:not(.focus-ring),
   color: var(--brand-primary-on-light);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-capsule-secondary {
-    background: rgba(118, 118, 128, 0.24);
-    color: var(--brand-primary-on-dark);
-  }
+.dark .ios-capsule-secondary {
+  background: rgba(118, 118, 128, 0.24);
+  color: var(--brand-primary-on-dark);
 }
 
 /* iOS Segmented Control */
@@ -817,10 +832,8 @@ a:focus-visible:not(.focus-ring),
   padding: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-segment {
-    background: rgba(118, 118, 128, 0.24);
-  }
+.dark .ios-segment {
+  background: rgba(118, 118, 128, 0.24);
 }
 
 .ios-segment-item {
@@ -843,11 +856,9 @@ a:focus-visible:not(.focus-ring),
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-segment-item.active {
-    background: rgba(60, 60, 67, 0.6);
-    color: #fff;
-  }
+.dark .ios-segment-item.active {
+  background: rgba(60, 60, 67, 0.6);
+  color: #fff;
 }
 
 /* iOS List Item */
@@ -867,14 +878,13 @@ a:focus-visible:not(.focus-ring),
   background: rgba(0, 0, 0, 0.04);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-list-item {
-    background: transparent;
-    border-bottom-color: rgba(84, 84, 88, 0.36);
-  }
-  .ios-list-item:active {
-    background: rgba(255, 255, 255, 0.06);
-  }
+.dark .ios-list-item {
+  background: transparent;
+  border-bottom-color: rgba(84, 84, 88, 0.36);
+}
+
+.dark .ios-list-item:active {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* iOS Input Field */
@@ -899,16 +909,16 @@ a:focus-visible:not(.focus-ring),
   color: rgba(60, 60, 67, 0.4);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-input {
-    background: rgba(118, 118, 128, 0.16);
-  }
-  .ios-input:focus {
-    background: rgba(118, 118, 128, 0.24);
-  }
-  .ios-input::placeholder {
-    color: rgba(235, 235, 245, 0.3);
-  }
+.dark .ios-input {
+  background: rgba(118, 118, 128, 0.16);
+}
+
+.dark .ios-input:focus {
+  background: rgba(118, 118, 128, 0.24);
+}
+
+.dark .ios-input::placeholder {
+  color: rgba(235, 235, 245, 0.3);
 }
 
 /* iOS Dynamic Island Pill */
@@ -934,10 +944,8 @@ a:focus-visible:not(.focus-ring),
   margin: 8px auto 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-sheet-handle {
-    background: rgba(235, 235, 245, 0.3);
-  }
+.dark .ios-sheet-handle {
+  background: rgba(235, 235, 245, 0.3);
 }
 
 /* iOS Safe Area Spacing */
@@ -981,10 +989,8 @@ a:focus-visible:not(.focus-ring),
   color: rgba(60, 60, 67, 0.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ios-caption {
-    color: rgba(235, 235, 245, 0.6);
-  }
+.dark .ios-caption {
+  color: rgba(235, 235, 245, 0.6);
 }
 
 /* iOS Haptic-like press feedback */

@@ -182,8 +182,8 @@ export function PricingSection() {
                   href="/register"
                   className={`group flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-[background-color,box-shadow] ${
                     plan.popular
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40'
-                      : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl shadow-blue-500/25 hover:from-blue-500 hover:to-purple-500 hover:shadow-2xl hover:shadow-blue-500/40'
+                      : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700'
                   }`}
                 >
                   {plan.cta}

@@ -12,6 +12,7 @@ import {
   Check,
   type LucideIcon,
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
@@ -87,21 +88,23 @@ export function ClientSearchToolbar({
       <div className="flex items-center gap-2">
         {/* Mobile/tablet: Vistas dropdown */}
         <div ref={viewDropdownRef} className="relative lg:hidden">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               setViewDropdownOpen(!viewDropdownOpen)
               if (isMobileDevice()) haptics.selection()
             }}
             aria-haspopup="true"
             aria-expanded={viewDropdownOpen}
-            className="h-10 px-3 flex items-center gap-2 text-sm font-medium text-muted border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] rounded-xl hover:bg-zinc-100/80 dark:hover:bg-white/10 transition-colors"
+            className="h-10 px-3 gap-2 text-muted border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04]"
           >
             <CurrentViewIcon className="h-4 w-4" />
             <span className="hidden sm:inline">{currentView.label}</span>
             <ChevronDown
               className={`h-3.5 w-3.5 transition-transform duration-200 ${viewDropdownOpen ? 'rotate-180' : ''}`}
             />
-          </button>
+          </Button>
           <AnimatePresence>
             {viewDropdownOpen && (
               <motion.div
@@ -156,12 +159,14 @@ export function ClientSearchToolbar({
         </div>
 
         {/* Filtros button */}
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => {
             onOpenSegmentFilter()
             if (isMobileDevice()) haptics.selection()
           }}
-          className="h-10 px-3 flex items-center gap-2 text-sm font-medium text-muted border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] rounded-xl hover:bg-zinc-100/80 dark:hover:bg-white/10 transition-colors"
+          className="h-10 px-3 gap-2 text-muted border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04]"
         >
           <Filter className="h-4 w-4" />
           <span className="hidden sm:inline">Filtros</span>
@@ -170,7 +175,7 @@ export function ClientSearchToolbar({
               1
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Stats toggle - below controls, secondary action */}

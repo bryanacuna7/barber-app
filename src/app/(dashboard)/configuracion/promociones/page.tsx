@@ -140,22 +140,26 @@ function RuleCard({ rule, onToggle, onEdit, onDelete, disabled = false }: RuleCa
 
         {/* Action buttons */}
         <div className="flex items-center gap-1 shrink-0">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => onEdit(rule)}
             aria-label={`Editar regla ${rule.label}`}
-            className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="h-9 w-9 p-0 text-muted"
           >
             <Pencil className="h-4 w-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setConfirmDelete((v) => !v)}
             aria-label={`Eliminar regla ${rule.label}`}
-            className="h-9 w-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            className="h-9 w-9 p-0 text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
           >
             <Trash2 className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 

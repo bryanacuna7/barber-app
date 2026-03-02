@@ -127,12 +127,12 @@ export default function BarberosPage() {
                 <NotificationBell />
               </div>
               <Button
-                variant="gradient"
+                variant="cta"
                 onClick={() => {
                   setIsInviteOpen(true)
                   if (isMobileDevice()) haptics.tap()
                 }}
-                className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+                className="shrink-0 min-w-[44px] min-h-[44px] h-10"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
                 <span className="hidden sm:inline">Agregar Miembro del equipo</span>
@@ -175,7 +175,7 @@ export default function BarberosPage() {
             </p>
             {!searchQuery && (
               <Button
-                variant="gradient"
+                variant="cta"
                 onClick={() => setIsInviteOpen(true)}
                 className="mt-4 min-h-[44px]"
               >
@@ -481,17 +481,19 @@ function InviteBarberModal({
               <span className="flex-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
                 {setupResult.setupUrl}
               </span>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={handleCopy}
-                className="shrink-0 rounded-md p-1.5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                className="shrink-0 p-1.5 h-auto min-h-0"
               >
                 {copied ? (
                   <Check className="size-4 text-emerald-500" />
                 ) : (
                   <Copy className="size-4" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -750,18 +752,20 @@ function BarberDetailModal({
                   {barber.isActive ? 'Activo' : 'Inactivo'}
                 </span>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => {
                   setEditName(barber.name)
                   setEditEmail(barber.email)
                   setIsEditing(true)
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-colors hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                className="h-10 w-10 p-0"
                 aria-label="Editar perfil"
               >
                 <Pencil className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             {/* Info rows */}

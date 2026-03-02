@@ -69,7 +69,11 @@ const notificationColors: Record<string, { icon: string; bg: string }> = {
   system_alert: { icon: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30' },
 }
 
-export function NotificationBell() {
+interface NotificationBellProps {
+  className?: string
+}
+
+export function NotificationBell({ className }: NotificationBellProps = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [stats, setStats] = useState<NotificationStats>({ total: 0, unread: 0 })
@@ -337,7 +341,10 @@ export function NotificationBell() {
       <button
         ref={buttonRef}
         onClick={handleToggle}
-        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm ring-1 ring-zinc-200 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-white"
+        className={cn(
+          'relative flex h-10 w-10 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm ring-1 ring-zinc-200 transition-colors hover:bg-zinc-50 hover:text-zinc-900 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-white',
+          className
+        )}
         aria-label="Notificaciones"
       >
         <Bell className="h-5 w-5" />

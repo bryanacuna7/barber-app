@@ -60,13 +60,13 @@ export function LandingNavbar() {
         <div className="hidden items-center gap-3 lg:flex">
           <Link
             href="/login"
-            className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-600"
+            className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
           >
             Iniciar sesion
           </Link>
           <Link
             href="/register"
-            className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-shadow hover:shadow-xl hover:shadow-blue-500/40"
+            className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-[box-shadow,filter] hover:from-blue-500 hover:to-purple-500 hover:shadow-xl hover:shadow-blue-500/40"
           >
             Registrar mi barberia
           </Link>
@@ -108,14 +108,14 @@ export function LandingNavbar() {
                 <Link
                   href="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="block rounded-xl border border-zinc-200 bg-white py-3 text-center text-base font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                  className="block rounded-xl border border-zinc-200 bg-white py-3 text-center text-base font-semibold text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
                 >
                   Iniciar sesion
                 </Link>
                 <Link
                   href="/register"
                   onClick={() => setMenuOpen(false)}
-                  className="block rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 text-center text-base font-semibold text-white"
+                  className="block rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 text-center text-base font-semibold text-white transition-[box-shadow,filter] hover:from-blue-500 hover:to-purple-500"
                 >
                   Registrar mi barberia
                 </Link>
@@ -151,13 +151,13 @@ export function MobileFloatingCTA() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="flex-1 rounded-xl border border-zinc-200 bg-white py-3 text-center text-sm font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+              className="flex-1 rounded-xl border border-zinc-200 bg-white py-3 text-center text-sm font-semibold text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
             >
               Iniciar sesion
             </Link>
             <Link
               href="/register"
-              className="flex-[2] rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-blue-500/25"
+              className="flex-[2] rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-[box-shadow,filter] hover:from-blue-500 hover:to-purple-500 hover:shadow-xl hover:shadow-blue-500/40"
             >
               Registrar mi barberia
             </Link>
