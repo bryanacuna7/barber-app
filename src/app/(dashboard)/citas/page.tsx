@@ -30,13 +30,13 @@ import { toast } from 'sonner'
 import { usePreference } from '@/lib/preferences'
 import { formatCurrencyCompactMillions } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { Appointment } from '@/types/domain'
+import { useSelection } from '@/hooks/useSelection'
+import { BulkActionsToolbar } from '@/components/ui/bulk-actions-toolbar'
 
 // React Query hooks
-import {
-  useCalendarAppointments,
-  useCreateAppointment,
-  useUpdateAppointmentStatus,
-} from '@/hooks/queries/useAppointments'
+import { useCalendarAppointments, useCreateAppointment } from '@/hooks/queries/useAppointments'
+import { useOptimisticAppointmentStatus } from '@/hooks/queries/useOptimisticAppointments'
 import { useClients } from '@/hooks/queries/useClients'
 import { useServices } from '@/hooks/queries/useServices'
 import { useBarbers } from '@/hooks/queries/useBarbers'
@@ -55,8 +55,24 @@ import { CalendarMonthView } from '@/components/calendar/calendar-month-view'
 import { CalendarStatsPanel } from '@/components/calendar/calendar-stats-panel'
 import { CreateAppointmentSheet } from '@/components/calendar/create-appointment-sheet'
 import { AppointmentDetailModal } from '@/components/calendar/appointment-detail-modal'
+import { ClientEffects } from '@/components/dashboard/client-effects'
+import { useSavedFilters, type SavedFilter } from '@/hooks/useSavedFilters'
+import { SavedFilterBar } from '@/components/ui/saved-filter-bar'
 
 type ViewMode = 'day' | 'week' | 'month'
+type StatusFilter = 'all' | 'scheduled' | 'completed'
+
+interface CitasFilterState {
+  statusFilter: StatusFilter
+}
+
+const CITAS_FILTER_PRESETS: SavedFilter<CitasFilterState>[] = [
+  { id: 'all', label: 'Todas', filter: { statusFilter: 'all' } },
+  { id: 'scheduled', label: 'Agendadas', filter: { statusFilter: 'scheduled' } },
+  { id: 'completed', label: 'Completadas', filter: { statusFilter: 'completed' } },
+]
+
+const DEFAULT_CITAS_FILTER: CitasFilterState = { statusFilter: 'all' }
 
 function CitasCalendarFusionContent() {
   const { businessId, isBarber, barberId, staffPermissions } = useBusiness()
@@ -86,6 +102,26 @@ function CitasCalendarFusionContent() {
     time: '09:00',
     notes: '',
   }))
+
+  // Saved filter presets
+  const savedFilters = useSavedFilters<CitasFilterState>({
+    pageKey: 'citas',
+    defaultFilter: DEFAULT_CITAS_FILTER,
+    builtInPresets: CITAS_FILTER_PRESETS,
+  })
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    savedFilters.activeFilter.statusFilter
+  )
+
+  const handleApplyCitasPreset = (presetId: string) => {
+    savedFilters.applyPreset(presetId)
+    const preset = savedFilters.presets.find((p) => p.id === presetId)
+    if (preset) setStatusFilter(preset.filter.statusFilter)
+  }
+
+  const handleSaveCitasPreset = (label: string) => {
+    savedFilters.savePreset(label, { statusFilter })
+  }
 
   // Auto-open create sheet when navigated with ?intent=create
   useEffect(() => {
@@ -130,7 +166,7 @@ function CitasCalendarFusionContent() {
   const { data: servicesData } = useServices(businessId || '')
   const { data: barbersData } = useBarbers(businessId || '')
   const createAppointment = useCreateAppointment()
-  const updateAppointmentStatus = useUpdateAppointmentStatus()
+  const updateAppointmentStatus = useOptimisticAppointmentStatus()
 
   const clients = clientsData?.clients || []
   const services = servicesData || []
@@ -180,8 +216,24 @@ function CitasCalendarFusionContent() {
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments]
       .filter((apt) => apt.status !== 'cancelled' && apt.status !== 'no_show')
+      .filter((apt) => {
+        if (statusFilter === 'all') return true
+        if (statusFilter === 'scheduled')
+          return apt.status === 'pending' || apt.status === 'confirmed'
+        if (statusFilter === 'completed') return apt.status === 'completed'
+        return true
+      })
       .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
-  }, [filteredAppointments])
+  }, [filteredAppointments, statusFilter])
+
+  const selection = useSelection(sortedAppointments)
+  const clearSelection = selection.clear
+
+  useEffect(() => {
+    if (viewMode !== 'day') {
+      clearSelection()
+    }
+  }, [viewMode, clearSelection])
 
   // Time blocks (Cinema feature - day view only)
   const timeBlocks = useMemo(() => {
@@ -446,6 +498,42 @@ function CitasCalendarFusionContent() {
     [updateAppointmentStatus]
   )
 
+  async function handleBulkAction(actionId: string, ids: string[]) {
+    if (ids.length === 0) return
+
+    const statusByActionId: Record<string, Appointment['status']> = {
+      'appointment.confirm': 'confirmed',
+      'appointment.complete': 'completed',
+      'appointment.cancel': 'cancelled',
+    }
+
+    const status = statusByActionId[actionId]
+    if (!status) {
+      toast.info('Acción masiva no disponible')
+      return
+    }
+
+    const results = await Promise.allSettled(
+      ids.map((appointmentId) => updateAppointmentStatus.mutateAsync({ appointmentId, status }))
+    )
+
+    const successCount = results.filter((r) => r.status === 'fulfilled').length
+    const failureCount = results.length - successCount
+
+    if (successCount > 0) {
+      clearSelection()
+      toast.success(
+        successCount === 1 ? '1 cita actualizada' : `${successCount} citas actualizadas`
+      )
+    }
+
+    if (failureCount > 0) {
+      toast.error(
+        failureCount === 1 ? '1 cita no se pudo actualizar' : `${failureCount} citas fallaron`
+      )
+    }
+  }
+
   // Error state
   if (queryError) {
     return (
@@ -457,6 +545,7 @@ function CitasCalendarFusionContent() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <ClientEffects title="Citas" />
       <div className="relative z-10 flex">
         {/* Main content area */}
         <div className="flex-1 lg:pr-80 w-full min-w-0">
@@ -479,6 +568,18 @@ function CitasCalendarFusionContent() {
             goalProgress={goalProgress}
             appointmentCount={filteredAppointments.length}
           />
+
+          {/* Saved Filter Presets */}
+          <div className="hidden lg:block px-4 lg:px-6 pt-2">
+            <SavedFilterBar
+              presets={savedFilters.presets}
+              activePresetId={savedFilters.activePresetId}
+              onApplyPreset={handleApplyCitasPreset}
+              onDeletePreset={savedFilters.deletePreset}
+              onSavePreset={handleSaveCitasPreset}
+              canSave={statusFilter !== 'all'}
+            />
+          </div>
 
           {/* Guide Tip */}
           <div className="px-0 lg:px-6 pt-4">
@@ -528,6 +629,9 @@ function CitasCalendarFusionContent() {
                 onStatusChange={handleAppointmentStatusChange}
                 isBarber={isBarber}
                 onWalkIn={() => setIsWalkInOpen(true)}
+                isSelected={selection.isSelected}
+                onToggleSelect={selection.toggle}
+                selectionCount={selection.count}
               />
             )}
 
@@ -647,6 +751,14 @@ function CitasCalendarFusionContent() {
             : undefined
         }
         onCreated={() => refetch()}
+      />
+
+      <BulkActionsToolbar
+        count={selection.count}
+        entityType="appointment"
+        onAction={handleBulkAction}
+        selectedIds={Array.from(selection.selected)}
+        onClear={selection.clear}
       />
 
       <style jsx global>{`

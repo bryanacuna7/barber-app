@@ -32,6 +32,9 @@ export function ClientCalendarView({
   setCurrentMonth,
   onClientClick,
 }: ClientCalendarViewProps) {
+  const dayCellClass = 'relative h-16 rounded-lg sm:h-20 md:h-24 lg:h-28'
+  const interactiveDayCellClass = `${dayCellClass} cursor-pointer transition-[filter] hover:brightness-110`
+
   const goToPrevMonth = () => {
     const newMonth = new Date(currentMonth)
     newMonth.setMonth(newMonth.getMonth() - 1)
@@ -66,7 +69,7 @@ export function ClientCalendarView({
     const days: React.ReactNode[] = []
 
     for (let i = 0; i < startDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="aspect-square" />)
+      days.push(<div key={`empty-${i}`} className={dayCellClass} aria-hidden="true" />)
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -82,7 +85,7 @@ export function ClientCalendarView({
       days.push(
         <motion.div
           key={day}
-          className={`aspect-square rounded-lg ${getIntensityColor(visitsOnDay)} relative cursor-pointer transition-[filter] hover:brightness-110 ${
+          className={`${interactiveDayCellClass} ${getIntensityColor(visitsOnDay)} ${
             isToday ? 'ring-2 ring-inset ring-purple-500' : ''
           }`}
           title={`${day} ${format(currentMonth, 'MMMM', { locale: es })} - ${visitsOnDay} visitas`}
@@ -98,7 +101,7 @@ export function ClientCalendarView({
     }
 
     return days
-  }, [clients, currentMonth])
+  }, [clients, currentMonth, interactiveDayCellClass])
 
   return (
     <motion.div
@@ -137,16 +140,18 @@ export function ClientCalendarView({
       </div>
 
       {/* Heatmap grid */}
-      <div className="grid grid-cols-7 gap-2 mb-4">
-        {/* Day labels */}
-        {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-          <div key={day} className="text-center text-xs font-medium text-muted pb-2">
-            {day}
-          </div>
-        ))}
+      <div className="mx-auto mb-4 w-full max-w-[1200px]">
+        <div className="grid grid-cols-7 gap-2">
+          {/* Day labels */}
+          {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
+            <div key={day} className="text-center text-xs font-medium text-muted pb-2">
+              {day}
+            </div>
+          ))}
 
-        {/* Calendar days */}
-        {calendarDays}
+          {/* Calendar days */}
+          {calendarDays}
+        </div>
       </div>
 
       {/* Legend */}

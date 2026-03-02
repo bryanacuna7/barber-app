@@ -20,24 +20,35 @@
  */
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { AnimatePresence } from 'framer-motion'
+import { Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { NotificationBell } from '@/components/notifications/notification-bell'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import type { Client } from '@/types'
 import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
-import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { usePreference } from '@/lib/preferences'
 import { getClientSegment } from '@/lib/utils/client-segments'
+import {
+  DEFAULT_CLIENT_FILTERS,
+  countActiveClientFilters,
+  matchesClientFilters,
+  type ClientFilters,
+} from '@/lib/utils/client-filters'
 import { buildWhatsAppLink } from '@/lib/whatsapp/deep-link'
+import { DashboardPageHeader } from '@/components/dashboard/page-header'
+import { getDashboardRouteMeta } from '@/lib/navigation/route-meta'
+import { useSavedFilters } from '@/hooks/useSavedFilters'
+import { useSelection } from '@/hooks/useSelection'
+import { BulkActionsToolbar } from '@/components/ui/bulk-actions-toolbar'
+import { useToast } from '@/components/ui/toast'
 
 // React Query hooks
 import { useClientMetrics } from '@/hooks/queries/useClientMetrics'
 import { useCreateClient } from '@/hooks/queries/useClients'
+import { useOptimisticDeleteClient } from '@/hooks/queries/useOptimisticClients'
 import { useClientActivities } from '@/hooks/queries/useClientActivities'
 
 // Real-time WebSocket integration
@@ -61,18 +72,34 @@ import { ClientTableView } from '@/components/clients/client-table-view'
 import { ClientCalendarView } from '@/components/clients/client-calendar-view'
 import { ClientMobileSheet } from '@/components/clients/client-mobile-sheet'
 import { CreateClientModal } from '@/components/clients/create-client-modal'
-import { ClientDetailModal } from '@/components/clients/client-detail-modal'
+import { ClientDetailPanel } from '@/components/clients/client-detail-panel'
+import { SplitPanel } from '@/components/ui/split-panel'
+import { EmptyClients, EmptySearch, EmptyState } from '@/components/ui/empty-state'
+import { ClientEffects } from '@/components/dashboard/client-effects'
+import { SavedFilterBar } from '@/components/ui/saved-filter-bar'
 
-type ClientSegment = 'all' | 'vip' | 'frequent' | 'new' | 'inactive'
 type ViewMode = 'cards' | 'table' | 'calendar'
 type SortColumn = 'name' | 'segment' | 'spent' | 'visits' | null
 
+// Built-in presets removed — quick filters (Todos/VIP/En riesgo) are now
+// handled directly in <ClientSearchToolbar> with colored pill buttons.
+
 export default function ClientesPage() {
+  const headerMeta = getDashboardRouteMeta('/clientes')
+  const router = useRouter()
+  const toast = useToast()
+
   // UI state
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
-  const [selectedSegment, setSelectedSegment] = useState<ClientSegment>('all')
+  const savedFilters = useSavedFilters<ClientFilters>({
+    pageKey: 'clientes',
+    defaultFilter: DEFAULT_CLIENT_FILTERS,
+    builtInPresets: [],
+  })
+  const filters = savedFilters.activeFilter
+  const setFilters = savedFilters.setActiveFilter
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [viewMode, setViewMode] = usePreference<ViewMode>('clientes_view', 'cards', [
     'cards',
@@ -117,6 +144,7 @@ export default function ClientesPage() {
     enabled: !!selectedCardClient,
   })
   const createClient = useCreateClient()
+  const { deleteClient } = useOptimisticDeleteClient()
   useRealtimeClients({ businessId, enabled: !!businessId })
 
   // Smart notifications — clients that need attention
@@ -143,9 +171,7 @@ export default function ClientesPage() {
   const filteredClients = useMemo(() => {
     let result = clients
 
-    if (selectedSegment !== 'all') {
-      result = result.filter((c) => getClientSegment(c) === selectedSegment)
-    }
+    result = result.filter((c) => matchesClientFilters(c, filters))
 
     if (search) {
       const searchLower = search.toLowerCase()
@@ -190,13 +216,18 @@ export default function ClientesPage() {
     }
 
     return result
-  }, [clients, selectedSegment, search, sortColumn, sortDirection])
+  }, [clients, filters, search, sortColumn, sortDirection])
 
   const DISPLAY_LIMIT = 50
+  const hasAppliedFilters = search.trim().length > 0 || countActiveClientFilters(filters) > 0
+  const isCriticalClientsEmpty = metrics.total === 0
   const displayedClients = useMemo(() => {
     if (showAll || viewMode === 'calendar') return filteredClients
     return filteredClients.slice(0, DISPLAY_LIMIT)
   }, [filteredClients, showAll, viewMode])
+
+  // Bulk selection for multi-select actions
+  const selection = useSelection(displayedClients)
 
   // Handlers
   async function handleSubmit(e: React.FormEvent) {
@@ -227,6 +258,29 @@ export default function ClientesPage() {
     } else {
       setSortColumn(column)
       setSortDirection('asc')
+    }
+  }
+
+  function handleBulkAction(actionId: string, ids: string[]) {
+    if (ids.length === 0) return
+
+    if (actionId !== 'client.delete') {
+      toast.info('Acción masiva no disponible todavía')
+      return
+    }
+
+    // Clear UI state before optimistic removal
+    const deletedIds = new Set(ids)
+    selection.clear()
+    setSelectedClient((prev) => (prev && deletedIds.has(prev.id) ? null : prev))
+    setSelectedCardClient((prev) => (prev && deletedIds.has(prev.id) ? null : prev))
+    if (selectedCardClient && deletedIds.has(selectedCardClient.id)) {
+      setIsMobileDetailOpen(false)
+    }
+
+    // Use undoable optimistic delete for each client
+    for (const id of ids) {
+      deleteClient(id)
     }
   }
 
@@ -277,6 +331,7 @@ export default function ClientesPage() {
 
   return (
     <ComponentErrorBoundary>
+      <ClientEffects title="Clientes" />
       <ClientesTourWrapper>
         <PullToRefresh
           onRefresh={async () => {
@@ -287,15 +342,10 @@ export default function ClientesPage() {
           <div className="relative overflow-x-hidden pb-4">
             <div className="relative z-10 space-y-4 sm:space-y-6">
               {/* Header */}
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <h1 className="app-page-title brand-gradient-text">Clientes</h1>
-                  <p className="app-page-subtitle mt-1">{metrics.total} registrados</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div className="lg:hidden">
-                    <NotificationBell />
-                  </div>
+              <DashboardPageHeader
+                title={headerMeta.title}
+                subtitle={`${headerMeta.subtitle} · ${metrics.total} registrados`}
+                actions={
                   <Button
                     variant="cta"
                     data-tour="clients-add-button"
@@ -308,22 +358,31 @@ export default function ClientesPage() {
                     <Plus className="h-5 w-5 sm:mr-2" />
                     <span className="hidden sm:inline">Nuevo Cliente</span>
                   </Button>
-                </div>
+                }
+              />
+
+              <div className="flex justify-end lg:hidden">
+                <Button
+                  variant="cta"
+                  data-tour="clients-add-button-mobile"
+                  onClick={() => {
+                    setShowModal(true)
+                    if (isMobileDevice()) haptics.tap()
+                  }}
+                  className="min-w-[44px] min-h-[44px] h-10"
+                >
+                  <Plus className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Nuevo Cliente</span>
+                </Button>
               </div>
 
               {/* Guide Tip */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={animations.spring.default}
-              >
-                <GuideContextualTip
-                  tipId="clientes-loyalty"
-                  title="Premiá a tus clientes frecuentes"
-                  description="Activá el programa de lealtad para que tus clientes acumulen puntos y vuelvan más seguido."
-                  linkHref="/guia#clientes"
-                />
-              </motion.div>
+              <GuideContextualTip
+                tipId="clientes-loyalty"
+                title="Premiá a tus clientes frecuentes"
+                description="Activá el programa de lealtad para que tus clientes acumulen puntos y vuelvan más seguido."
+                linkHref="/guia#clientes"
+              />
 
               {/* Stats */}
               <ClientStatsSection metrics={metrics} statsExpanded={statsExpanded} />
@@ -343,62 +402,124 @@ export default function ClientesPage() {
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
                 onOpenSegmentFilter={() => setSegmentSheetOpen(true)}
-                selectedSegment={selectedSegment}
+                filters={filters}
+                onFiltersChange={setFilters}
                 statsExpanded={statsExpanded}
                 onToggleStats={() => setStatsExpanded(!statsExpanded)}
               />
+
+              {/* Saved filter presets — show when user has custom presets or can save */}
+              {(savedFilters.presets.length > 0 || countActiveClientFilters(filters) > 0) && (
+                <div className="hidden lg:block">
+                  <SavedFilterBar
+                    presets={savedFilters.presets}
+                    activePresetId={savedFilters.activePresetId}
+                    onApplyPreset={savedFilters.applyPreset}
+                    onDeletePreset={savedFilters.deletePreset}
+                    onSavePreset={(label) => savedFilters.savePreset(label, filters)}
+                    canSave={countActiveClientFilters(filters) > 0}
+                  />
+                </div>
+              )}
 
               {/* Segment Filter Sheet */}
               <ClientSegmentSheet
                 isOpen={segmentSheetOpen}
                 onOpenChange={setSegmentSheetOpen}
-                selectedSegment={selectedSegment}
-                onSegmentChange={setSelectedSegment}
+                filters={filters}
+                onFiltersChange={setFilters}
                 metrics={metrics}
               />
 
-              {/* Client Views */}
-              <AnimatePresence mode="wait">
-                {viewMode === 'cards' && (
-                  <ClientCardsView
-                    clients={displayedClients}
-                    selectedCardClient={selectedCardClient}
-                    onSelectCardClient={setSelectedCardClient}
-                    onMobileDetailOpen={() => setIsMobileDetailOpen(true)}
-                    onSelectClient={setSelectedClient}
-                    clientActivities={clientActivities}
-                    activitiesLoading={activitiesLoading}
-                    onWhatsApp={handleWhatsApp}
-                  />
-                )}
+              <SplitPanel
+                isOpen={!!selectedClient}
+                onClose={() => setSelectedClient(null)}
+                panel={
+                  selectedClient ? (
+                    <ClientDetailPanel client={selectedClient} onWhatsApp={handleWhatsApp} />
+                  ) : (
+                    <div />
+                  )
+                }
+              >
+                <div>
+                  {/* Client Views */}
+                  {filteredClients.length === 0 ? (
+                    <div className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-8 dark:border-zinc-800/70 dark:bg-zinc-900/70">
+                      {isCriticalClientsEmpty ? (
+                        <EmptyClients
+                          onAddClient={() => setShowModal(true)}
+                          onViewGuide={() => router.push('/guia#clientes')}
+                        />
+                      ) : hasAppliedFilters ? (
+                        <EmptySearch query={search.trim() || 'filtros aplicados'} />
+                      ) : (
+                        <EmptyState
+                          icon={Search}
+                          title="No encontramos clientes"
+                          description="Prueba con otro término o cambia los filtros para ver resultados."
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <AnimatePresence mode="wait">
+                      {viewMode === 'cards' && (
+                        <ClientCardsView
+                          clients={displayedClients}
+                          selectedCardClient={selectedCardClient}
+                          onSelectCardClient={setSelectedCardClient}
+                          onMobileDetailOpen={() => setIsMobileDetailOpen(true)}
+                          onSelectClient={setSelectedClient}
+                          clientActivities={clientActivities}
+                          activitiesLoading={activitiesLoading}
+                          onWhatsApp={handleWhatsApp}
+                          isSelected={selection.isSelected}
+                          onToggleSelect={selection.toggle}
+                          selectionCount={selection.count}
+                        />
+                      )}
 
-                {viewMode === 'table' && (
-                  <ClientTableView
-                    clients={displayedClients}
-                    sortColumn={sortColumn}
-                    sortDirection={sortDirection}
-                    onSort={handleSort}
-                    onSelectClient={setSelectedClient}
-                  />
-                )}
+                      {viewMode === 'table' && (
+                        <ClientTableView
+                          clients={displayedClients}
+                          sortColumn={sortColumn}
+                          sortDirection={sortDirection}
+                          onSort={handleSort}
+                          onSelectClient={setSelectedClient}
+                          isSelected={selection.isSelected}
+                          onToggleSelect={selection.toggle}
+                          onToggleAll={selection.toggleAll}
+                          isAllSelected={selection.isAllSelected}
+                          selectionCount={selection.count}
+                        />
+                      )}
 
-                {viewMode === 'calendar' && (
-                  <ClientCalendarView
-                    clients={filteredClients}
-                    currentMonth={currentMonth}
-                    setCurrentMonth={setCurrentMonth}
-                  />
-                )}
-              </AnimatePresence>
+                      {viewMode === 'calendar' && (
+                        <ClientCalendarView
+                          clients={filteredClients}
+                          currentMonth={currentMonth}
+                          setCurrentMonth={setCurrentMonth}
+                        />
+                      )}
+                    </AnimatePresence>
+                  )}
 
-              {/* Show all button for progressive disclosure */}
-              {!showAll && viewMode !== 'calendar' && filteredClients.length > DISPLAY_LIMIT && (
-                <div className="flex justify-center pt-4">
-                  <Button variant="ghost" onClick={() => setShowAll(true)} className="text-sm">
-                    Mostrar todos ({filteredClients.length})
-                  </Button>
+                  {/* Show all button for progressive disclosure */}
+                  {!showAll &&
+                    viewMode !== 'calendar' &&
+                    filteredClients.length > DISPLAY_LIMIT && (
+                      <div className="flex justify-center pt-4">
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowAll(true)}
+                          className="text-sm"
+                        >
+                          Mostrar todos ({filteredClients.length})
+                        </Button>
+                      </div>
+                    )}
                 </div>
-              )}
+              </SplitPanel>
 
               {/* Mobile Client Detail Sheet */}
               <ClientMobileSheet
@@ -417,16 +538,18 @@ export default function ClientesPage() {
                 onSubmit={handleSubmit}
                 isPending={createClient.isPending}
               />
-
-              {/* Client Detail Modal */}
-              <ClientDetailModal
-                client={selectedClient}
-                onClose={() => setSelectedClient(null)}
-                onWhatsApp={handleWhatsApp}
-              />
             </div>
           </div>
         </PullToRefresh>
+
+        {/* Bulk Actions Toolbar — floats above bottom nav */}
+        <BulkActionsToolbar
+          count={selection.count}
+          entityType="client"
+          onAction={handleBulkAction}
+          selectedIds={Array.from(selection.selected)}
+          onClear={selection.clear}
+        />
       </ClientesTourWrapper>
     </ComponentErrorBoundary>
   )

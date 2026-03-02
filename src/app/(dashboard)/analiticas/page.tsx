@@ -17,6 +17,7 @@
 
 import { useState, Suspense } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import {
   TrendingUp,
   Calendar,
@@ -43,6 +44,10 @@ import {
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { useBusiness } from '@/contexts/business-context'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { DashboardPageHeader } from '@/components/dashboard/page-header'
+import { getDashboardRouteMeta } from '@/lib/navigation/route-meta'
+import { EmptyAnalytics } from '@/components/ui/empty-state'
+import { ClientEffects } from '@/components/dashboard/client-effects'
 
 // Lazy load tab components
 const NegocioTab = dynamic(
@@ -85,6 +90,8 @@ export default function AnaliticasPageV2() {
 type SectionTab = 'negocio' | 'clientes' | 'equipo'
 
 function AnalyticsContent() {
+  const headerMeta = getDashboardRouteMeta('/analiticas')
+  const router = useRouter()
   const { businessId } = useBusiness()
   const [period, setPeriod] = usePreference<AnalyticsPeriod>('analytics_period', 'month', [
     'week',
@@ -135,27 +142,60 @@ function AnalyticsContent() {
 
   if (!analytics) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted">No hay datos de analíticas disponibles</p>
+      <div className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-8 dark:border-zinc-800/70 dark:bg-zinc-900/70">
+        <EmptyAnalytics
+          onRefresh={() => {
+            void refetch()
+          }}
+          onViewGuide={() => router.push('/guia#analiticas')}
+        />
       </div>
     )
   }
 
   return (
     <div className="space-y-6 pb-24 lg:pb-6">
+      <ClientEffects title="Analíticas" />
       {/* Header */}
       <FadeInUp>
-        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="app-page-title brand-gradient-text">Analíticas</h1>
-            <p className="app-page-subtitle mt-1 lg:hidden">
-              Visualiza el rendimiento de tu barbería
-            </p>
-          </div>
+        <div className="space-y-3">
+          <DashboardPageHeader
+            title={headerMeta.title}
+            subtitle={headerMeta.subtitle}
+            actions={
+              <div className="relative hidden overflow-hidden lg:flex items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+                <div className="pointer-events-none absolute inset-x-3 top-0 hidden h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent lg:block" />
+                {[
+                  { value: 'week' as AnalyticsPeriod, label: 'Semana' },
+                  { value: 'month' as AnalyticsPeriod, label: 'Mes' },
+                  { value: 'year' as AnalyticsPeriod, label: 'Año' },
+                ].map((option) => {
+                  const isActive = period === option.value
 
-          {/* Period Selector */}
-          <div className="relative overflow-hidden flex w-full sm:w-auto items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-            <div className="pointer-events-none absolute inset-x-3 top-0 hidden h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent lg:block" />
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setPeriod(option.value)
+                        if (isMobileDevice()) haptics.selection()
+                      }}
+                      className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-colors ${
+                        isActive
+                          ? 'brand-tab-active'
+                          : 'text-muted border-zinc-200/70 dark:border-zinc-800/80 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+            }
+          />
+
+          <div className="relative overflow-hidden flex w-full items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:hidden">
+            <div className="pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
             {[
               { value: 'week' as AnalyticsPeriod, label: 'Semana' },
               { value: 'month' as AnalyticsPeriod, label: 'Mes' },
@@ -171,7 +211,7 @@ function AnalyticsContent() {
                     setPeriod(option.value)
                     if (isMobileDevice()) haptics.selection()
                   }}
-                  className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-colors ${
+                  className={`flex flex-1 min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-colors ${
                     isActive
                       ? 'brand-tab-active'
                       : 'text-muted border-zinc-200/70 dark:border-zinc-800/80 bg-white/55 dark:bg-white/[0.03] hover:bg-zinc-100/80 dark:hover:bg-white/10'

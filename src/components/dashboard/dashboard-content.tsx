@@ -14,6 +14,10 @@ import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { ShareBookingLink } from '@/components/share/share-booking-link'
 import { bookingPath } from '@/lib/utils/booking-url'
 import { useBusiness } from '@/contexts/business-context'
+import { DashboardPageHeader } from '@/components/dashboard/page-header'
+import { getDashboardRouteMeta } from '@/lib/navigation/route-meta'
+import { EmptyState } from '@/components/ui/empty-state'
+import { ClientEffects } from '@/components/dashboard/client-effects'
 
 const TIP_ID = 'dashboard-welcome'
 
@@ -74,29 +78,14 @@ export function DashboardContent() {
     no_show: 'No asistió',
   }
 
-  // Get greeting based on time
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
+  const headerMeta = getDashboardRouteMeta('/dashboard')
 
   return (
     <DashboardTourWrapper>
+      <ClientEffects title="Dashboard" badgeCount={stats.todayAppointments} />
       <div className="min-h-screen space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="app-page-title">
-              <span className="bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-700 dark:from-white dark:via-zinc-100 dark:to-zinc-300 bg-clip-text text-transparent">
-                {greeting}
-              </span>
-            </h1>
-            <p className="app-page-subtitle mt-0.5">
-              Bienvenido a{' '}
-              <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                {stats.business.name}
-              </span>
-            </p>
-          </div>
-        </div>
+        <DashboardPageHeader title={headerMeta.title} subtitle={headerMeta.subtitle} />
 
         {/* Inline tip — compact, dashboard-only */}
         {!tipDismissed && (
@@ -209,27 +198,27 @@ export function DashboardContent() {
                 ))}
               </div>
             ) : upcomingAppointments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 relative">
-                {/* Círculo decorativo de fondo */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="h-32 w-32 rounded-full bg-blue-50/30 dark:bg-blue-950/20 blur-2xl animate-pulse" />
-                </div>
-
-                {/* Icono con floating animation */}
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 shadow-lg animate-float">
-                  <Sparkles className="h-8 w-8 text-zinc-400" />
-
-                  {/* Círculo de pulso */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-zinc-300/50 dark:border-zinc-700/50 animate-[pulse-ring_2s_ease-in-out_infinite]" />
-                </div>
-
-                <p className="mt-4 text-lg font-medium text-zinc-900 dark:text-white relative">
-                  Sin citas agendadas
-                </p>
-                <p className="mt-1 text-base text-zinc-500 text-center relative">
-                  No hay más citas programadas para hoy
-                </p>
-              </div>
+              <EmptyState
+                variant="default"
+                icon={Calendar}
+                title="Sin citas agendadas"
+                description="No hay más citas programadas para hoy."
+                action={
+                  <Link href="/citas?intent=create">
+                    <Button variant="gradient" size="sm" className="min-h-[44px]">
+                      Crear Cita
+                    </Button>
+                  </Link>
+                }
+                secondaryAction={
+                  <Link href="/guia#citas">
+                    <Button variant="outline" size="sm" className="min-h-[44px]">
+                      Ver Guía
+                    </Button>
+                  </Link>
+                }
+                className="py-12"
+              />
             ) : (
               <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {upcomingAppointments.map((apt, index) => {

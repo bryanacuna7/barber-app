@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { detectUserRole, getStaffPermissions, canBarberAccessPath } from '@/lib/auth/roles'
+import { detectUserRole, getStaffPermissions, type UserRoleInfo } from '@/lib/auth/roles'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { MobileHeader } from '@/components/dashboard/mobile-header'
 import { BottomNav } from '@/components/dashboard/bottom-nav'
@@ -13,32 +13,86 @@ import { TourProvider } from '@/lib/tours/tour-provider'
 import { TourTooltip } from '@/components/tours/tour-tooltip'
 import { BusinessProvider } from '@/contexts/business-context'
 import { CommandPaletteProvider } from '@/components/dashboard/command-palette'
-import { AlertTriangle, Lock } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
 import { LogoutButton } from '@/components/dashboard/logout-button'
-import { PageTransition } from '@/components/dashboard/page-transition'
+import { DashboardContentArea } from '@/components/dashboard/dashboard-content-area'
+import { ShortcutProvider } from '@/lib/keyboard/shortcut-provider'
 
 const manifestVersion =
   process.env.NEXT_PUBLIC_MANIFEST_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA ?? '1'
 
-export async function generateMetadata(): Promise<Metadata> {
+const businessSelect =
+  'id, name, slug, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions'
+
+type DashboardAuthContext = {
+  user: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null
+  roleInfo: UserRoleInfo | null
+}
+
+type DashboardBusiness = {
+  id: string
+  name: string
+  slug: string | null
+  brand_primary_color: string | null
+  brand_secondary_color: string | null
+  logo_url: string | null
+  is_active: boolean | null
+  staff_permissions: unknown
+}
+
+const getDashboardAuthContext = cache(async (): Promise<DashboardAuthContext> => {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return {}
+  if (!user) {
+    return { user: null, roleInfo: null }
+  }
 
   const roleInfo = await detectUserRole(supabase, user.id)
+  return { user, roleInfo }
+})
+
+const getDashboardBusiness = cache(
+  async (businessId: string): Promise<DashboardBusiness | null> => {
+    if (!businessId) return null
+
+    const supabase = await createClient()
+    const { data: business } = await supabase
+      .from('businesses')
+      .select(businessSelect)
+      .eq('id', businessId)
+      .maybeSingle()
+
+    return (business as DashboardBusiness | null) ?? null
+  }
+)
+
+const getBusinessOnboarding = cache(
+  async (businessId: string): Promise<{ completed: boolean } | null> => {
+    if (!businessId) return null
+
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('business_onboarding')
+      .select('completed')
+      .eq('business_id', businessId)
+      .maybeSingle()
+
+    return data as { completed: boolean } | null
+  }
+)
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { user, roleInfo } = await getDashboardAuthContext()
+  if (!user) return {}
   if (!roleInfo?.businessId) return {}
 
-  const { data: business } = await supabase
-    .from('businesses')
-    .select('name, slug')
-    .eq('id', roleInfo.businessId)
-    .maybeSingle()
+  const business = await getDashboardBusiness(roleInfo.businessId)
 
   const businessName = normalizeDisplayBusinessName(business?.name)
   if (!businessName) return {}
@@ -64,21 +118,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || ''
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { user, roleInfo } = await getDashboardAuthContext()
 
   if (!user) {
     redirect('/login')
   }
-
-  // Detect user role (admin > owner > barber > client)
-  const roleInfo = await detectUserRole(supabase, user.id)
 
   // Client role → redirect to client dashboard
   if (roleInfo?.role === 'client') {
@@ -144,24 +188,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   // Fetch business data AND onboarding in parallel to reduce TTFB
-  const businessSelect =
-    'id, name, slug, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions'
-  const needsOnboarding = roleInfo.isOwner && !roleInfo.isAdmin && !pathname.includes('/onboarding')
+  // This layout only serves (dashboard) routes — /onboarding is a separate route group,
+  // so the old `!pathname.includes('/onboarding')` guard is unnecessary.
+  const needsOnboarding = roleInfo.isOwner && !roleInfo.isAdmin
 
-  const [businessResult, onboardingResult] = await Promise.all([
-    roleInfo.isOwner
-      ? supabase.from('businesses').select(businessSelect).eq('owner_id', user.id).single()
-      : supabase.from('businesses').select(businessSelect).eq('id', roleInfo.businessId).single(),
-    needsOnboarding && roleInfo.businessId
-      ? supabase
-          .from('business_onboarding')
-          .select('completed')
-          .eq('business_id', roleInfo.businessId)
-          .single()
-      : Promise.resolve({ data: null }),
+  const [business, onboardingResult] = await Promise.all([
+    getDashboardBusiness(roleInfo.businessId),
+    needsOnboarding ? getBusinessOnboarding(roleInfo.businessId) : Promise.resolve(null),
   ])
-
-  const business = businessResult.data
 
   if (!business) {
     return (
@@ -187,20 +221,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   const businessName = normalizeDisplayBusinessName(business.name)
+  const businessSlug = business.slug ?? undefined
   const brandColor = business.brand_primary_color || '#27272A'
   const brandSecondary = business.brand_secondary_color || null
   const logoUrl = business.logo_url || null
   const isActive = business.is_active ?? true
   const staffPermissions = getStaffPermissions(business.staff_permissions)
-  const isCitasRoute = pathname.startsWith('/citas')
-  const isMiDiaRoute = pathname.startsWith('/mi-dia')
 
   // Check onboarding status (already fetched in parallel above)
-  if (
-    needsOnboarding &&
-    onboardingResult.data &&
-    !(onboardingResult.data as { completed: boolean }).completed
-  ) {
+  if (needsOnboarding && onboardingResult && !onboardingResult.completed) {
     redirect('/onboarding')
   }
 
@@ -228,19 +257,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     )
   }
 
-  // Page guard for barbers: check if they can access the current page
-  const isBarberDenied =
-    roleInfo.role === 'barber' && pathname && !canBarberAccessPath(pathname, staffPermissions)
-
-  // Barber landing: redirect root/dashboard to mi-dia
-  if (roleInfo.role === 'barber' && (pathname === '/dashboard' || pathname === '')) {
-    redirect('/mi-dia')
-  }
+  // Barber page guard + route-dependent padding moved to DashboardContentArea (client component)
+  // to eliminate the headers() call that made this layout fully dynamic.
 
   return (
     <BusinessProvider
       businessId={business.id}
-      slug={business.slug}
+      slug={businessSlug}
       userId={user.id}
       userEmail={user.email}
       userName={
@@ -262,79 +285,41 @@ export default async function DashboardLayout({ children }: { children: React.Re
     >
       <TourProvider businessId={business.id}>
         <CommandPaletteProvider>
-          <div className="min-h-screen">
-            <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
-            <OfflineBanner />
+          <ShortcutProvider>
+            <div className="min-h-screen">
+              <ThemeProvider primaryColor={brandColor} secondaryColor={brandSecondary} />
+              <OfflineBanner />
 
-            {/* Mobile header with notification bell (self-managed by pathname on client) */}
-            <MobileHeader businessName={businessName} logoUrl={logoUrl} />
+              {/* Mobile header with notification bell (self-managed by pathname on client) */}
+              <MobileHeader businessName={businessName} logoUrl={logoUrl} />
 
-            {roleInfo.isOwner ? (
-              <DashboardShell
-                businessName={businessName}
-                businessSlug={business.slug}
-                logoUrl={logoUrl}
-                isBarber={roleInfo.isBarber}
-              >
-                <div
-                  className={
-                    isCitasRoute || isMiDiaRoute
-                      ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                      : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                  }
+              {roleInfo.isOwner ? (
+                <DashboardShell
+                  businessName={businessName}
+                  businessSlug={businessSlug}
+                  logoUrl={logoUrl}
+                  isBarber={roleInfo.isBarber}
                 >
-                  <TrialBanner />
-                  <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
-                </div>
-              </DashboardShell>
-            ) : (
-              <main id="main-content">
-                <div
-                  className={
-                    isCitasRoute || isMiDiaRoute
-                      ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                      : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
-                  }
-                >
-                  <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
-                </div>
-              </main>
-            )}
+                  <DashboardContentArea banner={<TrialBanner />}>{children}</DashboardContentArea>
+                </DashboardShell>
+              ) : (
+                <main id="main-content">
+                  <DashboardContentArea>{children}</DashboardContentArea>
+                </main>
+              )}
 
-            {/* Mobile bottom navigation */}
-            <BottomNav isAdmin={roleInfo.isAdmin} isBarber={roleInfo.isBarber} />
+              {/* Mobile bottom navigation */}
+              <BottomNav isAdmin={roleInfo.isAdmin} isBarber={roleInfo.isBarber} />
 
-            {/* Tour tooltip overlay (owner only) */}
-            {roleInfo.isOwner && <TourTooltip />}
+              {/* Tour tooltip overlay (owner only) */}
+              {roleInfo.isOwner && <TourTooltip />}
 
-            {/* PWA install prompt (contextual, shows after 3 visits) */}
-            <InstallPrompt />
-          </div>
+              {/* PWA install prompt (contextual, shows after 3 visits) */}
+              <InstallPrompt />
+            </div>
+          </ShortcutProvider>
         </CommandPaletteProvider>
       </TourProvider>
     </BusinessProvider>
-  )
-}
-
-function AccessDenied() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="max-w-sm w-full text-center px-4">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
-          <Lock className="h-7 w-7 text-zinc-400 dark:text-zinc-500" />
-        </div>
-        <h2 className="mt-5 text-xl font-semibold text-zinc-900 dark:text-white">
-          Acceso restringido
-        </h2>
-        <p className="mt-2 text-sm text-muted">Esta sección no está habilitada para tu rol.</p>
-        <Link
-          href="/mi-dia"
-          className="mt-6 inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-medium text-white"
-          style={{ backgroundColor: 'var(--brand-primary)' }}
-        >
-          Ir a Mi Día
-        </Link>
-      </div>
-    </div>
   )
 }

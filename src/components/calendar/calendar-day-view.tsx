@@ -44,6 +44,9 @@ export interface CalendarDayViewProps {
   onStatusChange: (appointmentId: string, status: 'cancelled') => void
   isBarber: boolean
   onWalkIn: () => void
+  isSelected?: (id: string) => boolean
+  onToggleSelect?: (id: string, event?: { shiftKey: boolean }) => void
+  selectionCount?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -54,12 +57,17 @@ export function CalendarDayView({
   timeBlocks,
   unscheduledCount,
   gaps,
-  selectedId,
+  selectedId: _selectedId,
   onSelectId,
   draggedId,
   onDragId,
   onStatusChange,
+  isSelected,
+  onToggleSelect,
+  selectionCount = 0,
 }: CalendarDayViewProps) {
+  void _selectedId
+  const hasBulkSelection = selectionCount > 0
   return (
     <div className="space-y-4">
       {unscheduledCount > 0 && (
@@ -168,11 +176,42 @@ export function CalendarDayView({
                         >
                           <div
                             onClick={() => onSelectId(apt.id)}
-                            className="cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900"
+                            className={`cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900 ${
+                              isSelected?.(apt.id) ? 'bg-blue-50 dark:bg-blue-950/20' : ''
+                            }`}
                           >
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
+                                  {onToggleSelect && (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        onToggleSelect(apt.id, { shiftKey: e.shiftKey })
+                                      }}
+                                      aria-label={`Seleccionar ${apt.client?.name || 'cita'}`}
+                                      role="checkbox"
+                                      aria-checked={isSelected?.(apt.id) ?? false}
+                                      className="mr-1 flex h-5 w-5 items-center justify-center rounded border-2 border-zinc-300 dark:border-zinc-600"
+                                    >
+                                      {isSelected?.(apt.id) && (
+                                        <svg
+                                          className="h-3 w-3 text-blue-600 dark:text-blue-400"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                          strokeWidth={3}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M5 13l4 4L19 7"
+                                          />
+                                        </svg>
+                                      )}
+                                    </button>
+                                  )}
                                   <div
                                     className={`w-1.5 h-1.5 rounded-full ${
                                       apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
@@ -218,12 +257,47 @@ export function CalendarDayView({
                           className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-[opacity,background-color] ${
                             draggedId === apt.id
                               ? 'opacity-50'
-                              : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
+                              : isSelected?.(apt.id)
+                                ? 'bg-blue-50 dark:bg-blue-950/20'
+                                : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
                           }`}
                         >
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="group flex items-center gap-2 mb-1">
+                                {onToggleSelect && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      onToggleSelect(apt.id, { shiftKey: e.shiftKey })
+                                    }}
+                                    aria-label={`Seleccionar ${apt.client?.name || 'cita'}`}
+                                    role="checkbox"
+                                    aria-checked={isSelected?.(apt.id) ?? false}
+                                    className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-opacity ${
+                                      isSelected?.(apt.id)
+                                        ? 'border-blue-500 bg-blue-500 text-white opacity-100'
+                                        : `border-zinc-300 dark:border-zinc-600 ${hasBulkSelection ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
+                                    }`}
+                                  >
+                                    {isSelected?.(apt.id) && (
+                                      <svg
+                                        className="h-3 w-3"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={3}
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M5 13l4 4L19 7"
+                                        />
+                                      </svg>
+                                    )}
+                                  </button>
+                                )}
                                 <div
                                   className={`w-1.5 h-1.5 rounded-full ${
                                     apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'

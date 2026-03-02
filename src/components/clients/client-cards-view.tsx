@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react'
 import { motion } from 'framer-motion'
+import { EntityContextMenu } from '@/components/ui/entity-context-menu'
 import {
   Crown,
   Heart,
@@ -46,6 +47,10 @@ interface ClientCardsViewProps {
   clientActivities: ClientActivity[] | undefined
   activitiesLoading: boolean
   onWhatsApp: (phone: string) => void
+  // Bulk selection (optional — backwards compatible)
+  isSelected?: (id: string) => boolean
+  onToggleSelect?: (id: string, event?: { shiftKey: boolean }) => void
+  selectionCount?: number
 }
 
 function getActivityIcon(type: string) {
@@ -71,7 +76,11 @@ export function ClientCardsView({
   clientActivities,
   activitiesLoading,
   onWhatsApp,
+  isSelected,
+  onToggleSelect,
+  selectionCount = 0,
 }: ClientCardsViewProps) {
+  const hasBulkSelection = selectionCount > 0
   return (
     <motion.div
       key="cards"
@@ -91,7 +100,7 @@ export function ClientCardsView({
             const segment = getClientSegment(client)
             const tier = getSpendingTier(client)
             const loyalty = calculateLoyalty(client)
-            const isSelected = selectedCardClient?.id === client.id
+            const isCardSelected = selectedCardClient?.id === client.id
 
             // Tier config for badge
             const tierLabels = {
@@ -134,7 +143,7 @@ export function ClientCardsView({
                     whileTap={{ scale: 0.98 }}
                     transition={animations.spring.snappy}
                     className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-[background-color,border-color,box-shadow] border-2 ${
-                      isSelected
+                      isCardSelected
                         ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-950 dark:border-blue-500 dark:shadow-lg'
                         : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-900 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
                     }`}
@@ -276,49 +285,92 @@ export function ClientCardsView({
                   </motion.button>
                 </SwipeableRow>
                 {/* Desktop: compact card without swipe — single loyalty indicator */}
-                <motion.button
-                  onClick={() => {
-                    onSelectCardClient(client)
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={animations.spring.snappy}
-                  className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border hidden lg:flex items-center gap-3 ${
-                    isSelected
-                      ? 'bg-zinc-100 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-600'
-                      : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  {/* Avatar */}
-                  <div className="relative shrink-0">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300">
-                      {client.name.charAt(0).toUpperCase()}
-                    </div>
-                    {segment === 'vip' && (
-                      <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-amber-500 p-0.5">
-                        <Crown className="h-2.5 w-2.5 text-white" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Name + segment */}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
-                    <p className="text-xs text-muted">
-                      {client.total_visits || 0} visitas ·{' '}
-                      {formatCurrencyCompact(Number(client.total_spent || 0))}
-                    </p>
-                  </div>
-
-                  {/* Segment badge */}
-                  <span
-                    className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border ${segmentConfig[segment].color}`}
+                <EntityContextMenu entityType="client" entityId={client.id}>
+                  <motion.button
+                    onClick={() => {
+                      onSelectCardClient(client)
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={animations.spring.snappy}
+                    className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border hidden lg:flex items-center gap-3 ${
+                      isSelected?.(client.id)
+                        ? 'bg-blue-50 border-blue-300 dark:bg-blue-950/40 dark:border-blue-600'
+                        : isCardSelected
+                          ? 'bg-zinc-100 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-600'
+                          : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                    }`}
                   >
-                    {segmentConfig[segment].label}
-                  </span>
+                    {/* Bulk checkbox — visible on hover or when any selection active */}
+                    {onToggleSelect && (
+                      <button
+                        type="button"
+                        className={`shrink-0 transition-opacity ${hasBulkSelection ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onToggleSelect(client.id, { shiftKey: e.shiftKey })
+                        }}
+                        aria-label={`Seleccionar ${client.name}`}
+                        role="checkbox"
+                        aria-checked={isSelected?.(client.id) ?? false}
+                      >
+                        <div
+                          className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
+                            isSelected?.(client.id)
+                              ? 'border-blue-500 bg-blue-500 text-white'
+                              : 'border-zinc-300 dark:border-zinc-600 hover:border-blue-400'
+                          }`}
+                        >
+                          {isSelected?.(client.id) && (
+                            <svg
+                              className="h-3 w-3"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                    )}
 
-                  {/* Chevron on hover */}
-                  <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                </motion.button>
+                    {/* Avatar */}
+                    <div className="relative shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300">
+                        {client.name.charAt(0).toUpperCase()}
+                      </div>
+                      {segment === 'vip' && (
+                        <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-amber-500 p-0.5">
+                          <Crown className="h-2.5 w-2.5 text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Name + segment */}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
+                      <p className="text-xs text-muted">
+                        {client.total_visits || 0} visitas ·{' '}
+                        {formatCurrencyCompact(Number(client.total_spent || 0))}
+                      </p>
+                    </div>
+
+                    {/* Segment badge */}
+                    <span
+                      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border ${segmentConfig[segment].color}`}
+                    >
+                      {segmentConfig[segment].label}
+                    </span>
+
+                    {/* Chevron on hover */}
+                    <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                  </motion.button>
+                </EntityContextMenu>
               </Fragment>
             )
           })}

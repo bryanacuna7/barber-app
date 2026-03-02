@@ -35,6 +35,32 @@ interface NotificationStats {
   unread: number
 }
 
+// Module-level dedup: multiple NotificationBell instances share a single in-flight request
+let _inflight: Promise<{ notifications: Notification[]; stats: NotificationStats }> | null = null
+
+async function fetchNotificationsDeduped(): Promise<{
+  notifications: Notification[]
+  stats: NotificationStats
+}> {
+  if (_inflight) return _inflight
+  _inflight = (async () => {
+    try {
+      const res = await fetch('/api/notifications?limit=10', { cache: 'no-store' })
+      if (!res.ok) return { notifications: [], stats: { total: 0, unread: 0 } }
+      const data = await res.json()
+      return {
+        notifications: data.notifications || [],
+        stats: data.stats || { total: 0, unread: 0 },
+      }
+    } catch {
+      return { notifications: [], stats: { total: 0, unread: 0 } }
+    } finally {
+      _inflight = null
+    }
+  })()
+  return _inflight
+}
+
 const notificationIcons: Record<string, React.ElementType> = {
   trial_expiring: Clock,
   trial_expired: AlertCircle,
@@ -84,31 +110,19 @@ export function NotificationBell({ className }: NotificationBellProps = {}) {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const fetchNotifications = useCallback(async () => {
-    try {
-      const res = await fetch('/api/notifications?limit=10', {
-        cache: 'no-store',
-      })
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          setNotifications([])
-          setStats({ total: 0, unread: 0 })
-        }
-        return
-      }
-
-      const data = await res.json()
-      setNotifications(data.notifications || [])
-      setStats(data.stats || { total: 0, unread: 0 })
-    } catch (error) {
-      setNotifications([])
-      setStats({ total: 0, unread: 0 })
-      console.warn('Notifications fetch failed:', error)
-    }
+    const result = await fetchNotificationsDeduped()
+    setNotifications(result.notifications)
+    setStats(result.stats)
   }, [])
 
   useEffect(() => {
-    const initialFetch = setTimeout(() => void fetchNotifications(), 0)
+    // Initial fetch wrapped in IIFE to satisfy react-hooks/set-state-in-effect
+    const init = async () => {
+      const result = await fetchNotificationsDeduped()
+      setNotifications(result.notifications)
+      setStats(result.stats)
+    }
+    void init()
 
     // Poll every 60s, but only when tab is visible
     const interval = setInterval(() => {
@@ -117,16 +131,19 @@ export function NotificationBell({ className }: NotificationBellProps = {}) {
       }
     }, 60000)
 
-    // Also refetch when tab becomes visible after being hidden
+    // Refetch when tab becomes visible after being hidden
+    let wasHidden = false
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'hidden') {
+        wasHidden = true
+      } else if (wasHidden) {
+        wasHidden = false
         void fetchNotifications()
       }
     }
     document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
-      clearTimeout(initialFetch)
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibility)
     }

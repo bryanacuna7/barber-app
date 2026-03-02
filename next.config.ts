@@ -8,6 +8,15 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Cache dynamic RSC payloads on the client for 30s.
+    // Next.js 15+ defaults to 0s, causing the layout server component
+    // (which runs 3-4 Supabase roundtrips for auth/role/business) to
+    // re-execute on every client-side navigation between dashboard pages.
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
   typescript: {
     // Skip type checking during build (for performance baseline)
     ignoreBuildErrors: process.env.SKIP_TYPE_CHECK === 'true',

@@ -46,13 +46,9 @@ export function TopBar({ businessName, businessSlug, logoUrl }: TopBarProps) {
         aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
         aria-expanded={!collapsed}
         aria-controls="dashboard-sidebar"
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200/70 bg-white/70 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/70 bg-white/70 text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
       >
-        {collapsed ? (
-          <PanelLeftOpen className="h-[18px] w-[18px]" />
-        ) : (
-          <PanelLeftClose className="h-[18px] w-[18px]" />
-        )}
+        {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
       </button>
 
       {/* Logo + business name */}
@@ -83,25 +79,24 @@ export function TopBar({ businessName, businessSlug, logoUrl }: TopBarProps) {
           </kbd>
         </button>
 
-        {/* Notification bell */}
-        <NotificationBell className="h-9 w-9 border border-zinc-200/70 bg-white/70 text-zinc-500 shadow-none ring-0 hover:bg-zinc-100 hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300" />
-
         {/* Share booking link */}
         {businessSlug && (
           <button
             type="button"
             onClick={handleCopyShareLink}
             aria-label={copied ? 'Enlace copiado' : 'Compartir link de reservas'}
-            className="inline-flex h-9 items-center gap-2 rounded-full border border-zinc-200/70 bg-white/70 px-3 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-800/80 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/70 bg-white/70 text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:border-zinc-800/80 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
           >
             {copied ? (
               <Check className="h-4 w-4 text-green-600 dark:text-green-500" />
             ) : (
               <Link2 className="h-4 w-4" />
             )}
-            <span className="hidden xl:inline">{copied ? 'Copiado' : 'Compartir'}</span>
           </button>
         )}
+
+        {/* Notification bell */}
+        <NotificationBell className="h-9 w-9 border border-zinc-200/70 bg-white/70 text-zinc-500 shadow-none ring-0 hover:bg-zinc-100 hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-white/[0.03] dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-300" />
 
         {/* User profile */}
         <TopBarProfileMenu />

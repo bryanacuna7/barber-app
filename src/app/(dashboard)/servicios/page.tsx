@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
 import { Plus, Search, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,6 @@ import { Modal } from '@/components/ui/modal'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Input } from '@/components/ui/input'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { NotificationBell } from '@/components/notifications/notification-bell'
 import { AlertTriangle } from 'lucide-react'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
@@ -45,8 +44,14 @@ import { ServiceMobileCardList } from '@/components/services/service-mobile-card
 import { ServiceDesktopTable } from '@/components/services/service-desktop-table'
 import { ServiceInsightsSidebar } from '@/components/services/service-insights-sidebar'
 import { ServiceFormModal, type ServiceFormData } from '@/components/services/service-form-modal'
+import { DashboardPageHeader } from '@/components/dashboard/page-header'
+import { getDashboardRouteMeta } from '@/lib/navigation/route-meta'
+import { EmptyServices, EmptyState } from '@/components/ui/empty-state'
+import { ClientEffects } from '@/components/dashboard/client-effects'
 
 function ServiciosContent() {
+  const headerMeta = getDashboardRouteMeta('/servicios')
+  const router = useRouter()
   const { businessId } = useBusiness()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all')
@@ -331,6 +336,7 @@ function ServiciosContent() {
 
   return (
     <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
+      <ClientEffects title="Servicios" />
       {/* Subtle Mesh Gradients */}
       {!prefersReducedMotion && (
         <div className="hidden lg:block fixed inset-0 overflow-hidden pointer-events-none opacity-15">
@@ -361,42 +367,53 @@ function ServiciosContent() {
             transition={animations.spring.default}
             className="mb-6"
           >
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="app-page-title brand-gradient-text">Servicios</h1>
-                <p className="app-page-subtitle mt-1">{totalServices} servicios</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="lg:hidden">
-                  <NotificationBell />
-                </div>
-                <Button
-                  variant="ghost"
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="hidden lg:flex items-center gap-2 min-h-[44px] h-10 px-3"
-                  aria-label={sidebarOpen ? 'Ocultar insights' : 'Ver insights'}
-                >
-                  <BarChart3
-                    className={`h-4 w-4 transition-colors ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
-                  />
-                  <span
-                    className={`text-sm ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
+            <DashboardPageHeader
+              title={headerMeta.title}
+              subtitle={`${headerMeta.subtitle} · ${totalServices} servicios`}
+              actions={
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="hidden lg:flex items-center gap-2 min-h-[44px] h-10 px-3"
+                    aria-label={sidebarOpen ? 'Ocultar insights' : 'Ver insights'}
                   >
-                    Insights
-                  </span>
-                </Button>
-                <Button
-                  variant="gradient"
-                  onClick={() => {
-                    openCreateServiceForm()
-                    if (isMobileDevice()) haptics.tap()
-                  }}
-                  className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
-                >
-                  <Plus className="h-5 w-5 sm:mr-2" />
-                  <span className="hidden sm:inline">Nuevo Servicio</span>
-                </Button>
-              </div>
+                    <BarChart3
+                      className={`h-4 w-4 transition-colors ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
+                    />
+                    <span
+                      className={`text-sm ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
+                    >
+                      Insights
+                    </span>
+                  </Button>
+                  <Button
+                    variant="gradient"
+                    onClick={() => {
+                      openCreateServiceForm()
+                      if (isMobileDevice()) haptics.tap()
+                    }}
+                    className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+                  >
+                    <Plus className="h-5 w-5 sm:mr-2" />
+                    <span className="hidden sm:inline">Nuevo Servicio</span>
+                  </Button>
+                </div>
+              }
+            />
+
+            <div className="mt-3 flex justify-end lg:hidden">
+              <Button
+                variant="gradient"
+                onClick={() => {
+                  openCreateServiceForm()
+                  if (isMobileDevice()) haptics.tap()
+                }}
+                className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+              >
+                <Plus className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Nuevo Servicio</span>
+              </Button>
             </div>
           </motion.div>
 
@@ -464,24 +481,54 @@ function ServiciosContent() {
               </motion.div>
 
               {/* Mobile Card View */}
-              <ServiceMobileCardList
-                services={sortedServices}
-                listTransitionControls={listTransitionControls}
-                onEdit={openEditServiceForm}
-                onDelete={setDeleteService}
-              />
+              {sourceServices.length === 0 ? (
+                <div className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-8 dark:border-zinc-800/70 dark:bg-zinc-900/70">
+                  <EmptyServices
+                    onCreateService={openCreateServiceForm}
+                    onViewGuide={() => router.push('/guia#servicios')}
+                  />
+                </div>
+              ) : sortedServices.length === 0 ? (
+                <div className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-8 dark:border-zinc-800/70 dark:bg-zinc-900/70">
+                  <EmptyState
+                    icon={Search}
+                    title="No encontramos servicios"
+                    description="Ajusta tu búsqueda o cambia la categoría para ver resultados."
+                    action={
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSearchQuery('')
+                          setSelectedCategory('all')
+                        }}
+                        className="min-h-[44px]"
+                      >
+                        Limpiar filtros
+                      </Button>
+                    }
+                  />
+                </div>
+              ) : (
+                <>
+                  <ServiceMobileCardList
+                    services={sortedServices}
+                    listTransitionControls={listTransitionControls}
+                    onEdit={openEditServiceForm}
+                    onDelete={setDeleteService}
+                  />
 
-              {/* Desktop Table View */}
-              <ServiceDesktopTable
-                services={sortedServices}
-                sourceServicesCount={sourceServices.length}
-                sortField={sortField}
-                sortDirection={sortDirection}
-                listTransitionControls={listTransitionControls}
-                onSort={handleSort}
-                onEdit={openEditServiceForm}
-                onDelete={setDeleteService}
-              />
+                  <ServiceDesktopTable
+                    services={sortedServices}
+                    sourceServicesCount={sourceServices.length}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    listTransitionControls={listTransitionControls}
+                    onSort={handleSort}
+                    onEdit={openEditServiceForm}
+                    onDelete={setDeleteService}
+                  />
+                </>
+              )}
             </div>
 
             {/* Insights Sidebar */}
