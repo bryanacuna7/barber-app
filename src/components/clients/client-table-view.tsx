@@ -182,10 +182,8 @@ export function ClientTableView({
                         {client.name.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-medium text-zinc-900 dark:text-white text-sm">
-                          {client.name}
-                        </p>
-                        <p className="text-xs text-zinc-500">{client.phone}</p>
+                        <p className="font-medium text-foreground text-sm">{client.name}</p>
+                        <p className="text-xs text-muted">{client.phone}</p>
                       </div>
                     </div>
                   </td>
@@ -202,16 +200,14 @@ export function ClientTableView({
 
                   {/* Total spent */}
                   <td className="px-4 py-3 text-right">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                    <p className="text-sm font-semibold text-foreground">
                       {formatCurrency(Number(client.total_spent || 0))}
                     </p>
                   </td>
 
                   {/* Total visits */}
                   <td className="px-4 py-3 text-right">
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                      {client.total_visits}
-                    </p>
+                    <p className="text-sm font-semibold text-foreground">{client.total_visits}</p>
                   </td>
 
                   {/* Hover actions */}

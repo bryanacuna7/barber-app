@@ -86,7 +86,7 @@ export function ClientCalendarView({
           }`}
           title={`${day} ${format(currentMonth, 'MMMM', { locale: es })} - ${visitsOnDay} visitas`}
         >
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-zinc-700 dark:text-zinc-300">
+          <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-muted">
             {day}
           </span>
           {visitsOnDay > 0 && (
@@ -109,9 +109,7 @@ export function ClientCalendarView({
     >
       {/* Header with month navigation */}
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">
-          Calendario de Actividad
-        </h3>
+        <h3 className="text-2xl font-bold text-foreground">Calendario de Actividad</h3>
         <div className="flex items-center gap-2">
           <button
             onClick={goToPrevMonth}
@@ -119,7 +117,7 @@ export function ClientCalendarView({
           >
             <ChevronRight className="h-5 w-5 rotate-180 text-muted" />
           </button>
-          <span className="text-lg font-semibold text-zinc-900 dark:text-white px-4">
+          <span className="text-lg font-semibold text-foreground px-4">
             {format(currentMonth, 'MMMM yyyy', { locale: es })}
           </span>
           <button
@@ -135,7 +133,7 @@ export function ClientCalendarView({
       <div className="grid grid-cols-7 gap-2 mb-4">
         {/* Day labels */}
         {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-          <div key={day} className="text-center text-xs font-medium text-zinc-500 pb-2">
+          <div key={day} className="text-center text-xs font-medium text-muted pb-2">
             {day}
           </div>
         ))}
@@ -147,14 +145,14 @@ export function ClientCalendarView({
       {/* Legend */}
       <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-zinc-500">Menos</span>
+          <span className="text-sm text-muted">Menos</span>
           <div className="flex items-center gap-1">
             <div className="h-4 w-4 rounded bg-zinc-100 dark:bg-zinc-800" />
             <div className="h-4 w-4 rounded bg-blue-200 dark:bg-blue-900/40" />
             <div className="h-4 w-4 rounded bg-blue-400 dark:bg-blue-700" />
             <div className="h-4 w-4 rounded bg-blue-600 dark:bg-blue-500" />
           </div>
-          <span className="text-sm text-zinc-500">Más</span>
+          <span className="text-sm text-muted">Más</span>
         </div>
 
         {/* Monthly visit count */}
@@ -163,9 +161,7 @@ export function ClientCalendarView({
 
       {/* Active clients list for current month */}
       <div className="mt-6 pt-6 border-t border-zinc-200 dark:border-zinc-800">
-        <h4 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
-          Clientes Activos Este Mes
-        </h4>
+        <h4 className="text-lg font-semibold text-foreground mb-4">Clientes Activos Este Mes</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {activeClientsThisMonth.slice(0, 6).map((client) => {
             const segment = getClientSegment(client)
@@ -184,12 +180,10 @@ export function ClientCalendarView({
                   {client.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-left min-w-0 flex-1">
-                  <p className="font-medium text-sm text-zinc-900 dark:text-white truncate">
-                    {client.name}
-                  </p>
+                  <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <SegmentIcon className={`h-3 w-3 ${config.color.split(' ')[1]}`} />
-                    <span className="text-xs text-zinc-500 truncate">
+                    <span className="text-xs text-muted truncate">
                       {client.total_visits} visitas
                     </span>
                   </div>

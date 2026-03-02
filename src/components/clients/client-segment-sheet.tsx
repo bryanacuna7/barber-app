@@ -46,9 +46,9 @@ export function ClientSegmentSheet({
                 : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
             }`}
           >
-            <Users className="h-5 w-5 text-zinc-500" />
+            <Users className="h-5 w-5 text-muted" />
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-zinc-900 dark:text-white">Todos</p>
+              <p className="text-sm font-medium text-foreground">Todos</p>
               <p className="text-xs text-muted">{metrics.total} clientes</p>
             </div>
             {selectedSegment === 'all' && <Check className="h-4 w-4 text-[var(--brand-primary)]" />}
@@ -68,11 +68,9 @@ export function ClientSegmentSheet({
                     : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                 }`}
               >
-                <Icon className="h-5 w-5 text-zinc-500" />
+                <Icon className="h-5 w-5 text-muted" />
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                    {config.label}
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{config.label}</p>
                   <p className="text-xs text-muted">
                     {config.description} ({count})
                   </p>

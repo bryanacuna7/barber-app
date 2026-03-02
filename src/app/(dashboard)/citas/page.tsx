@@ -584,7 +584,7 @@ function CitasCalendarFusionContent() {
         >
           <SheetClose onClose={() => setIsStatsOpen(false)} />
           <SheetHeader>
-            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+            <SheetTitle className="text-foreground text-lg font-semibold">
               Calendar & Stats
             </SheetTitle>
           </SheetHeader>

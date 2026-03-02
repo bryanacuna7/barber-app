@@ -46,7 +46,7 @@ export function CalendarMonthView({ monthDays, today, onDayClick }: CalendarMont
               className={`inline-flex items-center justify-center ${
                 isSameDay(day.date, today)
                   ? 'bg-red-500 dark:bg-red-500 text-white w-6 h-6 rounded-full font-bold text-sm'
-                  : 'text-zinc-900 dark:text-white text-sm'
+                  : 'text-foreground text-sm'
               }`}
             >
               {format(day.date, 'd')}

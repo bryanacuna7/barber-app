@@ -527,7 +527,7 @@ function ServiciosContent() {
                 <AlertTriangle className="h-7 w-7 text-red-600 dark:text-red-400" />
               </motion.div>
               <div>
-                <p className="text-lg text-zinc-900 dark:text-white">
+                <p className="text-lg text-foreground">
                   ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
                 </p>
                 <p className="mt-2 text-base text-muted">

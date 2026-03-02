@@ -72,7 +72,7 @@ export function CreateAppointmentSheet({
           />
           <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-zinc-900">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Nueva Cita</h2>
+              <h2 className="text-xl font-bold text-foreground">Nueva Cita</h2>
               <Button
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
@@ -86,9 +86,7 @@ export function CreateAppointmentSheet({
             <div className="space-y-4">
               {/* Cliente */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Cliente
-                </label>
+                <label className="mb-1.5 block text-sm font-medium text-muted">Cliente</label>
                 <button
                   type="button"
                   onClick={() => setActivePickerField('client')}
@@ -110,9 +108,7 @@ export function CreateAppointmentSheet({
 
               {/* Servicio */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  Servicio
-                </label>
+                <label className="mb-1.5 block text-sm font-medium text-muted">Servicio</label>
                 <button
                   type="button"
                   onClick={() => setActivePickerField('service')}
@@ -139,7 +135,7 @@ export function CreateAppointmentSheet({
               {/* Miembro del equipo - hidden for barbers (auto-assigned) */}
               {!isBarber && (
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="mb-1.5 block text-sm font-medium text-muted">
                     Miembro del equipo
                   </label>
                   <button
@@ -165,9 +161,7 @@ export function CreateAppointmentSheet({
               {/* Fecha y Hora */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Fecha
-                  </label>
+                  <label className="mb-1.5 block text-sm font-medium text-muted">Fecha</label>
                   <DatePickerTrigger
                     value={selectedDate}
                     onChange={onDateChange}
@@ -176,9 +170,7 @@ export function CreateAppointmentSheet({
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Hora
-                  </label>
+                  <label className="mb-1.5 block text-sm font-medium text-muted">Hora</label>
                   <TimePickerTrigger
                     value={createForm.time || '09:00'}
                     onClick={() => setIsTimePickerOpen(true)}
@@ -189,7 +181,7 @@ export function CreateAppointmentSheet({
 
               {/* Notas */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1.5 block text-sm font-medium text-muted">
                   Notas (opcional)
                 </label>
                 <textarea
@@ -241,7 +233,7 @@ export function CreateAppointmentSheet({
           className="w-[min(42rem,calc(100%-1rem))] max-h-[72vh] overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 pb-safe md:max-h-[70vh]"
         >
           <SheetHeader>
-            <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+            <SheetTitle className="text-foreground text-lg font-semibold">
               {activePickerField === 'client' && 'Seleccionar Cliente'}
               {activePickerField === 'service' && 'Seleccionar Servicio'}
               {activePickerField === 'barber' && 'Seleccionar Miembro del equipo'}
@@ -259,7 +251,7 @@ export function CreateAppointmentSheet({
                   }}
                   className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
-                  <span className="text-base text-zinc-900 dark:text-white">{client.name}</span>
+                  <span className="text-base text-foreground">{client.name}</span>
                   {createForm.client_id === client.id && (
                     <Check className="h-5 w-5 text-blue-500 shrink-0" />
                   )}
@@ -277,7 +269,7 @@ export function CreateAppointmentSheet({
                   className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <div>
-                    <span className="text-base text-zinc-900 dark:text-white">{service.name}</span>
+                    <span className="text-base text-foreground">{service.name}</span>
                     <span className="text-sm text-muted ml-2">
                       ₡{service.price.toLocaleString()}
                     </span>
@@ -298,7 +290,7 @@ export function CreateAppointmentSheet({
                   }}
                   className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] rounded-xl text-left hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
-                  <span className="text-base text-zinc-900 dark:text-white">{barber.name}</span>
+                  <span className="text-base text-foreground">{barber.name}</span>
                   {createForm.barber_id === barber.id && (
                     <Check className="h-5 w-5 text-blue-500 shrink-0" />
                   )}

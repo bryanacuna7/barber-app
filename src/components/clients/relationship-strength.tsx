@@ -15,7 +15,7 @@ interface RelationshipStrengthProps {
 const strengthConfig = {
   weak: {
     label: 'Débil',
-    color: 'text-zinc-400 dark:text-zinc-500',
+    color: 'text-subtle',
     bgColor: 'bg-zinc-100 dark:bg-zinc-800',
     hearts: 1,
   },
@@ -45,7 +45,7 @@ export function RelationshipStrength({ strength, className = '' }: RelationshipS
   return (
     <div className={`rounded-xl p-4 ${config.bgColor} ${className}`}>
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Relación</span>
+        <span className="text-sm font-medium text-muted">Relación</span>
         <span className={`text-sm font-semibold ${config.color}`}>{config.label}</span>
       </div>
       <div className="flex gap-1">

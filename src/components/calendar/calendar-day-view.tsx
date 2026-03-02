@@ -85,7 +85,7 @@ export function CalendarDayView({
               <div className="flex flex-col gap-1.5 xl:flex-row xl:items-center xl:justify-between xl:gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <block.icon className={`w-5 h-5 ${block.iconColor}`} />
-                  <h3 className="truncate text-sm font-semibold text-zinc-900 dark:text-white leading-tight uppercase tracking-wide">
+                  <h3 className="truncate text-sm font-semibold text-foreground leading-tight uppercase tracking-wide">
                     {block.label}
                   </h3>
                 </div>
@@ -99,7 +99,7 @@ export function CalendarDayView({
               {/* Occupancy bar (Cinema feature) */}
               <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 p-3">
                 <div className="flex items-center justify-between mb-2 text-sm">
-                  <span className="text-zinc-900 dark:text-white">{block.count} citas</span>
+                  <span className="text-foreground">{block.count} citas</span>
                   <span
                     className={`font-bold ${
                       block.occupancyPercent >= 90
@@ -178,7 +178,7 @@ export function CalendarDayView({
                                       apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
                                     }`}
                                   />
-                                  <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                  <span className="font-medium text-foreground text-sm">
                                     {apt.client?.name || 'Cliente'}
                                   </span>
                                 </div>
@@ -229,7 +229,7 @@ export function CalendarDayView({
                                     apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
                                   }`}
                                 />
-                                <span className="font-medium text-zinc-900 dark:text-white text-sm">
+                                <span className="font-medium text-foreground text-sm">
                                   {apt.client?.name || 'Cliente'}
                                 </span>
                               </div>
@@ -271,9 +271,9 @@ export function CalendarDayView({
                     onClick={() => toast.info('Sugerir clientes para gap')}
                   >
                     <div className="flex items-center gap-2">
-                      <Plus className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
+                      <Plus className="w-3.5 h-3.5 text-subtle" />
                       <div className="flex-1">
-                        <div className="text-xs text-zinc-400 dark:text-zinc-500">
+                        <div className="text-xs text-subtle">
                           {gap.minutes} min disponible · {format(parseISO(gap.start), 'h:mm a')} -{' '}
                           {format(parseISO(gap.end), 'h:mm a')}
                         </div>

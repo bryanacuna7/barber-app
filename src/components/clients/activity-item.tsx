@@ -48,7 +48,7 @@ export function ActivityItem({
       <div className="flex-1 pb-6">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="font-medium text-zinc-900 dark:text-white text-sm">{title}</p>
+            <p className="font-medium text-foreground text-sm">{title}</p>
             <p className="text-xs text-muted mt-0.5">{description}</p>
           </div>
           {amount !== undefined && (
@@ -57,7 +57,7 @@ export function ActivityItem({
             </span>
           )}
         </div>
-        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
+        <p className="text-xs text-subtle mt-2">
           {format(date, "d 'de' MMMM, yyyy", { locale: es })}
         </p>
       </div>

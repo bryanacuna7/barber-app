@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-02-27 (Session 191 — Animation Audit Execution)
+- **Last Updated:** 2026-03-02 (Session 194 — Triage C+ E4 Complete)
 - **Branch:** `main`
-- **Version:** `0.9.20`
+- **Version:** `0.9.23`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,52 @@
 ---
 
 ## Recent Sessions
+
+### Sessions 192-194: Triage C+ Plan (E1→E4) (2026-02-28 – 2026-03-02)
+
+**Status:** COMPLETE. All 4 stages of the Triage C+ correction plan executed.
+
+**Plan:** `.claude/plans/tidy-herding-duckling.md` — Post-audit score 6.2/10 → targeting ~8.0
+
+**E1 — Emergency Surgery (Session 192):**
+
+- Deleted mock data visible to real users
+- Created OG image, removed Google verification placeholder
+- Deleted 6 dead code files (feature-flags, feature-gate, card-refactored, mi-dia-demo, use-clients barrel, use-services barrel)
+- Cleaned showPaymentAction dead flag, marked referral rewards "coming soon"
+- Renamed all page-v2.tsx → page.tsx (6 files) with build verification
+
+**E2 — Production Hygiene (Session 192):**
+
+- Migrated console.error/warn → Pino logger in 7 API route files
+- Eliminated dead LRU cache in middleware (useless on Vercel serverless)
+- Removed polling duplicates where WebSocket realtime exists
+
+**E3a — TypeScript Intermediate (Session 193):**
+
+- Regenerated Supabase types, activated `noImplicitAny` + `strictNullChecks`
+- Eliminated double-cast in layout.tsx, reduced `as any` in production files
+- Removed `build:skip-ts` from CI
+
+**E3b — TypeScript Strict (Session 193):**
+
+- Activated `strict: true` — 0 errors, CI without skip-ts
+- Commit: `58df5f9`
+
+**E4 — God-Component Splits (Sessions 193-194):**
+
+- **clientes/page.tsx:** 1,981 → 433 lines (10 sub-components + use-clients hook)
+- **citas/page.tsx:** 1,819 → 687 lines (7 sub-components in calendar/)
+- **servicios/page.tsx:** 1,568 → 562 lines (5 sub-components in services/)
+- Total: 5,368 lines → 1,682 lines in orchestrators + 22 focused sub-components
+- Commit: `b78dcde`
+
+**Gate E4 Verified:**
+
+- `npx tsc --noEmit` — 0 errors (strict: true)
+- `npm test` — 197/197 passing
+- `npm run build` — compiled successfully (114/114 static pages)
+- Visual regression: Playwright screenshots match baselines for all 3 pages
 
 ### Session 191: Animation Audit Execution (2026-02-27)
 
@@ -284,10 +330,12 @@
 
 ### Working
 
-- v0.9.20 (Session 190: Analytics Refactor + Dashboard Polish)
+- v0.9.23 (Session 194: Triage C+ E4 Complete)
+- TypeScript `strict: true` — 0 errors, CI enforced
+- God-components split: clientes, citas, servicios (5,368→1,682 lines in orchestrators)
+- 22 focused sub-components in `components/clients/`, `components/calendar/`, `components/services/`
 - All UX polish gates complete (E + F + card hierarchy + header CTA)
 - In-app guide with 10 sections, search, TOC, contextual tips
-- Zero dead links in mobile drawer menu
 - Brand tokens, `text-muted`, `<Button>` component migrated
 - Charts theme-aware, PWA native, gestures hardened
 
@@ -315,6 +363,8 @@
 
 ### Next Steps
 
-1. **Button migration** (~30 remaining raw buttons across dashboard pages)
-2. Comprehensive testing before sharing with first real barber client
-3. Landing page review
+1. **E4.4** — Evolve card.tsx (add Card.Button, Card.Link sub-components)
+2. **E4.5** — Migrate hardcoded colors → semantic tokens (315 occurrences)
+3. **Button migration** (~30 remaining raw buttons across dashboard pages)
+4. Clean up stale page-old.tsx files (6 untracked dead code files)
+5. Comprehensive testing before sharing with first real barber client

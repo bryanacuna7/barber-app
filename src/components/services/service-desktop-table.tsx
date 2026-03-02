@@ -47,7 +47,7 @@ export function ServiceDesktopTable({
   // Sort icon helper
   function getSortIcon(field: SortField) {
     if (sortField !== field) {
-      return <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-400" />
+      return <ChevronsUpDown className="h-3.5 w-3.5 text-subtle" />
     }
     return sortDirection === 'asc' ? (
       <ChevronUp className="h-3.5 w-3.5 text-violet-600" />
@@ -163,9 +163,7 @@ export function ServiceDesktopTable({
                             />
                           </span>
                           <div>
-                            <p className="font-medium text-zinc-900 dark:text-white">
-                              {service.name}
-                            </p>
+                            <p className="font-medium text-foreground">{service.name}</p>
                             <p className="text-xs text-muted line-clamp-1">
                               {service.barber_names.length} miembros del equipo
                             </p>
@@ -185,7 +183,7 @@ export function ServiceDesktopTable({
                       {/* Bookings */}
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <span className="font-semibold text-zinc-900 dark:text-white">
+                          <span className="font-semibold text-foreground">
                             {service.bookings_this_month}
                           </span>
                           {growth !== 0 && (
@@ -206,7 +204,7 @@ export function ServiceDesktopTable({
 
                       {/* Price */}
                       <td className="px-4 py-3 text-right">
-                        <span className="font-semibold text-zinc-900 dark:text-white">
+                        <span className="font-semibold text-foreground">
                           {formatCurrency(service.price)}
                         </span>
                       </td>
@@ -215,7 +213,7 @@ export function ServiceDesktopTable({
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                          <span className="text-sm font-medium text-zinc-900 dark:text-white">
+                          <span className="text-sm font-medium text-foreground">
                             {service.avg_rating}
                           </span>
                         </div>
@@ -226,7 +224,7 @@ export function ServiceDesktopTable({
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
-                            className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+                            className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
                             title="Editar"
                             onClick={() => onEdit(service)}
                           >
@@ -234,7 +232,7 @@ export function ServiceDesktopTable({
                           </Button>
                           <Button
                             variant="ghost"
-                            className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                            className="flex h-8 w-8 !p-0 !min-h-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                             title="Eliminar"
                             onClick={() => onDelete(service)}
                           >
@@ -253,10 +251,8 @@ export function ServiceDesktopTable({
         {/* Empty State */}
         {services.length === 0 && (
           <div className="py-12 text-center">
-            <Search className="mx-auto h-10 w-10 text-zinc-400" />
-            <p className="mt-3 text-sm font-medium text-zinc-900 dark:text-white">
-              No se encontraron servicios
-            </p>
+            <Search className="mx-auto h-10 w-10 text-subtle" />
+            <p className="mt-3 text-sm font-medium text-foreground">No se encontraron servicios</p>
           </div>
         )}
       </div>

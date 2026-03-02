@@ -35,7 +35,7 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
                   </div>
                   <Sparkles className="h-3.5 w-3.5 lg:hidden text-green-500/40" />
                 </div>
-                <p className="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-white leading-none">
+                <p className="text-2xl lg:text-3xl font-bold text-foreground leading-none">
                   {metrics.newThisMonth}
                 </p>
                 <p className="text-xs text-muted mt-1 lg:mt-1.5">nuevos</p>
@@ -57,7 +57,7 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
                   </div>
                   <TrendingUp className="h-3.5 w-3.5 lg:hidden text-blue-500/60" />
                 </div>
-                <p className="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-white leading-none">
+                <p className="text-2xl lg:text-3xl font-bold text-foreground leading-none">
                   {metrics.recentActive}
                 </p>
                 <p className="text-xs text-muted mt-1 lg:mt-1.5">activos</p>
@@ -79,7 +79,7 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
                   </div>
                   <TrendingUp className="h-3.5 w-3.5 lg:hidden text-emerald-500/60" />
                 </div>
-                <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-white leading-none truncate">
+                <p className="text-xl lg:text-2xl font-bold text-foreground leading-none truncate">
                   {formatCurrencyCompact(metrics.totalRevenue)}
                 </p>
                 <p className="text-xs text-muted mt-1 lg:mt-1.5">ingresos</p>
@@ -101,7 +101,7 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
                   </div>
                   <Target className="h-3.5 w-3.5 lg:hidden text-purple-500/40" />
                 </div>
-                <p className="text-xl lg:text-2xl font-bold text-zinc-900 dark:text-white leading-none truncate">
+                <p className="text-xl lg:text-2xl font-bold text-foreground leading-none truncate">
                   {formatCurrencyCompact(metrics.avgValue)}
                 </p>
                 <p className="text-xs text-muted mt-1 lg:mt-1.5">promedio</p>

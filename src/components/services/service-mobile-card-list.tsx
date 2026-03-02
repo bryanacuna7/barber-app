@@ -74,9 +74,7 @@ export function ServiceMobileCardList({
                         />
                       </span>
                       <div className="min-w-0">
-                        <p className="font-semibold text-zinc-900 dark:text-white truncate">
-                          {service.name}
-                        </p>
+                        <p className="font-semibold text-foreground truncate">{service.name}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-muted">{service.duration_minutes} min</span>
                           <span
@@ -91,7 +89,7 @@ export function ServiceMobileCardList({
 
                   {/* Row 2: Price + Bookings + Rating */}
                   <div className="flex items-center gap-4 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                    <span className="font-bold text-zinc-900 dark:text-white">
+                    <span className="font-bold text-foreground">
                       {formatCurrency(service.price)}
                     </span>
                     <span className="text-sm text-muted">
@@ -99,9 +97,7 @@ export function ServiceMobileCardList({
                     </span>
                     <span className="flex items-center gap-1 text-sm">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      <span className="text-zinc-700 dark:text-zinc-300">
-                        {service.avg_rating?.toFixed(1) || 'N/A'}
-                      </span>
+                      <span className="text-muted">{service.avg_rating?.toFixed(1) || 'N/A'}</span>
                     </span>
                   </div>
                 </div>

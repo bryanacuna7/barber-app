@@ -24,7 +24,7 @@ const tierConfig = {
   },
   silver: {
     label: 'Plata',
-    color: 'text-zinc-600 dark:text-zinc-400',
+    color: 'text-muted',
     bgColor: 'bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-700',
     borderColor: 'border-zinc-300 dark:border-zinc-600',
     iconBg: 'bg-zinc-500/20',
@@ -60,9 +60,7 @@ export function SpendingTier({ tier, amount, className = '' }: SpendingTierProps
       </div>
       <div>
         <p className={`text-sm font-medium mb-1 ${config.color}`}>Nivel {config.label}</p>
-        <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-          ₡{amount.toLocaleString('es-CR')}
-        </p>
+        <p className="text-2xl font-bold text-foreground">₡{amount.toLocaleString('es-CR')}</p>
         <p className="text-xs text-muted mt-1">Gastado histórico</p>
       </div>
     </div>

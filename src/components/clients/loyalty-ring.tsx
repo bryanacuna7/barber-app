@@ -57,9 +57,7 @@ export function LoyaltyRing({
       </svg>
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-zinc-900 dark:text-white">
-          {Math.round(percentage)}%
-        </span>
+        <span className="text-2xl font-bold text-foreground">{Math.round(percentage)}%</span>
         <span className="text-xs text-muted">Lealtad</span>
       </div>
     </div>

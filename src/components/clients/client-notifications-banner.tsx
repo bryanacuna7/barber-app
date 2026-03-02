@@ -31,7 +31,7 @@ export function ClientNotificationsBanner({
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                <h3 className="font-semibold text-zinc-900 dark:text-white">Acciones Sugeridas</h3>
+                <h3 className="font-semibold text-foreground">Acciones Sugeridas</h3>
                 <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
                   {notifications.length}
                 </span>
@@ -61,10 +61,10 @@ export function ClientNotificationsBanner({
                         {client.name.charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {client.name}
                         </p>
-                        <p className="text-xs text-zinc-500">{daysSinceVisit}d sin visita</p>
+                        <p className="text-xs text-muted">{daysSinceVisit}d sin visita</p>
                       </div>
                     </div>
                     <Button

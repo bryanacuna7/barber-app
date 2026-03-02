@@ -23,7 +23,7 @@ export function ClientMobileSheet({ client, isOpen, onOpenChange }: ClientMobile
         {client && (
           <>
             <SheetHeader>
-              <SheetTitle className="text-zinc-900 dark:text-white text-lg font-semibold">
+              <SheetTitle className="text-foreground text-lg font-semibold">
                 {client.name}
               </SheetTitle>
             </SheetHeader>
@@ -34,7 +34,7 @@ export function ClientMobileSheet({ client, isOpen, onOpenChange }: ClientMobile
                   {client.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-bold text-base text-zinc-900 dark:text-white">{client.name}</p>
+                  <p className="font-bold text-base text-foreground">{client.name}</p>
                   {client.phone && <p className="text-sm text-muted">{client.phone}</p>}
                 </div>
               </div>
@@ -42,15 +42,13 @@ export function ClientMobileSheet({ client, isOpen, onOpenChange }: ClientMobile
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3">
                   <p className="text-xs text-muted mb-1">Gastado</p>
-                  <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                  <p className="text-lg font-bold text-foreground">
                     {formatCurrencyCompact(Number(client.total_spent || 0))}
                   </p>
                 </div>
                 <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3">
                   <p className="text-xs text-muted mb-1">Visitas</p>
-                  <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                    {client.total_visits || 0}
-                  </p>
+                  <p className="text-lg font-bold text-foreground">{client.total_visits || 0}</p>
                 </div>
               </div>
               {/* Actions */}

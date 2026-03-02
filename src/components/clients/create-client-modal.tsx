@@ -67,9 +67,7 @@ export function CreateClientModal({
           />
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Notas (opcional)
-            </label>
+            <label className="mb-1.5 block text-sm font-medium text-muted">Notas (opcional)</label>
             <textarea
               placeholder="Preferencias, alergias, etc..."
               value={formData.notes}

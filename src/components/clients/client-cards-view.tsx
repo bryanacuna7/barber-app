@@ -192,7 +192,7 @@ export function ClientCardsView({
                           />
                         </svg>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-[11px] font-bold text-zinc-700 dark:text-white">
+                          <span className="text-[11px] font-bold text-foreground">
                             {Math.round(loyalty)}%
                           </span>
                         </div>
@@ -215,7 +215,7 @@ export function ClientCardsView({
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-bold text-base text-zinc-900 dark:text-white truncate">
+                            <p className="font-bold text-base text-foreground truncate">
                               {client.name}
                             </p>
                             {segment === 'vip' && (
@@ -251,13 +251,13 @@ export function ClientCardsView({
                       <div className="grid grid-cols-2 gap-2 mb-2">
                         <div>
                           <p className="text-xs text-muted mb-0.5">Gastado</p>
-                          <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                          <p className="text-lg font-bold text-foreground">
                             {formatCurrencyCompact(Number(client.total_spent || 0))}
                           </p>
                         </div>
                         <div>
                           <p className="text-xs text-muted mb-0.5">Visitas</p>
-                          <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                          <p className="text-lg font-bold text-foreground">
                             {client.total_visits || 0}
                           </p>
                         </div>
@@ -302,9 +302,7 @@ export function ClientCardsView({
 
                   {/* Name + segment */}
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm text-zinc-900 dark:text-white truncate">
-                      {client.name}
-                    </p>
+                    <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
                     <p className="text-xs text-muted">
                       {client.total_visits || 0} visitas ·{' '}
                       {formatCurrencyCompact(Number(client.total_spent || 0))}
@@ -343,9 +341,7 @@ export function ClientCardsView({
                   {selectedCardClient.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-                    {selectedCardClient.name}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-foreground">{selectedCardClient.name}</h2>
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border mt-1 ${
                       segmentConfig[getClientSegment(selectedCardClient)].color
@@ -375,7 +371,7 @@ export function ClientCardsView({
                     Visitas
                   </span>
                 </div>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                <p className="text-3xl font-bold text-foreground">
                   {selectedCardClient.total_visits || 0}
                 </p>
               </div>
@@ -388,7 +384,7 @@ export function ClientCardsView({
                     Gastado
                   </span>
                 </div>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white truncate">
+                <p className="text-2xl font-bold text-foreground truncate">
                   {formatCurrencyCompact(Number(selectedCardClient.total_spent || 0))}
                 </p>
               </div>
@@ -401,7 +397,7 @@ export function ClientCardsView({
                     Frecuencia
                   </span>
                 </div>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                <p className="text-3xl font-bold text-foreground">
                   {selectedCardClient.last_visit_at
                     ? `${Math.floor(
                         (new Date().getTime() -
@@ -420,7 +416,7 @@ export function ClientCardsView({
                     Lealtad
                   </span>
                 </div>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-white">
+                <p className="text-3xl font-bold text-foreground">
                   {Math.round(calculateLoyalty(selectedCardClient))}%
                 </p>
               </div>
@@ -429,22 +425,20 @@ export function ClientCardsView({
             {/* Contact Info */}
             <div className="space-y-2 mb-6">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                <Phone className="h-5 w-5 text-zinc-400" />
-                <span className="text-zinc-900 dark:text-white">{selectedCardClient.phone}</span>
+                <Phone className="h-5 w-5 text-muted" />
+                <span className="text-foreground">{selectedCardClient.phone}</span>
               </div>
               {selectedCardClient.email && (
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                  <Mail className="h-5 w-5 text-zinc-400" />
-                  <span className="text-zinc-900 dark:text-white">{selectedCardClient.email}</span>
+                  <Mail className="h-5 w-5 text-muted" />
+                  <span className="text-foreground">{selectedCardClient.email}</span>
                 </div>
               )}
             </div>
 
             {/* Activity Timeline — Real Data */}
             <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 mb-6">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">
-                Historial de Actividad
-              </h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Historial de Actividad</h3>
               <div className="space-y-0">
                 {activitiesLoading ? (
                   <div className="space-y-3">

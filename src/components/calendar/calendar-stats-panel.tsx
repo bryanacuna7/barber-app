@@ -70,9 +70,9 @@ export function CalendarStatsPanel({
                   isSameDay(day, today)
                     ? 'bg-red-500 dark:bg-red-500 text-white font-bold'
                     : isSameDay(day, selectedDate)
-                      ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-white'
+                      ? 'bg-zinc-200 dark:bg-zinc-700 text-foreground'
                       : isSameMonth(day, today)
-                        ? 'text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        ? 'text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800'
                         : 'text-zinc-400 dark:text-zinc-400/50'
                 } ${hasAppointments && !isSameDay(day, today) ? 'font-bold' : ''}`}
               >
@@ -88,21 +88,21 @@ export function CalendarStatsPanel({
         <div className="text-xs font-medium text-muted mb-3">ESTADÍSTICAS HOY</div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Agendadas</span>
+          <span className="text-sm text-foreground">Agendadas</span>
           <span className="text-sm font-bold text-blue-500 dark:text-blue-500">
             {stats.scheduled}
           </span>
         </div>
 
         <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
-          <span className="text-sm text-zinc-900 dark:text-white">Completada</span>
+          <span className="text-sm text-foreground">Completada</span>
           <span className="text-sm font-bold text-green-500 dark:text-emerald-500">
             {stats.completed}
           </span>
         </div>
 
         <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-500/10 to-red-500/10 dark:from-amber-500/20 dark:to-red-500/20 rounded-lg border border-amber-500/20 dark:border-amber-500/30">
-          <span className="text-sm font-bold text-zinc-900 dark:text-white">Ingresos</span>
+          <span className="text-sm font-bold text-foreground">Ingresos</span>
           <span className="text-lg font-bold text-amber-500 dark:text-amber-500">
             {formatCurrencyCompactMillions(stats.totalRevenue)}
           </span>

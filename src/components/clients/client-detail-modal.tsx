@@ -28,7 +28,7 @@ export function ClientDetailModal({ client, onClose, onWhatsApp }: ClientDetailM
                 {client.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{client.name}</h2>
+                <h2 className="text-xl font-bold text-foreground">{client.name}</h2>
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border mt-1 ${segmentConfig[getClientSegment(client)].color}`}
                 >
@@ -50,8 +50,8 @@ export function ClientDetailModal({ client, onClose, onWhatsApp }: ClientDetailM
             {/* Contacto */}
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                <Phone className="h-5 w-5 text-zinc-400" />
-                <span className="text-zinc-900 dark:text-white">{client.phone}</span>
+                <Phone className="h-5 w-5 text-muted" />
+                <span className="text-foreground">{client.phone}</span>
                 <Button
                   variant="success"
                   size="sm"
@@ -64,8 +64,8 @@ export function ClientDetailModal({ client, onClose, onWhatsApp }: ClientDetailM
               </div>
               {client.email && (
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                  <Mail className="h-5 w-5 text-zinc-400" />
-                  <span className="text-zinc-900 dark:text-white">{client.email}</span>
+                  <Mail className="h-5 w-5 text-muted" />
+                  <span className="text-foreground">{client.email}</span>
                 </div>
               )}
             </div>
@@ -73,26 +73,24 @@ export function ClientDetailModal({ client, onClose, onWhatsApp }: ClientDetailM
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="text-center p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
-                  {client.total_visits || 0}
-                </p>
-                <p className="text-xs text-zinc-500">Visitas</p>
+                <p className="text-2xl font-bold text-foreground">{client.total_visits || 0}</p>
+                <p className="text-xs text-muted">Visitas</p>
               </div>
               <div className="text-center p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                <p className="text-2xl font-bold text-zinc-900 dark:text-white">
+                <p className="text-2xl font-bold text-foreground">
                   {formatCurrency(Number(client.total_spent || 0))}
                 </p>
-                <p className="text-xs text-zinc-500">Total gastado</p>
+                <p className="text-xs text-muted">Total gastado</p>
               </div>
               <div className="text-center p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800">
-                <p className="text-lg font-bold text-zinc-900 dark:text-white">
+                <p className="text-lg font-bold text-foreground">
                   {client.last_visit_at
                     ? format(new Date(client.last_visit_at), 'd MMM', {
                         locale: es,
                       })
                     : '-'}
                 </p>
-                <p className="text-xs text-zinc-500">Ultima visita</p>
+                <p className="text-xs text-muted">Ultima visita</p>
               </div>
             </div>
 

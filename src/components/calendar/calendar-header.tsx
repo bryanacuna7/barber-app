@@ -61,7 +61,7 @@ export function CalendarHeader({
               onClick={() => onViewModeChange('day')}
               className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                 viewMode === 'day'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                  ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
                   : 'text-muted hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
@@ -71,7 +71,7 @@ export function CalendarHeader({
               onClick={() => onViewModeChange('week')}
               className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                 viewMode === 'week'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                  ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
                   : 'text-muted hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
@@ -81,7 +81,7 @@ export function CalendarHeader({
               onClick={() => onViewModeChange('month')}
               className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
                 viewMode === 'month'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
+                  ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
                   : 'text-muted hover:text-zinc-900 dark:hover:text-white'
               }`}
             >
@@ -149,7 +149,7 @@ export function CalendarHeader({
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <div className="flex-1 text-center min-w-0">
-              <div className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+              <div className="text-sm font-semibold text-foreground truncate">
                 <span className="hidden min-[390px]:inline">{mobileDateLabel}</span>
                 <span className="min-[390px]:hidden">{mobileDateLabelCompact}</span>
               </div>
@@ -215,9 +215,7 @@ export function CalendarHeader({
 
           <div className="pt-1 border-t border-zinc-200/70 dark:border-zinc-800/80">
             <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="font-semibold text-zinc-900 dark:text-white">
-                {projectedRevenueDisplay}
-              </span>
+              <span className="font-semibold text-foreground">{projectedRevenueDisplay}</span>
               <span className="text-muted">{mobileProjectionAppointmentsLabel}</span>
             </div>
           </div>
