@@ -21,13 +21,108 @@ interface SubscriptionData {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySupabase = SupabaseClient<any>
 
+async function createSystemNotification(
+  supabase: SupabaseClient<Database>,
+  params: {
+    userId?: string | null
+    businessId?: string | null
+    type: string
+    title: string
+    message: string
+    referenceType?: string | null
+    metadata?: Record<string, unknown>
+  }
+): Promise<void> {
+  const { error } = await (supabase as AnySupabase).rpc('create_notification', {
+    p_user_id: params.userId ?? null,
+    p_business_id: params.businessId ?? null,
+    p_type: params.type,
+    p_title: params.title,
+    p_message: params.message,
+    p_reference_type: params.referenceType ?? null,
+    p_reference_id: null,
+    p_metadata: params.metadata ?? {},
+  })
+
+  if (error) {
+    console.error('Failed to create notification:', error)
+  }
+}
+
+async function notifyTrialExpired(
+  supabase: SupabaseClient<Database>,
+  businessId: string
+): Promise<void> {
+  const now = new Date()
+  const dedupeWindowStart = new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString()
+
+  // Avoid duplicate notifications on concurrent requests.
+  const { data: existing } = await (supabase as AnySupabase)
+    .from('notifications')
+    .select('id')
+    .eq('business_id', businessId)
+    .eq('type', 'trial_expired')
+    .gte('created_at', dedupeWindowStart)
+    .limit(1)
+
+  if (existing && existing.length > 0) return
+
+  const { data: business } = await (supabase as AnySupabase)
+    .from('businesses')
+    .select('id, name, owner_id')
+    .eq('id', businessId)
+    .single()
+
+  if (!business) return
+
+  await createSystemNotification(supabase, {
+    userId: business.owner_id,
+    businessId: business.id,
+    type: 'trial_expired',
+    title: 'Tu prueba Pro terminó',
+    message:
+      'Tu negocio pasó al plan Básico. Reporta tu pago para reactivar el acceso Pro cuanto antes.',
+    referenceType: 'subscription',
+    metadata: { source: 'subscription_auto_degrade', reason: 'trial_expired' },
+  })
+
+  // Notify admins for manual follow-up (best effort).
+  const { data: admins } = await (supabase as AnySupabase).from('admin_users').select('user_id')
+  if (!admins || admins.length === 0) return
+
+  await Promise.all(
+    admins
+      .map((admin: { user_id: string | null }) => admin.user_id)
+      .filter((userId: string | null): userId is string => Boolean(userId))
+      .map((adminUserId: string) =>
+        createSystemNotification(supabase, {
+          userId: adminUserId,
+          businessId: business.id,
+          type: 'system_alert',
+          title: 'Trial expirado requiere seguimiento',
+          message: `El negocio "${business.name}" pasó de trial a básico por vencimiento.`,
+          referenceType: 'subscription',
+          metadata: {
+            source: 'subscription_auto_degrade',
+            reason: 'trial_expired_follow_up',
+            target_business_id: business.id,
+          },
+        })
+      )
+  )
+}
+
 /**
  * Get the current subscription status for a business
  */
 export async function getSubscriptionStatus(
   supabase: SupabaseClient<Database>,
-  businessId: string
+  businessId: string,
+  _depth = 0
 ): Promise<SubscriptionStatusResponse | null> {
+  // Guard against infinite recursion (degrade → re-fetch cycle)
+  if (_depth > 1) return null
+
   // Get subscription with plan
   const { data, error: subError } = await (supabase as AnySupabase)
     .from('business_subscriptions')
@@ -45,9 +140,11 @@ export async function getSubscriptionStatus(
   if (subscription.status === 'trial' && subscription.trial_ends_at) {
     const trialEnd = new Date(subscription.trial_ends_at)
     if (trialEnd < new Date()) {
-      await degradeToBasic(supabase, businessId)
-      // Re-fetch after degradation
-      return getSubscriptionStatus(supabase, businessId)
+      const downgraded = await degradeToBasic(supabase, businessId)
+      if (downgraded) {
+        await notifyTrialExpired(supabase, businessId)
+      }
+      return getSubscriptionStatus(supabase, businessId, _depth + 1)
     }
   }
 
@@ -65,8 +162,7 @@ export async function getSubscriptionStatus(
 
       if (!pendingPayments || pendingPayments === 0) {
         await degradeToBasic(supabase, businessId)
-        // Re-fetch after degradation
-        return getSubscriptionStatus(supabase, businessId)
+        return getSubscriptionStatus(supabase, businessId, _depth + 1)
       }
     }
   }
@@ -233,7 +329,7 @@ export async function canUseBranding(
 export async function degradeToBasic(
   supabase: SupabaseClient<Database>,
   businessId: string
-): Promise<void> {
+): Promise<boolean> {
   // Get basic plan ID
   const { data: basicPlan } = await (supabase as AnySupabase)
     .from('subscription_plans')
@@ -243,11 +339,11 @@ export async function degradeToBasic(
 
   if (!basicPlan) {
     console.error('Basic plan not found')
-    return
+    return false
   }
 
   // Update subscription to expired with basic plan
-  await (supabase as AnySupabase)
+  const { error } = await (supabase as AnySupabase)
     .from('business_subscriptions')
     .update({
       status: 'expired',
@@ -255,6 +351,13 @@ export async function degradeToBasic(
       updated_at: new Date().toISOString(),
     })
     .eq('business_id', businessId)
+
+  if (error) {
+    console.error('Failed to downgrade subscription to basic:', error)
+    return false
+  }
+
+  return true
 }
 
 /**
@@ -296,8 +399,7 @@ export async function checkAndDowngradeExpiredPaid(
     }
 
     // Downgrade to basic
-    await degradeToBasic(supabase, businessId)
-    return true
+    return await degradeToBasic(supabase, businessId)
   }
 
   return false

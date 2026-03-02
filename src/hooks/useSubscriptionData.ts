@@ -10,6 +10,43 @@ import type {
   SinpeDetailsValue,
 } from '@/types/database'
 
+const STATUS_REFRESH_INTERVAL_MS = 5 * 60 * 1000
+const DAYS_RECALC_INTERVAL_MS = 60 * 1000
+
+function calculateDaysRemaining(endDate: string | null): number | null {
+  if (!endDate) return null
+
+  const end = new Date(endDate)
+  if (Number.isNaN(end.getTime())) return null
+
+  return Math.max(0, Math.ceil((end.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+}
+
+function withLiveDaysRemaining(
+  subscription: SubscriptionStatusResponse
+): SubscriptionStatusResponse {
+  let daysRemaining = subscription.days_remaining
+
+  if (subscription.status === 'trial') {
+    daysRemaining = calculateDaysRemaining(subscription.trial_ends_at)
+  } else if (subscription.status === 'active') {
+    daysRemaining = calculateDaysRemaining(subscription.current_period_end)
+  }
+
+  if (
+    daysRemaining === subscription.days_remaining &&
+    (subscription.status !== 'trial' || subscription.trial_days_left === daysRemaining)
+  ) {
+    return subscription
+  }
+
+  return {
+    ...subscription,
+    days_remaining: daysRemaining,
+    trial_days_left: subscription.status === 'trial' ? daysRemaining : subscription.trial_days_left,
+  }
+}
+
 // Cache keys for each data source
 const CK = {
   status: 'sub_status',
@@ -44,6 +81,15 @@ export function useSubscriptionData() {
   const [sinpeConfig, setSinpeConfig] = useState<SinpeDetailsValue | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchStatusOnly = useCallback(async () => {
+    const statusRes = await fetchWithTimeout('/api/subscription/status')
+    if (!statusRes?.ok) return
+
+    const data = (await statusRes.json()) as SubscriptionStatusResponse
+    setSubscription(withLiveDaysRemaining(data))
+    setCache(CK.status, data, CACHE_TTL.SHORT)
+  }, [])
+
   const fetchData = useCallback(async () => {
     // Stale-while-revalidate: hydrate from cache immediately
     const cachedStatus = getStaleCache<SubscriptionStatusResponse>(CK.status)
@@ -55,7 +101,7 @@ export function useSubscriptionData() {
     const cachedSinpe = getStaleCache<SinpeDetailsValue>(CK.sinpe)
 
     // Hydrate state from cache
-    if (cachedStatus) setSubscription(cachedStatus.data)
+    if (cachedStatus) setSubscription(withLiveDaysRemaining(cachedStatus.data))
     if (cachedPlans) setPlans(cachedPlans.data)
     if (cachedPayments) setPayments(cachedPayments.data)
     if (cachedExchange) setExchangeRate(cachedExchange.data)
@@ -115,8 +161,8 @@ export function useSubscriptionData() {
         await Promise.all(fetches)
 
       if (statusRes?.ok) {
-        const data = await statusRes.json()
-        setSubscription(data)
+        const data = (await statusRes.json()) as SubscriptionStatusResponse
+        setSubscription(withLiveDaysRemaining(data))
         setCache(CK.status, data, CACHE_TTL.SHORT)
       }
       if (plansRes?.ok) {
@@ -165,6 +211,34 @@ export function useSubscriptionData() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    const recalcInterval = window.setInterval(() => {
+      setSubscription((current) => (current ? withLiveDaysRemaining(current) : current))
+    }, DAYS_RECALC_INTERVAL_MS)
+
+    return () => window.clearInterval(recalcInterval)
+  }, [])
+
+  useEffect(() => {
+    const statusRefreshInterval = window.setInterval(() => {
+      void fetchStatusOnly()
+    }, STATUS_REFRESH_INTERVAL_MS)
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return
+
+      setSubscription((current) => (current ? withLiveDaysRemaining(current) : current))
+      void fetchStatusOnly()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.clearInterval(statusRefreshInterval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [fetchStatusOnly])
 
   return {
     subscription,

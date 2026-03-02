@@ -1,12 +1,49 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { X, Clock, Sparkles, AlertTriangle, CreditCard, ChevronRight } from 'lucide-react'
 import { getStaleCache, setCache, CACHE_TTL } from '@/lib/cache'
 import type { SubscriptionStatusResponse } from '@/types/database'
 
 const CACHE_KEY = 'sub_status'
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000
+const DAYS_RECALC_INTERVAL_MS = 60 * 1000
+
+function calculateDaysRemaining(endDate: string | null): number | null {
+  if (!endDate) return null
+
+  const end = new Date(endDate)
+  if (Number.isNaN(end.getTime())) return null
+
+  const now = new Date()
+  return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+}
+
+function withLiveDaysRemaining(
+  subscription: SubscriptionStatusResponse
+): SubscriptionStatusResponse {
+  let daysRemaining = subscription.days_remaining
+
+  if (subscription.status === 'trial') {
+    daysRemaining = calculateDaysRemaining(subscription.trial_ends_at)
+  } else if (subscription.status === 'active') {
+    daysRemaining = calculateDaysRemaining(subscription.current_period_end)
+  }
+
+  if (
+    daysRemaining === subscription.days_remaining &&
+    (subscription.status !== 'trial' || subscription.trial_days_left === daysRemaining)
+  ) {
+    return subscription
+  }
+
+  return {
+    ...subscription,
+    days_remaining: daysRemaining,
+    trial_days_left: subscription.status === 'trial' ? daysRemaining : subscription.trial_days_left,
+  }
+}
 
 interface TrialBannerProps {
   variant?: 'full' | 'compact'
@@ -17,23 +54,12 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
   const [dismissed, setDismissed] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    // Stale-while-revalidate: show cached data instantly, refresh in background
-    const cached = getStaleCache<SubscriptionStatusResponse>(CACHE_KEY)
-    if (cached) {
-      setSubscription(cached.data)
-      setLoading(false)
-      if (!cached.isStale) return // fresh cache — skip network
-    }
-    fetchSubscription()
-  }, [])
-
-  async function fetchSubscription() {
+  const fetchSubscription = useCallback(async () => {
     try {
       const res = await fetch('/api/subscription/status')
       if (res.ok) {
-        const data = await res.json()
-        setSubscription(data)
+        const data = (await res.json()) as SubscriptionStatusResponse
+        setSubscription(withLiveDaysRemaining(data))
         setCache(CACHE_KEY, data, CACHE_TTL.SHORT)
       }
     } catch (error) {
@@ -41,7 +67,47 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // Stale-while-revalidate: show cached data instantly, refresh in background
+    const cached = getStaleCache<SubscriptionStatusResponse>(CACHE_KEY)
+    if (cached) {
+      setSubscription(withLiveDaysRemaining(cached.data))
+      setLoading(false)
+      if (!cached.isStale) return // fresh cache — skip network
+    }
+    void fetchSubscription()
+  }, [fetchSubscription])
+
+  useEffect(() => {
+    // Keep day counters moving even if layout remains mounted for hours/days.
+    const recalcInterval = window.setInterval(() => {
+      setSubscription((current) => (current ? withLiveDaysRemaining(current) : current))
+    }, DAYS_RECALC_INTERVAL_MS)
+
+    return () => window.clearInterval(recalcInterval)
+  }, [])
+
+  useEffect(() => {
+    const pollInterval = window.setInterval(() => {
+      void fetchSubscription()
+    }, REFRESH_INTERVAL_MS)
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return
+
+      setSubscription((current) => (current ? withLiveDaysRemaining(current) : current))
+      void fetchSubscription()
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.clearInterval(pollInterval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [fetchSubscription])
 
   if (loading || dismissed) return null
   if (!subscription) return null
