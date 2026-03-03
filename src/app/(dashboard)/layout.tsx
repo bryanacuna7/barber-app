@@ -107,6 +107,9 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    title: {
+      absolute: businessName,
+    },
     applicationName: businessName,
     manifest: `/api/pwa/manifest?${params.toString()}`,
     appleWebApp: {
