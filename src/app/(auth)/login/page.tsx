@@ -57,9 +57,9 @@ function LoginForm() {
   // Clean URL once without triggering navigation
   useEffect(() => {
     if (passwordUpdated) {
-      window.history.replaceState({}, '', '/login')
+      router.replace('/login', { scroll: false })
     }
-  }, [passwordUpdated])
+  }, [passwordUpdated, router])
 
   const { getFieldError, markFieldTouched, validateForm, clearErrors } =
     useFormValidation(loginSchema)
@@ -69,23 +69,9 @@ function LoginForm() {
     validateForm({ email, password })
   }
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsGoogleLoading(true)
-    setError('')
-
-    const supabase = createClient()
-
-    const redirectTo = `${window.location.origin}/auth/callback${explicitRedirect ? `?next=${encodeURIComponent(explicitRedirect)}` : ''}`
-
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo },
-    })
-
-    if (oauthError) {
-      setError('Error al conectar con Google. Intenta de nuevo.')
-      setIsGoogleLoading(false)
-    }
+    window.location.href = '/api/auth/google/initiate'
   }
 
   const handleLogin = async (e: React.FormEvent) => {
