@@ -12,6 +12,7 @@ import type { UserRole, StaffPermissions } from '@/lib/auth/roles'
 
 interface BusinessContextValue {
   businessId: string
+  businessName?: string
   slug?: string
   userId: string
   userEmail?: string
@@ -30,6 +31,7 @@ const BusinessContext = createContext<BusinessContextValue | undefined>(undefine
 interface BusinessProviderProps {
   children: React.ReactNode
   businessId: string
+  businessName?: string
   slug?: string
   userId: string
   userEmail?: string
@@ -46,6 +48,7 @@ interface BusinessProviderProps {
 export function BusinessProvider({
   children,
   businessId,
+  businessName,
   slug,
   userId,
   userEmail,
@@ -60,6 +63,7 @@ export function BusinessProvider({
 }: BusinessProviderProps) {
   const value: BusinessContextValue = {
     businessId,
+    businessName,
     slug,
     userId,
     userEmail,

@@ -12,6 +12,17 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Project-specific generated/external content:
+    'node_modules/**',
+    'dist/**',
+    'coverage/**',
+    'test-results/**',
+    'playwright-report/**',
+    '.agents/**',
+    '.claude/**',
+    '.github/**',
+    '.playwright-mcp/**',
+    'public/sw.js',
   ]),
   // Temporary rules for Phase 2-3 transition (will be fixed in Phase 3: Testing)
   {
@@ -27,6 +38,13 @@ const eslintConfig = defineConfig([
     rules: {
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'warn',
+    },
+  },
+  // CommonJS utility scripts can use require/module.exports.
+  {
+    files: ['**/*.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ])

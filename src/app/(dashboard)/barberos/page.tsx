@@ -36,6 +36,8 @@ import { IOSToggle } from '@/components/ui/ios-toggle'
 import { useToast } from '@/components/ui/toast'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { trackMobileEvent } from '@/lib/analytics/mobile'
+import { MOBILE_CANVAS_CLASS, MOBILE_PRIMARY_CTA_CLASS } from '@/lib/ui/mobile-contract'
 import { useBusiness } from '@/contexts/business-context'
 import {
   useBarbers,
@@ -70,6 +72,14 @@ export default function BarberosPage() {
   }, [barbers, searchQuery])
 
   const activeCount = barbers?.filter((b) => b.isActive).length ?? 0
+
+  const openInviteModal = (source: 'desktop' | 'mobile' | 'empty') => {
+    setIsInviteOpen(true)
+    if (isMobileDevice()) {
+      haptics.tap()
+      trackMobileEvent('mobile_equipo_invite_open', { source })
+    }
+  }
 
   const openDetail = (barber: UIBarber) => {
     setSelectedBarberId(barber.id)
@@ -111,7 +121,9 @@ export default function BarberosPage() {
 
   return (
     <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
-      <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 space-y-4 sm:space-y-6 relative z-10">
+      <div
+        className={`${MOBILE_CANVAS_CLASS} pt-4 sm:px-0 lg:px-0 lg:pt-0 space-y-4 sm:space-y-6 relative z-10`}
+      >
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="">
           <div className="flex items-center justify-between gap-3">
@@ -128,10 +140,7 @@ export default function BarberosPage() {
               </div>
               <Button
                 variant="cta"
-                onClick={() => {
-                  setIsInviteOpen(true)
-                  if (isMobileDevice()) haptics.tap()
-                }}
+                onClick={() => openInviteModal('desktop')}
                 className="hidden lg:inline-flex shrink-0 min-w-[44px] min-h-[44px] h-10"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
@@ -142,11 +151,8 @@ export default function BarberosPage() {
           <div className="mt-3 lg:hidden">
             <Button
               variant="cta"
-              onClick={() => {
-                setIsInviteOpen(true)
-                if (isMobileDevice()) haptics.tap()
-              }}
-              className="h-11 w-full !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100"
+              onClick={() => openInviteModal('mobile')}
+              className={`${MOBILE_PRIMARY_CTA_CLASS} !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100`}
             >
               <Plus className="h-5 w-5 mr-2" />
               <span>Agregar Miembro del equipo</span>
@@ -189,8 +195,8 @@ export default function BarberosPage() {
             {!searchQuery && (
               <Button
                 variant="cta"
-                onClick={() => setIsInviteOpen(true)}
-                className="mt-4 min-h-[44px]"
+                onClick={() => openInviteModal('empty')}
+                className="mt-4 h-11 whitespace-nowrap"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Agregar Miembro del equipo
@@ -422,6 +428,10 @@ function InviteBarberModal({
     e.preventDefault()
     if (!name.trim() || !email.trim()) return
 
+    const isMobile = isMobileDevice()
+    const safeMode = mode
+    const safeEmail = email.trim()
+
     try {
       const result =
         mode === 'add'
@@ -431,14 +441,37 @@ function InviteBarberModal({
       if (result.setup_url) {
         // Show the setup link so owner can share it
         setSetupResult({ barberName: name.trim(), setupUrl: result.setup_url })
-        if (isMobileDevice()) haptics.success()
+        if (isMobile) {
+          haptics.success()
+          trackMobileEvent('mobile_equipo_invite_success', {
+            mode: safeMode,
+            via: 'setup_url',
+            emailDomain: safeEmail.split('@')[1] ?? 'unknown',
+          })
+        }
       } else {
         toast.success('Miembro del equipo agregado')
+        if (isMobile) {
+          haptics.success()
+          trackMobileEvent('mobile_equipo_invite_success', {
+            mode: safeMode,
+            via: 'direct',
+            emailDomain: safeEmail.split('@')[1] ?? 'unknown',
+          })
+        }
         resetAndClose()
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al invitar miembro del equipo'
       toast.error(msg)
+      if (isMobile) {
+        haptics.error()
+        trackMobileEvent('mobile_equipo_invite_error', {
+          mode: safeMode,
+          message: msg,
+          emailDomain: safeEmail.split('@')[1] ?? 'unknown',
+        })
+      }
     }
   }
 

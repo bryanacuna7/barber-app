@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { X, Check, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -98,6 +99,16 @@ export function FocusMode({
     handlePaymentSelect,
   } = usePaymentFlow({ acceptedPaymentMethods, onComplete })
 
+  // Prevent background scroll while focus mode is open.
+  // position:fixed on body breaks framer-motion drag coords — use overflow only.
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
   // Live timer
   useEffect(() => {
     if (!appointment.started_at) return
@@ -136,19 +147,21 @@ export function FocusMode({
 
   const ringSize = 200
 
-  return (
+  if (typeof document === 'undefined') return null
+
+  return createPortal(
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[70] bg-zinc-950"
+      className="fixed inset-0 z-[70] bg-zinc-950 overflow-hidden flex flex-col"
       role="dialog"
       aria-label="Modo enfoque"
       data-testid="focus-mode"
     >
-      {/* Top bar: Dismiss only */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-end px-6 py-5 pt-safe">
+      {/* Top bar */}
+      <div className="shrink-0 flex items-center justify-end px-6 pt-safe pb-2">
         <button
           onClick={onDismiss}
           className="flex items-center justify-center w-10 h-10 rounded-full bg-zinc-800/80 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors"
@@ -159,8 +172,8 @@ export function FocusMode({
         </button>
       </div>
 
-      {/* Center content */}
-      <div className="h-full flex flex-col items-center justify-center px-8">
+      {/* Center content — flex-1 fills remaining space, ring always visible */}
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-8">
         {/* Client + Service */}
         <p className="text-xl font-semibold text-white mb-0.5">
           {appointment.client?.name || 'Walk-in'}
@@ -203,9 +216,9 @@ export function FocusMode({
         </div>
       </div>
 
-      {/* Bottom actions */}
+      {/* Bottom actions — always visible, no overlap */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-10 px-6 mx-auto w-full max-w-lg"
+        className="shrink-0 px-6 pb-safe-or-7 mx-auto w-full max-w-lg"
         style={{ paddingBottom: 'max(calc(env(safe-area-inset-bottom, 0px) + 1.25rem), 1.75rem)' }}
       >
         {/* Walk-in button */}
@@ -247,6 +260,7 @@ export function FocusMode({
         options={activePaymentOptions}
         onSelect={handlePaymentSelect}
       />
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

@@ -119,6 +119,7 @@ export function BulkActionsToolbar({
                     key={action.id}
                     variant={action.destructive ? 'danger' : 'ghost'}
                     size="sm"
+                    title={actionLabel}
                     onClick={() => onAction(action.id, selectedIds)}
                     className="h-8 min-h-0 gap-1.5 rounded-full px-3.5 py-1.5 text-sm"
                   >

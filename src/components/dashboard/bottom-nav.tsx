@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -161,13 +160,14 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
             {leftTabs.map((item) => {
               const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
               return (
-                <Link
+                <button
                   key={item.name}
-                  href={item.href}
+                  type="button"
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={item.name}
                   onClick={() => {
                     if (isMobileDevice()) haptics.selection()
+                    router.push(item.href)
                   }}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
@@ -214,7 +214,7 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                   >
                     {item.name}
                   </span>
-                </Link>
+                </button>
               )
             })}
 
@@ -249,13 +249,14 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
             {rightNavItems.map((item) => {
               const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
               return (
-                <Link
+                <button
                   key={item.name}
-                  href={item.href}
+                  type="button"
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={item.name}
                   onClick={() => {
                     if (isMobileDevice()) haptics.selection()
+                    router.push(item.href)
                   }}
                   className={cn(
                     'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
@@ -290,7 +291,7 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                   >
                     {item.name}
                   </span>
-                </Link>
+                </button>
               )
             })}
 

@@ -1,6 +1,6 @@
 // Service Worker with offline support and caching strategies
-const CACHE_NAME = 'barberapp-v4'
-const RUNTIME_CACHE = 'barberapp-runtime-v4'
+const CACHE_NAME = 'barberapp-v6'
+const RUNTIME_CACHE = 'barberapp-runtime-v6'
 
 // Only precache offline fallback and icons — NEVER cache HTML shells
 // HTML is served network-first so it's always fresh when online
@@ -86,6 +86,17 @@ self.addEventListener('fetch', (event) => {
 
   // Skip cross-origin requests
   if (url.origin !== self.location.origin) {
+    return
+  }
+
+  // CRITICAL: Never intercept navigation requests (mode: 'navigate').
+  // These are full HTML page loads triggered by iOS when opening the PWA
+  // or when a hard reload happens. Letting the browser handle them directly
+  // prevents the service worker from returning a cached RSC payload
+  // (from a previous client-side navigation) as the HTML response,
+  // which would break iOS PWA standalone mode on all pages.
+  if (request.mode === 'navigate') {
+    event.respondWith(fetch(request))
     return
   }
 

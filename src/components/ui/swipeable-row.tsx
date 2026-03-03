@@ -99,6 +99,8 @@ function SwipeActionButton({
       onClick={(e) => {
         e.stopPropagation()
         haptics.tap()
+        // Snap row closed before executing action so it doesn't freeze open
+        animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 })
         action.onClick()
       }}
       aria-label={action.label}

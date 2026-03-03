@@ -43,7 +43,7 @@ export function DashboardStats({
         value={monthRevenue}
         icon={Banknote}
         description={`${monthAppointments} citas`}
-        valueClassName="text-[22px] sm:text-[36px]"
+        valueClassName="text-[clamp(1.1rem,6.2vw,1.45rem)] sm:text-[36px]"
       />
 
       {/* Secondary: Clientes */}

@@ -7,8 +7,11 @@ const DEFAULT_SHORT_NAME = 'BarberApp'
 const FALLBACK_THEME_COLOR = '#10141b'
 
 function toShortName(name: string): string {
-  if (name.length <= 12) return name
-  return name.slice(0, 12)
+  const MAX = 20
+  if (name.length <= MAX) return name
+  const truncated = name.slice(0, MAX)
+  const lastSpace = truncated.lastIndexOf(' ')
+  return lastSpace > 3 ? truncated.slice(0, lastSpace) : truncated
 }
 
 function normalizeName(raw: string | null): string | null {

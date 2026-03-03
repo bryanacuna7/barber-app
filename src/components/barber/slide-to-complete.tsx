@@ -56,9 +56,9 @@ export function SlideToComplete({
       // Complete!
       setCompleted(true)
       haptics.success()
-      animate(x, trackWidth, { duration: 0.2 })
-      // Delay callback slightly for visual feedback
-      setTimeout(() => onComplete(), 300)
+      animate(x, trackWidth, { duration: 0.15 })
+      // Minimal delay — just enough for the checkmark to render before API fires
+      setTimeout(() => onComplete(), 80)
     } else {
       // Snap back
       haptics.tap()

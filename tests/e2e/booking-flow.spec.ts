@@ -18,7 +18,7 @@ import { format, addDays, startOfDay } from 'date-fns'
 // Test data - seeded with scripts/seed-test-data.ts
 // PREREQUISITE: Run `npx tsx scripts/seed-test-data.ts` before running these tests
 const TEST_BUSINESS = {
-  slug: 'barberia-test',
+  slug: process.env.E2E_BOOKING_SLUG || 'barberia-test',
   name: 'Barberia Test',
   expectedServices: [
     'Corte Clásico',
@@ -31,6 +31,8 @@ const TEST_BUSINESS = {
   ],
   expectedBarbers: ['Juan Carlos', 'Miguel Ángel', 'David López'],
 }
+
+let bookingSeedAvailable = true
 
 // Helper functions
 async function navigateToBookingPage(page: Page, slug: string) {
@@ -142,6 +144,34 @@ async function submitBooking(page: Page) {
 
 // Test Suite
 test.describe('Booking Flow E2E Tests', () => {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext()
+    const page = await context.newPage()
+
+    try {
+      await page.goto(`/reservar/${TEST_BUSINESS.slug}`, { waitUntil: 'domcontentloaded' })
+      await page.waitForLoadState('networkidle')
+
+      const hasHeader = await page.locator('[data-testid="booking-header"]').isVisible()
+      const has404 = await page
+        .locator('h1:has-text("404")')
+        .isVisible()
+        .catch(() => false)
+      bookingSeedAvailable = hasHeader && !has404
+    } catch {
+      bookingSeedAvailable = false
+    } finally {
+      await context.close()
+    }
+  })
+
+  test.beforeEach(() => {
+    test.skip(
+      !bookingSeedAvailable,
+      `Booking seed data not available for slug "${TEST_BUSINESS.slug}". Seed supabase/seed_test_data.sql before running this suite.`
+    )
+  })
+
   test.describe('E2E-BOOKING-001: Happy Path - Complete Booking Flow', () => {
     test('should complete full booking flow successfully', async ({ page }) => {
       // Step 1: Navigate to booking page

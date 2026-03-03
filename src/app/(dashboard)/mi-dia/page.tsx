@@ -146,7 +146,6 @@ function MiDiaPageContent() {
   const { checkIn, complete, noShow, loadingAppointmentId } = useAppointmentActions({
     barberId,
     onSuccess: (action) => {
-      // Show success message
       const messages = {
         'check-in': 'Cita iniciada correctamente',
         complete: 'Cita completada correctamente',
@@ -154,18 +153,15 @@ function MiDiaPageContent() {
       }
       toast.success(messages[action])
 
-      // Auto-enter focus mode after check-in
-      if (action === 'check-in') {
-        // The appointment ID was passed to checkIn — find it from loading state
-        // We'll set it in the wrapped checkIn below
+      // Eagerly exit focus mode on terminal actions — don't wait for refetch.
+      // Without this, FocusMode stays open if the refetch fails (e.g. CORS / network error).
+      if (action === 'complete' || action === 'no-show') {
+        setFocusAppointmentId(null)
       }
 
-      // Refetch will happen automatically via real-time hook
-      // But we can force it for immediate feedback
       refetch()
     },
     onError: (action, error) => {
-      // Show error message
       toast.error(error.message)
     },
   })

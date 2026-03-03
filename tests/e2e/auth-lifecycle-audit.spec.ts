@@ -1,5 +1,12 @@
 import { test, expect, type Page } from '@playwright/test'
 
+const RUN_AUTH_LIFECYCLE = process.env.E2E_AUTH_LIFECYCLE === 'true'
+
+test.skip(
+  !RUN_AUTH_LIFECYCLE,
+  'Set E2E_AUTH_LIFECYCLE=true to run auth lifecycle audit in a dedicated environment.'
+)
+
 interface RoleCreds {
   email: string
   password: string
@@ -50,7 +57,9 @@ async function assertChangePasswordFormVisible(page: Page) {
   await expect(page.locator('[data-testid="change-password-submit"]')).toBeVisible()
 }
 
-test.describe('Auth Lifecycle Audit', () => {
+const authLifecycleDescribe = RUN_AUTH_LIFECYCLE ? test.describe : test.describe.skip
+
+authLifecycleDescribe('Auth Lifecycle Audit', () => {
   test('protects self-service credential routes for unauthenticated users', async ({ page }) => {
     const protectedPaths = [
       '/configuracion/avanzado/cambiar-contrasena',

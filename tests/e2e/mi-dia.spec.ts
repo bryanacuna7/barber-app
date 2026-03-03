@@ -17,10 +17,17 @@ import { test, expect, type Page } from '@playwright/test'
 
 // Test data setup
 // Using demo user created by scripts/create-demo-user.ts
+const RUN_MI_DIA = process.env.E2E_MI_DIA === 'true'
 const DEMO_USER = {
-  email: 'demo@barbershop.com',
-  password: 'demo123456',
+  email: process.env.E2E_MI_DIA_EMAIL ?? '',
+  password: process.env.E2E_MI_DIA_PASSWORD ?? '',
 }
+const HAS_MI_DIA_CREDENTIALS = Boolean(DEMO_USER.email && DEMO_USER.password)
+
+test.skip(
+  !RUN_MI_DIA || !HAS_MI_DIA_CREDENTIALS,
+  'Set E2E_MI_DIA=true plus E2E_MI_DIA_EMAIL/E2E_MI_DIA_PASSWORD to run Mi Día E2E tests.'
+)
 
 // Test barber data for mocked responses
 const TEST_BARBER = {
@@ -30,30 +37,67 @@ const TEST_BARBER = {
 
 // Helper functions
 async function loginAsBarber(page: Page) {
-  await page.goto('/login')
-  await page.fill('[data-testid="login-email"]', DEMO_USER.email)
-  await page.fill('[data-testid="login-password"]', DEMO_USER.password)
-  await page.click('button[type="submit"]')
-
-  // Wait for redirect — barbers go to /mi-dia, owners go to /dashboard
-  await page.waitForURL(/\/(dashboard|mi-dia)/, { timeout: 10000 })
-
-  // Wait for dashboard content to appear (handles on-demand compilation)
-  try {
-    await page.waitForSelector('text=Próximas Citas Hoy', {
-      timeout: 90000,
-      state: 'visible',
-    })
-  } catch {
-    // If not found, wait for greeting text or Mi Día header
-    await page.waitForSelector('text=/Buenos días|Buenas tardes|Buenas noches|Mi Día/i', {
-      timeout: 90000,
-      state: 'visible',
-    })
+  const waitForHydratedLoginForm = async () => {
+    await expect(page.locator('[data-testid="login-card"]')).toBeVisible({ timeout: 20000 })
+    await page
+      .waitForFunction(
+        () => {
+          const form = document.querySelector('[data-testid="login-form"]')
+          if (!form) return false
+          const keys = Object.keys(form)
+          return keys.some(
+            (key) => key.startsWith('__reactProps$') || key.startsWith('__reactFiber$')
+          )
+        },
+        undefined,
+        { timeout: 12000 }
+      )
+      .catch(() => {})
   }
 
-  // Extra wait for all content to render
-  await page.waitForTimeout(500)
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 60000 })
+      await waitForHydratedLoginForm()
+      await page.fill('[data-testid="login-email"]', DEMO_USER.email)
+      await page.fill('[data-testid="login-password"]', DEMO_USER.password)
+      await page.click('[data-testid="login-submit"]')
+
+      // Wait for redirect — barbers go to /mi-dia, owners go to /dashboard
+      await page.waitForURL(/\/(dashboard|mi-dia|onboarding)/, { timeout: 35000 })
+
+      // Wait for dashboard content to appear (handles on-demand compilation)
+      try {
+        await page.waitForSelector('text=Próximas Citas Hoy', {
+          timeout: 90000,
+          state: 'visible',
+        })
+      } catch {
+        // If not found, wait for greeting text or Mi Día header
+        await page.waitForSelector('text=/Buenos días|Buenas tardes|Buenas noches|Mi Día/i', {
+          timeout: 90000,
+          state: 'visible',
+        })
+      }
+
+      // Extra wait for all content to render
+      await page.waitForTimeout(500)
+      return
+    } catch (error) {
+      const loginErrorVisible = await page
+        .locator('[data-testid="login-error"]')
+        .isVisible()
+        .catch(() => false)
+      if (loginErrorVisible) {
+        throw new Error(
+          'Mi Día E2E login failed with visible auth error. Verify E2E_MI_DIA_EMAIL/E2E_MI_DIA_PASSWORD.'
+        )
+      }
+
+      if (attempt === 3) throw error
+      await page.waitForTimeout(1200)
+    }
+  }
 }
 
 async function setupTestAppointments(page: Page) {
@@ -63,7 +107,9 @@ async function setupTestAppointments(page: Page) {
 }
 
 // Tests
-test.describe('Mi Día Feature - E2E Tests', () => {
+const miDiaDescribe = RUN_MI_DIA && HAS_MI_DIA_CREDENTIALS ? test.describe : test.describe.skip
+
+miDiaDescribe('Mi Día Feature - E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await loginAsBarber(page)

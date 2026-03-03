@@ -114,11 +114,11 @@ export function NegocioTab({ analytics, durationData, durationLoading, period }:
             </TabsList>
 
             <TabsContent value="revenue">
-              <RevenueChart data={analytics.revenueSeries} period={period} height={200} />
+              <RevenueChart data={analytics.revenueSeries} period={period} height={220} />
             </TabsContent>
 
             <TabsContent value="services">
-              <ServicesChart data={analytics.services} period={period} height={200} />
+              <ServicesChart data={analytics.services} period={period} height={240} />
             </TabsContent>
           </Tabs>
         </div>

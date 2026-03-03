@@ -7,7 +7,7 @@ import {
   useMotionValue,
   useTransform,
   useReducedMotion,
-  PanInfo,
+  type PanInfo,
 } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -40,7 +40,11 @@ export function Drawer({
   const prefersReducedMotion = useReducedMotion()
   const [isDragging, setIsDragging] = useState(false)
   const y = useMotionValue(0)
-  const opacity = useTransform(y, [0, 200], [1, 0.5])
+  const opacity = useTransform(y, (latestY) => {
+    const safeY = Number.isFinite(latestY) ? latestY : 0
+    const clampedY = Math.min(Math.max(safeY, 0), 200)
+    return 1 - (clampedY / 200) * 0.5
+  })
 
   // Handle escape key
   useEffect(() => {
@@ -87,9 +91,11 @@ export function Drawer({
   }
 
   const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const offsetY = Number.isFinite(info.offset.y) ? info.offset.y : 0
+
     // Only allow dragging down
-    if (info.offset.y > 0) {
-      y.set(info.offset.y)
+    if (offsetY > 0) {
+      y.set(offsetY)
     } else {
       y.set(0)
     }
@@ -98,9 +104,11 @@ export function Drawer({
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setIsDragging(false)
     const threshold = 150
+    const offsetY = Number.isFinite(info.offset.y) ? info.offset.y : 0
+    const velocityY = Number.isFinite(info.velocity.y) ? info.velocity.y : 0
 
     // Close if dragged down beyond threshold or velocity is high
-    if (info.offset.y > threshold || info.velocity.y > 500) {
+    if (offsetY > threshold || velocityY > 500) {
       onClose()
     } else {
       // Snap back

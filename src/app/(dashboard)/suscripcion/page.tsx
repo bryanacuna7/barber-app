@@ -230,7 +230,7 @@ export default function SuscripcionPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-col sm:flex-row gap-3">
             {/* Reportar Pago - always visible */}
             <Button
               variant="primary"
@@ -238,7 +238,7 @@ export default function SuscripcionPage() {
                 setSelectedPlan(currentPlan || plans.find((p) => p.name === 'pro') || null)
                 setShowPaymentForm(true)
               }}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <CreditCard className="h-4 w-4" />
               Reportar Pago
@@ -256,7 +256,7 @@ export default function SuscripcionPage() {
                     setShowChangePlanModal(true)
                   }
                 }}
-                className="flex items-center gap-2"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 {otherPlan.price_usd > (currentPlan?.price_usd || 0) ? (
                   <ArrowUpCircle className="h-4 w-4 text-green-500" />

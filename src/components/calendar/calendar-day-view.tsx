@@ -92,7 +92,8 @@ function AppointmentRow({
   onToggleSelect,
   onOpenContextMenu,
 }: AppointmentRowProps) {
-  const canAct = apt.status === 'pending' || apt.status === 'confirmed'
+  const canAct =
+    apt.status === 'pending' || apt.status === 'confirmed' || apt.status === 'in_progress'
 
   const rightActions = canAct
     ? [
@@ -144,7 +145,7 @@ function AppointmentRow({
         <SwipeableRow
           rightActions={rightActions}
           leftActions={leftActions}
-          showAffordance={canAct}
+          showAffordance={false}
           containerClassName="rounded-none"
         >
           <div

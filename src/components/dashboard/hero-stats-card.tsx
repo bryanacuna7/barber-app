@@ -50,13 +50,20 @@ function HeroMetricColumn({
   const { label, value, description } = metric
   const valueText = typeof value === 'number' ? value.toLocaleString('es-CR') : String(value)
   const compactMobile = typeof value === 'number' ? null : compactCurrencyForMobile(valueText)
+  const mobileValueClass =
+    typeof value === 'number' ? 'text-[32px]' : 'text-[clamp(1.45rem,7.2vw,2rem)]'
 
   return (
     <div className={align === 'right' ? 'text-right' : ''}>
       <p className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.1em] text-white/70">
         {label}
       </p>
-      <p className="mt-1 font-bold tracking-tight leading-[1.05] whitespace-nowrap tabular-nums text-[32px] sm:text-[52px] text-white">
+      <p
+        className={cn(
+          'mt-1 font-bold tracking-tight leading-[1.05] whitespace-nowrap tabular-nums sm:text-[52px] text-white',
+          mobileValueClass
+        )}
+      >
         {typeof value === 'number' ? (
           <AnimatedNumber value={value} />
         ) : compactMobile ? (

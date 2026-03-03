@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 const updateAppointmentSchema = z.object({
   client_id: z.string().uuid().optional(),
   service_id: z.string().uuid().optional(),
-  scheduled_at: z.string().datetime().optional(),
+  scheduled_at: z.string().datetime({ offset: true }).optional(),
   status: z.enum(['pending', 'confirmed', 'completed', 'cancelled', 'no_show']).optional(),
   client_notes: z.string().optional().nullable(),
   internal_notes: z.string().optional().nullable(),

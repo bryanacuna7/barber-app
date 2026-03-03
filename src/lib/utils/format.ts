@@ -39,8 +39,11 @@ export function formatCurrencyCompact(amount: number): string {
 }
 
 /**
- * Compact currency for mobile displays (e.g., "₡45,000" → "₡45 mil").
- * Returns null if the value is not a ₡ currency string or doesn't need compacting.
+ * Compact currency for mobile displays only at millions scale.
+ * Examples:
+ * - "₡142,500" -> "₡142,500"
+ * - "₡1,250,000" -> "₡1,3 M"
+ * Returns null if the value is not a ₡ currency string.
  */
 export function compactCurrencyForMobile(value: string): string | null {
   const trimmed = value.trim()
@@ -52,7 +55,7 @@ export function compactCurrencyForMobile(value: string): string | null {
 
   const amount = Number(numericPart)
   if (!Number.isFinite(amount)) return null
-  if (Math.abs(amount) < 1_000) return trimmed
+  if (Math.abs(amount) < 1_000_000) return trimmed
 
   const compact = new Intl.NumberFormat('es-CR', {
     notation: 'compact',

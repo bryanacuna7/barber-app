@@ -12,6 +12,8 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { AlertTriangle } from 'lucide-react'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { trackMobileEvent } from '@/lib/analytics/mobile'
+import { MOBILE_CANVAS_CLASS, MOBILE_PRIMARY_CTA_CLASS } from '@/lib/ui/mobile-contract'
 import {
   useServices,
   useCreateService,
@@ -204,7 +206,7 @@ function ServiciosContent() {
     }
   }
 
-  function openCreateServiceForm() {
+  function openCreateServiceForm(source: 'desktop' | 'mobile' | 'empty' = 'desktop') {
     setEditingService(null)
     setFormData({
       name: '',
@@ -217,6 +219,10 @@ function ServiciosContent() {
     })
     setError('')
     setShowForm(true)
+    if (isMobileDevice()) {
+      haptics.tap()
+      trackMobileEvent('mobile_servicios_create_open', { source })
+    }
   }
 
   function openEditServiceForm(service: MockService) {
@@ -252,12 +258,15 @@ function ServiciosContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const isMobile = isMobileDevice()
     if (formData.duration < 5 || formData.duration > 480) {
       setError('La duración debe estar entre 5 y 480 minutos')
+      if (isMobile) haptics.warning()
       return
     }
     if (formData.price < 0) {
       setError('El precio no puede ser negativo')
+      if (isMobile) haptics.warning()
       return
     }
     try {
@@ -269,18 +278,43 @@ function ServiciosContent() {
       } else {
         await createService.mutateAsync({ ...formData, business_id: formData.business_id ?? '' })
       }
+      if (isMobile) {
+        haptics.success()
+        trackMobileEvent('mobile_servicios_save_success', {
+          mode: editingService ? 'edit' : 'create',
+        })
+      }
       resetForm()
     } catch (err) {
+      if (isMobile) {
+        haptics.error()
+        trackMobileEvent('mobile_servicios_save_error', {
+          mode: editingService ? 'edit' : 'create',
+          message: err instanceof Error ? err.message : 'unknown',
+        })
+      }
       setError(err instanceof Error ? err.message : 'Error al guardar servicio')
     }
   }
 
   async function handleDeleteConfirm() {
     if (!deleteService) return
+    const isMobile = isMobileDevice()
     try {
       await deleteServiceMutation.mutateAsync(deleteService.id)
+      if (isMobile) {
+        haptics.warning()
+        trackMobileEvent('mobile_servicios_delete_success', { serviceId: deleteService.id })
+      }
       setDeleteService(null)
     } catch (err) {
+      if (isMobile) {
+        haptics.error()
+        trackMobileEvent('mobile_servicios_delete_error', {
+          serviceId: deleteService.id,
+          message: err instanceof Error ? err.message : 'unknown',
+        })
+      }
       setError(err instanceof Error ? err.message : 'Error al eliminar servicio')
     }
   }
@@ -359,7 +393,7 @@ function ServiciosContent() {
         }}
         disabled={showForm || !!deleteService}
       >
-        <div className="px-0 pt-4 sm:px-0 lg:px-0 lg:pt-0 relative z-10">
+        <div className={`${MOBILE_CANVAS_CLASS} pt-4 sm:px-0 lg:px-0 lg:pt-0 relative z-10`}>
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -389,10 +423,7 @@ function ServiciosContent() {
                   </Button>
                   <Button
                     variant="gradient"
-                    onClick={() => {
-                      openCreateServiceForm()
-                      if (isMobileDevice()) haptics.tap()
-                    }}
+                    onClick={() => openCreateServiceForm('desktop')}
                     className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
                   >
                     <Plus className="h-5 w-5 sm:mr-2" />
@@ -405,11 +436,8 @@ function ServiciosContent() {
             <div className="mt-3 lg:hidden">
               <Button
                 variant="gradient"
-                onClick={() => {
-                  openCreateServiceForm()
-                  if (isMobileDevice()) haptics.tap()
-                }}
-                className="h-11 w-full !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100"
+                onClick={() => openCreateServiceForm('mobile')}
+                className={`${MOBILE_PRIMARY_CTA_CLASS} !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100`}
               >
                 <Plus className="h-5 w-5 mr-2" />
                 <span>Nuevo Servicio</span>
@@ -484,7 +512,7 @@ function ServiciosContent() {
               {sourceServices.length === 0 ? (
                 <div className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-8 dark:border-zinc-800/70 dark:bg-zinc-900/70">
                   <EmptyServices
-                    onCreateService={openCreateServiceForm}
+                    onCreateService={() => openCreateServiceForm('empty')}
                     onViewGuide={() => router.push('/guia#servicios')}
                   />
                 </div>

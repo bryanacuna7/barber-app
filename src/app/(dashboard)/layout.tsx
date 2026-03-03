@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { detectUserRole, getStaffPermissions, type UserRoleInfo } from '@/lib/auth/roles'
 import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 import { MobileHeader } from '@/components/dashboard/mobile-header'
-import { BottomNav } from '@/components/dashboard/bottom-nav'
+import { BottomNavClient as BottomNav } from '@/components/dashboard/bottom-nav-client'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TrialBanner } from '@/components/subscription/trial-banner'
 import { TourProvider } from '@/lib/tours/tour-provider'
@@ -17,7 +17,7 @@ import { AlertTriangle } from 'lucide-react'
 import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
 import { OpenInAppBanner } from '@/components/pwa/open-in-app-banner'
-import { NextUpChip } from '@/components/dashboard/next-up-chip'
+import { NextUpChipClient as NextUpChip } from '@/components/dashboard/next-up-chip-client'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
 import { LogoutButton } from '@/components/dashboard/logout-button'
 import { DashboardContentArea } from '@/components/dashboard/dashboard-content-area'
@@ -268,6 +268,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <BusinessProvider
       businessId={business.id}
+      businessName={businessName}
       slug={businessSlug}
       userId={user.id}
       userEmail={user.email}

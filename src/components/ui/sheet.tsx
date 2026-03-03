@@ -23,6 +23,7 @@ interface SheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   children: React.ReactNode
+  zIndex?: number
 }
 
 interface SheetContentProps {
@@ -35,6 +36,7 @@ interface SheetContentProps {
 // Context to pass onOpenChange to SheetContent
 const SheetContext = React.createContext<{
   onOpenChange: (open: boolean) => void
+  zIndex: number
 } | null>(null)
 
 const useSheetContext = () => {
@@ -45,7 +47,7 @@ const useSheetContext = () => {
   return context
 }
 
-export function Sheet({ open, onOpenChange, children }: SheetProps) {
+export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps) {
   const [mounted, setMounted] = React.useState(false)
   const previousFocusRef = React.useRef<HTMLElement | null>(null)
 
@@ -90,7 +92,8 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+            style={{ zIndex }}
           />
           {children}
         </>
@@ -99,7 +102,7 @@ export function Sheet({ open, onOpenChange, children }: SheetProps) {
   )
 
   return (
-    <SheetContext.Provider value={{ onOpenChange }}>
+    <SheetContext.Provider value={{ onOpenChange, zIndex }}>
       {mounted ? createPortal(overlay, document.body) : null}
     </SheetContext.Provider>
   )
@@ -111,7 +114,7 @@ export function SheetContent({
   className = '',
   children,
 }: SheetContentProps) {
-  const { onOpenChange } = useSheetContext()
+  const { onOpenChange, zIndex } = useSheetContext()
   const prefersReducedMotion = useReducedMotion()
   const [isDragging, setIsDragging] = React.useState(false)
 
@@ -186,12 +189,21 @@ export function SheetContent({
     }
   }
 
+  const contentStyle = isBottomSheet
+    ? {
+        y: isDragging ? y : 0,
+        opacity: sheetOpacity,
+        zIndex: zIndex + 1,
+      }
+    : { zIndex: zIndex + 1 }
+
   return (
     <motion.div
       initial={variants.initial}
       animate={variants.animate}
       exit={variants.exit}
       transition={prefersReducedMotion ? reducedMotion.spring.sheet : animations.spring.sheet}
+      style={contentStyle}
       {...(isBottomSheet && {
         drag: 'y',
         dragDirectionLock: true,
@@ -200,12 +212,8 @@ export function SheetContent({
         onDragStart: handleDragStart,
         onDrag: handleDrag,
         onDragEnd: handleDragEnd,
-        style: {
-          y: isDragging ? y : 0,
-          opacity: sheetOpacity,
-        },
       })}
-      className={`fixed z-[71] flex flex-col gap-4 bg-background p-6 shadow-lg ${
+      className={`fixed flex flex-col gap-4 bg-background p-6 shadow-lg ${
         isCenteredBottomSheet
           ? 'left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-lg rounded-2xl border'
           : side === 'bottom'

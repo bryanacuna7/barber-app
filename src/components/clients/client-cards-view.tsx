@@ -286,13 +286,21 @@ export function ClientCardsView({
                 </SwipeableRow>
                 {/* Desktop: compact card without swipe — single loyalty indicator */}
                 <EntityContextMenu entityType="client" entityId={client.id}>
-                  <motion.button
+                  <motion.div
                     onClick={() => {
                       onSelectCardClient(client)
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onSelectCardClient(client)
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     whileTap={{ scale: 0.98 }}
                     transition={animations.spring.snappy}
-                    className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border hidden lg:flex items-center gap-3 ${
+                    className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border hidden lg:flex items-center gap-3 cursor-pointer ${
                       isSelected?.(client.id)
                         ? 'bg-blue-50 border-blue-300 dark:bg-blue-950/40 dark:border-blue-600'
                         : isCardSelected
@@ -369,7 +377,7 @@ export function ClientCardsView({
 
                     {/* Chevron on hover */}
                     <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                  </motion.button>
+                  </motion.div>
                 </EntityContextMenu>
               </Fragment>
             )

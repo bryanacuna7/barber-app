@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils/cn'
+import { localDateTimeToUtcIso } from '@/lib/utils/timezone'
 import type { Appointment, Service, Client } from '@/types'
 
 interface AppointmentFormProps {
@@ -115,7 +116,7 @@ export function AppointmentForm({
     setIsSubmitting(true)
 
     try {
-      const scheduled_at = new Date(`${date}T${time}:00`).toISOString()
+      const scheduled_at = localDateTimeToUtcIso(date, time)
       await onSubmit({
         ...formData,
         scheduled_at,

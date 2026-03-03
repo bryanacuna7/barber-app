@@ -42,7 +42,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       // Haptic feedback for primary actions on mobile
       if (
         isMobileDevice() &&
-        (variant === 'primary' || variant === 'gradient' || variant === 'danger')
+        (variant === 'primary' ||
+          variant === 'gradient' ||
+          variant === 'danger' ||
+          variant === 'success' ||
+          variant === 'cta')
       ) {
         haptics.tap()
       }

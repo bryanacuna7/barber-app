@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-03-02 (Session 195 — Custom Domain + Wildcard Subdomains)
+- **Last Updated:** 2026-03-03 (Session 196 — Mobile UX Top-Tier Polish)
 - **Branch:** `main`
-- **Version:** `0.9.25`
+- **Version:** `0.9.26`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,24 @@
 ---
 
 ## Recent Sessions
+
+### Session 196: Mobile UX Top-Tier Polish (2026-03-03)
+
+**Status:** COMPLETE. 5 polished mobile interactions committed (commit `fc8638c`).
+
+**What was done:**
+
+- **Long-press context menu:** iOS-style portal action sheet on appointment cards (`use-long-press.ts`, `appointment-context-menu.tsx`). 500ms hold, 10px cancel, click-swallow pattern.
+- **Swipe complete:** `SwipeableRow` now has `leftActions` (swipe right → complete, emerald) in addition to `rightActions` (swipe left → cancel). `showAffordance={canAct}` for discoverability.
+- **Status accent bar:** Visible 3px colored bar on appointment rows (emerald=done, blue=confirmed, amber=pending) replaces invisible dot.
+- **Header compression:** Revenue row collapses after 64px scroll in `CalendarHeader` mobile view. Self-contained `useScrolled` hook.
+- **Citas badge:** Smart `citasBadgeCount` badge on bottom nav Citas tab — hidden when active, 9+, brand color. Powered by `useTodayStats` hook.
+- **Next Up chip:** Spotify mini-player style chip above bottom nav showing next appointment ≤60 min away. Hidden on `/citas` and `/mi-dia`.
+- **Modal mobileFullHeight opt-in:** Was forcing all mobile modals to 100dvh. Now opt-in via `mobileFullHeight` prop.
+- **P1 fixes:** userScalable:true restored (accessibility), all P1/P2/P3 review issues resolved.
+
+**New files (4):** `use-long-press.ts`, `appointment-context-menu.tsx`, `useTodayStats.ts`, `next-up-chip.tsx`
+**Modified (8):** `citas/page.tsx`, `calendar-day-view.tsx`, `calendar-header.tsx`, `bottom-nav.tsx`, `layout.tsx` (dashboard + root), `modal.tsx`, `open-in-app-banner.tsx`
 
 ### Session 195: Custom Domain + Wildcard Subdomains (2026-03-02)
 

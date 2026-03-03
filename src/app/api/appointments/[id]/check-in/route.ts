@@ -122,11 +122,13 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         )
       }
 
+      // Confirmed appointments with started_at are already in progress and
+      // cannot be checked in again.
       if (appointment.status === 'confirmed' && appointment.started_at) {
         return NextResponse.json(
           {
             error: 'Cita ya iniciada',
-            message: 'Esta cita ya fue iniciada anteriormente.',
+            message: 'No se puede hacer check-in porque la cita ya fue iniciada anteriormente.',
           },
           { status: 400 }
         )

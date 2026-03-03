@@ -58,6 +58,7 @@ function RevenueTooltip(
 
 export function RevenueChart({ data, period, height }: RevenueChartProps) {
   const chart = useChartColors()
+  const chartHeight = height ?? 260
 
   // Calculate trend vs previous period
   const trend = useMemo(() => {
@@ -103,6 +104,9 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
   )
 
   const xAxisInterval = period === 'week' ? 0 : period === 'month' ? 4 : 1
+  const primaryInsight = trend
+    ? `${trend.isPositive ? 'Subiste' : 'Bajaste'} ${trend.value}% frente al bloque anterior`
+    : 'Mantén foco en bloques con menor ocupación para subir ingreso'
 
   return (
     <Card className="border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 backdrop-blur-none">
@@ -119,31 +123,32 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
           </div>
         </div>
 
-        {/* Trend Insight */}
-        {trend && (
-          <div className="mt-3">
-            <div
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                trend.isPositive
+        <div className="mt-3 rounded-xl border border-zinc-200/80 bg-zinc-50/80 p-3 text-xs dark:border-zinc-800/80 dark:bg-zinc-800/40">
+          <div
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium ${
+              trend
+                ? trend.isPositive
                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                   : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-              }`}
-            >
-              {trend.isPositive ? (
+                : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+            }`}
+          >
+            {trend ? (
+              trend.isPositive ? (
                 <TrendingUp className="w-3 h-3" />
               ) : (
                 <TrendingDown className="w-3 h-3" />
-              )}
-              <span>
-                {trend.isPositive ? '+' : '-'}
-                {trend.value}% vs período anterior
-              </span>
-            </div>
+              )
+            ) : (
+              <TrendingUp className="w-3 h-3" />
+            )}
+            <span>Insight principal</span>
           </div>
-        )}
+          <p className="mt-2 text-zinc-700 dark:text-zinc-300">{primaryInsight}</p>
+        </div>
       </CardHeader>
       <CardContent className="p-3 lg:p-6">
-        <div className="h-[200px] sm:h-[300px]">
+        <div style={{ height: chartHeight }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
@@ -161,21 +166,21 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
               <XAxis
                 dataKey="mobileLabel"
                 stroke={chart.axis}
-                fontSize={11}
-                tick={{ fontSize: 11, className: 'text-xs' }}
+                fontSize={10}
+                tick={{ fontSize: 10, className: 'text-[10px]' }}
                 tickLine={false}
                 axisLine={false}
                 interval={xAxisInterval}
-                minTickGap={16}
+                minTickGap={24}
               />
               <YAxis
                 stroke={chart.axis}
-                fontSize={11}
-                tick={{ fontSize: 11, className: 'text-xs' }}
+                fontSize={10}
+                tick={{ fontSize: 10, className: 'text-[10px]' }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => formatCurrency(value, true)}
-                width={52}
+                width={58}
               />
               <Tooltip
                 content={
@@ -209,7 +214,7 @@ export function RevenueChart({ data, period, height }: RevenueChartProps) {
                 fillOpacity={1}
                 fill="url(#colorRevenue)"
                 activeDot={{
-                  r: 5,
+                  r: 7,
                   fill: chart.accent,
                   stroke: 'var(--chart-tooltip-bg)',
                   strokeWidth: 2,

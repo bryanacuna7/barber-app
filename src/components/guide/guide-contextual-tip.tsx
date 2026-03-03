@@ -7,7 +7,7 @@
  * Dismissal is persisted in localStorage scoped to business + user + tip.
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Info, X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -28,11 +28,6 @@ function getStorageKey(businessId: string, userId: string, tipId: string) {
   return `guide-tip-${businessId}-${userId}-${tipId}`
 }
 
-function readDismissed(businessId: string, userId: string, tipId: string) {
-  if (typeof window === 'undefined') return true // SSR: hidden
-  return localStorage.getItem(getStorageKey(businessId, userId, tipId)) === 'true'
-}
-
 export function GuideContextualTip({
   tipId,
   title,
@@ -42,15 +37,31 @@ export function GuideContextualTip({
   className,
 }: GuideContextualTipProps) {
   const { businessId, userId } = useBusiness()
-  const [dismissed, setDismissed] = useState(() => readDismissed(businessId, userId, tipId))
+  const [dismissedInSession, setDismissedInSession] = useState(false)
+  const storageKey = useMemo(
+    () => getStorageKey(businessId, userId, tipId),
+    [businessId, userId, tipId]
+  )
+
+  const isDismissedFromStorage = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      return localStorage.getItem(storageKey) === 'true'
+    } catch {
+      return false
+    }
+  }, [storageKey])
 
   const handleDismiss = useCallback(() => {
-    const key = getStorageKey(businessId, userId, tipId)
-    localStorage.setItem(key, 'true')
-    setDismissed(true)
-  }, [businessId, userId, tipId])
+    try {
+      localStorage.setItem(storageKey, 'true')
+    } catch {
+      // Ignore localStorage write failures and still dismiss in-session.
+    }
+    setDismissedInSession(true)
+  }, [storageKey])
 
-  if (dismissed) return null
+  if (dismissedInSession || isDismissedFromStorage) return null
 
   return (
     <div

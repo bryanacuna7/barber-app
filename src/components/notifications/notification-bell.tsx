@@ -239,6 +239,7 @@ export function NotificationBell({ className }: NotificationBellProps = {}) {
       if (res.ok) {
         setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
         setStats((prev) => ({ ...prev, unread: 0 }))
+        setIsOpen(false)
       }
     } catch (error) {
       console.error('Failed to mark all as read:', error)

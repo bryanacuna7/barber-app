@@ -29,6 +29,8 @@ import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import type { Client } from '@/types'
 import { ClientesTourWrapper } from '@/components/tours/clientes-tour-wrapper'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { trackMobileEvent } from '@/lib/analytics/mobile'
+import { MOBILE_CANVAS_CLASS, MOBILE_PRIMARY_CTA_CLASS } from '@/lib/ui/mobile-contract'
 import { usePreference } from '@/lib/preferences'
 import { getClientSegment } from '@/lib/utils/client-segments'
 import {
@@ -229,10 +231,19 @@ export default function ClientesPage() {
   // Bulk selection for multi-select actions
   const selection = useSelection(displayedClients)
 
+  function openCreateClientModal(source: 'desktop' | 'mobile') {
+    setShowModal(true)
+    if (isMobileDevice()) {
+      haptics.tap()
+      trackMobileEvent('mobile_clientes_create_open', { source })
+    }
+  }
+
   // Handlers
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const isMobile = isMobileDevice()
     try {
       await createClient.mutateAsync({
         name: formData.name,
@@ -240,9 +251,22 @@ export default function ClientesPage() {
         email: formData.email || undefined,
         notes: formData.notes || undefined,
       })
+      if (isMobile) {
+        haptics.success()
+        trackMobileEvent('mobile_clientes_create_success', {
+          hasEmail: Boolean(formData.email.trim()),
+          hasNotes: Boolean(formData.notes.trim()),
+        })
+      }
       setFormData({ name: '', phone: '', email: '', notes: '' })
       setShowModal(false)
     } catch (err) {
+      if (isMobile) {
+        haptics.error()
+        trackMobileEvent('mobile_clientes_create_error', {
+          message: err instanceof Error ? err.message : 'unknown',
+        })
+      }
       setError(err instanceof Error ? err.message : 'Error al crear cliente')
     }
   }
@@ -339,7 +363,7 @@ export default function ClientesPage() {
           }}
           disabled={showModal || !!selectedClient || isMobileDetailOpen || segmentSheetOpen}
         >
-          <div className="relative overflow-x-hidden pb-4">
+          <div className={`${MOBILE_CANVAS_CLASS} relative overflow-x-hidden pb-4`}>
             <div className="relative z-10 space-y-4 sm:space-y-6">
               {/* Header */}
               <DashboardPageHeader
@@ -349,10 +373,7 @@ export default function ClientesPage() {
                   <Button
                     variant="cta"
                     data-tour="clients-add-button"
-                    onClick={() => {
-                      setShowModal(true)
-                      if (isMobileDevice()) haptics.tap()
-                    }}
+                    onClick={() => openCreateClientModal('desktop')}
                     className="min-w-[44px] min-h-[44px] h-10"
                   >
                     <Plus className="h-5 w-5 sm:mr-2" />
@@ -361,18 +382,15 @@ export default function ClientesPage() {
                 }
               />
 
-              <div className="flex justify-end lg:hidden">
+              <div className="lg:hidden">
                 <Button
                   variant="cta"
                   data-tour="clients-add-button-mobile"
-                  onClick={() => {
-                    setShowModal(true)
-                    if (isMobileDevice()) haptics.tap()
-                  }}
-                  className="min-w-[44px] min-h-[44px] h-10"
+                  onClick={() => openCreateClientModal('mobile')}
+                  className={`${MOBILE_PRIMARY_CTA_CLASS} !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100`}
                 >
-                  <Plus className="h-5 w-5 sm:mr-2" />
-                  <span className="hidden sm:inline">Nuevo Cliente</span>
+                  <Plus className="h-5 w-5 mr-2" />
+                  <span>Nuevo Cliente</span>
                 </Button>
               </div>
 
@@ -448,7 +466,9 @@ export default function ClientesPage() {
                     <div className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-8 dark:border-zinc-800/70 dark:bg-zinc-900/70">
                       {isCriticalClientsEmpty ? (
                         <EmptyClients
-                          onAddClient={() => setShowModal(true)}
+                          onAddClient={() =>
+                            openCreateClientModal(isMobileDevice() ? 'mobile' : 'desktop')
+                          }
                           onViewGuide={() => router.push('/guia#clientes')}
                         />
                       ) : hasAppliedFilters ? (
@@ -480,18 +500,39 @@ export default function ClientesPage() {
                       )}
 
                       {viewMode === 'table' && (
-                        <ClientTableView
-                          clients={displayedClients}
-                          sortColumn={sortColumn}
-                          sortDirection={sortDirection}
-                          onSort={handleSort}
-                          onSelectClient={setSelectedClient}
-                          isSelected={selection.isSelected}
-                          onToggleSelect={selection.toggle}
-                          onToggleAll={selection.toggleAll}
-                          isAllSelected={selection.isAllSelected}
-                          selectionCount={selection.count}
-                        />
+                        <>
+                          {/* Mobile: fall back to cards — table doesn't fit narrow screens */}
+                          <div className="sm:hidden">
+                            <ClientCardsView
+                              clients={displayedClients}
+                              selectedCardClient={selectedCardClient}
+                              onSelectCardClient={setSelectedCardClient}
+                              onMobileDetailOpen={() => setIsMobileDetailOpen(true)}
+                              onSelectClient={setSelectedClient}
+                              clientActivities={clientActivities}
+                              activitiesLoading={activitiesLoading}
+                              onWhatsApp={handleWhatsApp}
+                              isSelected={selection.isSelected}
+                              onToggleSelect={selection.toggle}
+                              selectionCount={selection.count}
+                            />
+                          </div>
+                          {/* Desktop: full sortable table */}
+                          <div className="hidden sm:block">
+                            <ClientTableView
+                              clients={displayedClients}
+                              sortColumn={sortColumn}
+                              sortDirection={sortDirection}
+                              onSort={handleSort}
+                              onSelectClient={setSelectedClient}
+                              isSelected={selection.isSelected}
+                              onToggleSelect={selection.toggle}
+                              onToggleAll={selection.toggleAll}
+                              isAllSelected={selection.isAllSelected}
+                              selectionCount={selection.count}
+                            />
+                          </div>
+                        </>
                       )}
 
                       {viewMode === 'calendar' && (

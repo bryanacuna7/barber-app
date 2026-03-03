@@ -163,16 +163,14 @@ export default function BarberAccountPage() {
                 disabled={profileLoading || photoSaving || !barberId}
               />
 
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleSavePhoto}
-                  disabled={!canSavePhoto}
-                  isLoading={photoSaving}
-                  className="h-11"
-                >
-                  Guardar foto
-                </Button>
-              </div>
+              <Button
+                onClick={handleSavePhoto}
+                disabled={!canSavePhoto}
+                isLoading={photoSaving}
+                className="h-11 w-full"
+              >
+                Guardar foto
+              </Button>
             </CardContent>
           </Card>
         </FadeInUp>

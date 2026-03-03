@@ -10,6 +10,7 @@ import { format, startOfDay, endOfDay } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptAppointments, calculateDayStats, getMiDiaQuery } from '@/lib/adapters/appointments'
+import { normalizeDateTimeToUtcIso } from '@/lib/utils/timezone'
 import type { Appointment, DayStatistics } from '@/types/domain'
 
 /**
@@ -126,9 +127,13 @@ export function useCreateAppointment() {
       status: string
     }) => {
       const supabase = createClient()
+      const normalizedScheduledAt = normalizeDateTimeToUtcIso(appointment.scheduled_at)
       const { data, error } = await supabase
         .from('appointments')
-        .insert(appointment)
+        .insert({
+          ...appointment,
+          scheduled_at: normalizedScheduledAt,
+        })
         .select(
           'id, status, client_id, service_id, barber_id, scheduled_at, duration_minutes, price, created_at, business_id'
         )

@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 const appointmentSchema = z.object({
   client_id: z.string().uuid(),
   service_id: z.string().uuid(),
-  scheduled_at: z.string().datetime(),
+  scheduled_at: z.string().datetime({ offset: true }),
   client_notes: z.string().optional().nullable(),
   internal_notes: z.string().optional().nullable(),
 })

@@ -160,12 +160,13 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
         return unauthorizedResponse('No tienes permiso para completar esta cita')
       }
 
-      // 3. Validate current status - only pending or confirmed can be completed
-      if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
+      // 3. Validate current status - pending, confirmed, or in_progress can be completed
+      const completableStatuses = ['pending', 'confirmed', 'in_progress']
+      if (!completableStatuses.includes(appointment.status)) {
         return NextResponse.json(
           {
             error: 'Estado invalido',
-            message: `No se puede completar una cita con estado "${appointment.status}". Solo citas pendientes o confirmadas pueden completarse.`,
+            message: `No se puede completar una cita con estado "${appointment.status}".`,
           },
           { status: 400 }
         )

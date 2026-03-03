@@ -61,9 +61,18 @@ function ServicesTooltip(
 export function ServicesChart({ data, period, height }: ServicesChartProps) {
   void period
   const chart = useChartColors()
+  const chartHeight = height ?? 280
 
   // Memoize top 5 slice — avoids new array reference on every render
   const topServices = useMemo(() => data.slice(0, 5), [data])
+  const chartData = useMemo(
+    () =>
+      topServices.map((service) => ({
+        ...service,
+        shortName: service.name.length > 14 ? `${service.name.slice(0, 14)}…` : service.name,
+      })),
+    [topServices]
+  )
 
   // Brand-derived rank colors (monochromatic, decreasing intensity)
   const barOpacities = [1, 0.75, 0.55, 0.4, 0.28]
@@ -73,6 +82,14 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
     if (isMobile) return formatCurrencyCompactMillions(value)
     return `₡${value.toLocaleString('es-CR')}`
   }
+
+  const topService = topServices[0] ?? null
+  const topServiceShare = useMemo(() => {
+    if (!topService) return 0
+    const totalRevenue = topServices.reduce((sum, item) => sum + (item.revenue ?? 0), 0)
+    if (totalRevenue <= 0) return 0
+    return Math.round(((topService.revenue ?? 0) / totalRevenue) * 100)
+  }, [topService, topServices])
 
   return (
     <Card className="border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 backdrop-blur-none">
@@ -84,14 +101,24 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
           </div>
           <div className="text-xs lg:text-sm text-muted">Por ingresos</div>
         </div>
+        {topService && (
+          <div className="mt-3 rounded-xl border border-zinc-200/80 bg-zinc-50/80 p-3 text-xs dark:border-zinc-800/80 dark:bg-zinc-800/40">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-1 font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+              Insight principal
+            </span>
+            <p className="mt-2 text-zinc-700 dark:text-zinc-300">
+              {topService.name} concentra {topServiceShare}% del ingreso del top 5.
+            </p>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="p-3 lg:p-6">
         {topServices.length === 0 ? (
           <div className="text-center py-8 text-muted">No hay datos para este período</div>
         ) : (
-          <div className="h-[200px] sm:h-[300px]">
+          <div style={{ height: chartHeight }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topServices} layout="vertical">
+              <BarChart data={chartData} layout="vertical" barCategoryGap={10}>
                 <CartesianGrid
                   strokeDasharray="2 5"
                   stroke={chart.grid}
@@ -101,20 +128,20 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                 <XAxis
                   type="number"
                   stroke={chart.axis}
-                  fontSize={11}
-                  tick={{ fontSize: 11, className: 'text-xs' }}
+                  fontSize={10}
+                  tick={{ fontSize: 10, className: 'text-[10px]' }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => formatCurrency(value, true)}
                 />
                 <YAxis
                   type="category"
-                  dataKey="name"
+                  dataKey="shortName"
                   stroke={chart.axis}
-                  fontSize={11}
-                  tick={{ fontSize: 11, className: 'text-xs' }}
-                  width={80}
-                  className="lg:!w-[120px]"
+                  fontSize={10}
+                  tick={{ fontSize: 10, className: 'text-[10px]' }}
+                  width={74}
+                  className="lg:!w-[124px]"
                   tickLine={false}
                   axisLine={false}
                 />
@@ -128,9 +155,13 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                       }}
                     />
                   }
+                  labelFormatter={(
+                    label: string,
+                    payload: readonly { payload?: { name?: string } }[]
+                  ) => payload?.[0]?.payload?.name ?? label}
                   cursor={{ fill: `${chart.accent}1f` }}
                 />
-                <Bar dataKey="revenue" radius={[0, 9, 9, 0]}>
+                <Bar dataKey="revenue" radius={[0, 9, 9, 0]} barSize={22}>
                   {topServices.map((_, idx) => (
                     <Cell
                       key={`service-bar-${idx}`}

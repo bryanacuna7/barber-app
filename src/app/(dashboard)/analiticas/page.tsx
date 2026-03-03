@@ -44,6 +44,7 @@ import {
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { useBusiness } from '@/contexts/business-context'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { trackMobileEvent } from '@/lib/analytics/mobile'
 import { DashboardPageHeader } from '@/components/dashboard/page-header'
 import { getDashboardRouteMeta } from '@/lib/navigation/route-meta'
 import { EmptyAnalytics } from '@/components/ui/empty-state'
@@ -104,6 +105,22 @@ function AnalyticsContent() {
     ['negocio', 'clientes', 'equipo']
   )
   const [statsExpanded, setStatsExpanded] = useState(false)
+
+  const handlePeriodChange = (nextPeriod: AnalyticsPeriod) => {
+    setPeriod(nextPeriod)
+    if (isMobileDevice()) {
+      haptics.selection()
+      trackMobileEvent('mobile_analytics_period_change', { period: nextPeriod })
+    }
+  }
+
+  const handleSectionChange = (section: SectionTab) => {
+    setActiveSection(section)
+    if (isMobileDevice()) {
+      haptics.selection()
+      trackMobileEvent('mobile_analytics_section_change', { section })
+    }
+  }
 
   // React Query: Fetch analytics data
   const {
@@ -176,10 +193,7 @@ function AnalyticsContent() {
                     <button
                       key={option.value}
                       type="button"
-                      onClick={() => {
-                        setPeriod(option.value)
-                        if (isMobileDevice()) haptics.selection()
-                      }}
+                      onClick={() => handlePeriodChange(option.value)}
                       className={`flex flex-1 sm:flex-none min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-colors ${
                         isActive
                           ? 'brand-tab-active'
@@ -207,10 +221,7 @@ function AnalyticsContent() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => {
-                    setPeriod(option.value)
-                    if (isMobileDevice()) haptics.selection()
-                  }}
+                  onClick={() => handlePeriodChange(option.value)}
                   className={`flex flex-1 min-h-[44px] items-center justify-center rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap border transition-colors ${
                     isActive
                       ? 'brand-tab-active'
@@ -306,7 +317,7 @@ function AnalyticsContent() {
       </ComponentErrorBoundary>
 
       {/* Section Tabs: Negocio | Clientes | Equipo */}
-      <Tabs value={activeSection} onValueChange={(v) => setActiveSection(v as SectionTab)}>
+      <Tabs value={activeSection} onValueChange={(v) => handleSectionChange(v as SectionTab)}>
         <TabsList className="flex w-full items-center gap-1.5 overflow-x-auto scrollbar-hide rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
           <TabsTrigger
             value="negocio"

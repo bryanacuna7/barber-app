@@ -52,7 +52,7 @@ export function GenerateReferralCode({ businessId }: GenerateReferralCodeProps) 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
     >
-      <Card className="h-full border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] p-6 lg:p-8 text-center shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+      <Card className="lg:h-full border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-white/[0.04] p-6 lg:p-8 text-center shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl">
         <div className="mx-auto w-full max-w-xl">
           <div className="mb-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-zinc-200/70 dark:border-zinc-800/80 bg-white/75 dark:bg-white/[0.06] mb-4">

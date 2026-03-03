@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Sunrise, Sun, Moon } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
@@ -29,6 +29,8 @@ import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { usePreference } from '@/lib/preferences'
 import { formatCurrencyCompactMillions } from '@/lib/utils'
+import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { trackMobileEvent } from '@/lib/analytics/mobile'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Appointment } from '@/types/domain'
 import { useSelection } from '@/hooks/useSelection'
@@ -46,6 +48,8 @@ import { QueryError } from '@/components/ui/query-error'
 import { useBusiness } from '@/contexts/business-context'
 import { WalkInSheet } from '@/components/barber/walk-in-sheet'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
+import { localDateTimeToUtcIso } from '@/lib/utils/timezone'
+import { getSuggestedAppointmentTime } from '@/lib/utils/appointment-time'
 
 // Extracted sub-components
 import { CalendarHeader } from '@/components/calendar/calendar-header'
@@ -65,6 +69,9 @@ type StatusFilter = 'all' | 'scheduled' | 'completed'
 interface CitasFilterState {
   statusFilter: StatusFilter
 }
+
+type CreateAppointmentErrorField = 'client_id' | 'service_id' | 'barber_id' | 'general'
+type CreateAppointmentErrors = Partial<Record<CreateAppointmentErrorField, string>>
 
 const CITAS_FILTER_PRESETS: SavedFilter<CitasFilterState>[] = [
   { id: 'all', label: 'Todas', filter: { statusFilter: 'all' } },
@@ -88,7 +95,6 @@ function CitasCalendarFusionContent() {
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(new Date())
   const today = useMemo(() => startOfDay(new Date()), [])
-  const intentHandled = useRef(false)
   const [isStatsOpen, setIsStatsOpen] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isWalkInOpen, setIsWalkInOpen] = useState(false)
@@ -100,9 +106,15 @@ function CitasCalendarFusionContent() {
     client_id: '',
     service_id: '',
     barber_id: isBarber && barberId ? barberId : '',
-    time: '09:00',
+    time: getSuggestedAppointmentTime({ selectedDate: new Date() }),
     notes: '',
   }))
+  const [createFormErrors, setCreateFormErrors] = useState<CreateAppointmentErrors>({})
+
+  const getDefaultCreateTime = useCallback(
+    () => getSuggestedAppointmentTime({ selectedDate }),
+    [selectedDate]
+  )
 
   // Saved filter presets
   const savedFilters = useSavedFilters<CitasFilterState>({
@@ -126,8 +138,7 @@ function CitasCalendarFusionContent() {
 
   // Auto-open create sheet when navigated with ?intent=create
   useEffect(() => {
-    if (searchParams.get('intent') === 'create' && !intentHandled.current) {
-      intentHandled.current = true
+    if (searchParams.get('intent') === 'create') {
       router.replace('/citas', { scroll: false })
       requestAnimationFrame(() => setIsCreateOpen(true))
     }
@@ -187,6 +198,31 @@ function CitasCalendarFusionContent() {
   }, [viewMode])
 
   const handleToday = useCallback(() => setSelectedDate(new Date()), [])
+
+  const handleCreateOpen = useCallback(() => {
+    setCreateForm({
+      client_id: '',
+      service_id: '',
+      barber_id: isBarber && barberId ? barberId : '',
+      time: getDefaultCreateTime(),
+      notes: '',
+    })
+    setCreateFormErrors({})
+    setIsCreateOpen(true)
+    if (isMobileDevice()) {
+      haptics.tap()
+      trackMobileEvent('mobile_citas_create_open', { view: viewMode })
+    }
+  }, [barberId, getDefaultCreateTime, isBarber, viewMode])
+
+  const clearCreateFormError = useCallback((field: CreateAppointmentErrorField) => {
+    setCreateFormErrors((prev) => {
+      if (!prev[field]) return prev
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }, [])
 
   // Barber filtering
   const roleFilteredAppointments = useMemo(() => {
@@ -450,16 +486,41 @@ function CitasCalendarFusionContent() {
 
   // Handlers
   const handleCreateAppointment = async () => {
-    if (!createForm.client_id || !createForm.service_id || !createForm.barber_id || !businessId) {
-      toast.error('Por favor completa todos los campos requeridos')
+    const isMobile = isMobileDevice()
+
+    const nextErrors: CreateAppointmentErrors = {}
+    if (!createForm.client_id) nextErrors.client_id = 'Selecciona un cliente'
+    if (!createForm.service_id) nextErrors.service_id = 'Selecciona un servicio'
+    if (!createForm.barber_id) nextErrors.barber_id = 'Selecciona un miembro del equipo'
+    if (!businessId) {
+      nextErrors.general = 'No pudimos identificar tu negocio. Cerrá y volvé a abrir el formulario.'
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setCreateFormErrors(nextErrors)
+      toast.error('Faltan campos requeridos para guardar la cita')
+      if (isMobile) haptics.warning()
       return
     }
+
+    setCreateFormErrors({})
     const service = services.find((s) => s.id === createForm.service_id)
     if (!service) {
+      setCreateFormErrors((prev) => ({
+        ...prev,
+        service_id: 'Selecciona un servicio válido',
+      }))
       toast.error('Servicio no encontrado')
+      if (isMobile) haptics.warning()
       return
     }
-    const scheduledAt = `${formDate}T${createForm.time}:00`
+    const scheduledAt = localDateTimeToUtcIso(formDate, createForm.time)
+    if (isMobile) {
+      trackMobileEvent('mobile_citas_create_submit', {
+        view: viewMode,
+        hasNotes: Boolean(createForm.notes.trim()),
+      })
+    }
     try {
       await createAppointment.mutateAsync({
         business_id: businessId,
@@ -472,28 +533,57 @@ function CitasCalendarFusionContent() {
         status: 'pending',
       })
       toast.success('Cita creada exitosamente')
+      if (isMobile) {
+        haptics.success()
+        trackMobileEvent('mobile_citas_create_success', { view: viewMode })
+      }
       setIsCreateOpen(false)
       setCreateForm({
         client_id: '',
         service_id: '',
         barber_id: isBarber && barberId ? barberId : '',
-        time: '09:00',
+        time: getDefaultCreateTime(),
         notes: '',
       })
+      setCreateFormErrors({})
     } catch (error) {
       toast.error('Error al crear la cita')
+      if (isMobile) {
+        haptics.error()
+        trackMobileEvent('mobile_citas_create_error', {
+          view: viewMode,
+          message: error instanceof Error ? error.message : 'unknown',
+        })
+      }
       console.error(error)
     }
   }
 
   const handleAppointmentStatusChange = useCallback(
     async (appointmentId: string, status: 'cancelled' | 'completed') => {
+      const isMobile = isMobileDevice()
       try {
         await updateAppointmentStatus.mutateAsync({ appointmentId, status })
-        if (status === 'cancelled') toast.success('Cita cancelada')
-        else if (status === 'completed') toast.success('Cita completada ✓')
+        if (status === 'cancelled') {
+          toast.success('Cita cancelada')
+          if (isMobile) haptics.warning()
+        } else if (status === 'completed') {
+          toast.success('Cita completada ✓')
+          if (isMobile) haptics.success()
+        }
+        if (isMobile) {
+          trackMobileEvent('mobile_citas_status_update', { appointmentId, status })
+        }
       } catch (error) {
         toast.error('No se pudo actualizar la cita')
+        if (isMobile) {
+          haptics.error()
+          trackMobileEvent('mobile_citas_status_update_error', {
+            appointmentId,
+            status,
+            message: error instanceof Error ? error.message : 'unknown',
+          })
+        }
         console.error(error)
       }
     },
@@ -557,7 +647,7 @@ function CitasCalendarFusionContent() {
             onPrevious={handlePrevious}
             onNext={handleNext}
             onToday={handleToday}
-            onCreateOpen={() => setIsCreateOpen(true)}
+            onCreateOpen={handleCreateOpen}
             onWalkInOpen={() => setIsWalkInOpen(true)}
             isSelectedDateToday={isSelectedDateToday}
             desktopContextLabel={desktopContextLabel}
@@ -725,6 +815,9 @@ function CitasCalendarFusionContent() {
         isPending={createAppointment.isPending}
         isBarber={isBarber}
         barberId={barberId ?? null}
+        defaultTime={getDefaultCreateTime()}
+        fieldErrors={createFormErrors}
+        onClearFieldError={clearCreateFormError}
         activePickerField={activePickerField}
         setActivePickerField={setActivePickerField}
         isTimePickerOpen={isTimePickerOpen}

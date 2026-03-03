@@ -14,6 +14,7 @@ interface IOSDatePickerProps {
   title?: string
   minDate?: Date
   maxDate?: Date
+  zIndex?: number
 }
 
 // Spanish month names
@@ -183,6 +184,7 @@ function DesktopDatePicker({
   isOpen,
   onClose,
   title = 'Seleccionar fecha',
+  zIndex = 70,
 }: IOSDatePickerProps) {
   const [viewDate, setViewDate] = useState(value)
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -288,7 +290,8 @@ function DesktopDatePicker({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[70] bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            style={{ zIndex }}
             onClick={onClose}
           />
 
@@ -298,7 +301,8 @@ function DesktopDatePicker({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="fixed left-1/2 top-1/2 z-[71] -translate-x-1/2 -translate-y-1/2 w-[360px] rounded-2xl bg-white shadow-2xl shadow-black/20 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[360px] rounded-2xl bg-white shadow-2xl shadow-black/20 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+            style={{ zIndex: zIndex + 1 }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-700">
               <button
@@ -407,6 +411,7 @@ function MobileDatePicker({
   isOpen,
   onClose,
   title = 'Seleccionar fecha',
+  zIndex = 70,
 }: IOSDatePickerProps) {
   const currentYear = new Date().getFullYear()
 
@@ -468,7 +473,8 @@ function MobileDatePicker({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[70] bg-black/45 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/45 backdrop-blur-sm"
+            style={{ zIndex }}
             onClick={onClose}
           />
 
@@ -477,7 +483,8 @@ function MobileDatePicker({
             animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
             exit={{ opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' }}
             transition={animations.spring.sheet}
-            className="fixed left-1/2 top-1/2 z-[71] w-[calc(100%-1rem)] max-w-md max-h-[72vh] overflow-y-auto rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/70 dark:bg-[#2C2C2E]"
+            className="fixed left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-md max-h-[72vh] overflow-y-auto rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/70 dark:bg-[#2C2C2E]"
+            style={{ zIndex: zIndex + 1 }}
           >
             <div className="flex justify-center pt-3 pb-2">
               <div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-600" />
@@ -532,9 +539,16 @@ interface DatePickerTriggerProps {
   onChange: (date: Date) => void
   label?: string
   className?: string
+  pickerZIndex?: number
 }
 
-export function DatePickerTrigger({ value, onChange, label, className }: DatePickerTriggerProps) {
+export function DatePickerTrigger({
+  value,
+  onChange,
+  label,
+  className,
+  pickerZIndex = 70,
+}: DatePickerTriggerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   // Format: "Jue 6 Feb 2026" (Spanish)
@@ -588,6 +602,7 @@ export function DatePickerTrigger({ value, onChange, label, className }: DatePic
         value={value}
         onChange={onChange}
         title={label || 'Seleccionar fecha'}
+        zIndex={pickerZIndex}
       />
     </>
   )

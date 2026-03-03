@@ -668,12 +668,26 @@ export default function ClientesPageV2() {
                       setShowModal(true)
                       if (isMobileDevice()) haptics.tap()
                     }}
-                    className="min-w-[44px] min-h-[44px] h-10"
+                    className="hidden lg:inline-flex min-w-[44px] min-h-[44px] h-10"
                   >
                     <Plus className="h-5 w-5 sm:mr-2" />
                     <span className="hidden sm:inline">Nuevo Cliente</span>
                   </Button>
                 </div>
+              </div>
+              <div className="lg:hidden">
+                <Button
+                  variant="cta"
+                  data-tour="clients-add-button-mobile"
+                  onClick={() => {
+                    setShowModal(true)
+                    if (isMobileDevice()) haptics.tap()
+                  }}
+                  className="h-11 w-full !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  <span>Nuevo Cliente</span>
+                </Button>
               </div>
 
               {/* Guide Tip */}

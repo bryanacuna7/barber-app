@@ -116,19 +116,31 @@ interface ToastContainerProps {
 
 function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex w-full max-w-sm flex-col gap-2 pointer-events-none">
-      <AnimatePresence mode="popLayout">
-        {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
-        ))}
-      </AnimatePresence>
-    </div>
+    <>
+      {/* Mobile: top-center, below status bar */}
+      <div className="sm:hidden fixed top-[calc(env(safe-area-inset-top,0px)+12px)] left-3 right-3 z-[100] flex flex-col gap-2 pointer-events-none">
+        <AnimatePresence mode="popLayout">
+          {toasts.map((toast) => (
+            <ToastItem key={toast.id} toast={toast} onRemove={onRemove} mobile />
+          ))}
+        </AnimatePresence>
+      </div>
+      {/* Desktop: bottom-right */}
+      <div className="hidden sm:flex fixed bottom-4 right-4 z-[100] w-full max-w-sm flex-col gap-2 pointer-events-none">
+        <AnimatePresence mode="popLayout">
+          {toasts.map((toast) => (
+            <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
+          ))}
+        </AnimatePresence>
+      </div>
+    </>
   )
 }
 
 interface ToastItemProps {
   toast: Toast
   onRemove: (id: string) => void
+  mobile?: boolean
 }
 
 const icons = {
@@ -155,7 +167,7 @@ const iconStyles = {
   info: 'text-blue-500',
 }
 
-function ToastItem({ toast, onRemove }: ToastItemProps) {
+function ToastItem({ toast, onRemove, mobile = false }: ToastItemProps) {
   const Icon = icons[toast.type]
   const [progress, setProgress] = useState(100)
   const remainingRef = useRef(Math.max(0, toast.duration ?? 0))
@@ -224,9 +236,13 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 300, scale: 0.8 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 300, scale: 0.8, transition: { duration: 0.2 } }}
+      initial={mobile ? { opacity: 0, y: -16, scale: 0.96 } : { opacity: 0, x: 300, scale: 0.8 }}
+      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+      exit={
+        mobile
+          ? { opacity: 0, y: -16, scale: 0.96, transition: { duration: 0.15 } }
+          : { opacity: 0, x: 300, scale: 0.8, transition: { duration: 0.2 } }
+      }
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.7}

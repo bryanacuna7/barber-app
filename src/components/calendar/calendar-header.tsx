@@ -183,6 +183,7 @@ export function CalendarHeader({
             >
               <UserPlus className="h-5 w-5 text-amber-500" />
             </Button>
+            {/* Citas exception: icon-first CTAs to preserve calendar scan speed on mobile */}
             <Button
               variant="cta"
               onClick={onCreateOpen}
