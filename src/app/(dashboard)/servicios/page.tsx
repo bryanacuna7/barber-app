@@ -402,17 +402,17 @@ function ServiciosContent() {
               }
             />
 
-            <div className="mt-3 flex justify-end lg:hidden">
+            <div className="mt-3 lg:hidden">
               <Button
                 variant="gradient"
                 onClick={() => {
                   openCreateServiceForm()
                   if (isMobileDevice()) haptics.tap()
                 }}
-                className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+                className="h-11 w-full !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100"
               >
-                <Plus className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">Nuevo Servicio</span>
+                <Plus className="h-5 w-5 mr-2" />
+                <span>Nuevo Servicio</span>
               </Button>
             </div>
           </motion.div>

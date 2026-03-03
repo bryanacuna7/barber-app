@@ -124,7 +124,7 @@ export default function BarberosPage() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="lg:hidden">
-                <NotificationBell />
+                <NotificationBell className="mr-1" />
               </div>
               <Button
                 variant="cta"
@@ -132,12 +132,25 @@ export default function BarberosPage() {
                   setIsInviteOpen(true)
                   if (isMobileDevice()) haptics.tap()
                 }}
-                className="shrink-0 min-w-[44px] min-h-[44px] h-10"
+                className="hidden lg:inline-flex shrink-0 min-w-[44px] min-h-[44px] h-10"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
-                <span className="hidden sm:inline">Agregar Miembro del equipo</span>
+                <span>Agregar Miembro del equipo</span>
               </Button>
             </div>
+          </div>
+          <div className="mt-3 lg:hidden">
+            <Button
+              variant="cta"
+              onClick={() => {
+                setIsInviteOpen(true)
+                if (isMobileDevice()) haptics.tap()
+              }}
+              className="h-11 w-full !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              <span>Agregar Miembro del equipo</span>
+            </Button>
           </div>
         </motion.div>
 
@@ -574,17 +587,22 @@ function InviteBarberModal({
           required
         />
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={resetAndClose} className="h-11">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetAndClose}
+            className="h-11 w-full sm:w-auto"
+          >
             Cancelar
           </Button>
           <Button
             type="submit"
             isLoading={addBarber.isPending || inviteBarber.isPending}
             disabled={!name.trim() || !email.trim()}
-            className="h-11"
+            className="h-11 w-full sm:w-auto"
           >
-            {mode === 'add' ? 'Agregar Miembro del equipo' : 'Enviar Invitación'}
+            {mode === 'add' ? 'Agregar Miembro' : 'Enviar Invitación'}
           </Button>
         </div>
       </form>
