@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -16,6 +17,12 @@ interface ModalProps {
   showCloseButton?: boolean
   closeOnOverlayClick?: boolean
   className?: string
+  /**
+   * When true, the modal expands to near-full screen height on mobile.
+   * Use for complex forms (create appointment, client detail).
+   * Leave false (default) for confirm dialogs and small modals.
+   */
+  mobileFullHeight?: boolean
 }
 
 const sizeClasses = {
@@ -36,6 +43,7 @@ export function Modal({
   showCloseButton = true,
   closeOnOverlayClick = true,
   className,
+  mobileFullHeight = false,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
@@ -87,13 +95,13 @@ export function Modal({
     }
   }
 
-  return (
+  const modal = (
     <AnimatePresence onExitComplete={handleExitComplete}>
       {isOpen && (
         <div
           ref={overlayRef}
           onClick={handleOverlayClick}
-          className="fixed inset-0 z-[80] flex items-center justify-center px-4 py-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:p-6"
+          className="fixed inset-0 z-[80] flex items-start justify-center px-4 py-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-labelledby={title ? 'modal-title' : undefined}
@@ -127,7 +135,11 @@ export function Modal({
             className={cn(
               'relative w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl',
               'border border-zinc-200 dark:border-zinc-800',
-              'max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] sm:max-h-[90vh] overflow-hidden flex flex-col min-h-0',
+              // Full-height on mobile only when explicitly requested (complex forms)
+              mobileFullHeight
+                ? 'h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] sm:h-auto sm:max-h-[90vh]'
+                : 'max-h-[90dvh]',
+              'overflow-hidden flex flex-col min-h-0',
               'focus-visible:!outline-none',
               sizeClasses[size],
               className
@@ -174,6 +186,9 @@ export function Modal({
       )}
     </AnimatePresence>
   )
+
+  if (typeof document === 'undefined') return null
+  return createPortal(modal, document.body)
 }
 
 // Modal Footer component for actions
