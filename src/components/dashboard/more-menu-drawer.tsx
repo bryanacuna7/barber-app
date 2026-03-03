@@ -447,12 +447,20 @@ function UserProfileHeader() {
           alt=""
           className="h-10 w-10 rounded-full object-cover"
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            const target = e.currentTarget
+            target.style.display = 'none'
+            const fallback = target.nextElementSibling as HTMLElement | null
+            if (fallback) fallback.style.display = 'flex'
+          }}
         />
-      ) : (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
-          <Users className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
-        </div>
-      )}
+      ) : null}
+      <div
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700 flex-shrink-0"
+        style={{ display: userAvatarUrl ? 'none' : 'flex' }}
+      >
+        <Users className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
+      </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[17px] font-semibold text-zinc-900 dark:text-white">
           {displayName}

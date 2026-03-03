@@ -336,12 +336,20 @@ export function TopBarProfileMenu() {
             alt=""
             className="h-7 w-7 rounded-full object-cover"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              const target = e.currentTarget
+              target.style.display = 'none'
+              const fallback = target.nextElementSibling as HTMLElement | null
+              if (fallback) fallback.style.display = 'flex'
+            }}
           />
-        ) : (
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
-            <UserRound className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-          </div>
-        )}
+        ) : null}
+        <div
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700"
+          style={{ display: userAvatarUrl ? 'none' : 'flex' }}
+        >
+          <UserRound className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+        </div>
       </button>
 
       {mounted && menu ? createPortal(menu, document.body) : null}
