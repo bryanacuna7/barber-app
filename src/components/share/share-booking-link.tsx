@@ -6,7 +6,7 @@ import { QRCodeCanvas } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
-import { bookingAbsoluteUrl } from '@/lib/utils/booking-url'
+import { bookingAbsoluteUrl, bookingDisplayUrl } from '@/lib/utils/booking-url'
 import { animations } from '@/lib/design-system'
 
 interface ShareBookingLinkProps {
@@ -39,6 +39,7 @@ export function ShareBookingLink({
   const qrRef = useRef<HTMLCanvasElement | null>(null)
 
   const getAbsoluteUrl = useCallback(() => bookingAbsoluteUrl(slug), [slug])
+  const displayUrl = bookingDisplayUrl(slug)
 
   const handleCopy = useCallback(() => {
     const url = getAbsoluteUrl()
@@ -101,7 +102,7 @@ export function ShareBookingLink({
     return (
       <div className="flex items-center gap-2">
         <div className="flex-1 min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-[14px] font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 truncate">
-          {bookingPath}
+          {displayUrl}
         </div>
         <Button
           type="button"
@@ -130,7 +131,7 @@ export function ShareBookingLink({
       {/* URL display with inline copy */}
       <div className="flex items-center gap-2">
         <div className="flex-1 min-w-0 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-[15px] font-medium text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 truncate">
-          {bookingPath}
+          {displayUrl}
         </div>
         <button
           type="button"
@@ -141,7 +142,7 @@ export function ShareBookingLink({
           {copied ? <Check className="h-5 w-5 text-green-600" /> : <Copy className="h-5 w-5" />}
         </button>
         <a
-          href={bookingPath}
+          href={getAbsoluteUrl()}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
@@ -200,7 +201,7 @@ export function ShareBookingLink({
                   ref={(el: HTMLCanvasElement | null) => {
                     qrRef.current = el
                   }}
-                  value={bookingPath}
+                  value={getAbsoluteUrl()}
                   size={180}
                   level="M"
                   marginSize={1}
