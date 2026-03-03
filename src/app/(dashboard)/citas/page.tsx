@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Sunrise, Sun, Moon } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
 import {
@@ -76,6 +76,7 @@ const DEFAULT_CITAS_FILTER: CitasFilterState = { statusFilter: 'all' }
 
 function CitasCalendarFusionContent() {
   const { businessId, isBarber, barberId, staffPermissions } = useBusiness()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const [viewMode, setViewMode] = usePreference<ViewMode>('citas_view', 'day', [
     'day',
@@ -127,10 +128,10 @@ function CitasCalendarFusionContent() {
   useEffect(() => {
     if (searchParams.get('intent') === 'create' && !intentHandled.current) {
       intentHandled.current = true
-      window.history.replaceState(null, '', '/citas')
+      router.replace('/citas', { scroll: false })
       requestAnimationFrame(() => setIsCreateOpen(true))
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   // Update current time every minute
   useEffect(() => {

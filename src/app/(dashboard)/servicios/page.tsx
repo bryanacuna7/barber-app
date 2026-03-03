@@ -83,10 +83,10 @@ function ServiciosContent() {
   useEffect(() => {
     if (searchParamsHook.get('intent') === 'create' && !intentHandled.current) {
       intentHandled.current = true
-      window.history.replaceState(null, '', '/servicios')
+      router.replace('/servicios', { scroll: false })
       requestAnimationFrame(() => setShowForm(true))
     }
-  }, [searchParamsHook])
+  }, [searchParamsHook, router])
 
   useEffect(() => {
     if (prefersReducedMotion) return

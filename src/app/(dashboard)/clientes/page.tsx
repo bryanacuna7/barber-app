@@ -132,10 +132,10 @@ export default function ClientesPage() {
   useEffect(() => {
     if (searchParams.get('intent') === 'create' && !intentHandled.current) {
       intentHandled.current = true
-      window.history.replaceState(null, '', '/clientes')
+      router.replace('/clientes', { scroll: false })
       requestAnimationFrame(() => setShowModal(true))
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   // Data hooks
   const { metrics, clients, isLoading, error: queryError, refetch } = useClientMetrics(businessId)

@@ -19,7 +19,7 @@
  */
 
 import { Fragment, useState, useMemo, useEffect, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus,
@@ -258,6 +258,7 @@ function SortIndicator({
 }
 
 export default function ClientesPageV2() {
+  const router = useRouter()
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
@@ -299,10 +300,10 @@ export default function ClientesPageV2() {
   useEffect(() => {
     if (searchParams.get('intent') === 'create' && !intentHandled.current) {
       intentHandled.current = true
-      window.history.replaceState(null, '', '/clientes')
+      router.replace('/clientes', { scroll: false })
       requestAnimationFrame(() => setShowModal(true))
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   // Click-outside + Escape handler for view dropdown
   useEffect(() => {
