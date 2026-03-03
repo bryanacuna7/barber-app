@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Plus, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -26,6 +27,23 @@ interface CalendarHeaderProps {
   appointmentCount: number
 }
 
+/**
+ * useScrolled — returns true once the page has scrolled past `threshold` px.
+ * Self-contained so CalendarHeader needs no scroll-related props.
+ */
+function useScrolled(threshold = 64) {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > threshold)
+    handler() // sync on mount
+    window.addEventListener('scroll', handler, { passive: true })
+    return () => window.removeEventListener('scroll', handler)
+  }, [threshold])
+
+  return scrolled
+}
+
 export function CalendarHeader({
   viewMode,
   onViewModeChange,
@@ -45,51 +63,33 @@ export function CalendarHeader({
   goalProgress,
   appointmentCount,
 }: CalendarHeaderProps) {
+  const scrolled = useScrolled()
+
   return (
     <header className="sticky top-0 z-40 bg-transparent backdrop-blur-sm border-b border-transparent dark:border-white/5">
       <div className="px-0 lg:px-6 py-4">
         {/* DESKTOP HEADER - Single row layout */}
         <div className="hidden lg:flex items-center justify-between mb-4 gap-2">
-          {/* Left: Month/Year context */}
           <div className="text-sm font-medium text-muted min-w-0 flex-shrink-0">
             {desktopContextLabel}
           </div>
 
-          {/* Center: View Switcher */}
           <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
-            <button
-              onClick={() => onViewModeChange('day')}
-              className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
-                viewMode === 'day'
-                  ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
-                  : 'text-muted hover:text-zinc-900 dark:hover:text-white'
-              }`}
-            >
-              Día
-            </button>
-            <button
-              onClick={() => onViewModeChange('week')}
-              className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
-                viewMode === 'week'
-                  ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
-                  : 'text-muted hover:text-zinc-900 dark:hover:text-white'
-              }`}
-            >
-              Semana
-            </button>
-            <button
-              onClick={() => onViewModeChange('month')}
-              className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
-                viewMode === 'month'
-                  ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
-                  : 'text-muted hover:text-zinc-900 dark:hover:text-white'
-              }`}
-            >
-              Mes
-            </button>
+            {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => onViewModeChange(mode)}
+                className={`px-4 py-1.5 rounded-md font-medium text-sm transition-colors ${
+                  viewMode === mode
+                    ? 'bg-white dark:bg-zinc-700 text-foreground shadow-sm'
+                    : 'text-muted hover:text-zinc-900 dark:hover:text-white'
+                }`}
+              >
+                {mode === 'day' ? 'Día' : mode === 'week' ? 'Semana' : 'Mes'}
+              </button>
+            ))}
           </div>
 
-          {/* Right: Navigation */}
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -136,9 +136,9 @@ export function CalendarHeader({
           </div>
         </div>
 
-        {/* MOBILE HEADER - 2 rows: Row1=navigation, Row2=view switcher */}
+        {/* MOBILE HEADER */}
         <div className="lg:hidden mb-3 rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/80 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.35)] p-2.5 space-y-2">
-          {/* Row 1: < Date > Hoy + */}
+          {/* Row 1: < Date > [Hoy] [Walk-in] [+] */}
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -194,7 +194,7 @@ export function CalendarHeader({
             </Button>
           </div>
 
-          {/* Row 2: D/S/M segmented control (full width) */}
+          {/* Row 2: D/S/M segmented control */}
           <div className="flex items-center gap-1 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1">
             {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
               <button
@@ -213,12 +213,26 @@ export function CalendarHeader({
             ))}
           </div>
 
-          <div className="pt-1 border-t border-zinc-200/70 dark:border-zinc-800/80">
-            <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="font-semibold text-foreground">{projectedRevenueDisplay}</span>
-              <span className="text-muted">{mobileProjectionAppointmentsLabel}</span>
-            </div>
-          </div>
+          {/* Row 3: Revenue stats — collapses on scroll to reclaim screen space */}
+          <AnimatePresence initial={false}>
+            {!scrolled && (
+              <motion.div
+                key="revenue-row"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div className="pt-1 border-t border-zinc-200/70 dark:border-zinc-800/80">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-semibold text-foreground">{projectedRevenueDisplay}</span>
+                    <span className="text-muted">{mobileProjectionAppointmentsLabel}</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Revenue stats - Desktop expanded */}

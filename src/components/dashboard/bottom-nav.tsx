@@ -21,6 +21,7 @@ import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { MoreMenuDrawer } from './more-menu-drawer'
 import { useBusiness } from '@/contexts/business-context'
+import { useTodayStats } from '@/hooks/queries/useTodayStats'
 import type { UserRole } from '@/lib/auth/roles'
 
 const ownerNavigation = [
@@ -64,10 +65,19 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false)
 
-  // Try to read role from context (may fail if outside provider during SSR edge cases)
-  let userRole: UserRole = 'owner'
-  let contextIsBarber = isBarber
-  let staffPermissions = {
+  // Read business context once. BottomNav always renders inside BusinessProvider
+  // for logged-in users; the catch is a guard against rare SSR edge cases.
+  let ctx: ReturnType<typeof useBusiness> | null = null
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    ctx = useBusiness()
+  } catch {
+    ctx = null
+  }
+
+  const userRole: UserRole = ctx?.userRole ?? (isBarber ? 'barber' : isAdmin ? 'admin' : 'owner')
+  const contextIsBarber = ctx?.isBarber ?? isBarber
+  const staffPermissions = ctx?.staffPermissions ?? {
     nav_citas: true,
     nav_servicios: true,
     nav_clientes: false,
@@ -76,15 +86,10 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
     can_create_citas: true,
     can_view_all_citas: false,
   }
-  try {
-    const ctx = useBusiness()
-    userRole = ctx.userRole
-    staffPermissions = ctx.staffPermissions
-    contextIsBarber = ctx.isBarber
-  } catch {
-    // Fallback: use props
-    userRole = isBarber ? 'barber' : isAdmin ? 'admin' : 'owner'
-  }
+
+  // Badge count for Citas tab — always called (hooks rules compliant)
+  const { data: todayStats } = useTodayStats(ctx?.businessId)
+  const citasBadgeCount = todayStats?.count ?? 0
 
   const isBarberRole = userRole === 'barber'
   // Owners/admins who are also barbers — get Mi Día quick access in tabs
@@ -189,6 +194,18 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                     className="relative z-10 flex h-[26px] w-[26px] items-center justify-center"
                   >
                     <item.icon className="h-[22px] w-[22px]" strokeWidth={isActive ? 2.5 : 2} />
+                    {/* Badge: today's remaining appointments on Citas tab */}
+                    {item.href === '/citas' && citasBadgeCount > 0 && !isActive && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+                        className="absolute -right-1 -top-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-[3px] text-[9px] font-bold leading-none text-white"
+                        style={{ backgroundColor: 'var(--brand-primary)' }}
+                      >
+                        {citasBadgeCount > 9 ? '9+' : citasBadgeCount}
+                      </motion.span>
+                    )}
                   </motion.div>
 
                   <span

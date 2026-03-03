@@ -487,10 +487,11 @@ function CitasCalendarFusionContent() {
   }
 
   const handleAppointmentStatusChange = useCallback(
-    async (appointmentId: string, status: 'cancelled') => {
+    async (appointmentId: string, status: 'cancelled' | 'completed') => {
       try {
         await updateAppointmentStatus.mutateAsync({ appointmentId, status })
         if (status === 'cancelled') toast.success('Cita cancelada')
+        else if (status === 'completed') toast.success('Cita completada ✓')
       } catch (error) {
         toast.error('No se pudo actualizar la cita')
         console.error(error)

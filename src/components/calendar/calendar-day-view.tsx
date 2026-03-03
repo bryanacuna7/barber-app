@@ -1,11 +1,13 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, parseISO } from 'date-fns'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
+import { AppointmentContextMenu, type ContextMenuAppointment } from './appointment-context-menu'
+import { useLongPress } from '@/hooks/use-long-press'
 import { animations } from '@/lib/design-system'
 import { formatCurrencyCompactMillions } from '@/lib/utils'
 
@@ -41,12 +43,247 @@ export interface CalendarDayViewProps {
   onSelectId: (id: string | null) => void
   draggedId: string | null
   onDragId: (id: string | null) => void
-  onStatusChange: (appointmentId: string, status: 'cancelled') => void
+  onStatusChange: (appointmentId: string, status: 'cancelled' | 'completed') => void
   isBarber: boolean
   onWalkIn: () => void
   isSelected?: (id: string) => boolean
   onToggleSelect?: (id: string, event?: { shiftKey: boolean }) => void
   selectionCount?: number
+}
+
+// ---------------------------------------------------------------------------
+// Status accent bar — replaces the invisible 1.5px dot
+// ---------------------------------------------------------------------------
+
+function StatusAccent({ status }: { status: string }) {
+  const color =
+    status === 'completed'
+      ? 'bg-emerald-400 dark:bg-emerald-500'
+      : status === 'confirmed'
+        ? 'bg-blue-400 dark:bg-blue-500'
+        : status === 'pending'
+          ? 'bg-amber-400 dark:bg-amber-500'
+          : 'bg-zinc-300 dark:bg-zinc-600'
+
+  return <div className={`w-[3px] self-stretch flex-shrink-0 rounded-full ${color}`} />
+}
+
+// ---------------------------------------------------------------------------
+// Single swipeable appointment row
+// ---------------------------------------------------------------------------
+
+interface AppointmentRowProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  apt: any
+  isLast: boolean
+  onSelectId: (id: string) => void
+  onStatusChange: (id: string, status: 'cancelled' | 'completed') => void
+  isSelected?: (id: string) => boolean
+  onToggleSelect?: (id: string, event?: { shiftKey: boolean }) => void
+  onOpenContextMenu: (apt: ContextMenuAppointment) => void
+}
+
+function AppointmentRow({
+  apt,
+  isLast,
+  onSelectId,
+  onStatusChange,
+  isSelected,
+  onToggleSelect,
+  onOpenContextMenu,
+}: AppointmentRowProps) {
+  const canAct = apt.status === 'pending' || apt.status === 'confirmed'
+
+  const rightActions = canAct
+    ? [
+        {
+          icon: <X className="h-5 w-5" />,
+          label: 'Cancelar',
+          color: 'bg-red-500',
+          onClick: () => onStatusChange(apt.id, 'cancelled'),
+        },
+      ]
+    : []
+
+  const leftActions = canAct
+    ? [
+        {
+          icon: <CheckCircle2 className="h-5 w-5" />,
+          label: 'Completar',
+          color: 'bg-emerald-500',
+          onClick: () => onStatusChange(apt.id, 'completed'),
+        },
+      ]
+    : []
+
+  const contextMenuData: ContextMenuAppointment = {
+    id: apt.id,
+    clientName: apt.client?.name || 'Cliente',
+    serviceName: apt.service?.name || 'Servicio',
+    timeLabel: format(parseISO(apt.scheduled_at), 'h:mm a'),
+    clientPhone: apt.client?.phone ?? null,
+    status: apt.status,
+  }
+
+  const longPress = useLongPress({
+    onLongPress: () => onOpenContextMenu(contextMenuData),
+  })
+
+  const timeLabel = format(parseISO(apt.scheduled_at), 'h:mm a')
+  const price = formatCurrencyCompactMillions(apt.service?.price || 0)
+
+  return (
+    <motion.div
+      layout
+      exit={{ opacity: 0, x: -80, transition: { duration: 0.2 } }}
+      transition={animations.spring.layout}
+      className={isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/80'}
+    >
+      {/* Mobile: swipeable + long-press */}
+      <div className="lg:hidden">
+        <SwipeableRow
+          rightActions={rightActions}
+          leftActions={leftActions}
+          showAffordance={canAct}
+          containerClassName="rounded-none"
+        >
+          <div
+            {...longPress}
+            onClick={(e) => longPress.onClick(e, () => onSelectId(apt.id))}
+            className={`flex cursor-pointer items-stretch gap-3 px-3 py-3 select-none active:bg-zinc-100/80 dark:active:bg-zinc-900 ${
+              isSelected?.(apt.id) ? 'bg-blue-50 dark:bg-blue-950/20' : ''
+            }`}
+          >
+            {/* Status accent bar */}
+            <StatusAccent status={apt.status} />
+
+            {/* Main content */}
+            <div className="flex min-w-0 flex-1 items-start justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-0.5">
+                  {onToggleSelect && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onToggleSelect(apt.id, { shiftKey: e.shiftKey })
+                      }}
+                      aria-label={`Seleccionar ${apt.client?.name || 'cita'}`}
+                      role="checkbox"
+                      aria-checked={isSelected?.(apt.id) ?? false}
+                      className="flex h-5 w-5 items-center justify-center rounded border-2 border-zinc-300 dark:border-zinc-600"
+                    >
+                      {isSelected?.(apt.id) && (
+                        <svg
+                          className="h-3 w-3 text-blue-600 dark:text-blue-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  )}
+                  <span className="text-sm font-semibold text-foreground leading-tight truncate">
+                    {apt.client?.name || 'Cliente'}
+                  </span>
+                </div>
+                <span className="text-xs text-muted leading-tight">
+                  {apt.service?.name || 'Servicio'}
+                </span>
+              </div>
+
+              {/* Time (primary) + Price (secondary) */}
+              <div className="ml-3 flex-shrink-0 text-right">
+                <div className="text-sm font-semibold text-foreground tabular-nums leading-tight">
+                  {timeLabel}
+                </div>
+                <div className="mt-0.5 text-xs font-medium text-amber-500 dark:text-amber-400 leading-tight">
+                  {price}
+                </div>
+              </div>
+            </div>
+          </div>
+        </SwipeableRow>
+      </div>
+
+      {/* Desktop: draggable version */}
+      <motion.div
+        className="hidden lg:block"
+        drag
+        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+        dragElastic={0.05}
+        onDragStart={() => {}}
+        onDragEnd={() => {
+          toast.info('Rescheduling (demo)')
+        }}
+        whileTap={{ scale: 0.98 }}
+        whileDrag={{ scale: 1.05, zIndex: 50 }}
+        onClick={() => onSelectId(apt.id)}
+      >
+        <div
+          className={`flex cursor-grab items-stretch gap-3 px-4 py-3 active:cursor-grabbing transition-[opacity,background-color] ${
+            isSelected?.(apt.id)
+              ? 'bg-blue-50 dark:bg-blue-950/20'
+              : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
+          }`}
+        >
+          <StatusAccent status={apt.status} />
+
+          <div className="flex min-w-0 flex-1 items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="group flex items-center gap-2 mb-0.5">
+                {onToggleSelect && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onToggleSelect(apt.id, { shiftKey: e.shiftKey })
+                    }}
+                    aria-label={`Seleccionar ${apt.client?.name || 'cita'}`}
+                    role="checkbox"
+                    aria-checked={isSelected?.(apt.id) ?? false}
+                    className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-opacity ${
+                      isSelected?.(apt.id)
+                        ? 'border-blue-500 bg-blue-500 text-white opacity-100'
+                        : 'border-zinc-300 dark:border-zinc-600 opacity-0 group-hover:opacity-100'
+                    }`}
+                  >
+                    {isSelected?.(apt.id) && (
+                      <svg
+                        className="h-3 w-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                )}
+                <span className="text-sm font-semibold text-foreground leading-tight">
+                  {apt.client?.name || 'Cliente'}
+                </span>
+              </div>
+              <span className="text-xs text-muted">{apt.service?.name || 'Servicio'}</span>
+            </div>
+
+            <div className="ml-3 flex-shrink-0 text-right">
+              <div className="text-sm font-semibold text-foreground tabular-nums leading-tight">
+                {timeLabel}
+              </div>
+              <div className="mt-0.5 text-xs font-medium text-amber-500 dark:text-amber-400 leading-tight">
+                {price}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -59,15 +296,20 @@ export function CalendarDayView({
   gaps,
   selectedId: _selectedId,
   onSelectId,
-  draggedId,
-  onDragId,
+  draggedId: _draggedId,
+  onDragId: _onDragId,
   onStatusChange,
   isSelected,
   onToggleSelect,
   selectionCount = 0,
 }: CalendarDayViewProps) {
   void _selectedId
-  const hasBulkSelection = selectionCount > 0
+  void _draggedId
+  void _onDragId
+  void selectionCount
+
+  const [contextMenu, setContextMenu] = useState<ContextMenuAppointment | null>(null)
+
   return (
     <div className="space-y-4">
       {unscheduledCount > 0 && (
@@ -104,17 +346,17 @@ export function CalendarDayView({
                 </span>
               </div>
 
-              {/* Occupancy bar (Cinema feature) */}
+              {/* Occupancy bar */}
               <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 p-3">
                 <div className="flex items-center justify-between mb-2 text-sm">
                   <span className="text-foreground">{block.count} citas</span>
                   <span
                     className={`font-bold ${
                       block.occupancyPercent >= 90
-                        ? 'text-red-500 dark:text-red-500'
+                        ? 'text-red-500'
                         : block.occupancyPercent >= 60
-                          ? 'text-amber-500 dark:text-amber-500'
-                          : 'text-green-500 dark:text-emerald-500'
+                          ? 'text-amber-500'
+                          : 'text-emerald-500'
                     }`}
                   >
                     {block.occupancyPercent}%
@@ -126,209 +368,39 @@ export function CalendarDayView({
                     animate={{ width: `${block.occupancyPercent}%` }}
                     className={`h-full ${
                       block.occupancyPercent >= 90
-                        ? 'bg-red-500 dark:bg-red-500'
+                        ? 'bg-red-500'
                         : block.occupancyPercent >= 60
-                          ? 'bg-amber-500 dark:bg-amber-500'
-                          : 'bg-green-500 dark:bg-emerald-500'
+                          ? 'bg-amber-500'
+                          : 'bg-emerald-500'
                     }`}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Appointments (grouped rows inside block card) */}
+            {/* Appointments list */}
             <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950/60">
               {block.appointments.length === 0 && (
-                <div className="px-4 py-3 text-sm text-muted">Sin citas programadas</div>
+                <div className="px-4 py-3 text-sm text-muted">Sin citas en este bloque</div>
               )}
 
               <AnimatePresence mode="popLayout">
-                {block.appointments.map((apt, aptIndex) => {
-                  const canCancel = apt.status === 'pending' || apt.status === 'confirmed'
-                  const isLast = aptIndex === block.appointments.length - 1
-
-                  const rightActions = []
-                  if (canCancel) {
-                    rightActions.push({
-                      icon: <X className="h-5 w-5" />,
-                      label: 'Cancelar',
-                      color: 'bg-red-500',
-                      onClick: () => onStatusChange(apt.id, 'cancelled'),
-                    })
-                  }
-
-                  return (
-                    <motion.div
-                      key={apt.id}
-                      layout
-                      exit={{ opacity: 0, x: -80, transition: { duration: 0.2 } }}
-                      transition={animations.spring.layout}
-                      className={
-                        isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/80'
-                      }
-                    >
-                      {/* Mobile: swipeable version */}
-                      <div className="lg:hidden">
-                        <SwipeableRow
-                          rightActions={rightActions}
-                          showAffordance={false}
-                          containerClassName="rounded-none"
-                        >
-                          <div
-                            onClick={() => onSelectId(apt.id)}
-                            className={`cursor-pointer px-3 py-3 active:bg-zinc-100/80 dark:active:bg-zinc-900 ${
-                              isSelected?.(apt.id) ? 'bg-blue-50 dark:bg-blue-950/20' : ''
-                            }`}
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  {onToggleSelect && (
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        onToggleSelect(apt.id, { shiftKey: e.shiftKey })
-                                      }}
-                                      aria-label={`Seleccionar ${apt.client?.name || 'cita'}`}
-                                      role="checkbox"
-                                      aria-checked={isSelected?.(apt.id) ?? false}
-                                      className="mr-1 flex h-5 w-5 items-center justify-center rounded border-2 border-zinc-300 dark:border-zinc-600"
-                                    >
-                                      {isSelected?.(apt.id) && (
-                                        <svg
-                                          className="h-3 w-3 text-blue-600 dark:text-blue-400"
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                          stroke="currentColor"
-                                          strokeWidth={3}
-                                        >
-                                          <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M5 13l4 4L19 7"
-                                          />
-                                        </svg>
-                                      )}
-                                    </button>
-                                  )}
-                                  <div
-                                    className={`w-1.5 h-1.5 rounded-full ${
-                                      apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
-                                    }`}
-                                  />
-                                  <span className="font-medium text-foreground text-sm">
-                                    {apt.client?.name || 'Cliente'}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-muted leading-tight">
-                                  {apt.service?.name || 'Servicio'}
-                                </div>
-                              </div>
-                              <div className="text-right text-xs">
-                                <div className="text-muted font-medium tabular-nums leading-tight">
-                                  {format(parseISO(apt.scheduled_at), 'h:mm a')}
-                                </div>
-                                <div className="mt-1 text-[13px] leading-tight font-semibold text-amber-500 dark:text-amber-500">
-                                  {formatCurrencyCompactMillions(apt.service?.price || 0)}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </SwipeableRow>
-                      </div>
-
-                      {/* Desktop: draggable version */}
-                      <motion.div
-                        className="hidden lg:block"
-                        drag
-                        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                        dragElastic={0.05}
-                        onDragStart={() => onDragId(apt.id)}
-                        onDragEnd={() => {
-                          onDragId(null)
-                          toast.info('Rescheduling (demo)')
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                        whileDrag={{ scale: 1.05, zIndex: 50 }}
-                        onClick={() => onSelectId(apt.id)}
-                      >
-                        <div
-                          className={`cursor-grab px-4 py-3 active:cursor-grabbing transition-[opacity,background-color] ${
-                            draggedId === apt.id
-                              ? 'opacity-50'
-                              : isSelected?.(apt.id)
-                                ? 'bg-blue-50 dark:bg-blue-950/20'
-                                : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <div className="group flex items-center gap-2 mb-1">
-                                {onToggleSelect && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      onToggleSelect(apt.id, { shiftKey: e.shiftKey })
-                                    }}
-                                    aria-label={`Seleccionar ${apt.client?.name || 'cita'}`}
-                                    role="checkbox"
-                                    aria-checked={isSelected?.(apt.id) ?? false}
-                                    className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-opacity ${
-                                      isSelected?.(apt.id)
-                                        ? 'border-blue-500 bg-blue-500 text-white opacity-100'
-                                        : `border-zinc-300 dark:border-zinc-600 ${hasBulkSelection ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`
-                                    }`}
-                                  >
-                                    {isSelected?.(apt.id) && (
-                                      <svg
-                                        className="h-3 w-3"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth={3}
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          d="M5 13l4 4L19 7"
-                                        />
-                                      </svg>
-                                    )}
-                                  </button>
-                                )}
-                                <div
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    apt.status === 'completed' ? 'bg-emerald-500' : 'bg-blue-500'
-                                  }`}
-                                />
-                                <span className="font-medium text-foreground text-sm">
-                                  {apt.client?.name || 'Cliente'}
-                                </span>
-                              </div>
-                              <div className="text-xs text-muted">
-                                {apt.service?.name || 'Servicio'}
-                              </div>
-                            </div>
-                            <div className="text-right text-xs">
-                              <div className="text-muted font-medium tabular-nums leading-tight">
-                                {format(parseISO(apt.scheduled_at), 'h:mm a')}
-                              </div>
-                              <div className="mt-1 text-[13px] leading-tight font-semibold text-amber-500 dark:text-amber-500">
-                                {formatCurrencyCompactMillions(apt.service?.price || 0)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </motion.div>
-                  )
-                })}
+                {block.appointments.map((apt, aptIndex) => (
+                  <AppointmentRow
+                    key={apt.id}
+                    apt={apt}
+                    isLast={aptIndex === block.appointments.length - 1}
+                    onSelectId={onSelectId}
+                    onStatusChange={onStatusChange}
+                    isSelected={isSelected}
+                    onToggleSelect={onToggleSelect}
+                    onOpenContextMenu={setContextMenu}
+                  />
+                ))}
               </AnimatePresence>
             </div>
 
-            {/* Gap indicators (Cinema feature) */}
+            {/* Gap indicators */}
             <div className="mt-3 space-y-1.5 lg:space-y-2">
               {gaps
                 .filter((gap) => {
@@ -359,6 +431,16 @@ export function CalendarDayView({
           </motion.div>
         ))}
       </div>
+
+      {/* Long-press context menu (portal) */}
+      <AppointmentContextMenu
+        isOpen={!!contextMenu}
+        onClose={() => setContextMenu(null)}
+        appointment={contextMenu}
+        onComplete={(id) => onStatusChange(id, 'completed')}
+        onEdit={(id) => onSelectId(id)}
+        onCancel={(id) => onStatusChange(id, 'cancelled')}
+      />
     </div>
   )
 }
