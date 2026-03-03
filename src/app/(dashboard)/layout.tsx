@@ -16,6 +16,8 @@ import { CommandPaletteProvider } from '@/components/dashboard/command-palette'
 import { AlertTriangle } from 'lucide-react'
 import { OfflineBanner } from '@/components/dashboard/offline-banner'
 import { InstallPrompt } from '@/components/pwa/install-prompt'
+import { OpenInAppBanner } from '@/components/pwa/open-in-app-banner'
+import { NextUpChip } from '@/components/dashboard/next-up-chip'
 import { normalizeDisplayBusinessName } from '@/lib/branding'
 import { LogoutButton } from '@/components/dashboard/logout-button'
 import { DashboardContentArea } from '@/components/dashboard/dashboard-content-area'
@@ -311,6 +313,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 </main>
               )}
 
+              {/* Next-up appointment chip — above bottom nav, outside /citas */}
+              <NextUpChip />
+
               {/* Mobile bottom navigation */}
               <BottomNav isAdmin={roleInfo.isAdmin} isBarber={roleInfo.isBarber} />
 
@@ -319,6 +324,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
               {/* PWA install prompt (contextual, shows after 3 visits) */}
               <InstallPrompt />
+              {/* Banner for iOS users who ended up in browser after OAuth redirect */}
+              <OpenInAppBanner />
             </div>
           </ShortcutProvider>
         </CommandPaletteProvider>

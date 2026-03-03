@@ -75,6 +75,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  userScalable: true,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f6f7f9' },
     { media: '(prefers-color-scheme: dark)', color: '#10141b' },
@@ -95,6 +96,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href={`/api/pwa/icon?size=180&v=${manifestVersion}`} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-[#0a0a0a]`}
