@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-03-02 (Session 194 — Triage C+ E4 Complete)
+- **Last Updated:** 2026-03-02 (Session 195 — Custom Domain + Wildcard Subdomains)
 - **Branch:** `main`
-- **Version:** `0.9.23`
+- **Version:** `0.9.25`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,23 @@
 ---
 
 ## Recent Sessions
+
+### Session 195: Custom Domain + Wildcard Subdomains (2026-03-02)
+
+**Status:** COMPLETE. Custom domain nexocr.pro configured with wildcard subdomains.
+
+**What was done:**
+
+- **Domain purchased:** `nexocr.pro` via Vercel ($4.99/yr, renews $23/yr). Also owns `nexocr.xyz`
+- **Wildcard subdomain routing:** `*.nexocr.pro` → middleware rewrites to `/reservar/[slug]`
+- **Dashboard URL:** `barberapp.nexocr.pro` (reserved subdomain, serves app normally)
+- **Booking URLs updated:** All share/copy/QR/WhatsApp now use `slug.nexocr.pro` format
+- **OAuth configured:** Google Cloud + Supabase redirect URLs updated for new domains
+- **Architecture decision:** Shopify model — shared dashboard, per-business subdomains for public booking only
+
+**Files created:** None
+**Files modified (3):** `src/middleware.ts` (subdomain detection), `src/lib/utils/booking-url.ts` (subdomain URLs), `src/components/share/share-booking-link.tsx` (display URL)
+**Config:** Vercel domains (barberapp.nexocr.pro, \*.nexocr.pro), env var NEXT_PUBLIC_ROOT_DOMAIN, Google OAuth origins, Supabase redirect URLs
 
 ### Sessions 192-194: Triage C+ Plan (E1→E4) (2026-02-28 – 2026-03-02)
 
@@ -330,7 +347,7 @@
 
 ### Working
 
-- v0.9.23 (Session 194: Triage C+ E4 Complete)
+- v0.9.25 (Session 195: Custom domain nexocr.pro + wildcard subdomains)
 - TypeScript `strict: true` — 0 errors, CI enforced
 - God-components split: clientes, citas, servicios (5,368→1,682 lines in orchestrators)
 - 22 focused sub-components in `components/clients/`, `components/calendar/`, `components/services/`

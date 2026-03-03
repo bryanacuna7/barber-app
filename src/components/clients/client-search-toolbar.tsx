@@ -268,7 +268,7 @@ export function ClientSearchToolbar({
         </div>
 
         {/* Pills row — horizontally scrollable */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide -mx-1 px-1">
+        <div className="flex items-center gap-2">
           {/* View dropdown */}
           <div ref={viewDropdownRef} className="relative shrink-0">
             <button
@@ -318,75 +318,80 @@ export function ClientSearchToolbar({
             </AnimatePresence>
           </div>
 
-          {/* Separator dot */}
-          <span className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
+          {/* Scrollable pills live in a separate container so the view menu isn't clipped */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide -mx-1 px-1">
+              {/* Separator dot */}
+              <span className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
 
-          {/* Quick filters */}
-          <button
-            onClick={() => {
-              onFiltersChange(DEFAULT_CLIENT_FILTERS)
-              if (isMobileDevice()) haptics.selection()
-            }}
-            className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-200 ${
-              isQuickAll
-                ? 'bg-[var(--brand-primary)] text-white shadow-[0_2px_8px_rgba(var(--brand-primary-rgb),0.3)]'
-                : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
-            }`}
-          >
-            Todos
-          </button>
+              {/* Quick filters */}
+              <button
+                onClick={() => {
+                  onFiltersChange(DEFAULT_CLIENT_FILTERS)
+                  if (isMobileDevice()) haptics.selection()
+                }}
+                className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 transition-all duration-200 ${
+                  isQuickAll
+                    ? 'bg-[var(--brand-primary)] text-white shadow-[0_2px_8px_rgba(var(--brand-primary-rgb),0.3)]'
+                    : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
+                }`}
+              >
+                Todos
+              </button>
 
-          <button
-            onClick={() => {
-              onFiltersChange({ ...DEFAULT_CLIENT_FILTERS, segment: 'vip' })
-              if (isMobileDevice()) haptics.selection()
-            }}
-            className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
-              isQuickVip
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/25'
-                : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
-            }`}
-          >
-            <Crown className="h-3.5 w-3.5" />
-            VIP
-          </button>
+              <button
+                onClick={() => {
+                  onFiltersChange({ ...DEFAULT_CLIENT_FILTERS, segment: 'vip' })
+                  if (isMobileDevice()) haptics.selection()
+                }}
+                className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
+                  isQuickVip
+                    ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/25'
+                    : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
+                }`}
+              >
+                <Crown className="h-3.5 w-3.5" />
+                VIP
+              </button>
 
-          <button
-            onClick={() => {
-              onFiltersChange({ ...DEFAULT_CLIENT_FILTERS, highRiskOnly: true })
-              if (isMobileDevice()) haptics.selection()
-            }}
-            className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
-              isQuickRisk
-                ? 'bg-red-500/12 text-red-600 dark:text-red-400 ring-1 ring-red-500/25'
-                : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
-            }`}
-          >
-            <AlertTriangle className="h-3.5 w-3.5" />
-            Riesgo
-          </button>
+              <button
+                onClick={() => {
+                  onFiltersChange({ ...DEFAULT_CLIENT_FILTERS, highRiskOnly: true })
+                  if (isMobileDevice()) haptics.selection()
+                }}
+                className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
+                  isQuickRisk
+                    ? 'bg-red-500/12 text-red-600 dark:text-red-400 ring-1 ring-red-500/25'
+                    : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
+                }`}
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+                Riesgo
+              </button>
 
-          {/* Advanced filters pill */}
-          <button
-            onClick={() => {
-              onOpenSegmentFilter()
-              if (isMobileDevice()) haptics.selection()
-            }}
-            className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
-              activeFilterCount > 0
-                ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)]/20'
-                : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
-            }`}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            {activeFilterCount > 0 ? (
-              <span className="bg-[var(--brand-primary)] text-white text-[10px] rounded-full h-[18px] min-w-[18px] px-1 flex items-center justify-center font-bold leading-none">
-                {activeFilterCount}
-              </span>
-            ) : (
-              <span>Más</span>
-            )}
-          </button>
+              {/* Advanced filters pill */}
+              <button
+                onClick={() => {
+                  onOpenSegmentFilter()
+                  if (isMobileDevice()) haptics.selection()
+                }}
+                className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
+                  activeFilterCount > 0
+                    ? 'bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] ring-1 ring-[var(--brand-primary)]/20'
+                    : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
+                }`}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                {activeFilterCount > 0 ? (
+                  <span className="bg-[var(--brand-primary)] text-white text-[10px] rounded-full h-[18px] min-w-[18px] px-1 flex items-center justify-center font-bold leading-none">
+                    {activeFilterCount}
+                  </span>
+                ) : (
+                  <span>Más</span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
