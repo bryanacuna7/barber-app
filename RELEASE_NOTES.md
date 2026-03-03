@@ -8,9 +8,9 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.25
+## v0.9.26
 
-### Nuevo
+### Arreglado
 
-- Dominio personalizado: cada barberia tiene su propio enlace (ej: mi-barberia.nexocr.pro)
-- Dashboard accesible desde barberapp.nexocr.pro
+- El menú de vista en la lista de clientes ya no queda tapado al desplazarse horizontalmente
+- La URL ya no se reescribe de forma incorrecta al abrir formularios desde atajos del sistema

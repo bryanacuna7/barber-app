@@ -4,6 +4,13 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.26] - 2026-03-03
+
+### Arreglado
+
+- El menú de vista en la lista de clientes ya no queda tapado al desplazarse horizontalmente
+- La URL ya no se reescribe de forma incorrecta al abrir formularios desde atajos del sistema
+
 ## [0.9.25] - 2026-03-02
 
 ### Nuevo
