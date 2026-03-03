@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Script from 'next/script'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ToastProvider } from '@/components/ui/toast'
 import { QueryProvider } from '@/providers/query-provider'
 import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register'
@@ -104,6 +105,7 @@ export default function RootLayout({
         <QueryProvider>
           <ToastProvider>{children}</ToastProvider>
         </QueryProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
