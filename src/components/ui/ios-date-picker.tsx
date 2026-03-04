@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -15,6 +16,8 @@ interface IOSDatePickerProps {
   minDate?: Date
   maxDate?: Date
   zIndex?: number
+  forceMobile?: boolean
+  forceDesktop?: boolean
 }
 
 // Spanish month names
@@ -38,11 +41,20 @@ const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 // Hook to detect if should use mobile picker (based on screen width)
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const getIsMobile = () => {
+    if (typeof window === 'undefined') return false
+    return (
+      window.innerWidth < 768 ||
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(hover: none)').matches
+    )
+  }
+
+  const [isMobile, setIsMobile] = useState(getIsMobile)
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      setIsMobile(getIsMobile())
     }
 
     checkMobile()
@@ -79,11 +91,27 @@ function WheelColumn({
   onChange: (value: string) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDragging, setIsDragging] = useState(false)
+  const [, setIsDragging] = useState(false)
+  const resolveIndex = useCallback(
+    (candidate: string) => {
+      if (items.length === 0) return -1
+      const exactIndex = items.indexOf(candidate)
+      if (exactIndex !== -1) return exactIndex
+
+      const numeric = Number.parseInt(candidate, 10)
+      if (!Number.isNaN(numeric)) {
+        return Math.max(0, Math.min(items.length - 1, numeric - 1))
+      }
+
+      return 0
+    },
+    [items]
+  )
+  const selectedIndex = resolveIndex(value)
 
   const scrollToValue = useCallback(
     (val: string, smooth = true) => {
-      const index = items.indexOf(val)
+      const index = resolveIndex(val)
       if (index !== -1 && containerRef.current) {
         containerRef.current.scrollTo({
           top: index * ITEM_HEIGHT,
@@ -91,7 +119,7 @@ function WheelColumn({
         })
       }
     },
-    [items]
+    [resolveIndex]
   )
 
   useEffect(() => {
@@ -100,7 +128,7 @@ function WheelColumn({
   }, [])
 
   const handleScroll = useCallback(() => {
-    if (!containerRef.current || isDragging) return
+    if (!containerRef.current) return
 
     const scrollTop = containerRef.current.scrollTop
     const index = Math.round(scrollTop / ITEM_HEIGHT)
@@ -109,7 +137,7 @@ function WheelColumn({
     if (items[clampedIndex] !== value) {
       onChange(items[clampedIndex])
     }
-  }, [isDragging, items, value, onChange])
+  }, [items, value, onChange])
 
   const handleScrollEnd = useCallback(() => {
     if (!containerRef.current) return
@@ -131,26 +159,39 @@ function WheelColumn({
     if (!container) return
 
     let scrollTimeout: NodeJS.Timeout
+    let rafId: number | null = null
 
     const onScroll = () => {
-      handleScroll()
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          handleScroll()
+          rafId = null
+        })
+      }
       clearTimeout(scrollTimeout)
-      scrollTimeout = setTimeout(handleScrollEnd, 100)
+      scrollTimeout = setTimeout(handleScrollEnd, 80)
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
+    container.addEventListener('scrollend', handleScrollEnd, {
+      passive: true,
+    } as AddEventListenerOptions)
     return () => {
       container.removeEventListener('scroll', onScroll)
+      container.removeEventListener('scrollend', handleScrollEnd)
+      if (rafId !== null) cancelAnimationFrame(rafId)
       clearTimeout(scrollTimeout)
     }
   }, [handleScroll, handleScrollEnd])
 
   return (
-    <div className="relative h-[220px] flex-1 overflow-hidden touch-pan-y">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[88px] bg-gradient-to-b from-white via-white/90 to-transparent dark:from-[#2C2C2E] dark:via-[#2C2C2E]/90" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[88px] bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#2C2C2E] dark:via-[#2C2C2E]/90" />
-      <div className="pointer-events-none absolute inset-x-2 top-1/2 z-5 h-[44px] -translate-y-1/2 rounded-xl bg-zinc-100/80 dark:bg-zinc-700/50" />
-
+    <div
+      className="relative h-[220px] flex-1 overflow-hidden touch-pan-y"
+      style={{
+        mask: 'linear-gradient(transparent, white 20%, white 80%, transparent)',
+        WebkitMask: 'linear-gradient(transparent, white 20%, white 80%, transparent)',
+      }}
+    >
       <div
         ref={containerRef}
         className="h-full overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide snap-y snap-mandatory select-none touch-pan-y"
@@ -167,17 +208,28 @@ function WheelColumn({
         onMouseUp={() => setIsDragging(false)}
         onMouseLeave={() => setIsDragging(false)}
       >
-        {items.map((item) => {
-          const isSelected = item === value
+        {items.map((item, index) => {
+          const isSelected = index === selectedIndex
+          const distance = selectedIndex === -1 ? 99 : Math.abs(index - selectedIndex)
+          const direction = index - selectedIndex
+          const rotateX = Math.max(-72, Math.min(72, direction * 18))
+          const scale = Math.max(0.62, 1 - distance * 0.12)
+          const opacity = Math.max(0.28, 1 - distance * 0.15)
+          const translateZ = Math.max(0, 24 - distance * 8)
           return (
             <div
               key={item}
               className={cn(
-                'flex h-[44px] items-center justify-center snap-center transition-[color,transform] duration-150',
+                'flex h-[44px] items-center justify-center snap-center transition-[color,transform,opacity] duration-150',
                 isSelected
-                  ? 'text-[22px] font-semibold text-zinc-900 dark:text-white scale-105'
-                  : 'text-[20px] font-normal text-zinc-400 dark:text-zinc-500'
+                  ? 'text-[22px] font-semibold text-zinc-900 dark:text-zinc-100'
+                  : 'text-[20px] font-medium text-zinc-400 dark:text-zinc-500'
               )}
+              style={{
+                transform: `perspective(320px) rotateX(${rotateX}deg) translateZ(${translateZ}px) scale(${scale})`,
+                opacity,
+                textShadow: isSelected ? undefined : 'none',
+              }}
               onClick={() => {
                 onChange(item)
                 scrollToValue(item)
@@ -480,7 +532,6 @@ function MobileDatePicker({
   maxDate,
   zIndex = 70,
 }: IOSDatePickerProps) {
-  const currentYear = new Date().getFullYear()
   const minDay = useMemo(() => (minDate ? toDayStart(minDate) : null), [minDate])
   const maxDay = useMemo(() => (maxDate ? toDayStart(maxDate) : null), [maxDate])
 
@@ -494,23 +545,10 @@ function MobileDatePicker({
     [maxDay, minDay]
   )
 
-  // Generate years based on min/max constraints
-  const years = useMemo(() => {
-    let startYear = currentYear - 1
-    let endYear = currentYear + 1
-
-    if (minDay) startYear = minDay.getFullYear()
-    if (maxDay) endYear = maxDay.getFullYear()
-    if (minDay && !maxDay) endYear = Math.max(startYear + 5, currentYear + 1)
-    if (!minDay && maxDay) startYear = Math.min(endYear - 5, currentYear - 1)
-
-    const count = Math.max(1, endYear - startYear + 1)
-    return Array.from({ length: count }, (_, i) => (startYear + i).toString())
-  }, [currentYear, maxDay, minDay])
-
   const [tempDay, setTempDay] = useState(value.getDate().toString())
   const [tempMonth, setTempMonth] = useState(MONTHS[value.getMonth()])
   const [tempYear, setTempYear] = useState(value.getFullYear().toString())
+  const [wheelKey, setWheelKey] = useState(0)
 
   // Sync temp values when picker opens
   useEffect(() => {
@@ -523,19 +561,7 @@ function MobileDatePicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, clampDateToRange])
 
-  useEffect(() => {
-    if (years.length === 0) return
-    if (!years.includes(tempYear)) {
-      setTempYear(years[0])
-    }
-  }, [tempYear, years])
-
-  const availableMonths = useMemo(() => {
-    const selectedYear = parseInt(tempYear, 10)
-    const startMonth = minDay && selectedYear === minDay.getFullYear() ? minDay.getMonth() : 0
-    const endMonth = maxDay && selectedYear === maxDay.getFullYear() ? maxDay.getMonth() : 11
-    return MONTHS.slice(startMonth, endMonth + 1)
-  }, [maxDay, minDay, tempYear])
+  const availableMonths = useMemo(() => MONTHS, [])
 
   // Generate days based on selected month/year
   const days = useMemo(() => {
@@ -543,25 +569,8 @@ function MobileDatePicker({
     if (monthIndex < 0) return ['1']
     const year = parseInt(tempYear, 10)
     const daysInMonth = getDaysInMonth(year, monthIndex)
-    const minBound =
-      minDay && year === minDay.getFullYear() && monthIndex === minDay.getMonth()
-        ? minDay.getDate()
-        : 1
-    const maxBound =
-      maxDay && year === maxDay.getFullYear() && monthIndex === maxDay.getMonth()
-        ? maxDay.getDate()
-        : daysInMonth
-
-    return Array.from({ length: maxBound - minBound + 1 }, (_, i) => (minBound + i).toString())
-  }, [maxDay, minDay, tempMonth, tempYear])
-
-  // Keep month within constrained list after year changes.
-  useEffect(() => {
-    if (availableMonths.length === 0) return
-    if (!availableMonths.includes(tempMonth)) {
-      setTempMonth(availableMonths[0])
-    }
-  }, [availableMonths, tempMonth])
+    return Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString())
+  }, [tempMonth, tempYear])
 
   // Adjust day if out of bounds for selected month/year.
   useEffect(() => {
@@ -591,7 +600,7 @@ function MobileDatePicker({
     onClose()
   }
 
-  return (
+  const content = (
     <AnimatePresence>
       {isOpen && (
         <>
@@ -600,60 +609,92 @@ function MobileDatePicker({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/45 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 dark:bg-black/55 backdrop-blur-[2px]"
             style={{ zIndex }}
             onClick={onClose}
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-            exit={{ opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
             transition={animations.spring.sheet}
-            className="fixed left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-md max-h-[72vh] overflow-y-auto overflow-x-hidden overscroll-x-none rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/70 dark:bg-[#2C2C2E] touch-pan-y"
+            className="fixed inset-x-0 bottom-0 mx-auto max-h-[78vh] w-[calc(100%-0.75rem)] max-w-md overflow-y-auto rounded-[26px] bg-white dark:bg-zinc-900/98 shadow-[0_16px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_26px_64px_rgba(0,0,0,0.65)]"
             style={{ zIndex: zIndex + 1 }}
           >
             <div className="flex justify-center pt-3 pb-2">
-              <div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+              <div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-500/80" />
             </div>
 
             <div className="flex items-center justify-between px-4 pb-4">
               <button
                 onClick={onClose}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-500 active:bg-zinc-100 dark:active:bg-zinc-700"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 active:bg-zinc-100 dark:active:bg-zinc-800/70"
               >
                 <X className="h-5 w-5" />
               </button>
-              <span className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              <span className="text-[17px] font-semibold text-zinc-900 dark:text-zinc-100">
                 {title}
               </span>
               <button
                 onClick={handleConfirm}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-[#007AFF] active:bg-blue-50 dark:text-[#0A84FF] dark:active:bg-blue-900/30"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-blue-500 dark:text-[#5ab0ff] active:bg-blue-50 dark:active:bg-blue-950/60"
               >
                 <Check className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 overflow-x-hidden px-4 pb-8 touch-pan-y">
-              <WheelColumn items={days} value={tempDay} onChange={setTempDay} />
-              <WheelColumn items={availableMonths} value={tempMonth} onChange={setTempMonth} />
-              <WheelColumn items={years} value={tempYear} onChange={setTempYear} />
+            <div className="px-4 pb-4">
+              <div className="relative mx-auto flex h-[220px] items-center justify-center gap-1 px-1">
+                <div className="pointer-events-none absolute inset-x-3 top-1/2 h-[44px] -translate-y-1/2 rounded-xl bg-zinc-100/80 dark:bg-white/8" />
+                <WheelColumn
+                  key={`day-${wheelKey}`}
+                  items={days}
+                  value={tempDay}
+                  onChange={setTempDay}
+                />
+                <WheelColumn
+                  key={`month-${wheelKey}`}
+                  items={availableMonths}
+                  value={tempMonth}
+                  onChange={setTempMonth}
+                />
+              </div>
             </div>
 
+            {/* Quick shortcut */}
+            <div className="px-4 pb-4 pt-0 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const today = clampDateToRange(new Date())
+                  setTempDay(today.getDate().toString())
+                  setTempMonth(MONTHS[today.getMonth()])
+                  setTempYear(today.getFullYear().toString())
+                  setWheelKey((k) => k + 1)
+                }}
+                className="w-full h-[44px] rounded-xl bg-zinc-100 dark:bg-white/8 text-[15px] font-medium text-zinc-600 dark:text-zinc-300 active:bg-zinc-200 dark:active:bg-white/14 transition-colors"
+              >
+                Hoy
+              </button>
+            </div>
             <div className="h-safe-area-inset-bottom" />
           </motion.div>
         </>
       )}
     </AnimatePresence>
   )
+
+  if (typeof document === 'undefined') return null
+  return createPortal(content, document.body)
 }
 
 // Main export - automatically chooses between mobile and desktop variants
 export function IOSDatePicker(props: IOSDatePickerProps) {
   const isMobile = useIsMobile()
+  const shouldUseMobile = props.forceDesktop ? false : props.forceMobile || isMobile
 
-  if (isMobile) {
+  if (shouldUseMobile) {
     return <MobileDatePicker {...props} />
   }
 
@@ -669,6 +710,8 @@ interface DatePickerTriggerProps {
   pickerZIndex?: number
   minDate?: Date
   maxDate?: Date
+  forceMobile?: boolean
+  forceDesktop?: boolean
 }
 
 export function DatePickerTrigger({
@@ -679,10 +722,12 @@ export function DatePickerTrigger({
   pickerZIndex = 70,
   minDate,
   maxDate,
+  forceMobile,
+  forceDesktop,
 }: DatePickerTriggerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Compact format: "6 Feb 2026" (Spanish)
+  // Compact format: "6 Feb" (Spanish)
   const formattedDate = useMemo(() => {
     const monthAbbrev = [
       'Ene',
@@ -701,9 +746,7 @@ export function DatePickerTrigger({
 
     const date = value.getDate()
     const month = monthAbbrev[value.getMonth()]
-    const year = value.getFullYear()
-
-    return `${date} ${month} ${year}`
+    return `${date} ${month}`
   }, [value])
 
   return (
@@ -712,16 +755,16 @@ export function DatePickerTrigger({
         type="button"
         onClick={() => setIsOpen(true)}
         className={cn(
-          'flex h-10 min-w-0 items-center justify-center rounded-xl px-3 gap-2',
-          'bg-zinc-100/80 dark:bg-zinc-800/80',
-          'text-[15px] font-medium text-zinc-900 dark:text-white',
-          'active:scale-95 transition-[transform,background-color] duration-150',
-          'hover:bg-zinc-100 dark:hover:bg-zinc-800',
-          'focus:outline-none focus:ring-2 focus:ring-[#007AFF]/50',
+          'flex h-11 min-w-0 items-center justify-center rounded-xl border px-3 gap-2',
+          'border-zinc-700/80 bg-zinc-900/85',
+          'text-[15px] font-medium text-zinc-100',
+          'active:scale-95 transition-[transform,background-color,border-color] duration-150',
+          'hover:bg-zinc-900',
+          'focus:outline-none focus:ring-2 focus:ring-[#007AFF]/40',
           className
         )}
       >
-        <CalendarIcon className="h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
+        <CalendarIcon className="h-4 w-4 shrink-0 text-zinc-400" />
         <span className="min-w-0 truncate whitespace-nowrap text-left">{formattedDate}</span>
       </button>
 
@@ -734,6 +777,8 @@ export function DatePickerTrigger({
         minDate={minDate}
         maxDate={maxDate}
         zIndex={pickerZIndex}
+        forceMobile={forceMobile}
+        forceDesktop={forceDesktop}
       />
     </>
   )

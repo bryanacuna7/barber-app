@@ -17,6 +17,7 @@ interface IOSTimePickerProps {
   title?: string
   zIndex?: number
   hourFormat?: HourFormat
+  forceDesktop?: boolean
 }
 
 interface TimeParts {
@@ -31,10 +32,19 @@ const PERIODS: Array<'AM' | 'PM'> = ['AM', 'PM']
 const ITEM_HEIGHT = 44
 
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const getIsMobile = () => {
+    if (typeof window === 'undefined') return false
+    return (
+      window.innerWidth < 768 ||
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(hover: none)').matches
+    )
+  }
+
+  const [isMobile, setIsMobile] = useState(getIsMobile)
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    const checkMobile = () => setIsMobile(getIsMobile())
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -64,11 +74,13 @@ function parseTime(value: string): TimeParts {
 
   const safeHour = Number.isNaN(hourNum) ? 9 : Math.max(0, Math.min(23, hourNum))
   const safeMinute = Number.isNaN(minuteNum) ? 0 : Math.max(0, Math.min(59, minuteNum))
-  const roundedMinute = Math.round(safeMinute / 5) * 5
-  const normalizedMinute = roundedMinute >= 60 ? 55 : roundedMinute
+  const roundedTotalMinutes = Math.round((safeHour * 60 + safeMinute) / 5) * 5
+  const wrappedTotalMinutes = ((roundedTotalMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
+  const normalizedHour = Math.floor(wrappedTotalMinutes / 60)
+  const normalizedMinute = wrappedTotalMinutes % 60
 
   return {
-    hour24: safeHour.toString().padStart(2, '0'),
+    hour24: normalizedHour.toString().padStart(2, '0'),
     minute: normalizedMinute.toString().padStart(2, '0'),
   }
 }
@@ -106,9 +118,10 @@ function WheelColumn({
   onChange: (value: string) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isDragging, setIsDragging] = useState(false)
+  const [, setIsDragging] = useState(false)
   const lastEmittedValueRef = useRef(value)
   const lastHapticValueRef = useRef(value)
+  const selectedIndex = items.indexOf(value)
 
   useEffect(() => {
     lastEmittedValueRef.current = value
@@ -155,13 +168,13 @@ function WheelColumn({
   }, [])
 
   const handleScroll = useCallback(() => {
-    if (!containerRef.current || isDragging) return
+    if (!containerRef.current) return
 
     const scrollTop = containerRef.current.scrollTop
     const index = Math.round(scrollTop / ITEM_HEIGHT)
     const clampedIndex = Math.max(0, Math.min(index, items.length - 1))
     emitValueChange(items[clampedIndex])
-  }, [emitValueChange, isDragging, items])
+  }, [emitValueChange, items])
 
   const handleScrollEnd = useCallback(() => {
     if (!containerRef.current) return
@@ -197,18 +210,25 @@ function WheelColumn({
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
+    container.addEventListener('scrollend', handleScrollEnd, {
+      passive: true,
+    } as AddEventListenerOptions)
     return () => {
       container.removeEventListener('scroll', onScroll)
+      container.removeEventListener('scrollend', handleScrollEnd)
       if (rafId !== null) cancelAnimationFrame(rafId)
       clearTimeout(scrollTimeout)
     }
   }, [handleScroll, handleScrollEnd])
 
   return (
-    <div className="relative h-[220px] w-[92px] overflow-hidden touch-pan-y">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[88px] bg-gradient-to-b from-white via-white/90 to-transparent dark:from-[#2C2C2E] dark:via-[#2C2C2E]/90" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[88px] bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#2C2C2E] dark:via-[#2C2C2E]/90" />
-
+    <div
+      className="relative h-[220px] flex-1 overflow-hidden touch-pan-y"
+      style={{
+        mask: 'linear-gradient(transparent, white 20%, white 80%, transparent)',
+        WebkitMask: 'linear-gradient(transparent, white 20%, white 80%, transparent)',
+      }}
+    >
       <div
         ref={containerRef}
         className="h-full overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide snap-y snap-mandatory select-none touch-pan-y"
@@ -229,17 +249,29 @@ function WheelColumn({
         onMouseUp={() => setIsDragging(false)}
         onMouseLeave={() => setIsDragging(false)}
       >
-        {items.map((item) => {
+        {items.map((item, index) => {
           const isSelected = item === value
+          const distance = selectedIndex === -1 ? 99 : Math.abs(index - selectedIndex)
+          const direction = index - selectedIndex
+          const rotateX = Math.max(-72, Math.min(72, direction * 18))
+          const scale = Math.max(0.62, 1 - distance * 0.12)
+          const opacity = Math.max(0.28, 1 - distance * 0.15)
+          const translateZ = Math.max(0, 24 - distance * 8)
+
           return (
             <div
               key={item}
               className={cn(
-                'flex h-[44px] items-center justify-center snap-center leading-none transition-[color,transform] duration-150',
+                'flex h-[44px] items-center justify-center snap-center leading-none transition-[color,transform,opacity] duration-150',
                 isSelected
-                  ? 'text-[23px] font-semibold text-zinc-900 dark:text-white scale-[1.03] translate-y-[1px]'
-                  : 'text-[21px] font-normal text-zinc-400 dark:text-zinc-500 translate-y-[1px]'
+                  ? 'text-[24px] font-semibold text-zinc-900 dark:text-zinc-100'
+                  : 'text-[21px] font-medium text-zinc-400 dark:text-zinc-500'
               )}
+              style={{
+                transform: `perspective(320px) rotateX(${rotateX}deg) translateZ(${translateZ}px) scale(${scale})`,
+                opacity,
+                textShadow: isSelected ? undefined : 'none',
+              }}
               onClick={() => {
                 emitValueChange(item, { haptic: true })
                 scrollToValue(item)
@@ -471,6 +503,7 @@ function MobileTimePicker({
   const [tempHour, setTempHour] = useState(use12Hour ? initial12.hour12 : initial.hour24)
   const [tempMinute, setTempMinute] = useState(initial.minute)
   const [tempPeriod, setTempPeriod] = useState<'AM' | 'PM'>(initial12.period)
+  const [wheelKey, setWheelKey] = useState(0)
 
   const handleConfirm = () => {
     const normalizedHour = use12Hour ? to24Hour(tempHour, tempPeriod) : tempHour
@@ -487,56 +520,63 @@ function MobileTimePicker({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/45 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/40 dark:bg-black/55 backdrop-blur-[2px]"
             style={{ zIndex }}
             onClick={onClose}
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' }}
-            animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-            exit={{ opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed left-1/2 top-1/2 max-h-[72vh] w-[calc(100%-1rem)] max-w-md overflow-y-auto rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/70 dark:bg-[#2C2C2E]"
+            className="fixed inset-x-0 bottom-0 mx-auto max-h-[78vh] w-[calc(100%-0.75rem)] max-w-md overflow-y-auto rounded-[26px] bg-white dark:bg-zinc-900/98 shadow-[0_16px_48px_rgba(0,0,0,0.12)] dark:shadow-[0_26px_64px_rgba(0,0,0,0.65)]"
             style={{ zIndex: zIndex + 1 }}
           >
             <div className="flex justify-center pb-2 pt-3">
-              <div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+              <div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-500/80" />
             </div>
 
             <div className="flex items-center justify-between px-4 pb-4">
               <button
                 onClick={onClose}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-500 active:bg-zinc-100 dark:active:bg-zinc-700"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 active:bg-zinc-100 dark:active:bg-zinc-800/70"
               >
                 <X className="h-5 w-5" />
               </button>
-              <span className="text-[17px] font-semibold text-zinc-900 dark:text-white">
+              <span className="text-[17px] font-semibold text-zinc-900 dark:text-zinc-100">
                 {title}
               </span>
               <button
                 onClick={handleConfirm}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-[#007AFF] active:bg-blue-50 dark:text-[#0A84FF] dark:active:bg-blue-900/30"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-blue-500 dark:text-[#5ab0ff] active:bg-blue-50 dark:active:bg-blue-950/60"
               >
                 <Check className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="px-4 pb-8">
-              <div className="relative mx-auto flex h-[220px] items-center justify-center gap-0.5">
-                <div className="pointer-events-none absolute inset-x-4 top-1/2 h-[44px] -translate-y-1/2 rounded-xl bg-zinc-100/85 dark:bg-zinc-700/55" />
+            <div className="px-4 pb-4">
+              <div className="relative mx-auto flex h-[220px] items-center justify-center gap-1 px-1">
+                <div className="pointer-events-none absolute inset-x-3 top-1/2 h-[44px] -translate-y-1/2 rounded-xl bg-zinc-100/80 dark:bg-white/8" />
 
                 <WheelColumn
+                  key={`hour-${wheelKey}`}
                   items={use12Hour ? HOURS_12 : HOURS_24}
                   value={tempHour}
                   onChange={setTempHour}
                 />
-                <div className="flex h-[44px] w-8 items-center justify-center pb-[1px] text-[30px] font-semibold leading-none text-zinc-900 dark:text-white">
+                <div className="flex h-[44px] w-8 items-center justify-center pb-[1px] text-[30px] font-semibold leading-none text-zinc-400">
                   :
                 </div>
-                <WheelColumn items={MINUTES} value={tempMinute} onChange={setTempMinute} />
+                <WheelColumn
+                  key={`min-${wheelKey}`}
+                  items={MINUTES}
+                  value={tempMinute}
+                  onChange={setTempMinute}
+                />
                 {use12Hour && (
                   <WheelColumn
+                    key={`period-${wheelKey}`}
                     items={PERIODS}
                     value={tempPeriod}
                     onChange={(v) => setTempPeriod(v as 'AM' | 'PM')}
@@ -545,6 +585,33 @@ function MobileTimePicker({
               </div>
             </div>
 
+            {/* Quick shortcuts */}
+            <div className="px-4 pb-4 pt-0 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const now = new Date()
+                  const roundedNow = parseTime(
+                    `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+                  )
+                  if (use12Hour) {
+                    const { hour12, period } = to12Hour(roundedNow.hour24)
+                    setTempHour(hour12)
+                    setTempPeriod(period)
+                  } else {
+                    setTempHour(roundedNow.hour24)
+                  }
+                  setTempMinute(roundedNow.minute)
+                  setWheelKey((k) => k + 1)
+                }}
+                className="w-full h-[44px] rounded-xl bg-zinc-100 dark:bg-white/8 text-[15px] font-medium text-zinc-600 dark:text-zinc-300 active:bg-zinc-200 dark:active:bg-white/14 transition-colors"
+              >
+                Ahora
+              </button>
+              <p className="text-center text-[11px] text-zinc-400 dark:text-zinc-600">
+                Intervalos de 5 minutos
+              </p>
+            </div>
             <div className="h-safe-area-inset-bottom" />
           </motion.div>
         </>
@@ -559,7 +626,7 @@ function MobileTimePicker({
 export function IOSTimePicker(props: IOSTimePickerProps) {
   const isMobile = useIsMobile()
   const pickerKey = `${props.value}-${props.hourFormat ?? 'auto'}-${props.isOpen ? 'open' : 'closed'}-${isMobile ? 'm' : 'd'}`
-  if (isMobile) return <MobileTimePicker key={pickerKey} {...props} />
+  if (isMobile && !props.forceDesktop) return <MobileTimePicker key={pickerKey} {...props} />
   return <DesktopTimePicker key={pickerKey} {...props} />
 }
 
@@ -584,12 +651,12 @@ export function TimePickerTrigger({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex h-10 min-w-[72px] items-center justify-center rounded-xl px-3',
-        'bg-zinc-100/80 dark:bg-zinc-800/80',
-        'text-[15px] font-medium text-zinc-900 dark:text-white',
-        'active:scale-95 transition-[transform,background-color] duration-150',
-        'hover:bg-zinc-100 dark:hover:bg-zinc-800',
-        'focus:outline-none focus:ring-2 focus:ring-[#007AFF]/50',
+        'flex h-11 min-w-[72px] items-center justify-center rounded-xl px-3 border',
+        'border-zinc-300 bg-zinc-100 dark:border-zinc-700/80 dark:bg-zinc-900/85',
+        'text-[15px] font-medium text-zinc-900 dark:text-zinc-100',
+        'active:scale-95 transition-[transform,background-color,border-color] duration-150',
+        'hover:bg-zinc-200 dark:hover:bg-zinc-900',
+        'focus:outline-none focus:ring-2 focus:ring-[#007AFF]/40',
         className
       )}
     >

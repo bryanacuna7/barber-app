@@ -22,6 +22,8 @@ interface GuideContextualTipProps {
   linkHref: string
   linkText?: string
   className?: string
+  /** Single-line compact layout for mobile. Default false = full layout (desktop). */
+  compact?: boolean
 }
 
 function getStorageKey(businessId: string, userId: string, tipId: string) {
@@ -35,6 +37,7 @@ export function GuideContextualTip({
   linkHref,
   linkText = 'Ver en la guía',
   className,
+  compact = false,
 }: GuideContextualTipProps) {
   const { businessId, userId } = useBusiness()
   const [dismissedInSession, setDismissedInSession] = useState(false)
@@ -62,6 +65,42 @@ export function GuideContextualTip({
   }, [storageKey])
 
   if (dismissedInSession || isDismissedFromStorage) return null
+
+  if (compact) {
+    return (
+      <div
+        className={cn(
+          'flex items-center gap-2.5 rounded-xl px-3.5 py-2.5',
+          'bg-blue-50 dark:bg-blue-950/30',
+          className
+        )}
+        role="status"
+      >
+        <Info
+          className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0"
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+        <p className="flex-1 min-w-0 text-[13px] font-medium text-blue-800 dark:text-blue-200 truncate">
+          {title}
+        </p>
+        <Link
+          href={linkHref}
+          className="shrink-0 text-[13px] font-medium text-blue-600 dark:text-blue-400"
+        >
+          {linkText} →
+        </Link>
+        <button
+          type="button"
+          onClick={handleDismiss}
+          aria-label="Cerrar consejo"
+          className="shrink-0 grid place-items-center h-6 w-6 rounded text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+        >
+          <X className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div

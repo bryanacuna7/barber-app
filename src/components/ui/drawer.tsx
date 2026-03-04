@@ -137,7 +137,7 @@ export function Drawer({
                 ? reducedMotion.spring.default.duration
                 : animations.duration.normal,
             }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-md"
             aria-hidden="true"
           />
 
@@ -161,8 +161,11 @@ export function Drawer({
               opacity,
             }}
             className={cn(
-              'relative w-full bg-white dark:bg-zinc-950 rounded-t-[28px] shadow-2xl',
-              'border border-black/10 dark:border-zinc-800/60 border-b-0',
+              'relative w-full rounded-t-[28px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl',
+              'border-x border-t border-zinc-200/70 dark:border-zinc-800/80',
+              'shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]',
+              'before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px',
+              'before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60',
               'max-h-[85vh] overflow-hidden flex flex-col',
               'focus-visible:!outline-none',
               'pb-safe', // Safe area for iOS home indicator
@@ -176,12 +179,12 @@ export function Drawer({
 
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-start justify-between px-4 sm:px-6 pb-4 pt-2">
+              <div className="flex items-start justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-4 pb-4 pt-2 dark:border-zinc-800/70 dark:from-zinc-900/55 sm:px-6">
                 <div className="flex-1 pr-4">
                   {title && (
                     <h2
                       id="drawer-title"
-                      className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
+                      className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
                     >
                       {title}
                     </h2>
@@ -194,9 +197,9 @@ export function Drawer({
                     whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
                     onClick={onClose}
                     className={cn(
-                      'p-2 rounded-xl transition-colors duration-200',
-                      'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
-                      'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                      'inline-flex h-11 w-11 items-center justify-center rounded-2xl border p-2 transition-colors duration-200',
+                      'border-zinc-200/70 bg-white/80 text-zinc-400 backdrop-blur hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:hover:text-zinc-200',
+                      'hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80',
                       'focus:outline-none focus:ring-2 focus:ring-zinc-500'
                     )}
                     aria-label="Cerrar"

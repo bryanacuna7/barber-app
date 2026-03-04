@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { format, parseISO, addMinutes, isValid } from 'date-fns'
-import { X, Plus, CheckCircle2 } from 'lucide-react'
+import { X, Plus, CheckCircle2, CalendarX2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
 import { AppointmentContextMenu, type ContextMenuAppointment } from './appointment-context-menu'
@@ -116,7 +116,7 @@ function StatusPill({ status }: { status: string }) {
   const pill = map[status] ?? map.pending
   return (
     <span
-      className={`inline-block mt-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold leading-none ${pill.className}`}
+      className={`inline-block mt-1 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[10px] font-semibold leading-none ${pill.className}`}
     >
       {pill.label}
     </span>
@@ -233,10 +233,10 @@ function AppointmentRow({
 
             {/* Main content */}
             <div
-              className={`flex min-w-0 flex-1 items-start justify-between gap-2 ${isCancelled ? 'opacity-50' : ''}`}
+              className={`flex min-w-0 flex-1 flex-col gap-1 ${isCancelled ? 'opacity-50' : ''}`}
             >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
+              <div className="min-w-0">
+                <div className="mb-0.5 flex min-w-0 items-center gap-2">
                   {onToggleSelect && (
                     <button
                       type="button"
@@ -263,7 +263,7 @@ function AppointmentRow({
                     </button>
                   )}
                   <span
-                    className={`text-sm font-semibold text-foreground leading-tight truncate ${isCancelled ? 'line-through' : ''}`}
+                    className={`min-w-0 flex-1 truncate text-sm font-semibold leading-tight text-foreground ${isCancelled ? 'line-through' : ''}`}
                   >
                     {apt.service?.name || 'Servicio'}
                   </span>
@@ -274,9 +274,9 @@ function AppointmentRow({
               </div>
 
               {/* Price + Status pill */}
-              <div className="flex-shrink-0 text-right">
+              <div className="flex w-full items-center justify-between text-left">
                 <div
-                  className={`text-sm font-semibold tabular-nums leading-tight ${isCancelled ? 'text-muted line-through' : 'text-foreground'}`}
+                  className={`whitespace-nowrap text-sm font-semibold tabular-nums leading-tight ${isCancelled ? 'text-muted line-through' : 'text-foreground'}`}
                 >
                   {price}
                 </div>
@@ -323,8 +323,8 @@ function AppointmentRow({
           <div
             className={`flex min-w-0 flex-1 items-start justify-between gap-2 ${isCancelled ? 'opacity-50' : ''}`}
           >
-            <div className="min-w-0 flex-1">
-              <div className="group flex items-center gap-2 mb-0.5">
+            <div className="min-w-0 flex-1 pr-2">
+              <div className="group mb-0.5 flex min-w-0 items-center gap-2">
                 {onToggleSelect && (
                   <button
                     type="button"
@@ -338,7 +338,7 @@ function AppointmentRow({
                     className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-opacity ${
                       isSelected?.(apt.id)
                         ? 'border-blue-500 bg-blue-500 text-white opacity-100'
-                        : 'border-zinc-300 dark:border-zinc-600 opacity-0 group-hover:opacity-100'
+                        : 'border-zinc-400 bg-white/80 text-zinc-700 opacity-100 hover:bg-white dark:border-zinc-400 dark:bg-zinc-900/90 dark:text-zinc-200 dark:hover:bg-zinc-900'
                     }`}
                   >
                     {isSelected?.(apt.id) && (
@@ -355,17 +355,19 @@ function AppointmentRow({
                   </button>
                 )}
                 <span
-                  className={`text-sm font-semibold text-foreground leading-tight ${isCancelled ? 'line-through' : ''}`}
+                  className={`min-w-0 flex-1 truncate whitespace-nowrap text-sm font-semibold leading-tight text-foreground ${isCancelled ? 'line-through' : ''}`}
                 >
                   {apt.service?.name || 'Servicio'}
                 </span>
               </div>
-              <span className="text-xs text-muted">{apt.client?.name || 'Cliente'}</span>
+              <span className="block truncate text-xs text-muted">
+                {apt.client?.name || 'Cliente'}
+              </span>
             </div>
 
             <div className="flex-shrink-0 text-right">
               <div
-                className={`text-sm font-semibold tabular-nums leading-tight ${isCancelled ? 'text-muted line-through' : 'text-foreground'}`}
+                className={`whitespace-nowrap text-sm font-semibold tabular-nums leading-tight ${isCancelled ? 'text-muted line-through' : 'text-foreground'}`}
               >
                 {price}
               </div>
@@ -378,12 +380,12 @@ function AppointmentRow({
   )
 }
 
-
 // ---------------------------------------------------------------------------
-// Scroll-fade wrapper — dims blocks as they scroll past (mobile only)
+// Card-level fade — opacity dims as card scrolls past the sticky label.
+// Pure visual transform: zero layout change, zero feedback loop.
 // ---------------------------------------------------------------------------
 
-function TimeBlockScrollFade({
+function CardScrollFade({
   children,
   isLast,
   entryDelay,
@@ -392,24 +394,19 @@ function TimeBlockScrollFade({
   isLast: boolean
   entryDelay: number
 }) {
-  const innerRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
-    target: innerRef,
-    // From: block top at 65% viewport → To: block top 8% above viewport top
-    offset: ['start 0.65', 'start -0.08'],
+    target: cardRef,
+    offset: ['start 0.55', 'start -0.1'],
   })
 
-  // Last block never dims — it's always the "current" section
-  const opacity = useTransform(scrollYProgress, [0, 0.6, 1], isLast ? [1, 1, 1] : [1, 1, 0.38])
-  const scale = useTransform(scrollYProgress, [0, 0.6, 1], isLast ? [1, 1, 1] : [1, 1, 0.975])
+  // Dims past sections so the current block stays in focus
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], isLast ? [1, 1, 1] : [1, 1, 0.15])
 
   return (
-    // Outer: scroll-linked visual state
-    <motion.div style={{ opacity, scale, transformOrigin: 'top center' }}>
-      {/* Inner: entry animation */}
+    <motion.div ref={cardRef} style={{ opacity }}>
       <motion.div
-        ref={innerRef}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...animations.spring.gentle, delay: entryDelay }}
       >
@@ -432,6 +429,7 @@ export function CalendarDayView({
   draggedId: _draggedId,
   onDragId: _onDragId,
   onStatusChange,
+  onWalkIn,
   isSelected,
   onToggleSelect,
   selectionCount = 0,
@@ -444,6 +442,7 @@ export function CalendarDayView({
   void selectionCount
 
   const [contextMenu, setContextMenu] = useState<ContextMenuAppointment | null>(null)
+  const allBlocksEmpty = timeBlocks.every((b) => b.appointments.length === 0)
 
   return (
     <div className="space-y-4">
@@ -455,133 +454,165 @@ export function CalendarDayView({
         </div>
       )}
 
-      {/* Time blocks (Cinema feature) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-        {timeBlocks.map((block, blockIndex) => (
-          <TimeBlockScrollFade
-            key={block.id}
-            isLast={blockIndex === timeBlocks.length - 1}
-            entryDelay={blockIndex * 0.1}
+      {/* Mobile: unified empty state when ALL blocks are empty */}
+      {allBlocksEmpty && (
+        <div className="lg:hidden flex flex-col items-center gap-3 rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 px-6 py-10 shadow-sm dark:shadow-none text-center">
+          <CalendarX2 className="h-10 w-10 text-zinc-300 dark:text-zinc-600" strokeWidth={1.5} />
+          <div>
+            <p className="text-sm font-medium text-foreground">Sin citas para hoy</p>
+            <p className="mt-0.5 text-xs text-muted">Agendá una cita o agregá un walk-in</p>
+          </div>
+          <button
+            type="button"
+            onClick={onWalkIn}
+            className="mt-1 flex items-center gap-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 px-4 h-10 text-sm font-medium text-foreground active:bg-zinc-200 dark:active:bg-zinc-700 transition-colors"
           >
-            {/* Block label — fuera del card, estilo Mock B */}
-            <div className="flex items-center justify-between px-1 mb-2">
-              <div className="flex items-center gap-1.5">
-                <block.icon className={`w-3.5 h-3.5 ${block.iconColor}`} />
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted">
-                  {block.label}
-                </h3>
-                <span className="text-[11px] text-subtle">
-                  · {block.start > 12 ? block.start - 12 : block.start}
-                  {block.start >= 12 ? 'pm' : 'am'} – {block.end > 12 ? block.end - 12 : block.end}
-                  {block.end >= 12 ? 'pm' : 'am'}
-                </span>
-              </div>
-              <span
-                className={`text-[11px] font-semibold ${
-                  block.occupancyPercent >= 90
-                    ? 'text-red-500'
-                    : block.occupancyPercent >= 60
-                      ? 'text-amber-500'
-                      : 'text-emerald-500'
-                }`}
-              >
-                {block.count} citas · {block.occupancyPercent}%
-              </span>
-            </div>
+            <Plus className="h-4 w-4" />
+            Agregar cita
+          </button>
+        </div>
+      )}
 
-            {/* Slim occupancy bar */}
-            <div className="h-[3px] mb-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+      {/* Time blocks — sticky labels + fading cards */}
+      {/* Desktop: always visible. Mobile: hidden when all blocks empty */}
+      <div
+        className={`grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 ${allBlocksEmpty ? 'hidden lg:grid' : ''}`}
+      >
+        {timeBlocks.map((block, blockIndex) => {
+          const isLastBlock = blockIndex === timeBlocks.length - 1
+          return (
+            <div key={block.id} className="relative">
+              {/* Sticky label — glass pill, never fades, sticks at top while scrolling */}
               <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${block.occupancyPercent}%` }}
-                className={`h-full rounded-full ${
-                  block.occupancyPercent >= 90
-                    ? 'bg-red-500'
-                    : block.occupancyPercent >= 60
-                      ? 'bg-amber-500'
-                      : 'bg-emerald-500'
-                }`}
-              />
-            </div>
-
-            {/* Appointments card — solo las filas */}
-            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none">
-              {block.appointments.length === 0 && (
-                <div className="px-4 py-3 text-sm text-muted">Sin citas en este bloque</div>
-              )}
-
-              <AnimatePresence mode="popLayout">
-                {(() => {
-                  // Compute now-line insertion index for the active block
-                  const isActiveBlock =
-                    isSelectedDateToday &&
-                    currentTime != null &&
-                    currentTime.getHours() >= block.start &&
-                    currentTime.getHours() < block.end
-
-                  const nowIndex = isActiveBlock
-                    ? block.appointments.findIndex((apt) => {
-                        if (!isValid(parseISO(apt.scheduled_at))) return false
-                        return parseISO(apt.scheduled_at) >= currentTime!
-                      })
-                    : -1
-                  // -1 means all apts are past → show after last; findIndex returns -1 on no match
-                  const insertAfterLast =
-                    isActiveBlock && nowIndex === -1 && block.appointments.length > 0
-
-                  return block.appointments.map((apt, aptIndex) => (
-                    <React.Fragment key={apt.id}>
-                      {aptIndex === (nowIndex === -1 ? -99 : nowIndex) && (
-                        <NowLine time={currentTime!} />
-                      )}
-                      <AppointmentRow
-                        apt={apt}
-                        isLast={aptIndex === block.appointments.length - 1 && !insertAfterLast}
-                        onSelectId={onSelectId}
-                        onStatusChange={onStatusChange}
-                        isSelected={isSelected}
-                        onToggleSelect={onToggleSelect}
-                        onOpenContextMenu={setContextMenu}
-                      />
-                      {insertAfterLast && aptIndex === block.appointments.length - 1 && (
-                        <NowLine time={currentTime!} />
-                      )}
-                    </React.Fragment>
-                  ))
-                })()}
-              </AnimatePresence>
-            </div>
-
-            {/* Gap indicators */}
-            <div className="mt-3 space-y-1.5 lg:space-y-2">
-              {gaps
-                .filter((gap) => {
-                  const gapHour = parseISO(gap.start).getHours()
-                  return gapHour >= block.start && gapHour < block.end
-                })
-                .map((gap, gapIndex) => (
-                  <motion.div
-                    key={`gap-${blockIndex}-${gapIndex}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="rounded-lg p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-colors"
-                    onClick={() => toast.info('Sugerir clientes para gap')}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ ...animations.spring.gentle, delay: blockIndex * 0.05 }}
+                className="sticky top-14 z-[5] -mx-1 px-1 pt-1 pb-2 bg-white/85 dark:bg-zinc-950/85 backdrop-blur-sm md:static md:bg-transparent md:dark:bg-transparent md:backdrop-blur-none"
+              >
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <block.icon className={`w-3.5 h-3.5 ${block.iconColor}`} />
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted">
+                      {block.label}
+                    </h3>
+                    <span className="text-[11px] text-subtle">
+                      · {block.start > 12 ? block.start - 12 : block.start}
+                      {block.start >= 12 ? 'pm' : 'am'} –{' '}
+                      {block.end > 12 ? block.end - 12 : block.end}
+                      {block.end >= 12 ? 'pm' : 'am'}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[11px] font-semibold ${
+                      block.occupancyPercent >= 90
+                        ? 'text-red-500'
+                        : block.occupancyPercent >= 60
+                          ? 'text-amber-500'
+                          : 'text-emerald-500'
+                    }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Plus className="w-3.5 h-3.5 text-subtle" />
-                      <div className="flex-1">
-                        <div className="text-xs text-subtle">
-                          {gap.minutes} min disponible · {format(parseISO(gap.start), 'h:mm a')} -{' '}
-                          {format(parseISO(gap.end), 'h:mm a')}
+                    {block.count} citas · {block.occupancyPercent}%
+                  </span>
+                </div>
+
+                {/* Slim occupancy bar */}
+                <div className="h-[3px] mb-1 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${block.occupancyPercent}%` }}
+                    className={`h-full rounded-full ${
+                      block.occupancyPercent >= 90
+                        ? 'bg-red-500'
+                        : block.occupancyPercent >= 60
+                          ? 'bg-amber-500'
+                          : 'bg-emerald-500'
+                    }`}
+                  />
+                </div>
+              </motion.div>
+
+              {/* Card content — fades as block scrolls past top */}
+              <CardScrollFade isLast={isLastBlock} entryDelay={blockIndex * 0.1}>
+                {/* Appointments card */}
+                <div className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none mt-2">
+                  {block.appointments.length === 0 && (
+                    <div className="px-4 py-3 text-sm text-muted">Sin citas en este bloque</div>
+                  )}
+
+                  <AnimatePresence mode="popLayout">
+                    {(() => {
+                      // Compute now-line insertion index for the active block
+                      const isActiveBlock =
+                        isSelectedDateToday &&
+                        currentTime != null &&
+                        currentTime.getHours() >= block.start &&
+                        currentTime.getHours() < block.end
+
+                      const nowIndex = isActiveBlock
+                        ? block.appointments.findIndex((apt) => {
+                            if (!isValid(parseISO(apt.scheduled_at))) return false
+                            return parseISO(apt.scheduled_at) >= currentTime!
+                          })
+                        : -1
+                      // -1 means all apts are past → show after last
+                      const insertAfterLast =
+                        isActiveBlock && nowIndex === -1 && block.appointments.length > 0
+
+                      return block.appointments.map((apt, aptIndex) => (
+                        <React.Fragment key={apt.id}>
+                          {aptIndex === (nowIndex === -1 ? -99 : nowIndex) && (
+                            <NowLine time={currentTime!} />
+                          )}
+                          <AppointmentRow
+                            apt={apt}
+                            isLast={aptIndex === block.appointments.length - 1 && !insertAfterLast}
+                            onSelectId={onSelectId}
+                            onStatusChange={onStatusChange}
+                            isSelected={isSelected}
+                            onToggleSelect={onToggleSelect}
+                            onOpenContextMenu={setContextMenu}
+                          />
+                          {insertAfterLast && aptIndex === block.appointments.length - 1 && (
+                            <NowLine time={currentTime!} />
+                          )}
+                        </React.Fragment>
+                      ))
+                    })()}
+                  </AnimatePresence>
+                </div>
+
+                {/* Gap indicators */}
+                <div className="mt-3 space-y-1.5 lg:space-y-2">
+                  {gaps
+                    .filter((gap) => {
+                      const gapHour = parseISO(gap.start).getHours()
+                      return gapHour >= block.start && gapHour < block.end
+                    })
+                    .map((gap, gapIndex) => (
+                      <motion.div
+                        key={`gap-${blockIndex}-${gapIndex}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="rounded-lg p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-colors"
+                        onClick={() => toast.info('Sugerir clientes para gap')}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus className="w-3.5 h-3.5 text-subtle" />
+                          <div className="flex-1">
+                            <div className="text-xs text-subtle">
+                              {gap.minutes} min disponible · {format(parseISO(gap.start), 'h:mm a')}{' '}
+                              - {format(parseISO(gap.end), 'h:mm a')}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+                      </motion.div>
+                    ))}
+                </div>
+              </CardScrollFade>
             </div>
-          </TimeBlockScrollFade>
-        ))}
+          )
+        })}
       </div>
 
       {/* Long-press context menu (portal) */}

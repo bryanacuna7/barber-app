@@ -24,6 +24,7 @@ import {
   isValid,
   startOfDay,
   endOfDay,
+  getDay,
 } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -42,6 +43,7 @@ import { useOptimisticAppointmentStatus } from '@/hooks/queries/useOptimisticApp
 import { useClients } from '@/hooks/queries/useClients'
 import { useServices } from '@/hooks/queries/useServices'
 import { useBarbers } from '@/hooks/queries/useBarbers'
+import { useBusinessSettings } from '@/hooks/queries/useSettings'
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { ComponentErrorBoundary, CalendarErrorBoundary } from '@/components/error-boundaries'
 import { QueryError } from '@/components/ui/query-error'
@@ -64,7 +66,14 @@ import { useSavedFilters, type SavedFilter } from '@/hooks/useSavedFilters'
 import { SavedFilterBar } from '@/components/ui/saved-filter-bar'
 
 type ViewMode = 'day' | 'week' | 'month'
-type StatusFilter = 'all' | 'scheduled' | 'completed'
+type StatusFilter =
+  | 'all'
+  | 'pending'
+  | 'confirmed'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show'
 
 interface CitasFilterState {
   statusFilter: StatusFilter
@@ -75,14 +84,19 @@ type CreateAppointmentErrors = Partial<Record<CreateAppointmentErrorField, strin
 
 const CITAS_FILTER_PRESETS: SavedFilter<CitasFilterState>[] = [
   { id: 'all', label: 'Todas', filter: { statusFilter: 'all' } },
-  { id: 'scheduled', label: 'Agendadas', filter: { statusFilter: 'scheduled' } },
+  { id: 'pending', label: 'Pendientes', filter: { statusFilter: 'pending' } },
+  { id: 'confirmed', label: 'Confirmadas', filter: { statusFilter: 'confirmed' } },
+  { id: 'in_progress', label: 'En curso', filter: { statusFilter: 'in_progress' } },
   { id: 'completed', label: 'Completadas', filter: { statusFilter: 'completed' } },
+  { id: 'cancelled', label: 'Canceladas', filter: { statusFilter: 'cancelled' } },
+  { id: 'no_show', label: 'No-show', filter: { statusFilter: 'no_show' } },
 ]
 
 const DEFAULT_CITAS_FILTER: CitasFilterState = { statusFilter: 'all' }
 
 function CitasCalendarFusionContent() {
   const { businessId, isBarber, barberId, staffPermissions } = useBusiness()
+  const { data: businessSettings } = useBusinessSettings(businessId)
   const router = useRouter()
   const searchParams = useSearchParams()
   const [viewMode, setViewMode] = usePreference<ViewMode>('citas_view', 'day', [
@@ -256,13 +270,9 @@ function CitasCalendarFusionContent() {
 
   const sortedAppointments = useMemo(() => {
     return [...filteredAppointments]
-      .filter((apt) => apt.status !== 'cancelled' && apt.status !== 'no_show')
       .filter((apt) => {
-        if (statusFilter === 'all') return true
-        if (statusFilter === 'scheduled')
-          return apt.status === 'pending' || apt.status === 'confirmed'
-        if (statusFilter === 'completed') return apt.status === 'completed'
-        return true
+        if (statusFilter === 'all') return apt.status !== 'cancelled' && apt.status !== 'no_show'
+        return apt.status === statusFilter
       })
       .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
   }, [filteredAppointments, statusFilter])
@@ -276,15 +286,35 @@ function CitasCalendarFusionContent() {
     }
   }, [viewMode, clearSelection])
 
-  // Time blocks (Cinema feature - day view only)
+  // Time blocks — dynamic based on business operating hours for the selected day
   const timeBlocks = useMemo(() => {
     if (viewMode !== 'day') return []
+
+    // Map JS getDay() (0=Sun) → operating_hours key
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+    const dayKey = dayKeys[getDay(selectedDate)]
+    const dayHours = businessSettings?.operatingHours?.[dayKey]
+
+    // Parse HH:MM to hour number
+    const parseHour = (time: string) => {
+      const [h] = time.split(':').map(Number)
+      return h
+    }
+
+    const openHour = dayHours ? parseHour(dayHours.open) : 7
+    const closeHour = dayHours ? parseHour(dayHours.close) : 21
+
+    // Split the business day into 3 blocks: morning / midday / afternoon
+    const totalHours = closeHour - openHour
+    const midStart = openHour + Math.floor(totalHours * 0.4) // ~40% mark
+    const aftStart = openHour + Math.floor(totalHours * 0.65) // ~65% mark
+
     const blocks = [
       {
         id: 'morning',
         label: 'MAÑANA',
-        start: 7,
-        end: 12,
+        start: openHour,
+        end: midStart,
         icon: Sunrise,
         iconColor: 'text-violet-400',
         gradient: 'from-violet-500/10 to-blue-500/10',
@@ -292,8 +322,8 @@ function CitasCalendarFusionContent() {
       {
         id: 'midday',
         label: 'MEDIODÍA',
-        start: 12,
-        end: 15,
+        start: midStart,
+        end: aftStart,
         icon: Sun,
         iconColor: 'text-amber-400',
         gradient: 'from-purple-500/10 to-violet-500/10',
@@ -301,8 +331,8 @@ function CitasCalendarFusionContent() {
       {
         id: 'afternoon',
         label: 'TARDE',
-        start: 15,
-        end: 21,
+        start: aftStart,
+        end: closeHour,
         icon: Moon,
         iconColor: 'text-blue-400',
         gradient: 'from-blue-500/10 to-purple-500/10',
@@ -326,7 +356,7 @@ function CitasCalendarFusionContent() {
         count: blockAppointments.length,
       }
     })
-  }, [viewMode, sortedAppointments])
+  }, [viewMode, sortedAppointments, selectedDate, businessSettings])
 
   // Week days
   const weekDays = useMemo(() => {
@@ -419,8 +449,6 @@ function CitasCalendarFusionContent() {
     return { scheduled, completed, totalRevenue, projectedRevenue }
   }, [filteredAppointments, sortedAppointments])
 
-  const DAILY_GOAL = 200000
-  const goalProgress = Math.min(Math.round((stats.projectedRevenue / DAILY_GOAL) * 100), 100)
   const isSelectedDateToday = useMemo(() => isSameDay(selectedDate, today), [selectedDate, today])
 
   // Header labels
@@ -478,11 +506,6 @@ function CitasCalendarFusionContent() {
         return !isValid(date)
       }).length,
     [filteredAppointments]
-  )
-
-  const mobileProjectionAppointmentsLabel = useMemo(
-    () => `${filteredAppointments.length} citas`,
-    [filteredAppointments.length]
   )
 
   // Derive form date from selectedDate
@@ -665,9 +688,7 @@ function CitasCalendarFusionContent() {
             mobileDateLabelCompact={mobileDateLabelCompact}
             jumpToCurrentLabel={jumpToCurrentLabel}
             projectedRevenueDisplay={projectedRevenueDisplay}
-            mobileProjectionAppointmentsLabel={mobileProjectionAppointmentsLabel}
             projectionWindowLabel={projectionWindowLabel}
-            goalProgress={goalProgress}
             appointmentCount={filteredAppointments.length}
           />
 
@@ -684,18 +705,20 @@ function CitasCalendarFusionContent() {
           </div>
 
           {/* Mobile sticky filter pills */}
-          <div className="lg:hidden sticky top-[var(--header-h,120px)] z-30 backdrop-blur-sm px-4 pt-2 pb-1">
+          <div className="lg:hidden sticky top-0 z-30 -mx-4 px-4 pt-2.5 pb-2 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/40 dark:border-zinc-800/40">
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
               {savedFilters.presets.map((preset) => {
-                const isActive = savedFilters.activePresetId === preset.id
+                const isActive =
+                  savedFilters.activePresetId === preset.id ||
+                  (savedFilters.activePresetId === null && preset.id === 'all')
                 return (
                   <button
                     key={preset.id}
                     onClick={() => handleApplyCitasPreset(preset.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors min-h-[32px] ${
+                    className={`shrink-0 px-3.5 py-2 rounded-full text-[13px] font-semibold transition-colors min-h-[36px] ${
                       isActive
-                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                        : 'bg-zinc-100 dark:bg-zinc-800 text-muted hover:text-foreground'
+                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
+                        : 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400'
                     }`}
                   >
                     {preset.label}
@@ -705,14 +728,22 @@ function CitasCalendarFusionContent() {
             </div>
           </div>
 
-          {/* Guide Tip */}
+          {/* Guide Tip — compact on mobile, full on desktop */}
           <div className="px-0 lg:px-6 pt-4">
             <GuideContextualTip
               tipId="citas-timer"
               title="Controlá la duración de cada cita"
               description="Usá el temporizador al iniciar una cita. La app aprende la duración promedio y ajusta los slots automáticamente."
               linkHref="/guia#citas"
-              className="mb-4 sm:mb-5"
+              compact
+              className="lg:hidden mb-3"
+            />
+            <GuideContextualTip
+              tipId="citas-timer"
+              title="Controlá la duración de cada cita"
+              description="Usá el temporizador al iniciar una cita. La app aprende la duración promedio y ajusta los slots automáticamente."
+              linkHref="/guia#citas"
+              className="hidden lg:flex mb-4 sm:mb-5"
             />
           </div>
 

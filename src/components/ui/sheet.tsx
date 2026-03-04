@@ -92,7 +92,7 @@ export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/65 backdrop-blur-md"
             style={{ zIndex }}
           />
           {children}
@@ -213,22 +213,22 @@ export function SheetContent({
         onDrag: handleDrag,
         onDragEnd: handleDragEnd,
       })}
-      className={`fixed flex flex-col gap-4 bg-background p-6 shadow-lg ${
+      className={`fixed flex flex-col gap-4 p-6 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60 ${
         isCenteredBottomSheet
-          ? 'left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-lg rounded-2xl border'
+          ? 'left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-lg rounded-[28px] border border-zinc-200/70 dark:border-zinc-800/80'
           : side === 'bottom'
-            ? 'inset-x-0 bottom-0 rounded-t-2xl border-t touch-pan-x'
+            ? 'inset-x-0 bottom-0 rounded-t-[28px] border-x border-t border-zinc-200/70 dark:border-zinc-800/80 touch-pan-x'
             : side === 'right'
-              ? 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l sm:max-w-md'
+              ? 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l border-zinc-200/70 dark:border-zinc-800/80 sm:max-w-md'
               : side === 'left'
-                ? 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r sm:max-w-md'
-                : 'inset-x-0 top-0 rounded-b-2xl border-b'
+                ? 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-zinc-200/70 dark:border-zinc-800/80 sm:max-w-md'
+                : 'inset-x-0 top-0 rounded-b-[28px] border-x border-b border-zinc-200/70 dark:border-zinc-800/80'
       } ${className}`}
     >
       {/* Drag handle for bottom sheets */}
       {isBottomSheet && (
         <div className="flex justify-center -mt-2 mb-2 md:hidden">
-          <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+          <div className="h-1 w-10 rounded-full bg-zinc-300/90 dark:bg-zinc-700/90" />
         </div>
       )}
       {children}

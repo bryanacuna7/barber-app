@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     start_url: '/dashboard',
     scope: '/',
     display: 'standalone',
-    background_color: '#f6f7f9',
+    background_color: '#000000',
     theme_color: FALLBACK_THEME_COLOR,
     orientation: 'portrait',
     categories: ['business', 'lifestyle'],

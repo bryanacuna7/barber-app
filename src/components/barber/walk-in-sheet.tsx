@@ -1,14 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, Clock, Loader2, Scissors, UserPlus } from 'lucide-react'
-import { Sheet, SheetClose, SheetContent } from '@/components/ui/sheet'
+import { ChevronLeft, Clock, Loader2, Scissors, UserPlus, X } from 'lucide-react'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useServices } from '@/hooks/queries/useServices'
 import { useCreateWalkIn } from '@/hooks/queries/useAppointments'
 import type { TodayAppointment } from '@/types/custom'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
+import { cn } from '@/lib/utils/cn'
 
 interface BarberOption {
   id: string
@@ -87,20 +88,6 @@ export function WalkInSheet({
 
   const isCreating = createWalkIn.isPending
 
-  const selectedCheckmark = (
-    <div className="h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
-      <svg className="h-3 w-3 text-white" viewBox="0 0 12 12" fill="none">
-        <path
-          d="M2 6l3 3 5-5"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  )
-
   return (
     <Sheet
       open={open}
@@ -113,19 +100,16 @@ export function WalkInSheet({
     >
       <SheetContent
         side="bottom"
-        centered
-        className="w-[calc(100%-1.25rem)] max-w-sm sm:max-w-md p-0 gap-0 overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_22px_64px_rgba(15,23,42,0.26)]"
+        className="!gap-0 !p-0 max-h-[90vh] overflow-hidden flex flex-col"
       >
-        <div className="p-5 sm:p-6 max-h-[80vh] overflow-y-auto">
-          <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+        {/* Drag handle */}
+        <div className="flex-shrink-0 pt-2 pb-1">
+          <div className="mx-auto h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+        </div>
 
-          <SheetClose
-            onClose={handleClose}
-            className="right-4 top-4 z-10 h-9 w-9 rounded-lg text-zinc-500 opacity-100 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
-          />
-
-          {/* Header */}
-          <div className="mb-1 flex items-center gap-2 pr-12">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pb-3">
+          <div className="flex items-center gap-2">
             {step === 'service' && needsBarberStep && (
               <button
                 type="button"
@@ -133,18 +117,29 @@ export function WalkInSheet({
                   setSelectedBarberId(null)
                   setSelectedServiceId(null)
                 }}
-                className="flex items-center justify-center w-8 h-8 -ml-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                className="flex items-center justify-center w-8 h-8 -ml-1 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 aria-label="Volver a seleccionar barbero"
               >
                 <ChevronLeft className="h-5 w-5 text-muted" />
               </button>
             )}
             <UserPlus className="h-5 w-5 text-amber-500" />
-            <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-              Walk-in
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">Walk-in</h2>
           </div>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-5">
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={isCreating}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors active:scale-95 hover:text-zinc-200 focus:outline-none disabled:opacity-50"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] [-webkit-overflow-scrolling:touch]">
+          <p className="text-sm text-muted mb-4">
             {step === 'barber'
               ? 'Selecciona el miembro del equipo'
               : 'Selecciona el servicio para el cliente'}
@@ -158,7 +153,7 @@ export function WalkInSheet({
                   key={barber.id}
                   type="button"
                   onClick={() => setSelectedBarberId(barber.id)}
-                  className="group flex w-full items-center gap-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-900 px-4 py-3.5 text-left transition-colors hover:bg-white hover:border-zinc-300 dark:hover:bg-zinc-800 dark:hover:border-zinc-600"
+                  className="flex min-h-[56px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-800/70"
                 >
                   {barber.photo_url ? (
                     <img
@@ -171,9 +166,7 @@ export function WalkInSheet({
                       <Scissors className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                     </span>
                   )}
-                  <span className="text-base font-semibold text-zinc-900 dark:text-white">
-                    {barber.name}
-                  </span>
+                  <span className="text-sm font-medium text-foreground">{barber.name}</span>
                 </button>
               ))}
             </div>
@@ -187,9 +180,9 @@ export function WalkInSheet({
                   <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
                 </div>
               ) : activeServices.length === 0 ? (
-                <p className="text-center text-sm text-zinc-500 py-8">No hay servicios activos</p>
+                <p className="text-center text-sm text-muted py-8">No hay servicios activos</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {activeServices.map((service) => {
                     const isSelected = selectedServiceId === service.id
                     return (
@@ -198,29 +191,58 @@ export function WalkInSheet({
                         type="button"
                         onClick={() => setSelectedServiceId(service.id)}
                         disabled={isCreating}
-                        className={`group flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition-colors ${
+                        className={cn(
+                          'flex min-h-[56px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
                           isSelected
-                            ? 'border-amber-400 bg-amber-50 dark:border-amber-500/50 dark:bg-amber-950/30'
-                            : 'border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-900 hover:bg-white hover:border-zinc-300 dark:hover:bg-zinc-800 dark:hover:border-zinc-600'
-                        }`}
+                            ? 'bg-amber-50 dark:bg-amber-500/10'
+                            : 'hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-800/70'
+                        )}
                       >
+                        <div
+                          className={cn(
+                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                            isSelected ? 'bg-amber-500' : 'bg-zinc-100 dark:bg-zinc-800'
+                          )}
+                        >
+                          <Scissors
+                            className={cn(
+                              'h-4 w-4',
+                              isSelected ? 'text-white' : 'text-zinc-500 dark:text-zinc-400'
+                            )}
+                          />
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <span
-                            className={`text-base font-semibold ${isSelected ? 'text-amber-900 dark:text-amber-100' : 'text-zinc-900 dark:text-white'}`}
+                          <p
+                            className={cn(
+                              'text-sm font-medium',
+                              isSelected ? 'text-amber-900 dark:text-amber-100' : 'text-foreground'
+                            )}
                           >
                             {service.name}
-                          </span>
+                          </p>
                           <div className="flex items-center gap-3 mt-0.5">
-                            <span className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+                            <span className="flex items-center gap-1 text-xs text-muted">
                               <Clock className="h-3.5 w-3.5" />
                               {service.duration} min
                             </span>
-                            <span className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+                            <span className="text-xs text-muted">
                               {formatCurrency(Number(service.price))}
                             </span>
                           </div>
                         </div>
-                        {isSelected && selectedCheckmark}
+                        {isSelected && (
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500">
+                            <svg className="h-3 w-3 text-white" viewBox="0 0 12 12" fill="none">
+                              <path
+                                d="M2 6l3 3 5-5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        )}
                       </button>
                     )
                   })}
@@ -249,15 +271,6 @@ export function WalkInSheet({
               </div>
             </>
           )}
-
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isCreating}
-            className="mt-3 w-full py-2 text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
-          >
-            Cancelar
-          </button>
         </div>
       </SheetContent>
     </Sheet>

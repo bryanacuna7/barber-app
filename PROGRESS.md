@@ -7,7 +7,7 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-03-03 (Session 196 — Mobile UX Top-Tier Polish)
+- **Last Updated:** 2026-03-04 (Session 198 — Citas Mobile Polish Sprint)
 - **Branch:** `main`
 - **Version:** `0.9.26`
 - **Phase:** Customer Discovery — solving real barber pains
@@ -72,6 +72,38 @@
 ---
 
 ## Recent Sessions
+
+### Session 198: Citas Mobile Polish Sprint (2026-03-04)
+
+**Status:** COMPLETE. Citas page mobile UX polished to top-tier level.
+
+**What was done:**
+
+- **Spacing reduction:** Banner `mb-5→mb-2`, header `py-4→py-2.5`, wrapper `mb-3→mb-1` (mobile only)
+- **KPI demotion:** Replaced 2 large KPI cards (~120px) with single compact line: `₡7,000 proy. · 1 cita` (~20px). KPIs as support, not protagonist.
+- **Segmented control:** Added `layoutId` sliding thumb animation for Día/Semana/Mes switcher
+- **Filter chips expanded:** 3 filters → 7 (Todas→Pendientes→Confirmadas→En curso→Completadas→Canceladas→No-show). Each maps 1:1 to appointment status.
+- **Filter chip styling:** Higher contrast active state, `min-h-[36px]`, sticky `top-0` with `backdrop-blur-xl`
+- **Appointment detail → bottom sheet:** Replaced centered modal with `<Sheet side="bottom">` — drag handle, compact info rows (no cards), status pill, cancel button `h-11`
+- **Dynamic time blocks:** Mañana/Mediodía/Tarde read from `useBusinessSettings` operating hours instead of hardcoded 7am–9pm
+- **Walk-in sheet polish:** Consistent with Nueva Cita sheet pattern
+- **Compact tip:** `GuideContextualTip` single-line mode for mobile
+
+**Design principles extracted (apply to other pages):**
+
+1. KPIs as compact support text, not cards — hero numbers belong in dashboard only
+2. Bottom sheets for all mobile detail/action views — never centered modals
+3. Sticky filter bar with backdrop-blur, high-contrast active state
+4. Info as icon + text rows, not bordered cards
+5. One destructive action button (full-width, `h-11`), no redundant "Close"
+6. `lg:hidden`/`hidden lg:block` guards — zero desktop regression
+
+**New files (3):** `quick-actions-popover.tsx`, `quick-actions-sheet.tsx`, `splash-screen.tsx`
+**Modified (20):** `citas/page.tsx`, `calendar-header.tsx`, `appointment-detail-modal.tsx`, `calendar-day-view.tsx`, `create-appointment-sheet.tsx`, `walk-in-sheet.tsx`, `trial-banner.tsx`, `guide-contextual-tip.tsx`, `bottom-nav.tsx`, `sheet.tsx`, `dialog.tsx`, `drawer.tsx`, `ios-date-picker.tsx`, `ios-time-picker.tsx`, + 6 others
+
+**Next:** Migrate these principles to other pages: `/dashboard`, `/clientes`, `/mi-dia`, More drawer
+
+---
 
 ### Session 197: Mobile UI/UX 2026 Redesign — All Waves Complete (2026-03-03)
 

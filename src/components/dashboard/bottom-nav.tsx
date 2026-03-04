@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Calendar,
+  Clock3,
   Users,
   Scissors,
   MoreHorizontal,
@@ -19,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { MoreMenuDrawer } from './more-menu-drawer'
+import { QuickActionsSheet } from './quick-actions-sheet'
 import { useBusiness } from '@/contexts/business-context'
 import { useTodayStats } from '@/hooks/queries/useTodayStats'
 import type { UserRole } from '@/lib/auth/roles'
@@ -48,10 +50,34 @@ const ownerMorePages = [
 const barberMorePages = ['/clientes', '/analiticas', '/guia']
 
 const ownerQuickActions = [
-  { name: 'Nueva Cita', href: '/citas', icon: CalendarPlus, action: 'create-appointment' },
-  { name: 'Walk-in', href: '/citas', icon: UserPlus, action: 'walk-in' },
-  { name: 'Nuevo Cliente', href: '/clientes', icon: UserPlus, action: 'create-client' },
-  { name: 'Nuevo Servicio', href: '/servicios', icon: LayoutGrid, action: 'create-service' },
+  {
+    name: 'Nueva Cita',
+    description: 'Con fecha y hora',
+    href: '/citas',
+    icon: CalendarPlus,
+    action: 'create-appointment',
+  },
+  {
+    name: 'Walk-in',
+    description: 'Sin reserva, llegó ahora',
+    href: '/citas',
+    icon: Clock3,
+    action: 'walk-in',
+  },
+  {
+    name: 'Nuevo Cliente',
+    description: 'Registrar cliente nuevo',
+    href: '/clientes',
+    icon: UserPlus,
+    action: 'create-client',
+  },
+  {
+    name: 'Nuevo Servicio',
+    description: 'Agregar servicio al catálogo',
+    href: '/servicios',
+    icon: LayoutGrid,
+    action: 'create-service',
+  },
 ]
 
 interface BottomNavProps {
@@ -64,6 +90,7 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
   const router = useRouter()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false)
+  const [keepQuickActionNavOnTop, setKeepQuickActionNavOnTop] = useState(false)
 
   // Read business context once. BottomNav always renders inside BusinessProvider
   // for logged-in users; the catch is a guard against rare SSR edge cases.
@@ -149,18 +176,53 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
       // Barber: go directly to create cita (skip action sheet)
       router.push('/citas?intent=create')
     } else {
-      setIsQuickActionOpen(true)
+      setIsQuickActionOpen((prev) => !prev)
     }
   }
 
   // Left tabs (before + button)
   const leftTabs = isBarberRole ? navigation : ownerNavigation.slice(0, 2)
+  const quickActions = ownerQuickActions.map((action) => ({
+    id: action.action,
+    label: action.name,
+    description: action.description,
+    icon: action.icon,
+    onSelect: () => handleQuickAction(action),
+  }))
+  const isQuickActionCompactMode = (isQuickActionOpen || keepQuickActionNavOnTop) && !isBarberRole
+
+  useEffect(() => {
+    if (isQuickActionOpen) {
+      setKeepQuickActionNavOnTop(true)
+      return
+    }
+
+    if (!keepQuickActionNavOnTop) return
+
+    const timeout = window.setTimeout(() => {
+      setKeepQuickActionNavOnTop(false)
+    }, 180)
+
+    return () => window.clearTimeout(timeout)
+  }, [isQuickActionOpen, keepQuickActionNavOnTop])
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden">
+      <nav
+        className={cn(
+          'fixed bottom-0 left-0 right-0 lg:hidden',
+          isQuickActionCompactMode ? 'z-[206]' : 'z-50'
+        )}
+      >
         <div className="px-2 pb-3 pb-safe-offset-3">
-          <div className="mx-auto flex max-w-[95%] items-center justify-around gap-0 rounded-full bg-white/80 dark:bg-black/60 px-1.5 py-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08),0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),0_-2px_12px_rgba(0,0,0,0.15)] backdrop-blur-xl border border-black/10 dark:border-zinc-800/80">
+          <div
+            className={cn(
+              'mx-auto flex max-w-[95%] items-center justify-around gap-0 rounded-full px-1.5 py-1.5',
+              isQuickActionCompactMode
+                ? 'bg-transparent border border-transparent shadow-none backdrop-blur-0'
+                : 'bg-white/80 dark:bg-black/60 shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08),0_-2px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_2px_8px_rgba(0,0,0,0.2),0_-2px_12px_rgba(0,0,0,0.15)] backdrop-blur-xl border border-black/10 dark:border-zinc-800/80'
+            )}
+          >
             {/* Left tabs */}
             {leftTabs.map((item) => {
               const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`)
@@ -168,6 +230,8 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                 <button
                   key={item.name}
                   type="button"
+                  disabled={isQuickActionCompactMode}
+                  aria-hidden={isQuickActionCompactMode}
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={item.name}
                   onClick={() => {
@@ -175,8 +239,9 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                     router.push(item.href)
                   }}
                   className={cn(
-                    'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
+                    'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5 transition-[opacity,transform] duration-150',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
+                    isQuickActionCompactMode && 'pointer-events-none scale-95 opacity-0',
                     isActive
                       ? 'text-zinc-900 dark:text-white'
                       : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -227,25 +292,63 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
             {showPlusButton && (
               <button
                 onClick={handlePlusClick}
-                aria-label="Crear nuevo"
+                aria-label={isQuickActionOpen ? 'Cerrar crear nuevo' : 'Crear nuevo'}
                 aria-haspopup={!isBarberRole}
                 aria-expanded={isQuickActionOpen}
+                aria-pressed={isQuickActionOpen}
                 className="relative flex flex-col items-center justify-center gap-0.5 rounded-full px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2"
                 style={{ '--tw-ring-color': 'var(--brand-primary)' } as React.CSSProperties}
               >
                 <motion.div
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ scale: 0.94 }}
+                  animate={{
+                    scale: isQuickActionOpen ? 1.08 : 1,
+                    boxShadow: isQuickActionOpen
+                      ? `0 8px 20px rgba(var(--brand-primary-rgb), 0.58)`
+                      : `0 4px 14px rgba(var(--brand-primary-rgb), 0.4)`,
+                  }}
+                  transition={{ type: 'spring', stiffness: 520, damping: 34, mass: 0.7 }}
                   className="flex h-[36px] w-[36px] items-center justify-center rounded-full"
                   style={{
-                    background: `linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark, var(--brand-primary)))`,
-                    boxShadow: `0 4px 14px rgba(var(--brand-primary-rgb), 0.4)`,
+                    background: isQuickActionOpen
+                      ? 'rgba(24,24,27,0.95)'
+                      : `linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark, var(--brand-primary)))`,
+                    border: isQuickActionOpen
+                      ? '1px solid rgba(var(--brand-primary-rgb), 0.45)'
+                      : 'none',
                   }}
                 >
-                  <Plus
-                    className="h-5 w-5"
-                    style={{ color: 'var(--brand-primary-contrast, #fff)' }}
-                    strokeWidth={2.5}
-                  />
+                  <div className="relative h-5 w-5">
+                    <motion.span
+                      initial={false}
+                      animate={{
+                        opacity: isQuickActionOpen ? 0 : 1,
+                        scale: isQuickActionOpen ? 0.78 : 1,
+                        rotate: isQuickActionOpen ? -55 : 0,
+                      }}
+                      transition={{ duration: 0.14, ease: [0.33, 1, 0.68, 1] }}
+                      className="absolute inset-0 inline-flex items-center justify-center"
+                    >
+                      <Plus
+                        className="h-5 w-5"
+                        style={{ color: 'var(--brand-primary-contrast, #fff)' }}
+                        strokeWidth={2.75}
+                      />
+                    </motion.span>
+
+                    <motion.span
+                      initial={false}
+                      animate={{
+                        opacity: isQuickActionOpen ? 1 : 0,
+                        scale: isQuickActionOpen ? 1 : 0.78,
+                        rotate: isQuickActionOpen ? 0 : 55,
+                      }}
+                      transition={{ duration: 0.14, ease: [0.33, 1, 0.68, 1] }}
+                      className="absolute inset-0 inline-flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-white" strokeWidth={2.75} />
+                    </motion.span>
+                  </div>
                 </motion.div>
               </button>
             )}
@@ -257,6 +360,8 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                 <button
                   key={item.name}
                   type="button"
+                  disabled={isQuickActionCompactMode}
+                  aria-hidden={isQuickActionCompactMode}
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={item.name}
                   onClick={() => {
@@ -264,8 +369,9 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
                     router.push(item.href)
                   }}
                   className={cn(
-                    'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
+                    'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5 transition-[opacity,transform] duration-150',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
+                    isQuickActionCompactMode && 'pointer-events-none scale-95 opacity-0',
                     isActive
                       ? 'text-zinc-900 dark:text-white'
                       : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -302,13 +408,16 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
 
             {/* More Button */}
             <button
+              disabled={isQuickActionCompactMode}
+              aria-hidden={isQuickActionCompactMode}
               onClick={() => {
                 setIsMoreOpen(true)
                 if (isMobileDevice()) haptics.selection()
               }}
               className={cn(
-                'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5',
+                'relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5 transition-[opacity,transform] duration-150',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-black',
+                isQuickActionCompactMode && 'pointer-events-none scale-95 opacity-0',
                 isMoreActive
                   ? 'text-zinc-900 dark:text-white'
                   : 'text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
@@ -350,65 +459,14 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
         </div>
       </nav>
 
-      {/* Quick Action Sheet (owner only) */}
-      <AnimatePresence>
-        {isQuickActionOpen && !isBarberRole && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsQuickActionOpen(false)}
-              className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm lg:hidden"
-            />
-            {/* Action Sheet */}
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={animations.spring.sheet}
-              className="fixed bottom-0 left-0 right-0 z-[61] lg:hidden"
-            >
-              <div className="mx-4 mb-safe-offset-4 overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/80 dark:bg-[#232326]">
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 pb-2 pt-4">
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                    Crear nuevo
-                  </h3>
-                  <button
-                    onClick={() => setIsQuickActionOpen(false)}
-                    className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                    aria-label="Cerrar"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                {/* Actions */}
-                <div className="px-2 pb-4 pt-1">
-                  {ownerQuickActions.map((action) => (
-                    <button
-                      key={action.action}
-                      onClick={() => handleQuickAction(action)}
-                      className="flex min-h-[44px] w-full items-center gap-4 rounded-xl px-4 py-3.5 text-left text-zinc-900 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]/40 dark:text-zinc-100 dark:hover:bg-zinc-800/80"
-                    >
-                      <div
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border bg-zinc-100 dark:bg-zinc-700/60"
-                        style={{ borderColor: 'rgba(var(--brand-primary-rgb), 0.28)' }}
-                      >
-                        <action.icon className="h-5 w-5 text-[var(--brand-primary-on-light)] dark:text-zinc-100" />
-                      </div>
-                      <span className="text-base font-medium text-zinc-900 dark:text-white">
-                        {action.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <QuickActionsSheet
+        isOpen={isQuickActionOpen && !isBarberRole}
+        onClose={() => setIsQuickActionOpen(false)}
+        title="Crear nuevo"
+        actions={quickActions}
+        showBottomConnector
+        bottomOffsetPx={56}
+      />
 
       {/* More Menu Drawer */}
       <MoreMenuDrawer

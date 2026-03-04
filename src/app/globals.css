@@ -77,7 +77,7 @@
 }
 
 :root.dark {
-  --background: #0a0a0a;
+  --background: #09090b;
   --foreground: #ededed;
   --brand-primary: #6d7cff;
   --brand-primary-rgb: 109, 124, 255;
@@ -102,7 +102,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light):not(.dark) {
-    --background: #0a0a0a;
+    --background: #09090b;
     --foreground: #ededed;
     --brand-primary: #6d7cff;
     --brand-primary-rgb: 109, 124, 255;

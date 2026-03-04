@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, Check, Search, Scissors } from 'lucide-react'
+import { ChevronDown, Check, Search, Scissors, X } from 'lucide-react'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
 import { DatePickerTrigger } from '@/components/ui/ios-date-picker'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
+import { useIsMobile } from '@/hooks/use-is-mobile'
 import { cn } from '@/lib/utils/cn'
 
 type CreateAppointmentErrorField = 'client_id' | 'service_id' | 'barber_id' | 'general'
@@ -106,6 +107,8 @@ export function CreateAppointmentSheet({
   setIsTimePickerOpen,
 }: CreateAppointmentSheetProps) {
   const [clientSearch, setClientSearch] = useState('')
+  const [preferDesktopPickers, setPreferDesktopPickers] = useState(false)
+  const isMobile = useIsMobile(1024)
 
   const minAllowedDate = useMemo(() => {
     const date = new Date()
@@ -120,19 +123,19 @@ export function CreateAppointmentSheet({
   const filteredClients = useMemo(() => {
     if (!clientSearch.trim()) return clients
     const q = clientSearch.toLowerCase()
-    return clients.filter(
-      (c) => c.name.toLowerCase().includes(q) || c.phone.includes(q)
-    )
+    return clients.filter((c) => c.name.toLowerCase().includes(q) || c.phone.includes(q))
   }, [clients, clientSearch])
 
   const handleClose = () => {
     setActivePickerField(null)
     setIsTimePickerOpen(false)
+    setClientSearch('')
     onOpenChange(false)
   }
 
   const openPicker = (field: 'client' | 'service' | 'barber') => {
     if (isMobileDevice()) haptics.selection()
+    if (field !== 'client') setClientSearch('')
     setActivePickerField(field)
   }
 
@@ -143,15 +146,23 @@ export function CreateAppointmentSheet({
   }
 
   useEffect(() => {
-    if (activePickerField !== 'client') setClientSearch('')
-  }, [activePickerField])
-
-  useEffect(() => {
     if (!isOpen) {
       setActivePickerField(null)
       setIsTimePickerOpen(false)
     }
   }, [isOpen, setActivePickerField, setIsTimePickerOpen])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const mediaQuery = window.matchMedia(
+      '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
+    )
+    const syncDesktopMode = () => setPreferDesktopPickers(mediaQuery.matches)
+    syncDesktopMode()
+    mediaQuery.addEventListener('change', syncDesktopMode)
+    return () => mediaQuery.removeEventListener('change', syncDesktopMode)
+  }, [])
 
   useEffect(() => {
     if (!isOpen) return
@@ -175,153 +186,231 @@ export function CreateAppointmentSheet({
       : activePickerField === 'service'
         ? 'Seleccionar Servicio'
         : 'Miembro del equipo'
+  const desktopDateTimeTriggerClass =
+    'h-11 w-full justify-start rounded-xl bg-zinc-100 px-3 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-white'
+  const mobileDateTimeTriggerClass =
+    'h-11 w-full justify-start rounded-xl !border-0 bg-zinc-900/85 px-3 text-sm text-zinc-100 shadow-none'
+  const dateTimeTriggerClass = preferDesktopPickers
+    ? desktopDateTimeTriggerClass
+    : mobileDateTimeTriggerClass
+
+  /* ── Shared form body (renders inside Modal on desktop, Sheet on mobile) ── */
+  const formBody = (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-muted">Cliente</label>
+        <button
+          type="button"
+          onClick={() => openPicker('client')}
+          className={cn(
+            'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
+            fieldErrors?.client_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
+          )}
+        >
+          <span
+            className={createForm.client_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}
+          >
+            {createForm.client_id
+              ? clients.find((c) => c.id === createForm.client_id)?.name || 'Selecciona un cliente'
+              : 'Selecciona un cliente'}
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+        </button>
+        {fieldErrors?.client_id && (
+          <p className="mt-1 text-xs text-red-500">{fieldErrors.client_id}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-muted">Servicio</label>
+        <button
+          type="button"
+          onClick={() => openPicker('service')}
+          className={cn(
+            'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
+            fieldErrors?.service_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
+          )}
+        >
+          <span
+            className={createForm.service_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}
+          >
+            {createForm.service_id
+              ? (() => {
+                  const service = services.find((item) => item.id === createForm.service_id)
+                  return service ? service.name : 'Selecciona un servicio'
+                })()
+              : 'Selecciona un servicio'}
+          </span>
+          <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+        </button>
+        {fieldErrors?.service_id && (
+          <p className="mt-1 text-xs text-red-500">{fieldErrors.service_id}</p>
+        )}
+      </div>
+
+      {!isBarber && (
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-muted">Miembro del equipo</label>
+          <button
+            type="button"
+            onClick={() => openPicker('barber')}
+            className={cn(
+              'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
+              fieldErrors?.barber_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
+            )}
+          >
+            <span
+              className={createForm.barber_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}
+            >
+              {createForm.barber_id
+                ? barbers.find((item) => item.id === createForm.barber_id)?.name ||
+                  'Selecciona un miembro del equipo'
+                : 'Selecciona un miembro del equipo'}
+            </span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+          </button>
+          {fieldErrors?.barber_id && (
+            <p className="mt-1 text-xs text-red-500">{fieldErrors.barber_id}</p>
+          )}
+        </div>
+      )}
+
+      {/* Date + Time: unified card on mobile, grid-cols-2 on desktop */}
+      {isMobile ? (
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-muted">Fecha y hora</label>
+          <div className="flex items-center rounded-xl bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+            <DatePickerTrigger
+              value={selectedDate}
+              onChange={onDateChange}
+              label="Fecha"
+              minDate={minAllowedDate}
+              maxDate={maxAllowedDate}
+              pickerZIndex={90}
+              forceDesktop={preferDesktopPickers}
+              className="h-11 flex-1 justify-start rounded-none border-0 bg-transparent px-3 text-sm text-zinc-900 dark:text-white shadow-none"
+            />
+            <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-600 shrink-0" />
+            <TimePickerTrigger
+              value={createForm.time || defaultTime}
+              onClick={() => {
+                if (isMobileDevice()) haptics.selection()
+                setIsTimePickerOpen(true)
+              }}
+              className="h-11 flex-1 justify-start rounded-none border-0 bg-transparent px-3 text-sm text-zinc-900 dark:text-white shadow-none"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-muted">Fecha</label>
+            <DatePickerTrigger
+              value={selectedDate}
+              onChange={onDateChange}
+              label="Fecha"
+              minDate={minAllowedDate}
+              maxDate={maxAllowedDate}
+              pickerZIndex={90}
+              forceDesktop={preferDesktopPickers}
+              className={dateTimeTriggerClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-muted">Hora</label>
+            <TimePickerTrigger
+              value={createForm.time || defaultTime}
+              onClick={() => {
+                if (isMobileDevice()) haptics.selection()
+                setIsTimePickerOpen(true)
+              }}
+              className={dateTimeTriggerClass}
+            />
+          </div>
+        </div>
+      )}
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-muted">Notas (opcional)</label>
+        <textarea
+          value={createForm.notes}
+          onChange={(e) => setCreateForm((prev) => ({ ...prev, notes: e.target.value }))}
+          placeholder="Notas adicionales sobre la cita..."
+          rows={3}
+          className="w-full resize-none rounded-xl bg-zinc-100 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white"
+        />
+      </div>
+
+      <div className="mt-2 pt-1">
+        {fieldErrors?.general && (
+          <p className="mb-2 text-xs font-medium text-red-500">{fieldErrors.general}</p>
+        )}
+        {isMobile ? (
+          <Button type="submit" isLoading={isPending} className="h-11 w-full">
+            Guardar
+          </Button>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleClose}
+              className="h-11 w-full sm:w-auto text-muted"
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" isLoading={isPending} className="h-11 w-full sm:w-auto">
+              Guardar
+            </Button>
+          </div>
+        )}
+      </div>
+    </form>
+  )
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose} title="Nueva Cita" contentFill={false}>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-muted">Cliente</label>
-            <button
-              type="button"
-              onClick={() => openPicker('client')}
-              className={cn(
-                'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
-                fieldErrors?.client_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
-              )}
-            >
-              <span
-                className={createForm.client_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'}
-              >
-                {createForm.client_id
-                  ? clients.find((c) => c.id === createForm.client_id)?.name ||
-                    'Selecciona un cliente'
-                  : 'Selecciona un cliente'}
-              </span>
-              <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
-            </button>
-            {fieldErrors?.client_id && (
-              <p className="mt-1 text-xs text-red-500">{fieldErrors.client_id}</p>
-            )}
-          </div>
+      {/* Desktop: centered Modal (unchanged) */}
+      {!isMobile && (
+        <Modal isOpen={isOpen} onClose={handleClose} title="Nueva Cita" contentFill={false}>
+          {formBody}
+        </Modal>
+      )}
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-muted">Servicio</label>
-            <button
-              type="button"
-              onClick={() => openPicker('service')}
-              className={cn(
-                'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
-                fieldErrors?.service_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
-              )}
-            >
-              <span
-                className={
-                  createForm.service_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
-                }
-              >
-                {createForm.service_id
-                  ? (() => {
-                      const service = services.find((item) => item.id === createForm.service_id)
-                      return service ? service.name : 'Selecciona un servicio'
-                    })()
-                  : 'Selecciona un servicio'}
-              </span>
-              <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
-            </button>
-            {fieldErrors?.service_id && (
-              <p className="mt-1 text-xs text-red-500">{fieldErrors.service_id}</p>
-            )}
-          </div>
-
-          {!isBarber && (
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-muted">
-                Miembro del equipo
-              </label>
+      {/* Mobile: bottom Sheet */}
+      {isMobile && (
+        <Sheet
+          open={isOpen}
+          onOpenChange={(open) => {
+            if (!open) handleClose()
+          }}
+        >
+          <SheetContent
+            side="bottom"
+            className="!gap-0 !p-0 max-h-[90vh] overflow-hidden flex flex-col"
+          >
+            {/* Sheet header with drag handle */}
+            <div className="flex-shrink-0 pt-2 pb-1">
+              <div className="mx-auto h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+            </div>
+            <div className="flex items-center justify-between px-5 pb-3">
+              <h2 className="text-lg font-semibold text-foreground">Nueva Cita</h2>
               <button
                 type="button"
-                onClick={() => openPicker('barber')}
-                className={cn(
-                  'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
-                  fieldErrors?.barber_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
-                )}
-              >
-                <span
-                  className={
-                    createForm.barber_id ? 'text-zinc-900 dark:text-white' : 'text-zinc-400'
-                  }
-                >
-                  {createForm.barber_id
-                    ? barbers.find((item) => item.id === createForm.barber_id)?.name ||
-                      'Selecciona un miembro del equipo'
-                    : 'Selecciona un miembro del equipo'}
-                </span>
-                <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
-              </button>
-              {fieldErrors?.barber_id && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.barber_id}</p>
-              )}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-muted">Fecha</label>
-              <DatePickerTrigger
-                value={selectedDate}
-                onChange={onDateChange}
-                label="Fecha"
-                minDate={minAllowedDate}
-                maxDate={maxAllowedDate}
-                pickerZIndex={90}
-                className="h-11 w-full justify-start rounded-xl bg-zinc-100 px-3 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-muted">Hora</label>
-              <TimePickerTrigger
-                value={createForm.time || defaultTime}
-                onClick={() => {
-                  if (isMobileDevice()) haptics.selection()
-                  setIsTimePickerOpen(true)
-                }}
-                className="h-11 w-full justify-start rounded-xl bg-zinc-100 px-3 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-white"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-muted">Notas (opcional)</label>
-            <textarea
-              value={createForm.notes}
-              onChange={(e) => setCreateForm((prev) => ({ ...prev, notes: e.target.value }))}
-              placeholder="Notas adicionales sobre la cita..."
-              rows={3}
-              className="w-full resize-none rounded-xl bg-zinc-100 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white"
-            />
-          </div>
-
-          <div className="mt-2 pt-1">
-            {fieldErrors?.general && (
-              <p className="mb-2 text-xs font-medium text-red-500">{fieldErrors.general}</p>
-            )}
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
-              <Button
-                type="button"
-                variant="ghost"
                 onClick={handleClose}
-                className="h-11 w-full sm:w-auto text-muted"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 transition-colors active:scale-95 hover:text-zinc-200 focus:outline-none"
+                aria-label="Cerrar"
               >
-                Cancelar
-              </Button>
-              <Button type="submit" isLoading={isPending} className="h-11 w-full sm:w-auto">
-                Guardar
-              </Button>
+                <X className="h-5 w-5" />
+              </button>
             </div>
-          </div>
-        </form>
-      </Modal>
+            {/* Scrollable form area */}
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] [-webkit-overflow-scrolling:touch]">
+              {formBody}
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
 
       <IOSTimePicker
         isOpen={isTimePickerOpen}
@@ -330,6 +419,7 @@ export function CreateAppointmentSheet({
         onChange={(value) => setCreateForm((prev) => ({ ...prev, time: value }))}
         title="Hora de la cita"
         zIndex={90}
+        forceDesktop={preferDesktopPickers}
       />
 
       {/* Picker Sheet */}
@@ -340,7 +430,14 @@ export function CreateAppointmentSheet({
           if (!open) setActivePickerField(null)
         }}
       >
-        <SheetContent side="bottom" className="max-h-[82vh] !gap-0 !p-0 overflow-hidden">
+        <SheetContent
+          side="bottom"
+          centered={preferDesktopPickers}
+          className={cn(
+            '!gap-0 !p-0 overflow-hidden',
+            preferDesktopPickers ? 'max-h-[70vh] w-[min(680px,calc(100%-2rem))]' : 'max-h-[82vh]'
+          )}
+        >
           {/* Header */}
           <div className="px-5 pt-5 pb-0 flex-shrink-0">
             <h2 className="text-base font-semibold text-foreground">{pickerTitle}</h2>
@@ -405,9 +502,7 @@ export function CreateAppointmentSheet({
                           <p
                             className={cn(
                               'text-sm font-medium truncate',
-                              isSelected
-                                ? 'text-blue-600 dark:text-blue-400'
-                                : 'text-foreground'
+                              isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'
                             )}
                           >
                             {client.name}

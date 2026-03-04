@@ -53,10 +53,10 @@ function DayDetailsPopover({ date, appointments, onClose, onAppointmentClick }: 
   )
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+      <Card className="flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-[28px] border-zinc-200/70 bg-white/95 shadow-[0_24px_70px_rgba(9,9,11,0.35)] backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-700">
+        <div className="flex items-center justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent p-4 dark:border-zinc-800/70 dark:from-zinc-900/55">
           <div>
             <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
               {format(date, "d 'de' MMMM", { locale: es })}
@@ -65,7 +65,12 @@ function DayDetailsPopover({ date, appointments, onClose, onAppointmentClick }: 
               {appointments.length} {appointments.length === 1 ? 'cita' : 'citas'}
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-10 w-10 rounded-xl border border-zinc-200/70 bg-white/80 p-0 text-zinc-500 backdrop-blur hover:bg-zinc-100/80 hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:text-zinc-400 dark:hover:bg-zinc-800/80 dark:hover:text-zinc-200"
+          >
             <X className="w-4 h-4" />
           </Button>
         </div>

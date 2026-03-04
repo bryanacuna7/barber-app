@@ -7,6 +7,7 @@ import { QueryProvider } from '@/providers/query-provider'
 import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register'
 import { SkipToContent } from '@/components/accessibility/skip-to-content'
 import { PremiumBackground } from '@/components/ui/premium-background'
+import { SplashScreen } from '@/components/splash-screen'
 import './globals.css'
 
 const manifestVersion =
@@ -28,6 +29,18 @@ const themeInitScript = `
   } catch {
     // noop
   }
+})();
+`
+
+// Inline script that hides static splash if already shown this session
+const splashGateScript = `
+(() => {
+  try {
+    if (sessionStorage.getItem('bsp_splash_shown')) {
+      var el = document.getElementById('splash-static');
+      if (el) el.style.display = 'none';
+    }
+  } catch {}
 })();
 `
 
@@ -78,7 +91,7 @@ export const viewport: Viewport = {
   userScalable: true,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#f6f7f9' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
   ],
 }
 
@@ -99,8 +112,75 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-[#0a0a0a]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-[#09090b]`}
       >
+        {/* Static splash — server-rendered, shows instantly before JS loads */}
+        <div
+          id="splash-static"
+          suppressHydrationWarning
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#000',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: 56,
+              height: 120,
+              overflow: 'hidden',
+              borderRadius: 9999,
+              marginBottom: 32,
+            }}
+          >
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: '-95%',
+                  width: '320%',
+                  top: i * 26 - 30,
+                  height: 10,
+                  borderRadius: 5,
+                  background: '#fff',
+                  transform: 'rotate(-30deg)',
+                }}
+              />
+            ))}
+          </div>
+          <p
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              color: '#fff',
+              margin: 0,
+            }}
+          >
+            BarberApp
+          </p>
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 400,
+              color: '#71717a',
+              margin: '6px 0 0',
+            }}
+          >
+            Agenda fácil, clientes felices
+          </p>
+        </div>
+        <Script id="splash-gate" strategy="beforeInteractive">
+          {splashGateScript}
+        </Script>
+        <SplashScreen />
         <PremiumBackground />
         <SkipToContent />
         <ServiceWorkerRegister />

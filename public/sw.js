@@ -1,6 +1,6 @@
 // Service Worker with offline support and caching strategies
-const CACHE_NAME = 'barberapp-v6'
-const RUNTIME_CACHE = 'barberapp-runtime-v6'
+const CACHE_NAME = 'barberapp-v7'
+const RUNTIME_CACHE = 'barberapp-runtime-v7'
 
 // Only precache offline fallback and icons — NEVER cache HTML shells
 // HTML is served network-first so it's always fresh when online
