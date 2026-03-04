@@ -141,12 +141,13 @@ export function CalendarHeader({
 
           {/* MOBILE HEADER */}
           <div className="lg:hidden mb-3 rounded-2xl bg-transparent p-2.5 space-y-2">
-            {/* Row 1: < Date > [Hoy] [Walk-in] [+] */}
-            <div className="flex items-center gap-1">
+            {/* Row 1: [< Date >] · [Hoy] [+] — nav group left, actions right */}
+            <div className="flex items-center">
+              {/* Nav group */}
               <Button
                 variant="ghost"
                 onClick={onPrevious}
-                className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-muted"
+                className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-muted flex-shrink-0"
                 aria-label="Anterior"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -160,32 +161,37 @@ export function CalendarHeader({
               <Button
                 variant="ghost"
                 onClick={onNext}
-                className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-muted"
+                className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-muted flex-shrink-0"
                 aria-label="Siguiente"
               >
                 <ChevronRight className="w-5 h-5" />
               </Button>
 
-              {!isSelectedDateToday && (
+              {/* Divider — separates navigation from actions */}
+              <div className="w-px h-4 bg-zinc-200/70 dark:bg-zinc-700/60 mx-1.5 flex-shrink-0" />
+
+              {/* Action cluster */}
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                {!isSelectedDateToday && (
+                  <Button
+                    variant="ghost"
+                    onClick={onToday}
+                    className="min-h-[44px] h-auto px-2 text-xs font-semibold text-blue-600 dark:text-blue-400"
+                    aria-label="Ir a hoy"
+                  >
+                    Hoy
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
-                  onClick={onToday}
-                  className="min-h-[44px] h-auto px-2 text-xs font-semibold text-blue-600 dark:text-blue-400 flex-shrink-0"
-                  aria-label="Ir a hoy"
+                  onClick={() => setIsActionSheetOpen(true)}
+                  data-testid="create-appointment-btn-mobile"
+                  className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-foreground"
+                  aria-label="Crear cita"
                 >
-                  Hoy
+                  <Plus className="h-5 w-5" strokeWidth={2.5} />
                 </Button>
-              )}
-
-              <Button
-                variant="ghost"
-                onClick={() => setIsActionSheetOpen(true)}
-                data-testid="create-appointment-btn-mobile"
-                className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-foreground flex-shrink-0"
-                aria-label="Crear cita"
-              >
-                <Plus className="h-5 w-5" strokeWidth={2.5} />
-              </Button>
+              </div>
             </div>
 
             {/* Row 2: D/S/M segmented control */}
