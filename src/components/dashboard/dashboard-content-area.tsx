@@ -35,6 +35,7 @@ export function DashboardContentArea({ children, banner }: DashboardContentAreaP
   const { userRole, staffPermissions } = useBusiness()
 
   const isCompactRoute = pathname.startsWith('/citas') || pathname.startsWith('/mi-dia')
+  const isCitasRoute = pathname.startsWith('/citas')
   const isBarber = userRole === 'barber'
 
   // Barber landing: redirect root/dashboard → /mi-dia
@@ -51,10 +52,16 @@ export function DashboardContentArea({ children, banner }: DashboardContentAreaP
     <div
       className={
         isCompactRoute
-          ? 'px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
+          ? `px-4 pt-0 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10 ${isCitasRoute ? 'relative bg-white dark:bg-zinc-950' : ''}`
           : 'px-4 py-5 pb-24 sm:px-6 sm:py-6 lg:px-8 lg:py-7 lg:pb-10'
       }
     >
+      {isCitasRoute && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 -z-10 bg-white dark:bg-zinc-950"
+        />
+      )}
       {banner}
       <PageTransition>{isBarberDenied ? <AccessDenied /> : children}</PageTransition>
     </div>

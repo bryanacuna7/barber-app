@@ -407,7 +407,7 @@ export function CalendarDayView({
   return (
     <div className="space-y-4">
       {unscheduledCount > 0 && (
-        <div className="rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-950 p-4 shadow-sm dark:shadow-none">
+        <div className="rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 p-4 shadow-sm dark:shadow-none">
           <span className="text-xs font-medium uppercase tracking-wide text-muted">
             Sin hora asignada · {unscheduledCount}
           </span>
@@ -465,7 +465,7 @@ export function CalendarDayView({
             </div>
 
             {/* Appointments card — solo las filas */}
-            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-950 shadow-sm dark:shadow-none">
+            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none">
               {block.appointments.length === 0 && (
                 <div className="px-4 py-3 text-sm text-muted">Sin citas en este bloque</div>
               )}

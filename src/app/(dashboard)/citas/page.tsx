@@ -642,7 +642,7 @@ function CitasCalendarFusionContent() {
   }
 
   return (
-    <div className="-mx-4 sm:-mx-6 lg:mx-0 px-4 sm:px-6 lg:px-0 min-h-screen overflow-x-hidden bg-white dark:bg-zinc-950">
+    <div className="-mx-4 sm:-mx-6 lg:mx-0 px-4 sm:px-6 lg:px-0 min-h-screen overflow-x-hidden">
       <ClientEffects title="Citas" />
       <div className="relative z-10 flex">
         {/* Main content area */}

@@ -73,6 +73,23 @@
 
 ## Recent Sessions
 
+### Session 197: Mobile UI/UX 2026 Redesign — All Waves Complete (2026-03-03)
+
+**Status:** COMPLETE. Full redesign committed (`b5fc0f5`).
+
+**What was done (5 Waves):**
+
+- **Wave 1 — Mercury Dashboard:** HeroStatsCard reactive gradient (emerald>0, slate=0); StatsCard borderless with soft shadow + sparkline integration; `SparklineChart` SVG inline 40×24px; `use-dashboard-sparklines` single aggregated RPC hook.
+- **Wave 2A — TimeTree Calendar Month:** `CalendarMonthView` full redesign — barbero-colored dots (stable hash), collapsible month→week with AnimatePresence, rich appointment list below calendar (hora apilada + barra color + precio + StatusPill), Today=dark circle, Selected=soft rounded-xl.
+- **Wave 2B — Revolut Feed + NowLine:** `NowLine` "you are here" separator between past/future appointments in active block; sticky mobile filter pills (Todas/Agendadas/Completadas) with backdrop-blur; CalendarDayView rich rows + block headers (MAÑANA/MEDIODÍA/TARDE) with slim occupancy bar.
+- **Wave 3 — Sparklines:** dashboard-stats distributes 7-day trend arrays to StatsCards.
+- **Wave 4 — Uber Account More Menu:** MoreMenuDrawer header with avatar 52px + nombre negocio + plan/rol + 3 borderless quick-action cards (Analíticas/Suscripción/Soporte).
+
+**New files (2):** `sparkline-chart.tsx`, `use-dashboard-sparklines.ts`
+**Modified (17):** `citas/page.tsx`, `calendar-day-view.tsx`, `calendar-header.tsx`, `calendar-month-view.tsx`, `more-menu-drawer.tsx`, `hero-stats-card.tsx`, `stats-card.tsx`, `dashboard-stats.tsx`, + 9 others
+
+---
+
 ### Session 196: Mobile UX Top-Tier Polish (2026-03-03)
 
 **Status:** COMPLETE. 5 polished mobile interactions committed (commit `fc8638c`).
