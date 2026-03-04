@@ -45,6 +45,16 @@ export function DashboardContentArea({ children, banner }: DashboardContentAreaP
     }
   }, [isBarber, pathname, router])
 
+  // iOS pull-down fix for /citas: keep root canvas dark during overscroll bounce.
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('citas-overscroll-fix', isCitasRoute)
+
+    return () => {
+      root.classList.remove('citas-overscroll-fix')
+    }
+  }, [isCitasRoute])
+
   // Barber page guard
   const isBarberDenied = isBarber && !canBarberAccessPath(pathname, staffPermissions)
 

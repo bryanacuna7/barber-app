@@ -4,6 +4,22 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.27] - 2026-03-04
+
+### Nuevo
+
+- Calendario del mes con puntos de color por barbero y lista de citas al tocar un día
+- Línea con la hora actual en la vista de agenda del día
+- Filtros rápidos (Todas / Agendadas / Completadas) fijos al hacer scroll
+- Gráficas de tendencia de 7 días en las tarjetas del panel
+- Menú principal con perfil del negocio y accesos directos
+
+### Mejorado
+
+- Fondo del calendario uniforme en modo oscuro
+- Tarjetas de estadísticas sin bordes con sombra suave
+- Tarjeta de ingresos del día con color reactivo al rendimiento
+
 ## [0.9.26] - 2026-03-03
 
 ### Arreglado

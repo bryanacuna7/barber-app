@@ -246,6 +246,12 @@ html {
   background-color: var(--background);
 }
 
+html.citas-overscroll-fix,
+html.citas-overscroll-fix body {
+  background-color: #0a0a0a;
+  overscroll-behavior-y: none;
+}
+
 /* Premium Focus Ring - Consistent across all interactive elements */
 .focus-ring {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-blue-400/50 dark:focus-visible:ring-offset-zinc-900;
