@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useRef, useState } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { format, parseISO, addMinutes, isValid } from 'date-fns'
 import { X, Plus, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -378,6 +378,47 @@ function AppointmentRow({
   )
 }
 
+
+// ---------------------------------------------------------------------------
+// Scroll-fade wrapper — dims blocks as they scroll past (mobile only)
+// ---------------------------------------------------------------------------
+
+function TimeBlockScrollFade({
+  children,
+  isLast,
+  entryDelay,
+}: {
+  children: React.ReactNode
+  isLast: boolean
+  entryDelay: number
+}) {
+  const innerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: innerRef,
+    // From: block top at 65% viewport → To: block top 8% above viewport top
+    offset: ['start 0.65', 'start -0.08'],
+  })
+
+  // Last block never dims — it's always the "current" section
+  const opacity = useTransform(scrollYProgress, [0, 0.6, 1], isLast ? [1, 1, 1] : [1, 1, 0.38])
+  const scale = useTransform(scrollYProgress, [0, 0.6, 1], isLast ? [1, 1, 1] : [1, 1, 0.975])
+
+  return (
+    // Outer: scroll-linked visual state
+    <motion.div style={{ opacity, scale, transformOrigin: 'top center' }}>
+      {/* Inner: entry animation */}
+      <motion.div
+        ref={innerRef}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...animations.spring.gentle, delay: entryDelay }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -417,11 +458,10 @@ export function CalendarDayView({
       {/* Time blocks (Cinema feature) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         {timeBlocks.map((block, blockIndex) => (
-          <motion.div
+          <TimeBlockScrollFade
             key={block.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
+            isLast={blockIndex === timeBlocks.length - 1}
+            entryDelay={blockIndex * 0.1}
           >
             {/* Block label — fuera del card, estilo Mock B */}
             <div className="flex items-center justify-between px-1 mb-2">
@@ -540,7 +580,7 @@ export function CalendarDayView({
                   </motion.div>
                 ))}
             </div>
-          </motion.div>
+          </TimeBlockScrollFade>
         ))}
       </div>
 
