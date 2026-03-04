@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
-import { ChevronDown, Check } from 'lucide-react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { useEffect, useMemo, useState } from 'react'
+import { ChevronDown, Check, Search, Scissors } from 'lucide-react'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { IOSTimePicker, TimePickerTrigger } from '@/components/ui/ios-time-picker'
@@ -51,6 +51,39 @@ export interface CreateAppointmentSheetProps {
   setIsTimePickerOpen: (open: boolean) => void
 }
 
+// Avatar helpers
+const AVATAR_COLORS = [
+  'bg-blue-500',
+  'bg-emerald-500',
+  'bg-violet-500',
+  'bg-orange-500',
+  'bg-rose-500',
+  'bg-cyan-500',
+  'bg-amber-500',
+  'bg-indigo-500',
+]
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((p) => p[0] ?? '')
+    .join('')
+    .toUpperCase()
+}
+
+function getAvatarColor(name: string): string {
+  const hash = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length]
+}
+
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m > 0 ? `${h}h ${m}min` : `${h}h`
+}
+
 export function CreateAppointmentSheet({
   isOpen,
   onOpenChange,
@@ -72,6 +105,8 @@ export function CreateAppointmentSheet({
   isTimePickerOpen,
   setIsTimePickerOpen,
 }: CreateAppointmentSheetProps) {
+  const [clientSearch, setClientSearch] = useState('')
+
   const minAllowedDate = useMemo(() => {
     const date = new Date()
     date.setHours(0, 0, 0, 0)
@@ -81,6 +116,14 @@ export function CreateAppointmentSheet({
     () => new Date(minAllowedDate.getFullYear(), 11, 31),
     [minAllowedDate]
   )
+
+  const filteredClients = useMemo(() => {
+    if (!clientSearch.trim()) return clients
+    const q = clientSearch.toLowerCase()
+    return clients.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.phone.includes(q)
+    )
+  }, [clients, clientSearch])
 
   const handleClose = () => {
     setActivePickerField(null)
@@ -100,6 +143,10 @@ export function CreateAppointmentSheet({
   }
 
   useEffect(() => {
+    if (activePickerField !== 'client') setClientSearch('')
+  }, [activePickerField])
+
+  useEffect(() => {
     if (!isOpen) {
       setActivePickerField(null)
       setIsTimePickerOpen(false)
@@ -108,22 +155,26 @@ export function CreateAppointmentSheet({
 
   useEffect(() => {
     if (!isOpen) return
-
     const selectedDay = new Date(
       selectedDate.getFullYear(),
       selectedDate.getMonth(),
       selectedDate.getDate()
     )
-
     if (selectedDay < minAllowedDate) {
       onDateChange(minAllowedDate)
       return
     }
-
     if (selectedDay > maxAllowedDate) {
       onDateChange(maxAllowedDate)
     }
   }, [isOpen, maxAllowedDate, minAllowedDate, onDateChange, selectedDate])
+
+  const pickerTitle =
+    activePickerField === 'client'
+      ? 'Seleccionar Cliente'
+      : activePickerField === 'service'
+        ? 'Seleccionar Servicio'
+        : 'Miembro del equipo'
 
   return (
     <>
@@ -172,9 +223,7 @@ export function CreateAppointmentSheet({
                 {createForm.service_id
                   ? (() => {
                       const service = services.find((item) => item.id === createForm.service_id)
-                      return service
-                        ? `${service.name} - ₡${service.price.toLocaleString()}`
-                        : 'Selecciona un servicio'
+                      return service ? service.name : 'Selecciona un servicio'
                     })()
                   : 'Selecciona un servicio'}
               </span>
@@ -283,6 +332,7 @@ export function CreateAppointmentSheet({
         zIndex={90}
       />
 
+      {/* Picker Sheet */}
       <Sheet
         open={isOpen && activePickerField !== null}
         zIndex={90}
@@ -290,86 +340,207 @@ export function CreateAppointmentSheet({
           if (!open) setActivePickerField(null)
         }}
       >
-        <SheetContent
-          side="bottom"
-          centered
-          className="w-[min(42rem,calc(100%-1rem))] max-h-[72vh] overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 pb-safe md:max-h-[70vh]"
-        >
-          <SheetHeader>
-            <SheetTitle className="text-foreground text-lg font-semibold">
-              {activePickerField === 'client' && 'Seleccionar Cliente'}
-              {activePickerField === 'service' && 'Seleccionar Servicio'}
-              {activePickerField === 'barber' && 'Seleccionar Miembro del equipo'}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="mt-4 max-h-[calc(72vh-96px)] overflow-y-auto px-2 pb-4 pb-safe">
-            {activePickerField === 'client' &&
-              clients.map((client) => (
-                <button
-                  key={client.id}
-                  type="button"
-                  onClick={() => {
-                    setCreateForm((prev) => ({ ...prev, client_id: client.id }))
-                    if (isMobileDevice()) haptics.selection()
-                    onClearFieldError?.('client_id')
-                    onClearFieldError?.('general')
-                    setActivePickerField(null)
-                  }}
-                  className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800 dark:active:bg-zinc-800"
-                >
-                  <span className="text-base text-foreground">{client.name}</span>
-                  {createForm.client_id === client.id && (
-                    <Check className="h-5 w-5 shrink-0 text-blue-500" />
-                  )}
-                </button>
-              ))}
+        <SheetContent side="bottom" className="max-h-[82vh] !gap-0 !p-0 overflow-hidden">
+          {/* Header */}
+          <div className="px-5 pt-5 pb-0 flex-shrink-0">
+            <h2 className="text-base font-semibold text-foreground">{pickerTitle}</h2>
 
-            {activePickerField === 'service' &&
-              services.map((service) => (
-                <button
-                  key={service.id}
-                  type="button"
-                  onClick={() => {
-                    setCreateForm((prev) => ({ ...prev, service_id: service.id }))
-                    if (isMobileDevice()) haptics.selection()
-                    onClearFieldError?.('service_id')
-                    onClearFieldError?.('general')
-                    setActivePickerField(null)
-                  }}
-                  className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800 dark:active:bg-zinc-800"
-                >
-                  <div>
-                    <span className="text-base text-foreground">{service.name}</span>
-                    <span className="ml-2 text-sm text-muted">
-                      ₡{service.price.toLocaleString()}
-                    </span>
+            {/* Search bar — clients only */}
+            {activePickerField === 'client' && (
+              <div className="relative mt-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  placeholder="Buscar cliente..."
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="w-full h-10 pl-9 pr-4 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-sm text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:focus:ring-blue-500/30"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* List */}
+          <div className="mt-3 overflow-y-auto overscroll-contain px-2 pb-4 pb-safe [-webkit-overflow-scrolling:touch]">
+            {/* Clients */}
+            {activePickerField === 'client' && (
+              <>
+                {filteredClients.length === 0 ? (
+                  <div className="py-12 text-center text-sm text-muted">
+                    Sin resultados para &ldquo;{clientSearch}&rdquo;
                   </div>
-                  {createForm.service_id === service.id && (
-                    <Check className="h-5 w-5 shrink-0 text-blue-500" />
-                  )}
-                </button>
-              ))}
+                ) : (
+                  filteredClients.map((client) => {
+                    const isSelected = createForm.client_id === client.id
+                    return (
+                      <button
+                        key={client.id}
+                        type="button"
+                        onClick={() => {
+                          setCreateForm((prev) => ({ ...prev, client_id: client.id }))
+                          if (isMobileDevice()) haptics.selection()
+                          onClearFieldError?.('client_id')
+                          onClearFieldError?.('general')
+                          setActivePickerField(null)
+                        }}
+                        className={cn(
+                          'flex min-h-[56px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
+                          isSelected
+                            ? 'bg-blue-50 dark:bg-blue-500/10'
+                            : 'hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-800/70'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white',
+                            getAvatarColor(client.name)
+                          )}
+                        >
+                          {getInitials(client.name)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={cn(
+                              'text-sm font-medium truncate',
+                              isSelected
+                                ? 'text-blue-600 dark:text-blue-400'
+                                : 'text-foreground'
+                            )}
+                          >
+                            {client.name}
+                          </p>
+                          {client.phone && (
+                            <p className="text-xs text-muted truncate">{client.phone}</p>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500">
+                            <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })
+                )}
+              </>
+            )}
 
+            {/* Services */}
+            {activePickerField === 'service' &&
+              services.map((service) => {
+                const isSelected = createForm.service_id === service.id
+                return (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => {
+                      setCreateForm((prev) => ({ ...prev, service_id: service.id }))
+                      if (isMobileDevice()) haptics.selection()
+                      onClearFieldError?.('service_id')
+                      onClearFieldError?.('general')
+                      setActivePickerField(null)
+                    }}
+                    className={cn(
+                      'flex min-h-[56px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
+                      isSelected
+                        ? 'bg-blue-50 dark:bg-blue-500/10'
+                        : 'hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-800/70'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                        isSelected ? 'bg-blue-500' : 'bg-zinc-100 dark:bg-zinc-800'
+                      )}
+                    >
+                      <Scissors
+                        className={cn(
+                          'h-4 w-4',
+                          isSelected ? 'text-white' : 'text-zinc-500 dark:text-zinc-400'
+                        )}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'
+                        )}
+                      >
+                        {service.name}
+                      </p>
+                      <p className="text-xs text-muted">{formatDuration(service.duration)}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={cn(
+                          'text-sm font-semibold tabular-nums',
+                          isSelected ? 'text-blue-500' : 'text-foreground'
+                        )}
+                      >
+                        ₡{service.price.toLocaleString()}
+                      </span>
+                      {isSelected && (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+                          <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+
+            {/* Barbers */}
             {activePickerField === 'barber' &&
-              barbers.map((barber) => (
-                <button
-                  key={barber.id}
-                  type="button"
-                  onClick={() => {
-                    setCreateForm((prev) => ({ ...prev, barber_id: barber.id }))
-                    if (isMobileDevice()) haptics.selection()
-                    onClearFieldError?.('barber_id')
-                    onClearFieldError?.('general')
-                    setActivePickerField(null)
-                  }}
-                  className="flex min-h-[44px] w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800 dark:active:bg-zinc-800"
-                >
-                  <span className="text-base text-foreground">{barber.name}</span>
-                  {createForm.barber_id === barber.id && (
-                    <Check className="h-5 w-5 shrink-0 text-blue-500" />
-                  )}
-                </button>
-              ))}
+              barbers.map((barber) => {
+                const isSelected = createForm.barber_id === barber.id
+                return (
+                  <button
+                    key={barber.id}
+                    type="button"
+                    onClick={() => {
+                      setCreateForm((prev) => ({ ...prev, barber_id: barber.id }))
+                      if (isMobileDevice()) haptics.selection()
+                      onClearFieldError?.('barber_id')
+                      onClearFieldError?.('general')
+                      setActivePickerField(null)
+                    }}
+                    className={cn(
+                      'flex min-h-[56px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
+                      isSelected
+                        ? 'bg-blue-50 dark:bg-blue-500/10'
+                        : 'hover:bg-zinc-100 active:bg-zinc-100 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-800/70'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white',
+                        getAvatarColor(barber.name)
+                      )}
+                    >
+                      {getInitials(barber.name)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={cn(
+                          'text-sm font-medium',
+                          isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-foreground'
+                        )}
+                      >
+                        {barber.name}
+                      </p>
+                    </div>
+                    {isSelected && (
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500">
+                        <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
           </div>
         </SheetContent>
       </Sheet>
