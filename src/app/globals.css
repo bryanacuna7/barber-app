@@ -243,6 +243,7 @@ body {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  background-color: var(--background);
 }
 
 /* Premium Focus Ring - Consistent across all interactive elements */

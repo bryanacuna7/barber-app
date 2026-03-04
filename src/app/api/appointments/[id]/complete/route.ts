@@ -162,7 +162,7 @@ export const PATCH = withAuthAndRateLimit<RouteParams>(
 
       // 3. Validate current status - pending, confirmed, or in_progress can be completed
       const completableStatuses = ['pending', 'confirmed', 'in_progress']
-      if (!completableStatuses.includes(appointment.status)) {
+      if (!completableStatuses.includes(appointment.status ?? '')) {
         return NextResponse.json(
           {
             error: 'Estado invalido',

@@ -155,10 +155,9 @@ export function ServicesChart({ data, period, height }: ServicesChartProps) {
                       }}
                     />
                   }
-                  labelFormatter={(
-                    label: string,
-                    payload: readonly { payload?: { name?: string } }[]
-                  ) => payload?.[0]?.payload?.name ?? label}
+                  labelFormatter={(label, payload: readonly { payload?: { name?: string } }[]) =>
+                    payload?.[0]?.payload?.name ?? String(label)
+                  }
                   cursor={{ fill: `${chart.accent}1f` }}
                 />
                 <Bar dataKey="revenue" radius={[0, 9, 9, 0]} barSize={22}>
