@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { DashboardTourWrapper } from '@/components/tours/dashboard-tour-wrapper'
 import { useDashboardStats } from '@/hooks/use-dashboard-stats'
 import { useDashboardAppointments } from '@/hooks/use-dashboard-appointments'
+import { useDashboardSparklines } from '@/hooks/use-dashboard-sparklines'
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { ShareBookingLink } from '@/components/share/share-booking-link'
 import { bookingPath } from '@/lib/utils/booking-url'
@@ -37,6 +38,7 @@ function useDashboardTipDismiss() {
 export function DashboardContent() {
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboardStats()
   const { data: appointmentsData, isLoading: appointmentsLoading } = useDashboardAppointments()
+  const { data: sparklines } = useDashboardSparklines()
   const { dismissed: tipDismissed, dismiss: dismissTip } = useDashboardTipDismiss()
 
   // Real-time: WebSocket invalidates dashboard queries when appointments change
@@ -125,6 +127,7 @@ export function DashboardContent() {
             monthRevenue={formatCurrencyCompactMillions(stats.monthRevenue)}
             monthAppointments={stats.monthAppointments}
             totalClients={stats.totalClients}
+            sparklines={sparklines}
           />
         </div>
 

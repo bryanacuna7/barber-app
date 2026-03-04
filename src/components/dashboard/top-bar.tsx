@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Scissors, Search, PanelLeftClose, PanelLeftOpen, Link2, Check } from 'lucide-react'
+import { Search, PanelLeftClose, PanelLeftOpen, Link2, Check } from 'lucide-react'
 import { useSidebarState } from './sidebar-state'
 import { useCommandPalette } from './command-palette'
 import { NotificationBell } from '@/components/notifications/notification-bell'
@@ -53,11 +53,7 @@ export function TopBar({ businessName, businessSlug, logoUrl }: TopBarProps) {
 
       {/* Logo + business name */}
       <Link href="/dashboard" className="flex items-center gap-2.5">
-        {logoUrl ? (
-          <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
-        ) : (
-          <Scissors className="h-5 w-5 text-zinc-900 dark:text-white" />
-        )}
+        {logoUrl ? <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" /> : null}
         <span className="font-semibold text-sm truncate max-w-[180px] text-zinc-900 dark:text-white">
           {businessName}
         </span>

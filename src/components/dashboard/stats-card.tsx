@@ -4,6 +4,7 @@ import { type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { compactCurrencyForMobile } from '@/lib/utils/format'
 import { AnimatedNumber } from '@/components/ui/motion'
+import { SparklineChart } from './sparkline-chart'
 
 interface StatsCardProps {
   title: string
@@ -19,6 +20,15 @@ interface StatsCardProps {
   valueClassName?: string
   /** Override font classes for the title label */
   titleClassName?: string
+  sparkline?: {
+    id: string
+    data: number[]
+    color: string
+    ariaLabel: string
+    trendLabel?: string
+    trendPositive?: boolean
+  }
+  className?: string
 }
 
 const variants = {
@@ -27,7 +37,8 @@ const variants = {
     iconBg: 'bg-zinc-100 dark:bg-zinc-800',
     iconColor: 'text-muted',
     gradient: null,
-    shadow: 'shadow-sm hover:shadow-md',
+    shadow:
+      'shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)]',
   },
   primary: {
     bg: 'bg-gradient-to-br from-blue-600 to-blue-700',
@@ -68,6 +79,8 @@ export function StatsCard({
   variant = 'default',
   valueClassName,
   titleClassName,
+  sparkline,
+  className,
 }: StatsCardProps) {
   const styles = variants[variant]
   const isGradient = styles.gradient
@@ -85,7 +98,8 @@ export function StatsCard({
         'transition-shadow duration-300',
         styles.bg,
         styles.shadow,
-        !isGradient && 'border border-zinc-200 dark:border-zinc-800'
+        className
+        // no border — Mercury "infinite" borderless effect via shadow only
       )}
     >
       {/* Gradient overlay for depth */}
@@ -168,16 +182,44 @@ export function StatsCard({
               <span>{Math.abs(trend.value)}%</span>
             </div>
           )}
+
+          {sparkline && sparkline.data.length >= 2 && (
+            <div className="mt-2">
+              <SparklineChart
+                id={sparkline.id}
+                data={sparkline.data}
+                color={sparkline.color}
+                ariaLabel={sparkline.ariaLabel}
+              />
+              {sparkline.trendLabel && (
+                <p
+                  className={cn(
+                    'text-[10px] font-semibold mt-0.5',
+                    isGradient
+                      ? 'text-white/70'
+                      : sparkline.trendPositive !== false
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-amber-500 dark:text-amber-400'
+                  )}
+                >
+                  {sparkline.trendLabel}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div
           className={cn(
-            'absolute right-0 top-0 flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-xl',
+            'absolute right-0 top-0 flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl',
             styles.iconBg,
             isGradient && 'ring-2 ring-white/10 sm:ring-4'
           )}
         >
-          <Icon className={cn('h-4 w-4 sm:h-6 sm:w-6', styles.iconColor)} />
+          <Icon
+            className={cn('h-[18px] w-[18px] sm:h-6 sm:w-6 shrink-0', styles.iconColor)}
+            strokeWidth={2.2}
+          />
         </div>
       </div>
 

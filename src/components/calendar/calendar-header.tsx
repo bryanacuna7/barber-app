@@ -137,7 +137,7 @@ export function CalendarHeader({
         </div>
 
         {/* MOBILE HEADER */}
-        <div className="lg:hidden mb-3 rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/80 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.35)] p-2.5 space-y-2">
+        <div className="lg:hidden mb-3 rounded-2xl bg-transparent p-2.5 space-y-2">
           {/* Row 1: < Date > [Hoy] [Walk-in] [+] */}
           <div className="flex items-center gap-1">
             <Button
@@ -196,7 +196,7 @@ export function CalendarHeader({
           </div>
 
           {/* Row 2: D/S/M segmented control */}
-          <div className="flex items-center gap-1 rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.04] p-1">
+          <div className="flex items-center gap-1 rounded-xl bg-zinc-950 p-1">
             {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
               <button
                 type="button"
@@ -204,9 +204,7 @@ export function CalendarHeader({
                 onClick={() => onViewModeChange(mode)}
                 aria-pressed={viewMode === mode}
                 className={`flex-1 min-h-[38px] rounded-lg border border-transparent text-xs font-semibold transition-colors ${
-                  viewMode === mode
-                    ? 'brand-tab-active'
-                    : 'text-muted hover:bg-zinc-100/80 dark:hover:bg-white/10'
+                  viewMode === mode ? 'brand-tab-active' : 'text-muted hover:bg-zinc-900/70'
                 }`}
               >
                 {mode === 'day' ? 'Día' : mode === 'week' ? 'Semana' : 'Mes'}
@@ -225,7 +223,7 @@ export function CalendarHeader({
                 transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 style={{ overflow: 'hidden' }}
               >
-                <div className="pt-1 border-t border-zinc-200/70 dark:border-zinc-800/80">
+                <div className="pt-1 border-t border-zinc-800/40">
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <span className="font-semibold text-foreground">{projectedRevenueDisplay}</span>
                     <span className="text-muted">{mobileProjectionAppointmentsLabel}</span>

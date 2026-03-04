@@ -23,6 +23,11 @@ interface ModalProps {
    * Leave false (default) for confirm dialogs and small modals.
    */
   mobileFullHeight?: boolean
+  /**
+   * When true, content area fills available height.
+   * Set false for compact forms to avoid dead space on mobile.
+   */
+  contentFill?: boolean
 }
 
 const sizeClasses = {
@@ -44,6 +49,7 @@ export function Modal({
   closeOnOverlayClick = true,
   className,
   mobileFullHeight = false,
+  contentFill = true,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
@@ -178,7 +184,12 @@ export function Modal({
             )}
 
             {/* Content */}
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:p-6 touch-pan-y [-webkit-overflow-scrolling:touch]">
+            <div
+              className={cn(
+                contentFill && 'flex-1 min-h-0',
+                'overflow-y-auto overscroll-contain p-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:p-6 touch-pan-y [-webkit-overflow-scrolling:touch]'
+              )}
+            >
               {children}
             </div>
           </motion.div>

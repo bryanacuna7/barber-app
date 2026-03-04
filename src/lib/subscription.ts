@@ -136,15 +136,32 @@ export async function getSubscriptionStatus(
 
   const subscription = data as SubscriptionData
 
-  // Check if trial expired and auto-degrade
+  // Check if trial expired and auto-degrade (skip for admin-owned businesses)
   if (subscription.status === 'trial' && subscription.trial_ends_at) {
     const trialEnd = new Date(subscription.trial_ends_at)
     if (trialEnd < new Date()) {
-      const downgraded = await degradeToBasic(supabase, businessId)
-      if (downgraded) {
-        await notifyTrialExpired(supabase, businessId)
+      // Don't degrade if business owner is an admin
+      const { data: business } = await (supabase as AnySupabase)
+        .from('businesses')
+        .select('owner_id')
+        .eq('id', businessId)
+        .single()
+
+      const isAdminOwned = business?.owner_id
+        ? await (supabase as AnySupabase)
+            .from('admin_users')
+            .select('user_id', { count: 'exact', head: true })
+            .eq('user_id', business.owner_id)
+            .then(({ count }: { count: number | null }) => (count ?? 0) > 0)
+        : false
+
+      if (!isAdminOwned) {
+        const downgraded = await degradeToBasic(supabase, businessId)
+        if (downgraded) {
+          await notifyTrialExpired(supabase, businessId)
+        }
+        return getSubscriptionStatus(supabase, businessId, _depth + 1)
       }
-      return getSubscriptionStatus(supabase, businessId, _depth + 1)
     }
   }
 

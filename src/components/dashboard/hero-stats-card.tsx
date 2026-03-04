@@ -13,16 +13,21 @@ interface HeroMetric {
 interface HeroStatsCardProps {
   left: HeroMetric
   right: HeroMetric
+  /** True when today has revenue > 0 — switches gradient to emerald; false = slate */
+  activeDay?: boolean
+  className?: string
 }
 
-export function HeroStatsCard({ left, right }: HeroStatsCardProps) {
+export function HeroStatsCard({ left, right, activeDay = true, className }: HeroStatsCardProps) {
   return (
     <div
       className={cn(
         'relative overflow-hidden rounded-2xl p-5 sm:p-6',
-        'bg-gradient-to-br from-emerald-500 to-teal-600',
-        'shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30',
-        'transition-shadow duration-300'
+        activeDay
+          ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30'
+          : 'bg-gradient-to-br from-slate-500 to-slate-700 shadow-lg shadow-slate-500/15 hover:shadow-xl hover:shadow-slate-500/20',
+        'transition-shadow duration-300',
+        className
       )}
     >
       {/* Gradient overlays for depth — same as StatsCard gradient variants */}

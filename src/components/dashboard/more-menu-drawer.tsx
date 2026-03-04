@@ -21,10 +21,10 @@ import {
   Trophy,
   Target,
   BookOpen,
-  Link2,
   Copy,
   Check,
   Share2,
+  Globe,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils/cn'
@@ -287,9 +287,9 @@ function IOSRow({
       href={href}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors',
-        'active:bg-zinc-100 dark:active:bg-white/5',
-        isActive && 'bg-zinc-100 dark:bg-white/5'
+        'relative flex items-center gap-3 pl-4 pr-3 min-h-[44px] transition-colors',
+        'active:bg-zinc-100 dark:active:bg-zinc-800/60',
+        isActive && 'bg-zinc-100 dark:bg-zinc-800/60'
       )}
     >
       {/* iOS colored square icon */}
@@ -302,13 +302,8 @@ function IOSRow({
         <Icon className="h-[17px] w-[17px] text-white" strokeWidth={2} />
       </div>
 
-      {/* Label + chevron with separator */}
-      <div
-        className={cn(
-          'flex flex-1 items-center justify-between min-h-[44px] pr-1',
-          !isLast && 'border-b border-zinc-200 dark:border-zinc-700/50'
-        )}
-      >
+      {/* Label + chevron */}
+      <div className="flex flex-1 items-center justify-between min-h-[44px] pr-1">
         <span
           className={cn(
             'text-[17px] leading-tight',
@@ -322,28 +317,52 @@ function IOSRow({
           strokeWidth={2.5}
         />
       </div>
+
+      {/* Gradient separator */}
+      {!isLast && (
+        <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent dark:via-zinc-700/60" />
+      )}
     </Link>
   )
 }
 
-// ── Share Link (preserved with full behavior) ──
+// ── Uber-style profile header card (Avatar + business name + 3 quick-actions) ──
 
-function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClose: () => void }) {
+function ProfileHeaderCard({
+  isBarberRole,
+  onClose,
+}: {
+  isBarberRole: boolean
+  onClose: () => void
+}) {
   const [copied, setCopied] = useState(false)
+  const [reservasOpen, setReservasOpen] = useState(false)
   const toast = useToast()
 
   let slug: string | undefined
+  let businessName: string | undefined
+  let userRole: string | undefined
   try {
     const ctx = useBusiness()
     slug = ctx.slug
+    businessName = ctx.businessName
+    userRole = ctx.userRole
   } catch {
     slug = undefined
   }
 
-  if (isBarberRole || !slug) return null
+  const initials = (businessName ?? 'B')
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('')
+
+  const roleLabel =
+    userRole === 'owner' ? 'Propietario' : userRole === 'admin' ? 'Admin' : 'Miembro del equipo'
 
   const handleCopy = () => {
-    const url = bookingAbsoluteUrl(slug!)
+    if (!slug) return
+    const url = bookingAbsoluteUrl(slug)
     navigator.clipboard
       .writeText(url)
       .then(() => {
@@ -351,13 +370,12 @@ function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClo
         toast.info('Enlace copiado al portapapeles')
         setTimeout(() => setCopied(false), 2000)
       })
-      .catch(() => {
-        toast.error('No se pudo copiar')
-      })
+      .catch(() => toast.error('No se pudo copiar'))
   }
 
   const handleShare = () => {
-    const url = bookingAbsoluteUrl(slug!)
+    if (!slug) return
+    const url = bookingAbsoluteUrl(slug)
     if (navigator.share) {
       navigator.share({ title: 'Link de Reservas', url }).catch(() => {})
     } else {
@@ -370,42 +388,100 @@ function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClo
   }
 
   return (
-    <div className="mb-5">
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden dark:border-zinc-700 dark:bg-zinc-800/80">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex-shrink-0 w-[29px] h-[29px] rounded-[7px] bg-blue-500 flex items-center justify-center">
-            <Link2 className="h-[17px] w-[17px] text-white" strokeWidth={2} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[17px] text-zinc-900 dark:text-zinc-100">Link de Reservas</p>
-            <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
-              Comparte con tus clientes
-            </p>
-          </div>
+    <div className="rounded-2xl bg-white dark:bg-zinc-900 p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none">
+      {/* Avatar + business name row */}
+      <div className="flex items-center gap-3.5 mb-4">
+        <div className="flex-shrink-0 w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/25">
+          <span className="text-white text-xl font-black tracking-tight">{initials}</span>
         </div>
-        <div className="grid grid-cols-2 gap-px bg-zinc-200 dark:bg-zinc-700/50 mx-4 mb-3 rounded-lg overflow-hidden">
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex h-[38px] items-center justify-center gap-1.5 bg-white text-[14px] font-medium text-zinc-700 transition-colors active:bg-zinc-100 dark:bg-zinc-700/80 dark:text-zinc-200 dark:active:bg-zinc-600"
-          >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-400" />
-            ) : (
-              <Copy className="h-3.5 w-3.5" />
-            )}
-            {copied ? 'Copiado' : 'Copiar'}
-          </button>
-          <button
-            type="button"
-            onClick={handleShare}
-            className="flex h-[38px] items-center justify-center gap-1.5 bg-white text-[14px] font-medium text-zinc-700 transition-colors active:bg-zinc-100 dark:bg-zinc-700/80 dark:text-zinc-200 dark:active:bg-zinc-600"
-          >
-            <Share2 className="h-3.5 w-3.5" />
-            Compartir
-          </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-[17px] font-bold text-zinc-900 dark:text-white leading-tight truncate">
+            {businessName ?? 'Mi Negocio'}
+          </p>
+          <p className="text-[13px] text-zinc-400 dark:text-zinc-500 mt-0.5">{roleLabel}</p>
         </div>
       </div>
+
+      {/* 3 quick-action cards */}
+      <div className="grid grid-cols-3 gap-2">
+        {/* Reservas — expands inline */}
+        {!isBarberRole && slug && (
+          <button
+            type="button"
+            onClick={() => setReservasOpen((v) => !v)}
+            aria-label="Compartir link de reservas"
+            className={cn(
+              'flex flex-col items-center justify-center gap-1.5 rounded-xl py-3 min-h-[64px] transition-colors',
+              reservasOpen
+                ? 'bg-blue-50 dark:bg-blue-950/40'
+                : 'bg-zinc-100 dark:bg-zinc-800 active:bg-zinc-200 dark:active:bg-zinc-700'
+            )}
+          >
+            <div className="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center">
+              <Globe className="w-4 h-4 text-white" strokeWidth={2} />
+            </div>
+            <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+              Reservas
+            </span>
+          </button>
+        )}
+
+        {/* Analíticas */}
+        <Link
+          href="/analiticas"
+          onClick={onClose}
+          aria-label="Ir a Analíticas"
+          className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 py-3 min-h-[64px] active:bg-zinc-200 dark:active:bg-zinc-700 transition-colors"
+        >
+          <div className="w-7 h-7 rounded-lg bg-blue-500 flex items-center justify-center">
+            <BarChart3 className="w-4 h-4 text-white" strokeWidth={2} />
+          </div>
+          <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+            Analíticas
+          </span>
+        </Link>
+
+        {/* Configuración */}
+        <Link
+          href="/configuracion"
+          onClick={onClose}
+          aria-label="Ir a Configuración"
+          className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 py-3 min-h-[64px] active:bg-zinc-200 dark:active:bg-zinc-700 transition-colors"
+        >
+          <div className="w-7 h-7 rounded-lg bg-zinc-500 flex items-center justify-center">
+            <Settings className="w-4 h-4 text-white" strokeWidth={2} />
+          </div>
+          <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">Config</span>
+        </Link>
+      </div>
+
+      {/* Inline share expand */}
+      {reservasOpen && !isBarberRole && slug && (
+        <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="flex h-[38px] items-center justify-center gap-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[14px] font-medium text-zinc-700 dark:text-zinc-200 transition-colors active:bg-zinc-200 dark:active:bg-zinc-700"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-emerald-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              {copied ? 'Copiado' : 'Copiar'}
+            </button>
+            <button
+              type="button"
+              onClick={handleShare}
+              className="flex h-[38px] items-center justify-center gap-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[14px] font-medium text-zinc-700 dark:text-zinc-200 transition-colors active:bg-zinc-200 dark:active:bg-zinc-700"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              Compartir
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -415,59 +491,8 @@ function ShareLinkItem({ isBarberRole, onClose }: { isBarberRole: boolean; onClo
 function SettingsGroup({ children }: { children: React.ReactNode }) {
   return (
     <div>
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden dark:border-zinc-700 dark:bg-zinc-800/80">
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 overflow-hidden dark:border-0 dark:bg-zinc-900">
         {children}
-      </div>
-    </div>
-  )
-}
-
-// ── User profile header ──
-
-function UserProfileHeader() {
-  let userEmail: string | undefined
-  let userName: string | undefined
-  let userAvatarUrl: string | undefined
-  try {
-    const ctx = useBusiness()
-    userEmail = ctx.userEmail
-    userName = ctx.userName
-    userAvatarUrl = ctx.userAvatarUrl
-  } catch {
-    return null
-  }
-
-  const displayName = userName || userEmail?.split('@')[0] || 'Usuario'
-
-  return (
-    <div className="flex items-center gap-3 px-1 pb-1">
-      {userAvatarUrl ? (
-        <img
-          src={userAvatarUrl}
-          alt=""
-          className="h-10 w-10 rounded-full object-cover"
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-            const target = e.currentTarget
-            target.style.display = 'none'
-            const fallback = target.nextElementSibling as HTMLElement | null
-            if (fallback) fallback.style.display = 'flex'
-          }}
-        />
-      ) : null}
-      <div
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700 flex-shrink-0"
-        style={{ display: userAvatarUrl ? 'none' : 'flex' }}
-      >
-        <Users className="h-5 w-5 text-zinc-500 dark:text-zinc-400" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[17px] font-semibold text-zinc-900 dark:text-white">
-          {displayName}
-        </p>
-        {userEmail && (
-          <p className="truncate text-[13px] text-zinc-500 dark:text-zinc-400">{userEmail}</p>
-        )}
       </div>
     </div>
   )
@@ -544,11 +569,8 @@ export function MoreMenuDrawer({
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="Más opciones" showCloseButton={false}>
       <div className="space-y-5 pb-2">
-        {/* User profile */}
-        <UserProfileHeader />
-
-        {/* Share Link block (P1: preserved with full behavior) */}
-        <ShareLinkItem isBarberRole={isBarberRole} onClose={onClose} />
+        {/* Uber-style profile header + quick actions */}
+        <ProfileHeaderCard isBarberRole={isBarberRole} onClose={onClose} />
 
         {/* iOS-style grouped cards */}
         {menuCards.map((items, cardIndex) => (

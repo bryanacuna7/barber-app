@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, addMinutes, isValid } from 'date-fns'
 import { X, Plus, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
@@ -49,6 +49,24 @@ export interface CalendarDayViewProps {
   isSelected?: (id: string) => boolean
   onToggleSelect?: (id: string, event?: { shiftKey: boolean }) => void
   selectionCount?: number
+  currentTime?: Date
+  isSelectedDateToday?: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Now line — "you are here" separator between past and upcoming appointments
+// ---------------------------------------------------------------------------
+
+function NowLine({ time }: { time: Date }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 pointer-events-none" aria-hidden="true">
+      <span className="text-[10px] font-bold tabular-nums text-[var(--brand-primary)] shrink-0">
+        {format(time, 'H:mm')}
+      </span>
+      <div className="h-[1.5px] flex-1 bg-[var(--brand-primary)] opacity-50 rounded-full" />
+      <div className="w-2 h-2 rounded-full bg-[var(--brand-primary)] animate-pulse shrink-0" />
+    </div>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -66,6 +84,43 @@ function StatusAccent({ status }: { status: string }) {
           : 'bg-zinc-300 dark:bg-zinc-600'
 
   return <div className={`w-[3px] self-stretch flex-shrink-0 rounded-full ${color}`} />
+}
+
+function StatusPill({ status }: { status: string }) {
+  const map: Record<string, { label: string; className: string }> = {
+    pending: {
+      label: 'Pendiente',
+      className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
+    },
+    confirmed: {
+      label: 'Confirmada',
+      className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+    },
+    completed: {
+      label: 'Completada',
+      className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400',
+    },
+    cancelled: {
+      label: 'Cancelada',
+      className: 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400',
+    },
+    no_show: {
+      label: 'No Show',
+      className: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
+    },
+    in_progress: {
+      label: 'En curso',
+      className: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400',
+    },
+  }
+  const pill = map[status] ?? map.pending
+  return (
+    <span
+      className={`inline-block mt-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold leading-none ${pill.className}`}
+    >
+      {pill.label}
+    </span>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -130,15 +185,23 @@ function AppointmentRow({
     onLongPress: () => onOpenContextMenu(contextMenuData),
   })
 
-  const timeLabel = format(parseISO(apt.scheduled_at), 'h:mm a')
+  const startTime = format(parseISO(apt.scheduled_at), 'H:mm')
+  const endTime = format(
+    addMinutes(
+      parseISO(apt.scheduled_at),
+      apt.duration_minutes || apt.service?.duration_minutes || 30
+    ),
+    'H:mm'
+  )
   const price = formatCurrencyCompactMillions(apt.service?.price || 0)
+  const isCancelled = apt.status === 'cancelled' || apt.status === 'no_show'
 
   return (
     <motion.div
       layout
       exit={{ opacity: 0, x: -80, transition: { duration: 0.2 } }}
       transition={animations.spring.layout}
-      className={isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/80'}
+      className={isLast ? '' : 'border-b border-zinc-200/70 dark:border-zinc-800/50'}
     >
       {/* Mobile: swipeable + long-press */}
       <div className="lg:hidden">
@@ -151,15 +214,27 @@ function AppointmentRow({
           <div
             {...longPress}
             onClick={(e) => longPress.onClick(e, () => onSelectId(apt.id))}
-            className={`flex cursor-pointer items-stretch gap-3 px-3 py-3 select-none active:bg-zinc-100/80 dark:active:bg-zinc-900 ${
+            className={`flex cursor-pointer items-stretch gap-2.5 px-3 py-3 select-none active:bg-zinc-100/80 dark:active:bg-zinc-900 ${
               isSelected?.(apt.id) ? 'bg-blue-50 dark:bg-blue-950/20' : ''
             }`}
           >
+            {/* Stacked start/end time */}
+            <div
+              className={`flex-shrink-0 w-[38px] flex flex-col justify-center text-right ${isCancelled ? 'opacity-40' : ''}`}
+            >
+              <span className="text-[13px] font-semibold text-foreground tabular-nums leading-tight">
+                {startTime}
+              </span>
+              <span className="text-[11px] text-muted tabular-nums leading-tight">{endTime}</span>
+            </div>
+
             {/* Status accent bar */}
             <StatusAccent status={apt.status} />
 
             {/* Main content */}
-            <div className="flex min-w-0 flex-1 items-start justify-between">
+            <div
+              className={`flex min-w-0 flex-1 items-start justify-between gap-2 ${isCancelled ? 'opacity-50' : ''}`}
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
                   {onToggleSelect && (
@@ -187,23 +262,25 @@ function AppointmentRow({
                       )}
                     </button>
                   )}
-                  <span className="text-sm font-semibold text-foreground leading-tight truncate">
-                    {apt.client?.name || 'Cliente'}
+                  <span
+                    className={`text-sm font-semibold text-foreground leading-tight truncate ${isCancelled ? 'line-through' : ''}`}
+                  >
+                    {apt.service?.name || 'Servicio'}
                   </span>
                 </div>
-                <span className="text-xs text-muted leading-tight">
-                  {apt.service?.name || 'Servicio'}
+                <span className="text-xs text-muted leading-tight truncate block">
+                  {apt.client?.name || 'Cliente'}
                 </span>
               </div>
 
-              {/* Time (primary) + Price (secondary) */}
-              <div className="ml-3 flex-shrink-0 text-right">
-                <div className="text-sm font-semibold text-foreground tabular-nums leading-tight">
-                  {timeLabel}
-                </div>
-                <div className="mt-0.5 text-xs font-medium text-amber-500 dark:text-amber-400 leading-tight">
+              {/* Price + Status pill */}
+              <div className="flex-shrink-0 text-right">
+                <div
+                  className={`text-sm font-semibold tabular-nums leading-tight ${isCancelled ? 'text-muted line-through' : 'text-foreground'}`}
+                >
                   {price}
                 </div>
+                <StatusPill status={apt.status} />
               </div>
             </div>
           </div>
@@ -225,15 +302,27 @@ function AppointmentRow({
         onClick={() => onSelectId(apt.id)}
       >
         <div
-          className={`flex cursor-grab items-stretch gap-3 px-4 py-3 active:cursor-grabbing transition-[opacity,background-color] ${
+          className={`flex cursor-grab items-stretch gap-2.5 px-4 py-3 active:cursor-grabbing transition-[opacity,background-color] ${
             isSelected?.(apt.id)
               ? 'bg-blue-50 dark:bg-blue-950/20'
               : 'hover:bg-zinc-100/85 dark:hover:bg-zinc-900'
           }`}
         >
+          {/* Stacked start/end time */}
+          <div
+            className={`flex-shrink-0 w-[38px] flex flex-col justify-center text-right ${isCancelled ? 'opacity-40' : ''}`}
+          >
+            <span className="text-[13px] font-semibold text-foreground tabular-nums leading-tight">
+              {startTime}
+            </span>
+            <span className="text-[11px] text-muted tabular-nums leading-tight">{endTime}</span>
+          </div>
+
           <StatusAccent status={apt.status} />
 
-          <div className="flex min-w-0 flex-1 items-start justify-between">
+          <div
+            className={`flex min-w-0 flex-1 items-start justify-between gap-2 ${isCancelled ? 'opacity-50' : ''}`}
+          >
             <div className="min-w-0 flex-1">
               <div className="group flex items-center gap-2 mb-0.5">
                 {onToggleSelect && (
@@ -265,20 +354,22 @@ function AppointmentRow({
                     )}
                   </button>
                 )}
-                <span className="text-sm font-semibold text-foreground leading-tight">
-                  {apt.client?.name || 'Cliente'}
+                <span
+                  className={`text-sm font-semibold text-foreground leading-tight ${isCancelled ? 'line-through' : ''}`}
+                >
+                  {apt.service?.name || 'Servicio'}
                 </span>
               </div>
-              <span className="text-xs text-muted">{apt.service?.name || 'Servicio'}</span>
+              <span className="text-xs text-muted">{apt.client?.name || 'Cliente'}</span>
             </div>
 
-            <div className="ml-3 flex-shrink-0 text-right">
-              <div className="text-sm font-semibold text-foreground tabular-nums leading-tight">
-                {timeLabel}
-              </div>
-              <div className="mt-0.5 text-xs font-medium text-amber-500 dark:text-amber-400 leading-tight">
+            <div className="flex-shrink-0 text-right">
+              <div
+                className={`text-sm font-semibold tabular-nums leading-tight ${isCancelled ? 'text-muted line-through' : 'text-foreground'}`}
+              >
                 {price}
               </div>
+              <StatusPill status={apt.status} />
             </div>
           </div>
         </div>
@@ -303,6 +394,8 @@ export function CalendarDayView({
   isSelected,
   onToggleSelect,
   selectionCount = 0,
+  currentTime,
+  isSelectedDateToday = false,
 }: CalendarDayViewProps) {
   void _selectedId
   void _draggedId
@@ -314,7 +407,7 @@ export function CalendarDayView({
   return (
     <div className="space-y-4">
       {unscheduledCount > 0 && (
-        <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm">
+        <div className="rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-950 p-4 shadow-sm dark:shadow-none">
           <span className="text-xs font-medium uppercase tracking-wide text-muted">
             Sin hora asignada · {unscheduledCount}
           </span>
@@ -329,75 +422,93 @@ export function CalendarDayView({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...animations.spring.gentle, delay: blockIndex * 0.1 }}
-            className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm"
           >
-            {/* Block header */}
-            <div className="mb-4">
-              <div className="flex flex-col gap-1.5 xl:flex-row xl:items-center xl:justify-between xl:gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <block.icon className={`w-5 h-5 ${block.iconColor}`} />
-                  <h3 className="truncate text-sm font-semibold text-foreground leading-tight uppercase tracking-wide">
-                    {block.label}
-                  </h3>
-                </div>
-                <span className="pl-7 text-xs sm:text-sm font-medium text-muted xl:pl-0 xl:shrink-0">
-                  {block.start > 12 ? block.start - 12 : block.start}
-                  {block.start >= 12 ? 'pm' : 'am'} - {block.end > 12 ? block.end - 12 : block.end}
+            {/* Block label — fuera del card, estilo Mock B */}
+            <div className="flex items-center justify-between px-1 mb-2">
+              <div className="flex items-center gap-1.5">
+                <block.icon className={`w-3.5 h-3.5 ${block.iconColor}`} />
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted">
+                  {block.label}
+                </h3>
+                <span className="text-[11px] text-subtle">
+                  · {block.start > 12 ? block.start - 12 : block.start}
+                  {block.start >= 12 ? 'pm' : 'am'} – {block.end > 12 ? block.end - 12 : block.end}
                   {block.end >= 12 ? 'pm' : 'am'}
                 </span>
               </div>
-
-              {/* Occupancy bar */}
-              <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 p-3">
-                <div className="flex items-center justify-between mb-2 text-sm">
-                  <span className="text-foreground">{block.count} citas</span>
-                  <span
-                    className={`font-bold ${
-                      block.occupancyPercent >= 90
-                        ? 'text-red-500'
-                        : block.occupancyPercent >= 60
-                          ? 'text-amber-500'
-                          : 'text-emerald-500'
-                    }`}
-                  >
-                    {block.occupancyPercent}%
-                  </span>
-                </div>
-                <div className="h-1.5 bg-zinc-200/70 dark:bg-zinc-800/80 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${block.occupancyPercent}%` }}
-                    className={`h-full ${
-                      block.occupancyPercent >= 90
-                        ? 'bg-red-500'
-                        : block.occupancyPercent >= 60
-                          ? 'bg-amber-500'
-                          : 'bg-emerald-500'
-                    }`}
-                  />
-                </div>
-              </div>
+              <span
+                className={`text-[11px] font-semibold ${
+                  block.occupancyPercent >= 90
+                    ? 'text-red-500'
+                    : block.occupancyPercent >= 60
+                      ? 'text-amber-500'
+                      : 'text-emerald-500'
+                }`}
+              >
+                {block.count} citas · {block.occupancyPercent}%
+              </span>
             </div>
 
-            {/* Appointments list */}
-            <div className="mt-4 overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950/60">
+            {/* Slim occupancy bar */}
+            <div className="h-[3px] mb-3 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${block.occupancyPercent}%` }}
+                className={`h-full rounded-full ${
+                  block.occupancyPercent >= 90
+                    ? 'bg-red-500'
+                    : block.occupancyPercent >= 60
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500'
+                }`}
+              />
+            </div>
+
+            {/* Appointments card — solo las filas */}
+            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-950 shadow-sm dark:shadow-none">
               {block.appointments.length === 0 && (
                 <div className="px-4 py-3 text-sm text-muted">Sin citas en este bloque</div>
               )}
 
               <AnimatePresence mode="popLayout">
-                {block.appointments.map((apt, aptIndex) => (
-                  <AppointmentRow
-                    key={apt.id}
-                    apt={apt}
-                    isLast={aptIndex === block.appointments.length - 1}
-                    onSelectId={onSelectId}
-                    onStatusChange={onStatusChange}
-                    isSelected={isSelected}
-                    onToggleSelect={onToggleSelect}
-                    onOpenContextMenu={setContextMenu}
-                  />
-                ))}
+                {(() => {
+                  // Compute now-line insertion index for the active block
+                  const isActiveBlock =
+                    isSelectedDateToday &&
+                    currentTime != null &&
+                    currentTime.getHours() >= block.start &&
+                    currentTime.getHours() < block.end
+
+                  const nowIndex = isActiveBlock
+                    ? block.appointments.findIndex((apt) => {
+                        if (!isValid(parseISO(apt.scheduled_at))) return false
+                        return parseISO(apt.scheduled_at) >= currentTime!
+                      })
+                    : -1
+                  // -1 means all apts are past → show after last; findIndex returns -1 on no match
+                  const insertAfterLast =
+                    isActiveBlock && nowIndex === -1 && block.appointments.length > 0
+
+                  return block.appointments.map((apt, aptIndex) => (
+                    <React.Fragment key={apt.id}>
+                      {aptIndex === (nowIndex === -1 ? -99 : nowIndex) && (
+                        <NowLine time={currentTime!} />
+                      )}
+                      <AppointmentRow
+                        apt={apt}
+                        isLast={aptIndex === block.appointments.length - 1 && !insertAfterLast}
+                        onSelectId={onSelectId}
+                        onStatusChange={onStatusChange}
+                        isSelected={isSelected}
+                        onToggleSelect={onToggleSelect}
+                        onOpenContextMenu={setContextMenu}
+                      />
+                      {insertAfterLast && aptIndex === block.appointments.length - 1 && (
+                        <NowLine time={currentTime!} />
+                      )}
+                    </React.Fragment>
+                  ))
+                })()}
               </AnimatePresence>
             </div>
 
@@ -414,7 +525,7 @@ export function CalendarDayView({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     whileTap={{ scale: 0.98 }}
-                    className="rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700 p-2 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    className="rounded-lg p-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-colors"
                     onClick={() => toast.info('Sugerir clientes para gap')}
                   >
                     <div className="flex items-center gap-2">

@@ -487,18 +487,24 @@ function CitasCalendarFusionContent() {
   // Handlers
   const handleCreateAppointment = async () => {
     const isMobile = isMobileDevice()
+    const maxAllowedDate = startOfDay(new Date(new Date().getFullYear(), 11, 31))
 
     const nextErrors: CreateAppointmentErrors = {}
     if (!createForm.client_id) nextErrors.client_id = 'Selecciona un cliente'
     if (!createForm.service_id) nextErrors.service_id = 'Selecciona un servicio'
     if (!createForm.barber_id) nextErrors.barber_id = 'Selecciona un miembro del equipo'
+    if (startOfDay(selectedDate) < startOfDay(new Date())) {
+      nextErrors.general = 'No puedes crear citas en fechas anteriores a hoy.'
+    } else if (startOfDay(selectedDate) > maxAllowedDate) {
+      nextErrors.general = 'Solo puedes crear citas dentro del año actual.'
+    }
     if (!businessId) {
       nextErrors.general = 'No pudimos identificar tu negocio. Cerrá y volvé a abrir el formulario.'
     }
 
     if (Object.keys(nextErrors).length > 0) {
       setCreateFormErrors(nextErrors)
-      toast.error('Faltan campos requeridos para guardar la cita')
+      toast.error(nextErrors.general || 'Faltan campos requeridos para guardar la cita')
       if (isMobile) haptics.warning()
       return
     }
@@ -636,7 +642,7 @@ function CitasCalendarFusionContent() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="-mx-4 sm:-mx-6 lg:mx-0 px-4 sm:px-6 lg:px-0 min-h-screen overflow-x-hidden bg-white dark:bg-zinc-950">
       <ClientEffects title="Citas" />
       <div className="relative z-10 flex">
         {/* Main content area */}
@@ -661,7 +667,7 @@ function CitasCalendarFusionContent() {
             appointmentCount={filteredAppointments.length}
           />
 
-          {/* Saved Filter Presets */}
+          {/* Saved Filter Presets — desktop */}
           <div className="hidden lg:block px-4 lg:px-6 pt-2">
             <SavedFilterBar
               presets={savedFilters.presets}
@@ -671,6 +677,28 @@ function CitasCalendarFusionContent() {
               onSavePreset={handleSaveCitasPreset}
               canSave={statusFilter !== 'all'}
             />
+          </div>
+
+          {/* Mobile sticky filter pills */}
+          <div className="lg:hidden sticky top-[var(--header-h,120px)] z-30 backdrop-blur-sm px-4 pt-2 pb-1">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+              {savedFilters.presets.map((preset) => {
+                const isActive = savedFilters.activePresetId === preset.id
+                return (
+                  <button
+                    key={preset.id}
+                    onClick={() => handleApplyCitasPreset(preset.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors min-h-[32px] ${
+                      isActive
+                        ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-muted hover:text-foreground'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Guide Tip */}
@@ -688,11 +716,11 @@ function CitasCalendarFusionContent() {
           <div className="px-0 pb-4 lg:p-6">
             {isLoading && (
               <div className="space-y-4">
-                <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
+                <div className="rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 p-4">
                   <Skeleton className="h-3 w-20 mb-3" />
                   <Skeleton className="h-10 w-full rounded-xl" />
                 </div>
-                <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+                <div className="rounded-2xl border border-zinc-200/80 dark:border-0 bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="flex items-center gap-3 p-4">
                       <Skeleton className="h-4 w-14" />
@@ -724,6 +752,8 @@ function CitasCalendarFusionContent() {
                 isSelected={selection.isSelected}
                 onToggleSelect={selection.toggle}
                 selectionCount={selection.count}
+                currentTime={currentTime}
+                isSelectedDateToday={isSelectedDateToday}
               />
             )}
 
@@ -746,9 +776,10 @@ function CitasCalendarFusionContent() {
               <CalendarMonthView
                 monthDays={monthDays}
                 today={today}
+                selectedDate={selectedDate}
                 onDayClick={(date) => {
                   setSelectedDate(date)
-                  setViewMode('day')
+                  // Stay in month view — appointments shown below the calendar
                 }}
               />
             )}

@@ -60,6 +60,14 @@ function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate()
 }
 
+function toDayStart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function dateToTimestamp(date: Date): number {
+  return toDayStart(date).getTime()
+}
+
 // Wheel column for mobile iOS-style picker
 function WheelColumn({
   items,
@@ -138,19 +146,26 @@ function WheelColumn({
   }, [handleScroll, handleScrollEnd])
 
   return (
-    <div className="relative h-[220px] flex-1 overflow-hidden">
+    <div className="relative h-[220px] flex-1 overflow-hidden touch-pan-y">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[88px] bg-gradient-to-b from-white via-white/90 to-transparent dark:from-[#2C2C2E] dark:via-[#2C2C2E]/90" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[88px] bg-gradient-to-t from-white via-white/90 to-transparent dark:from-[#2C2C2E] dark:via-[#2C2C2E]/90" />
       <div className="pointer-events-none absolute inset-x-2 top-1/2 z-5 h-[44px] -translate-y-1/2 rounded-xl bg-zinc-100/80 dark:bg-zinc-700/50" />
 
       <div
         ref={containerRef}
-        className="h-full overflow-y-auto scrollbar-hide snap-y snap-mandatory"
-        style={{ paddingTop: 88, paddingBottom: 88 }}
+        className="h-full overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-hide snap-y snap-mandatory select-none touch-pan-y"
+        style={{
+          paddingTop: 88,
+          paddingBottom: 88,
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch',
+        }}
         onTouchStart={() => setIsDragging(true)}
         onTouchEnd={() => setIsDragging(false)}
+        onTouchCancel={() => setIsDragging(false)}
         onMouseDown={() => setIsDragging(true)}
         onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
       >
         {items.map((item) => {
           const isSelected = item === value
@@ -184,10 +199,22 @@ function DesktopDatePicker({
   isOpen,
   onClose,
   title = 'Seleccionar fecha',
+  minDate,
+  maxDate,
   zIndex = 70,
 }: IOSDatePickerProps) {
   const [viewDate, setViewDate] = useState(value)
   const popoverRef = useRef<HTMLDivElement>(null)
+  const minDateTs = useMemo(() => (minDate ? dateToTimestamp(minDate) : null), [minDate])
+  const maxDateTs = useMemo(() => (maxDate ? dateToTimestamp(maxDate) : null), [maxDate])
+  const minMonthTs = useMemo(
+    () => (minDate ? new Date(minDate.getFullYear(), minDate.getMonth(), 1).getTime() : null),
+    [minDate]
+  )
+  const maxMonthTs = useMemo(
+    () => (maxDate ? new Date(maxDate.getFullYear(), maxDate.getMonth(), 1).getTime() : null),
+    [maxDate]
+  )
 
   // Sync view date when picker opens
   useEffect(() => {
@@ -227,17 +254,32 @@ function DesktopDatePicker({
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
+  const isDateDisabled = useCallback(
+    (date: Date) => {
+      const ts = dateToTimestamp(date)
+      if (minDateTs !== null && ts < minDateTs) return true
+      if (maxDateTs !== null && ts > maxDateTs) return true
+      return false
+    },
+    [maxDateTs, minDateTs]
+  )
+
   const handleSelectDate = (date: Date) => {
+    if (isDateDisabled(date)) return
     onChange(date)
     onClose()
   }
 
   const handlePreviousMonth = () => {
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
+    const nextDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1)
+    if (minMonthTs !== null && nextDate.getTime() < minMonthTs) return
+    setViewDate(nextDate)
   }
 
   const handleNextMonth = () => {
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))
+    const nextDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)
+    if (maxMonthTs !== null && nextDate.getTime() > maxMonthTs) return
+    setViewDate(nextDate)
   }
 
   // Generate calendar days
@@ -280,6 +322,12 @@ function DesktopDatePicker({
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+  const isPrevMonthDisabled =
+    minMonthTs !== null &&
+    new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getTime() <= minMonthTs
+  const isNextMonthDisabled =
+    maxMonthTs !== null &&
+    new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getTime() >= maxMonthTs
 
   return (
     <AnimatePresence>
@@ -322,7 +370,13 @@ function DesktopDatePicker({
               <div className="flex items-center justify-between mb-4">
                 <button
                   onClick={handlePreviousMonth}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+                  disabled={isPrevMonthDisabled}
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                    isPrevMonthDisabled
+                      ? 'cursor-not-allowed text-zinc-300 dark:text-zinc-600'
+                      : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                  )}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -331,7 +385,13 @@ function DesktopDatePicker({
                 </span>
                 <button
                   onClick={handleNextMonth}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+                  disabled={isNextMonthDisabled}
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                    isNextMonthDisabled
+                      ? 'cursor-not-allowed text-zinc-300 dark:text-zinc-600'
+                      : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                  )}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -352,6 +412,7 @@ function DesktopDatePicker({
               {/* Calendar grid */}
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map((day, index) => {
+                  const isDisabled = isDateDisabled(day.date)
                   const isToday =
                     day.date.getFullYear() === today.getFullYear() &&
                     day.date.getMonth() === today.getMonth() &&
@@ -366,15 +427,19 @@ function DesktopDatePicker({
                     <button
                       key={index}
                       onClick={() => handleSelectDate(day.date)}
+                      disabled={isDisabled}
                       className={cn(
                         'h-9 rounded-lg text-[14px] font-medium transition-colors',
+                        isDisabled && 'cursor-not-allowed opacity-40',
                         !day.isCurrentMonth && 'text-zinc-300 dark:text-zinc-600',
                         day.isCurrentMonth &&
                           !isToday &&
                           !isSelected &&
+                          !isDisabled &&
                           'text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-700',
                         isToday &&
                           !isSelected &&
+                          !isDisabled &&
                           'text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-50 dark:hover:bg-blue-900/30',
                         isSelected &&
                           'bg-blue-600 dark:bg-blue-500 text-white font-bold hover:bg-blue-700 dark:hover:bg-blue-600'
@@ -411,14 +476,37 @@ function MobileDatePicker({
   isOpen,
   onClose,
   title = 'Seleccionar fecha',
+  minDate,
+  maxDate,
   zIndex = 70,
 }: IOSDatePickerProps) {
   const currentYear = new Date().getFullYear()
+  const minDay = useMemo(() => (minDate ? toDayStart(minDate) : null), [minDate])
+  const maxDay = useMemo(() => (maxDate ? toDayStart(maxDate) : null), [maxDate])
 
-  // Generate years: current year - 1 to current year + 1 (3 years)
+  const clampDateToRange = useCallback(
+    (date: Date) => {
+      const candidate = toDayStart(date)
+      if (minDay && candidate < minDay) return minDay
+      if (maxDay && candidate > maxDay) return maxDay
+      return candidate
+    },
+    [maxDay, minDay]
+  )
+
+  // Generate years based on min/max constraints
   const years = useMemo(() => {
-    return Array.from({ length: 3 }, (_, i) => (currentYear - 1 + i).toString())
-  }, [currentYear])
+    let startYear = currentYear - 1
+    let endYear = currentYear + 1
+
+    if (minDay) startYear = minDay.getFullYear()
+    if (maxDay) endYear = maxDay.getFullYear()
+    if (minDay && !maxDay) endYear = Math.max(startYear + 5, currentYear + 1)
+    if (!minDay && maxDay) startYear = Math.min(endYear - 5, currentYear - 1)
+
+    const count = Math.max(1, endYear - startYear + 1)
+    return Array.from({ length: count }, (_, i) => (startYear + i).toString())
+  }, [currentYear, maxDay, minDay])
 
   const [tempDay, setTempDay] = useState(value.getDate().toString())
   const [tempMonth, setTempMonth] = useState(MONTHS[value.getMonth()])
@@ -427,39 +515,78 @@ function MobileDatePicker({
   // Sync temp values when picker opens
   useEffect(() => {
     if (isOpen) {
-      setTempDay(value.getDate().toString())
-      setTempMonth(MONTHS[value.getMonth()])
-      setTempYear(value.getFullYear().toString())
+      const nextDate = clampDateToRange(value)
+      setTempDay(nextDate.getDate().toString())
+      setTempMonth(MONTHS[nextDate.getMonth()])
+      setTempYear(nextDate.getFullYear().toString())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen])
+  }, [isOpen, clampDateToRange])
+
+  useEffect(() => {
+    if (years.length === 0) return
+    if (!years.includes(tempYear)) {
+      setTempYear(years[0])
+    }
+  }, [tempYear, years])
+
+  const availableMonths = useMemo(() => {
+    const selectedYear = parseInt(tempYear, 10)
+    const startMonth = minDay && selectedYear === minDay.getFullYear() ? minDay.getMonth() : 0
+    const endMonth = maxDay && selectedYear === maxDay.getFullYear() ? maxDay.getMonth() : 11
+    return MONTHS.slice(startMonth, endMonth + 1)
+  }, [maxDay, minDay, tempYear])
 
   // Generate days based on selected month/year
   const days = useMemo(() => {
     const monthIndex = MONTHS.indexOf(tempMonth)
+    if (monthIndex < 0) return ['1']
     const year = parseInt(tempYear, 10)
     const daysInMonth = getDaysInMonth(year, monthIndex)
-    return Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString())
-  }, [tempMonth, tempYear])
+    const minBound =
+      minDay && year === minDay.getFullYear() && monthIndex === minDay.getMonth()
+        ? minDay.getDate()
+        : 1
+    const maxBound =
+      maxDay && year === maxDay.getFullYear() && monthIndex === maxDay.getMonth()
+        ? maxDay.getDate()
+        : daysInMonth
 
-  // Adjust day if it exceeds days in selected month
+    return Array.from({ length: maxBound - minBound + 1 }, (_, i) => (minBound + i).toString())
+  }, [maxDay, minDay, tempMonth, tempYear])
+
+  // Keep month within constrained list after year changes.
   useEffect(() => {
-    const dayNum = parseInt(tempDay, 10)
-    const monthIndex = MONTHS.indexOf(tempMonth)
-    const year = parseInt(tempYear, 10)
-    const maxDays = getDaysInMonth(year, monthIndex)
-
-    if (dayNum > maxDays) {
-      setTempDay(maxDays.toString())
+    if (availableMonths.length === 0) return
+    if (!availableMonths.includes(tempMonth)) {
+      setTempMonth(availableMonths[0])
     }
-  }, [tempDay, tempMonth, tempYear])
+  }, [availableMonths, tempMonth])
+
+  // Adjust day if out of bounds for selected month/year.
+  useEffect(() => {
+    if (days.length === 0) return
+
+    const dayNum = parseInt(tempDay, 10)
+    const firstDay = parseInt(days[0], 10)
+    const lastDay = parseInt(days[days.length - 1], 10)
+
+    if (Number.isNaN(dayNum) || dayNum < firstDay) {
+      setTempDay(firstDay.toString())
+      return
+    }
+
+    if (dayNum > lastDay) {
+      setTempDay(lastDay.toString())
+    }
+  }, [days, tempDay])
 
   const handleConfirm = () => {
     const dayNum = parseInt(tempDay, 10)
     const monthIndex = MONTHS.indexOf(tempMonth)
     const year = parseInt(tempYear, 10)
 
-    const newDate = new Date(year, monthIndex, dayNum)
+    const newDate = clampDateToRange(new Date(year, monthIndex, dayNum))
     onChange(newDate)
     onClose()
   }
@@ -483,7 +610,7 @@ function MobileDatePicker({
             animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
             exit={{ opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' }}
             transition={animations.spring.sheet}
-            className="fixed left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-md max-h-[72vh] overflow-y-auto rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/70 dark:bg-[#2C2C2E]"
+            className="fixed left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-md max-h-[72vh] overflow-y-auto overflow-x-hidden overscroll-x-none rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/70 dark:bg-[#2C2C2E] touch-pan-y"
             style={{ zIndex: zIndex + 1 }}
           >
             <div className="flex justify-center pt-3 pb-2">
@@ -508,9 +635,9 @@ function MobileDatePicker({
               </button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 px-4 pb-8">
+            <div className="flex items-center justify-center gap-2 overflow-x-hidden px-4 pb-8 touch-pan-y">
               <WheelColumn items={days} value={tempDay} onChange={setTempDay} />
-              <WheelColumn items={MONTHS} value={tempMonth} onChange={setTempMonth} />
+              <WheelColumn items={availableMonths} value={tempMonth} onChange={setTempMonth} />
               <WheelColumn items={years} value={tempYear} onChange={setTempYear} />
             </div>
 
@@ -540,6 +667,8 @@ interface DatePickerTriggerProps {
   label?: string
   className?: string
   pickerZIndex?: number
+  minDate?: Date
+  maxDate?: Date
 }
 
 export function DatePickerTrigger({
@@ -548,12 +677,13 @@ export function DatePickerTrigger({
   label,
   className,
   pickerZIndex = 70,
+  minDate,
+  maxDate,
 }: DatePickerTriggerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Format: "Jue 6 Feb 2026" (Spanish)
+  // Compact format: "6 Feb 2026" (Spanish)
   const formattedDate = useMemo(() => {
-    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     const monthAbbrev = [
       'Ene',
       'Feb',
@@ -569,12 +699,11 @@ export function DatePickerTrigger({
       'Dic',
     ]
 
-    const day = dayNames[value.getDay()]
     const date = value.getDate()
     const month = monthAbbrev[value.getMonth()]
     const year = value.getFullYear()
 
-    return `${day} ${date} ${month} ${year}`
+    return `${date} ${month} ${year}`
   }, [value])
 
   return (
@@ -583,7 +712,7 @@ export function DatePickerTrigger({
         type="button"
         onClick={() => setIsOpen(true)}
         className={cn(
-          'flex h-10 items-center justify-center rounded-xl px-3 gap-2',
+          'flex h-10 min-w-0 items-center justify-center rounded-xl px-3 gap-2',
           'bg-zinc-100/80 dark:bg-zinc-800/80',
           'text-[15px] font-medium text-zinc-900 dark:text-white',
           'active:scale-95 transition-[transform,background-color] duration-150',
@@ -592,8 +721,8 @@ export function DatePickerTrigger({
           className
         )}
       >
-        <CalendarIcon className="h-4 w-4 text-muted" />
-        <span>{formattedDate}</span>
+        <CalendarIcon className="h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" />
+        <span className="min-w-0 truncate whitespace-nowrap text-left">{formattedDate}</span>
       </button>
 
       <IOSDatePicker
@@ -602,6 +731,8 @@ export function DatePickerTrigger({
         value={value}
         onChange={onChange}
         title={label || 'Seleccionar fecha'}
+        minDate={minDate}
+        maxDate={maxDate}
         zIndex={pickerZIndex}
       />
     </>

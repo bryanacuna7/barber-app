@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ArrowLeft, Scissors } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { NotificationBell } from '@/components/notifications/notification-bell'
 
 interface MobileHeaderProps {
@@ -145,9 +145,7 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
           <Link href="/dashboard" className="flex items-center gap-2">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="h-7 w-7 rounded-lg object-cover" />
-            ) : (
-              <Scissors className="h-5 w-5" />
-            )}
+            ) : null}
             <span className="max-w-[160px] truncate font-semibold text-zinc-900 dark:text-white">
               {currentTitle}
             </span>

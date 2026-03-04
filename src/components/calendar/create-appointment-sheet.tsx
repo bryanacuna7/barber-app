@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -72,6 +72,16 @@ export function CreateAppointmentSheet({
   isTimePickerOpen,
   setIsTimePickerOpen,
 }: CreateAppointmentSheetProps) {
+  const minAllowedDate = useMemo(() => {
+    const date = new Date()
+    date.setHours(0, 0, 0, 0)
+    return date
+  }, [])
+  const maxAllowedDate = useMemo(
+    () => new Date(minAllowedDate.getFullYear(), 11, 31),
+    [minAllowedDate]
+  )
+
   const handleClose = () => {
     setActivePickerField(null)
     setIsTimePickerOpen(false)
@@ -96,9 +106,28 @@ export function CreateAppointmentSheet({
     }
   }, [isOpen, setActivePickerField, setIsTimePickerOpen])
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    const selectedDay = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    )
+
+    if (selectedDay < minAllowedDate) {
+      onDateChange(minAllowedDate)
+      return
+    }
+
+    if (selectedDay > maxAllowedDate) {
+      onDateChange(maxAllowedDate)
+    }
+  }, [isOpen, maxAllowedDate, minAllowedDate, onDateChange, selectedDate])
+
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose} title="Nueva Cita" mobileFullHeight>
+      <Modal isOpen={isOpen} onClose={handleClose} title="Nueva Cita" contentFill={false}>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-muted">Cliente</label>
@@ -200,6 +229,8 @@ export function CreateAppointmentSheet({
                 value={selectedDate}
                 onChange={onDateChange}
                 label="Fecha"
+                minDate={minAllowedDate}
+                maxDate={maxAllowedDate}
                 pickerZIndex={90}
                 className="h-11 w-full justify-start rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
               />
@@ -228,7 +259,7 @@ export function CreateAppointmentSheet({
             />
           </div>
 
-          <div className="sticky bottom-0 -mx-5 mt-2 border-t border-zinc-200/80 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-3 backdrop-blur-sm dark:border-zinc-800/80 dark:bg-zinc-900/95 sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+          <div className="mt-2 border-t border-zinc-200/80 pt-3 dark:border-zinc-800/80">
             {fieldErrors?.general && (
               <p className="mb-2 text-xs font-medium text-red-500">{fieldErrors.general}</p>
             )}

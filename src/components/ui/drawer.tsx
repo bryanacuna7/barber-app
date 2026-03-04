@@ -161,8 +161,8 @@ export function Drawer({
               opacity,
             }}
             className={cn(
-              'relative w-full bg-white dark:bg-zinc-900 rounded-t-[28px] shadow-2xl',
-              'border border-black/10 dark:border-zinc-800/80 border-b-0',
+              'relative w-full bg-white dark:bg-zinc-950 rounded-t-[28px] shadow-2xl',
+              'border border-black/10 dark:border-zinc-800/60 border-b-0',
               'max-h-[85vh] overflow-hidden flex flex-col',
               'focus-visible:!outline-none',
               'pb-safe', // Safe area for iOS home indicator

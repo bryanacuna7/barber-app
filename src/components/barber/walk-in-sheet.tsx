@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronLeft, Clock, Loader2, Scissors, UserPlus } from 'lucide-react'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useServices } from '@/hooks/queries/useServices'
 import { useCreateWalkIn } from '@/hooks/queries/useAppointments'
@@ -55,6 +55,11 @@ export function WalkInSheet({
   const reset = () => {
     setSelectedBarberId(null)
     setSelectedServiceId(null)
+  }
+
+  const handleClose = () => {
+    if (isCreating) return
+    onOpenChange(false)
   }
 
   const handleCreate = async (mode: 'queue' | 'start_now') => {
@@ -114,8 +119,13 @@ export function WalkInSheet({
         <div className="p-5 sm:p-6 max-h-[80vh] overflow-y-auto">
           <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-zinc-200 dark:bg-zinc-700" />
 
+          <SheetClose
+            onClose={handleClose}
+            className="right-4 top-4 z-10 h-9 w-9 rounded-lg text-zinc-500 opacity-100 hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+          />
+
           {/* Header */}
-          <div className="flex items-center gap-2 mb-1">
+          <div className="mb-1 flex items-center gap-2 pr-12">
             {step === 'service' && needsBarberStep && (
               <button
                 type="button"
@@ -242,7 +252,7 @@ export function WalkInSheet({
 
           <button
             type="button"
-            onClick={() => onOpenChange(false)}
+            onClick={handleClose}
             disabled={isCreating}
             className="mt-3 w-full py-2 text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors"
           >
