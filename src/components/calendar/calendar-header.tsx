@@ -196,7 +196,7 @@ export function CalendarHeader({
           </div>
 
           {/* Row 2: D/S/M segmented control */}
-          <div className="flex items-center gap-1 rounded-xl bg-zinc-950 p-1">
+          <div className="flex items-center gap-1 rounded-xl bg-zinc-100 dark:bg-zinc-950 p-1">
             {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
               <button
                 type="button"
@@ -204,7 +204,9 @@ export function CalendarHeader({
                 onClick={() => onViewModeChange(mode)}
                 aria-pressed={viewMode === mode}
                 className={`flex-1 min-h-[38px] rounded-lg border border-transparent text-xs font-semibold transition-colors ${
-                  viewMode === mode ? 'brand-tab-active' : 'text-muted hover:bg-zinc-900/70'
+                  viewMode === mode
+                    ? 'brand-tab-active'
+                    : 'text-muted hover:bg-zinc-200 dark:hover:bg-zinc-900/70'
                 }`}
               >
                 {mode === 'day' ? 'Día' : mode === 'week' ? 'Semana' : 'Mes'}
@@ -223,7 +225,7 @@ export function CalendarHeader({
                 transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 style={{ overflow: 'hidden' }}
               >
-                <div className="pt-1 border-t border-zinc-800/40">
+                <div className="pt-1 border-t border-zinc-200 dark:border-zinc-800/40">
                   <div className="flex items-center justify-between gap-3 text-sm">
                     <span className="font-semibold text-foreground">{projectedRevenueDisplay}</span>
                     <span className="text-muted">{mobileProjectionAppointmentsLabel}</span>
