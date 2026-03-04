@@ -49,6 +49,7 @@ const barberMorePages = ['/clientes', '/analiticas', '/guia']
 
 const ownerQuickActions = [
   { name: 'Nueva Cita', href: '/citas', icon: CalendarPlus, action: 'create-appointment' },
+  { name: 'Walk-in', href: '/citas', icon: UserPlus, action: 'walk-in' },
   { name: 'Nuevo Cliente', href: '/clientes', icon: UserPlus, action: 'create-client' },
   { name: 'Nuevo Servicio', href: '/servicios', icon: LayoutGrid, action: 'create-service' },
 ]
@@ -135,7 +136,11 @@ export function BottomNav({ isAdmin = false, isBarber = false }: BottomNavProps 
   const handleQuickAction = (action: (typeof ownerQuickActions)[number]) => {
     setIsQuickActionOpen(false)
     if (isMobileDevice()) haptics.selection()
-    router.push(`${action.href}?intent=create`)
+    if (action.action === 'walk-in') {
+      router.push('/citas?intent=walk-in')
+    } else {
+      router.push(`${action.href}?intent=create`)
+    }
   }
 
   const handlePlusClick = () => {

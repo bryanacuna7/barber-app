@@ -142,6 +142,10 @@ function CitasCalendarFusionContent() {
       router.replace('/citas', { scroll: false })
       requestAnimationFrame(() => setIsCreateOpen(true))
     }
+    if (searchParams.get('intent') === 'walk-in') {
+      router.replace('/citas', { scroll: false })
+      requestAnimationFrame(() => setIsWalkInOpen(true))
+    }
   }, [searchParams, router])
 
   // Update current time every minute
