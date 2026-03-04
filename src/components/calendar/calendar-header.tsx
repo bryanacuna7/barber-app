@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CalendarPlus, ChevronLeft, ChevronRight, Plus, UserPlus, X } from 'lucide-react'
@@ -66,6 +66,8 @@ export function CalendarHeader({
 }: CalendarHeaderProps) {
   const scrolled = useScrolled()
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false)
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
+  const plusBtnRef = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -183,8 +185,15 @@ export function CalendarHeader({
                   </Button>
                 )}
                 <Button
+                  ref={plusBtnRef}
                   variant="ghost"
-                  onClick={() => setIsActionSheetOpen(true)}
+                  onClick={() => {
+                    if (plusBtnRef.current) {
+                      const r = plusBtnRef.current.getBoundingClientRect()
+                      setMenuPos({ top: r.bottom + 8, right: window.innerWidth - r.right })
+                    }
+                    setIsActionSheetOpen(true)
+                  }}
                   data-testid="create-appointment-btn-mobile"
                   className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-foreground"
                   aria-label="Crear cita"
@@ -263,79 +272,66 @@ export function CalendarHeader({
         </div>
       </header>
 
-      {/* Mobile action sheet — Nueva Cita / Walk-in — rendered via portal to escape z-index stacking context */}
+      {/* Mobile dropdown menu — expands from + button via origin-scale */}
       {typeof window !== 'undefined' &&
         createPortal(
           <AnimatePresence>
-            {isActionSheetOpen && (
+            {isActionSheetOpen && menuPos && (
               <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                {/* tap-away dismiss — no blur to keep context visible */}
+                <div
+                  className="fixed inset-0 z-[200] lg:hidden"
                   onClick={() => setIsActionSheetOpen(false)}
-                  className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm lg:hidden"
                 />
                 <motion.div
-                  initial={{ y: '100%' }}
-                  animate={{ y: 0 }}
-                  exit={{ y: '100%' }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 38 }}
-                  className="fixed bottom-0 left-0 right-0 z-[201] lg:hidden"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                  className="fixed z-[201] w-60 overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/80 dark:bg-[#232326] lg:hidden"
+                  style={{
+                    top: menuPos.top,
+                    right: menuPos.right,
+                    transformOrigin: 'top right',
+                  }}
                 >
-                  <div className="mx-4 mb-[calc(env(safe-area-inset-bottom)+80px)] overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/80 dark:bg-[#232326]">
-                    <div className="flex items-center justify-between px-5 pb-2 pt-4">
-                      <h3 className="text-base font-semibold text-zinc-900 dark:text-white">
-                        Nueva cita
-                      </h3>
-                      <button
-                        onClick={() => setIsActionSheetOpen(false)}
-                        className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                        aria-label="Cerrar"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="px-2 pb-4 pt-1">
-                      <button
-                        onClick={() => {
-                          setIsActionSheetOpen(false)
-                          onCreateOpen()
-                        }}
-                        className="flex min-h-[52px] w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/80"
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/60">
-                          <CalendarPlus className="h-5 w-5 text-zinc-700 dark:text-zinc-100" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                            Nueva cita
-                          </p>
-                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                            Con fecha y hora
-                          </p>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsActionSheetOpen(false)
-                          onWalkInOpen()
-                        }}
-                        className="flex min-h-[52px] w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/80"
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/60">
-                          <UserPlus className="h-5 w-5 text-zinc-700 dark:text-zinc-100" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                            Walk-in
-                          </p>
-                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                            Sin reserva, llegó ahora
-                          </p>
-                        </div>
-                      </button>
-                    </div>
+                  <div className="px-2 py-2">
+                    <button
+                      onClick={() => {
+                        setIsActionSheetOpen(false)
+                        onCreateOpen()
+                      }}
+                      className="flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors active:bg-zinc-100 dark:active:bg-zinc-800/80"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/60 flex-shrink-0">
+                        <CalendarPlus className="h-4 w-4 text-zinc-700 dark:text-zinc-100" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                          Nueva cita
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">Con fecha y hora</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsActionSheetOpen(false)
+                        onWalkInOpen()
+                      }}
+                      className="flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors active:bg-zinc-100 dark:active:bg-zinc-800/80"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/60 flex-shrink-0">
+                        <UserPlus className="h-4 w-4 text-zinc-700 dark:text-zinc-100" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+                          Walk-in
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          Sin reserva, llegó ahora
+                        </p>
+                      </div>
+                    </button>
                   </div>
                 </motion.div>
               </>
