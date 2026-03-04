@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CalendarPlus, ChevronLeft, ChevronRight, Plus, UserPlus, X } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, ChevronRight, Clock3, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { QuickActionsSheet } from '@/components/dashboard/quick-actions-sheet'
 
 type ViewMode = 'day' | 'week' | 'month'
 
@@ -66,8 +66,6 @@ export function CalendarHeader({
 }: CalendarHeaderProps) {
   const scrolled = useScrolled()
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false)
-  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
-  const plusBtnRef = useRef<HTMLButtonElement>(null)
 
   return (
     <>
@@ -127,7 +125,7 @@ export function CalendarHeader({
                 className="min-w-[44px] min-h-[44px] w-10 h-10 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors"
                 aria-label="Agregar walk-in"
               >
-                <UserPlus className="w-5 h-5 text-muted" />
+                <Clock3 className="w-5 h-5 text-muted" />
               </Button>
               <Button
                 onClick={onCreateOpen}
@@ -185,18 +183,13 @@ export function CalendarHeader({
                   </Button>
                 )}
                 <Button
-                  ref={plusBtnRef}
                   variant="ghost"
-                  onClick={() => {
-                    if (plusBtnRef.current) {
-                      const r = plusBtnRef.current.getBoundingClientRect()
-                      setMenuPos({ top: r.bottom + 8, right: window.innerWidth - r.right })
-                    }
-                    setIsActionSheetOpen(true)
-                  }}
+                  onClick={() => setIsActionSheetOpen(true)}
                   data-testid="create-appointment-btn-mobile"
                   className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-foreground"
                   aria-label="Crear cita"
+                  aria-haspopup="dialog"
+                  aria-expanded={isActionSheetOpen}
                 >
                   <Plus className="h-5 w-5" strokeWidth={2.5} />
                 </Button>
@@ -272,73 +265,27 @@ export function CalendarHeader({
         </div>
       </header>
 
-      {/* Mobile dropdown menu — expands from + button via origin-scale */}
-      {typeof window !== 'undefined' &&
-        createPortal(
-          <AnimatePresence>
-            {isActionSheetOpen && menuPos && (
-              <>
-                {/* tap-away dismiss — no blur to keep context visible */}
-                <div
-                  className="fixed inset-0 z-[200] lg:hidden"
-                  onClick={() => setIsActionSheetOpen(false)}
-                />
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-                  className="fixed z-[201] w-60 overflow-hidden rounded-2xl border border-zinc-200/70 bg-white shadow-2xl dark:border-zinc-700/80 dark:bg-[#232326] lg:hidden"
-                  style={{
-                    top: menuPos.top,
-                    right: menuPos.right,
-                    transformOrigin: 'top right',
-                  }}
-                >
-                  <div className="px-2 py-2">
-                    <button
-                      onClick={() => {
-                        setIsActionSheetOpen(false)
-                        onCreateOpen()
-                      }}
-                      className="flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors active:bg-zinc-100 dark:active:bg-zinc-800/80"
-                    >
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/60 flex-shrink-0">
-                        <CalendarPlus className="h-4 w-4 text-zinc-700 dark:text-zinc-100" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                          Nueva cita
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">Con fecha y hora</p>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsActionSheetOpen(false)
-                        onWalkInOpen()
-                      }}
-                      className="flex min-h-[52px] w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors active:bg-zinc-100 dark:active:bg-zinc-800/80"
-                    >
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-700/60 flex-shrink-0">
-                        <UserPlus className="h-4 w-4 text-zinc-700 dark:text-zinc-100" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                          Walk-in
-                        </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                          Sin reserva, llegó ahora
-                        </p>
-                      </div>
-                    </button>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      <QuickActionsSheet
+        isOpen={isActionSheetOpen}
+        onClose={() => setIsActionSheetOpen(false)}
+        title="Crear nuevo"
+        actions={[
+          {
+            id: 'create-appointment',
+            label: 'Nueva cita',
+            description: 'Con fecha y hora',
+            icon: CalendarPlus,
+            onSelect: onCreateOpen,
+          },
+          {
+            id: 'walk-in',
+            label: 'Walk-in',
+            description: 'Sin reserva, llegó ahora',
+            icon: Clock3,
+            onSelect: onWalkInOpen,
+          },
+        ]}
+      />
     </>
   )
 }

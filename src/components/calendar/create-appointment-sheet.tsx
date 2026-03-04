@@ -135,10 +135,8 @@ export function CreateAppointmentSheet({
               type="button"
               onClick={() => openPicker('client')}
               className={cn(
-                'flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none focus:ring-2 active:bg-zinc-50 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700',
-                fieldErrors?.client_id
-                  ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/70'
-                  : 'border-zinc-300 focus:border-zinc-500 focus:ring-zinc-500/20 dark:border-zinc-700'
+                'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
+                fieldErrors?.client_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
               )}
             >
               <span
@@ -162,10 +160,8 @@ export function CreateAppointmentSheet({
               type="button"
               onClick={() => openPicker('service')}
               className={cn(
-                'flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none focus:ring-2 active:bg-zinc-50 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700',
-                fieldErrors?.service_id
-                  ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/70'
-                  : 'border-zinc-300 focus:border-zinc-500 focus:ring-zinc-500/20 dark:border-zinc-700'
+                'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
+                fieldErrors?.service_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
               )}
             >
               <span
@@ -198,10 +194,8 @@ export function CreateAppointmentSheet({
                 type="button"
                 onClick={() => openPicker('barber')}
                 className={cn(
-                  'flex h-11 w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none focus:ring-2 active:bg-zinc-50 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700',
-                  fieldErrors?.barber_id
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20 dark:border-red-500/70'
-                    : 'border-zinc-300 focus:border-zinc-500 focus:ring-zinc-500/20 dark:border-zinc-700'
+                  'flex h-11 w-full items-center justify-between rounded-xl bg-zinc-100 px-4 text-left text-sm text-zinc-900 transition-colors focus:outline-none active:bg-zinc-200/70 dark:bg-zinc-800 dark:text-white dark:active:bg-zinc-700/80',
+                  fieldErrors?.barber_id ? 'ring-2 ring-red-400/60 dark:ring-red-500/50' : ''
                 )}
               >
                 <span
@@ -232,7 +226,7 @@ export function CreateAppointmentSheet({
                 minDate={minAllowedDate}
                 maxDate={maxAllowedDate}
                 pickerZIndex={90}
-                className="h-11 w-full justify-start rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                className="h-11 w-full justify-start rounded-xl bg-zinc-100 px-3 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-white"
               />
             </div>
             <div>
@@ -243,7 +237,7 @@ export function CreateAppointmentSheet({
                   if (isMobileDevice()) haptics.selection()
                   setIsTimePickerOpen(true)
                 }}
-                className="h-11 w-full justify-start rounded-xl border border-zinc-300 bg-white px-3 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                className="h-11 w-full justify-start rounded-xl bg-zinc-100 px-3 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-white"
               />
             </div>
           </div>
@@ -255,11 +249,11 @@ export function CreateAppointmentSheet({
               onChange={(e) => setCreateForm((prev) => ({ ...prev, notes: e.target.value }))}
               placeholder="Notas adicionales sobre la cita..."
               rows={3}
-              className="w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+              className="w-full resize-none rounded-xl bg-zinc-100 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:bg-zinc-800 dark:text-white"
             />
           </div>
 
-          <div className="mt-2 border-t border-zinc-200/80 pt-3 dark:border-zinc-800/80">
+          <div className="mt-2 pt-1">
             {fieldErrors?.general && (
               <p className="mb-2 text-xs font-medium text-red-500">{fieldErrors.general}</p>
             )}

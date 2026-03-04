@@ -122,7 +122,7 @@ export function Modal({
                 ? reducedMotion.spring.default.duration
                 : animations.duration.normal,
             }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-md"
             aria-hidden="true"
           />
 
@@ -139,8 +139,12 @@ export function Modal({
                 : animations.spring.sheet
             }
             className={cn(
-              'relative w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl',
-              'border border-zinc-200 dark:border-zinc-800',
+              'relative w-full rounded-[28px]',
+              'bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl',
+              'border border-zinc-200/70 dark:border-zinc-800/80',
+              'shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]',
+              'before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px',
+              'before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60',
               // Full-height on mobile only when explicitly requested (complex forms)
               mobileFullHeight
                 ? 'h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] max-h-[calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-1.5rem)] sm:h-auto sm:max-h-[90vh]'
@@ -153,12 +157,12 @@ export function Modal({
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-start justify-between p-5 sm:p-6 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-start justify-between p-5 sm:p-6">
                 <div className="flex-1 pr-4">
                   {title && (
                     <h2
                       id="modal-title"
-                      className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100"
+                      className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[1.35rem]"
                     >
                       {title}
                     </h2>
@@ -169,9 +173,9 @@ export function Modal({
                   <button
                     onClick={onClose}
                     className={cn(
-                      'inline-flex h-11 w-11 items-center justify-center rounded-xl transition-colors duration-200',
-                      'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
-                      'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                      'inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition-colors duration-200',
+                      'border-zinc-200/70 bg-white/80 text-zinc-400 backdrop-blur hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:hover:text-zinc-200',
+                      'hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80',
                       'focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2',
                       'active:scale-95'
                     )}
@@ -187,7 +191,7 @@ export function Modal({
             <div
               className={cn(
                 contentFill && 'flex-1 min-h-0',
-                'overflow-y-auto overscroll-contain p-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:p-6 touch-pan-y [-webkit-overflow-scrolling:touch]'
+                'overflow-y-auto overscroll-contain p-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] touch-pan-y sm:p-6 [-webkit-overflow-scrolling:touch]'
               )}
             >
               {children}
@@ -209,15 +213,5 @@ interface ModalFooterProps {
 }
 
 export function ModalFooter({ children, className }: ModalFooterProps) {
-  return (
-    <div
-      className={cn(
-        'flex items-center justify-end gap-3 pt-6 mt-6',
-        'border-t border-zinc-200 dark:border-zinc-800',
-        className
-      )}
-    >
-      {children}
-    </div>
-  )
+  return <div className={cn('mt-6 flex items-center justify-end gap-3', className)}>{children}</div>
 }
