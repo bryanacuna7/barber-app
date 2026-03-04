@@ -260,9 +260,9 @@ export function CreateAppointmentSheet({
             <div className="grid grid-cols-2 gap-3 sm:flex sm:justify-end">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={handleClose}
-                className="h-11 w-full sm:w-auto"
+                className="h-11 w-full sm:w-auto text-muted"
               >
                 Cancelar
               </Button>
