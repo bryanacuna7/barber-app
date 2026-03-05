@@ -46,40 +46,42 @@ export function MiDiaHeader({
       )}
       data-testid="mi-dia-header"
     >
-      <div className="container mx-auto max-w-4xl px-4 py-3">
+      <div className="container mx-auto max-w-4xl px-4 py-3 lg:py-4">
         {/* Row 1: Title + actions */}
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-bold text-zinc-900 dark:text-white leading-tight truncate">
+            <h1 className="text-lg lg:text-xl font-bold text-zinc-900 dark:text-white leading-tight truncate">
               Mi Dia
             </h1>
-            <p className="text-xs text-muted capitalize truncate mt-0.5">
+            <p className="text-xs lg:text-sm text-muted capitalize truncate mt-0.5">
               {barberName} &middot; {formattedDate}
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2.5 lg:gap-3 shrink-0">
             {/* Progress counter */}
             <span
-              className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-white"
+              className="text-sm lg:text-base font-semibold tabular-nums text-zinc-900 dark:text-white"
               aria-label={`${completedCount} de ${totalCount} completadas`}
             >
               {completedCount}/{totalCount}
             </span>
 
-            {/* Walk-in "+" button */}
+            {/* Walk-in button: icon on mobile, label on desktop */}
             {canCreateCitas && onWalkIn && (
               <button
                 onClick={onWalkIn}
                 className={cn(
-                  'flex items-center justify-center w-8 h-8 rounded-full',
+                  'flex items-center justify-center rounded-full',
                   'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900',
-                  'active:scale-95 transition-transform'
+                  'active:scale-95 lg:hover:opacity-90 transition-all',
+                  'w-8 h-8 lg:w-auto lg:h-9 lg:rounded-lg lg:px-3.5 lg:gap-1.5'
                 )}
                 aria-label="Agregar walk-in"
                 data-testid="header-walk-in-button"
               >
                 <Plus className="h-4 w-4" />
+                <span className="hidden lg:inline text-sm font-medium">Walk-in</span>
               </button>
             )}
           </div>

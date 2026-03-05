@@ -219,8 +219,8 @@ export function SwipeableRow({
   const leftRevealWidth = computeRevealWidth(leftActions.length, revealThreshold)
   const rightRevealWidth = computeRevealWidth(rightActions.length, revealThreshold)
 
-  const leftCommitAction = leftActions[0] ?? null
-  const rightCommitAction = rightActions[0] ?? null
+  const leftCommitAction = leftActions[leftActions.length - 1] ?? null
+  const rightCommitAction = rightActions[rightActions.length - 1] ?? null
 
   const springClose = prefersReducedMotion ? { duration: 0.05 } : animations.spring.swipeClose
   const springOpen = prefersReducedMotion ? { duration: 0.05 } : animations.spring.swipeOpen
@@ -342,6 +342,7 @@ export function SwipeableRow({
   /* --- Action button click (from tray) --- */
   const handleActionClick = useCallback(
     (action: SwipeAction) => {
+      suppressClickUntilRef.current = Date.now() + 350
       haptics.tap()
       action.onClick()
       closeRow()
@@ -446,6 +447,7 @@ export function SwipeableRow({
 
       g.isDragging = false
       g.direction = 'unknown'
+      suppressClickUntilRef.current = Date.now() + 350
 
       handleGestureEnd(g.velocityX)
     }
@@ -463,6 +465,7 @@ export function SwipeableRow({
 
   /* --- Tap-to-close + desktop pointer fallback --- */
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null)
+  const suppressClickUntilRef = useRef(0)
 
   const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     pointerStartRef.current = { x: event.clientX, y: event.clientY }
@@ -547,6 +550,12 @@ export function SwipeableRow({
         ref={contentRef}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
+        onClickCapture={(event) => {
+          if (Date.now() < suppressClickUntilRef.current) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+        }}
         className={cn('relative z-10 w-full touch-pan-y', className)}
         style={{ x }}
       >

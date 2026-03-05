@@ -16,16 +16,53 @@ export function useServices(businessId: string) {
     queryKey: queryKeys.services.list(businessId),
     queryFn: async () => {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('services')
-        .select(
-          'id, name, description, category, icon, duration_minutes, price, display_order, is_active, business_id'
-        )
-        .eq('business_id', businessId)
-        .order('display_order', { ascending: true })
 
-      if (error) throw error
-      return adaptServices(data ?? [])
+      // Fetch services + booking counts for current month in parallel
+      const monthStart = new Date()
+      monthStart.setDate(1)
+      monthStart.setHours(0, 0, 0, 0)
+
+      const [servicesResult, metricsResult] = await Promise.all([
+        supabase
+          .from('services')
+          .select(
+            'id, name, description, category, icon, duration_minutes, price, display_order, is_active, business_id'
+          )
+          .eq('business_id', businessId)
+          .order('display_order', { ascending: true }),
+        supabase
+          .from('appointments')
+          .select('service_id')
+          .eq('business_id', businessId)
+          .gte('scheduled_at', monthStart.toISOString())
+          .neq('status', 'cancelled'),
+      ])
+
+      if (servicesResult.error) throw servicesResult.error
+
+      // Build metrics map from appointment counts
+      const metricsMap = new Map<
+        string,
+        { bookings: number; revenue: number; avgRating: number; popularityRank: number }
+      >()
+      if (metricsResult.data) {
+        for (const row of metricsResult.data) {
+          if (!row.service_id) continue
+          const existing = metricsMap.get(row.service_id)
+          if (existing) {
+            existing.bookings += 1
+          } else {
+            metricsMap.set(row.service_id, {
+              bookings: 1,
+              revenue: 0,
+              avgRating: 0,
+              popularityRank: 0,
+            })
+          }
+        }
+      }
+
+      return adaptServices(servicesResult.data ?? [], metricsMap)
     },
     enabled: !!businessId,
   })

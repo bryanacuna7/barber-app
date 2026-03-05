@@ -91,6 +91,7 @@ export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps)
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => onOpenChange(false)}
             className="fixed inset-0 bg-black/65 backdrop-blur-md"
             style={{ zIndex }}

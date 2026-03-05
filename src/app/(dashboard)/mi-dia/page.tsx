@@ -351,7 +351,7 @@ function MiDiaPageContent() {
       </ComponentErrorBoundary>
 
       {/* Main Content */}
-      <main className="container mx-auto max-w-4xl px-3 sm:px-4 py-4 sm:py-5">
+      <main className="container mx-auto max-w-4xl px-3 sm:px-4 lg:px-6 py-4 sm:py-5 lg:py-6">
         {/* Onboarding Checklist */}
         {showOnboarding && barberId && (
           <div className="mb-4">

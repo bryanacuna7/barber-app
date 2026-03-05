@@ -21,6 +21,8 @@ export function MobileHeader({ businessName, logoUrl }: MobileHeaderProps) {
     pathname.startsWith('/clientes/') ||
     pathname === '/barberos' ||
     pathname.startsWith('/barberos/') ||
+    pathname === '/servicios' ||
+    pathname.startsWith('/servicios/') ||
     pathname === '/mi-dia' ||
     pathname.startsWith('/mi-dia/')
 

@@ -95,10 +95,11 @@ export function MiDiaAppointmentRow({
       onClick={() => onSelect(appointment)}
       disabled={isLoading}
       className={cn(
-        'w-full flex items-center gap-3 px-3 py-3 text-left',
+        'group w-full flex items-center gap-3 px-3 py-3 text-left',
         'bg-white dark:bg-zinc-900',
         'rounded-xl border border-zinc-200/60 dark:border-zinc-800/60',
         'active:bg-zinc-50 dark:active:bg-zinc-800/80 transition-colors',
+        'lg:hover:bg-zinc-50 lg:dark:hover:bg-zinc-800/50 lg:hover:border-zinc-300 lg:dark:hover:border-zinc-700',
         isFinalized && 'opacity-50',
         className
       )}
@@ -139,6 +140,52 @@ export function MiDiaAppointmentRow({
           )}
         </p>
       </div>
+
+      {/* Desktop hover actions (hidden on mobile, visible on hover) */}
+      {!isFinalized && (onCheckIn || onNoShow) && (
+        <div className="hidden lg:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity shrink-0">
+          {onCheckIn && (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation()
+                onCheckIn(appointment.id)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation()
+                  onCheckIn(appointment.id)
+                }
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+            >
+              <Play className="h-3 w-3" />
+              Iniciar
+            </span>
+          )}
+          {onNoShow && (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation()
+                onNoShow(appointment.id)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation()
+                  onNoShow(appointment.id)
+                }
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors"
+            >
+              <UserX className="h-3 w-3" />
+              No Show
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Right side: delay chip or status pill */}
       <div className="shrink-0 flex flex-col items-end gap-1">

@@ -1,62 +1,104 @@
 'use client'
 
 /**
- * Equipo Page V2 - Team Management
- * Feature 0B: Owner can invite/manage barbers
+ * Equipo Page — Orchestrator
  *
- * Real data from Supabase via React Query hooks.
- * Invite flow: name + email → creates auth user + barber record + sends email.
- * Manage: toggle active/inactive, delete barber.
+ * Decomposed from 924-line monolith. Mobile: SwipeableRow list + bottom sheets.
+ * Desktop: table + centered modals. Viewport-gated rendering (no dual render).
+ *
+ * Sub-components in src/components/team/:
+ * - TeamMobileList — Owner featured card + member rows with SwipeableRow
+ * - TeamDetailSheet — Viewport-gated: Sheet mobile / Modal desktop
+ * - TeamInviteSheet — Viewport-gated: Sheet mobile / Modal desktop
  */
 
-import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Search,
   Plus,
   ChevronRight,
   UserRound,
-  Mail,
-  Phone,
-  Shield,
-  Trash2,
-  CheckCircle2,
   XCircle,
-  Copy,
-  Check,
-  MessageCircle,
-  Link2,
-  Pencil,
+  CheckCircle2,
+  Shield,
+  X,
 } from 'lucide-react'
-import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { IOSToggle } from '@/components/ui/ios-toggle'
+import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
+import { DashboardPageHeader } from '@/components/dashboard/page-header'
 import { useToast } from '@/components/ui/toast'
-import { NotificationBell } from '@/components/notifications/notification-bell'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { trackMobileEvent } from '@/lib/analytics/mobile'
-import { MOBILE_CANVAS_CLASS, MOBILE_PRIMARY_CTA_CLASS } from '@/lib/ui/mobile-contract'
+import { MOBILE_CANVAS_CLASS } from '@/lib/ui/mobile-contract'
 import { useBusiness } from '@/contexts/business-context'
-import {
-  useBarbers,
-  useAddBarber,
-  useInviteBarber,
-  useUpdateBarber,
-  useDeleteBarber,
-} from '@/hooks/queries/useBarbers'
+import { useBarbers, useDeleteBarber } from '@/hooks/queries/useBarbers'
 import type { UIBarber } from '@/lib/adapters/barbers'
+
+// Extracted sub-components
+import { TeamMobileList } from '@/components/team/team-mobile-list'
+import { TeamDetailSheet } from '@/components/team/team-detail-sheet'
+import { TeamInviteSheet } from '@/components/team/team-invite-sheet'
+
+type StatusFilter = 'all' | 'active' | 'inactive'
+
+function BarberAvatar({
+  name,
+  avatarUrl,
+  isActive,
+}: {
+  name: string
+  avatarUrl?: string
+  isActive: boolean
+}) {
+  const normalized = avatarUrl?.trim()
+  const show = normalized && normalized.toLowerCase() !== 'null'
+  const initials =
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? '')
+      .join('') || 'U'
+
+  return (
+    <div
+      className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+        isActive ? 'bg-gradient-to-br from-teal-400 to-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'
+      }`}
+    >
+      {show ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={normalized}
+          alt=""
+          className="h-full w-full rounded-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        <span className="text-xs font-semibold uppercase text-white">{initials}</span>
+      )}
+    </div>
+  )
+}
 
 export default function BarberosPage() {
   const { businessId } = useBusiness()
-  const { data: barbers, isLoading, error } = useBarbers(businessId)
+  const { data: barbers, isLoading, error, refetch } = useBarbers(businessId)
+
+  const toast = useToast()
+  const deleteBarberMutation = useDeleteBarber()
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null)
+  const [detailMode, setDetailMode] = useState<'view' | 'edit'>('view')
+  const [deletingBarber, setDeletingBarber] = useState<UIBarber | null>(null)
 
-  // Derive live barber from query data (stays in sync after mutations)
+  // Derive live barber from query data
   const selectedBarber = useMemo(
     () => barbers?.find((b) => b.id === selectedBarberId) ?? null,
     [barbers, selectedBarberId]
@@ -64,29 +106,42 @@ export default function BarberosPage() {
 
   const filteredBarbers = useMemo(() => {
     if (!barbers) return []
-    if (!searchQuery) return barbers
-    const q = searchQuery.toLowerCase()
-    return barbers.filter(
-      (b) => b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q)
-    )
-  }, [barbers, searchQuery])
+    let result = barbers
+
+    // Status filter
+    if (statusFilter === 'active') result = result.filter((b) => b.isActive)
+    else if (statusFilter === 'inactive') result = result.filter((b) => !b.isActive)
+
+    // Search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        (b) => b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [barbers, searchQuery, statusFilter])
 
   const activeCount = barbers?.filter((b) => b.isActive).length ?? 0
 
   const openInviteModal = (source: 'desktop' | 'mobile' | 'empty') => {
+    ;(document.activeElement as HTMLElement | null)?.blur?.()
     setIsInviteOpen(true)
     if (isMobileDevice()) {
-      haptics.tap()
-      trackMobileEvent('mobile_equipo_invite_open', { source })
+      requestAnimationFrame(() => {
+        haptics.tap()
+        trackMobileEvent('mobile_equipo_invite_open', { source })
+      })
     }
   }
 
   const openDetail = (barber: UIBarber) => {
+    setDetailMode('view')
     setSelectedBarberId(barber.id)
     if (isMobileDevice()) haptics.tap()
   }
 
-  // Loading state
+  // Loading
   if (isLoading) {
     return (
       <div className="min-h-screen px-0 pt-4 lg:px-0 lg:pt-0 space-y-6">
@@ -95,7 +150,7 @@ export default function BarberosPage() {
           <Skeleton className="h-5 w-48" />
         </div>
         <Skeleton className="h-11 w-full rounded-xl" />
-        <div className="space-y-1 rounded-2xl overflow-hidden border border-zinc-200/80 dark:border-zinc-700/70">
+        <div className="space-y-1 rounded-2xl overflow-hidden">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-[72px] rounded-none" />
           ))}
@@ -104,7 +159,7 @@ export default function BarberosPage() {
     )
   }
 
-  // Error state
+  // Error
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
@@ -119,806 +174,301 @@ export default function BarberosPage() {
     )
   }
 
+  const isDetailOpen = !!selectedBarberId
+
   return (
     <div className="min-h-screen lg:pb-6 relative overflow-x-hidden">
-      <div
-        className={`${MOBILE_CANVAS_CLASS} pt-4 sm:px-0 lg:px-0 lg:pt-0 space-y-4 sm:space-y-6 relative z-10`}
+      <PullToRefresh
+        onRefresh={async () => {
+          await refetch()
+        }}
+        disabled={isDetailOpen || isInviteOpen || !!deletingBarber}
       >
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="app-page-title brand-gradient-text">Equipo</h1>
-              <p className="app-page-subtitle mt-1">
-                {activeCount} miembro del equipo{activeCount !== 1 ? 's' : ''} activo
-                {activeCount !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="lg:hidden">
-                <NotificationBell className="mr-1" />
-              </div>
+        <div
+          className={`${MOBILE_CANVAS_CLASS} pt-4 sm:px-0 lg:px-0 lg:pt-0 space-y-4 sm:space-y-6 relative z-10`}
+        >
+          {/* ── Desktop Header ── */}
+          <DashboardPageHeader
+            title="Equipo"
+            subtitle={`${activeCount} miembro${activeCount !== 1 ? 's' : ''} activo${activeCount !== 1 ? 's' : ''}`}
+            actions={
               <Button
                 variant="cta"
                 onClick={() => openInviteModal('desktop')}
-                className="hidden lg:inline-flex shrink-0 min-w-[44px] min-h-[44px] h-10"
+                className="min-w-[44px] min-h-[44px] h-10"
               >
                 <Plus className="h-5 w-5 sm:mr-2" />
-                <span>Agregar Miembro del equipo</span>
+                <span className="hidden sm:inline">Agregar Miembro</span>
               </Button>
-            </div>
-          </div>
-          <div className="mt-3 lg:hidden">
-            <Button
-              variant="cta"
-              onClick={() => openInviteModal('mobile')}
-              className={`${MOBILE_PRIMARY_CTA_CLASS} !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100`}
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              <span>Agregar Miembro del equipo</span>
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* Search */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-        >
-          <Input
-            type="text"
-            placeholder="Buscar por nombre o email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            leftIcon={<Search className="h-5 w-5" />}
-            className="h-11 bg-white/65 dark:bg-white/[0.04] border border-zinc-200/70 dark:border-zinc-800/80"
+            }
           />
-        </motion.div>
 
-        {/* Barber List */}
-        {filteredBarbers.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16 space-y-3"
-          >
-            <UserRound className="h-12 w-12 text-zinc-300 dark:text-zinc-600 mx-auto" />
-            <p className="text-lg font-semibold text-zinc-900 dark:text-white">
-              {searchQuery ? 'Sin resultados' : 'Sin miembros del equipo'}
-            </p>
-            <p className="text-sm text-muted">
-              {searchQuery
-                ? 'Intenta con otro término de búsqueda'
-                : 'Invita a tu primer miembro del equipo para empezar'}
-            </p>
-            {!searchQuery && (
-              <Button
-                variant="cta"
-                onClick={() => openInviteModal('empty')}
-                className="mt-4 h-11 whitespace-nowrap"
+          {/* ── Mobile Header ── */}
+          <div className="lg:hidden space-y-3">
+            {/* Search bar row: [Search...] [+ circle] */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-11 w-full rounded-xl bg-zinc-100/70 dark:bg-white/[0.06] pl-10 pr-9 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:bg-zinc-100 dark:focus:bg-white/[0.09] focus:ring-1 focus:ring-zinc-300/60 dark:focus:ring-zinc-600/50"
+                  aria-label="Buscar miembro del equipo"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => openInviteModal('mobile')}
+                aria-label="Agregar miembro"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shrink-0 active:scale-95 transition-transform"
               >
-                <Plus className="h-5 w-5 mr-2" />
-                Agregar Miembro del equipo
-              </Button>
-            )}
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 shadow-sm dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl"
-          >
-            {/* Mobile: compact list */}
-            <div className="lg:hidden">
-              {filteredBarbers.map((barber, index) => (
-                <motion.div
-                  key={barber.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.03 }}
-                  onClick={() => openDetail(barber)}
-                  className={`flex items-center gap-3 p-3.5 transition-colors cursor-pointer active:bg-zinc-100/80 dark:active:bg-white/[0.06] ${
-                    index < filteredBarbers.length - 1
-                      ? 'border-b border-zinc-200/70 dark:border-zinc-800/80'
-                      : ''
-                  }`}
-                >
-                  <div
-                    className={`h-11 w-11 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      barber.isActive
-                        ? 'bg-gradient-to-br from-teal-400 to-emerald-500'
-                        : 'bg-zinc-300 dark:bg-zinc-700'
+                <Plus className="h-5 w-5" strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {/* Filter pills — sticky */}
+            <div className="sticky top-0 z-20 -mx-4 px-4 py-1.5 backdrop-blur-xl bg-white/80 dark:bg-zinc-950/80 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {(['all', 'active', 'inactive'] as StatusFilter[]).map((filter) => {
+                const isActive = statusFilter === filter
+                const label =
+                  filter === 'all' ? 'Todos' : filter === 'active' ? 'Activos' : 'Inactivos'
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => {
+                      setStatusFilter(filter)
+                      if (isMobileDevice()) haptics.selection()
+                    }}
+                    className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 transition-colors duration-150 ${
+                      isActive
+                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
+                        : 'text-zinc-500 dark:text-zinc-400 bg-zinc-100/70 dark:bg-white/[0.06]'
                     }`}
                   >
-                    {barber.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={barber.avatarUrl}
-                        alt=""
-                        className="h-full w-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <UserRound className="h-5 w-5 text-white" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-[15px] text-zinc-900 dark:text-white truncate">
-                        {barber.name}
-                      </p>
-                      {barber.role === 'owner' && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold uppercase tracking-wider">
-                          Dueño
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted truncate">{barber.email}</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        barber.isActive
-                          ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                          : 'bg-zinc-100 dark:bg-zinc-800 text-muted'
-                      }`}
-                    >
-                      {barber.isActive ? (
-                        <CheckCircle2 className="h-3 w-3" />
-                      ) : (
-                        <XCircle className="h-3 w-3" />
-                      )}
-                      {barber.isActive ? 'Activo' : 'Inactivo'}
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted flex-shrink-0" />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Desktop: table layout with more info */}
-            <div className="hidden lg:block">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800/80">
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                      Miembro del equipo
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                      Rol
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                      Estado
-                    </th>
-                    <th className="w-12 px-4 py-3">
-                      <span className="sr-only">Acciones</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBarbers.map((barber, index) => (
-                    <tr
-                      key={barber.id}
-                      onClick={() => openDetail(barber)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          openDetail(barber)
-                        }
-                      }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={`Ver detalle de ${barber.name}`}
-                      className={`group cursor-pointer transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 focus-visible:ring-inset ${
-                        index < filteredBarbers.length - 1
-                          ? 'border-b border-zinc-200 dark:border-zinc-800/80'
-                          : ''
-                      }`}
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              barber.isActive
-                                ? 'bg-gradient-to-br from-teal-400 to-emerald-500'
-                                : 'bg-zinc-300 dark:bg-zinc-700'
-                            }`}
-                          >
-                            {barber.avatarUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={barber.avatarUrl}
-                                alt=""
-                                className="h-full w-full rounded-full object-cover"
-                              />
-                            ) : (
-                              <UserRound className="h-4 w-4 text-white" />
-                            )}
-                          </div>
-                          <span className="font-semibold text-sm text-zinc-900 dark:text-white">
-                            {barber.name}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted">{barber.email}</td>
-                      <td className="px-4 py-3">
-                        {barber.role === 'owner' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium">
-                            <Shield className="h-3 w-3" />
-                            Dueño
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted">Miembro del equipo</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                            barber.isActive
-                              ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-zinc-100 dark:bg-zinc-800 text-muted'
-                          }`}
-                        >
-                          {barber.isActive ? (
-                            <CheckCircle2 className="h-3 w-3" />
-                          ) : (
-                            <XCircle className="h-3 w-3" />
-                          )}
-                          {barber.isActive ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <ChevronRight className="h-4 w-4 text-muted opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Bottom spacing for nav */}
-        <div className="h-24 lg:h-0" />
-      </div>
-
-      {/* Invite Modal */}
-      <InviteBarberModal open={isInviteOpen} onOpenChange={setIsInviteOpen} />
-
-      {/* Detail Modal */}
-      {selectedBarber && (
-        <BarberDetailModal
-          barber={selectedBarber}
-          open={!!selectedBarberId}
-          onOpenChange={(open) => {
-            if (!open) setSelectedBarberId(null)
-          }}
-        />
-      )}
-    </div>
-  )
-}
-
-// ─── Invite Barber Modal ──────────────────────────────────────
-
-function InviteBarberModal({
-  open,
-  onOpenChange,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const toast = useToast()
-  const addBarber = useAddBarber()
-  const inviteBarber = useInviteBarber()
-  const [mode, setMode] = useState<'add' | 'invite'>('add')
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [setupResult, setSetupResult] = useState<{
-    barberName: string
-    setupUrl: string
-  } | null>(null)
-  const [copied, setCopied] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name.trim() || !email.trim()) return
-
-    const isMobile = isMobileDevice()
-    const safeMode = mode
-    const safeEmail = email.trim()
-
-    try {
-      const result =
-        mode === 'add'
-          ? await addBarber.mutateAsync({ name: name.trim(), email: email.trim() })
-          : await inviteBarber.mutateAsync({ name: name.trim(), email: email.trim() })
-
-      if (result.setup_url) {
-        // Show the setup link so owner can share it
-        setSetupResult({ barberName: name.trim(), setupUrl: result.setup_url })
-        if (isMobile) {
-          haptics.success()
-          trackMobileEvent('mobile_equipo_invite_success', {
-            mode: safeMode,
-            via: 'setup_url',
-            emailDomain: safeEmail.split('@')[1] ?? 'unknown',
-          })
-        }
-      } else {
-        toast.success('Miembro del equipo agregado')
-        if (isMobile) {
-          haptics.success()
-          trackMobileEvent('mobile_equipo_invite_success', {
-            mode: safeMode,
-            via: 'direct',
-            emailDomain: safeEmail.split('@')[1] ?? 'unknown',
-          })
-        }
-        resetAndClose()
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error al invitar miembro del equipo'
-      toast.error(msg)
-      if (isMobile) {
-        haptics.error()
-        trackMobileEvent('mobile_equipo_invite_error', {
-          mode: safeMode,
-          message: msg,
-          emailDomain: safeEmail.split('@')[1] ?? 'unknown',
-        })
-      }
-    }
-  }
-
-  const handleCopy = async () => {
-    if (!setupResult) return
-    try {
-      await navigator.clipboard.writeText(setupResult.setupUrl)
-      setCopied(true)
-      toast.success('Link copiado')
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      toast.error('No se pudo copiar')
-    }
-  }
-
-  const handleWhatsApp = () => {
-    if (!setupResult) return
-    const text = `¡Hola ${setupResult.barberName}! Te agregué al equipo. Usa este enlace para crear tu contraseña:\n${setupResult.setupUrl}`
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
-  }
-
-  const resetAndClose = () => {
-    setName('')
-    setEmail('')
-    setMode('add')
-    setSetupResult(null)
-    setCopied(false)
-    onOpenChange(false)
-  }
-
-  // ── Success state: show shareable link ──
-  if (setupResult) {
-    return (
-      <Modal
-        isOpen={open}
-        onClose={resetAndClose}
-        title="Miembro agregado"
-        description="Comparte este enlace para que establezca su contraseña."
-      >
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 p-3">
-            <CheckCircle2 className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-            <p className="text-sm text-emerald-800 dark:text-emerald-300">
-              <span className="font-medium">{setupResult.barberName}</span> ya tiene cuenta. Solo
-              falta que establezca su contraseña.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted">Enlace de acceso</label>
-            <div className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-2.5">
-              <Link2 className="size-4 shrink-0 text-subtle" />
-              <span className="flex-1 truncate text-sm text-zinc-600 dark:text-zinc-400">
-                {setupResult.setupUrl}
-              </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                className="shrink-0 p-1.5 h-auto min-h-0"
-              >
-                {copied ? (
-                  <Check className="size-4 text-emerald-500" />
-                ) : (
-                  <Copy className="size-4" />
-                )}
-              </Button>
+                    {label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <Button type="button" variant="outline" onClick={handleWhatsApp} className="h-11 gap-2">
-              <MessageCircle className="size-4" />
-              WhatsApp
-            </Button>
-            <Button type="button" onClick={handleCopy} className="h-11 gap-2">
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copied ? 'Copiado' : 'Copiar link'}
-            </Button>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button type="button" variant="ghost" onClick={resetAndClose} className="h-11">
-              Listo
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    )
-  }
-
-  // ── Form state ──
-  return (
-    <Modal
-      isOpen={open}
-      onClose={resetAndClose}
-      title={mode === 'add' ? 'Agregar Miembro del equipo' : 'Invitar Miembro del equipo'}
-      description={
-        mode === 'add'
-          ? 'Crea su cuenta y envíale un enlace para establecer su contraseña.'
-          : 'Envía una invitación por correo para que complete su acceso.'
-      }
-    >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-2 gap-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 p-1">
-          <button
-            type="button"
-            onClick={() => setMode('add')}
-            className={`h-10 rounded-lg text-sm font-medium transition-colors ${
-              mode === 'add'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                : 'text-zinc-500 dark:text-zinc-400'
-            }`}
-          >
-            Agregar
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('invite')}
-            className={`h-10 rounded-lg text-sm font-medium transition-colors ${
-              mode === 'invite'
-                ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                : 'text-zinc-500 dark:text-zinc-400'
-            }`}
-          >
-            Invitar
-          </button>
-        </div>
-
-        <Input
-          label="Nombre"
-          type="text"
-          placeholder="Ej: Juan Pérez"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-
-        <Input
-          label="Email"
-          type="email"
-          placeholder="juan@ejemplo.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={resetAndClose}
-            className="h-11 w-full sm:w-auto"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            isLoading={addBarber.isPending || inviteBarber.isPending}
-            disabled={!name.trim() || !email.trim()}
-            className="h-11 w-full sm:w-auto"
-          >
-            {mode === 'add' ? 'Agregar Miembro' : 'Enviar Invitación'}
-          </Button>
-        </div>
-      </form>
-    </Modal>
-  )
-}
-
-// ─── Barber Detail Modal ──────────────────────────────────────
-
-function BarberDetailModal({
-  barber,
-  open,
-  onOpenChange,
-}: {
-  barber: UIBarber
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  const toast = useToast()
-  const updateBarber = useUpdateBarber()
-  const deleteBarber = useDeleteBarber()
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editName, setEditName] = useState(barber.name)
-  const [editEmail, setEditEmail] = useState(barber.email)
-
-  const handleToggleActive = async () => {
-    try {
-      await updateBarber.mutateAsync({
-        id: barber.id,
-        updates: { is_active: !barber.isActive },
-      })
-      toast.success(barber.isActive ? `${barber.name} desactivado` : `${barber.name} activado`)
-      if (isMobileDevice()) haptics.tap()
-    } catch {
-      toast.error('Error al actualizar estado')
-    }
-  }
-
-  const handleSaveEdit = async () => {
-    const trimmedName = editName.trim()
-    const trimmedEmail = editEmail.trim()
-    if (!trimmedName) {
-      toast.error('El nombre no puede estar vacío')
-      return
-    }
-    try {
-      const updates: Record<string, string> = {}
-      if (trimmedName !== barber.name) updates.name = trimmedName
-      if (trimmedEmail !== barber.email) updates.email = trimmedEmail
-      if (Object.keys(updates).length === 0) {
-        setIsEditing(false)
-        return
-      }
-      await updateBarber.mutateAsync({ id: barber.id, updates })
-      toast.success('Perfil actualizado')
-      setIsEditing(false)
-      if (isMobileDevice()) haptics.success()
-    } catch {
-      toast.error('Error al actualizar perfil')
-    }
-  }
-
-  const handleCancelEdit = () => {
-    setEditName(barber.name)
-    setEditEmail(barber.email)
-    setIsEditing(false)
-  }
-
-  const handleDelete = async () => {
-    try {
-      await deleteBarber.mutateAsync(barber.id)
-      toast.success(`${barber.name} eliminado`)
-      onOpenChange(false)
-      if (isMobileDevice()) haptics.tap()
-    } catch {
-      toast.error('Error al eliminar miembro del equipo')
-    }
-  }
-
-  const handleClose = () => {
-    setShowDeleteConfirm(false)
-    setIsEditing(false)
-    setEditName(barber.name)
-    setEditEmail(barber.email)
-    onOpenChange(false)
-  }
-
-  return (
-    <Modal
-      isOpen={open}
-      onClose={handleClose}
-      title={isEditing ? 'Editar perfil' : barber.name}
-      description={isEditing ? undefined : barber.role === 'owner' ? 'Dueño' : 'Miembro del equipo'}
-    >
-      <div className="space-y-5">
-        {isEditing ? (
-          /* ── Edit mode ── */
-          <>
-            <Input
-              label="Nombre"
-              type="text"
-              placeholder="Ej: Juan Pérez"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              autoFocus
-            />
-            <Input
-              label="Email"
-              type="email"
-              placeholder="juan@ejemplo.com"
-              value={editEmail}
-              onChange={(e) => setEditEmail(e.target.value)}
-            />
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={handleCancelEdit} className="h-11">
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleSaveEdit}
-                isLoading={updateBarber.isPending}
-                disabled={!editName.trim()}
-                className="h-11"
-              >
-                Guardar
-              </Button>
+          {/* ── Desktop Search ── */}
+          <div className="hidden lg:block">
+            <div className="relative w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-full rounded-lg bg-zinc-100/70 dark:bg-white/[0.06] pl-9 pr-3 text-sm text-foreground placeholder:text-subtle outline-none transition-colors focus:bg-zinc-100 dark:focus:bg-white/[0.09] focus:ring-1 focus:ring-zinc-300/60 dark:focus:ring-zinc-600/50"
+              />
             </div>
-          </>
-        ) : (
-          /* ── View mode ── */
-          <>
-            {/* Avatar + status + edit button */}
-            <div className="flex items-center gap-4">
-              <div
-                className={`h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  barber.isActive
-                    ? 'bg-gradient-to-br from-teal-400 to-emerald-500'
-                    : 'bg-zinc-300 dark:bg-zinc-700'
-                }`}
-              >
-                {barber.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={barber.avatarUrl}
-                    alt=""
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                ) : (
-                  <UserRound className="h-7 w-7 text-white" />
-                )}
-              </div>
-              <div className="flex-1">
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    barber.isActive
-                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
-                  }`}
+          </div>
+
+          {/* ── Content ── */}
+          {filteredBarbers.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
+              className="text-center py-16 space-y-3"
+            >
+              <UserRound className="h-12 w-12 text-zinc-300 dark:text-zinc-600 mx-auto" />
+              <p className="text-lg font-semibold text-zinc-900 dark:text-white">
+                {searchQuery ? 'Sin resultados' : 'Sin miembros del equipo'}
+              </p>
+              <p className="text-sm text-muted">
+                {searchQuery
+                  ? 'Intenta con otro término de búsqueda'
+                  : 'Invita a tu primer miembro del equipo para empezar'}
+              </p>
+              {!searchQuery && (
+                <Button
+                  variant="cta"
+                  onClick={() => openInviteModal('empty')}
+                  className="mt-4 h-11 whitespace-nowrap"
                 >
-                  {barber.isActive ? (
-                    <CheckCircle2 className="h-3 w-3" />
-                  ) : (
-                    <XCircle className="h-3 w-3" />
-                  )}
-                  {barber.isActive ? 'Activo' : 'Inactivo'}
-                </span>
-              </div>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEditName(barber.name)
-                  setEditEmail(barber.email)
-                  setIsEditing(true)
-                }}
-                className="h-10 w-10 p-0"
-                aria-label="Editar perfil"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Info rows */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-                <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                <div className="min-w-0">
-                  <div className="text-xs text-muted">Email</div>
-                  <div className="font-medium text-zinc-900 dark:text-white truncate">
-                    {barber.email}
-                  </div>
-                </div>
-              </div>
-
-              {barber.phone && (
-                <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-                  <Phone className="h-5 w-5 text-violet-500 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-xs text-muted">Teléfono</div>
-                    <div className="font-medium text-zinc-900 dark:text-white">{barber.phone}</div>
-                  </div>
-                </div>
+                  <Plus className="h-5 w-5 mr-2" />
+                  Agregar Miembro del equipo
+                </Button>
               )}
-
-              <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-                <Shield className="h-5 w-5 text-amber-500 flex-shrink-0" />
-                <div className="min-w-0">
-                  <div className="text-xs text-muted">Cuenta vinculada</div>
-                  <div className="font-medium text-zinc-900 dark:text-white">
-                    {barber.userId ? 'Sí — puede iniciar sesión' : 'No — sin acceso al sistema'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Active toggle */}
-            {barber.role !== 'owner' && (
-              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
-                <div>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-                    Acceso activo
-                  </p>
-                  <p className="text-xs text-muted mt-0.5">
-                    {barber.isActive
-                      ? 'Puede iniciar sesión y ver sus citas'
-                      : 'No puede acceder al sistema'}
-                  </p>
-                </div>
-                <IOSToggle
-                  checked={barber.isActive}
-                  onChange={handleToggleActive}
-                  disabled={updateBarber.isPending}
+            </motion.div>
+          ) : (
+            <>
+              {/* Mobile: visual list with owner card + SwipeableRow */}
+              <div className="lg:hidden">
+                <TeamMobileList
+                  barbers={filteredBarbers}
+                  onSelect={openDetail}
+                  onDelete={(b) => {
+                    setDeletingBarber(b)
+                    if (isMobileDevice()) haptics.tap()
+                  }}
                 />
               </div>
-            )}
 
-            {/* Delete */}
-            {barber.role !== 'owner' && (
-              <AnimatePresence>
-                {!showDeleteConfirm ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full h-11 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Eliminar miembro del equipo
-                  </Button>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-3"
-                  >
-                    <p className="text-sm text-center text-red-600 dark:text-red-400 font-medium">
-                      ¿Estás seguro? Esta acción no se puede deshacer.
-                    </p>
-                    <div className="flex justify-end gap-3">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="h-11"
+              {/* Desktop: table layout — preserved from original */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="hidden lg:block overflow-hidden rounded-2xl border border-zinc-200/80 dark:border-zinc-700/70 bg-white/92 dark:bg-zinc-900/88 shadow-sm dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+              >
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-800/80">
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                        Miembro del equipo
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                        Email
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                        Rol
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                        Estado
+                      </th>
+                      <th className="w-12 px-4 py-3">
+                        <span className="sr-only">Acciones</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBarbers.map((barber, index) => (
+                      <tr
+                        key={barber.id}
+                        onClick={() => openDetail(barber)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            openDetail(barber)
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`Ver detalle de ${barber.name}`}
+                        className={`group cursor-pointer transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 focus-visible:ring-inset ${
+                          index < filteredBarbers.length - 1
+                            ? 'border-b border-zinc-200 dark:border-zinc-800/80'
+                            : ''
+                        }`}
                       >
-                        Cancelar
-                      </Button>
-                      <Button
-                        variant="danger"
-                        onClick={handleDelete}
-                        isLoading={deleteBarber.isPending}
-                        className="h-11"
-                      >
-                        Eliminar
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            )}
-          </>
-        )}
-      </div>
-    </Modal>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <BarberAvatar
+                              name={barber.name}
+                              avatarUrl={barber.avatarUrl}
+                              isActive={barber.isActive}
+                            />
+                            <span className="font-semibold text-sm text-zinc-900 dark:text-white">
+                              {barber.name}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-muted">{barber.email}</td>
+                        <td className="px-4 py-3">
+                          {barber.role === 'owner' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium">
+                              <Shield className="h-3 w-3" />
+                              Dueño
+                            </span>
+                          ) : (
+                            <span className="text-sm text-muted">Barbero</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                              barber.isActive
+                                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                                : 'bg-zinc-100 dark:bg-zinc-800 text-muted'
+                            }`}
+                          >
+                            {barber.isActive ? (
+                              <CheckCircle2 className="h-3 w-3" />
+                            ) : (
+                              <XCircle className="h-3 w-3" />
+                            )}
+                            {barber.isActive ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <ChevronRight className="h-4 w-4 text-muted opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </motion.div>
+            </>
+          )}
+
+          {/* Bottom spacing for nav */}
+          <div className="h-24 lg:h-0" />
+        </div>
+      </PullToRefresh>
+
+      {/* Invite Sheet */}
+      <TeamInviteSheet open={isInviteOpen} onOpenChange={setIsInviteOpen} />
+
+      {/* Detail Sheet */}
+      <TeamDetailSheet
+        barber={selectedBarber}
+        open={isDetailOpen}
+        onOpenChange={(open) => {
+          if (!open) setSelectedBarberId(null)
+        }}
+        initialMode={detailMode}
+      />
+
+      {/* Mobile compact delete confirmation */}
+      <Sheet
+        open={!!deletingBarber}
+        onOpenChange={(open) => {
+          if (!open) setDeletingBarber(null)
+        }}
+      >
+        <SheetContent side="bottom">
+          <SheetClose onClose={() => setDeletingBarber(null)} />
+          <div className="space-y-4 pt-2 pb-[env(safe-area-inset-bottom,0px)]">
+            <div className="text-center">
+              <p className="text-base font-semibold text-foreground">
+                ¿Eliminar a {deletingBarber?.name}?
+              </p>
+              <p className="text-sm text-muted mt-1">Esta acción no se puede deshacer.</p>
+            </div>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                if (!deletingBarber) return
+                try {
+                  await deleteBarberMutation.mutateAsync(deletingBarber.id)
+                  toast.success(`${deletingBarber.name} eliminado`)
+                  setDeletingBarber(null)
+                  if (isMobileDevice()) haptics.tap()
+                } catch {
+                  toast.error('Error al eliminar miembro')
+                }
+              }}
+              isLoading={deleteBarberMutation.isPending}
+              className="w-full h-11"
+            >
+              Eliminar Miembro
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
   )
 }

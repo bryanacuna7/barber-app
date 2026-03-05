@@ -1,13 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import {
   Settings,
   History,
   LogOut,
-  UserRound,
   PencilLine,
   Check,
   CreditCard,
@@ -45,9 +44,33 @@ export function TopBarProfileMenu() {
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const mounted = typeof window !== 'undefined'
+  const normalizedAvatarUrl = useMemo(() => {
+    if (typeof userAvatarUrl !== 'string') return undefined
+    const trimmed = userAvatarUrl.trim()
+    if (!trimmed) return undefined
+
+    const lowered = trimmed.toLowerCase()
+    if (lowered === 'null' || lowered === 'undefined') return undefined
+
+    return trimmed
+  }, [userAvatarUrl])
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | undefined>(undefined)
+  const showAvatarImage = Boolean(normalizedAvatarUrl) && failedAvatarUrl !== normalizedAvatarUrl
 
   const fallbackName = userName || userEmail?.split('@')[0] || 'Usuario'
   const accountHref = isOwner ? '/configuracion/general' : '/mi-dia/cuenta'
+  const avatarInitials = useMemo(() => {
+    const normalized = fallbackName.trim()
+    if (!normalized) return 'U'
+
+    const parts = normalized.split(/\s+/).filter(Boolean)
+    const initials = parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('')
+
+    return initials || 'U'
+  }, [fallbackName])
 
   const closeMenu = useCallback(() => setIsOpen(false), [])
 
@@ -330,25 +353,22 @@ export function TopBarProfileMenu() {
           isOpen && 'bg-zinc-100 dark:bg-zinc-800'
         )}
       >
-        {userAvatarUrl ? (
+        {showAvatarImage ? (
           <img
-            src={userAvatarUrl}
+            src={normalizedAvatarUrl}
             alt=""
             className="h-7 w-7 rounded-full object-cover"
             referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget
-              target.style.display = 'none'
-              const fallback = target.nextElementSibling as HTMLElement | null
-              if (fallback) fallback.style.display = 'flex'
-            }}
+            onError={() => setFailedAvatarUrl(normalizedAvatarUrl)}
           />
         ) : null}
         <div
           className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700"
-          style={{ display: userAvatarUrl ? 'none' : 'flex' }}
+          style={{ display: showAvatarImage ? 'none' : 'flex' }}
         >
-          <UserRound className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-300">
+            {avatarInitials}
+          </span>
         </div>
       </button>
 

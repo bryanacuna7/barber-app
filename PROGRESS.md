@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-03-05 (Session 200 — SwipeableRow Rewrite)
+- **Last Updated:** 2026-03-05 (Session 201 — Equipo + Servicios Mobile Polish)
 - **Branch:** `main`
-- **Version:** `0.9.28`
+- **Version:** `0.9.32`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -72,6 +72,25 @@
 ---
 
 ## Recent Sessions
+
+### Session 201: Equipo + Servicios Mobile Polish (2026-03-05)
+
+**Status:** COMPLETE. Mobile UX for Equipo and Servicios pages polished.
+
+**What was done:**
+
+- **Equipo decomposition:** Extracted `team-mobile-list.tsx`, `team-detail-sheet.tsx`, `team-invite-sheet.tsx` from monolithic barberos/page.tsx
+- **Compact delete sheets:** Both Equipo and Servicios now use bottom Sheet (not centered Modal) for delete confirmation on mobile
+- **Service form compact:** Mobile form redesigned — expandable description, horizontal category pills, side-by-side duration/price, no scroll needed
+- **Filter animation fix:** Removed per-item stagger animations (`initial/exit` with `delay: index * 0.04`) that caused cascade lag on filter changes. Container-level `listTransitionControls` handles transitions.
+- **Real booking counts:** `useServices` hook now fetches appointment counts for current month in parallel with services query. Services show actual reservations instead of always 0.
+- **Safe area padding:** Delete sheets in both pages use `pb-[env(safe-area-inset-bottom)]` for iPhone home indicator
+- **AnimatePresence removed from service list:** Filtering no longer triggers exit animations (slide-left) on filtered-out items
+
+**Files created (3):** `team-mobile-list.tsx`, `team-detail-sheet.tsx`, `team-invite-sheet.tsx`
+**Files modified (6):** `barberos/page.tsx`, `servicios/page.tsx`, `service-form-modal.tsx`, `service-mobile-card-list.tsx`, `useServices.ts`, `team-detail-sheet.tsx`
+
+---
 
 ### Session 200: SwipeableRow Rewrite — Spark Mail 4-Gesture Pattern (2026-03-05)
 

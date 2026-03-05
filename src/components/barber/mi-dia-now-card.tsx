@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Phone, MessageCircle, ChevronRight, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { haptics } from '@/lib/utils/mobile'
+import { useIsMobile } from '@/hooks/use-is-mobile'
+import { Button } from '@/components/ui/button'
 import { SlideToComplete } from './slide-to-complete'
 import { buildWhatsAppLink } from '@/lib/whatsapp/deep-link'
 import type { TodayAppointment } from '@/types/custom'
@@ -65,6 +67,7 @@ export function MiDiaNowCard({
 }: MiDiaNowCardProps) {
   const [elapsed, setElapsed] = useState('')
   const [elapsedMins, setElapsedMins] = useState(0)
+  const isMobile = useIsMobile(1024)
 
   const duration = appointment.duration_minutes || 30
   const isWalkIn = appointment.source === 'walk_in'
@@ -123,8 +126,9 @@ export function MiDiaNowCard({
             onFocusMode(appointment.id)
           }}
           whileTap={{ scale: 0.97 }}
+          whileHover={{ scale: 1.01 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="flex items-center gap-4 w-full text-left rounded-xl -mx-1 px-1 py-1"
+          className="flex items-center gap-4 w-full text-left rounded-xl -mx-1 px-1 py-1 lg:hover:bg-emerald-50/50 lg:dark:hover:bg-emerald-950/20 lg:cursor-pointer transition-colors"
           aria-label="Entrar en modo enfoque"
         >
           {/* Progress ring with timer inside */}
@@ -193,9 +197,20 @@ export function MiDiaNowCard({
           </div>
         )}
 
-        {/* Slide to complete */}
+        {/* Complete action: slide on mobile, button on desktop */}
         <div className="mt-3">
-          <SlideToComplete onComplete={() => onComplete(appointment.id)} disabled={isLoading} />
+          {isMobile ? (
+            <SlideToComplete onComplete={() => onComplete(appointment.id)} disabled={isLoading} />
+          ) : (
+            <Button
+              variant="success"
+              onClick={() => onComplete(appointment.id)}
+              disabled={isLoading}
+              className="w-full h-11"
+            >
+              Completar servicio
+            </Button>
+          )}
         </div>
 
         {/* No "No asistió" here — client is already being served */}

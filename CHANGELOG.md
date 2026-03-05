@@ -4,6 +4,19 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.32] - 2026-03-05
+
+### Nuevo
+
+- Las reservas de cada servicio ahora muestran datos reales del mes actual
+- Formulario de servicio compacto en mobile — nombre, descripcion expandible, precio y duracion sin necesidad de scroll
+- Confirmacion de eliminar ahora aparece como hoja inferior, no ventana centrada
+
+### Mejorado
+
+- Filtrar servicios por categoria se siente instantaneo, sin animaciones lentas
+- Las hojas de eliminar en equipo y servicios ahora respetan el area segura del iPhone
+
 ## [0.9.31] - 2026-03-05
 
 ### Nuevo

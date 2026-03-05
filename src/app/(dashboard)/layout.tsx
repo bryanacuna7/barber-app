@@ -29,6 +29,17 @@ const manifestVersion =
 const businessSelect =
   'id, name, slug, brand_primary_color, brand_secondary_color, logo_url, is_active, staff_permissions'
 
+function normalizeOptionalMetadataText(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+
+  const lowered = trimmed.toLowerCase()
+  if (lowered === 'null' || lowered === 'undefined') return undefined
+
+  return trimmed
+}
+
 type DashboardAuthContext = {
   user: { id: string; email?: string; user_metadata?: Record<string, unknown> } | null
   roleInfo: UserRoleInfo | null
@@ -273,13 +284,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
       userId={user.id}
       userEmail={user.email}
       userName={
-        (user.user_metadata?.full_name as string) ||
-        (user.user_metadata?.name as string) ||
+        normalizeOptionalMetadataText(user.user_metadata?.full_name) ||
+        normalizeOptionalMetadataText(user.user_metadata?.name) ||
         undefined
       }
       userAvatarUrl={
-        (user.user_metadata?.avatar_url as string) ||
-        (user.user_metadata?.picture as string) ||
+        normalizeOptionalMetadataText(user.user_metadata?.avatar_url) ||
+        normalizeOptionalMetadataText(user.user_metadata?.picture) ||
         undefined
       }
       userRole={roleInfo.role}

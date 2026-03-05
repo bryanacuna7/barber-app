@@ -184,7 +184,7 @@ export function MiDiaTimeline({
   let staggerOffset = 0
 
   return (
-    <div className={cn('space-y-5', className)} data-testid="mi-dia-timeline">
+    <div className={cn('space-y-5 lg:space-y-6', className)} data-testid="mi-dia-timeline">
       {/* Zone 1: NOW */}
       {zones.now && (
         <section>
@@ -386,7 +386,8 @@ export function MiDiaTimeline({
             'w-full flex items-center justify-center gap-2 py-3 px-4',
             'rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700',
             'text-sm font-medium text-muted',
-            'hover:bg-zinc-50 dark:hover:bg-zinc-900/50 active:scale-[0.98] transition-all'
+            'hover:bg-zinc-50 dark:hover:bg-zinc-900/50 active:scale-[0.98] transition-all',
+            'lg:hover:border-zinc-400 lg:dark:hover:border-zinc-600 lg:cursor-pointer'
           )}
           data-testid="walk-in-bottom-cta"
         >

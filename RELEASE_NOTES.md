@@ -8,14 +8,14 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.31
+## v0.9.32
 
 ### Nuevo
 
-- **Deslizar rediseñado** — El gesto de deslizar en citas ahora se siente fluido y natural. Deslizar corto muestra acciones, deslizar largo ejecuta al instante.
-- **Mi Día reorganizado** — Vista del barbero con tarjeta de cita actual, línea de tiempo por zonas horarias, y hoja de detalle al tocar una cita.
+- **Reservas reales por servicio** — Cada servicio muestra cuantas reservas tiene este mes, calculado desde las citas reales.
+- **Formulario compacto** — Crear o editar un servicio en mobile se ve todo sin scroll. Descripcion expandible con un tap.
 
 ### Mejorado
 
-- **Animaciones más suaves** — Las acciones de deslizar abren y cierran con movimiento más natural.
-- **Tocar para cerrar** — Si una fila está abierta, tocar el contenido la cierra sin activar nada.
+- **Filtros instantaneos** — Cambiar de categoria en servicios ahora responde al instante, sin animaciones lentas.
+- **Eliminar mejorado** — La confirmacion aparece como hoja inferior en mobile (equipo y servicios), con area segura para iPhone.

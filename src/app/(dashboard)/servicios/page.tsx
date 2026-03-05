@@ -3,17 +3,18 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
-import { Plus, Search, BarChart3 } from 'lucide-react'
+import { Plus, Search, BarChart3, X, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { Input } from '@/components/ui/input'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { AlertTriangle } from 'lucide-react'
 import { animations } from '@/lib/design-system'
 import { haptics, isMobileDevice } from '@/lib/utils/mobile'
 import { trackMobileEvent } from '@/lib/analytics/mobile'
-import { MOBILE_CANVAS_CLASS, MOBILE_PRIMARY_CTA_CLASS } from '@/lib/ui/mobile-contract'
+import { MOBILE_CANVAS_CLASS } from '@/lib/ui/mobile-contract'
 import {
   useServices,
   useCreateService,
@@ -64,6 +65,7 @@ function ServiciosContent() {
   const [editingService, setEditingService] = useState<{ id: string } | null>(null)
   const [deleteService, setDeleteService] = useState<MockService | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const isDesktop = useMediaQuery('(min-width: 1024px)')
 
   const [formData, setFormData] = useState<ServiceFormData>({
     name: '',
@@ -394,119 +396,150 @@ function ServiciosContent() {
         disabled={showForm || !!deleteService}
       >
         <div className={`${MOBILE_CANVAS_CLASS} pt-4 sm:px-0 lg:px-0 lg:pt-0 relative z-10`}>
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={animations.spring.default}
-            className="mb-6"
-          >
-            <DashboardPageHeader
-              title={headerMeta.title}
-              subtitle={`${headerMeta.subtitle} · ${totalServices} servicios`}
-              actions={
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    className="hidden lg:flex items-center gap-2 min-h-[44px] h-10 px-3"
-                    aria-label={sidebarOpen ? 'Ocultar insights' : 'Ver insights'}
+          {/* ── Desktop Header ── */}
+          <DashboardPageHeader
+            title={headerMeta.title}
+            subtitle={`${headerMeta.subtitle} · ${totalServices} servicios`}
+            actions={
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="hidden lg:flex items-center gap-2 min-h-[44px] h-10 px-3"
+                  aria-label={sidebarOpen ? 'Ocultar insights' : 'Ver insights'}
+                >
+                  <BarChart3
+                    className={`h-4 w-4 transition-colors ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
+                  />
+                  <span
+                    className={`text-sm ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
                   >
-                    <BarChart3
-                      className={`h-4 w-4 transition-colors ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
-                    />
-                    <span
-                      className={`text-sm ${sidebarOpen ? 'text-violet-600 dark:text-violet-400' : 'text-muted'}`}
-                    >
-                      Insights
-                    </span>
-                  </Button>
-                  <Button
-                    variant="gradient"
-                    onClick={() => openCreateServiceForm('desktop')}
-                    className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
-                  >
-                    <Plus className="h-5 w-5 sm:mr-2" />
-                    <span className="hidden sm:inline">Nuevo Servicio</span>
-                  </Button>
-                </div>
-              }
-            />
+                    Insights
+                  </span>
+                </Button>
+                <Button
+                  variant="gradient"
+                  onClick={() => openCreateServiceForm('desktop')}
+                  className="shrink-0 min-w-[44px] min-h-[44px] h-10 border-0"
+                >
+                  <Plus className="h-5 w-5 sm:mr-2" />
+                  <span className="hidden sm:inline">Nuevo Servicio</span>
+                </Button>
+              </div>
+            }
+          />
 
-            <div className="mt-3 lg:hidden">
-              <Button
-                variant="gradient"
+          {/* ── Mobile Header (matches Equipo pattern) ── */}
+          <div className="lg:hidden space-y-3">
+            {/* Search bar row: [Search...] [+ circle] */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-zinc-400 dark:text-zinc-500 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Buscar servicios..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-11 w-full rounded-xl bg-zinc-100/70 dark:bg-white/[0.06] pl-10 pr-9 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none transition-colors focus:bg-zinc-100 dark:focus:bg-white/[0.09] focus:ring-1 focus:ring-zinc-300/60 dark:focus:ring-zinc-600/50"
+                  aria-label="Buscar servicios"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <button
                 onClick={() => openCreateServiceForm('mobile')}
-                className={`${MOBILE_PRIMARY_CTA_CLASS} !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100`}
+                aria-label="Nuevo servicio"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shrink-0 active:scale-95 transition-transform"
               >
-                <Plus className="h-5 w-5 mr-2" />
-                <span>Nuevo Servicio</span>
-              </Button>
+                <Plus className="h-4 w-4" strokeWidth={2.5} />
+              </button>
             </div>
-          </motion.div>
+
+            {/* Filter pills — sticky */}
+            <div className="sticky top-0 z-20 -mx-4 px-4 py-1.5 backdrop-blur-xl bg-white/80 dark:bg-zinc-950/80 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {(['all', ...Object.keys(CATEGORY_LABELS)] as CategoryFilter[]).map((filter) => {
+                const isActive = selectedCategory === filter
+                const label =
+                  filter === 'all' ? 'Todas' : CATEGORY_LABELS[filter as ServiceCategory]
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => {
+                      setSelectedCategory(filter)
+                      if (isMobileDevice()) haptics.selection()
+                    }}
+                    className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 transition-colors duration-150 ${
+                      isActive
+                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
+                        : 'text-zinc-500 dark:text-zinc-400 bg-zinc-100/70 dark:bg-white/[0.06]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {/* Guide Tip */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...animations.spring.default, delay: 0.05 }}
-          >
-            <GuideContextualTip
-              tipId="servicios-duration"
-              title="La duración importa"
-              description="La duración de cada servicio determina los slots disponibles para reservas online. Configurala lo más precisa posible."
-              linkHref="/guia#servicios"
-              className="mb-4 sm:mb-5"
-            />
-          </motion.div>
+          <GuideContextualTip
+            tipId="servicios-duration"
+            title="La duración importa"
+            description="La duración de cada servicio determina los slots disponibles para reservas online. Configurala lo más precisa posible."
+            linkHref="/guia#servicios"
+            className="mb-4 sm:mb-5"
+          />
 
           {/* Main Layout: Content + Sidebar */}
           <div className="flex gap-6">
             <div className="flex-1 min-w-0">
-              {/* Toolbar */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...animations.spring.default, delay: 0.1 }}
-                className="relative overflow-hidden mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:rounded-[22px] sm:border sm:border-zinc-200/70 sm:dark:border-zinc-800/80 sm:bg-white/60 sm:dark:bg-white/[0.03] sm:p-3 sm:backdrop-blur-xl sm:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] sm:dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)]"
-              >
-                <div className="pointer-events-none absolute inset-x-4 top-0 hidden h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent lg:block" />
-                <div className="w-full sm:flex-1 sm:max-w-md">
-                  <Input
-                    type="text"
-                    placeholder="Buscar servicios..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    leftIcon={<Search className="h-4 w-4" />}
-                    className="h-11 border border-zinc-200/70 dark:border-zinc-800/80 bg-white/65 dark:bg-white/[0.04] focus:ring-violet-400/45 focus:border-violet-400/45"
-                  />
+              {/* Desktop Toolbar */}
+              <div className="hidden lg:block relative overflow-hidden mb-4 rounded-[22px] border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-white/[0.03] p-3 backdrop-blur-xl shadow-[0_1px_2px_rgba(16,24,40,0.05),0_1px_3px_rgba(16,24,40,0.04)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.28)]">
+                <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1 max-w-md">
+                    <Input
+                      type="text"
+                      placeholder="Buscar servicios..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      leftIcon={<Search className="h-4 w-4" />}
+                      className="h-11 border border-zinc-200/70 dark:border-zinc-800/80 bg-white/65 dark:bg-white/[0.04] focus:ring-violet-400/45 focus:border-violet-400/45"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 overflow-x-auto">
+                    <Button
+                      variant={selectedCategory === 'all' ? 'primary' : 'ghost'}
+                      onClick={() => setSelectedCategory('all')}
+                      className="h-9 shrink-0 rounded-full px-3 text-xs"
+                    >
+                      Todas
+                    </Button>
+                    {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => {
+                      const categoryColor = getCategoryColor(category)
+                      const isActive = selectedCategory === category
+                      return (
+                        <Button
+                          key={category}
+                          variant={isActive ? 'primary' : 'ghost'}
+                          onClick={() => setSelectedCategory(category)}
+                          className={`h-9 shrink-0 rounded-full px-3 text-xs ${
+                            isActive ? '' : `${categoryColor.text} ${categoryColor.bg}`
+                          }`}
+                        >
+                          {CATEGORY_LABELS[category]}
+                        </Button>
+                      )
+                    })}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-                  <Button
-                    variant={selectedCategory === 'all' ? 'primary' : 'ghost'}
-                    onClick={() => setSelectedCategory('all')}
-                    className="h-9 shrink-0 rounded-full px-3 text-xs"
-                  >
-                    Todas
-                  </Button>
-                  {(Object.keys(CATEGORY_LABELS) as ServiceCategory[]).map((category) => {
-                    const categoryColor = getCategoryColor(category)
-                    const isActive = selectedCategory === category
-                    return (
-                      <Button
-                        key={category}
-                        variant={isActive ? 'primary' : 'ghost'}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`h-9 shrink-0 rounded-full px-3 text-xs ${
-                          isActive ? '' : `${categoryColor.text} ${categoryColor.bg}`
-                        }`}
-                      >
-                        {CATEGORY_LABELS[category]}
-                      </Button>
-                    )
-                  })}
-                </div>
-              </motion.div>
+              </div>
 
               {/* Mobile Card View */}
               {sourceServices.length === 0 ? (
@@ -585,47 +618,76 @@ function ServiciosContent() {
           onCategoryChange={handleCategoryChange}
         />
 
-        {/* Delete Confirmation Modal */}
-        <Modal
-          isOpen={!!deleteService}
-          onClose={() => setDeleteService(null)}
-          title="Eliminar Servicio"
-        >
-          <div className="space-y-5">
-            <div className="flex items-start gap-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={animations.spring.snappy}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30"
-              >
-                <AlertTriangle className="h-7 w-7 text-red-600 dark:text-red-400" />
-              </motion.div>
-              <div>
-                <p className="text-lg text-foreground">
-                  ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
-                </p>
-                <p className="mt-2 text-base text-muted">
-                  Esta acción no se puede deshacer. Las citas existentes con este servicio no se
-                  verán afectadas.
-                </p>
+        {/* Delete Confirmation — Desktop: Modal, Mobile: Sheet */}
+        {isDesktop ? (
+          <Modal
+            isOpen={!!deleteService}
+            onClose={() => setDeleteService(null)}
+            title="Eliminar Servicio"
+          >
+            <div className="space-y-5">
+              <div className="flex items-start gap-4">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={animations.spring.snappy}
+                  className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30"
+                >
+                  <AlertTriangle className="h-7 w-7 text-red-600 dark:text-red-400" />
+                </motion.div>
+                <div>
+                  <p className="text-lg text-foreground">
+                    ¿Estás seguro de que deseas eliminar <strong>{deleteService?.name}</strong>?
+                  </p>
+                  <p className="mt-2 text-base text-muted">
+                    Esta acción no se puede deshacer. Las citas existentes con este servicio no se
+                    verán afectadas.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setDeleteService(null)} className="h-11">
+                  Cancelar
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteConfirm}
+                  isLoading={deleteServiceMutation.isPending}
+                  className="h-11"
+                >
+                  Eliminar
+                </Button>
               </div>
             </div>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setDeleteService(null)} className="h-11">
-                Cancelar
-              </Button>
-              <Button
-                variant="danger"
-                onClick={handleDeleteConfirm}
-                isLoading={deleteServiceMutation.isPending}
-                className="h-11"
-              >
-                Eliminar
-              </Button>
-            </div>
-          </div>
-        </Modal>
+          </Modal>
+        ) : (
+          <Sheet
+            open={!!deleteService}
+            onOpenChange={(open) => {
+              if (!open) setDeleteService(null)
+            }}
+          >
+            <SheetContent side="bottom">
+              <SheetClose onClose={() => setDeleteService(null)} />
+              <div className="space-y-4 pt-2 pb-[env(safe-area-inset-bottom,0px)]">
+                <div className="text-center">
+                  <p className="text-base font-semibold text-foreground">
+                    ¿Eliminar {deleteService?.name}?
+                  </p>
+                  <p className="text-sm text-muted mt-1">Esta acción no se puede deshacer.</p>
+                </div>
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteConfirm}
+                  isLoading={deleteServiceMutation.isPending}
+                  className="w-full h-11"
+                >
+                  Eliminar Servicio
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </PullToRefresh>
     </div>
   )

@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
+function normalizeOptionalText(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  if (!trimmed) return undefined
+
+  const lowered = trimmed.toLowerCase()
+  if (lowered === 'null' || lowered === 'undefined') return undefined
+
+  return trimmed
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
@@ -76,6 +87,44 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (user) {
+    // Sync Google profile data into user_metadata when local metadata is missing.
+    // This avoids broken avatar placeholders for accounts originally created with email/password.
+    const googleIdentity = user.identities?.find((identity) => identity.provider === 'google')
+    const identityData = (googleIdentity?.identity_data ?? {}) as Record<string, unknown>
+
+    const googleAvatar =
+      normalizeOptionalText(identityData.avatar_url) || normalizeOptionalText(identityData.picture)
+    const googleName =
+      normalizeOptionalText(identityData.full_name) || normalizeOptionalText(identityData.name)
+
+    const currentAvatar =
+      normalizeOptionalText(user.user_metadata?.avatar_url) ||
+      normalizeOptionalText(user.user_metadata?.picture)
+    const currentName =
+      normalizeOptionalText(user.user_metadata?.full_name) ||
+      normalizeOptionalText(user.user_metadata?.name)
+
+    const metadataPatch: Record<string, string> = {}
+    if (!currentAvatar && googleAvatar) {
+      metadataPatch.avatar_url = googleAvatar
+      metadataPatch.picture = googleAvatar
+    }
+    if (!currentName && googleName) {
+      metadataPatch.full_name = googleName
+      metadataPatch.name = googleName
+    }
+
+    if (Object.keys(metadataPatch).length > 0) {
+      await supabase.auth
+        .updateUser({
+          data: {
+            ...(user.user_metadata ?? {}),
+            ...metadataPatch,
+          },
+        })
+        .catch(() => {})
+    }
+
     const { detectUserRole } = await import('@/lib/auth/roles')
     const roleInfo = await detectUserRole(supabase, user.id)
     const destination = roleInfo?.role === 'client' ? '/mi-cuenta' : '/dashboard'

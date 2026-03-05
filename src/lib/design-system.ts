@@ -119,7 +119,7 @@ export const animations = {
     gentle: { type: 'spring', stiffness: 120, damping: 14 },
     default: { type: 'spring', stiffness: 300, damping: 25 },
     snappy: { type: 'spring', stiffness: 400, damping: 30 },
-    sheet: { type: 'spring', stiffness: 300, damping: 30 },
+    sheet: { type: 'spring', stiffness: 380, damping: 30, mass: 0.8 },
     bouncy: { type: 'spring', stiffness: 300, damping: 10 },
     card: { type: 'spring', stiffness: 400, damping: 17 },
     swipeClose: { type: 'spring', stiffness: 340, damping: 32, mass: 0.8 },
