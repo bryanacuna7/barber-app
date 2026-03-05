@@ -1,8 +1,9 @@
 # ROADMAP - BarberApp
 
-**Version:** 0.9.7
-**Updated:** 2026-02-23 (Session 182)
+**Version:** 0.9.28
+**Updated:** 2026-03-05 (Session 200)
 **Source of Truth:** This is the ONLY roadmap document. All others are archived.
+**Philosophy:** [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md)
 
 ---
 
@@ -16,6 +17,7 @@ Everything below is DONE and in production on `main`:
 - Gamification (Client Loyalty + Barber Leaderboard + SaaS Referral)
 - PWA mobile-first, installable, auto-update (iOS fix), custom barber pole icon
 - Subscriptions: Basic ($12/mo) + Pro ($29/mo), SINPE payment, trial system
+- Custom domain: `nexocr.pro` + wildcard subdomains (`slug.nexocr.pro`)
 
 ### Security & Infrastructure
 
@@ -25,124 +27,126 @@ Everything below is DONE and in production on `main`:
 - Pino structured logging, Sentry error tracking, Redis rate limiting
 - Supabase egress optimization (migrated project, caching, selective queries)
 - TypeScript strict mode (0 errors), ESLint (0 errors)
+- Notification Orchestrator (centralized send with dedup + audit logging)
+- Barber blocks (agenda blocks / vacations / breaks)
+- CSV exports (clients + appointments)
+- Per-barber custom permissions
+- Account claim token (IDOR security fix)
+- E2E audit: 12/13 findings resolved
 
-### UI/UX
-
-- All 5 dashboard pages modernized (squash-merged 138 commits)
-- Color Audit (3 phases) — brand tokens, gradient unification, data viz theming
-- Motion Tokens — unified design system for animations
-- Desktop Premium — command palette (Cmd+K), sidebar, hover actions, skeletons
-- 9 Olas of mobile UX premium simplification
-- Configuracion decomposed into 7 Next.js subroutes
-
-### Customer Discovery Features (Sessions 152-182)
+### Customer Discovery Features (Sessions 152-186)
 
 - **Duration Tracking** — Iniciar > Timer > Completar > Pago (3 taps max)
-- **Smart Duration (P1)** — ML-style duration prediction, per-business toggle
+- **Smart Duration** — ML-style 5-level cascade prediction, per-business toggle
+- **Gap-Based Slots** — Occupied windows > gaps > precise slots with tail + dedup
 - **Smart Slots + Descuentos** — Demand heatmap, promo rules config, booking discounts
 - **Client Cancel/Reschedule** — From tracking page, configurable policy, auto-notifications
-- **SINPE Advance Payment** — Optional prepayment with discount, proof upload/WhatsApp, owner verification
+- **SINPE Advance Payment** — Optional prepayment with discount, proof upload/WhatsApp
 - **Payment Methods** — Owner-configurable (Efectivo/SINPE/Tarjeta), smart completion flow
 - **Push Notifications** — VAPID + SW + 4 event triggers
 - **WhatsApp Deep Links** — "Llega Antes" CTA, pre-filled messages
 - **Client Dashboard** — `/mi-cuenta` with home, profile, loyalty, multi-business
 - **Public Tracking** — Uber-style `/track/[token]` (5 states), cron reminders (24h + 1h)
 - **Invite Barbers** — Email invitations with credentials
+- **In-App Guide** — 10 sections, search, TOC, contextual tips on 5 pages
+
+### UI/UX (Sessions 133-199)
+
+- 9 Olas of mobile UX premium simplification
+- Desktop Premium — command palette (Cmd+K), sidebar, hover actions, skeletons
+- Color Audit (3 phases) — brand tokens, gradient unification, data viz theming
+- Motion tokens — unified design system for animations
+- Animation audit — 14 items resolved, zero `transition-all` remaining
+- Configuracion decomposed into 7 Next.js subroutes
+- God-component splits: clientes, citas, servicios (5,368 > 1,682 lines)
+- Mobile 2026 Redesign (5 waves) — Mercury dashboard, TimeTree calendar, Revolut feed, sparklines, Uber account menu
+- Top-tier mobile polish — long-press context menu, swipe complete, status bars, header compression, citas badge, Next Up chip
+- Citas mobile polish — KPI demotion, 7 filters, segmented control, bottom sheets, dynamic time blocks
+- Clientes mobile polish — iOS Contacts layout, alphabet rail, swipe actions, detail sheets
 
 ### Admin & Ops
 
 - Super Admin Panel (6 pages + 11 API routes)
-- Discord Deploys (GitHub Action sends release notes on push to main)
+- Discord deploys (GitHub Action sends release notes on push to main)
 
 ---
 
-## Paused: UX Polish (from Mobile UX Audit)
+## Next Up: Rescued from Dashboard UX Playbook
 
-Items from `docs/reference/MOBILE_UX_AUDIT.md`, paused during customer discovery phase.
+High-value features from the archived FEATURES_PLAYBOOK.md that solve real user problems.
 
-### P0 — Must Fix
+### Tab Title + Favicon Badge
 
-| #   | Item                             | Status  | Details                                                               |
-| --- | -------------------------------- | ------- | --------------------------------------------------------------------- |
-| 1   | **Button migration**             | Pending | citas: ~22 manual `<button>` > `<Button>`, barberos: ~7 manual        |
-| 2   | **Charts mobile-first** (Gate E) | FAIL    | Touch-first redesign, readable at 360/375/390, tactile interaction    |
-| 3   | **Card padre / double inset**    | Pending | Remove wrapper containers in citas/servicios that create "boxed" feel |
-| 4   | **Create Modal Contract**        | Pending | Unify Nueva Cita / Nuevo Cliente / Nuevo Servicio visual parity       |
+**Problem:** Owner with 15 browser tabs can't see appointment count without switching.
+**Solution:** Dynamic `document.title` per page + canvas-based favicon with numeric badge.
+**Effort:** Small (2 hooks + 1 wrapper component). **Impact:** High for desktop users.
 
-### P1 — Should Fix
+### Saved Filters (Presets)
 
-| #   | Item                                | Status  | Details                                                    |
-| --- | ----------------------------------- | ------- | ---------------------------------------------------------- |
-| 5   | **Copy UX Spanish audit** (Gate F)  | Pending | Eliminate ES/EN mix, consistent tone across modules        |
-| 6   | **Header CTA Contract**             | Pending | Same position/scale/hierarchy for + button across modules  |
-| 7   | **360px + dark mode QA**            | Pending | Full visual verification at smallest viewport + dark theme |
-| 8   | **Action Contract standardization** | Pending | Minimize manual `button` in core flows, unified action API |
-| 9   | **Typography Contract**             | Pending | Converge all active screens to fixed semantic scale        |
-| 10  | **"Ver todas" CTA no-wrap**         | Pending | Fix line break on small viewports in dashboard             |
+**Problem:** Every day the barber opens the app and filters the same thing manually.
+**Solution:** Persistent filter presets per page (localStorage). Built-in presets (VIP, En riesgo, Pendientes hoy) + user-created custom presets. Chip bar UI.
+**Effort:** Medium. **Impact:** Daily time savings.
 
-### P2 — Nice to Have
+### Undo Toast (Delayed Commit)
 
-| #   | Item                             | Status  | Details                                                   |
-| --- | -------------------------------- | ------- | --------------------------------------------------------- |
-| 11  | **Interaction OS**               | Pending | Unified motion/gesture/feedback system across all modules |
-| 12  | **Admin Context Switch**         | Pending | Explicit mobile toggle between Business and Super Admin   |
-| 13  | **Header contextual** (Option B) | Pending | Replace global branding header with task-focused headers  |
-| 14  | **Focus ring colors**            | Low     | 6 inputs still use `focus:ring-violet-400`                |
-| 15  | **Safe Area matrix**             | Pending | Hardware testing on notch/dynamic island/cutout devices   |
+**Problem:** "Are you sure?" confirmation dialogs add friction to every destructive action.
+**Solution:** Gmail/Linear pattern — execute immediately in UI, show 5s undo toast, commit to server only after timeout. Pause-on-hover.
+**Effort:** Medium. **Impact:** Faster workflows, less anxiety.
 
-### Release Gates (from Mobile UX Audit)
+**Design patterns to preserve:**
 
-| Gate | Description               | Status                  |
-| ---- | ------------------------- | ----------------------- |
-| A    | Consistencia estructural  | PARCIAL                 |
-| B    | Tipografia y acciones     | PARCIAL ALTA            |
-| C    | Interaccion               | PARCIAL ALTA            |
-| D    | Performance perceptual    | PENDIENTE DE MEDICION   |
-| E    | Data Viz mobile           | **FAIL**                |
-| F    | Copy UX                   | PENDIENTE DE VALIDACION |
-| G    | Accesibilidad operacional | PENDIENTE DE PRUEBAS    |
-| H    | Safe Area / Cutout        | PARCIAL                 |
-| I    | Formularios en overlays   | PARCIAL ALTA            |
+- `delayed-commit` vs `immediate-compensate` vs `immediate` execution models
+- Rollback policy by HTTP status (409=conflict, 403=perms, 404=gone, 500=retry)
+- localStorage versioned keys (`_v1` suffix) with try/catch + fallback
+
+### Optimistic Updates
+
+**Problem:** Changing appointment status waits for server response. Feels sluggish on slow Costa Rican mobile networks.
+**Solution:** Update UI immediately, rollback on error. Uses React Query `onMutate`/`onError`/`onSettled`.
+**Effort:** Medium. **Impact:** Perceived performance improvement.
 
 ---
 
-## Next Up: Remaining Features
+## Remaining UX Polish
 
-Features not yet started, ordered by business priority.
+From `docs/reference/MOBILE_UX_AUDIT.md`, still pending:
+
+| #   | Item                               | Priority | Notes                                            |
+| --- | ---------------------------------- | -------- | ------------------------------------------------ |
+| 1   | Button migration (~30 raw buttons) | P0       | Dashboard pages still have manual `<button>`     |
+| 2   | Create Modal Contract              | P1       | Unify Nueva Cita/Cliente/Servicio visual parity  |
+| 3   | 360px + dark mode QA               | P1       | Full visual verification at smallest viewport    |
+| 4   | Typography Contract                | P1       | Converge screens to fixed semantic scale         |
+| 5   | Focus ring colors                  | P2       | 6 inputs still use `focus:ring-violet-400`       |
+| 6   | Safe Area matrix                   | P2       | Hardware testing on notch/dynamic island devices |
+
+---
+
+## Remaining Features
 
 ### Tier 1 — High Priority
 
-| Feature                                      | ROI                   | Notes                                               |
-| -------------------------------------------- | --------------------- | --------------------------------------------------- |
-| **Calendar mobile refinement**               | Better field staff UX | Week view swipeable days, Month view dot indicators |
-| **Settings search + progressive disclosure** | 10x faster settings   | Fuse.js fuzzy search, Cmd+K integration             |
-| **Navigation accessibility**                 | WCAG compliance       | Focus rings, skip links, aria-labels                |
-| **E2E test alignment**                       | Release confidence    | Fix P0 findings from AUDITORIA_E2E_COMPLETA.md      |
+| Feature                                      | ROI                 | Notes                                        |
+| -------------------------------------------- | ------------------- | -------------------------------------------- |
+| **Settings search + progressive disclosure** | 10x faster settings | Fuse.js fuzzy search, Cmd+K integration      |
+| **Navigation accessibility**                 | WCAG compliance     | Focus rings, skip links, aria-labels         |
+| **Dashboard detail sheets migration**        | Consistency         | Apply Session 198 principles to `/dashboard` |
+| **Mi Dia detail views migration**            | Consistency         | Timeline detail views need sheet treatment   |
 
 ### Tier 2 — Medium Priority
 
-| Feature                    | ROI              | Notes                                                 |
-| -------------------------- | ---------------- | ----------------------------------------------------- |
-| **Business types + Kash**  | Multi-vertical   | Support beyond barber shops + Kash payments           |
-| **Notification hardening** | Delivery quality | Orchestrator unico, dedup, retries, trazabilidad      |
-| **Granular permissions**   | Enterprise       | Per-barber permission toggles (0C from customer plan) |
-| **Agenda blocks**          | Operational      | Break/vacation blocking without fake appointments     |
+| Feature                      | ROI            | Notes                                       |
+| ---------------------------- | -------------- | ------------------------------------------- |
+| **Business types + Kash**    | Multi-vertical | Support beyond barber shops + Kash payments |
+| **Card.tsx evolution**       | DX             | Add Card.Button, Card.Link sub-components   |
+| **Semantic token migration** | Consistency    | ~315 hardcoded color occurrences            |
 
-### Tier 3 — Lower Priority
-
-| Feature                    | ROI          | Notes                                         |
-| -------------------------- | ------------ | --------------------------------------------- |
-| **Extended test coverage** | Code quality | From current coverage to comprehensive suite  |
-| **CSV exports**            | Operational  | Basic client/appointment data export          |
-| **appointment_source**     | Analytics    | Track origin (public, walk-in, owner, barber) |
-
-### Tier 4 — Strategic
+### Tier 3 — Strategic
 
 | Feature                         | ROI            | Notes                                        |
 | ------------------------------- | -------------- | -------------------------------------------- |
 | **Complete rebranding**         | Multi-vertical | barber > staff migration throughout codebase |
 | **Performance optimizations**   | Scale          | Redis caching, CDN, advanced optimizations   |
-| **Security Phase 2**            | Hardening      | Advanced threat protection                   |
 | **Accessibility certification** | Compliance     | WCAG AA full certification                   |
 | **Public API + integrations**   | Platform play  | REST API, Zapier, webhooks                   |
 
@@ -180,39 +184,30 @@ The 12 non-negotiable contracts from `docs/reference/MOBILE_UX_AUDIT.md`:
 
 ## Archived Documents
 
-| Document                                               | Reason                                           |
-| ------------------------------------------------------ | ------------------------------------------------ |
-| `docs/archive/P1_DYNAMIC_DURATION_SCHEDULING_PLAN.md`  | All phases mostly complete (Sessions 178-182)    |
-| `docs/archive/PLAN_CUSTOMER_DISCOVERY.md`              | Features 0-5 implemented (Sessions 152-182)      |
-| `docs/planning/MVP_ROADMAP.md`                         | MVP scope exceeded; all items done or superseded |
-| `docs/planning/POST_MVP_ROADMAP.md`                    | Consolidated into this file                      |
-| `docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md`        | Outdated; references completed work as pending   |
-| `docs/planning/implementation-v2.5.md`                 | Explicitly deprecated since Session 75           |
-| `docs/ui-ux-redesign/UI_UX_REDESIGN_ROADMAP.md`        | Fully implemented and merged                     |
-| `docs/ui-ux-redesign/FRONTEND_MODERNIZATION_PLAN.md`   | Fully implemented                                |
-| `docs/ui-ux-redesign/DEMOS_REGISTRY.md`                | Historical reference                             |
-| `docs/ui-ux-redesign/DESIGN_AUDIT_ALL_DEMOS.md`        | Historical reference                             |
-| `docs/planning/CITAS_PAGE_SIMPLIFICATION.md`           | Superseded by UI/UX redesign                     |
-| `docs/planning/MI_DIA_CHECKLIST.md`                    | Historical                                       |
-| `docs/planning/MI_DIA_IMPLEMENTATION.md`               | Historical                                       |
-| `docs/planning/QUICK_WINS_IMPLEMENTED.md`              | Already done                                     |
-| `docs/planning/REFACTORING_SESSION_SUMMARY.md`         | Historical                                       |
-| `docs/planning/VERBOSITY_AUDIT_REPORT.md`              | Historical                                       |
-| `docs/planning/ARCHITECTURE_MODERNIZATION_ANALYSIS.md` | Historical                                       |
-| `color-audit.md`                                       | All 3 phases complete                            |
+| Document                                                      | Reason                                                                   |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `docs/archive/2026-03/FEATURES_PLAYBOOK.md`                   | ~85% superseded by organic evolution; 4 features rescued to this roadmap |
+| `docs/archive/2026-02/P1_DYNAMIC_DURATION_SCHEDULING_PLAN.md` | All phases complete (Sessions 178-186)                                   |
+| `docs/archive/2026-02/PLAN_CUSTOMER_DISCOVERY.md`             | Features 0-5 implemented (Sessions 152-182)                              |
+| `docs/archive/2026-02/color-audit.md`                         | All 3 phases complete                                                    |
+| `docs/planning/MVP_ROADMAP.md`                                | MVP scope exceeded                                                       |
+| `docs/planning/POST_MVP_ROADMAP.md`                           | Consolidated into this file                                              |
+| `docs/planning/IMPLEMENTATION_ROADMAP_FINAL.md`               | Outdated                                                                 |
+| `docs/planning/implementation-v2.5.md`                        | Deprecated since Session 75                                              |
+| `docs/ui-ux-redesign/UI_UX_REDESIGN_ROADMAP.md`               | Fully implemented                                                        |
+| `docs/ui-ux-redesign/FRONTEND_MODERNIZATION_PLAN.md`          | Fully implemented                                                        |
 
 **Documents that remain active:**
 
 - `PROGRESS.md` — Session state and history
-- `docs/reference/MOBILE_UX_AUDIT.md` — UX contracts and release gates
-- `AUDITORIA_E2E_COMPLETA.md` — E2E test findings and fixes needed
 - `ROADMAP.md` — This file (single source of truth for what's next)
 - `DATABASE_SCHEMA.md` — Database structure
 - `DECISIONS.md` — Architectural decisions
 - `GUARDRAILS.md` — Non-negotiable behavior rules
+- `docs/PHILOSOPHY.md` — Product philosophy and principles
 - `docs/reference/*` — Technical reference docs
 - `docs/security/*` — Security documentation
 
 ---
 
-**Last Updated:** Session 182 (2026-02-23)
+**Last Updated:** Session 200 (2026-03-05)
