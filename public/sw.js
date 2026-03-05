@@ -96,8 +96,7 @@ self.addEventListener('fetch', (event) => {
   // (from a previous client-side navigation) as the HTML response,
   // which would break iOS PWA standalone mode on all pages.
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request))
-    return
+    return // Let browser handle natively — calling respondWith breaks iOS standalone
   }
 
   // Never cache manifests; force fresh network fetch for PWA metadata updates

@@ -4,6 +4,12 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.29] - 2026-03-04
+
+### Arreglado
+
+- La app se muestra correctamente en pantalla completa (standalone) en todas las páginas, no solo en el dashboard
+
 ## [0.9.28] - 2026-03-04
 
 ### Nuevo
