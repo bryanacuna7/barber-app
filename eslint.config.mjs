@@ -30,6 +30,16 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/ban-ts-comment': 'off', // Allow @ts-nocheck temporarily
       '@typescript-eslint/no-explicit-any': 'warn', // Downgrade to warning
       '@typescript-eslint/no-unused-vars': 'warn', // Downgrade to warning
+      // Prevent naive Date construction from template literals (timezone bugs).
+      // Use localDateTimeToUtcIso() or anchorDateToNoon() from @/lib/utils/timezone.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'NewExpression[callee.name="Date"][arguments.0.type="TemplateLiteral"]',
+          message:
+            'Do not use new Date(`...`) with template literals — it causes timezone bugs. Use localDateTimeToUtcIso() for persistence or anchorDateToNoon() for day-only logic from @/lib/utils/timezone.',
+        },
+      ],
     },
   },
   // Relax React hooks rules for components (valid edge cases)

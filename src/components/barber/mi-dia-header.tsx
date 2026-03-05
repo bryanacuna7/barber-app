@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { Calendar, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { anchorDateToNoon } from '@/lib/utils/timezone'
 
 interface MiDiaHeaderProps {
   barberName: string
@@ -25,9 +26,7 @@ interface MiDiaHeaderProps {
  */
 export function MiDiaHeader({ barberName, date, stats, lastUpdated, className }: MiDiaHeaderProps) {
   const formatDate = (dateString: string) => {
-    // Append T12:00:00 to avoid UTC midnight timezone shift
-    // "2026-02-09" parsed as UTC → in CR (UTC-6) becomes Feb 8 at 6PM
-    const dateObj = new Date(`${dateString}T12:00:00`)
+    const dateObj = anchorDateToNoon(dateString)
     return new Intl.DateTimeFormat('es-CR', {
       weekday: 'long',
       day: 'numeric',

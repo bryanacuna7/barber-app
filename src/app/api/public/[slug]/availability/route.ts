@@ -7,6 +7,7 @@ import { evaluatePromo } from '@/lib/promo-engine'
 import type { OperatingHours } from '@/types'
 import type { PromoRule } from '@/types/promo'
 import type { SlotDiscount, EnrichedTimeSlot } from '@/types/api'
+import { anchorDateToNoon } from '@/lib/utils/timezone'
 
 type BusinessAvailabilityConfig = {
   id: string
@@ -37,9 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
     return NextResponse.json({ error: 'date and service_id are required' }, { status: 400 })
   }
 
-  // Append T12:00:00 to anchor in local day — plain "YYYY-MM-DD" creates midnight UTC
-  // which shifts back one day in UTC-6 (Costa Rica).
-  const date = new Date(dateStr + 'T12:00:00')
+  const date = anchorDateToNoon(dateStr)
   if (isNaN(date.getTime())) {
     return NextResponse.json({ error: 'Invalid date format' }, { status: 400 })
   }

@@ -1,5 +1,6 @@
 import { CalendarDays, Package } from 'lucide-react'
 import { getAppVersion, getChangelogReleases } from '@/lib/changelog'
+import { anchorDateToNoon } from '@/lib/utils/timezone'
 
 const dateFormatter = new Intl.DateTimeFormat('es-ES', {
   year: 'numeric',
@@ -12,7 +13,7 @@ function formatReleaseDate(date: string | null): string {
     return 'Sin fecha'
   }
 
-  const parsed = new Date(`${date}T00:00:00`)
+  const parsed = anchorDateToNoon(date)
   if (Number.isNaN(parsed.getTime())) {
     return date
   }

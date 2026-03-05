@@ -8,8 +8,8 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.29
+## v0.9.30
 
 ### Arreglado
 
-- **Pantalla completa en todas las páginas** — Antes, solo el dashboard se mostraba en modo app completa al abrir desde la pantalla de inicio. Ahora todas las secciones (citas, clientes, servicios, etc.) se ven correctamente sin barra de Safari.
+- **Hora correcta en citas** — Las citas se guardaban con la hora desfasada por zona horaria. Ahora siempre se usa la hora de Costa Rica correctamente.

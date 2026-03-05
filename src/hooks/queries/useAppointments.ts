@@ -10,7 +10,7 @@ import { format, startOfDay, endOfDay } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import { queryKeys, invalidateQueries } from '@/lib/react-query/config'
 import { adaptAppointments, calculateDayStats, getMiDiaQuery } from '@/lib/adapters/appointments'
-import { normalizeDateTimeToUtcIso } from '@/lib/utils/timezone'
+import { anchorDateToNoon, normalizeDateTimeToUtcIso } from '@/lib/utils/timezone'
 import type { Appointment, DayStatistics } from '@/types/domain'
 
 /**
@@ -193,9 +193,8 @@ export function useBarberDayAppointments(barberId: string | null) {
       if (!barberId) throw new Error('Barber ID is required')
 
       const supabase = createClient()
-      // Use T12:00:00 to avoid UTC midnight timezone shift for CR (UTC-6)
       const todayStr = format(new Date(), 'yyyy-MM-dd')
-      const today = new Date(`${todayStr}T12:00:00`)
+      const today = anchorDateToNoon(todayStr)
       const startDate = startOfDay(today)
       const endDate = endOfDay(today)
 

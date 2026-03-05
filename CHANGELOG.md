@@ -4,19 +4,26 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.30] - 2026-03-05
+
+### Arreglado
+
+- Las citas ahora se guardan con la hora correcta de Costa Rica en lugar de desfasarse por zona horaria
+- Mejoras de redacción en el historial de cambios
+
 ## [0.9.29] - 2026-03-04
 
 ### Arreglado
 
-- La app se muestra correctamente en pantalla completa (standalone) en todas las páginas, no solo en el dashboard
+- La app se muestra correctamente en pantalla completa en todas las páginas, no solo en el dashboard
 
 ## [0.9.28] - 2026-03-04
 
 ### Nuevo
 
-- Lista de clientes estilo Contactos de iOS con secciones alfabéticas y deslizar para acciones
-- Índice alfabético lateral que se centra automáticamente entre los filtros y la barra inferior
-- Deslizar a la izquierda muestra acciones rápidas de WhatsApp y ver perfil
+- Lista de clientes organizada por letra con secciones alfabéticas para encontrar contactos más rápido
+- Índice alfabético lateral para saltar directamente a cualquier letra
+- Deslizar a la izquierda en un contacto muestra acciones rápidas de WhatsApp y ver perfil
 
 ### Mejorado
 
@@ -98,7 +105,7 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 ### Mejorado
 
 - Los servicios ahora muestran un icono personalizable que el dueño puede elegir desde la pagina de Servicios
-- La logica de iconos de servicios esta unificada para que se vean iguales en el dashboard y en la pagina de reservas
+- Los iconos de servicios ahora se ven iguales en el panel y en la pagina de reservas
 
 ## [0.9.20] - 2026-02-27
 
@@ -111,12 +118,7 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 ### Mejorado
 
 - Las estadisticas de citas del dia simplifican "Pendiente" y "Confirmada" en una sola categoria "Agendadas"
-- El menu de navegacion movil tiene un diseno mas limpio con iconos estilo iOS
-- Mejor organizacion del codigo de segmentos de clientes para reutilizacion
-
-### Corregido
-
-- Limpieza de imports no utilizados en varias paginas del dashboard
+- El menú de navegación en el celular tiene un diseño más limpio
 
 ## [0.9.19] - 2026-02-26
 
@@ -133,7 +135,7 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
 ### Corregido
 
-- Error intermitente del service worker durante el desarrollo ya no aparece en consola
+- Correcciones menores de estabilidad
 
 ## [0.9.18] - 2026-02-26
 
@@ -198,7 +200,7 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 ### Mejorado
 
 - Los horarios disponibles se calculan con mayor precision usando el historial real
-- Los toggles del panel usan el diseño nativo de iOS
+- Los toggles del panel tienen un diseño más moderno
 
 ## [0.9.13] - 2026-02-25
 
@@ -207,7 +209,7 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 - Atencion sin cita (walk-in): crea citas rapidas para clientes que llegan sin reserva
 - Selector de metodo de pago al completar cita (efectivo, sinpe, tarjeta)
 - Enlace directo a WhatsApp del cliente desde la card de cita
-- Boton flotante de reserva en mobile
+- Boton de reserva siempre visible en el celular
 
 ### Mejorado
 
@@ -225,7 +227,7 @@ Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 ### Mejorado
 
 - Botones de accion en cards de citas mas claros en mobile
-- Mi Dia aparece en las tabs principales para owner-barbero
+- Mi Día ahora aparece en la barra de navegación principal
 
 ## [0.9.11] - 2026-02-24
 

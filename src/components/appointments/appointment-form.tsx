@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils/cn'
-import { localDateTimeToUtcIso } from '@/lib/utils/timezone'
+import { anchorDateToNoon, localDateTimeToUtcIso } from '@/lib/utils/timezone'
 import type { Appointment, Service, Client } from '@/types'
 
 interface AppointmentFormProps {
@@ -237,9 +237,11 @@ export function AppointmentForm({
         <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
           <p className="text-sm text-muted mb-1">Vista previa:</p>
           <p className="font-medium text-zinc-900 dark:text-zinc-100 capitalize">
-            {format(new Date(`${date}T${time}:00`), "EEEE, d 'de' MMMM 'a las' HH:mm", {
+            {format(anchorDateToNoon(date), "EEEE, d 'de' MMMM", {
               locale: es,
             })}
+            {' a las '}
+            {time}
           </p>
         </div>
 
