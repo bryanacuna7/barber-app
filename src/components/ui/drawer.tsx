@@ -54,10 +54,6 @@ export function Drawer({
   const lastTouchTimeRef = useRef(0)
   const lastTouchYRef = useRef(0)
 
-  // Content swipe refs
-  const contentSwipeStartYRef = useRef<number | null>(null)
-  const canContentSwipeCloseRef = useRef(false)
-
   // ── Open/close lifecycle ──
   useEffect(() => {
     if (isOpen) {
@@ -188,41 +184,63 @@ export function Drawer({
     }
   }, [onClose])
 
-  // ── Content swipe to close ──
-  const handleContentTouchStart = useCallback(
-    (e: React.TouchEvent<HTMLDivElement>) => {
-      if (!enableContentSwipeToClose) return
-      contentSwipeStartYRef.current = e.touches[0]?.clientY ?? null
-      canContentSwipeCloseRef.current = e.currentTarget.scrollTop <= 0
-    },
-    [enableContentSwipeToClose]
-  )
+  // ── Content swipe to close (uses native event for preventDefault) ──
+  const contentScrollRef = useRef<HTMLDivElement>(null)
 
-  const handleContentTouchMove = useCallback(
-    (e: React.TouchEvent<HTMLDivElement>) => {
-      if (!enableContentSwipeToClose || !canContentSwipeCloseRef.current) return
-      const startY = contentSwipeStartYRef.current
+  useEffect(() => {
+    if (!enableContentSwipeToClose || !isOpen) return
+    const el = contentScrollRef.current
+    if (!el) return
+
+    let startY: number | null = null
+    let canSwipeClose = false
+    const onTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0]?.clientY ?? null
+      canSwipeClose = el.scrollTop <= 0
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!canSwipeClose || startY == null) return
       const currentY = e.touches[0]?.clientY
-      if (startY == null || currentY == null) return
+      if (currentY == null) return
 
-      if (e.currentTarget.scrollTop > 0) {
-        canContentSwipeCloseRef.current = false
+      // If content has scrolled down, cancel swipe-to-close
+      if (el.scrollTop > 0) {
+        canSwipeClose = false
         return
       }
 
-      if (currentY - startY > contentSwipeCloseThreshold) {
-        contentSwipeStartYRef.current = null
-        canContentSwipeCloseRef.current = false
+      const deltaY = currentY - startY
+      if (deltaY > 0) {
+        // User is swiping down while at top — prevent content scroll
+        e.preventDefault()
+      }
+
+      if (deltaY > contentSwipeCloseThreshold) {
+        startY = null
+        canSwipeClose = false
         onClose()
       }
-    },
-    [enableContentSwipeToClose, contentSwipeCloseThreshold, onClose]
-  )
+    }
 
-  const handleContentTouchEnd = useCallback(() => {
-    contentSwipeStartYRef.current = null
-    canContentSwipeCloseRef.current = false
-  }, [])
+    const onTouchEnd = () => {
+      startY = null
+      canSwipeClose = false
+    }
+
+    // passive: false is required for preventDefault to work on iOS
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchmove', onTouchMove, { passive: false })
+    el.addEventListener('touchend', onTouchEnd, { passive: true })
+    el.addEventListener('touchcancel', onTouchEnd, { passive: true })
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchmove', onTouchMove)
+      el.removeEventListener('touchend', onTouchEnd)
+      el.removeEventListener('touchcancel', onTouchEnd)
+    }
+  }, [enableContentSwipeToClose, isOpen, contentSwipeCloseThreshold, onClose])
 
   // ── Overlay click ──
   const handleOverlayClick = useCallback(
@@ -323,11 +341,9 @@ export function Drawer({
 
         {/* Content */}
         <div
+          ref={contentScrollRef}
           className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6"
-          onTouchStart={handleContentTouchStart}
-          onTouchMove={handleContentTouchMove}
-          onTouchEnd={handleContentTouchEnd}
-          onTouchCancel={handleContentTouchEnd}
+          style={{ overscrollBehavior: 'contain' }}
         >
           {children}
         </div>
