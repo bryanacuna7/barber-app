@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { X, Sparkles, Upload, MessageCircle, AlertCircle, CreditCard, Loader2 } from 'lucide-react'
 import type {
@@ -31,6 +32,11 @@ export function PaymentFormModal({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'sinpe' | 'usd'>('sinpe')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const priceCRC = exchangeRate ? Math.round(plan.price_usd * exchangeRate.usd_to_crc) : null
 
@@ -79,14 +85,20 @@ export function PaymentFormModal({
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+  const modalContent = (
+    <div className="fixed inset-0 z-[140] flex items-end justify-center bg-black/70 backdrop-blur-md sm:items-center sm:p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md overflow-hidden rounded-[28px] border border-zinc-200/70 bg-white/95 backdrop-blur-xl shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:border-zinc-800/80 dark:bg-zinc-950/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]"
+        className="flex h-[100dvh] w-full max-w-md flex-col overflow-hidden rounded-t-[28px] border-x border-t border-zinc-200/70 bg-white/95 backdrop-blur-xl shadow-[0_24px_70px_rgba(9,9,11,0.35)] sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:rounded-[28px] sm:border dark:border-zinc-800/80 dark:bg-zinc-950/95 dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]"
+        style={{
+          maxHeight: 'calc(100dvh - env(safe-area-inset-bottom))',
+        }}
       >
-        <div className="mb-4 flex items-center justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-6 pb-4 pt-5 dark:border-zinc-800/70 dark:from-zinc-900/55">
+        <div
+          className="mb-4 flex shrink-0 items-center justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-4 pb-4 sm:px-6 sm:pt-5 dark:border-zinc-800/70 dark:from-zinc-900/55"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2.75rem)' }}
+        >
           <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">
             Reportar Pago
           </h2>
@@ -98,7 +110,10 @@ export function PaymentFormModal({
           </button>
         </div>
 
-        <div className="px-6 pb-6">
+        <div
+          className="overflow-y-auto px-4 sm:px-6 sm:pb-6"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+        >
           <div className="mb-4 rounded-xl bg-blue-50 p-4 dark:bg-blue-950/30">
             <div className="flex items-center gap-3">
               <Sparkles className="h-8 w-8 text-blue-500" />
@@ -126,11 +141,11 @@ export function PaymentFormModal({
             <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Método de pago
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => setPaymentMethod('sinpe')}
-                className={`rounded-lg border-2 px-3 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-lg border-2 px-2 py-2 text-xs font-medium leading-tight transition-colors sm:px-3 sm:text-sm ${
                   paymentMethod === 'sinpe'
                     ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400'
                     : 'border-zinc-200 text-zinc-600 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400'
@@ -142,7 +157,7 @@ export function PaymentFormModal({
                 type="button"
                 onClick={() => setPaymentMethod('usd')}
                 disabled={!usdBankAccount?.enabled}
-                className={`rounded-lg border-2 px-3 py-2 text-sm font-medium transition-colors ${
+                className={`rounded-lg border-2 px-2 py-2 text-xs font-medium leading-tight transition-colors sm:px-3 sm:text-sm ${
                   paymentMethod === 'usd'
                     ? 'border-green-500 bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400'
                     : !usdBankAccount?.enabled
@@ -151,7 +166,11 @@ export function PaymentFormModal({
                 }`}
               >
                 Depósito USD
-                {!usdBankAccount?.enabled && <span className="ml-1 text-xs">(Próximamente)</span>}
+                {!usdBankAccount?.enabled && (
+                  <span className="mt-0.5 block text-[11px] leading-tight sm:text-xs">
+                    (Próximamente)
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -234,7 +253,7 @@ export function PaymentFormModal({
               </label>
               <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-300 bg-zinc-50 p-4 transition-colors hover:border-blue-400 hover:bg-blue-50 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-blue-500 dark:hover:bg-zinc-700">
                 <Upload className="mb-2 h-8 w-8 text-zinc-400" />
-                <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                <span className="max-w-full truncate text-sm text-zinc-600 dark:text-zinc-400">
                   {file ? file.name : 'Subir imagen del comprobante'}
                 </span>
                 <input
@@ -303,4 +322,7 @@ export function PaymentFormModal({
       </motion.div>
     </div>
   )
+
+  if (!mounted) return null
+  return createPortal(modalContent, document.body)
 }

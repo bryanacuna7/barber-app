@@ -8,7 +8,6 @@ import { es } from 'date-fns/locale'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { animations } from '@/lib/design-system'
 
- 
 interface WeekDay {
   date: Date
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,6 +19,12 @@ interface CalendarWeekViewProps {
   weekDays: WeekDay[]
   /** 3-day subset for mobile (current + next 2) */
   mobileWeekDays: WeekDay[]
+  businessHours?: {
+    /** Opening hour (24h) */
+    start: number
+    /** Closing hour label shown in grid (24h) */
+    end: number
+  }
   selectedDate: Date
   currentTime: Date
   currentTimePercent: number
@@ -34,6 +39,7 @@ interface CalendarWeekViewProps {
 export function CalendarWeekView({
   weekDays,
   mobileWeekDays,
+  businessHours = { start: 7, end: 20 },
   selectedDate,
   currentTime,
   currentTimePercent,
@@ -44,6 +50,11 @@ export function CalendarWeekView({
   onSelectAppointment,
 }: CalendarWeekViewProps) {
   const today = useMemo(() => startOfDay(new Date()), [])
+  const hourSlots = useMemo(() => {
+    const start = Math.max(0, Math.min(23, businessHours.start))
+    const end = Math.max(start, Math.min(23, businessHours.end))
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+  }, [businessHours.end, businessHours.start])
 
   return (
     <div className="overflow-x-auto">
@@ -128,8 +139,7 @@ export function CalendarWeekView({
         {/* Timeline grid - Mobile: 3 days */}
         <div className="relative lg:hidden">
           {/* Hour rows */}
-          {Array.from({ length: 14 }).map((_, i) => {
-            const hour = 7 + i
+          {hourSlots.map((hour) => {
             return (
               <div
                 key={hour}
@@ -176,8 +186,7 @@ export function CalendarWeekView({
         {/* Timeline grid - Desktop: 7 days */}
         <div className="relative hidden lg:block">
           {/* Hour rows */}
-          {Array.from({ length: 14 }).map((_, i) => {
-            const hour = 7 + i
+          {hourSlots.map((hour) => {
             return (
               <div
                 key={hour}
@@ -222,17 +231,18 @@ export function CalendarWeekView({
           })}
 
           {/* Current time indicator (Week view) */}
-          {currentTime.getHours() >= 7 && currentTime.getHours() < 21 && (
-            <div
-              className="absolute inset-x-0 h-0.5 bg-red-500 dark:bg-red-500 z-20 pointer-events-none"
-              style={{ top: `${currentTimePercent}%` }}
-            >
-              <div className="absolute left-0 w-2 h-2 bg-red-500 dark:bg-red-500 rounded-full -translate-y-1/2 animate-pulse" />
-              <div className="absolute left-3 -translate-y-1/2 text-xs font-bold text-white bg-red-500 dark:bg-red-500 px-2 py-0.5 rounded shadow-sm">
-                {format(currentTime, 'h:mm a')}
+          {currentTime.getHours() >= businessHours.start &&
+            currentTime.getHours() < businessHours.end + 1 && (
+              <div
+                className="absolute inset-x-0 h-0.5 bg-red-500 dark:bg-red-500 z-20 pointer-events-none"
+                style={{ top: `${currentTimePercent}%` }}
+              >
+                <div className="absolute left-0 w-2 h-2 bg-red-500 dark:bg-red-500 rounded-full -translate-y-1/2 animate-pulse" />
+                <div className="absolute left-3 -translate-y-1/2 text-xs font-bold text-white bg-red-500 dark:bg-red-500 px-2 py-0.5 rounded shadow-sm">
+                  {format(currentTime, 'h:mm a')}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
     </div>

@@ -45,7 +45,7 @@ export function ClientNotificationsBanner({
               </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {notifications.slice(0, 3).map((client) => {
+              {notifications.map((client) => {
                 const lastVisit = client.last_visit_at ? new Date(client.last_visit_at) : null
                 const daysSinceVisit = lastVisit
                   ? Math.floor((new Date().getTime() - lastVisit.getTime()) / (1000 * 60 * 60 * 24))

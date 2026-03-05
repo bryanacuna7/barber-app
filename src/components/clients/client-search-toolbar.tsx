@@ -42,6 +42,9 @@ interface ClientSearchToolbarProps {
   onFiltersChange: (filters: ClientFilters) => void
   statsExpanded: boolean
   onToggleStats: () => void
+  followUpCount?: number
+  isFollowUpActive?: boolean
+  onToggleFollowUp?: () => void
 }
 
 const viewOptions: Array<{ mode: ViewMode; icon: LucideIcon; label: string }> = [
@@ -60,6 +63,9 @@ export function ClientSearchToolbar({
   onFiltersChange,
   statsExpanded,
   onToggleStats,
+  followUpCount = 0,
+  isFollowUpActive = false,
+  onToggleFollowUp,
 }: ClientSearchToolbarProps) {
   const [viewDropdownOpen, setViewDropdownOpen] = useState(false)
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false)
@@ -188,6 +194,29 @@ export function ClientSearchToolbar({
             <AlertTriangle className="h-3.5 w-3.5" />
             En riesgo
           </button>
+
+          {/* Seguimiento — desktop */}
+          {followUpCount > 0 && (
+            <button
+              onClick={() => onToggleFollowUp?.()}
+              className={`h-8 px-3.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 transition-all duration-200 ${
+                isFollowUpActive
+                  ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/25'
+                  : 'text-muted hover:bg-zinc-100/80 dark:hover:bg-white/[0.07]'
+              }`}
+            >
+              Seguimiento
+              <span
+                className={`text-[10px] rounded-full h-[18px] min-w-[18px] px-1 flex items-center justify-center font-bold leading-none ${
+                  isFollowUpActive
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                }`}
+              >
+                {followUpCount}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Divider */}
@@ -245,30 +274,13 @@ export function ClientSearchToolbar({
         </div>
       </div>
 
-      {/* ── MOBILE: Search full width + scrollable pills ── */}
-      <div className="lg:hidden space-y-2.5">
-        {/* Search — full width */}
-        <div className="relative flex items-center">
-          <Search className="absolute left-3 h-4 w-4 text-muted pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre, teléfono o email..."
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="h-11 w-full rounded-xl bg-zinc-100/70 dark:bg-white/[0.06] pl-10 pr-10 text-sm text-foreground placeholder:text-subtle outline-none transition-colors focus:bg-zinc-100 dark:focus:bg-white/[0.09] focus:ring-1 focus:ring-zinc-300/60 dark:focus:ring-zinc-600/50"
-          />
-          {search && (
-            <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-3 p-1 rounded-md text-muted hover:text-foreground transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Pills row — horizontally scrollable */}
-        <div className="flex items-center gap-2">
+      {/* ── MOBILE: scrollable pills only (search moved to compact header row) ── */}
+      <div className="lg:hidden">
+        {/* Pills row — horizontally scrollable, sticky */}
+        <div
+          data-filter-bar
+          className="sticky top-0 z-20 -mx-4 px-4 py-1.5 backdrop-blur-xl bg-white/80 dark:bg-zinc-950/80 flex items-center gap-2"
+        >
           {/* View dropdown */}
           <div ref={viewDropdownRef} className="relative shrink-0">
             <button
@@ -320,7 +332,7 @@ export function ClientSearchToolbar({
 
           {/* Scrollable pills live in a separate container so the view menu isn't clipped */}
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-hide -mx-1 px-1">
+            <div className="flex items-center gap-2 overflow-x-auto py-0.5 scrollbar-hide -mx-1 px-1">
               {/* Separator dot */}
               <span className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
 
@@ -369,6 +381,32 @@ export function ClientSearchToolbar({
                 Riesgo
               </button>
 
+              {/* Seguimiento pill — only visible when there are follow-up clients */}
+              {followUpCount > 0 && (
+                <button
+                  onClick={() => {
+                    onToggleFollowUp?.()
+                    if (isMobileDevice()) haptics.selection()
+                  }}
+                  className={`h-9 px-3.5 rounded-full text-xs font-semibold shrink-0 inline-flex items-center gap-1.5 transition-all duration-200 ${
+                    isFollowUpActive
+                      ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/25'
+                      : 'text-muted bg-zinc-100/70 dark:bg-white/[0.06]'
+                  }`}
+                >
+                  Seguimiento
+                  <span
+                    className={`text-[10px] rounded-full h-[18px] min-w-[18px] px-1 flex items-center justify-center font-bold leading-none ${
+                      isFollowUpActive
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                    }`}
+                  >
+                    {followUpCount}
+                  </span>
+                </button>
+              )}
+
               {/* Advanced filters pill */}
               <button
                 onClick={() => {
@@ -394,17 +432,6 @@ export function ClientSearchToolbar({
           </div>
         </div>
       </div>
-
-      {/* Stats toggle — mobile only */}
-      <button
-        onClick={onToggleStats}
-        className="lg:hidden flex items-center gap-2 px-1 py-1 text-xs text-muted"
-      >
-        <ChevronDown
-          className={`h-3.5 w-3.5 transition-transform duration-200 ${statsExpanded ? 'rotate-180' : ''}`}
-        />
-        <span>{statsExpanded ? 'Ocultar estadísticas' : 'Ver estadísticas'}</span>
-      </button>
 
       {/* Advanced filters sheet */}
       <Sheet open={advancedFiltersOpen} onOpenChange={setAdvancedFiltersOpen}>

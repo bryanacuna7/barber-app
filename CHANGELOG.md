@@ -4,6 +4,24 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.28] - 2026-03-04
+
+### Nuevo
+
+- Lista de clientes estilo Contactos de iOS con secciones alfabéticas y deslizar para acciones
+- Índice alfabético lateral que se centra automáticamente entre los filtros y la barra inferior
+- Deslizar a la izquierda muestra acciones rápidas de WhatsApp y ver perfil
+
+### Mejorado
+
+- El detalle del cliente al deslizar ahora usa la misma ficha limpia que al tocar el contacto
+- Se eliminó el límite de 50 clientes y el botón "Mostrar todos"
+- El ícono de lápiz se reemplazó por un ícono de persona para reflejar que abre el perfil, no un editor
+
+### Arreglado
+
+- Deslizar un contacto ya no causa parpadeo gris en la fila
+
 ## [0.9.27] - 2026-03-04
 
 ### Nuevo

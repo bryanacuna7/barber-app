@@ -7,9 +7,9 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-03-04 (Session 198 — Citas Mobile Polish Sprint)
+- **Last Updated:** 2026-03-04 (Session 199 — Clients Mobile Polish)
 - **Branch:** `main`
-- **Version:** `0.9.26`
+- **Version:** `0.9.28`
 - **Phase:** Customer Discovery — solving real barber pains
 - **Roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
@@ -73,6 +73,35 @@
 
 ## Recent Sessions
 
+### Session 199: Clients Mobile Polish (2026-03-04)
+
+**Status:** COMPLETE. Clients page migrated to iOS Contacts-style design.
+
+**What was done:**
+
+- **iOS Contacts layout:** Alphabet sections (A, B, C...) with letter headers, swipeable contact rows
+- **Alphabet rail:** Vanilla DOM singleton appended to body (escapes framer-motion transforms), dynamic positioning between filter bar and bottom nav using JS measurement (`data-filter-bar` + `nav.fixed.bottom-0`)
+- **Touch handling:** `touch-action:none` on nav, `passive:false` event listeners, `e.preventDefault()` for reliable iOS Safari taps and touch-scrub
+- **Swipe actions:** WhatsApp (green) + Ver perfil (blue) — changed from Edit/pencil icon to User icon since action opens detail view, not edit form
+- **Swipe flicker fix:** Removed `active:bg-zinc-100` CSS from contact rows (fires on touch-start during swipe)
+- **Detail sheet consistency:** Blue pencil swipe action now opens `ClientMobileSheet` (Apple Contacts style) instead of old `ClientDetailPanel` (boxy bordered cards)
+- **Show all contacts:** Removed 50-client `DISPLAY_LIMIT` and "Mostrar todos" button
+- **Pointer-events optimization:** Rail container is `pointer-events-none`, only letter buttons are `pointer-events-auto`
+
+**Files modified (3):**
+
+- `src/components/clients/client-cards-view.tsx` (AlphabetRail, swipe actions, contact rows)
+- `src/components/clients/client-search-toolbar.tsx` (added `data-filter-bar` attribute)
+- `src/app/(dashboard)/clientes/page.tsx` (removed DISPLAY_LIMIT/showAll)
+
+**Design principles applied from Session 198:**
+
+- Bottom sheets for all mobile detail views
+- Info as rows, not bordered cards
+- Consistent component reuse (ClientMobileSheet for both tap and swipe)
+
+---
+
 ### Session 198: Citas Mobile Polish Sprint (2026-03-04)
 
 **Status:** COMPLETE. Citas page mobile UX polished to top-tier level.
@@ -101,7 +130,7 @@
 **New files (3):** `quick-actions-popover.tsx`, `quick-actions-sheet.tsx`, `splash-screen.tsx`
 **Modified (20):** `citas/page.tsx`, `calendar-header.tsx`, `appointment-detail-modal.tsx`, `calendar-day-view.tsx`, `create-appointment-sheet.tsx`, `walk-in-sheet.tsx`, `trial-banner.tsx`, `guide-contextual-tip.tsx`, `bottom-nav.tsx`, `sheet.tsx`, `dialog.tsx`, `drawer.tsx`, `ios-date-picker.tsx`, `ios-time-picker.tsx`, + 6 others
 
-**Next:** Migrate these principles to other pages: `/dashboard`, `/clientes`, `/mi-dia`, More drawer
+**Next:** Migrate these principles to other pages: `/dashboard`, `/mi-dia`
 
 ---
 

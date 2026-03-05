@@ -1,16 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-  UserPlus,
-  Users,
-  DollarSign,
-  Activity,
-  TrendingUp,
-  Sparkles,
-  Target,
-  type LucideIcon,
-} from 'lucide-react'
+import { UserPlus, Users, DollarSign, Activity, type LucideIcon } from 'lucide-react'
 import { ComponentErrorBoundary } from '@/components/error-boundaries'
 import { formatCurrencyCompact } from '@/lib/utils'
 import { animations } from '@/lib/design-system'
@@ -27,7 +18,6 @@ interface StatCardConfig {
   helper: string
   value: string | number
   icon: LucideIcon
-  accentIcon: LucideIcon
   iconBgClass: string
   iconTextClass: string
   topLineClass: string
@@ -43,7 +33,6 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
       helper: 'este mes',
       value: metrics.newThisMonth,
       icon: UserPlus,
-      accentIcon: Sparkles,
       iconBgClass: 'bg-green-500/15 dark:bg-green-500/25',
       iconTextClass: 'text-green-600 dark:text-green-400',
       topLineClass: 'via-emerald-500/60',
@@ -55,7 +44,6 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
       helper: 'últimos 30 días',
       value: metrics.recentActive,
       icon: Users,
-      accentIcon: TrendingUp,
       iconBgClass: 'bg-blue-500/15 dark:bg-blue-500/25',
       iconTextClass: 'text-blue-600 dark:text-blue-400',
       topLineClass: 'via-blue-500/60',
@@ -67,7 +55,6 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
       helper: 'histórico',
       value: formatCurrencyCompact(metrics.totalRevenue),
       icon: DollarSign,
-      accentIcon: TrendingUp,
       iconBgClass: 'bg-emerald-500/15 dark:bg-emerald-500/25',
       iconTextClass: 'text-emerald-600 dark:text-emerald-400',
       topLineClass: 'via-amber-500/60',
@@ -80,7 +67,6 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
       helper: 'por cliente',
       value: formatCurrencyCompact(metrics.avgValue),
       icon: Activity,
-      accentIcon: Target,
       iconBgClass: 'bg-purple-500/15 dark:bg-purple-500/25',
       iconTextClass: 'text-purple-600 dark:text-purple-400',
       topLineClass: 'via-violet-500/60',
@@ -99,7 +85,6 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
           <div className="flex gap-3 overflow-x-auto pb-2 lg:pb-0 lg:grid lg:grid-cols-4 lg:gap-4 scrollbar-hide">
             {statCards.map((card) => {
               const Icon = card.icon
-              const AccentIcon = card.accentIcon
               return (
                 <motion.div
                   key={card.key}
@@ -123,9 +108,6 @@ export function ClientStatsSection({ metrics, statsExpanded }: ClientStatsSectio
                           <p className="text-[11px] text-muted/75 truncate">{card.helper}</p>
                         </div>
                       </div>
-                      <AccentIcon
-                        className={`h-3.5 w-3.5 shrink-0 ${card.iconTextClass} opacity-50`}
-                      />
                     </div>
 
                     <div className="mt-3">

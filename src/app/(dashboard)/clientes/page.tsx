@@ -22,7 +22,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, BarChart3, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
@@ -111,12 +111,12 @@ export default function ClientesPage() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [segmentSheetOpen, setSegmentSheetOpen] = useState(false)
   const [statsExpanded, setStatsExpanded] = useState(false)
+  const [isFollowUpActive, setIsFollowUpActive] = useState(false)
   const [sortColumn, setSortColumn] = useState<SortColumn>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [selectedCardClient, setSelectedCardClient] = useState<Client | null>(null)
   const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [showAll, setShowAll] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -169,9 +169,17 @@ export default function ClientesPage() {
       .slice(0, 5)
   }, [clients])
 
+  // IDs of clients needing follow-up (for quick set lookup)
+  const followUpIds = useMemo(() => new Set(notifications.map((c) => c.id)), [notifications])
+
   // Filter + sort
   const filteredClients = useMemo(() => {
     let result = clients
+
+    // When "Seguimiento" pill is active, only show follow-up clients
+    if (isFollowUpActive) {
+      result = result.filter((c) => followUpIds.has(c.id))
+    }
 
     result = result.filter((c) => matchesClientFilters(c, filters))
 
@@ -218,15 +226,11 @@ export default function ClientesPage() {
     }
 
     return result
-  }, [clients, filters, search, sortColumn, sortDirection])
+  }, [clients, filters, search, sortColumn, sortDirection, isFollowUpActive, followUpIds])
 
-  const DISPLAY_LIMIT = 50
   const hasAppliedFilters = search.trim().length > 0 || countActiveClientFilters(filters) > 0
   const isCriticalClientsEmpty = metrics.total === 0
-  const displayedClients = useMemo(() => {
-    if (showAll || viewMode === 'calendar') return filteredClients
-    return filteredClients.slice(0, DISPLAY_LIMIT)
-  }, [filteredClients, showAll, viewMode])
+  const displayedClients = filteredClients
 
   // Bulk selection for multi-select actions
   const selection = useSelection(displayedClients)
@@ -382,16 +386,46 @@ export default function ClientesPage() {
                 }
               />
 
-              <div className="lg:hidden">
-                <Button
-                  variant="cta"
-                  data-tour="clients-add-button-mobile"
-                  onClick={() => openCreateClientModal('mobile')}
-                  className={`${MOBILE_PRIMARY_CTA_CLASS} !border-zinc-200 !bg-white !text-zinc-900 shadow-sm hover:!bg-zinc-50 dark:!border-zinc-200 dark:!bg-white dark:!text-zinc-900 dark:hover:!bg-zinc-100`}
+              {/* Mobile compact command bar: [🔍 Search...] [🔔] [+] */}
+              <div className="lg:hidden flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Buscar cliente..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-11 w-full rounded-xl bg-zinc-100/70 dark:bg-white/[0.06] pl-10 pr-9 text-sm text-foreground placeholder:text-subtle outline-none transition-colors focus:bg-zinc-100 dark:focus:bg-white/[0.09] focus:ring-1 focus:ring-zinc-300/60 dark:focus:ring-zinc-600/50"
+                    aria-label="Buscar cliente"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted hover:text-foreground transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => setStatsExpanded(!statsExpanded)}
+                  aria-label={statsExpanded ? 'Ocultar estadísticas' : 'Ver estadísticas'}
+                  className={`flex items-center justify-center h-11 w-11 shrink-0 rounded-xl transition-colors ${
+                    statsExpanded
+                      ? 'text-foreground bg-zinc-100/70 dark:bg-white/[0.1]'
+                      : 'text-muted hover:text-foreground hover:bg-zinc-100/70 dark:hover:bg-white/[0.06]'
+                  }`}
                 >
-                  <Plus className="h-5 w-5 mr-2" />
-                  <span>Nuevo Cliente</span>
-                </Button>
+                  <BarChart3 className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => openCreateClientModal('mobile')}
+                  aria-label="Nuevo cliente"
+                  data-tour="clients-add-button-mobile"
+                  className="flex items-center justify-center h-11 w-11 shrink-0 text-foreground transition-transform active:scale-95"
+                >
+                  <Plus className="h-5 w-5" strokeWidth={2.5} />
+                </button>
               </div>
 
               {/* Guide Tip */}
@@ -405,13 +439,15 @@ export default function ClientesPage() {
               {/* Stats */}
               <ClientStatsSection metrics={metrics} statsExpanded={statsExpanded} />
 
-              {/* Notifications */}
-              <ClientNotificationsBanner
-                notifications={notifications}
-                showNotifications={showNotifications}
-                onDismiss={() => setShowNotifications(false)}
-                onWhatsApp={handleWhatsApp}
-              />
+              {/* Notifications — desktop only (mobile removed bell to avoid confusion with global notifications) */}
+              <div className="hidden lg:block">
+                <ClientNotificationsBanner
+                  notifications={notifications}
+                  showNotifications={showNotifications}
+                  onDismiss={() => setShowNotifications(false)}
+                  onWhatsApp={handleWhatsApp}
+                />
+              </div>
 
               {/* Search + View Selector + Filters */}
               <ClientSearchToolbar
@@ -424,6 +460,9 @@ export default function ClientesPage() {
                 onFiltersChange={setFilters}
                 statsExpanded={statsExpanded}
                 onToggleStats={() => setStatsExpanded(!statsExpanded)}
+                followUpCount={notifications.length}
+                isFollowUpActive={isFollowUpActive}
+                onToggleFollowUp={() => setIsFollowUpActive((prev) => !prev)}
               />
 
               {/* Saved filter presets — show when user has custom presets or can save */}
@@ -500,39 +539,18 @@ export default function ClientesPage() {
                       )}
 
                       {viewMode === 'table' && (
-                        <>
-                          {/* Mobile: fall back to cards — table doesn't fit narrow screens */}
-                          <div className="sm:hidden">
-                            <ClientCardsView
-                              clients={displayedClients}
-                              selectedCardClient={selectedCardClient}
-                              onSelectCardClient={setSelectedCardClient}
-                              onMobileDetailOpen={() => setIsMobileDetailOpen(true)}
-                              onSelectClient={setSelectedClient}
-                              clientActivities={clientActivities}
-                              activitiesLoading={activitiesLoading}
-                              onWhatsApp={handleWhatsApp}
-                              isSelected={selection.isSelected}
-                              onToggleSelect={selection.toggle}
-                              selectionCount={selection.count}
-                            />
-                          </div>
-                          {/* Desktop: full sortable table */}
-                          <div className="hidden sm:block">
-                            <ClientTableView
-                              clients={displayedClients}
-                              sortColumn={sortColumn}
-                              sortDirection={sortDirection}
-                              onSort={handleSort}
-                              onSelectClient={setSelectedClient}
-                              isSelected={selection.isSelected}
-                              onToggleSelect={selection.toggle}
-                              onToggleAll={selection.toggleAll}
-                              isAllSelected={selection.isAllSelected}
-                              selectionCount={selection.count}
-                            />
-                          </div>
-                        </>
+                        <ClientTableView
+                          clients={displayedClients}
+                          sortColumn={sortColumn}
+                          sortDirection={sortDirection}
+                          onSort={handleSort}
+                          onSelectClient={setSelectedClient}
+                          isSelected={selection.isSelected}
+                          onToggleSelect={selection.toggle}
+                          onToggleAll={selection.toggleAll}
+                          isAllSelected={selection.isAllSelected}
+                          selectionCount={selection.count}
+                        />
                       )}
 
                       {viewMode === 'calendar' && (
@@ -544,21 +562,6 @@ export default function ClientesPage() {
                       )}
                     </AnimatePresence>
                   )}
-
-                  {/* Show all button for progressive disclosure */}
-                  {!showAll &&
-                    viewMode !== 'calendar' &&
-                    filteredClients.length > DISPLAY_LIMIT && (
-                      <div className="flex justify-center pt-4">
-                        <Button
-                          variant="ghost"
-                          onClick={() => setShowAll(true)}
-                          className="text-sm"
-                        >
-                          Mostrar todos ({filteredClients.length})
-                        </Button>
-                      </div>
-                    )}
                 </div>
               </SplitPanel>
 

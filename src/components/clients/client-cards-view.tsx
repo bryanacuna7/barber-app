@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment } from 'react'
+import { useMemo, useRef, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { EntityContextMenu } from '@/components/ui/entity-context-menu'
 import {
@@ -8,12 +8,11 @@ import {
   Heart,
   Clock,
   Zap,
-  Award,
   ChevronRight,
   Phone,
   Mail,
   MessageCircle,
-  Edit,
+  User,
   UserPlus,
   DollarSign,
   Scissors,
@@ -25,7 +24,7 @@ import { ActivityItem } from '@/components/clients/activity-item'
 import { formatCurrencyCompact } from '@/lib/utils'
 import type { Client } from '@/types'
 import { animations } from '@/lib/design-system'
-import { getClientSegment, calculateLoyalty, getSpendingTier } from '@/lib/utils/client-segments'
+import { getClientSegment, calculateLoyalty } from '@/lib/utils/client-segments'
 import { segmentConfig } from '@/components/clients/segment-config'
 
 interface ClientActivity {
@@ -53,6 +52,96 @@ interface ClientCardsViewProps {
   selectionCount?: number
 }
 
+/**
+ * Alphabet rail — vanilla DOM appended to body to escape framer-motion transforms.
+ * Singleton pattern (ID-based) prevents StrictMode duplicates.
+ * Uses native event listeners so iOS Safari touch/click works reliably.
+ */
+const RAIL_ID = 'alphabet-rail'
+
+function AlphabetRail({
+  letters,
+  onScrollTo,
+}: {
+  letters: string[]
+  onScrollTo: (letter: string) => void
+}) {
+  const scrollRef = useRef(onScrollTo)
+  useEffect(() => {
+    scrollRef.current = onScrollTo
+  })
+
+  useEffect(() => {
+    if (letters.length <= 1) {
+      document.getElementById(RAIL_ID)?.remove()
+      return
+    }
+
+    // Singleton: remove any existing rail first
+    document.getElementById(RAIL_ID)?.remove()
+
+    const nav = document.createElement('nav')
+    nav.id = RAIL_ID
+    nav.setAttribute('aria-label', 'Índice alfabético')
+    // Position dynamically between filter bar and bottom nav
+    nav.style.cssText =
+      'position:fixed;right:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 2px;pointer-events:none;touch-action:none;'
+
+    // Calculate bounds: below filters, above bottom nav
+    const filterBar = document.querySelector('[data-filter-bar]')
+    const bottomNav = document.querySelector('nav.fixed.bottom-0')
+    const topPx = filterBar ? filterBar.getBoundingClientRect().bottom + 8 : 184 // fallback
+    const bottomPx = bottomNav ? window.innerHeight - bottomNav.getBoundingClientRect().top + 8 : 80 // fallback ~5rem
+    nav.style.top = `${topPx}px`
+    nav.style.bottom = `${bottomPx}px`
+
+    // Hide on large screens
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const applyMq = () => {
+      nav.style.display = mq.matches ? 'none' : 'flex'
+    }
+    applyMq()
+    mq.addEventListener('change', applyMq)
+
+    for (const letter of letters) {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.dataset.letter = letter
+      btn.className = 'flex h-[18px] w-[18px] items-center justify-center pointer-events-auto'
+      btn.style.touchAction = 'manipulation'
+      const span = document.createElement('span')
+      span.textContent = letter
+      span.className =
+        'text-[11px] font-bold text-blue-400 leading-none pointer-events-none select-none'
+      btn.appendChild(span)
+      // Native click for both desktop and iOS
+      btn.addEventListener('click', () => scrollRef.current(letter))
+      nav.appendChild(btn)
+    }
+
+    // Touch-scrub: drag finger along rail
+    const handleTouch = (e: TouchEvent) => {
+      e.preventDefault() // prevent scroll & ghost clicks
+      const touch = e.touches[0]
+      const el = document.elementFromPoint(touch.clientX, touch.clientY)
+      const l =
+        el?.getAttribute('data-letter') ?? (el as HTMLElement)?.parentElement?.dataset.letter
+      if (l) scrollRef.current(l)
+    }
+    nav.addEventListener('touchmove', handleTouch, { passive: false })
+    nav.addEventListener('touchstart', handleTouch, { passive: false })
+
+    document.body.appendChild(nav)
+
+    return () => {
+      nav.remove()
+      mq.removeEventListener('change', applyMq)
+    }
+  }, [letters])
+
+  return null
+}
+
 function getActivityIcon(type: string) {
   if (type === 'registered')
     return {
@@ -72,6 +161,7 @@ export function ClientCardsView({
   selectedCardClient,
   onSelectCardClient,
   onMobileDetailOpen,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSelectClient,
   clientActivities,
   activitiesLoading,
@@ -81,6 +171,38 @@ export function ClientCardsView({
   selectionCount = 0,
 }: ClientCardsViewProps) {
   const hasBulkSelection = selectionCount > 0
+
+  // ── Group clients by first letter (iOS Contacts sections) ──
+  const groupedClients = useMemo(() => {
+    const groups: Record<string, Client[]> = {}
+    for (const client of clients) {
+      const letter = (client.name.charAt(0) || '#').toUpperCase()
+      const key = /[A-Z]/.test(letter) ? letter : '#'
+      if (!groups[key]) groups[key] = []
+      groups[key].push(client)
+    }
+    return Object.entries(groups).sort(([a], [b]) => {
+      if (a === '#') return 1
+      if (b === '#') return -1
+      return a.localeCompare(b)
+    })
+  }, [clients])
+
+  const availableLetters = useMemo(() => groupedClients.map(([letter]) => letter), [groupedClients])
+
+  const mobileListRef = useRef<HTMLDivElement>(null)
+
+  const scrollToLetter = useCallback((letter: string) => {
+    // Multiple section-{letter} may exist (mobile + desktop); pick the visible one
+    const candidates = document.querySelectorAll(`[id="section-${letter}"]`)
+    for (const el of candidates) {
+      if ((el as HTMLElement).offsetParent !== null) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+    }
+  }, [])
+
   return (
     <motion.div
       key="cards"
@@ -89,8 +211,87 @@ export function ClientCardsView({
       exit={{ opacity: 0, y: -20 }}
       className={`grid grid-cols-1 gap-6 ${selectedCardClient ? 'lg:grid-cols-5' : 'lg:grid-cols-1'}`}
     >
-      {/* Left: Compact client list */}
-      <div className={`space-y-2 ${selectedCardClient ? 'lg:col-span-2' : 'lg:col-span-1'}`}>
+      {/* ── Mobile: iOS Contacts style list ── */}
+      <div
+        className={`lg:hidden relative ${selectedCardClient ? 'lg:col-span-2' : 'lg:col-span-1'}`}
+      >
+        <div ref={mobileListRef} className="pr-6">
+          {groupedClients.map(([letter, sectionClients]) => (
+            <div key={letter} id={`section-${letter}`}>
+              {/* Section header */}
+              <div className="sticky top-0 z-10 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-sm px-4 py-1.5">
+                <span className="text-[13px] font-bold text-foreground">{letter}</span>
+              </div>
+
+              {/* Client rows */}
+              {sectionClients.map((client, idx) => {
+                const segment = getClientSegment(client)
+                const rightActions = [
+                  {
+                    icon: <MessageCircle className="h-5 w-5" />,
+                    label: 'WhatsApp',
+                    color: 'bg-emerald-500',
+                    onClick: () => onWhatsApp(client.phone),
+                  },
+                  {
+                    icon: <User className="h-5 w-5" />,
+                    label: 'Ver perfil',
+                    color: 'bg-blue-500',
+                    onClick: () => {
+                      onSelectCardClient(client)
+                      onMobileDetailOpen()
+                    },
+                  },
+                ]
+
+                return (
+                  <div key={client.id}>
+                    <SwipeableRow rightActions={rightActions} showAffordance={false}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectCardClient(client)
+                          onMobileDetailOpen()
+                        }}
+                        className="w-full text-left flex items-center gap-3 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-950"
+                      >
+                        {/* Avatar */}
+                        <div className="relative shrink-0">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-zinc-600 to-zinc-800 text-sm font-bold text-white">
+                            {client.name.charAt(0).toUpperCase()}
+                          </div>
+                          {segment === 'vip' && (
+                            <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-amber-500 p-0.5">
+                              <Crown className="h-2.5 w-2.5 text-white" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Name only */}
+                        <p className="font-medium text-[15px] text-foreground truncate flex-1">
+                          {client.name}
+                        </p>
+                      </button>
+                    </SwipeableRow>
+                    {/* Divider outside SwipeableRow so it doesn't slide */}
+                    {idx < sectionClients.length - 1 && (
+                      <div className="ml-[4.25rem] h-px bg-zinc-200/60 dark:bg-zinc-800" />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* ── Alphabet index rail (iOS style — rendered via portal to escape transforms) ── */}
+        <AlphabetRail letters={availableLetters} onScrollTo={scrollToLetter} />
+      </div>
+
+      {/* ── Desktop: compact card list ── */}
+      <div
+        className={`hidden lg:block space-y-2 ${selectedCardClient ? 'lg:col-span-2' : 'lg:col-span-1'}`}
+      >
         <div
           className={`space-y-2 ${
             selectedCardClient ? 'lg:max-h-[calc(100vh-24rem)] lg:overflow-y-auto lg:pr-2' : ''
@@ -98,288 +299,99 @@ export function ClientCardsView({
         >
           {clients.map((client) => {
             const segment = getClientSegment(client)
-            const tier = getSpendingTier(client)
-            const loyalty = calculateLoyalty(client)
             const isCardSelected = selectedCardClient?.id === client.id
 
-            // Tier config for badge
-            const tierLabels = {
-              platinum: 'Platino',
-              gold: 'Oro',
-              silver: 'Plata',
-              bronze: 'Bronce',
-            }
-
-            const tierColors = {
-              platinum: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-              gold: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-              silver: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300',
-              bronze: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-            }
-
-            const rightActions = [
-              {
-                icon: <MessageCircle className="h-5 w-5" />,
-                label: 'WhatsApp',
-                color: 'bg-emerald-500',
-                onClick: () => onWhatsApp(client.phone),
-              },
-              {
-                icon: <Edit className="h-5 w-5" />,
-                label: 'Editar',
-                color: 'bg-blue-500',
-                onClick: () => onSelectClient(client),
-              },
-            ]
-
             return (
-              <Fragment key={client.id}>
-                <SwipeableRow rightActions={rightActions} className="lg:hidden">
-                  <motion.button
-                    onClick={() => {
+              <EntityContextMenu key={client.id} entityType="client" entityId={client.id}>
+                <motion.div
+                  onClick={() => {
+                    onSelectCardClient(client)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
                       onSelectCardClient(client)
-                      onMobileDetailOpen()
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={animations.spring.snappy}
-                    className={`relative w-full text-left rounded-2xl p-3 lg:p-4 transition-[background-color,border-color,box-shadow] border-2 ${
-                      isCardSelected
-                        ? 'bg-blue-50 border-blue-300 shadow-md dark:bg-blue-950 dark:border-blue-500 dark:shadow-lg'
-                        : 'bg-white border-zinc-200 shadow-sm dark:bg-zinc-900 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:shadow-md'
-                    }`}
-                  >
-                    {/* Loyalty badge - mobile (compact) */}
-                    <div className="absolute top-2 right-2 lg:hidden">
-                      <span
-                        className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
-                          loyalty >= 80
-                            ? 'bg-green-500/20 text-green-400'
-                            : loyalty >= 50
-                              ? 'bg-blue-500/20 text-blue-400'
-                              : loyalty >= 30
-                                ? 'bg-amber-500/20 text-amber-400'
-                                : 'bg-zinc-500/20 text-zinc-400'
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  whileTap={{ scale: 0.98 }}
+                  transition={animations.spring.snappy}
+                  className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border flex items-center gap-3 cursor-pointer ${
+                    isSelected?.(client.id)
+                      ? 'bg-blue-50 border-blue-300 dark:bg-blue-950/40 dark:border-blue-600'
+                      : isCardSelected
+                        ? 'bg-zinc-100 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-600'
+                        : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                  }`}
+                >
+                  {/* Bulk checkbox — visible on hover or when any selection active */}
+                  {onToggleSelect && (
+                    <button
+                      type="button"
+                      className={`shrink-0 transition-opacity ${hasBulkSelection ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onToggleSelect(client.id, { shiftKey: e.shiftKey })
+                      }}
+                      aria-label={`Seleccionar ${client.name}`}
+                      role="checkbox"
+                      aria-checked={isSelected?.(client.id) ?? false}
+                    >
+                      <div
+                        className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
+                          isSelected?.(client.id)
+                            ? 'border-blue-500 bg-blue-500 text-white'
+                            : 'border-zinc-300 dark:border-zinc-600 hover:border-blue-400'
                         }`}
                       >
-                        {Math.round(loyalty)}%
-                      </span>
-                    </div>
-                    {/* Loyalty ring - desktop (full SVG) */}
-                    <div className="absolute top-3 right-3 hidden lg:block">
-                      <div className="relative w-12 h-12">
-                        <svg className="w-12 h-12 transform -rotate-90">
-                          <circle
-                            cx="24"
-                            cy="24"
-                            r="20"
-                            stroke="currentColor"
-                            strokeWidth="3"
+                        {isSelected?.(client.id) && (
+                          <svg
+                            className="h-3 w-3"
                             fill="none"
-                            className="text-zinc-700 dark:text-zinc-600"
-                          />
-                          <circle
-                            cx="24"
-                            cy="24"
-                            r="20"
+                            viewBox="0 0 24 24"
                             stroke="currentColor"
-                            strokeWidth="3"
-                            fill="none"
-                            strokeLinecap="round"
-                            className={`transition-[stroke-dashoffset] duration-700 ${
-                              loyalty >= 80
-                                ? 'text-green-500'
-                                : loyalty >= 50
-                                  ? 'text-blue-500'
-                                  : loyalty >= 30
-                                    ? 'text-amber-500'
-                                    : 'text-zinc-500'
-                            }`}
-                            style={{
-                              strokeDasharray: `${2 * Math.PI * 20}`,
-                              strokeDashoffset: `${2 * Math.PI * 20 * (1 - loyalty / 100)}`,
-                            }}
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-[11px] font-bold text-foreground">
-                            {Math.round(loyalty)}%
-                          </span>
-                        </div>
+                            strokeWidth={3}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
                       </div>
+                    </button>
+                  )}
+
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300">
+                      {client.name.charAt(0).toUpperCase()}
                     </div>
-
-                    {/* Content */}
-                    <div className="pr-14">
-                      {/* Avatar + Name + VIP badge */}
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="relative shrink-0">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 dark:from-zinc-600 dark:to-zinc-700 text-lg font-bold text-white">
-                            {client.name.charAt(0).toUpperCase()}
-                          </div>
-                          {segment === 'vip' && (
-                            <div className="absolute -bottom-1 -right-1 rounded-full bg-amber-500 p-1">
-                              <Crown className="h-3 w-3 text-white" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-bold text-base text-foreground truncate">
-                              {client.name}
-                            </p>
-                            {segment === 'vip' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                                <Crown className="h-2.5 w-2.5" />
-                                VIP
-                              </span>
-                            )}
-                          </div>
-                          {/* Engagement badge */}
-                          <div className="flex items-center gap-1">
-                            <div className="flex gap-[2px]">
-                              {Array.from({
-                                length: Math.min(Math.ceil(loyalty / 25), 4),
-                              }).map((_, i) => (
-                                <div key={i} className="w-1 h-3 rounded-full bg-green-500" />
-                              ))}
-                              {Array.from({
-                                length: Math.max(0, 4 - Math.ceil(loyalty / 25)),
-                              }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="w-1 h-3 rounded-full bg-zinc-300 dark:bg-zinc-700"
-                                />
-                              ))}
-                            </div>
-                            <span className="text-xs text-muted">{loyalty}% engagement</span>
-                          </div>
-                        </div>
+                    {segment === 'vip' && (
+                      <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-amber-500 p-0.5">
+                        <Crown className="h-2.5 w-2.5 text-white" />
                       </div>
-
-                      {/* Metrics row */}
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <div>
-                          <p className="text-xs text-muted mb-0.5">Gastado</p>
-                          <p className="text-lg font-bold text-foreground">
-                            {formatCurrencyCompact(Number(client.total_spent || 0))}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted mb-0.5">Visitas</p>
-                          <p className="text-lg font-bold text-foreground">
-                            {client.total_visits || 0}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Spending tier badge */}
-                      <div className="flex items-center gap-1.5">
-                        <Award className="h-3.5 w-3.5 text-muted" />
-                        <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tierColors[tier]}`}
-                        >
-                          {tierLabels[tier]}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.button>
-                </SwipeableRow>
-                {/* Desktop: compact card without swipe — single loyalty indicator */}
-                <EntityContextMenu entityType="client" entityId={client.id}>
-                  <motion.div
-                    onClick={() => {
-                      onSelectCardClient(client)
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        onSelectCardClient(client)
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    whileTap={{ scale: 0.98 }}
-                    transition={animations.spring.snappy}
-                    className={`group/card relative w-full text-left rounded-xl p-3 transition-colors border hidden lg:flex items-center gap-3 cursor-pointer ${
-                      isSelected?.(client.id)
-                        ? 'bg-blue-50 border-blue-300 dark:bg-blue-950/40 dark:border-blue-600'
-                        : isCardSelected
-                          ? 'bg-zinc-100 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-600'
-                          : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                    }`}
-                  >
-                    {/* Bulk checkbox — visible on hover or when any selection active */}
-                    {onToggleSelect && (
-                      <button
-                        type="button"
-                        className={`shrink-0 transition-opacity ${hasBulkSelection ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onToggleSelect(client.id, { shiftKey: e.shiftKey })
-                        }}
-                        aria-label={`Seleccionar ${client.name}`}
-                        role="checkbox"
-                        aria-checked={isSelected?.(client.id) ?? false}
-                      >
-                        <div
-                          className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
-                            isSelected?.(client.id)
-                              ? 'border-blue-500 bg-blue-500 text-white'
-                              : 'border-zinc-300 dark:border-zinc-600 hover:border-blue-400'
-                          }`}
-                        >
-                          {isSelected?.(client.id) && (
-                            <svg
-                              className="h-3 w-3"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          )}
-                        </div>
-                      </button>
                     )}
+                  </div>
 
-                    {/* Avatar */}
-                    <div className="relative shrink-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-semibold text-zinc-600 dark:text-zinc-300">
-                        {client.name.charAt(0).toUpperCase()}
-                      </div>
-                      {segment === 'vip' && (
-                        <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-amber-500 p-0.5">
-                          <Crown className="h-2.5 w-2.5 text-white" />
-                        </div>
-                      )}
-                    </div>
+                  {/* Name + segment */}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
+                    <p className="text-xs text-muted">
+                      {client.total_visits || 0} visitas ·{' '}
+                      {formatCurrencyCompact(Number(client.total_spent || 0))}
+                    </p>
+                  </div>
 
-                    {/* Name + segment */}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm text-foreground truncate">{client.name}</p>
-                      <p className="text-xs text-muted">
-                        {client.total_visits || 0} visitas ·{' '}
-                        {formatCurrencyCompact(Number(client.total_spent || 0))}
-                      </p>
-                    </div>
+                  {/* Segment badge */}
+                  <span
+                    className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border ${segmentConfig[segment].color}`}
+                  >
+                    {segmentConfig[segment].label}
+                  </span>
 
-                    {/* Segment badge */}
-                    <span
-                      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border ${segmentConfig[segment].color}`}
-                    >
-                      {segmentConfig[segment].label}
-                    </span>
-
-                    {/* Chevron on hover */}
-                    <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity" />
-                  </motion.div>
-                </EntityContextMenu>
-              </Fragment>
+                  {/* Chevron on hover */}
+                  <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 shrink-0 opacity-0 group-hover/card:opacity-100 transition-opacity" />
+                </motion.div>
+              </EntityContextMenu>
             )
           })}
         </div>

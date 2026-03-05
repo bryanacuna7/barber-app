@@ -79,6 +79,11 @@ interface CitasFilterState {
   statusFilter: StatusFilter
 }
 
+type WeekBusinessHours = {
+  start: number
+  end: number
+}
+
 type CreateAppointmentErrorField = 'client_id' | 'service_id' | 'barber_id' | 'general'
 type CreateAppointmentErrors = Partial<Record<CreateAppointmentErrorField, string>>
 
@@ -372,6 +377,35 @@ function CitasCalendarFusionContent() {
     }))
   }, [viewMode, selectedDate, roleFilteredAppointments])
 
+  const weekBusinessHours = useMemo<WeekBusinessHours>(() => {
+    // Fallback used when operating hours are not configured yet.
+    const fallback: WeekBusinessHours = { start: 7, end: 20 }
+    const operatingHours = businessSettings?.operatingHours
+    if (!operatingHours) return fallback
+
+    // Keep week view aligned with day view: use selected day's schedule.
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+    const selectedDayKey = dayKeys[getDay(selectedDate)]
+    const day = operatingHours[selectedDayKey]
+    if (!day || day.isClosed) return fallback
+
+    const [openHourRaw] = day.open.split(':')
+    const [closeHourRaw, closeMinuteRaw] = day.close.split(':')
+    const openHour = Number(openHourRaw)
+    const closeHour = Number(closeHourRaw)
+    const closeMinute = Number(closeMinuteRaw || '0')
+
+    if (Number.isNaN(openHour) || Number.isNaN(closeHour) || Number.isNaN(closeMinute)) {
+      return fallback
+    }
+
+    const start = Math.max(0, Math.min(23, openHour))
+    // Keep the closing label visible if the business closes at hh:mm with minutes > 0.
+    const end = Math.max(start, Math.min(23, closeHour + (closeMinute > 0 ? 1 : 0)))
+
+    return { start, end }
+  }, [businessSettings, selectedDate])
+
   const mobileWeekDays = useMemo(() => {
     if (viewMode !== 'week' || weekDays.length === 0) return []
     const selectedIndex = weekDays.findIndex((day) => isSameDay(day.date, selectedDate))
@@ -430,10 +464,10 @@ function CitasCalendarFusionContent() {
   const currentTimePercent = useMemo(() => {
     const hours = currentTime.getHours()
     const minutes = currentTime.getMinutes()
-    const totalMinutes = (hours - 7) * 60 + minutes
-    const dayTotalMinutes = (21 - 7) * 60
+    const totalMinutes = (hours - weekBusinessHours.start) * 60 + minutes
+    const dayTotalMinutes = (weekBusinessHours.end + 1 - weekBusinessHours.start) * 60
     return (totalMinutes / dayTotalMinutes) * 100
-  }, [currentTime])
+  }, [currentTime, weekBusinessHours])
 
   // Stats
   const stats = useMemo(() => {
@@ -796,6 +830,7 @@ function CitasCalendarFusionContent() {
               <CalendarWeekView
                 weekDays={weekDays}
                 mobileWeekDays={mobileWeekDays}
+                businessHours={weekBusinessHours}
                 selectedDate={selectedDate}
                 currentTime={currentTime}
                 currentTimePercent={currentTimePercent}
