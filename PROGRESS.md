@@ -7,7 +7,7 @@
 - **Name:** BarberApp
 - **Stack:** Next.js 16, React 19, TypeScript, Supabase, TailwindCSS, Framer Motion
 - **Database:** PostgreSQL (Supabase project `zanywefnobtzhoeuoyuc`)
-- **Last Updated:** 2026-03-04 (Session 199 — Clients Mobile Polish)
+- **Last Updated:** 2026-03-05 (Session 200 — SwipeableRow Rewrite)
 - **Branch:** `main`
 - **Version:** `0.9.28`
 - **Phase:** Customer Discovery — solving real barber pains
@@ -72,6 +72,35 @@
 ---
 
 ## Recent Sessions
+
+### Session 200: SwipeableRow Rewrite — Spark Mail 4-Gesture Pattern (2026-03-05)
+
+**Status:** COMPLETE. SwipeableRow rewritten from scratch with raw touch events.
+
+**What was done:**
+
+- **Raw touch events:** Replaced framer-motion `useDragControls`/`drag` system with direct `touchstart/touchmove/touchend` event listeners (`passive: false`) for zero-latency gesture tracking
+- **Progressive fill trays:** Tray width grows dynamically with finger displacement via `useTransform(x, v => Math.max(0, v))` — no fixed-width trays
+- **4-gesture pattern:** Left short (reveal right tray), left long (commit right action), right short (reveal left tray), right long (commit left action)
+- **Velocity-aware snapping:** EMA velocity tracking (0.4/0.6 blend) + flick detection (>400px/s) for natural momentum
+- **Direction lock at 6px:** Horizontal vs vertical detection, matches `useLongPress` cancel threshold
+- **Tap-to-close:** Pointer down/up delta detection on content div — tap when open closes row
+- **Commit overlay:** Full-color background + scaled icon when past commit threshold (55% of container width)
+- **Haptics:** `selection()` at reveal threshold, `warning()` at commit threshold, reset on direction change
+- **Spring tuning:** Reduced stiffness/damping for more natural iOS feel (swipeClose: 340/32/0.8, swipeOpen: 260/26/0.8)
+- **Icon clipping:** `overflow-hidden` on tray clips icon until background grows enough to reveal it
+- **Affordance indicator:** 3 gray lines fade out immediately when swipe starts via motion value transform
+- **Zero React re-renders during drag:** All tracking in refs, rendering via motion values only
+
+**Files modified (3):**
+
+- `src/components/ui/swipeable-row.tsx` (complete rewrite — 240→443 lines)
+- `src/hooks/use-long-press.ts` (cancel threshold 10px→6px)
+- `src/lib/design-system.ts` (spring tuning)
+
+**Backward compatible:** All 6 consumers (calendar-day-view, client-cards-view, service-mobile-card-list, appointment-card, clientes/page, mi-dia-appointment-row) work without changes.
+
+---
 
 ### Session 199: Clients Mobile Polish (2026-03-04)
 

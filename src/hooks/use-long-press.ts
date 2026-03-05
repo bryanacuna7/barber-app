@@ -50,8 +50,8 @@ export function useLongPress({ delay = 500, onLongPress }: LongPressOptions) {
       if (!startPos.current) return
       const dx = Math.abs(e.clientX - startPos.current.x)
       const dy = Math.abs(e.clientY - startPos.current.y)
-      // Cancel if user moved > 10px (scrolling intent)
-      if (dx > 10 || dy > 10) clear()
+      // Cancel if user moved > 6px (matches SwipeableRow dead zone)
+      if (dx > 6 || dy > 6) clear()
     },
     [clear]
   )
