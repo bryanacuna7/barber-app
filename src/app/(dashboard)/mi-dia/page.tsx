@@ -1,52 +1,56 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useBarberDayAppointments } from '@/hooks/queries/useAppointments'
 import { useRealtimeAppointments } from '@/hooks/use-realtime-appointments'
 import { useAppointmentActions } from '@/hooks/use-appointment-actions'
+import { usePaymentFlow } from '@/hooks/use-payment-flow'
+import { computeDelays, groupByZone } from '@/lib/utils/appointment-helpers'
 import { MiDiaHeader } from '@/components/barber/mi-dia-header'
 import { MiDiaTimeline } from '@/components/barber/mi-dia-timeline'
+import { MiDiaDetailSheet } from '@/components/barber/mi-dia-detail-sheet'
 import { FocusMode } from '@/components/barber/focus-mode'
 import { WalkInSheet } from '@/components/barber/walk-in-sheet'
+import { PaymentMethodPickerSheet } from '@/components/barber/payment-method-picker-sheet'
+import { AdvancePaymentVerifyModal } from '@/components/barber/advance-payment-verify'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast'
 import { ComponentErrorBoundary } from '@/components/error-boundaries/ComponentErrorBoundary'
 import { QueryError } from '@/components/ui/query-error'
 import { OnboardingChecklist } from '@/components/barber/onboarding-checklist'
-import { getStaffPermissions, mergePermissions } from '@/lib/auth/roles'
+import { getStaffPermissions, mergePermissions, type StaffPermissions } from '@/lib/auth/roles'
 import { useBusiness } from '@/contexts/business-context'
 import type { TodayAppointment } from '@/types/custom'
 
+type PaymentMethod = 'cash' | 'sinpe' | 'card'
+
 /**
- * Mi Día - Staff View Page (Modernized with React Query + Real-time)
+ * Mi Dia - Staff View Page (Mock E Redesign)
  *
- * Phase 0 Week 5-6 Data Integration:
- * - Uses React Query for caching and state management
- * - Real-time WebSocket updates with automatic cache invalidation
- * - Error boundaries for graceful degradation
- * - Feature flag controlled rollout
- *
- * Performance: 95%+ bandwidth reduction vs polling + instant cache updates
+ * Zone-based layout: NOW > Requires Action > Upcoming > Finalized
+ * Centralized payment flow, single PaymentMethodPickerSheet instance.
  */
 function MiDiaPageContent() {
   const router = useRouter()
   const { businessId, barberId: contextBarberId, isOwner } = useBusiness()
   const barberId = contextBarberId ?? null
-  const [acceptedPaymentMethods, setAcceptedPaymentMethods] = useState<
-    ('cash' | 'sinpe' | 'card')[] | null
-  >(null)
+  const [acceptedPaymentMethods, setAcceptedPaymentMethods] = useState<PaymentMethod[] | null>(null)
   const [businessName, setBusinessName] = useState('')
   const [profileLoading, setProfileLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [barberName, setBarberName] = useState('')
   const [hasPhoto, setHasPhoto] = useState(false)
-  const [canCreateCitas, setCanCreateCitas] = useState(true) // default per DEFAULT_STAFF_PERMISSIONS
+  const [canCreateCitas, setCanCreateCitas] = useState(true)
   const [isWalkInSheetOpen, setIsWalkInSheetOpen] = useState(false)
+  const [selectedAppointment, setSelectedAppointment] = useState<TodayAppointment | null>(null)
+  const [focusAppointmentId, setFocusAppointmentId] = useState<string | null>(null)
+  const [verifyPaymentApt, setVerifyPaymentApt] = useState<TodayAppointment | null>(null)
 
   const toast = useToast()
 
@@ -82,37 +86,33 @@ function MiDiaPageContent() {
         }
 
         if (bizError || !bizData) {
-          // Keep null → card falls back to showing all payment methods (safe default)
           console.error('Error loading business data for Mi Día:', bizError)
         } else {
-          if (typeof bizData.name === 'string') {
-            setBusinessName(bizData.name)
-          }
+          if (typeof bizData.name === 'string') setBusinessName(bizData.name)
           if (Array.isArray(bizData.accepted_payment_methods)) {
-            setAcceptedPaymentMethods(
-              bizData.accepted_payment_methods as ('cash' | 'sinpe' | 'card')[]
-            )
+            setAcceptedPaymentMethods(bizData.accepted_payment_methods as PaymentMethod[])
           }
         }
 
-        // Resolve can_create_citas for current role
+        const barberRecord = barberData as Record<string, unknown>
+        const bizRecord = bizData as Record<string, unknown>
+
         if (!isOwner) {
-          const businessPerms = getStaffPermissions((bizData as any)?.staff_permissions)
+          const businessPerms = getStaffPermissions(bizRecord?.staff_permissions)
           const effectivePerms = mergePermissions(
             businessPerms,
-            (barberData as any)?.custom_permissions
+            barberRecord?.custom_permissions as Partial<StaffPermissions> | undefined
           )
           setCanCreateCitas(effectivePerms.can_create_citas)
         } else {
           setCanCreateCitas(true)
         }
 
-        setBarberName((barberData as any).name || '')
-        setHasPhoto(!!(barberData as any).photo_url)
+        setBarberName((barberRecord.name as string) || '')
+        setHasPhoto(!!barberRecord.photo_url)
 
-        // Detect first login — show onboarding if no photo
         const dismissed = localStorage.getItem(`onboarding_dismissed_${barberData.id}`)
-        if (!dismissed && !(barberData as any).photo_url) {
+        if (!dismissed && !barberRecord.photo_url) {
           setShowOnboarding(true)
         }
       } catch (error) {
@@ -134,14 +134,8 @@ function MiDiaPageContent() {
     refetch,
   } = useBarberDayAppointments(barberId)
 
-  // Real-time WebSocket subscription (automatic cache invalidation)
-  useRealtimeAppointments({
-    businessId,
-    enabled: !!businessId,
-  })
-
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [focusAppointmentId, setFocusAppointmentId] = useState<string | null>(null)
+  // Real-time WebSocket subscription
+  useRealtimeAppointments({ businessId, enabled: !!businessId })
 
   const { checkIn, complete, noShow, loadingAppointmentId } = useAppointmentActions({
     barberId,
@@ -153,50 +147,73 @@ function MiDiaPageContent() {
       }
       toast.success(messages[action])
 
-      // Eagerly exit focus mode on terminal actions — don't wait for refetch.
-      // Without this, FocusMode stays open if the refetch fails (e.g. CORS / network error).
       if (action === 'complete' || action === 'no-show') {
         setFocusAppointmentId(null)
+        setSelectedAppointment(null)
       }
 
       refetch()
     },
-    onError: (action, error) => {
+    onError: (_action, error) => {
       toast.error(error.message)
     },
   })
 
-  // Wrapped checkIn that enters focus mode only after successful API call
+  // Centralized payment flow (P0 fix: single instance)
+  const paymentFlow = usePaymentFlow({
+    acceptedPaymentMethods: acceptedPaymentMethods ?? undefined,
+    onComplete: (appointmentId, method) => complete(appointmentId, method),
+  })
+
+  // Wrapped checkIn that enters focus mode after success
   const handleCheckIn = useCallback(
     async (appointmentId: string) => {
       try {
         await checkIn(appointmentId)
         setFocusAppointmentId(appointmentId)
+        setSelectedAppointment(null)
       } catch {
-        // Error already shown via onError toast — don't enter focus mode
+        // Error shown via onError toast
       }
     },
     [checkIn]
   )
+
+  // Compute zones from appointments (pure helpers in page.tsx — P0 fix)
+  const sortedAppointments = useMemo(
+    () =>
+      data?.appointments
+        ? [...data.appointments].sort(
+            (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+          )
+        : [],
+    [data?.appointments]
+  )
+
+  const delayMap = useMemo(() => computeDelays(sortedAppointments), [sortedAppointments])
+  const zones = useMemo(
+    () => groupByZone(sortedAppointments, delayMap),
+    [sortedAppointments, delayMap]
+  )
+
+  // Stats for header
+  const completedCount = zones.finalized.completed.length
+  const totalCount = sortedAppointments.length
 
   // Auto-exit focus mode when appointment is no longer in-progress
   useEffect(() => {
     if (!focusAppointmentId || !data?.appointments) return
     const apt = data.appointments.find((a) => a.id === focusAppointmentId)
     if (!apt || apt.status !== 'confirmed' || !apt.started_at) {
-      // Appointment completed, cancelled, or not found — exit focus
-      // Small delay to let the completion animation show
       const timer = setTimeout(() => setFocusAppointmentId(null), 300)
       return () => clearTimeout(timer)
     }
   }, [focusAppointmentId, data?.appointments])
 
   // Pull-to-refresh handler
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
+  const handleRefresh = useCallback(async () => {
     await refetch()
-    setIsRefreshing(false)
-  }
+  }, [refetch])
 
   const handleOwnerOnlyOnboardingStep = useCallback(
     (path: string, featureLabel: string) => {
@@ -206,7 +223,6 @@ function MiDiaPageContent() {
         )
         return
       }
-
       router.push(path)
     },
     [isOwner, router, toast]
@@ -220,37 +236,42 @@ function MiDiaPageContent() {
     router.push('/mi-dia/cuenta')
   }, [isOwner, router])
 
-  // Context/profile loading state
+  // Find next non-finalized appointment for "Llega Antes" in detail sheet
+  const nextUpcomingForSelected = useMemo(() => {
+    if (!selectedAppointment) return null
+    const idx = sortedAppointments.findIndex((a) => a.id === selectedAppointment.id)
+    if (idx === -1) return null
+    return (
+      sortedAppointments
+        .slice(idx + 1)
+        .find(
+          (a) => a.status !== 'completed' && a.status !== 'cancelled' && a.status !== 'no_show'
+        ) ?? null
+    )
+  }, [selectedAppointment, sortedAppointments])
+
+  // PullToRefresh disabled check
+  const pullToRefreshDisabled =
+    !!focusAppointmentId ||
+    isWalkInSheetOpen ||
+    !!selectedAppointment ||
+    paymentFlow.paymentSheetOpen
+
+  // --- Loading / Error states ---
+
   if (profileLoading) {
     return (
-      <div>
-        <div className="animate-pulse">
-          {/* Header Skeleton */}
-          <div className="py-5">
-            <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-32 mb-3" />
-            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-48 mb-4" />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-16 bg-zinc-100 dark:bg-zinc-800 rounded-xl" />
-              ))}
-            </div>
-          </div>
-
-          {/* Timeline Skeleton */}
-          <div className="p-4 space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="h-48 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800"
-              />
-            ))}
-          </div>
+      <div className="animate-pulse">
+        <div className="h-16 bg-zinc-200 dark:bg-zinc-800 rounded-lg mb-4" />
+        <div className="px-4 space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-16 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl" />
+          ))}
         </div>
       </div>
     )
   }
 
-  // Context/profile error state
   if (profileError) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[60vh]">
@@ -260,7 +281,7 @@ function MiDiaPageContent() {
           className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-8 max-w-md w-full text-center"
         >
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/30 mx-auto mb-4">
-            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" aria-hidden="true" />
+            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">Error de Perfil</h2>
           <p className="text-sm text-muted">{profileError}</p>
@@ -269,37 +290,19 @@ function MiDiaPageContent() {
     )
   }
 
-  // Loading skeleton (first load)
   if (isLoadingAppointments && !data) {
     return (
-      <div>
-        <div className="animate-pulse">
-          {/* Header Skeleton */}
-          <div className="py-5">
-            <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-32 mb-3" />
-            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-48 mb-4" />
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-16 bg-zinc-100 dark:bg-zinc-800 rounded-xl" />
-              ))}
-            </div>
-          </div>
-
-          {/* Timeline Skeleton */}
-          <div className="p-4 space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="h-48 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800"
-              />
-            ))}
-          </div>
+      <div className="animate-pulse">
+        <div className="h-16 bg-zinc-200 dark:bg-zinc-800 rounded-lg mb-4" />
+        <div className="px-4 space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-16 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl" />
+          ))}
         </div>
       </div>
     )
   }
 
-  // Error state with retry (uses new QueryError component)
   if (fetchError && !data) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[60vh]">
@@ -308,7 +311,6 @@ function MiDiaPageContent() {
     )
   }
 
-  // No data (shouldn't happen, but handle it)
   if (!data) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[60vh]">
@@ -331,14 +333,9 @@ function MiDiaPageContent() {
     )
   }
 
-  // Find the in-progress appointment (confirmed + started_at) for the focus pill
-  const inProgressAppointment = data.appointments.find(
-    (a) => a.status === 'confirmed' && a.started_at
-  )
-
   return (
     <div>
-      {/* Header - Wrapped in error boundary */}
+      {/* Sticky compact header */}
       <ComponentErrorBoundary
         fallbackTitle="Error en el encabezado"
         fallbackDescription="Ocurrió un error al cargar las estadísticas del día"
@@ -346,16 +343,18 @@ function MiDiaPageContent() {
         <MiDiaHeader
           barberName={data.barber.name}
           date={data.date}
-          stats={data.stats}
-          lastUpdated={new Date()}
+          completedCount={completedCount}
+          totalCount={totalCount}
+          canCreateCitas={canCreateCitas}
+          onWalkIn={() => setIsWalkInSheetOpen(true)}
         />
       </ComponentErrorBoundary>
 
       {/* Main Content */}
-      <main className="container mx-auto max-w-4xl px-3 sm:px-4 py-5 sm:py-6">
+      <main className="container mx-auto max-w-4xl px-3 sm:px-4 py-4 sm:py-5">
         {/* Onboarding Checklist */}
         {showOnboarding && barberId && (
-          <div className="mb-5">
+          <div className="mb-4">
             <OnboardingChecklist
               barberName={barberName}
               hasPhoto={hasPhoto}
@@ -374,70 +373,52 @@ function MiDiaPageContent() {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="mb-4 flex items-center justify-end gap-2">
-          {/* Focus Mode pill — only shows when there's an in-progress appointment */}
-          {inProgressAppointment && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFocusAppointmentId(inProgressAppointment.id)}
-              className="h-11 min-w-[104px] justify-center gap-1.5 whitespace-nowrap px-4 leading-none"
-              aria-label="Entrar en modo enfoque"
-              data-testid="focus-pill-button"
-            >
-              <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-              Enfoque
-            </Button>
-          )}
-          {canCreateCitas && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsWalkInSheetOpen(true)}
-              className="h-11 min-w-[104px] justify-center whitespace-nowrap px-4 leading-none"
-              aria-label="Agregar walk-in"
-              data-testid="walk-in-button"
-            >
-              Walk-in
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            withRipple={false}
-            className="h-11 w-11 min-w-[44px] rounded-2xl justify-center px-0 leading-none"
-            aria-label="Actualizar citas"
-            data-testid="refresh-button"
-          >
-            <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="sr-only">Actualizar</span>
-          </Button>
-        </div>
-
-        {/* Timeline - Wrapped in error boundary */}
+        {/* Timeline with zones */}
         <ComponentErrorBoundary
           fallbackTitle="Error en el timeline"
-          fallbackDescription="Ocurrió un error al mostrar las citas. Las acciones están deshabilitadas temporalmente."
+          fallbackDescription="Ocurrió un error al mostrar las citas."
         >
-          <MiDiaTimeline
-            appointments={data.appointments}
-            onCheckIn={handleCheckIn}
-            onComplete={complete}
-            onNoShow={noShow}
-            onFocusMode={(id) => setFocusAppointmentId(id)}
-            loadingAppointmentId={loadingAppointmentId}
-            acceptedPaymentMethods={acceptedPaymentMethods ?? undefined}
-            barberName={data.barber.name}
-            businessName={businessName}
-          />
+          <PullToRefresh onRefresh={handleRefresh} disabled={pullToRefreshDisabled}>
+            <MiDiaTimeline
+              zones={zones}
+              delayMap={delayMap}
+              canCreateCitas={canCreateCitas}
+              onCheckIn={handleCheckIn}
+              onComplete={paymentFlow.handleCompleteClick}
+              onNoShow={noShow}
+              onFocusMode={(id) => setFocusAppointmentId(id)}
+              onSelect={(apt) => setSelectedAppointment(apt)}
+              onWalkIn={() => setIsWalkInSheetOpen(true)}
+              loadingAppointmentId={loadingAppointmentId}
+            />
+          </PullToRefresh>
         </ComponentErrorBoundary>
       </main>
+
+      {/* Detail Sheet */}
+      <MiDiaDetailSheet
+        appointment={selectedAppointment}
+        open={!!selectedAppointment}
+        onOpenChange={(open) => {
+          if (!open) setSelectedAppointment(null)
+        }}
+        onCheckIn={handleCheckIn}
+        onComplete={paymentFlow.handleCompleteClick}
+        onNoShow={noShow}
+        onFocusMode={(id) => {
+          setSelectedAppointment(null)
+          setFocusAppointmentId(id)
+        }}
+        onVerifyPayment={(id) => {
+          const apt = data.appointments.find((a) => a.id === id) ?? null
+          setVerifyPaymentApt(apt)
+        }}
+        nextAppointment={nextUpcomingForSelected}
+        barberName={data.barber.name}
+        businessName={businessName}
+        estimatedDelay={selectedAppointment ? (delayMap.get(selectedAppointment.id) ?? 0) : 0}
+        isLoading={selectedAppointment ? loadingAppointmentId === selectedAppointment.id : false}
+      />
 
       {/* Walk-in Sheet */}
       {barberId && businessId && (
@@ -465,15 +446,39 @@ function MiDiaPageContent() {
               <FocusMode
                 key={apt.id}
                 appointment={apt}
-                onComplete={complete}
+                onComplete={paymentFlow.handleCompleteClick}
                 onDismiss={() => setFocusAppointmentId(null)}
                 onWalkIn={canCreateCitas ? () => setIsWalkInSheetOpen(true) : undefined}
                 isLoading={loadingAppointmentId === apt.id}
-                acceptedPaymentMethods={acceptedPaymentMethods ?? undefined}
               />
             )
           })()}
       </AnimatePresence>
+
+      {/* SINGLE payment picker instance (P0 fix) */}
+      <PaymentMethodPickerSheet
+        open={paymentFlow.paymentSheetOpen}
+        onOpenChange={paymentFlow.setPaymentSheetOpen}
+        options={paymentFlow.activePaymentOptions}
+        onSelect={paymentFlow.handlePaymentSelect}
+      />
+
+      {/* Advance Payment Verification Modal */}
+      {verifyPaymentApt && (
+        <AdvancePaymentVerifyModal
+          appointmentId={verifyPaymentApt.id}
+          proofChannel={verifyPaymentApt.proof_channel || 'whatsapp'}
+          basePrice={verifyPaymentApt.base_price_snapshot ?? undefined}
+          discountPct={verifyPaymentApt.discount_pct_snapshot ?? undefined}
+          finalPrice={verifyPaymentApt.final_price_snapshot ?? undefined}
+          isOpen={!!verifyPaymentApt}
+          onClose={() => setVerifyPaymentApt(null)}
+          onVerified={() => {
+            setVerifyPaymentApt(null)
+            refetch()
+          }}
+        />
+      )}
     </div>
   )
 }

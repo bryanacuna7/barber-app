@@ -6,20 +6,16 @@ import { motion } from 'framer-motion'
 import { X, Check, UserPlus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
-import { usePaymentFlow } from '@/hooks/use-payment-flow'
-import { PaymentMethodPickerSheet } from './payment-method-picker-sheet'
 import { SlideToComplete } from './slide-to-complete'
 import type { TodayAppointment } from '@/types/custom'
 
-type PaymentMethod = 'cash' | 'sinpe' | 'card'
-
 interface FocusModeProps {
   appointment: TodayAppointment
-  onComplete?: (appointmentId: string, paymentMethod?: PaymentMethod) => void
+  /** Centralized complete handler — already wired to payment flow in page.tsx */
+  onComplete?: (appointmentId: string) => void
   onDismiss: () => void
   onWalkIn?: () => void
   isLoading?: boolean
-  acceptedPaymentMethods?: PaymentMethod[]
 }
 
 /* ─── Progress Ring (Apple Watch style) ─── */
@@ -86,18 +82,9 @@ export function FocusMode({
   onDismiss,
   onWalkIn,
   isLoading = false,
-  acceptedPaymentMethods,
 }: FocusModeProps) {
   const [elapsedMins, setElapsedMins] = useState(0)
   const [elapsed, setElapsed] = useState('')
-
-  const {
-    paymentSheetOpen,
-    setPaymentSheetOpen,
-    activePaymentOptions,
-    handleCompleteClick,
-    handlePaymentSelect,
-  } = usePaymentFlow({ acceptedPaymentMethods, onComplete })
 
   // Prevent background scroll while focus mode is open.
   // position:fixed on body breaks framer-motion drag coords — use overflow only.
@@ -235,16 +222,13 @@ export function FocusMode({
 
         {/* Mobile: Slide to Complete */}
         <div className="lg:hidden">
-          <SlideToComplete
-            onComplete={() => handleCompleteClick(appointment.id)}
-            disabled={isLoading}
-          />
+          <SlideToComplete onComplete={() => onComplete?.(appointment.id)} disabled={isLoading} />
         </div>
         {/* Desktop: Regular button */}
         <Button
           variant="success"
           size="lg"
-          onClick={() => handleCompleteClick(appointment.id)}
+          onClick={() => onComplete?.(appointment.id)}
           disabled={isLoading}
           className="hidden lg:flex w-full min-h-[56px] text-base font-semibold"
           data-testid="focus-mode-complete"
@@ -253,13 +237,6 @@ export function FocusMode({
           Completar
         </Button>
       </div>
-
-      <PaymentMethodPickerSheet
-        open={paymentSheetOpen}
-        onOpenChange={setPaymentSheetOpen}
-        options={activePaymentOptions}
-        onSelect={handlePaymentSelect}
-      />
     </motion.div>,
     document.body
   )

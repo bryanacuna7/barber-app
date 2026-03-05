@@ -37,6 +37,9 @@ export function usePaymentFlow({ acceptedPaymentMethods, onComplete }: UsePaymen
       : PAYMENT_OPTIONS.filter((opt) => acceptedPaymentMethods.includes(opt.value))
 
   const handleCompleteClick = (appointmentId: string) => {
+    // Guard: prevent double trigger if sheet is already open
+    if (paymentSheetOpen) return
+
     haptics.tap()
 
     // 0 methods configured → complete without asking payment
