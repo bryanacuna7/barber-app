@@ -4,6 +4,13 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.33] - 2026-03-05
+
+### Mejorado
+
+- Las hojas de crear, editar y detalle ahora abren al instante, sin traba ni lag
+- Todas las pantallas principales (citas, servicios, equipo) se benefician de la mejora
+
 ## [0.9.32] - 2026-03-05
 
 ### Nuevo
