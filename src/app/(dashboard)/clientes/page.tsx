@@ -422,9 +422,9 @@ export default function ClientesPage() {
                   onClick={() => openCreateClientModal('mobile')}
                   aria-label="Nuevo cliente"
                   data-tour="clients-add-button-mobile"
-                  className="flex items-center justify-center h-11 w-11 shrink-0 text-foreground transition-transform active:scale-95"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shrink-0 active:scale-95 transition-transform"
                 >
-                  <Plus className="h-5 w-5" strokeWidth={2.5} />
+                  <Plus className="h-4 w-4" strokeWidth={2.5} />
                 </button>
               </div>
 

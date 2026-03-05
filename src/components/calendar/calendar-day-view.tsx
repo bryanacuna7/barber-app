@@ -10,6 +10,7 @@ import { AppointmentContextMenu, type ContextMenuAppointment } from './appointme
 import { useLongPress } from '@/hooks/use-long-press'
 import { animations } from '@/lib/design-system'
 import { formatCurrencyCompactMillions } from '@/lib/utils'
+import { getEffectiveDurationMinutes, toMinutesOfDay } from '@/lib/utils/occupancy'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -18,14 +19,19 @@ import { formatCurrencyCompactMillions } from '@/lib/utils'
 interface TimeBlock {
   id: string
   label: string
-  start: number
-  end: number
+  startMinute: number
+  endMinute: number
   icon: React.ComponentType<{ className?: string }>
   iconColor: string
   gradient: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   appointments: any[]
+  blockMinutes: number
+  occupiedMinutes: number
+  rawOccupancyPercent: number
   occupancyPercent: number
+  occupancyCount: number
+  isOverbooked: boolean
   count: number
 }
 
@@ -67,6 +73,20 @@ function NowLine({ time }: { time: Date }) {
       <div className="w-2 h-2 rounded-full bg-[var(--brand-primary)] animate-pulse shrink-0" />
     </div>
   )
+}
+
+function formatMinuteLabel(minuteOfDay: number): string {
+  const normalized = ((minuteOfDay % 1440) + 1440) % 1440
+  const hours24 = Math.floor(normalized / 60)
+  const minutes = normalized % 60
+  const hours12 = hours24 % 12 || 12
+  const suffix = hours24 >= 12 ? 'pm' : 'am'
+
+  if (minutes === 0) {
+    return `${hours12}${suffix}`
+  }
+
+  return `${hours12}:${String(minutes).padStart(2, '0')}${suffix}`
 }
 
 // ---------------------------------------------------------------------------
@@ -186,13 +206,8 @@ function AppointmentRow({
   })
 
   const startTime = format(parseISO(apt.scheduled_at), 'H:mm')
-  const endTime = format(
-    addMinutes(
-      parseISO(apt.scheduled_at),
-      apt.duration_minutes || apt.service?.duration_minutes || 30
-    ),
-    'H:mm'
-  )
+  const effectiveStart = apt.started_at ? parseISO(apt.started_at) : parseISO(apt.scheduled_at)
+  const endTime = format(addMinutes(effectiveStart, getEffectiveDurationMinutes(apt)), 'H:mm')
   const price = formatCurrencyCompactMillions(apt.service?.price || 0)
   const isCancelled = apt.status === 'cancelled' || apt.status === 'no_show'
 
@@ -496,22 +511,21 @@ export function CalendarDayView({
                       {block.label}
                     </h3>
                     <span className="text-[11px] text-subtle">
-                      · {block.start > 12 ? block.start - 12 : block.start}
-                      {block.start >= 12 ? 'pm' : 'am'} –{' '}
-                      {block.end > 12 ? block.end - 12 : block.end}
-                      {block.end >= 12 ? 'pm' : 'am'}
+                      · {formatMinuteLabel(block.startMinute)} –{' '}
+                      {formatMinuteLabel(block.endMinute)}
                     </span>
                   </div>
                   <span
                     className={`text-[11px] font-semibold ${
-                      block.occupancyPercent >= 90
+                      block.isOverbooked || block.occupancyPercent >= 90
                         ? 'text-red-500'
                         : block.occupancyPercent >= 60
                           ? 'text-amber-500'
                           : 'text-emerald-500'
                     }`}
                   >
-                    {block.count} citas · {block.occupancyPercent}%
+                    {block.occupancyCount} citas · {block.occupancyPercent}%
+                    {block.isOverbooked ? ' · Sobrecupo' : ''}
                   </span>
                 </div>
 
@@ -521,7 +535,7 @@ export function CalendarDayView({
                     initial={{ width: 0 }}
                     animate={{ width: `${block.occupancyPercent}%` }}
                     className={`h-full rounded-full ${
-                      block.occupancyPercent >= 90
+                      block.isOverbooked || block.occupancyPercent >= 90
                         ? 'bg-red-500'
                         : block.occupancyPercent >= 60
                           ? 'bg-amber-500'
@@ -545,8 +559,8 @@ export function CalendarDayView({
                       const isActiveBlock =
                         isSelectedDateToday &&
                         currentTime != null &&
-                        currentTime.getHours() >= block.start &&
-                        currentTime.getHours() < block.end
+                        toMinutesOfDay(currentTime) >= block.startMinute &&
+                        toMinutesOfDay(currentTime) < block.endMinute
 
                       const nowIndex = isActiveBlock
                         ? block.appointments.findIndex((apt) => {
@@ -585,8 +599,8 @@ export function CalendarDayView({
                 <div className="mt-3 space-y-1.5 lg:space-y-2">
                   {gaps
                     .filter((gap) => {
-                      const gapHour = parseISO(gap.start).getHours()
-                      return gapHour >= block.start && gapHour < block.end
+                      const gapMinute = toMinutesOfDay(parseISO(gap.start))
+                      return gapMinute >= block.startMinute && gapMinute < block.endMinute
                     })
                     .map((gap, gapIndex) => (
                       <motion.div

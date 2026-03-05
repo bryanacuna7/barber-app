@@ -208,9 +208,9 @@ export function CalendarHeader({
                     Hoy
                   </Button>
                 )}
-                <Button
+                <button
                   ref={plusBtnRef}
-                  variant="ghost"
+                  type="button"
                   onClick={() => {
                     if (isActionSheetOpen) {
                       setIsActionSheetOpen(false)
@@ -231,7 +231,7 @@ export function CalendarHeader({
                     setIsActionSheetOpen(true)
                   }}
                   data-testid="create-appointment-btn-mobile"
-                  className="min-w-[44px] min-h-[44px] h-auto p-0 flex items-center justify-center text-foreground"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 active:scale-95 transition-transform"
                   aria-label="Crear cita"
                   aria-haspopup="dialog"
                   aria-expanded={isActionSheetOpen}
@@ -244,9 +244,9 @@ export function CalendarHeader({
                     transition={{ type: 'spring', stiffness: 380, damping: 26 }}
                     className="inline-flex"
                   >
-                    <Plus className="h-5 w-5" strokeWidth={2.5} />
+                    <Plus className="h-4 w-4" strokeWidth={2.5} />
                   </motion.span>
-                </Button>
+                </button>
               </div>
             </div>
 

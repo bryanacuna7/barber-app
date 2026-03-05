@@ -4,11 +4,13 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { X, Clock, Sparkles, AlertTriangle, CreditCard, ChevronRight } from 'lucide-react'
 import { getStaleCache, setCache, CACHE_TTL } from '@/lib/cache'
+import { useBusiness } from '@/contexts/business-context'
 import type { SubscriptionStatusResponse } from '@/types/database'
 
 const CACHE_KEY = 'sub_status'
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000
 const DAYS_RECALC_INTERVAL_MS = 60 * 1000
+const BASIC_BANNER_DISMISSED_KEY = 'basic_banner_dismissed'
 
 function calculateDaysRemaining(endDate: string | null): number | null {
   if (!endDate) return null
@@ -51,8 +53,19 @@ interface TrialBannerProps {
 
 export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
   const [subscription, setSubscription] = useState<SubscriptionStatusResponse | null>(null)
-  const [dismissed, setDismissed] = useState(false)
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem(BASIC_BANNER_DISMISSED_KEY) === 'true'
+  })
   const [loading, setLoading] = useState(true)
+  const { isAdmin } = useBusiness()
+
+  const handleDismiss = useCallback((persistent?: boolean) => {
+    setDismissed(true)
+    if (persistent) {
+      localStorage.setItem(BASIC_BANNER_DISMISSED_KEY, 'true')
+    }
+  }, [])
 
   const fetchSubscription = useCallback(async () => {
     try {
@@ -61,6 +74,10 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
         const data = (await res.json()) as SubscriptionStatusResponse
         setSubscription(withLiveDaysRemaining(data))
         setCache(CACHE_KEY, data, CACHE_TTL.SHORT)
+        // Clear persistent dismiss if user upgraded from basic
+        if (data.plan.name !== 'basic') {
+          localStorage.removeItem(BASIC_BANNER_DISMISSED_KEY)
+        }
       }
     } catch (error) {
       console.error('Error fetching subscription:', error)
@@ -111,6 +128,9 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
 
   if (loading || dismissed) return null
   if (!subscription) return null
+
+  // Never show upsell banners to super admins
+  if (isAdmin) return null
 
   // Don't show banner for active subscriptions with Pro plan (unless expiring soon)
   const isActiveProNotExpiring =
@@ -182,7 +202,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
         }`}
       >
         <button
-          onClick={() => setDismissed(true)}
+          onClick={() => handleDismiss()}
           className="absolute right-2 top-2 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
         >
           <X className="h-3.5 w-3.5" />
@@ -257,7 +277,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
     return (
       <div className="relative mb-3 mt-1 rounded-2xl border border-blue-200/80 bg-blue-50/95 p-4 shadow-sm dark:border-blue-800/70 dark:bg-blue-950/50">
         <button
-          onClick={() => setDismissed(true)}
+          onClick={() => handleDismiss()}
           className="absolute right-3 top-3 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
         >
           <X className="h-4 w-4" />
@@ -296,7 +316,7 @@ export function TrialBanner({ variant = 'full' }: TrialBannerProps) {
     return (
       <div className="relative mb-3 mt-1 rounded-2xl border border-zinc-200/70 bg-zinc-50/95 p-4 shadow-sm dark:border-zinc-700/70 dark:bg-zinc-900/75">
         <button
-          onClick={() => setDismissed(true)}
+          onClick={() => handleDismiss(true)}
           className="absolute right-3 top-3 p-1 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
         >
           <X className="h-4 w-4" />

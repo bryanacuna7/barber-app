@@ -343,7 +343,9 @@ export function useCalendarAppointments(startDate: Date, endDate: Date, business
           `
           id,
           scheduled_at,
+          started_at,
           duration_minutes,
+          actual_duration_minutes,
           price,
           status,
           client_notes,
@@ -376,7 +378,9 @@ export function useCalendarAppointments(startDate: Date, endDate: Date, business
       return (data || []).map((appt: any) => ({
         id: appt.id,
         scheduled_at: appt.scheduled_at,
+        started_at: appt.started_at ?? null,
         duration_minutes: appt.duration_minutes,
+        actual_duration_minutes: appt.actual_duration_minutes ?? null,
         price: appt.price,
         status: appt.status,
         client_notes: appt.client_notes,

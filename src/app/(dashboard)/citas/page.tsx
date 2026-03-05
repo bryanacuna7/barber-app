@@ -52,6 +52,12 @@ import { WalkInSheet } from '@/components/barber/walk-in-sheet'
 import { GuideContextualTip } from '@/components/guide/guide-contextual-tip'
 import { localDateTimeToUtcIso } from '@/lib/utils/timezone'
 import { getSuggestedAppointmentTime } from '@/lib/utils/appointment-time'
+import {
+  computeBlockOccupancy,
+  computeDayBlocks,
+  getEffectiveWindow,
+  toMinutesOfDay,
+} from '@/lib/utils/occupancy'
 
 // Extracted sub-components
 import { CalendarHeader } from '@/components/calendar/calendar-header'
@@ -299,69 +305,55 @@ function CitasCalendarFusionContent() {
     const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
     const dayKey = dayKeys[getDay(selectedDate)]
     const dayHours = businessSettings?.operatingHours?.[dayKey]
+    const blocks = computeDayBlocks(dayHours?.open, dayHours?.close)
+    const occupancySourceAppointments = filteredAppointments.filter(
+      (apt) => apt.status !== 'cancelled'
+    )
+    const occupancyMetrics = computeBlockOccupancy(
+      blocks,
+      occupancySourceAppointments,
+      selectedDate
+    )
 
-    // Parse HH:MM to hour number
-    const parseHour = (time: string) => {
-      const [h] = time.split(':').map(Number)
-      return h
-    }
-
-    const openHour = dayHours ? parseHour(dayHours.open) : 7
-    const closeHour = dayHours ? parseHour(dayHours.close) : 21
-
-    // Split the business day into 3 blocks: morning / midday / afternoon
-    const totalHours = closeHour - openHour
-    const midStart = openHour + Math.floor(totalHours * 0.4) // ~40% mark
-    const aftStart = openHour + Math.floor(totalHours * 0.65) // ~65% mark
-
-    const blocks = [
-      {
-        id: 'morning',
-        label: 'MAÑANA',
-        start: openHour,
-        end: midStart,
+    const blockStyleById = {
+      morning: {
         icon: Sunrise,
         iconColor: 'text-violet-400',
         gradient: 'from-violet-500/10 to-blue-500/10',
       },
-      {
-        id: 'midday',
-        label: 'MEDIODÍA',
-        start: midStart,
-        end: aftStart,
+      midday: {
         icon: Sun,
         iconColor: 'text-amber-400',
         gradient: 'from-purple-500/10 to-violet-500/10',
       },
-      {
-        id: 'afternoon',
-        label: 'TARDE',
-        start: aftStart,
-        end: closeHour,
+      afternoon: {
         icon: Moon,
         iconColor: 'text-blue-400',
         gradient: 'from-blue-500/10 to-purple-500/10',
       },
-    ]
-    return blocks.map((block) => {
+    } as const
+
+    return blocks.map((block, index) => {
+      const occupancy = occupancyMetrics[index]
       const blockAppointments = sortedAppointments.filter((apt) => {
-        const hour = parseISO(apt.scheduled_at).getHours()
-        return hour >= block.start && hour < block.end
+        const startMinute = toMinutesOfDay(parseISO(apt.scheduled_at))
+        return startMinute >= block.startMinute && startMinute < block.endMinute
       })
-      const totalMinutesInBlock = (block.end - block.start) * 60
-      const occupiedMinutes = blockAppointments.reduce(
-        (sum, apt) => sum + (apt.service?.duration_minutes || 30),
-        0
-      )
-      const occupancyPercent = Math.round((occupiedMinutes / totalMinutesInBlock) * 100)
+
       return {
         ...block,
+        ...blockStyleById[block.id],
         appointments: blockAppointments,
-        occupancyPercent,
         count: blockAppointments.length,
+        blockMinutes: occupancy.blockMinutes,
+        occupiedMinutes: Math.round(occupancy.occupiedMinutes),
+        rawOccupancyPercent: occupancy.rawOccupancyPercent,
+        occupancyPercent: occupancy.occupancyPercent,
+        isOverbooked: occupancy.isOverbooked,
+        occupancyCount: occupancy.occupancyCount,
       }
     })
-  }, [viewMode, sortedAppointments, selectedDate, businessSettings])
+  }, [viewMode, sortedAppointments, filteredAppointments, selectedDate, businessSettings])
 
   // Week days
   const weekDays = useMemo(() => {
@@ -442,24 +434,30 @@ function CitasCalendarFusionContent() {
   // Gaps (Cinema feature)
   const gaps = useMemo(() => {
     if (viewMode !== 'day') return []
+
     const foundGaps: Array<{ start: string; end: string; minutes: number }> = []
-    sortedAppointments.forEach((apt, i) => {
-      if (i === sortedAppointments.length - 1) return
-      const currentEnd = parseISO(apt.scheduled_at)
-      const duration = apt.service?.duration_minutes || 30
-      currentEnd.setMinutes(currentEnd.getMinutes() + duration)
-      const nextStart = parseISO(sortedAppointments[i + 1].scheduled_at)
-      const gapMinutes = differenceInMinutes(nextStart, currentEnd)
+    const gapSourceAppointments = [...filteredAppointments]
+      .filter((apt) => apt.status !== 'cancelled')
+      .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+
+    gapSourceAppointments.forEach((apt, i) => {
+      if (i === gapSourceAppointments.length - 1) return
+
+      const currentWindow = getEffectiveWindow(apt)
+      const nextWindow = getEffectiveWindow(gapSourceAppointments[i + 1])
+      const gapMinutes = differenceInMinutes(nextWindow.start, currentWindow.end)
+
       if (gapMinutes >= 30) {
         foundGaps.push({
-          start: currentEnd.toISOString(),
-          end: nextStart.toISOString(),
+          start: currentWindow.end.toISOString(),
+          end: nextWindow.start.toISOString(),
           minutes: gapMinutes,
         })
       }
     })
+
     return foundGaps
-  }, [viewMode, sortedAppointments])
+  }, [viewMode, filteredAppointments])
 
   const currentTimePercent = useMemo(() => {
     const hours = currentTime.getHours()
