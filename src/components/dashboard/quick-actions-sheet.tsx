@@ -175,16 +175,6 @@ export function QuickActionsSheet({
                   ))}
                 </div>
               </div>
-
-              {showBottomConnector && (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2"
-                >
-                  <div className="mx-auto h-8 w-px bg-gradient-to-b from-[var(--brand-primary)]/75 to-transparent dark:from-[var(--brand-primary)]/80" />
-                  <div className="mt-0.5 h-2 w-12 rounded-full bg-[var(--brand-primary)]/45 blur-[1px]" />
-                </div>
-              )}
             </div>
           </motion.div>
         </>
