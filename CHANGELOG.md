@@ -4,6 +4,20 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.31] - 2026-03-05
+
+### Nuevo
+
+- Gesto de deslizar completamente rediseñado — ahora se siente fluido y natural al deslizar citas
+- Vista de Mi Día reorganizada con tarjetas de cita, hoja de detalle y tarjeta de cita actual
+- Línea de tiempo del barbero mejorada con zonas horarias y estado visual
+
+### Mejorado
+
+- El deslizar corto muestra acciones y deja la fila abierta, el deslizar largo ejecuta la acción al instante
+- Tocar el contenido cuando está abierto cierra la fila sin activar nada
+- Animaciones más suaves al abrir y cerrar las acciones de deslizar
+
 ## [0.9.30] - 2026-03-05
 
 ### Arreglado
