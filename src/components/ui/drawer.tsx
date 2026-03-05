@@ -1,17 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-  useReducedMotion,
-  type PanInfo,
-} from 'framer-motion'
+import React, { useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import { animations, reducedMotion } from '@/lib/design-system'
+
+const DURATION = '0.4s'
+const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)'
+const DRAG_DISMISS_THRESHOLD = 150
+const DRAG_VELOCITY_THRESHOLD = 500
 
 interface DrawerProps {
   isOpen: boolean
@@ -40,32 +36,69 @@ export function Drawer({
   enableContentSwipeToClose = false,
   contentSwipeCloseThreshold = 80,
 }: DrawerProps) {
-  const overlayRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const rafRef = useRef(0)
+
+  // animatedOpen drives the CSS transition; exitComplete tracks unmount timing
+  const [animatedOpen, setAnimatedOpen] = useState(false)
+  const [exitComplete, setExitComplete] = useState(true)
+  // visible = keep in DOM while open OR while exit animation is still running
+  const visible = isOpen || !exitComplete
+
+  // Drag state (refs to avoid re-renders during gesture)
+  const isDraggingRef = useRef(false)
+  const dragStartYRef = useRef(0)
+  const dragCurrentYRef = useRef(0)
+  const dragVelocityRef = useRef(0)
+  const lastTouchTimeRef = useRef(0)
+  const lastTouchYRef = useRef(0)
+
+  // Content swipe refs
   const contentSwipeStartYRef = useRef<number | null>(null)
   const canContentSwipeCloseRef = useRef(false)
-  const prefersReducedMotion = useReducedMotion()
-  const [isDragging, setIsDragging] = useState(false)
-  const y = useMotionValue(0)
-  const opacity = useTransform(y, (latestY) => {
-    const safeY = Number.isFinite(latestY) ? latestY : 0
-    const clampedY = Math.min(Math.max(safeY, 0), 200)
-    return 1 - (clampedY / 200) * 0.5
-  })
 
-  // Handle escape key
+  // ── Open/close lifecycle ──
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose()
+    if (isOpen) {
+      // Double rAF: ensure browser paints "closed" before transitioning
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = requestAnimationFrame(() => {
+          setAnimatedOpen(true)
+          setExitComplete(false)
+        })
+      })
+    } else {
+      cancelAnimationFrame(rafRef.current)
+      // Wrap in rAF to satisfy lint (no sync setState in effect body)
+      rafRef.current = requestAnimationFrame(() => {
+        setAnimatedOpen(false)
+      })
+    }
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [isOpen])
+
+  // Mark exit complete when CSS transition finishes
+  const onTransitionEnd = useCallback(
+    (e: React.TransitionEvent) => {
+      if (e.target === drawerRef.current && e.propertyName === 'transform' && !isOpen) {
+        setExitComplete(true)
       }
+    },
+    [isOpen]
+  )
+
+  // ── Escape key ──
+  useEffect(() => {
+    if (!isOpen) return
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Lock body scroll when open
+  // ── Lock body scroll ──
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -77,7 +110,7 @@ export function Drawer({
     }
   }, [isOpen])
 
-  // Focus management: capture previous focus on open, restore on close
+  // ── Focus management ──
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement | null
@@ -88,189 +121,217 @@ export function Drawer({
     }
   }, [isOpen])
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (closeOnOverlayClick && e.target === overlayRef.current) {
-      onClose()
+  // ── Drag handle touch events ──
+  const onHandleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    if (!touch) return
+    isDraggingRef.current = true
+    dragStartYRef.current = touch.clientY
+    dragCurrentYRef.current = 0
+    dragVelocityRef.current = 0
+    lastTouchTimeRef.current = Date.now()
+    lastTouchYRef.current = touch.clientY
+
+    // Disable CSS transition during drag
+    if (drawerRef.current) {
+      drawerRef.current.style.transition = 'none'
     }
-  }
+  }, [])
 
-  const handleDragStart = () => {
-    setIsDragging(true)
-  }
+  const onHandleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDraggingRef.current) return
+    const touch = e.touches[0]
+    if (!touch) return
 
-  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const offsetY = Number.isFinite(info.offset.y) ? info.offset.y : 0
+    const deltaY = Math.max(0, touch.clientY - dragStartYRef.current)
+    dragCurrentYRef.current = deltaY
 
-    // Only allow dragging down
-    if (offsetY > 0) {
-      y.set(offsetY)
-    } else {
-      y.set(0)
+    // EMA velocity
+    const now = Date.now()
+    const dt = now - lastTouchTimeRef.current
+    if (dt > 0) {
+      const instantV = ((touch.clientY - lastTouchYRef.current) / dt) * 1000
+      dragVelocityRef.current = 0.4 * instantV + 0.6 * dragVelocityRef.current
     }
-  }
+    lastTouchTimeRef.current = now
+    lastTouchYRef.current = touch.clientY
 
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    setIsDragging(false)
-    const threshold = 150
-    const offsetY = Number.isFinite(info.offset.y) ? info.offset.y : 0
-    const velocityY = Number.isFinite(info.velocity.y) ? info.velocity.y : 0
+    // Apply transform directly (no React re-renders)
+    if (drawerRef.current) {
+      drawerRef.current.style.transform = `translateY(${deltaY}px)`
+    }
+  }, [])
 
-    // Close if dragged down beyond threshold or velocity is high
-    if (offsetY > threshold || velocityY > 500) {
+  const onHandleTouchEnd = useCallback(() => {
+    if (!isDraggingRef.current) return
+    isDraggingRef.current = false
+
+    const deltaY = dragCurrentYRef.current
+    const velocity = dragVelocityRef.current
+
+    // Restore CSS transition
+    if (drawerRef.current) {
+      drawerRef.current.style.transition = `transform ${DURATION} ${EASING}`
+    }
+
+    if (deltaY > DRAG_DISMISS_THRESHOLD || velocity > DRAG_VELOCITY_THRESHOLD) {
+      // Dismiss
+      if (drawerRef.current) {
+        drawerRef.current.style.transform = 'translateY(100%)'
+      }
       onClose()
     } else {
       // Snap back
-      y.set(0)
+      if (drawerRef.current) {
+        drawerRef.current.style.transform = 'translateY(0)'
+      }
     }
-  }
+  }, [onClose])
 
-  const resetContentSwipeState = () => {
+  // ── Content swipe to close ──
+  const handleContentTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!enableContentSwipeToClose) return
+      contentSwipeStartYRef.current = e.touches[0]?.clientY ?? null
+      canContentSwipeCloseRef.current = e.currentTarget.scrollTop <= 0
+    },
+    [enableContentSwipeToClose]
+  )
+
+  const handleContentTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!enableContentSwipeToClose || !canContentSwipeCloseRef.current) return
+      const startY = contentSwipeStartYRef.current
+      const currentY = e.touches[0]?.clientY
+      if (startY == null || currentY == null) return
+
+      if (e.currentTarget.scrollTop > 0) {
+        canContentSwipeCloseRef.current = false
+        return
+      }
+
+      if (currentY - startY > contentSwipeCloseThreshold) {
+        contentSwipeStartYRef.current = null
+        canContentSwipeCloseRef.current = false
+        onClose()
+      }
+    },
+    [enableContentSwipeToClose, contentSwipeCloseThreshold, onClose]
+  )
+
+  const handleContentTouchEnd = useCallback(() => {
     contentSwipeStartYRef.current = null
     canContentSwipeCloseRef.current = false
-  }
+  }, [])
 
-  const handleContentTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!enableContentSwipeToClose) return
-    contentSwipeStartYRef.current = e.touches[0]?.clientY ?? null
-    canContentSwipeCloseRef.current = e.currentTarget.scrollTop <= 0
-  }
+  // ── Overlay click ──
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (closeOnOverlayClick && e.target === e.currentTarget) {
+        onClose()
+      }
+    },
+    [closeOnOverlayClick, onClose]
+  )
 
-  const handleContentTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!enableContentSwipeToClose) return
-    if (!canContentSwipeCloseRef.current) return
-
-    const startY = contentSwipeStartYRef.current
-    const currentY = e.touches[0]?.clientY
-    if (startY == null || currentY == null) return
-
-    if (e.currentTarget.scrollTop > 0) {
-      canContentSwipeCloseRef.current = false
-      return
-    }
-
-    const deltaY = currentY - startY
-    if (deltaY > contentSwipeCloseThreshold) {
-      resetContentSwipeState()
-      onClose()
-    }
-  }
-
-  const handleContentTouchEnd = () => {
-    resetContentSwipeState()
-  }
+  if (!visible) return null
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div
-          ref={overlayRef}
-          onClick={handleOverlayClick}
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={title ? 'drawer-title' : undefined}
-        >
-          {/* Backdrop with blur */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: prefersReducedMotion
-                ? reducedMotion.spring.default.duration
-                : animations.duration.normal,
-            }}
-            className="absolute inset-0 bg-black/70 backdrop-blur-md"
-            aria-hidden="true"
-          />
+    <div
+      onClick={handleOverlayClick}
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={title ? 'drawer-title' : undefined}
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/70"
+        aria-hidden="true"
+        style={{
+          opacity: animatedOpen ? 1 : 0,
+          transition: `opacity ${DURATION} ${EASING}`,
+        }}
+      />
 
-          {/* Drawer container */}
-          <motion.div
-            ref={drawerRef}
-            tabIndex={-1}
-            drag="y"
-            dragDirectionLock
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
-            onDragStart={handleDragStart}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={prefersReducedMotion ? reducedMotion.spring.sheet : animations.spring.sheet}
-            style={{
-              y: isDragging ? y : 0,
-              opacity,
-            }}
+      {/* Drawer container */}
+      <div
+        ref={drawerRef}
+        tabIndex={-1}
+        onTransitionEnd={onTransitionEnd}
+        className={cn(
+          'relative w-full rounded-t-[28px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl',
+          'border-x border-t border-zinc-200/70 dark:border-zinc-800/80',
+          'shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]',
+          'max-h-[85vh] overflow-hidden flex flex-col',
+          'focus-visible:!outline-none',
+          'pb-safe',
+          className
+        )}
+        style={{
+          transform: animatedOpen ? 'translateY(0)' : 'translateY(100%)',
+          transition: `transform ${DURATION} ${EASING}`,
+          willChange: 'transform',
+        }}
+      >
+        {/* Drag Handle */}
+        <div
+          className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+          onTouchStart={onHandleTouchStart}
+          onTouchMove={onHandleTouchMove}
+          onTouchEnd={onHandleTouchEnd}
+          onTouchCancel={onHandleTouchEnd}
+        >
+          <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+        </div>
+
+        {/* Header */}
+        {(title || showCloseButton) && (
+          <div
             className={cn(
-              'relative w-full rounded-t-[28px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl',
-              'border-x border-t border-zinc-200/70 dark:border-zinc-800/80',
-              'shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)]',
-              'before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px',
-              'before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60',
-              'max-h-[85vh] overflow-hidden flex flex-col',
-              'focus-visible:!outline-none',
-              'pb-safe', // Safe area for iOS home indicator
-              className
+              'flex items-start justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-4 pb-4 pt-2 dark:border-zinc-800/70 dark:from-zinc-900/55 sm:px-6',
+              headerClassName
             )}
           >
-            {/* Drag Handle */}
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            <div className="flex-1 pr-4">
+              {title && (
+                <h2
+                  id="drawer-title"
+                  className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
+                >
+                  {title}
+                </h2>
+              )}
+              {description && <p className="mt-1 text-base text-muted">{description}</p>}
             </div>
-
-            {/* Header */}
-            {(title || showCloseButton) && (
-              <div
+            {showCloseButton && (
+              <button
+                onClick={onClose}
                 className={cn(
-                  'flex items-start justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-4 pb-4 pt-2 dark:border-zinc-800/70 dark:from-zinc-900/55 sm:px-6',
-                  headerClassName
+                  'inline-flex h-11 w-11 items-center justify-center rounded-2xl border p-2 transition-colors duration-200',
+                  'border-zinc-200/70 bg-white/80 text-zinc-400 backdrop-blur hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:hover:text-zinc-200',
+                  'hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80',
+                  'focus:outline-none focus:ring-2 focus:ring-zinc-500'
                 )}
+                aria-label="Cerrar"
               >
-                <div className="flex-1 pr-4">
-                  {title && (
-                    <h2
-                      id="drawer-title"
-                      className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
-                    >
-                      {title}
-                    </h2>
-                  )}
-                  {description && <p className="mt-1 text-base text-muted">{description}</p>}
-                </div>
-                {showCloseButton && (
-                  <motion.button
-                    whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-                    whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
-                    onClick={onClose}
-                    className={cn(
-                      'inline-flex h-11 w-11 items-center justify-center rounded-2xl border p-2 transition-colors duration-200',
-                      'border-zinc-200/70 bg-white/80 text-zinc-400 backdrop-blur hover:text-zinc-700 dark:border-zinc-800/80 dark:bg-zinc-900/70 dark:hover:text-zinc-200',
-                      'hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80',
-                      'focus:outline-none focus:ring-2 focus:ring-zinc-500'
-                    )}
-                    aria-label="Cerrar"
-                  >
-                    <X className="w-5 h-5" />
-                  </motion.button>
-                )}
-              </div>
+                <X className="w-5 h-5" />
+              </button>
             )}
+          </div>
+        )}
 
-            {/* Content */}
-            <div
-              className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6"
-              onTouchStart={handleContentTouchStart}
-              onTouchMove={handleContentTouchMove}
-              onTouchEnd={handleContentTouchEnd}
-              onTouchCancel={handleContentTouchEnd}
-            >
-              {children}
-            </div>
-          </motion.div>
+        {/* Content */}
+        <div
+          className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6"
+          onTouchStart={handleContentTouchStart}
+          onTouchMove={handleContentTouchMove}
+          onTouchEnd={handleContentTouchEnd}
+          onTouchCancel={handleContentTouchEnd}
+        >
+          {children}
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   )
 }

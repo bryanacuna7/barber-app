@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import {
   BarChart3,
   Scissors,
@@ -668,16 +667,11 @@ export function MoreMenuDrawer({
         </SettingsGroup>
 
         {/* Version footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="pt-1 text-center"
-        >
+        <div className="pt-1 text-center">
           <p className="text-[13px] text-zinc-500">
             BarberApp v{process.env.NEXT_PUBLIC_APP_VERSION ?? '0.9.8'}
           </p>
-        </motion.div>
+        </div>
       </div>
     </Drawer>
   )
