@@ -45,10 +45,30 @@ const useSheetContext = () => {
 
 // ─── Constants ─────────────────────────────────────────────
 
-const DURATION = '0.4s'
-const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)' // Apple-like sheet curve
+const SHEET_OPEN_DURATION_MS = 300
+const SHEET_CLOSE_DURATION_MS = 200
+const BACKDROP_OPEN_DURATION_MS = 240
+const BACKDROP_CLOSE_DURATION_MS = 160
+const OPEN_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)' // smooth iOS-like ease out
+const CLOSE_EASING = 'cubic-bezier(0.4, 0, 1, 1)' // faster ease in
 const DRAG_DISMISS_THRESHOLD = 150 // px
 const DRAG_VELOCITY_THRESHOLD = 500 // px/s
+const REDUCED_MOTION_DURATION_MS = 10
+
+function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setPrefersReducedMotion(media.matches)
+    onChange()
+    media.addEventListener('change', onChange)
+    return () => media.removeEventListener('change', onChange)
+  }, [])
+
+  return prefersReducedMotion
+}
 
 // ─── Sheet ─────────────────────────────────────────────────
 
@@ -58,6 +78,7 @@ export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps)
   const [animatedOpen, setAnimatedOpen] = React.useState(false)
   const previousFocusRef = React.useRef<HTMLElement | null>(null)
   const rafRef = React.useRef(0)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   React.useEffect(() => setMounted(true), [])
 
@@ -127,7 +148,13 @@ export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps)
           zIndex,
           backgroundColor: 'rgba(0,0,0,0.5)',
           opacity: animatedOpen ? 1 : 0,
-          transition: `opacity 0.3s ease-out`,
+          transition: `opacity ${
+            prefersReducedMotion
+              ? REDUCED_MOTION_DURATION_MS
+              : open
+                ? BACKDROP_OPEN_DURATION_MS
+                : BACKDROP_CLOSE_DURATION_MS
+          }ms ${open ? OPEN_EASING : CLOSE_EASING}`,
           pointerEvents: open ? 'auto' : 'none',
         }}
       />
@@ -153,6 +180,7 @@ export function SheetContent({
   const { onOpenChange, zIndex, open, animatedOpen, onContentTransitionEnd } = useSheetContext()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const dragRef = React.useRef({ startY: 0, currentY: 0, active: false, startTime: 0 })
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const isBottomSheet = side === 'bottom' && !centered
   const isCenteredBottomSheet = side === 'bottom' && centered
@@ -213,7 +241,9 @@ export function SheetContent({
     if (ds.currentY > DRAG_DISMISS_THRESHOLD || velocity > DRAG_VELOCITY_THRESHOLD) {
       // Dismiss
       haptics.tap()
-      el.style.transition = `transform 0.3s ${EASING}`
+      el.style.transition = `transform ${
+        prefersReducedMotion ? REDUCED_MOTION_DURATION_MS : SHEET_CLOSE_DURATION_MS
+      }ms ${CLOSE_EASING}`
       el.style.transform = 'translateY(100%)'
       const done = () => {
         el.removeEventListener('transitionend', done)
@@ -222,7 +252,9 @@ export function SheetContent({
       el.addEventListener('transitionend', done)
     } else {
       // Snap back
-      el.style.transition = `transform 0.3s ${EASING}`
+      el.style.transition = `transform ${
+        prefersReducedMotion ? REDUCED_MOTION_DURATION_MS : SHEET_OPEN_DURATION_MS
+      }ms ${OPEN_EASING}`
       el.style.transform = 'translateY(0)'
       const done = () => {
         el.removeEventListener('transitionend', done)
@@ -233,7 +265,7 @@ export function SheetContent({
       el.addEventListener('transitionend', done)
     }
     ds.currentY = 0
-  }, [onOpenChange])
+  }, [onOpenChange, prefersReducedMotion])
 
   // ── Transition end handler (for close unmount) ──
 
@@ -261,9 +293,15 @@ export function SheetContent({
 
   // ── Transition string ──
 
+  const transitionDuration = prefersReducedMotion
+    ? REDUCED_MOTION_DURATION_MS
+    : open
+      ? SHEET_OPEN_DURATION_MS
+      : SHEET_CLOSE_DURATION_MS
+  const transitionEasing = open ? OPEN_EASING : CLOSE_EASING
   const transitionProp = isCenteredBottomSheet
-    ? `transform ${DURATION} ${EASING}, opacity ${DURATION} ${EASING}`
-    : `transform ${DURATION} ${EASING}`
+    ? `transform ${transitionDuration}ms ${transitionEasing}, opacity ${transitionDuration}ms ${transitionEasing}`
+    : `transform ${transitionDuration}ms ${transitionEasing}`
 
   return (
     <div
@@ -274,7 +312,7 @@ export function SheetContent({
         onTouchMove: handleTouchMove,
         onTouchEnd: handleTouchEnd,
       })}
-      className={`fixed flex flex-col gap-4 p-6 bg-white dark:bg-zinc-950 shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60 motion-reduce:!duration-[0.01s] ${positionClass} ${className}`}
+      className={`fixed flex flex-col gap-4 p-6 bg-white dark:bg-zinc-950 shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60 ${positionClass} ${className}`}
       style={{
         zIndex: zIndex + 1,
         transform: getTransform(),
