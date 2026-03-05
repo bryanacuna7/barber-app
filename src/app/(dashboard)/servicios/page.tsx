@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, useAnimationControls, useReducedMotion } from 'framer-motion'
 import { Plus, Search, BarChart3, X, AlertTriangle } from 'lucide-react'
@@ -199,14 +199,17 @@ function ServiciosContent() {
   const maxBookings = top5Services[0]?.bookings_this_month || 100
 
   // Handlers
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('desc')
-    }
-  }
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))
+      } else {
+        setSortField(field)
+        setSortDirection('desc')
+      }
+    },
+    [sortField]
+  )
 
   function openCreateServiceForm(source: 'desktop' | 'mobile' | 'empty' = 'desktop') {
     setEditingService(null)
@@ -227,20 +230,23 @@ function ServiciosContent() {
     }
   }
 
-  function openEditServiceForm(service: MockService) {
-    setEditingService({ id: service.id })
-    setFormData({
-      name: service.name,
-      description: service.description,
-      category: service.category,
-      icon: service.iconName,
-      duration: service.duration_minutes,
-      price: service.price,
-      business_id: businessId,
-    })
-    setError('')
-    setShowForm(true)
-  }
+  const openEditServiceForm = useCallback(
+    (service: MockService) => {
+      setEditingService({ id: service.id })
+      setFormData({
+        name: service.name,
+        description: service.description,
+        category: service.category,
+        icon: service.iconName,
+        duration: service.duration_minutes,
+        price: service.price,
+        business_id: businessId,
+      })
+      setError('')
+      setShowForm(true)
+    },
+    [businessId]
+  )
 
   function resetForm() {
     setFormData({

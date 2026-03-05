@@ -22,6 +22,9 @@ interface DrawerProps {
   showCloseButton?: boolean
   closeOnOverlayClick?: boolean
   className?: string
+  headerClassName?: string
+  enableContentSwipeToClose?: boolean
+  contentSwipeCloseThreshold?: number
 }
 
 export function Drawer({
@@ -33,10 +36,15 @@ export function Drawer({
   showCloseButton = true,
   closeOnOverlayClick = true,
   className,
+  headerClassName,
+  enableContentSwipeToClose = false,
+  contentSwipeCloseThreshold = 80,
 }: DrawerProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const contentSwipeStartYRef = useRef<number | null>(null)
+  const canContentSwipeCloseRef = useRef(false)
   const prefersReducedMotion = useReducedMotion()
   const [isDragging, setIsDragging] = useState(false)
   const y = useMotionValue(0)
@@ -116,6 +124,41 @@ export function Drawer({
     }
   }
 
+  const resetContentSwipeState = () => {
+    contentSwipeStartYRef.current = null
+    canContentSwipeCloseRef.current = false
+  }
+
+  const handleContentTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!enableContentSwipeToClose) return
+    contentSwipeStartYRef.current = e.touches[0]?.clientY ?? null
+    canContentSwipeCloseRef.current = e.currentTarget.scrollTop <= 0
+  }
+
+  const handleContentTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!enableContentSwipeToClose) return
+    if (!canContentSwipeCloseRef.current) return
+
+    const startY = contentSwipeStartYRef.current
+    const currentY = e.touches[0]?.clientY
+    if (startY == null || currentY == null) return
+
+    if (e.currentTarget.scrollTop > 0) {
+      canContentSwipeCloseRef.current = false
+      return
+    }
+
+    const deltaY = currentY - startY
+    if (deltaY > contentSwipeCloseThreshold) {
+      resetContentSwipeState()
+      onClose()
+    }
+  }
+
+  const handleContentTouchEnd = () => {
+    resetContentSwipeState()
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -179,7 +222,12 @@ export function Drawer({
 
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-start justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-4 pb-4 pt-2 dark:border-zinc-800/70 dark:from-zinc-900/55 sm:px-6">
+              <div
+                className={cn(
+                  'flex items-start justify-between border-b border-zinc-200/70 bg-gradient-to-b from-zinc-50/80 to-transparent px-4 pb-4 pt-2 dark:border-zinc-800/70 dark:from-zinc-900/55 sm:px-6',
+                  headerClassName
+                )}
+              >
                 <div className="flex-1 pr-4">
                   {title && (
                     <h2
@@ -211,7 +259,15 @@ export function Drawer({
             )}
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6">{children}</div>
+            <div
+              className="flex-1 overflow-y-auto px-4 sm:px-6 pb-6"
+              onTouchStart={handleContentTouchStart}
+              onTouchMove={handleContentTouchMove}
+              onTouchEnd={handleContentTouchEnd}
+              onTouchCancel={handleContentTouchEnd}
+            >
+              {children}
+            </div>
           </motion.div>
         </div>
       )}

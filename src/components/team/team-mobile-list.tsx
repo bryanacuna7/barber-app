@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Star, ChevronRight, Trash2 } from 'lucide-react'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
@@ -201,7 +202,11 @@ interface TeamMobileListProps {
   onDelete: (barber: UIBarber) => void
 }
 
-export function TeamMobileList({ barbers, onSelect, onDelete }: TeamMobileListProps) {
+export const TeamMobileList = React.memo(function TeamMobileList({
+  barbers,
+  onSelect,
+  onDelete,
+}: TeamMobileListProps) {
   const owner = barbers.find((b) => b.role === 'owner')
   const team = barbers.filter((b) => b.role !== 'owner')
 
@@ -245,4 +250,4 @@ export function TeamMobileList({ barbers, onSelect, onDelete }: TeamMobileListPr
       )}
     </div>
   )
-}
+})

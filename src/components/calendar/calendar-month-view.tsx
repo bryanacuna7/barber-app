@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format, isSameDay, startOfWeek, endOfWeek, addMinutes, parseISO, isValid } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -152,7 +152,7 @@ function groupIntoWeeks(days: MonthDay[]): MonthDay[][] {
   return weeks
 }
 
-export function CalendarMonthView({
+export const CalendarMonthView = React.memo(function CalendarMonthView({
   monthDays,
   today,
   selectedDate,
@@ -323,4 +323,4 @@ export function CalendarMonthView({
       </div>
     </div>
   )
-}
+})

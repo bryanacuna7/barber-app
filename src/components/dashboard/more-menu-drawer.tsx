@@ -567,7 +567,16 @@ export function MoreMenuDrawer({
   }
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} title="Más opciones" showCloseButton={false}>
+    <Drawer
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Más opciones"
+      showCloseButton={false}
+      className="before:bg-transparent dark:before:bg-transparent"
+      headerClassName="border-b-0 bg-none pt-0 pb-3 dark:bg-none"
+      enableContentSwipeToClose
+      contentSwipeCloseThreshold={64}
+    >
       <div className="space-y-5 pb-2">
         {/* Uber-style profile header + quick actions */}
         <ProfileHeaderCard isBarberRole={isBarberRole} onClose={onClose} />

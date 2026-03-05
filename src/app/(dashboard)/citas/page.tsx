@@ -228,6 +228,8 @@ function CitasCalendarFusionContent() {
 
   const handleToday = useCallback(() => setSelectedDate(new Date()), [])
 
+  const handleWalkInOpen = useCallback(() => setIsWalkInOpen(true), [])
+
   const handleCreateOpen = useCallback(() => {
     setCreateForm({
       client_id: '',
@@ -713,7 +715,7 @@ function CitasCalendarFusionContent() {
             onNext={handleNext}
             onToday={handleToday}
             onCreateOpen={handleCreateOpen}
-            onWalkInOpen={() => setIsWalkInOpen(true)}
+            onWalkInOpen={handleWalkInOpen}
             isSelectedDateToday={isSelectedDateToday}
             desktopContextLabel={desktopContextLabel}
             mobileDateLabel={mobileDateLabel}
@@ -845,10 +847,7 @@ function CitasCalendarFusionContent() {
                 monthDays={monthDays}
                 today={today}
                 selectedDate={selectedDate}
-                onDayClick={(date) => {
-                  setSelectedDate(date)
-                  // Stay in month view — appointments shown below the calendar
-                }}
+                onDayClick={setSelectedDate}
               />
             )}
           </div>

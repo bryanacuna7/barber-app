@@ -2,22 +2,16 @@
 
 /**
  * Sheet Component (Modal that slides from side/bottom)
- * With drag-to-dismiss support for bottom sheets
+ * Uses CSS transitions (compositor thread) for buttery-smooth animations.
+ * Drag-to-dismiss via raw touch events — no framer-motion overhead.
  */
 
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-  useReducedMotion,
-  PanInfo,
-} from 'framer-motion'
-import { animations, reducedMotion } from '@/lib/design-system'
 import { haptics } from '@/lib/utils/mobile'
+
+// ─── Types ─────────────────────────────────────────────────
 
 interface SheetProps {
   open: boolean
@@ -33,28 +27,63 @@ interface SheetContentProps {
   children: React.ReactNode
 }
 
-// Context to pass onOpenChange to SheetContent
+// ─── Context ───────────────────────────────────────────────
+
 const SheetContext = React.createContext<{
   onOpenChange: (open: boolean) => void
   zIndex: number
+  open: boolean
+  animatedOpen: boolean
+  onContentTransitionEnd: () => void
 } | null>(null)
 
 const useSheetContext = () => {
   const context = React.useContext(SheetContext)
-  if (!context) {
-    throw new Error('Sheet components must be used within Sheet')
-  }
+  if (!context) throw new Error('Sheet components must be used within Sheet')
   return context
 }
 
+// ─── Constants ─────────────────────────────────────────────
+
+const DURATION = '0.4s'
+const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)' // Apple-like sheet curve
+const DRAG_DISMISS_THRESHOLD = 150 // px
+const DRAG_VELOCITY_THRESHOLD = 500 // px/s
+
+// ─── Sheet ─────────────────────────────────────────────────
+
 export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps) {
   const [mounted, setMounted] = React.useState(false)
+  const [visible, setVisible] = React.useState(false)
+  const [animatedOpen, setAnimatedOpen] = React.useState(false)
   const previousFocusRef = React.useRef<HTMLElement | null>(null)
+  const rafRef = React.useRef(0)
 
+  React.useEffect(() => setMounted(true), [])
+
+  // Open/close lifecycle
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    if (open) {
+      setVisible(true)
+      // Double rAF: ensure browser paints closed state before animating
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = requestAnimationFrame(() => {
+          setAnimatedOpen(true)
+        })
+      })
+    } else {
+      cancelAnimationFrame(rafRef.current)
+      setAnimatedOpen(false)
+    }
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [open])
 
+  // Called when SheetContent's transform transition finishes
+  const onContentTransitionEnd = React.useCallback(() => {
+    if (!open) setVisible(false)
+  }, [open])
+
+  // Body scroll lock
   React.useEffect(() => {
     if (open) {
       previousFocusRef.current = document.activeElement as HTMLElement | null
@@ -71,43 +100,49 @@ export function Sheet({ open, onOpenChange, children, zIndex = 70 }: SheetProps)
     }
   }, [open])
 
-  // Handle escape key
+  // Escape key
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        onOpenChange(false)
-      }
+      if (e.key === 'Escape' && open) onOpenChange(false)
     }
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [open, onOpenChange])
 
-  const overlay = (
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            onClick={() => onOpenChange(false)}
-            className="fixed inset-0 bg-black/65 backdrop-blur-md"
-            style={{ zIndex }}
-          />
-          {children}
-        </>
-      )}
-    </AnimatePresence>
+  const ctxValue = React.useMemo(
+    () => ({ onOpenChange, zIndex, open, animatedOpen, onContentTransitionEnd }),
+    [onOpenChange, zIndex, open, animatedOpen, onContentTransitionEnd]
+  )
+
+  if (!mounted || !visible) return null
+
+  const portal = (
+    <>
+      {/* Backdrop — CSS opacity transition */}
+      <div
+        onClick={() => onOpenChange(false)}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          opacity: animatedOpen ? 1 : 0,
+          transition: `opacity 0.3s ease-out`,
+          pointerEvents: open ? 'auto' : 'none',
+        }}
+      />
+      {children}
+    </>
   )
 
   return (
-    <SheetContext.Provider value={{ onOpenChange, zIndex }}>
-      {mounted ? createPortal(overlay, document.body) : null}
+    <SheetContext.Provider value={ctxValue}>
+      {createPortal(portal, document.body)}
     </SheetContext.Provider>
   )
 }
+
+// ─── SheetContent ──────────────────────────────────────────
 
 export function SheetContent({
   side = 'bottom',
@@ -115,116 +150,139 @@ export function SheetContent({
   className = '',
   children,
 }: SheetContentProps) {
-  const { onOpenChange, zIndex } = useSheetContext()
-  const prefersReducedMotion = useReducedMotion()
-  const [isDragging, setIsDragging] = React.useState(false)
+  const { onOpenChange, zIndex, open, animatedOpen, onContentTransitionEnd } = useSheetContext()
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  const dragRef = React.useRef({ startY: 0, currentY: 0, active: false, startTime: 0 })
 
-  // Drag state for bottom sheets
-  const y = useMotionValue(0)
-  const sheetOpacity = useTransform(y, [0, 200], [1, 0.5])
-
-  const slideVariants = {
-    bottom: {
-      initial: { y: '100%' },
-      animate: { y: 0 },
-      exit: { y: '100%' },
-    },
-    right: {
-      initial: { x: '100%' },
-      animate: { x: 0 },
-      exit: { x: '100%' },
-    },
-    left: {
-      initial: { x: '-100%' },
-      animate: { x: 0 },
-      exit: { x: '-100%' },
-    },
-    top: {
-      initial: { y: '-100%' },
-      animate: { y: 0 },
-      exit: { y: '-100%' },
-    },
-  }
-
-  const isCenteredBottomSheet = side === 'bottom' && centered
-  const variants = isCenteredBottomSheet
-    ? {
-        initial: { opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' },
-        animate: { opacity: 1, scale: 1, x: '-50%', y: '-50%' },
-        exit: { opacity: 0, scale: 0.98, x: '-50%', y: 'calc(-50% + 24px)' },
-      }
-    : slideVariants[side]
   const isBottomSheet = side === 'bottom' && !centered
+  const isCenteredBottomSheet = side === 'bottom' && centered
 
-  // Drag handlers for bottom sheets only
-  const handleDragStart = () => {
-    if (isBottomSheet) {
-      setIsDragging(true)
+  // ── Transform based on side + open state ──
+
+  const getTransform = (): string => {
+    if (isCenteredBottomSheet) {
+      return animatedOpen
+        ? 'translate(-50%, -50%) scale(1)'
+        : 'translate(-50%, calc(-50% + 24px)) scale(0.98)'
     }
+    const closed: Record<string, string> = {
+      bottom: 'translateY(100%)',
+      right: 'translateX(100%)',
+      left: 'translateX(-100%)',
+      top: 'translateY(-100%)',
+    }
+    return animatedOpen ? 'translateY(0)' : closed[side]
   }
 
-  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (isBottomSheet) {
-      // Only allow dragging down
-      if (info.offset.y > 0) {
-        y.set(info.offset.y)
-      } else {
-        y.set(0)
+  // ── Touch drag-to-dismiss (bottom sheets only) ──
+
+  const handleTouchStart = React.useCallback(
+    (e: React.TouchEvent) => {
+      if (!isBottomSheet || !open) return
+      dragRef.current = {
+        startY: e.touches[0].clientY,
+        currentY: 0,
+        active: true,
+        startTime: Date.now(),
       }
+      if (contentRef.current) {
+        contentRef.current.style.transition = 'none'
+      }
+    },
+    [isBottomSheet, open]
+  )
+
+  const handleTouchMove = React.useCallback((e: React.TouchEvent) => {
+    const ds = dragRef.current
+    if (!ds.active || !contentRef.current) return
+    const deltaY = e.touches[0].clientY - ds.startY
+    if (deltaY > 0) {
+      contentRef.current.style.transform = `translateY(${deltaY}px)`
+      ds.currentY = deltaY
     }
-  }
+  }, [])
 
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (isBottomSheet) {
-      setIsDragging(false)
-      const threshold = 150
+  const handleTouchEnd = React.useCallback(() => {
+    const ds = dragRef.current
+    if (!ds.active || !contentRef.current) return
+    ds.active = false
+    const el = contentRef.current
+    const elapsed = Math.max(Date.now() - ds.startTime, 1)
+    const velocity = (ds.currentY / elapsed) * 1000
 
-      // Close if dragged down beyond threshold or velocity is high
-      if (info.offset.y > threshold || info.velocity.y > 500) {
-        haptics.tap() // Haptic feedback on sheet dismiss
+    if (ds.currentY > DRAG_DISMISS_THRESHOLD || velocity > DRAG_VELOCITY_THRESHOLD) {
+      // Dismiss
+      haptics.tap()
+      el.style.transition = `transform 0.3s ${EASING}`
+      el.style.transform = 'translateY(100%)'
+      const done = () => {
+        el.removeEventListener('transitionend', done)
         onOpenChange(false)
-      } else {
-        // Snap back
-        y.set(0)
       }
+      el.addEventListener('transitionend', done)
+    } else {
+      // Snap back
+      el.style.transition = `transform 0.3s ${EASING}`
+      el.style.transform = 'translateY(0)'
+      const done = () => {
+        el.removeEventListener('transitionend', done)
+        // Restore React-managed styles
+        el.style.removeProperty('transition')
+        el.style.removeProperty('transform')
+      }
+      el.addEventListener('transitionend', done)
     }
-  }
+    ds.currentY = 0
+  }, [onOpenChange])
 
-  const contentStyle = isBottomSheet
-    ? {
-        y: isDragging ? y : 0,
-        opacity: sheetOpacity,
-        zIndex: zIndex + 1,
+  // ── Transition end handler (for close unmount) ──
+
+  const handleTransitionEnd = React.useCallback(
+    (e: React.TransitionEvent) => {
+      // Only react to this element's transform transition (ignore bubbled events)
+      if (e.target === contentRef.current && e.propertyName === 'transform') {
+        onContentTransitionEnd()
       }
-    : { zIndex: zIndex + 1 }
+    },
+    [onContentTransitionEnd]
+  )
+
+  // ── Position classes ──
+
+  const positionClass = isCenteredBottomSheet
+    ? 'left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-lg rounded-[28px] border border-zinc-200/70 dark:border-zinc-800/80'
+    : side === 'bottom'
+      ? 'inset-x-0 bottom-0 rounded-t-[28px] border-x border-t border-zinc-200/70 dark:border-zinc-800/80 touch-pan-x'
+      : side === 'right'
+        ? 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l border-zinc-200/70 dark:border-zinc-800/80 sm:max-w-md'
+        : side === 'left'
+          ? 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-zinc-200/70 dark:border-zinc-800/80 sm:max-w-md'
+          : 'inset-x-0 top-0 rounded-b-[28px] border-x border-b border-zinc-200/70 dark:border-zinc-800/80'
+
+  // ── Transition string ──
+
+  const transitionProp = isCenteredBottomSheet
+    ? `transform ${DURATION} ${EASING}, opacity ${DURATION} ${EASING}`
+    : `transform ${DURATION} ${EASING}`
 
   return (
-    <motion.div
-      initial={variants.initial}
-      animate={variants.animate}
-      exit={variants.exit}
-      transition={prefersReducedMotion ? reducedMotion.spring.sheet : animations.spring.sheet}
-      style={contentStyle}
+    <div
+      ref={contentRef}
+      onTransitionEnd={handleTransitionEnd}
       {...(isBottomSheet && {
-        drag: 'y',
-        dragDirectionLock: true,
-        dragConstraints: { top: 0, bottom: 0 },
-        dragElastic: { top: 0, bottom: 0.5 },
-        onDragStart: handleDragStart,
-        onDrag: handleDrag,
-        onDragEnd: handleDragEnd,
+        onTouchStart: handleTouchStart,
+        onTouchMove: handleTouchMove,
+        onTouchEnd: handleTouchEnd,
       })}
-      className={`fixed flex flex-col gap-4 p-6 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60 ${
-        isCenteredBottomSheet
-          ? 'left-1/2 top-1/2 w-[calc(100%-1rem)] max-w-lg rounded-[28px] border border-zinc-200/70 dark:border-zinc-800/80'
-          : side === 'bottom'
-            ? 'inset-x-0 bottom-0 rounded-t-[28px] border-x border-t border-zinc-200/70 dark:border-zinc-800/80 touch-pan-x'
-            : side === 'right'
-              ? 'inset-y-0 right-0 h-full w-3/4 max-w-sm border-l border-zinc-200/70 dark:border-zinc-800/80 sm:max-w-md'
-              : side === 'left'
-                ? 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-zinc-200/70 dark:border-zinc-800/80 sm:max-w-md'
-                : 'inset-x-0 top-0 rounded-b-[28px] border-x border-b border-zinc-200/70 dark:border-zinc-800/80'
-      } ${className}`}
+      className={`fixed flex flex-col gap-4 p-6 bg-white dark:bg-zinc-950 shadow-[0_24px_70px_rgba(9,9,11,0.35)] dark:shadow-[0_30px_90px_rgba(0,0,0,0.62)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-zinc-300/70 before:to-transparent dark:before:via-zinc-600/60 motion-reduce:!duration-[0.01s] ${positionClass} ${className}`}
+      style={{
+        zIndex: zIndex + 1,
+        transform: getTransform(),
+        opacity: isCenteredBottomSheet ? (animatedOpen ? 1 : 0) : undefined,
+        transition: transitionProp,
+        pointerEvents: open ? 'auto' : 'none',
+        willChange: 'transform',
+      }}
     >
       {/* Drag handle for bottom sheets */}
       {isBottomSheet && (
@@ -233,9 +291,11 @@ export function SheetContent({
         </div>
       )}
       {children}
-    </motion.div>
+    </div>
   )
 }
+
+// ─── Subcomponents ─────────────────────────────────────────
 
 export function SheetHeader({
   className = '',

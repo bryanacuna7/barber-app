@@ -12,7 +12,7 @@
  * - TeamInviteSheet — Viewport-gated: Sheet mobile / Modal desktop
  */
 
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   Search,
@@ -125,21 +125,24 @@ export default function BarberosPage() {
   const activeCount = barbers?.filter((b) => b.isActive).length ?? 0
 
   const openInviteModal = (source: 'desktop' | 'mobile' | 'empty') => {
-    ;(document.activeElement as HTMLElement | null)?.blur?.()
     setIsInviteOpen(true)
     if (isMobileDevice()) {
-      requestAnimationFrame(() => {
-        haptics.tap()
+      setTimeout(() => {
         trackMobileEvent('mobile_equipo_invite_open', { source })
-      })
+      }, 0)
     }
   }
 
-  const openDetail = (barber: UIBarber) => {
+  const openDetail = useCallback((barber: UIBarber) => {
     setDetailMode('view')
     setSelectedBarberId(barber.id)
     if (isMobileDevice()) haptics.tap()
-  }
+  }, [])
+
+  const handleDeleteBarber = useCallback((barber: UIBarber) => {
+    setDeletingBarber(barber)
+    if (isMobileDevice()) haptics.tap()
+  }, [])
 
   // Loading
   if (isLoading) {
@@ -229,9 +232,9 @@ export default function BarberosPage() {
               <button
                 onClick={() => openInviteModal('mobile')}
                 aria-label="Agregar miembro"
-                className="flex items-center justify-center w-11 h-11 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shrink-0 active:scale-95 transition-transform"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shrink-0 active:scale-95 transition-transform"
               >
-                <Plus className="h-5 w-5" strokeWidth={2.5} />
+                <Plus className="h-4 w-4" strokeWidth={2.5} />
               </button>
             </div>
 
@@ -310,10 +313,7 @@ export default function BarberosPage() {
                 <TeamMobileList
                   barbers={filteredBarbers}
                   onSelect={openDetail}
-                  onDelete={(b) => {
-                    setDeletingBarber(b)
-                    if (isMobileDevice()) haptics.tap()
-                  }}
+                  onDelete={handleDeleteBarber}
                 />
               </div>
 

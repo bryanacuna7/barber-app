@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { motion } from 'framer-motion'
 import { isSameDay, format, parseISO, isValid, startOfDay } from 'date-fns'
@@ -36,7 +36,7 @@ interface CalendarWeekViewProps {
   onSelectAppointment: (id: string) => void
 }
 
-export function CalendarWeekView({
+export const CalendarWeekView = React.memo(function CalendarWeekView({
   weekDays,
   mobileWeekDays,
   businessHours = { start: 7, end: 20 },
@@ -247,4 +247,4 @@ export function CalendarWeekView({
       </div>
     </div>
   )
-}
+})

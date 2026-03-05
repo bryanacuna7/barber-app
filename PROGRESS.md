@@ -73,6 +73,42 @@
 
 ## Recent Sessions
 
+### Session 202: Sheet Performance — CSS Transition Rewrite (2026-03-05)
+
+**Status:** COMPLETE. Bottom sheet animation lag eliminated across entire app.
+
+**Problem:** Opening bottom sheets (especially Team Invite) felt laggy/stuck. Framer-motion spring animations run on the main thread (JS), competing with React rendering. When `setOpen(true)` triggers, React re-renders heavy child components, blocking the main thread and causing visible stutter.
+
+**Root cause:** Framer-motion animations are NOT compositor-accelerated — they run JS on every frame. When the main thread is busy with React reconciliation, animation frames drop.
+
+**Solution (3 layers):**
+
+1. **sheet.tsx complete rewrite** — Replaced framer-motion with pure CSS transitions + raw touch events
+   - `will-change: transform` promotes to GPU compositor layer
+   - Apple-like curve: `cubic-bezier(0.32, 0.72, 0, 1)`, 400ms duration
+   - Double `requestAnimationFrame` for enter animation (ensures browser paints "closed" before transitioning to "open")
+   - `onTransitionEnd` for exit cleanup (no timeouts)
+   - Raw touch drag-to-dismiss with velocity detection (500px/s threshold)
+   - Zero framer-motion imports — smaller bundle, no main thread contention
+
+2. **React.memo on heavy children** — Prevents re-renders when parent sheet state changes
+   - `TeamMobileList`, `ServiceMobileCardList`, `ServiceDesktopTable`
+   - `CalendarDayView`, `CalendarWeekView`, `CalendarMonthView`
+
+3. **useCallback on parent handlers** — Makes React.memo effective
+   - `/barberos`: `openDetail`, `handleDeleteBarber`
+   - `/servicios`: `handleSort`, `openEditServiceForm`
+   - `/citas`: `handleWalkInOpen`, `onDayClick` (direct `setSelectedDate` reference)
+
+**Files rewritten (1):** `src/components/ui/sheet.tsx` (framer-motion → CSS transitions + raw touch)
+**Files memoized (6):** team-mobile-list, service-mobile-card-list, service-desktop-table, calendar-day-view, calendar-week-view, calendar-month-view
+**Files stabilized (3):** barberos/page.tsx, servicios/page.tsx, citas/page.tsx
+**Also cleaned:** team-invite-sheet.tsx (removed deprecated props), drawer.tsx (aligned with new sheet API)
+
+**Verification:** TypeScript clean (0 errors), ESLint clean (0 new warnings), sheet opens instantly on all tested pages.
+
+---
+
 ### Session 201: Equipo + Servicios Mobile Polish (2026-03-05)
 
 **Status:** COMPLETE. Mobile UX for Equipo and Servicios pages polished.

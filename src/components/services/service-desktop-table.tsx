@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 import { Search, Star, Pencil, Trash2, ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -34,7 +35,7 @@ interface ServiceDesktopTableProps {
 // Component
 // ============================================================================
 
-export function ServiceDesktopTable({
+export const ServiceDesktopTable = React.memo(function ServiceDesktopTable({
   services,
   sourceServicesCount,
   sortField,
@@ -268,4 +269,4 @@ export function ServiceDesktopTable({
       </motion.p>
     </>
   )
-}
+})

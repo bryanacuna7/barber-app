@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion, useAnimationControls } from 'framer-motion'
 import { Pencil, Trash2, Star } from 'lucide-react'
 import { SwipeableRow } from '@/components/ui/swipeable-row'
@@ -14,7 +15,7 @@ interface ServiceMobileCardListProps {
   onSelect?: (service: MockService) => void
 }
 
-export function ServiceMobileCardList({
+export const ServiceMobileCardList = React.memo(function ServiceMobileCardList({
   services,
   listTransitionControls,
   onEdit,
@@ -89,4 +90,4 @@ export function ServiceMobileCardList({
       ))}
     </motion.div>
   )
-}
+})

@@ -435,7 +435,7 @@ function CardScrollFade({
 // Component
 // ---------------------------------------------------------------------------
 
-export function CalendarDayView({
+export const CalendarDayView = React.memo(function CalendarDayView({
   timeBlocks,
   unscheduledCount,
   gaps,
@@ -640,4 +640,4 @@ export function CalendarDayView({
       />
     </div>
   )
-}
+})
