@@ -956,6 +956,40 @@ Claude: "🤖 Using @security-auditor as requested..."
 
 ---
 
+## Design Reference Protocol (Mobbin)
+
+> System for capturing, analyzing, and applying UI inspiration from Mobbin.
+
+### Reference Library Location
+
+`design-references/` — organized by category (booking, calendars, cards, etc.)
+
+### When user provides a Mobbin screenshot:
+
+1. Run 7-layer analysis (layout, typography, spacing, color, components, interaction, micro-details)
+2. Auto-generate `.meta.md` sidecar with patterns extracted
+3. Compare against current design system (`src/lib/design-system.ts`)
+4. Output comparison matrix + prioritized actionable changes
+5. Update `design-references/README.md` catalog
+6. Flag design debt in `design-references/DESIGN_DEBT.md`
+
+### When modifying UI components:
+
+1. Check if relevant references exist: `ls design-references/mobbin/{category}/`
+2. If references exist, compare implementation against them
+3. Apply relevant patterns from the reference library
+
+### Commands:
+
+- `/design-ref [path]` — Analyze a single Mobbin screenshot
+- `/design-audit batch [category]` — Analyze all un-analyzed refs
+- `/design-audit score [page]` — Quality scorecard (10 dimensions, 0-10)
+- `/design-audit progress` — Track quality scores over time
+
+### Quality Target: 8.5/10 per page (current baseline: ~6.8)
+
+---
+
 ## Validation & Quality Gates
 
 ### Quick Checks (~30 segundos)
@@ -1244,6 +1278,8 @@ SELECT EXISTS (
 | `/code-review`    | Quality review                                                             |
 | `/generate-tests` | Generate tests                                                             |
 | `/ui-ux-pro-max`  | Advanced UI/UX design with 67 styles, 96 palettes, design system generator |
+| `/design-ref`     | Analyze Mobbin screenshot — 7-layer analysis + comparison matrix           |
+| `/design-audit`   | Batch analyze refs, score pages, track quality progress                    |
 
 ## Advanced Skills
 

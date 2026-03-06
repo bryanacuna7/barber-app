@@ -61,3 +61,11 @@ __pycache__/
 .claude-backup-*/
 .vercel
 .env*.local
+
+# Design references - images only (metadata/analysis tracked in git)
+design-references/mobbin/**/*.png
+design-references/mobbin/**/*.jpg
+design-references/mobbin/**/*.jpeg
+design-references/mobbin/**/*.gif
+design-references/mobbin/**/*.mp4
+design-references/mobbin/**/*.webp
