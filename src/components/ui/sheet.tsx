@@ -207,6 +207,9 @@ export function SheetContent({
   const handleTouchStart = React.useCallback(
     (e: React.TouchEvent) => {
       if (!isBottomSheet || !open) return
+      // Don't start drag from interactive elements (buttons, inputs, etc.)
+      const target = e.target as HTMLElement
+      if (target.closest('button, a, input, textarea, select, [role="button"]')) return
       dragRef.current = {
         startY: e.touches[0].clientY,
         currentY: 0,
