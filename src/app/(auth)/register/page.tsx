@@ -199,13 +199,13 @@ function RegisterForm({
 
         clearErrors()
         didNavigate = true
-        router.push('/dashboard')
+        window.location.href = '/dashboard'
         return
       }
 
       clearErrors()
       didNavigate = true
-      router.push('/dashboard')
+      window.location.href = '/dashboard'
     } catch {
       if (accountCreated) {
         setSuccessMessage('Cuenta creada. Inicia sesión con tu correo y contraseña.')
