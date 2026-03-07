@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { cache } from 'react'
@@ -134,6 +135,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const requestHeaders = await headers()
+  const pathname = requestHeaders.get('x-pathname') ?? ''
+
   const { user, roleInfo } = await getDashboardAuthContext()
 
   if (!user) {
@@ -245,7 +249,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const staffPermissions = getStaffPermissions(business.staff_permissions)
 
   // Check onboarding status (already fetched in parallel above)
-  if (needsOnboarding && onboardingResult && !onboardingResult.completed) {
+  // Guard: skip redirect if already on /onboarding to prevent infinite redirect loop.
+  // Note: /onboarding lives inside (dashboard) route group, so this layout wraps it.
+  if (
+    needsOnboarding &&
+    onboardingResult &&
+    !onboardingResult.completed &&
+    pathname !== '/onboarding'
+  ) {
     redirect('/onboarding')
   }
 
