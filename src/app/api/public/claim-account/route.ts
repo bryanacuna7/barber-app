@@ -252,13 +252,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   })
 
   if (authError) {
+    const msg = authError.message?.toLowerCase() ?? ''
+
     // Supabase returns "User already registered" or similar when the email
     // exists. Surface this as a 409 so the front-end can switch to login mode.
-    const msg = authError.message?.toLowerCase() ?? ''
     if (
       msg.includes('already registered') ||
       msg.includes('already exists') ||
-      msg.includes('email address is already')
+      msg.includes('email address is already') ||
+      msg.includes('user already registered')
     ) {
       logger.info(
         { email, path: '/api/public/claim-account' },
@@ -275,8 +277,29 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
+    // Supabase Auth password policy violation (e.g. requires uppercase, symbols, etc.)
+    // Return 400 so the front-end shows the message directly to the user.
+    if (
+      msg.includes('password') ||
+      msg.includes('contraseña') ||
+      (authError as { status?: number }).status === 422
+    ) {
+      logger.info(
+        { email, path: '/api/public/claim-account', authError: authError.message },
+        'claim-account: password policy violation'
+      )
+      return NextResponse.json(
+        {
+          error:
+            authError.message ||
+            'La contraseña no cumple los requisitos. Usa al menos 8 caracteres con mayúsculas, números y símbolos.',
+        },
+        { status: 400 }
+      )
+    }
+
     logger.error(
-      { err: authError, path: '/api/public/claim-account' },
+      { err: authError, errMsg: authError.message, path: '/api/public/claim-account' },
       'claim-account: auth.admin.createUser failed'
     )
     return NextResponse.json(

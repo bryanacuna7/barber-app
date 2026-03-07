@@ -269,14 +269,19 @@ export async function POST(
           'Auto-claimed unclaimed client for authenticated user'
         )
       } else if (!(existingClient as any).user_id) {
-        // Refresh claim token for unclaimed clients so they can create an account
+        // Refresh claim token for unclaimed clients so they can create an account.
+        // Generate the token here so we can return the NEW value in the response
+        // (the existingClient object holds the stale pre-update value).
+        const freshClaimToken = crypto.randomUUID()
         await supabase
           .from('clients')
           .update({
-            claim_token: crypto.randomUUID(),
+            claim_token: freshClaimToken,
             claim_token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           } as any)
           .eq('id', existingClient.id)
+        // Patch the in-memory object so the response returns the current DB value
+        ;(client as any).claim_token = freshClaimToken
       }
       logger.debug(
         { clientId: client.id, businessId: business.id },

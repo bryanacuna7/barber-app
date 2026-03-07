@@ -170,6 +170,7 @@ const timeFormatter = new Intl.DateTimeFormat('es-CR', {
   hour: '2-digit',
   minute: '2-digit',
   hour12: true,
+  timeZone: 'America/Costa_Rica',
 })
 
 export function formatAppointmentTime(dateString: string): string {

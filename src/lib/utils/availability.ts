@@ -1,5 +1,5 @@
 import { addDays, format, setHours, setMinutes, isAfter, isBefore, startOfDay } from 'date-fns'
-import { toZonedTime } from 'date-fns-tz'
+import { toZonedTime, fromZonedTime, formatInTimeZone } from 'date-fns-tz'
 import type { OperatingHours } from '@/types'
 
 export interface TimeSlot {
@@ -45,7 +45,14 @@ const dayMap: Record<number, keyof OperatingHours> = {
   6: 'sat',
 }
 
-function parseTime(timeStr: string, date: Date): Date {
+function parseTime(timeStr: string, date: Date, tz?: string): Date {
+  if (tz) {
+    // Interpret the operating-hours string as wall-clock local time in the business timezone
+    // and convert it to a proper UTC Date.
+    const zonedDate = toZonedTime(date, tz)
+    const dateStr = format(zonedDate, 'yyyy-MM-dd')
+    return fromZonedTime(`${dateStr}T${timeStr}:00`, tz)
+  }
   const [hours, minutes] = timeStr.split(':').map(Number)
   return setMinutes(setHours(date, hours), minutes)
 }
@@ -128,10 +135,9 @@ function calculateIntervalBasedSlots(params: AvailabilityParams): TimeSlot[] {
   }
 
   const slots: TimeSlot[] = []
-  const dayStart = startOfDay(date)
 
-  const openTime = parseTime(hours.open, dayStart)
-  const closeTime = parseTime(hours.close, dayStart)
+  const openTime = parseTime(hours.open, date, timezone)
+  const closeTime = parseTime(hours.close, date, timezone)
 
   let currentTime = openTime
   // Slot times are constructed in "wall-clock local" representation via parseTime.
@@ -164,7 +170,9 @@ function calculateIntervalBasedSlots(params: AvailabilityParams): TimeSlot[] {
     )
 
     slots.push({
-      time: format(currentTime, 'h:mm a'),
+      time: timezone
+        ? formatInTimeZone(currentTime, timezone, 'h:mm a')
+        : format(currentTime, 'h:mm a'),
       datetime: currentTime.toISOString(),
       available: !hasAppointmentConflict,
     })
@@ -199,9 +207,8 @@ function calculateGapBasedSlots(params: AvailabilityParams): TimeSlot[] {
     return []
   }
 
-  const dayStart = startOfDay(date)
-  const openTime = parseTime(hours.open, dayStart)
-  const closeTime = parseTime(hours.close, dayStart)
+  const openTime = parseTime(hours.open, date, timezone)
+  const closeTime = parseTime(hours.close, date, timezone)
   // Slot times are in wall-clock local representation; align `now` to match.
   const now = timezone ? toZonedTime(new Date(), timezone) : new Date()
 
@@ -261,7 +268,9 @@ function calculateGapBasedSlots(params: AvailabilityParams): TimeSlot[] {
         if (!seenDatetimes.has(iso)) {
           seenDatetimes.add(iso)
           slots.push({
-            time: format(slotDate, 'h:mm a'),
+            time: timezone
+              ? formatInTimeZone(slotDate, timezone, 'h:mm a')
+              : format(slotDate, 'h:mm a'),
             datetime: iso,
             available: true,
           })
@@ -284,7 +293,9 @@ function calculateGapBasedSlots(params: AvailabilityParams): TimeSlot[] {
           if (!seenDatetimes.has(tailIso)) {
             seenDatetimes.add(tailIso)
             slots.push({
-              time: format(tailDate, 'h:mm a'),
+              time: timezone
+                ? formatInTimeZone(tailDate, timezone, 'h:mm a')
+                : format(tailDate, 'h:mm a'),
               datetime: tailIso,
               available: true,
             })
