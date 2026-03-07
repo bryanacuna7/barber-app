@@ -69,11 +69,15 @@ export async function POST(request: NextRequest) {
 
           if (!userBusiness) {
             // Orphaned user — create business for them and confirm email
-            const { error: bizError } = await supabase.from('businesses').insert({
-              owner_id: existingUser.id,
-              name: businessName,
-              slug,
-            })
+            const { data: createdBusiness, error: bizError } = await supabase
+              .from('businesses')
+              .insert({
+                owner_id: existingUser.id,
+                name: businessName,
+                slug,
+              })
+              .select('id')
+              .single()
 
             if (bizError) {
               return NextResponse.json(
@@ -91,6 +95,7 @@ export async function POST(request: NextRequest) {
               success: true,
               message: 'Cuenta lista. Inicia sesión con tu correo y contraseña.',
               canSignIn: true,
+              businessId: createdBusiness?.id ?? null,
             })
           }
         }
@@ -112,11 +117,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Create business (service role bypasses RLS)
-    const { error: businessError } = await supabase.from('businesses').insert({
-      owner_id: authData.user.id,
-      name: businessName,
-      slug,
-    })
+    const { data: createdBusiness, error: businessError } = await supabase
+      .from('businesses')
+      .insert({
+        owner_id: authData.user.id,
+        name: businessName,
+        slug,
+      })
+      .select('id')
+      .single()
 
     if (businessError) {
       // Cleanup: delete the orphaned auth user
@@ -130,6 +139,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       canSignIn: true,
+      businessId: createdBusiness?.id ?? null,
     })
   } catch {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })

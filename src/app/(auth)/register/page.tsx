@@ -49,6 +49,22 @@ import {
 } from '@/lib/referrals'
 
 const REGISTER_CARD_STABLE_HEIGHT = 'min-h-[760px]'
+const REGISTER_REQUEST_TIMEOUT_MS = 15000
+const AUTO_SIGNIN_TIMEOUT_MS = 12000
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(errorMessage))
+    }, timeoutMs)
+  })
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId)
+  })
+}
 
 function RegisterForm({
   referrerInfo,
@@ -108,60 +124,101 @@ function RegisterForm({
       return
     }
 
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          businessName: formData.businessName,
-        }),
-      })
+    let didNavigate = false
+    let accountCreated = false
 
-      const data = await res.json()
+    try {
+      const res = await withTimeout(
+        fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            businessName: formData.businessName,
+          }),
+        }),
+        REGISTER_REQUEST_TIMEOUT_MS,
+        'El registro tardó demasiado. Intenta de nuevo.'
+      )
+
+      let data: {
+        success?: boolean
+        canSignIn?: boolean
+        error?: string
+        businessId?: string | null
+      } = {}
+      try {
+        data = await res.json()
+      } catch {
+        data = {}
+      }
 
       if (!res.ok) {
         setError(data.error || 'Error al crear la cuenta. Intenta de nuevo.')
-        setIsLoading(false)
         return
       }
+
+      accountCreated = Boolean(data.success)
 
       // Track referral conversion if exists
       if (data.success) {
         const referralCode = getReferralCode()
         if (referralCode) {
-          await trackReferralConversion(referralCode, '').catch(() => {})
-          clearReferralCode()
+          const referredBusinessId =
+            typeof data.businessId === 'string' && data.businessId.trim().length > 0
+              ? data.businessId
+              : ''
+
+          if (referredBusinessId) {
+            void trackReferralConversion(referralCode, referredBusinessId).finally(() => {
+              clearReferralCode()
+            })
+          } else {
+            clearReferralCode()
+          }
         }
       }
 
       // Auto sign-in after successful registration
       if (data.canSignIn) {
         const supabase = createClient()
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formData.email,
-          password: formData.password,
-        })
+        const { error: signInError } = await withTimeout(
+          supabase.auth.signInWithPassword({
+            email: formData.email,
+            password: formData.password,
+          }),
+          AUTO_SIGNIN_TIMEOUT_MS,
+          'No se pudo iniciar sesión automáticamente a tiempo.'
+        )
 
         if (signInError) {
           setSuccessMessage('Cuenta creada. Inicia sesión con tu correo y contraseña.')
-          setIsLoading(false)
           return
         }
 
         clearErrors()
+        didNavigate = true
         router.push('/dashboard')
         router.refresh()
         return
       }
 
       clearErrors()
+      didNavigate = true
       router.push('/dashboard')
       router.refresh()
     } catch {
-      setError('Error de conexión. Intenta de nuevo.')
-      setIsLoading(false)
+      if (accountCreated) {
+        setSuccessMessage('Cuenta creada. Inicia sesión con tu correo y contraseña.')
+        setError('')
+      } else {
+        setError('Error de conexión o tiempo de espera. Intenta de nuevo.')
+      }
+    } finally {
+      if (!didNavigate) {
+        setIsLoading(false)
+      }
     }
   }
 
