@@ -200,14 +200,12 @@ function RegisterForm({
         clearErrors()
         didNavigate = true
         router.push('/dashboard')
-        router.refresh()
         return
       }
 
       clearErrors()
       didNavigate = true
       router.push('/dashboard')
-      router.refresh()
     } catch {
       if (accountCreated) {
         setSuccessMessage('Cuenta creada. Inicia sesión con tu correo y contraseña.')
