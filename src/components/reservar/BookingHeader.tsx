@@ -112,7 +112,7 @@ export function BookingHeader({ business, isClient = false }: BookingHeaderProps
           <ShareButton business={business} />
           {isClient && (
             <a
-              href="/mi-cuenta"
+              href={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/mi-cuenta`}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[13px] font-medium text-zinc-300 ios-press"
             >
               <User className="h-3.5 w-3.5" />

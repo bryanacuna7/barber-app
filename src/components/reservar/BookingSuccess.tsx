@@ -365,7 +365,7 @@ export function BookingSuccess({
 
           {/* Client dashboard CTA — shown after account creation or if already a client */}
           {showClientDashboardCta && (
-            <a href="/mi-cuenta">
+            <a href={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/mi-cuenta`}>
               <Button variant="primary" className="w-full h-12 text-base gap-2.5">
                 <CalendarCheck className="h-5 w-5" />
                 Ver mis citas
