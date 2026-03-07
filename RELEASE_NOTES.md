@@ -8,9 +8,10 @@
   Mantener solo la version actual (reemplazar en cada release).
 -->
 
-## v0.9.33
+## v0.9.34
 
-### Mejorado
+### Corregido
 
-- **Hojas instantaneas** — Abrir cualquier hoja (crear cita, invitar barbero, editar servicio, etc.) ahora se siente fluido e instantaneo. Se elimino el lag que se sentia al abrir.
-- **Todas las pantallas** — Citas, servicios y equipo se benefician de la mejora de rendimiento.
+- **Registro sin bloqueos** — El formulario de alta ya no se queda pegado con el boton girando indefinidamente.
+- **Tiempo de espera claro** — Si el servidor tarda demasiado, la app avisa y permite intentar de nuevo.
+- **Alta exitosa aunque falle el inicio automatico** — Si la cuenta se crea bien pero el inicio de sesion automatico falla, ahora se muestra un mensaje de exito con instrucciones para entrar manualmente.

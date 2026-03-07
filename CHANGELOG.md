@@ -4,6 +4,14 @@ Todas las versiones del proyecto, documentadas en formato [Keep a Changelog](htt
 Guia de estilo para copy publico: `docs/CHANGELOG_PUBLIC_STYLE.md`.
 Detalle tecnico interno: `CHANGELOG_INTERNAL.md`.
 
+## [0.9.34] - 2026-03-07
+
+### Corregido
+
+- El formulario de registro ya no se queda pegado con el spinner infinito
+- Si el registro tarda demasiado, el sistema avisa al usuario en lugar de bloquearse
+- Las recomendaciones entre barberías se procesan en segundo plano y no retrasan el alta
+
 ## [0.9.33] - 2026-03-05
 
 ### Mejorado
